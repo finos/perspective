@@ -98,6 +98,7 @@
         "fix:json": "prettier --tab-width 4 --write **/package.json",
         "fix_python": "node scripts/lint_python.js --fix",
         "fix": "npm-run-all --silent fix:*",
-        "toggle_puppeteer": "node scripts/toggle_puppeteer.js"
+        "toggle_puppeteer": "node scripts/toggle_puppeteer.js",
+        "version": "node scripts/version_python.js"
     }
 }

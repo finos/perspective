@@ -455,6 +455,10 @@ if (PSP_WASM_BUILD)
 	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		# Look for the binary using @loader_path (relative to binary location) instead of @rpath
+		# and include arrow in @rpath so it can be found by libbinding/libpsp
+		set(PSP_INSTALL_PATH "@loader_path" ${PYTHON_PYARROW_LIBRARY_DIR})
+		set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
 	endif()
 
@@ -471,9 +475,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# which means they use the old ABI: https://github.com/blue-yonder/turbodbc/issues/102#issuecomment-312222949
 		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 			target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
+			set_target_properties(psp PROPERTIES INSTALL_RPATH "${PSP_INSTALL_PATH}")
 		else()
 			target_link_libraries(psp arrow)
 			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
+			target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
 		endif()
 
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
@@ -486,11 +492,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
 
-		# Link again libarrow from pyarrow
 		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
+			# Add custom @rpath to binding
+			set_target_properties(binding PROPERTIES INSTALL_RPATH "${PSP_INSTALL_PATH}")
 		else()
-			target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
+			# Link binding code to pyarrow
+			target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
 		endif()
 		target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
 		target_link_libraries(binding ${PYTHON_LIBRARIES})

@@ -50,7 +50,7 @@
         "detectie": "1.0.0",
         "lit-html": "^1.1.2",
         "lodash": "^4.17.4",
-        "mobile-drag-drop": "^2.2.0"
+        "mobile-drag-drop": "^2.3.0-rc.2"
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.3.9",

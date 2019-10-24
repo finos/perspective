@@ -40,7 +40,7 @@
         "@finos/perspective-viewer": "^0.3.9",
         "core-js": "^2.6.9",
         "datasaur-local": "3.0.0",
-        "fin-hypergrid": "3.2.0",
+        "faux-hypergrid": "3.2.1",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
         "lodash": "^4.17.4",
         "rectangular": "1.0.1",

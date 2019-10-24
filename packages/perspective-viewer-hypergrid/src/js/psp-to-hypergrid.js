@@ -9,7 +9,7 @@
 
 const COLUMN_SEPARATOR_STRING = "|";
 
-const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;
+const TREE_COLUMN_INDEX = require("faux-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;
 
 function page2hypergrid(data, row_pivots, columns) {
     const data_columns = Object.keys(data);
