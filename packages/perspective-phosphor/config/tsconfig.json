@@ -4,23 +4,28 @@
         "noImplicitAny": true,
         "noEmitOnError": true,
         "noUnusedLocals": true,
-        "module": "commonjs",
+        "module": "es6",
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "target": "es2016",
-        "outDir": "dist/cjs",
+        "outDir": "dist/esm",
         "sourceMap": true,
         "inlineSourceMap": false,
+        "rootDir": "../src/ts",
         "lib": [
             "es2016",
-            "ES2015.Promise",
-            "DOM"
+            "es2015.promise",
+            "dom"
         ],
         "types": [
-            "@finos/perspective-viewer"
+            "@finos/perspective-viewer",
         ]
     },
     "include": [
-        "src/ts/*"
+        "../src/ts/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
     ]
 }

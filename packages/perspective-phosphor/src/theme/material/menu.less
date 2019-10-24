@@ -1,0 +1,149 @@
+@import "~@phosphor/widgets/style/menu.css";
+
+.p-Menu {
+    padding: 12px;
+    background: white;
+    color: #666;
+    border: 1px solid #ccc;
+    border-left-width: 0px;
+    border-top-width: 0px;
+    border-right-width: 1px;
+    font: 12px Helvetica, Arial, sans-serif;
+    box-shadow: -1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.p-Menu-item.p-mod-active {
+    background: #e5e5e5;
+}
+
+.p-Menu-item.p-mod-disabled {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+.p-Menu-itemIcon {
+    width: 21px;
+    padding: 4px 2px;
+}
+
+.p-Menu-itemLabel {
+    padding: 4px 2px 4px 2px;
+}
+
+.p-Menu-itemMnemonic {
+    text-decoration: underline;
+}
+
+.p-Menu-itemShortcut {
+    padding: 4px 0px;
+}
+
+.p-Menu-itemSubmenuIcon {
+    width: 16px;
+    padding: 4px 0px;
+}
+
+.p-Menu-item[data-type="separator"] > div {
+    padding: 0;
+    height: 9px;
+}
+
+.p-Menu-item[data-type="separator"] > div::after {
+    content: "";
+    display: block;
+    position: relative;
+    top: 4px;
+    border-top: 1px solid #dddddd;
+}
+
+.p-Menu-itemIcon::before,
+.p-Menu-itemSubmenuIcon::before {
+    font-family: "Material Icons";
+}
+
+.p-Menu-item.p-mod-toggled > .p-Menu-itemIcon::before {
+    content: "\E5CA";
+}
+
+.p-Menu-item[data-type="submenu"] > .p-Menu-itemSubmenuIcon::before {
+    content: "\E315";
+}
+
+.p-MenuBar {
+    padding-left: 5px;
+    font: 14px "Open Sans";
+}
+
+.p-MenuBar-menu {
+    transform: translateY(-1px);
+}
+
+.p-MenuBar-item {
+    padding: 10px 32px;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    color: #737373 !important;
+}
+
+.p-MenuBar-item.p-mod-active {
+    background: #e5e5e5;
+}
+
+.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+    z-index: 10001;
+    background: white;
+    border-left: 1px solid #c0c0c0;
+    border-right: 1px solid #c0c0c0;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.p-MenuItem-export:before {
+    content: "\E2C4";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-preview:before {
+    content: "\E8B8";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-duplicate:before {
+    content: "call_split";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-config:before {
+    content: "more_vert";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-copy:before {
+    content: "file_copy";
+    font-family: "Material Icons";
+}
+
+
+.p-MenuItem-link:before {
+    content: "link";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-linkOff:before {
+    content: "link_off";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-new:before {
+    content: "\E89E";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-reset:before {
+    content: "\E863";
+    font-family: "Material Icons";
+}
+
+.p-MenuItem-master:before {
+    content: "cast";
+    font-family: "Material Icons";
+}

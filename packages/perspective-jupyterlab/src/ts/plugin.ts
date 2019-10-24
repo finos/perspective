@@ -7,40 +7,36 @@
  *
  */
 
-import { Application, IPlugin } from '@phosphor/application';
+import {Application, IPlugin} from "@phosphor/application";
 
-import { Widget } from '@phosphor/widgets';
+import {Widget} from "@phosphor/widgets";
 
-import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
+import {IJupyterWidgetRegistry} from "@jupyter-widgets/base";
 
-import { PerspectiveModel } from "./model";
+import {PerspectiveModel} from "./model";
 
-import { PerspectiveView } from './view';
+import {PerspectiveView} from "./view";
 
-import {
-    PERSPECTIVE_VERSION
-} from './version';
-
+import {PERSPECTIVE_VERSION} from "./version";
 
 /**
  * PerspectiveJupyterPlugin Defines the Jupyterlab plugin, and registers `PerspectiveModel` and `PerspectiveView`
  * to be called on initialization.
  */
-export
-    const PerspectiveJupyterPlugin: IPlugin<Application<Widget>, void> = {
-        id: '@finos/perspective-jupyterlab',
-        requires: [IJupyterWidgetRegistry],
-        activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
-            registry.registerWidget({
-                name: '@finos/perspective-jupyterlab',
-                version: PERSPECTIVE_VERSION,
-                exports: {
-                    PerspectiveModel: PerspectiveModel,
-                    PerspectiveView: PerspectiveView
-                }
-            });
-        },
-        autoStart: true
-    };
+export const PerspectiveJupyterPlugin: IPlugin<Application<Widget>, void> = {
+    id: "@finos/perspective-jupyterlab",
+    requires: [IJupyterWidgetRegistry],
+    activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
+        registry.registerWidget({
+            name: "@finos/perspective-jupyterlab",
+            version: PERSPECTIVE_VERSION,
+            exports: {
+                PerspectiveModel: PerspectiveModel,
+                PerspectiveView: PerspectiveView
+            }
+        });
+    },
+    autoStart: true
+};
 
 export default PerspectiveJupyterPlugin;

@@ -1,12 +1,12 @@
 dist: trusty
 language: node_js
-node_js: "8"
+node_js: "10"
 sudo: required
 
 matrix:
   fast_finish: true
   include:
-    - node_js: "8"
+    - node_js: "10"
       language: node_js
       env: TEST=WASM
       services: docker
@@ -40,7 +40,8 @@ env:
 
 install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
-  - if [ "$TEST" = "PYTHON"]; then curl -sL https://deb.nodesource.com/setup_8.x | bash - && apt-get install npm; fi
+  - if [ "$TEST" = "PYTHON" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - node --version
   - yarn
 
 script:

@@ -19,3 +19,4 @@ import "!!style-loader!css-loader!less-loader!../less/index.less";
 
 import "@finos/perspective-viewer-hypergrid";
 import "@finos/perspective-viewer-highcharts";
+

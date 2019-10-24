@@ -8,5 +8,5 @@
  */
 
 declare module "@finos/perspective/dist/esm/api/client";
-declare module '@finos/perspective/dist/umd/psp.async.wasm';
-declare module '!!file-worker-loader?inline=true!*';
+declare module "@finos/perspective/dist/umd/psp.async.wasm";
+declare module "!!file-worker-loader?inline=true!*";

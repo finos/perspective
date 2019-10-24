@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "noImplicitAny": true,
+        "noEmitOnError": true,
+        "noUnusedLocals": true,
+        "module": "es6",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "target": "es2016",
+        "sourceMap": true,
+        "inlineSourceMap": false,
+        "rootDir": "../",
+        "lib": [
+            "es2016",
+            "es2015.promise",
+            "dom"
+        ],
+        "types": [
+            "@finos/perspective-viewer",
+            "jest"
+        ]
+    },
+    "include": [
+        "../test/ts/*"
+    ],
+    "exclude": [
+        "node_modules",
+    ]
+}

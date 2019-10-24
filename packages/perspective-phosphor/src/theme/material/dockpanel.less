@@ -1,0 +1,39 @@
+.p-DockPanel {
+    overflow: visible !important;
+    border-width: 24px 24px 20px 24px;
+    border-style: solid;
+    border-color: #eee;
+    background-color: #eee 
+}
+
+
+.p-DockPanel-handle {
+    background-color: none;
+}
+
+.p-DockPanel-overlay {
+    background: rgba(75, 75, 75, 0.2);
+    border: 1px dashed #666;
+    transition-property: top, left, right, bottom;
+    transition-duration: 50ms;
+    transition-timing-function: ease;
+    margin: 0px 5px 10px 5px;
+}
+
+.p-DockPanel {
+    perspective-viewer {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        position: absolute;
+        top: 0;
+        left: 4px;
+        right: 4px;
+        bottom: 8px;
+        overflow: visible !important;
+        --plugin--border: 1px solid #eaeaea;;
+        --plugin--box-shadow: 0px 2px 3px rgba(0,0,0,0.2); 
+    }
+}
