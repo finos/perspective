@@ -7,6 +7,7 @@ matplotlib>=3.0.0
 mock
 pandas>=0.22.0
 psutil>=5.4.8
+pyarrow==0.15.0
 pytest>=4.3.0
 pytest-cov>=2.6.1
 pytz>=2018.9

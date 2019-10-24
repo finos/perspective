@@ -27,23 +27,14 @@ function docker(target = "perspective", image = "python") {
 }
 
 try {
-    let target = "perspective";
-
-    if (HAS_TARGET) {
-        const new_target = args[args.indexOf("--target") + 1];
-        if (VALID_TARGETS.includes(new_target)) {
-            target = new_target;
-        }
-    }
-
     // dependencies need to be installed for test_python:table and test_python:node
     let cmd;
 
     if (process.env.PSP_DOCKER) {
-        cmd = `cd python/${target} && python3 -m pytest ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective`;
-        execute(`${docker(target, "python")} bash -c "${cmd}"`);
+        cmd = `cd python/perspective && python3 -m pytest ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective`;
+        execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
     } else {
-        const python_path = resolve(__dirname, "..", "python", target);
+        const python_path = resolve(__dirname, "..", "python", "perspective");
         cmd = `cd ${python_path} && python3 -m pytest ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective`;
         execute(cmd);
     }

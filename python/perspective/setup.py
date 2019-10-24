@@ -5,7 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from setuptools import setup, Extension
+from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 from codecs import open
@@ -56,16 +56,16 @@ class PSPBuild(build_ext):
         self.run_node()
 
     def run_node(self):
-        self.cmd = shutil.which('yarn')
-        if not self.cmd:
-            self.cmd = shutil.which('npm')
-            if not self.cmd:
+        self.npm_cmd = shutil.which('yarn')
+        if not self.npm_cmd:
+            self.npm_cmd = shutil.which('npm')
+            if not self.npm_cmd:
                 raise RuntimeError(
                     "Yarn or npm must be installed to build the following extensions: " +
                     ", ".join(e.name for e in self.extensions))
 
         try:
-            subprocess.check_output([self.cmd, '--version'])
+            subprocess.check_output([self.npm_cmd, '--version'])
         except OSError:
             raise RuntimeError(
                 "Yarn or npm must be installed to build the following extensions: " +
@@ -74,8 +74,9 @@ class PSPBuild(build_ext):
         self.build_extension_node()
 
     def run_cmake(self):
+        self.cmake_cmd = shutil.which('cmake')
         try:
-            out = subprocess.check_output(['cmake', '--version'])
+            out = subprocess.check_output([self.cmake_cmd, '--version'])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: " +
@@ -94,25 +95,27 @@ class PSPBuild(build_ext):
         env = os.environ.copy()
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        install = [self.cmd] if 'yarn' in self.cmd else [self.cmd, 'install']
-        build = [self.cmd, 'build'] if 'yarn' in self.cmd else [self.cmd, 'run', 'build']
+        install = [self.npm_cmd] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install']
+        build = [self.npm_cmd, 'build'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'build']
 
         subprocess.check_call(install, cwd=self.build_temp, env=env)
         subprocess.check_call(build, cwd=self.build_temp, env=env)
         print()  # Add an empty line for cleaner output
 
     def build_extension_cmake(self, ext):
-        extdir = os.path.abspath(
-            os.path.dirname(self.get_ext_fullpath(ext.name)))
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cfg = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir, 'perspective', 'table')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join('perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
-            '-DPSP_CPP_BUILD_TESTS=1'
+            '-DPSP_CPP_BUILD_TESTS=1',
+            '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
+            '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
+            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, 'perspective'))
         ]
 
         build_args = ['--config', cfg]
@@ -130,16 +133,27 @@ class PSPBuild(build_ext):
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
+        env["PYTHONPATH"] = os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))
 
-        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
-            env.get('CXXFLAGS', ''),
-            self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', os.path.abspath(os.path.join(ext.sourcedir, '..', '..', 'cpp', 'perspective'))] + cmake_args,
-                              cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args,
-                              cwd=self.build_temp)
+
+        try:
+            subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+            subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            out = e.output.decode()
+            print(out)
+
+            # if stale cmake build, or issues with python inside python, rerun with shell=true
+            if "The current CMakeCache.txt directory"in out:
+                # purge temporary folder
+                shutil.rmtree(self.build_temp)
+                os.makedirs(self.build_temp)
+                subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
+                subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+            else:
+                raise
         print()  # Add an empty line for cleaner output
 
 
@@ -153,6 +167,7 @@ setup(
     author_email='open_source@jpmorgan.com',
     license='Apache 2.0',
     install_requires=requires,
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 3',
@@ -161,8 +176,7 @@ setup(
     ],
 
     keywords='analytics tools plotting',
-    packages=['perspective'],
-    # package_data={'': ['../cpp', '../cmake']},
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     extras_require={

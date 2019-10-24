@@ -9,17 +9,16 @@
 
 const args = process.argv.slice(2);
 const resolve = require("path").resolve;
-const execSync = require("child_process").execSync;
-const fs = require("fs-extra");
 const mkdir = require("mkdirp");
-const rimraf = require("rimraf");
+const fs = require("fs-extra");
+const execSync = require("child_process").execSync;
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
-const IS_DOCKER = process.env.PSP_DOCKER;
 const VALID_TARGETS = ["node", "table"];
 const HAS_TARGET = args.indexOf("--target") != -1;
+const VERBOSE = args.indexOf("--verbose") != -1;
 
-function docker(target = "perspective", image = "python") {
+function docker(target = "perspective", image = "emsdk") {
     console.log(`-- Creating ${image} docker image`);
     let cmd = "docker run --rm -it";
     if (process.env.PSP_CPU_COUNT) {
@@ -31,19 +30,21 @@ function docker(target = "perspective", image = "python") {
 
 try {
     // copy C++ assets
-    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "obj")); // unused obj folder
-    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"), {overwrite: true});
-
     mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
-    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"), {overwrite: true});
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"),
+        resolve(__dirname, "..", "python", "perspective"));
+
+    fs.copySync(resolve(__dirname, "..", "cmake"),
+        resolve(__dirname, "..", "python", "perspective", "cmake"));
 
     let cmd;
-    if (IS_DOCKER) {
-        cmd = `cd python/perspective && python3 setup.py build`;
-        execute(`${docker(target, "python")} bash -c "${cmd}"`);
+
+    if (process.env.PSP_DOCKER) {
+        cmd = `cd python/perspective && python3 -m pip install . --no-clean`;
+        execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
     } else {
         const python_path = resolve(__dirname, "..", "python", "perspective");
-        cmd = `cd ${python_path} && python3 setup.py build`;
+        cmd = `cd ${python_path} && python3 -m pip install . --no-clean`;
         execute(cmd);
     }
 } catch (e) {

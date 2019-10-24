@@ -18,12 +18,12 @@ if (PYTHON_EXECUTABLE)
   # Find out the include path
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass"
+            "from __future__ import print_function;import numpy;print(numpy.get_include(), end='')"
             OUTPUT_VARIABLE __numpy_path)
   # And the version
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass"
+            "from __future__ import print_function;import numpy;print(numpy.__version__, end='')"
     OUTPUT_VARIABLE __numpy_version)
 elseif(__numpy_out)
   message(STATUS "Python executable not found.")
