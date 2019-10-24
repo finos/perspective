@@ -11,7 +11,7 @@ import rectangular from "rectangular";
 import superscript from "superscript-number";
 import lodash from "lodash";
 
-import cellRenderersRegistry from "fin-hypergrid/src/cellRenderers";
+import cellRenderersRegistry from "faux-hypergrid/src/cellRenderers";
 
 var Borders = cellRenderersRegistry.BaseClass.extend("Borders", {
     paint: function(gc, config) {

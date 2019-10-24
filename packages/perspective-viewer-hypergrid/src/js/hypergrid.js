@@ -7,8 +7,8 @@
  *
  */
 
-import Hypergrid from "fin-hypergrid";
-import Base from "fin-hypergrid/src/Base";
+import Hypergrid from "faux-hypergrid";
+import Base from "faux-hypergrid/src/Base";
 import groupedHeaderPlugin from "fin-hypergrid-grouped-header-plugin";
 
 import * as perspectivePlugin from "./perspective-plugin";

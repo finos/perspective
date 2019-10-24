@@ -121,6 +121,7 @@ export class DomElement extends PerspectiveElement {
 
         row.addEventListener("row-drag", () => {
             this.classList.add("dragging");
+            this._active_columns.style.overflow = "hidden";
             this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute("name") === name);
             if (this._original_index !== -1) {
                 this._drop_target_hover = this._active_columns.children[this._original_index];
@@ -129,7 +130,10 @@ export class DomElement extends PerspectiveElement {
                 this._drop_target_hover = this._new_row(name, type, aggregate);
             }
         });
-        row.addEventListener("row-dragend", () => this.classList.remove("dragging"));
+        row.addEventListener("row-dragend", () => {
+            this._active_columns.style.overflow = "auto";
+            this.classList.remove("dragging");
+        });
 
         if (computed) {
             row.setAttribute("computed_column", JSON.stringify(computed));
