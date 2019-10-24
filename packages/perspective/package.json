@@ -65,7 +65,7 @@
         "ws": "^6.1.2"
     },
     "optionalDependencies": {
-        "bufferutil": "~3.0.0"
+        "bufferutil": "~4.0.1"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.3.8"

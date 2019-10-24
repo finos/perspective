@@ -1,5 +1,3 @@
-import { PerspectiveEvents } from "@finos/perspective";
-
 declare module '@finos/perspective' {
     /**** object types ****/
     export enum TypeNames {

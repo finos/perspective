@@ -16,4 +16,3 @@ export * from "./widget";
 
 /* css */
 import "!!style-loader!css-loader!less-loader!../less/index.less";
-

@@ -7,14 +7,13 @@
  *
  */
 
-import {DOMWidgetModel, ISerializers} from '@jupyter-widgets/base';
-import {PERSPECTIVE_VERSION} from './version';
+import {DOMWidgetModel, ISerializers} from "@jupyter-widgets/base";
+import {PERSPECTIVE_VERSION} from "./version";
 
 /**
  * TODO: document
  */
-export
-class PerspectiveModel extends DOMWidgetModel {
+export class PerspectiveModel extends DOMWidgetModel {
     defaults() {
         return {
             ...super.defaults(),
@@ -24,8 +23,8 @@ class PerspectiveModel extends DOMWidgetModel {
             _view_name: PerspectiveModel.view_name,
             _view_module: PerspectiveModel.view_module,
             _view_module_version: PerspectiveModel.view_module_version,
-            
-            plugin: 'hypergrid',
+
+            plugin: "hypergrid",
             columns: [],
             row_pivots: [],
             column_pivots: [],
@@ -33,19 +32,19 @@ class PerspectiveModel extends DOMWidgetModel {
             sort: [],
             filters: [],
             plugin_config: {},
-            dark: false,
+            dark: false
         };
     }
 
     static serializers: ISerializers = {
-        ...DOMWidgetModel.serializers,
+        ...DOMWidgetModel.serializers
         // Add any extra serializers here
-    }
+    };
 
-    static model_name = 'PerspectiveModel';
-    static model_module = '@finos/perspective-jupyterlab';
+    static model_name = "PerspectiveModel";
+    static model_module = "@finos/perspective-jupyterlab";
     static model_module_version = PERSPECTIVE_VERSION;
-    static view_name = 'PerspectiveView';
-    static view_module = '@finos/perspective-jupyterlab';
+    static view_name = "PerspectiveView";
+    static view_module = "@finos/perspective-jupyterlab";
     static view_module_version = PERSPECTIVE_VERSION;
 }

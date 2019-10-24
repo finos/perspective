@@ -101,6 +101,16 @@ async function focus_package() {
                     key: "c",
                     name: "perspective-viewer-highcharts",
                     value: "perspective-viewer-highcharts"
+                },
+                {
+                    key: "o",
+                    name: "perspective-phosphor",
+                    value: "perspective-phosphor"
+                },
+                {
+                    key: "l",
+                    name: "perspective-jupyterlab",
+                    value: "perspective-jupyterlab"
                 }
             ]
         }

@@ -7,32 +7,32 @@
  *
  */
 
-import { DOMWidgetView } from "@jupyter-widgets/base";
-import { Client } from "@finos/perspective/dist/esm/api/client";
+import {DOMWidgetView} from "@jupyter-widgets/base";
+import {Client} from "@finos/perspective/dist/esm/api/client";
 
 /**
  * The schema for a message passed to and from `PerspectiveJupyterClient`.
  */
 export interface PerspectiveJupyterMessage {
-    id : number;
-    type : string;
-    data : string;
+    id: number;
+    type: string;
+    data: string;
 }
 
 /**
  * `PerspectiveJupyterClient` acts as a message bus between the frontend and backend,
  * passing messages from `perspective-viewer` (method calls, `to_format()` calls, etc.) to
  * the `PerspectiveManager` on the python side of the plugin.
- * 
+ *
  * This client implements the `Client` class as defined in `@finos/perspective/api`.
  */
 export class PerspectiveJupyterClient extends Client {
-    view : DOMWidgetView;
+    view: DOMWidgetView;
 
     /**
      * Create a new instance of the client.
-     * 
-     * @param view {DOMWidgetView} the plugin view that can send messages to the Python backend. 
+     *
+     * @param view {DOMWidgetView} the plugin view that can send messages to the Python backend.
      */
     constructor(view: DOMWidgetView) {
         super();
@@ -41,12 +41,12 @@ export class PerspectiveJupyterClient extends Client {
 
     /**
      * Given a message, pass it to the `PerspectiveManager` instance on the ipywidget.
-     * 
+     *
      * The sent message conforms to the `PerspectiveJupyterMessage` interface.
      *
      * @param msg {any} the message to pass to the `PerspectiveManager`.
      */
-    send(msg: any) : void {
+    send(msg: any): void {
         const serialized = JSON.stringify(msg);
         this.view.send({
             id: msg.id,
@@ -54,5 +54,4 @@ export class PerspectiveJupyterClient extends Client {
             data: serialized
         });
     }
-
 }
