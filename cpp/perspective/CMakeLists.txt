@@ -17,6 +17,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
 endif()
 
+
+## Helper function
+function(string_starts_with str search)
+  string(FIND "${str}" "${search}" out)
+  if("${out}" EQUAL 0)
+    return(true)
+  endif()
+  return(false)
+endfunction()
+
 ##############################
 # helper to grab gtest et al #
 ##############################
@@ -276,7 +286,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		#########################
 		# PYTHON BINDINGS BUILD #
 		#########################
-		if(PSP_PYTHON_VERSION STREQUAL 2)
+		set(PYTHON2 string_starts_with("${PSP_PYTHON_VERSION}" "2"))
+		if(PYTHON2)
 			include_directories("/usr/local/include/python2.7m")  # FIXME
 		else()
 			include_directories("/usr/local/include/python3.7m")  # FIXME

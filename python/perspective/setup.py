@@ -116,7 +116,7 @@ class PSPBuild(build_ext):
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
             '-DPSP_CPP_BUILD_TESTS=1',
-            '-DPSP_PYTHON_VERSION={}'.format(sys.version_info.major),
+            '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
             '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
             '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, 'perspective'))
