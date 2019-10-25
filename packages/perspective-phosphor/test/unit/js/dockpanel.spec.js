@@ -1,6 +1,6 @@
-import {PerspectiveDockPanel} from "../../dist/esm/dockpanel";
-import {PerspectiveWidget} from "../../dist/esm/widget";
-import {mapWidgets} from "../../dist/esm/utils";
+import {PerspectiveDockPanel} from "../../../dist/esm/dockpanel";
+import {PerspectiveWidget} from "../../../dist/esm/widget";
+import {mapWidgets} from "../../../dist/esm/utils";
 
 describe("dockpanel", () => {
     test("serialise returns a correct widget state", () => {

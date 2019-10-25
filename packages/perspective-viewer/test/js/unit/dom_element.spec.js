@@ -15,8 +15,13 @@ describe(DomElement, () => {
     describe("._autocomplete_choices", () => {
         let dom_element, json_choices;
 
+        beforeAll(() => {
+            window.customElements.define("perspective-dom-element", DomElement);
+        });
+
         beforeEach(() => {
             dom_element = new DomElement();
+            // eslint-disable-next-line prettier/prettier
             json_choices = [
                 {__ROW_PATH__: [], foo: 2},
                 {__ROW_PATH__: [null], foo: 25},
@@ -26,10 +31,7 @@ describe(DomElement, () => {
         });
 
         test("the first value and null values are filtered out", () => {
-            expect(dom_element._autocomplete_choices(json_choices)).toEqual([
-                ["somestring"],
-                ["otherstring"]
-            ]);
+            expect(dom_element._autocomplete_choices(json_choices)).toEqual([["somestring"], ["otherstring"]]);
         });
     });
 });

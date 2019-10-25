@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import {PerspectiveWorkspace} from "../../dist/esm/workspace";
+
+import {PerspectiveWorkspace} from "../../../dist/esm/workspace";
 import {toArray} from "@phosphor/algorithm";
-import {PerspectiveWidget} from "../../dist/esm/widget";
+import {PerspectiveWidget} from "../../../dist/esm/widget";
 
 describe("workspace", () => {
     test("addViewer adds widget to underlying dockpanel", () => {
@@ -74,7 +75,7 @@ describe("workspace", () => {
         expect(workspace.onPerspectiveClick).not.toHaveBeenCalled();
 
         workspace.makeMaster(widget);
-        widget.node.dispatchEvent(new CustomEvent("perspective-click"));
+        widget.viewer.dispatchEvent(new CustomEvent("perspective-click"));
         expect(workspace.onPerspectiveClick).toHaveBeenCalledTimes(1);
     });
 
@@ -85,15 +86,15 @@ describe("workspace", () => {
 
         workspace.onPerspectiveClick = jest.fn();
 
-        widget.node.dispatchEvent(new CustomEvent("perspective-click"));
+        widget.viewer.dispatchEvent(new CustomEvent("perspective-click"));
         expect(workspace.onPerspectiveClick).not.toHaveBeenCalled();
 
         workspace.makeMaster(widget);
-        widget.node.dispatchEvent(new CustomEvent("perspective-click"));
+        widget.viewer.dispatchEvent(new CustomEvent("perspective-click"));
         expect(workspace.onPerspectiveClick).toHaveBeenCalledTimes(1);
 
         workspace.makeDetail(widget);
-        widget.node.dispatchEvent(new CustomEvent("perspective-click"));
+        widget.viewer.dispatchEvent(new CustomEvent("perspective-click"));
         expect(workspace.onPerspectiveClick).toHaveBeenCalledTimes(1);
     });
 
@@ -112,7 +113,7 @@ describe("workspace", () => {
 
         workspace.makeMaster(masterWidget);
         const config = {filters: [["A", "===", "testValue"]]};
-        masterWidget.node.dispatchEvent(new CustomEvent("perspective-click", {detail: {config}}));
+        masterWidget.viewer.dispatchEvent(new CustomEvent("perspective-click", {detail: {config}}));
 
         setTimeout(() => {
             expect(detailWidget.save().filters).toEqual(config.filters);
@@ -135,7 +136,7 @@ describe("workspace", () => {
 
         workspace.makeMaster(masterWidget);
         const config = {filters: [["B", "===", "testValue"]]};
-        masterWidget.node.dispatchEvent(new CustomEvent("perspective-click", {detail: {config}}));
+        masterWidget.viewer.dispatchEvent(new CustomEvent("perspective-click", {detail: {config}}));
 
         setTimeout(() => {
             expect(detailWidget.save().filters).toEqual([]);

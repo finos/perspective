@@ -17,7 +17,7 @@ module.exports = {
     ],
 
     output: {
-        path: path.resolve(__dirname, "dist/themes/")
+        path: path.resolve(__dirname, "../dist/themes/")
     },
     module: {
         rules: [

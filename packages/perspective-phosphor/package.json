@@ -17,12 +17,16 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build": "npm-run-all build:esm build:cjs build:styles",
+        "build": "npm-run-all build:esm build:cjs build:styles build:umd",
         "build:esm": "tsc --p ./config --outDir dist/esm",
         "build:cjs": "webpack --color --config config/webpack.config.js",
         "build:styles": "webpack --color --config config/webpack.theme.config.js",
+        "build:umd": "webpack --color --config config/webpack.umd.config.js",
         "clean": "rimraf dist",
-        "test": "jest --silent --color 2>&1"
+        "test": "yarn test:run",
+        "test:run": "npm-run-all test:unit test:integration",
+        "test:unit": "jest  --color --silent --config=./config/jest.config.unit.js 2>&1",
+        "test:integration": "jest --silent --config=./config/jest.config.integration.js  --color 2>&1"
     },
     "dependencies": {
         "@finos/perspective": "^0.4.0-rc.2",
@@ -47,13 +51,5 @@
         "source-map-support": "^0.5.9",
         "typescript": "^3.6.0",
         "webpack-fix-style-only-entries": "^0.4.0"
-    },
-    "jest": {
-        "transform": {
-            ".js$": "@finos/perspective-test/src/js/transform.js"
-        },
-        "setupFiles": [
-            "./test/setup-jest.js"
-        ]
     }
 }

@@ -15,6 +15,10 @@ describe(PerspectiveElement, () => {
     describe(".get_maxes", () => {
         let max_cells, max_columns, num_columns, num_columns_fn, perspective_element, schema, schema_fn;
 
+        beforeAll(() => {
+            window.customElements.define("perspective-element", PerspectiveElement);
+        });
+
         beforeEach(() => {
             perspective_element = new PerspectiveElement();
             num_columns_fn = jest.fn(() => num_columns);
