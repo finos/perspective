@@ -288,14 +288,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		#########################
 		set(PYTHON2 string_starts_with("${PSP_PYTHON_VERSION}" "2"))
 		if(PYTHON2)
+			link_directories("/usr/local/lib")
 			include_directories("/usr/local/include/python2.7m")  # FIXME
 		else()
 			include_directories("/usr/local/include/python3.7m")  # FIXME
 		endif()
 
 		include_directories("${PSP_PYTHON_SRC}/perspective/include")
-		find_package( PythonInterp ${PSP_PYTHON_VERSION} REQUIRED )
-		find_package( PythonLibs  ${PSP_PYTHON_VERSION} REQUIRED )
+		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
 
 

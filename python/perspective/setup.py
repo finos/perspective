@@ -8,6 +8,7 @@
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+from distutils import sysconfig
 from codecs import open
 import io
 import os
@@ -117,6 +118,8 @@ class PSPBuild(build_ext):
             '-DPSP_PYTHON_BUILD=1',
             '-DPSP_CPP_BUILD_TESTS=1',
             '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
+            '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
+            '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
             '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
             '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, 'perspective'))
