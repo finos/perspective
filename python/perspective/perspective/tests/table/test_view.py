@@ -431,7 +431,7 @@ class TestView(object):
         sentinel = False
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel = True
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -445,11 +445,11 @@ class TestView(object):
         sentinel = 0
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         def callback1():
-            nonlocal sentinel
+            global sentinel
             sentinel -= 1
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -466,7 +466,7 @@ class TestView(object):
         sentinel = False
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel = True
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -490,11 +490,11 @@ class TestView(object):
         sentinel = 0
 
         def cb1():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         def cb2():
-            nonlocal sentinel
+            global sentinel
             sentinel += 2
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -511,11 +511,11 @@ class TestView(object):
         sentinel = 0
 
         def cb1():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         def cb2():
-            nonlocal sentinel
+            global sentinel
             sentinel += 2
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -534,11 +534,11 @@ class TestView(object):
         sentinel = 0
 
         def cb1():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         def cb2():
-            nonlocal sentinel
+            global sentinel
             sentinel += 2
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -553,11 +553,11 @@ class TestView(object):
         sentinel = 0
 
         def cb1():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         def cb2():
-            nonlocal sentinel
+            global sentinel
             sentinel += 2
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)

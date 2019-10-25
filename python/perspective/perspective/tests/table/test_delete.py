@@ -23,7 +23,7 @@ class TestDelete(object):
         sentinel = False
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel = True
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -35,7 +35,7 @@ class TestDelete(object):
         sentinel = False
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel = True
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -50,11 +50,11 @@ class TestDelete(object):
         sentinel2 = False
         
         def callback1():
-            nonlocal sentinel1
+            global sentinel1
             sentinel1 = True
 
         def callback2():
-            nonlocal sentinel2
+            global sentinel2
             sentinel2 = True
 
         tbl = Table([{"a": 1}])
@@ -70,7 +70,7 @@ class TestDelete(object):
         sentinel = False
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel = True
 
         tbl = Table([{"a": 1}])
@@ -86,11 +86,11 @@ class TestDelete(object):
         sentinel2 = False
         
         def callback1():
-            nonlocal sentinel1
+            global sentinel1
             sentinel1 = True
 
         def callback2():
-            nonlocal sentinel2
+            global sentinel2
             sentinel2 = True
 
         tbl = Table([{"a": 1}])
@@ -109,7 +109,7 @@ class TestDelete(object):
         sentinel = False
 
         def callback():
-            nonlocal sentinel
+            global sentinel
             sentinel = True
 
         tbl = Table([{"a": 1}])

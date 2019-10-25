@@ -196,7 +196,7 @@ class TestPerspectiveManager(object):
         sentinel = False
 
         def handle_to_dict(msg):
-            nonlocal sentinel
+            global sentinel
             sentinel = True
             message = json.loads(msg)
             assert message["data"] == data
@@ -213,7 +213,7 @@ class TestPerspectiveManager(object):
         sentinel = False
 
         def handle_to_dict(msg):
-            nonlocal sentinel
+            global sentinel
             sentinel = True
             message = json.loads(msg)
             assert message["data"] == {"a": [1], "b": ["a"]}
@@ -239,7 +239,7 @@ class TestPerspectiveManager(object):
         sentinel = 0
 
         def update_callback():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         # create a table and view using manager
@@ -264,7 +264,7 @@ class TestPerspectiveManager(object):
         sentinel = 0
 
         def update_callback():
-            nonlocal sentinel
+            global sentinel
             sentinel += 1
 
         # create a table and view using manager
