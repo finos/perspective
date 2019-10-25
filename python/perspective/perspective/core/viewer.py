@@ -29,7 +29,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                  editable=False):
         '''Initialize an instance of `PerspectiveViewer` with the given viewer configuration.
 
-        Do not pass a `Table` or data into the constructor — use the `load()` method to provide the viewer with data.
+        Do not pass a `Table` or data into the constructor - use the `load()` method to provide the viewer with data.
 
         Args:
             plugin (str) : the grid or visualization that will be displayed on render. Defaults to "hypergrid".
