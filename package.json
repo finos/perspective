@@ -87,6 +87,7 @@
         "test_js": "node scripts/test_js.js",
         "test_cpp": "node scripts/test_cpp.js",
         "test_python": "node scripts/test_python.js",
+        "test_python2": "node scripts/test_python.js --python2",
         "clean": "node scripts/clean.js",
         "start": "lerna run start --stream --scope",
         "precommit": "npm run lint",
