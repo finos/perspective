@@ -106,3 +106,7 @@ ENV/
 _depr
 docs/api
 /perspective/node/assets
+CMakeLists.txt
+cmake
+src
+test

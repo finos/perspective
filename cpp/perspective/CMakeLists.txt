@@ -101,6 +101,9 @@ if (NOT DEFINED PSP_PYTHON_BUILD)
 	set(PSP_PYTHON_BUILD OFF)
 elseif(PSP_PYTHON_BUILD)
 	set(PSP_CPP_BUILD ON)
+	if(NOT DEFINED PSP_PYTHON_VERSION)
+		set(PSP_PYTHON_VERSION 3)
+	endif()
 endif()
 
 if (NOT DEFINED PSP_CPP_BUILD_TESTS)
@@ -130,7 +133,7 @@ if (PSP_PYTHON_BUILD)
 	if(NOT DEFINED PSP_PYTHON_SRC)
 		set(PSP_PYTHON_SRC "${CMAKE_SOURCE_DIR}/../../python/perspective/perspective")
 	endif()
-	message(WARNING "${Cyan}Building Python binding${ColorReset}")
+	message(WARNING "${Cyan}Building Python ${Red}${PSP_PYTHON_VERSION}${Cyan} binding${ColorReset}")
 else()
 	message(WARNING "${Cyan}Skipping Python binding${ColorReset}")
 endif()
@@ -273,10 +276,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		#########################
 		# PYTHON BINDINGS BUILD #
 		#########################
-		include_directories("/usr/local/include/python3.7m")  # FIXME
+		if(PSP_PYTHON_VERSION STREQUAL 2)
+			include_directories("/usr/local/include/python2.7m")  # FIXME
+		else()
+			include_directories("/usr/local/include/python3.7m")  # FIXME
+		endif()
+
 		include_directories("${PSP_PYTHON_SRC}/perspective/include")
-		find_package( PythonInterp 3.7 REQUIRED )
-		find_package( PythonLibs 3.7 REQUIRED )
+		find_package( PythonInterp ${PSP_PYTHON_VERSION} REQUIRED )
+		find_package( PythonLibs  ${PSP_PYTHON_VERSION} REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
 
 
