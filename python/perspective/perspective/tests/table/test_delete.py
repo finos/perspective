@@ -19,43 +19,40 @@ class TestDelete(object):
         tbl.delete()
         # don't segfault
 
-    def test_table_delete_callback(self):
-        sentinel = False
+    def test_table_delete_callback(self, sentinel):
+        s = sentinel(False)
 
         def callback():
-            global sentinel
-            sentinel = True
+            s.set(True)
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         tbl.on_delete(callback)
         tbl.delete()
-        assert sentinel == True
+        assert s.get() is True
 
-    def test_table_delete_with_view(self):
-        sentinel = False
+    def test_table_delete_with_view(self, sentinel):
+        s = sentinel(False)
 
         def callback():
-            global sentinel
-            sentinel = True
+            s.set(True)
+
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         tbl.on_delete(callback)
         view = tbl.view()
         view.delete()
         tbl.delete()
-        assert sentinel == True
+        assert s.get() is True
 
-    def test_table_delete_multiple_callback(self):
-        sentinel1 = False
-        sentinel2 = False
-        
+    def test_table_delete_multiple_callback(self, sentinel):
+        s1 = sentinel(False)
+        s2 = sentinel(False)
+
         def callback1():
-            global sentinel1
-            sentinel1 = True
+            s1.set(True)
 
         def callback2():
-            global sentinel2
-            sentinel2 = True
+            s2.set(True)
 
         tbl = Table([{"a": 1}])
         tbl.on_delete(callback1)
@@ -63,15 +60,14 @@ class TestDelete(object):
 
         tbl.delete()
 
-        assert sentinel1 == True
-        assert sentinel2 == True
+        assert s1.get() is True
+        assert s2.get() is True
 
-    def test_table_remove_delete_callback(self):
-        sentinel = False
+    def test_table_remove_delete_callback(self, sentinel):
+        s = sentinel(False)
 
         def callback():
-            global sentinel
-            sentinel = True
+            s.set(True)
 
         tbl = Table([{"a": 1}])
         tbl.on_delete(callback)
@@ -79,19 +75,17 @@ class TestDelete(object):
 
         tbl.delete()
 
-        assert sentinel == False
+        assert s.get() is False
 
-    def test_view_delete_multiple_callback(self):
-        sentinel1 = False
-        sentinel2 = False
-        
+    def test_view_delete_multiple_callback(self, sentinel):
+        s1 = sentinel(False)
+        s2 = sentinel(False)
+
         def callback1():
-            global sentinel1
-            sentinel1 = True
+            s1.set(True)
 
         def callback2():
-            global sentinel2
-            sentinel2 = True
+            s2.set(True)
 
         tbl = Table([{"a": 1}])
         view = tbl.view()
@@ -102,15 +96,14 @@ class TestDelete(object):
         view.delete()
         tbl.delete()
 
-        assert sentinel1 == True
-        assert sentinel2 == True
+        assert s1.get() is True
+        assert s2.get() is True
 
-    def test_view_remove_delete_callback(self):
-        sentinel = False
+    def test_view_remove_delete_callback(self, sentinel):
+        s = sentinel(False)
 
         def callback():
-            global sentinel
-            sentinel = True
+            s.set(True)
 
         tbl = Table([{"a": 1}])
         view = tbl.view()
@@ -121,4 +114,4 @@ class TestDelete(object):
         view.delete()
         tbl.delete()
 
-        assert sentinel == False
+        assert s.get() is False

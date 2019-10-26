@@ -427,30 +427,27 @@ class TestView(object):
         assert view.to_records() == [{"a": "abc", "b": 4}]
 
     # on_update
-    def test_view_on_update(self):
-        sentinel = False
+    def test_view_on_update(self, sentinel):
+        s = sentinel(False)
 
         def callback():
-            global sentinel
-            sentinel = True
+            s.set(True)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
         view.on_update(callback)
         tbl.update(data)
-        assert sentinel is True
+        assert s.get() is True
 
-    def test_view_on_update_multiple_callback(self):
-        sentinel = 0
+    def test_view_on_update_multiple_callback(self, sentinel):
+        s = sentinel(0)
 
         def callback():
-            global sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         def callback1():
-            global sentinel
-            sentinel -= 1
+            s.set(s.get() - 1)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -458,23 +455,22 @@ class TestView(object):
         view.on_update(callback)
         view.on_update(callback1)
         tbl.update(data)
-        assert sentinel == 0
+        assert s.get() == 0
 
     # on_delete
 
-    def test_view_on_delete(self):
-        sentinel = False
+    def test_view_on_delete(self, sentinel):
+        s = sentinel(False)
 
         def callback():
-            global sentinel
-            sentinel = True
+            s.set(True)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
         view.on_delete(callback)
         view.delete()
-        assert sentinel is True
+        assert s.get() is True
 
     # delete
 
@@ -485,17 +481,16 @@ class TestView(object):
         view.delete()
         assert tbl._views == []
 
-    def test_view_delete_multiple_callbacks(self):
+    def test_view_delete_multiple_callbacks(self, sentinel):
         # make sure that callbacks on views get filtered
-        sentinel = 0
+        s = sentinel(0)
 
         def cb1():
-            global sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         def cb2():
-            global sentinel
-            sentinel += 2
+            s.set(s.get() + 2)
+
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         v1 = tbl.view()
@@ -505,18 +500,17 @@ class TestView(object):
         v1.delete()
         assert len(tbl._views) == 1
         tbl.update(data)
-        assert sentinel == 2
+        assert s.get() == 2
 
-    def test_view_delete_full_cleanup(self):
-        sentinel = 0
+    def test_view_delete_full_cleanup(self, sentinel):
+        s = sentinel(0)
 
         def cb1():
-            global sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         def cb2():
-            global sentinel
-            sentinel += 2
+            s.set(s.get() + 2)
+
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         v1 = tbl.view()
@@ -526,20 +520,19 @@ class TestView(object):
         v1.delete()
         v2.delete()
         tbl.update(data)
-        assert sentinel == 0
+        assert s.get() == 0
 
     # remove_update
 
-    def test_view_remove_update(self):
-        sentinel = 0
+    def test_view_remove_update(self, sentinel):
+        s = sentinel(0)
 
         def cb1():
-            global sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         def cb2():
-            global sentinel
-            sentinel += 2
+            s.set(s.get() + 2)
+
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
@@ -547,18 +540,17 @@ class TestView(object):
         view.on_update(cb2)
         view.remove_update(cb1)
         tbl.update(data)
-        assert sentinel == 2
+        assert s.get() == 2
 
-    def test_view_remove_multiple_update(self):
-        sentinel = 0
+    def test_view_remove_multiple_update(self, sentinel):
+        s = sentinel(0)
 
         def cb1():
-            global sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         def cb2():
-            global sentinel
-            sentinel += 2
+            s.set(s.get() + 2)
+
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
@@ -568,7 +560,7 @@ class TestView(object):
         view.remove_update(cb1)
         assert len(view._callbacks.get_callbacks()) == 1
         tbl.update(data)
-        assert sentinel == 2
+        assert s.get() == 2
 
     # hidden rows
 
