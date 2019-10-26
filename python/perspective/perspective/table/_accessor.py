@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import pandas
 import numpy
 from math import isnan
@@ -166,6 +167,8 @@ class _PerspectiveAccessor(object):
                 val = val.decode("utf-8")
             else:
                 val = str(val)
+                if six.PY2:
+                    val = val.encode("utf-8")
 
         return val
 
