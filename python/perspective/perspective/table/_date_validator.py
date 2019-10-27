@@ -69,10 +69,11 @@ class _PerspectiveDateValidator(object):
         if d is None:
             return d
 
-        if isinstance(d, long):
-            # compat with python2 long from datetime.datetime
-            d = d / 1000000000
-            return long(d)
+        if six.PY2:
+            if isinstance(d, long):
+                # compat with python2 long from datetime.datetime
+                d = d / 1000000000
+                return long(d)
 
         if isinstance(d, numpy.datetime64):
             if str(d) == "NaT":
@@ -80,8 +81,9 @@ class _PerspectiveDateValidator(object):
 
             d = d.astype(datetime)
 
-            if isinstance(d, long):
-                return long(round(d / 1000000))
+            if six.PY2:
+                if isinstance(d, long):
+                    return long(round(d / 1000000))
 
             if isinstance(d, int):
                 # sometimes `astype(datetime)` returns an int timestamp in nanoseconds - parse this.
