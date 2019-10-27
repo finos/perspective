@@ -63,6 +63,16 @@ class TestTable(object):
             "b": str
         }
 
+    def test_table_str_with_escape(self):
+        str_data = [{"a": "abc\"def\"", "b": "abc\"def\""}, {"a": 'abc\'def\'', "b": 'abc\'def\''}]
+        tbl = Table(str_data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_records() == str_data
+
     def test_table_date(self):
         str_data = [{"a": date.today(), "b": date.today()}]
         tbl = Table(str_data)

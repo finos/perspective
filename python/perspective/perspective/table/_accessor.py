@@ -166,9 +166,11 @@ class _PerspectiveAccessor(object):
             if isinstance(val, (bytes, bytearray)):
                 val = val.decode("utf-8")
             else:
-                val = str(val)
                 if six.PY2:
-                    val = val.encode("utf-8")
+                    # six.u mangles quotes with escape sequences - use native unicode()
+                    val = unicode(val)  # noqa: F821
+                else:
+                    val = str(val)
 
         return val
 
