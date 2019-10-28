@@ -15,7 +15,7 @@ const mkdir = require("mkdirp");
 const rimraf = require("rimraf");
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
-const VALID_TARGETS = ["node", "table"];
+const PY2 = args.indexOf("--python2") != -1;
 
 function docker(target = "perspective", image = "emsdk") {
     console.log(`-- Creating ${image} docker image`);
@@ -30,31 +30,27 @@ function docker(target = "perspective", image = "emsdk") {
 try {
     // copy C++ assets
     rimraf.sync(resolve(__dirname, "..", "python", "perspective", "obj")); // unused obj folder
-    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"),
-        resolve(__dirname, "..", "python", "perspective"),
-        {overwrite: true});
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"), {overwrite: true});
 
     mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
-    fs.copySync(resolve(__dirname, "..", "cmake"),
-        resolve(__dirname, "..", "python", "perspective", "cmake"),
-        {overwrite: true});
-
+    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"), {overwrite: true});
 
     let cmd;
-    let build_cmd =
-        "python3 -m pip install -r requirements-dev.txt &&\
-        python3 setup.py build &&\
-        python3 -m flake8 perspective && echo OK &&\
-        python3 -m pytest -v perspective --cov=perspective &&\
+    let python = PY2 ? "python2" : "python3";
+    let image = PY2 ? "python2" : "python";
+    let build_cmd = `${python} -m pip install -r requirements-dev.txt &&\
+        ${python} setup.py build &&\
+        ${python} -m flake8 perspective && echo OK &&\
+        ${python} -m pytest -v perspective --cov=perspective &&\
         make -C ./docs html &&\
-        python3 -m pip install . &&\
+        ${python} -m pip install . &&\
         codecov --token 0f25973b-091f-42fe-a469-95d1c6f7a957 &&\
-        python3 setup.py sdist &&\
-        cd dist/ && python3 -m pip install -U ./perspective*";
+        ${python} setup.py sdist &&\
+        cd dist/ && ${python} -m pip install -U ./perspective*`;
 
     if (process.env.PSP_DOCKER) {
         cmd = `cd python/perspective && ${build_cmd}`;
-        execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
+        execute(`${docker("perspective", image)} bash -c "${cmd}"`);
     } else {
         const python_path = resolve(__dirname, "..", "python", "perspective");
         cmd = `cd ${python_path} && ${build_cmd}`;

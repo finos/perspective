@@ -16,8 +16,6 @@ const rimraf = require("rimraf");
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 const IS_DOCKER = process.env.PSP_DOCKER;
-const VALID_TARGETS = ["node", "table"];
-const HAS_TARGET = args.indexOf("--target") != -1;
 const PY2 = args.indexOf("--python2") != -1;
 
 function docker(target = "perspective", image = "python") {
@@ -39,10 +37,10 @@ try {
     fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"), {overwrite: true});
 
     let cmd;
-    let python = PY2 ? 'python2': 'python3';
+    let python = PY2 ? "python2" : "python3";
     if (IS_DOCKER) {
         cmd = `cd python/perspective && ${python} setup.py build -v`;
-        execute(`${docker(target, "python")} bash -c "${cmd}"`);
+        execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
     } else {
         const python_path = resolve(__dirname, "..", "python", "perspective");
         cmd = `cd ${python_path} && ${python} setup.py build -v`;

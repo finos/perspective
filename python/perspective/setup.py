@@ -18,6 +18,7 @@ import platform
 import sys
 import subprocess
 from shutil import rmtree
+import logging
 try:
     from shutil import which
 except ImportError:
@@ -150,7 +151,7 @@ class PSPBuild(build_ext):
             subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out = e.output.decode()
-            print(out)
+            logging.critical(out)
 
             # if stale cmake build, or issues with python inside python, rerun with shell=true
             if "The current CMakeCache.txt directory"in out:

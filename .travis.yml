@@ -21,6 +21,12 @@ matrix:
       cache: pip
       services: docker
 
+    - python: "2.7"
+      language: python
+      env: TEST=PYTHON2
+      cache: pip
+      services: docker
+
     - language: c++
       env: TEST=CPP_OSX
       os: osx
@@ -52,5 +58,6 @@ script:
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn test_cpp; fi
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn ci_python; fi
+  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn ci_python --python2; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi

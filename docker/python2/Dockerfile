@@ -24,11 +24,21 @@ RUN tar xfz boost_1_71_0.tar.gz
 RUN cd boost_1_71_0 && CPLUS_INCLUDE_PATH="/usr/local/include/python2.7m" C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include/python2.7m" ./bootstrap.sh --with-python=/usr/local/bin/python2.7 || echo "boostrap failed"
 RUN cd boost_1_71_0 && CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/include/python2.7m" C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include/python2.7m" ./b2 -j4 install || echo "build boost failed" 
 
-RUN ln -s /usr/local/lib/libboost_python37.so /usr/local/lib/libboost_python.so
-RUN ln -s /usr/local/lib/libboost_numpy37.so /usr/local/lib/libboost_numpy.so
+RUN ln -s /usr/local/lib/libboost_python27.so /usr/local/lib/libboost_python.so
+RUN ln -s /usr/local/lib/libboost_numpy27.so /usr/local/lib/libboost_numpy.so
 
-RUN python2.7 -m pip install codecov nose2 mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
+RUN python2.7 -m pip install 'mock==2.0.0' codecov nose2 flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc 'backports.shutil_which'
 RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.15.0'
 
-RUN npm install --global yarn
+RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 RUN yarn --version
+
+RUN mkdir -p /usr/local \
+    && cd /usr/local \
+    && git clone https://github.com/google/flatbuffers.git \
+    && cd flatbuffers \
+    && cmake -G "Unix Makefiles" \
+    && make \
+    && cp -r /usr/local/flatbuffers/include/flatbuffers /usr/local/include \
+    && ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc \
+    && chmod +x /usr/local/flatbuffers/flatc
