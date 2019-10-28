@@ -266,6 +266,18 @@ class TestView(object):
             {"__ROW_PATH__": ["2019-10-01 11:30:00 UTC"], "a": 1}
         ]
 
+    def test_view_aggregate_datetime_leading_zeroes(self):
+        data = [{"a": datetime(2019, 1, 1, 5, 5, 5)}, {"a": datetime(2019, 1, 1, 5, 5, 5)}]
+        tbl = Table(data)
+        view = tbl.view(
+            aggregates={"a": "distinct count"},
+            row_pivots=["a"]
+        )
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 1},
+            {"__ROW_PATH__": ["2019-01-01 05:05:05 UTC"], "a": 1}
+        ]
+
     # sort
 
     def test_view_sort_int(self):

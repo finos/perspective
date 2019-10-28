@@ -23,15 +23,17 @@ namespace binding {
  *
  * Helper functions
  */
-// https://github.com/pybind/pybind11/issues/1598
-// no global py::objects
-static auto WARN = [](auto&&... args) { py::module::import("logging").attr("warning")(args...);};
-static auto CRITICAL = [](auto&&... args) { py::module::import("logging").attr("critical")(args...);};
-static auto IS_BOOL = [](auto type_instance) { return type_instance.is(py::module::import("builtins").attr("bool")); };
-static auto IS_INT = [](auto type_instance) { return type_instance.is(py::module::import("builtins").attr("int")); };
-static auto IS_FLOAT = [](auto type_instance) { return type_instance.is(py::module::import("builtins").attr("float")); };
-static auto IS_STR = [](auto type_instance) { return type_instance.is(py::module::import("builtins").attr("str")); };
-static auto IS_BYTES = [](auto type_instance) { return type_instance.is(py::module::import("builtins").attr("bytes")); };
+template <typename... Args>
+static void WARN(Args&&... args) { py::module::import("logging").attr("warning")(args...);};
+
+template <typename... Args>
+static void CRITICAL(Args&&... args) { py::module::import("logging").attr("critical")(args...);};
+
+static bool IS_BOOL(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("bool")); };
+static bool IS_INT(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("int")); };
+static bool IS_FLOAT(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("float")); };
+static bool IS_STR(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("str")); };
+static bool IS_BYTES(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("bytes")); };
 
 /******************************************************************************
  *
