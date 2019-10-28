@@ -24,10 +24,12 @@
 #include <random>
 #include <cmath>
 #include <sstream>
-#include <codecvt>
 
+#ifdef PSP_ENABLE_WASM
+#include <codecvt>
 typedef std::codecvt_utf8<wchar_t> utf8convert_type;
 typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
+#endif
 
 namespace perspective {
 

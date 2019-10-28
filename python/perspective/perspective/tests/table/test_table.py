@@ -1,11 +1,12 @@
 # *****************************************************************************
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-
+import six
 from perspective.table.libbinding import t_filter_op
 from perspective.table import Table
 from datetime import date, datetime
@@ -67,6 +68,19 @@ class TestTable(object):
         str_data = [{"a": "abc\"def\"", "b": "abc\"def\""}, {"a": 'abc\'def\'', "b": 'abc\'def\''}]
         tbl = Table(str_data)
         assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_records() == str_data
+
+    def test_table_str_unicode(self):
+        if six.PY2:
+            str_data = [{"a": u"ȀȁȀȃȀȁȀȃȀȁȀȃȀȁȀȃ", "b": u"ЖДфйЖДфйЖДфйЖДфй"}]
+        else:
+            str_data = [{"a": "ȀȁȀȃȀȁȀȃȀȁȀȃȀȁȀȃ", "b": "ЖДфйЖДфйЖДфйЖДфй"}]
+        tbl = Table(str_data)
+        assert tbl.size() == 1
         assert tbl.schema() == {
             "a": str,
             "b": str

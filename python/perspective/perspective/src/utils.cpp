@@ -151,7 +151,6 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         }
         case DTYPE_STR:
         default: {
-            std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
             return py::cast(scalar.to_string());
         }
     }
