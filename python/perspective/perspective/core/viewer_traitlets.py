@@ -34,6 +34,7 @@ class PerspectiveTraitlets(HasTraits):
     plugin_config = Dict(default_value={}).tag(sync=True)
     dark = Bool(False).tag(sync=True)
     editable = Bool(False).tag(sync=True)
+    client = Bool(False).tag(sync=True)
 
     @validate('plugin')
     def _validate_plugin(self, proposal): return validate_plugin(proposal.value)

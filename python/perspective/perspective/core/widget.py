@@ -5,26 +5,27 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import numpy
 import pandas
 import json
 from datetime import datetime
-from time import mktime
 from functools import partial, wraps
 from ipywidgets import Widget
 from traitlets import observe, Unicode
 from .data import deconstruct_pandas
 from .exception import PerspectiveError
 from .viewer import PerspectiveViewer
+from ..table import Table
 
 
-class DateTimeEncoder(json.JSONEncoder):
-    '''Create a custom JSON encoder that allows serialization of datetime and date objects.'''
+class DateTimeStringEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        if isinstance(obj, datetime):
-            # Convert to milliseconds - perspective.js expects millisecond timestamps, but python generates them in seconds.
-            return int((mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)
-        return super(DateTimeEncoder, self).default(obj)
+        '''Create a stringified representation of a datetime object.'''
+        if isinstance(obj, datetime.datetime):
+            return obj.strftime("%Y-%m-%d %H:%M:%S.%f")
+        else:
+            return super(DateTimeStringEncoder, self).default(obj)
 
 
 class PerspectiveWidget(Widget, PerspectiveViewer):
@@ -52,10 +53,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
     # Required by ipywidgets for proper registration of the backend
     _model_name = Unicode('PerspectiveModel').tag(sync=True)
     _model_module = Unicode('@finos/perspective-jupyterlab').tag(sync=True)
-    _model_module_version = Unicode('^0.3.9').tag(sync=True)
+    _model_module_version = Unicode('^0.4.0-rc.1').tag(sync=True)
     _view_name = Unicode('PerspectiveView').tag(sync=True)
     _view_module = Unicode('@finos/perspective-jupyterlab').tag(sync=True)
-    _view_module_version = Unicode('^0.3.9').tag(sync=True)
+    _view_module_version = Unicode('^0.4.0-rc.1').tag(sync=True)
 
     @wraps(PerspectiveViewer.__init__)
     def __init__(self,
@@ -87,11 +88,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         # and changes made in Python do not reflect to the front-end.
         self.client = client
 
-        # Handle messages from the the front end `PerspectiveJupyterClient.send()`.
-        # - The "data" value of the message should be a JSON-serialized string.
-        # - Both `on_msg` and `@observe("value")` must be specified on the handler for custom messages to be parsed by the Python widget.
-        self.on_msg(self.handle_message)
-
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
             data, pivots = deconstruct_pandas(table_or_data)
@@ -109,18 +105,46 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         # Initialize the viewer
         super(PerspectiveWidget, self).__init__(**kwargs)
 
-        #  If an empty dataset is provided, don't call `load()`
-        if table_or_data is None:
-            if index is not None or limit is not None:
-                raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
+        # Handle messages from the the front end `PerspectiveJupyterClient.send()`.
+        # - The "data" value of the message should be a JSON-serialized string.
+        # - Both `on_msg` and `@observe("value")` must be specified on the handler for custom messages to be parsed by the Python widget.
+        self.on_msg(self.handle_message)
+
+        if self.client:
+            if isinstance(table_or_data, Table):
+                raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
+
+            # Attempt to serialize data and pass it to the front-end as JSON
+            if isinstance(table_or_data, list) or isinstance(table_or_data, dict):
+                # grab reference to data if trivially serializable
+                data = table_or_data
+            elif isinstance(table_or_data, numpy.recarray):
+                # flatten numpy record arrays
+                columns = [table_or_data[col] for col in table_or_data.dtype.names]
+                data = dict(zip(table_or_data.dtype.names, columns))
+            elif isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
+                # take flattened dataframe and make it serializable
+                data = {}
+                for name in table_or_data.columns:
+                    column = table_or_data[name]
+                    d = column.values
+                    if numpy.issubdtype(column.dtype, numpy.datetime64):
+                        d = numpy.datetime_as_string(column.values, unit="ms")
+                    data[name] = d.tolist()
+            self._data = data
         else:
-            if index is not None:
-                kwargs.update({"index": index})
+            #  If an empty dataset is provided, don't call `load()`
+            if table_or_data is None:
+                if index is not None or limit is not None:
+                    raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
+            else:
+                if index is not None:
+                    kwargs.update({"index": index})
 
-            if limit is not None:
-                kwargs.update({"limit": limit})
+                if limit is not None:
+                    kwargs.update({"limit": limit})
 
-            self.load(table_or_data, **kwargs)
+                self.load(table_or_data, **kwargs)
 
     def post(self, msg, id=None):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.
@@ -151,13 +175,21 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
             if parsed["cmd"] == "init":
                 self.post({'id': -1, 'data': None})
-            elif parsed["cmd"] == "table" and self.table_name is not None:
-                # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
-                self.send({
-                    "id": -2,
-                    "type": "table",
-                    "data": self.table_name
-                })
+            elif parsed["cmd"] == "table":
+                if self.client and self._data is not None:
+                    # Send data to the client, transferring ownership to the browser
+                    self.send({
+                        "id": -2,
+                        "type": "data",
+                        "data": self._data
+                    })
+                elif self.table_name is not None:
+                    # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
+                    self.send({
+                        "id": -2,
+                        "type": "table",
+                        "data": self.table_name
+                    })
             else:
                 # For all calls to Perspective, process it in the manager.
                 post_callback = partial(self.post, id=parsed["id"])

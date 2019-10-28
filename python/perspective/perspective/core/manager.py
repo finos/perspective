@@ -169,9 +169,7 @@ class PerspectiveManager(object):
             method = msg.get("method", None)
             if method and method[:2] == "on":
                 # wrap the callback
-                import inspect
                 callback = partial(PerspectiveManager.callback, msg=msg, post_callback=post_callback, self=self)
-                print(inspect.getargspec(callback))
                 if callback_id:
                     self._callback_cache[callback_id] = callback
             elif callback_id is not None:
