@@ -154,7 +154,7 @@ class PSPBuild(build_ext):
             logging.critical(out)
 
             # if stale cmake build, or issues with python inside python, rerun with shell=true
-            if "The current CMakeCache.txt directory"in out:
+            if "The current CMakeCache.txt directory" in out:
                 # purge temporary folder
                 rmtree(self.build_temp)
                 os.makedirs(self.build_temp)

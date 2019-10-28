@@ -16,6 +16,7 @@ class TestPerspectiveManager(object):
 
     def post(self, msg):
         '''boilerplate callback to simulate a client's `post()` method.'''
+        msg = json.loads(msg)
         assert msg["id"] is not None
 
     def test_manager_host_table(self):
