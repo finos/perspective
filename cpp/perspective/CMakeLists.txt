@@ -342,6 +342,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	endif()
 endif()
 
+psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 

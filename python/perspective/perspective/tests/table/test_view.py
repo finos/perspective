@@ -224,7 +224,7 @@ class TestView(object):
         view = tbl.view(column_pivots=["a"])
         cols = list(view.to_dict().keys())
         for col in cols:
-            assert col in ["2019-07-11 12:30:00 UTC|a", "2019-07-11 12:30:00 UTC|b"]
+            assert col in ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
 
     # aggregate
 
@@ -263,7 +263,7 @@ class TestView(object):
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 1},
-            {"__ROW_PATH__": ["2019-10-01 11:30:00 UTC"], "a": 1}
+            {"__ROW_PATH__": ["2019-10-01 11:30:00.000"], "a": 1}
         ]
 
     def test_view_aggregate_datetime_leading_zeroes(self):
@@ -275,7 +275,7 @@ class TestView(object):
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 1},
-            {"__ROW_PATH__": ["2019-01-01 05:05:05 UTC"], "a": 1}
+            {"__ROW_PATH__": ["2019-01-01 05:05:05.000"], "a": 1}
         ]
 
     # sort
