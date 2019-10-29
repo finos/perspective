@@ -8,3 +8,9 @@
 from .table import Table
 
 __all__ = ["Table"]
+
+try:
+    from .libbinding import PerspectiveCppError  # noqa: F401
+    __all__.append("PerspectiveCppError")
+except ImportError:
+    pass

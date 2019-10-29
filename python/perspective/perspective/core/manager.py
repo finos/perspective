@@ -18,7 +18,7 @@ from .exception import PerspectiveError
 from .session import PerspectiveSession
 
 try:
-    import PerspectiveCppError
+    from ..table import PerspectiveCppError
 except ImportError:
     pass
 
