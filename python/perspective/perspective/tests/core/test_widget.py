@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import numpy as np
-import pandas as pd
 from pytest import raises
 from perspective import PerspectiveError, PerspectiveWidget, Table
 

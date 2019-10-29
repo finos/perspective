@@ -12,10 +12,15 @@ import string
 import datetime
 from functools import partial
 from ..table._date_validator import _PerspectiveDateValidator
-from ..table import Table, PerspectiveCppError
+from ..table import Table
 from ..table.view import View
 from .exception import PerspectiveError
 from .session import PerspectiveSession
+
+try:
+    import PerspectiveCppError
+except ImportError:
+    pass
 
 
 def gen_name(size=10, chars=string.ascii_uppercase + string.digits):

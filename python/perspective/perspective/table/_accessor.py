@@ -9,8 +9,12 @@ import six
 import pandas
 import numpy
 from math import isnan
-from .libbinding import t_dtype
 from ._date_validator import _PerspectiveDateValidator
+
+try:
+    from .libbinding import t_dtype
+except ImportError:
+    pass
 
 
 def _type_to_format(data_or_schema):

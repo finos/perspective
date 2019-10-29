@@ -8,9 +8,13 @@
 #
 import six
 import sys
-from perspective.table.libbinding import t_filter_op
 from perspective.table import Table
 from datetime import date, datetime
+
+try:
+    from perspective.table.libbinding import t_filter_op
+except ImportError:
+    pass
 
 
 class TestTable(object):

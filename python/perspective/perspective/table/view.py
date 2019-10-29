@@ -8,12 +8,16 @@
 import pandas
 from functools import partial, wraps
 from random import random
-from .libbinding import make_view_zero, make_view_one, make_view_two
 from .view_config import ViewConfig
 from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
+
+try:
+    from .libbinding import make_view_zero, make_view_one, make_view_two
+except ImportError:
+    pass
 
 
 class View(object):

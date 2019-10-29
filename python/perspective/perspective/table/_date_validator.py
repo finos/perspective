@@ -11,7 +11,12 @@ import numpy
 from datetime import datetime
 from re import search
 from dateutil.parser import parse
-from .libbinding import t_dtype
+
+try:
+    from .libbinding import t_dtype
+except ImportError:
+    pass
+
 if six.PY2:
     from past.builtins import long
 

@@ -114,24 +114,26 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if isinstance(table_or_data, Table):
                 raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
 
-            # Attempt to serialize data and pass it to the front-end as JSON
-            if isinstance(table_or_data, list) or isinstance(table_or_data, dict):
-                # grab reference to data if trivially serializable
-                data = table_or_data
-            elif isinstance(table_or_data, numpy.recarray):
-                # flatten numpy record arrays
-                columns = [table_or_data[col] for col in table_or_data.dtype.names]
-                data = dict(zip(table_or_data.dtype.names, columns))
-            elif isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
-                # take flattened dataframe and make it serializable
-                data = {}
-                for name in table_or_data.columns:
-                    column = table_or_data[name]
-                    d = column.values
-                    if numpy.issubdtype(column.dtype, numpy.datetime64):
-                        d = numpy.datetime_as_string(column.values, unit="ms")
-                    data[name] = d.tolist()
-            self._data = data
+            # cache self._data so creating multiple views don't reserialize the same data
+            if not hasattr(self, "_data") or self._data is None:
+                # Attempt to serialize data and pass it to the front-end as JSON
+                if isinstance(table_or_data, list) or isinstance(table_or_data, dict):
+                    # grab reference to data if trivially serializable
+                    data = table_or_data
+                elif isinstance(table_or_data, numpy.recarray):
+                    # flatten numpy record arrays
+                    columns = [table_or_data[col] for col in table_or_data.dtype.names]
+                    data = dict(zip(table_or_data.dtype.names, columns))
+                elif isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
+                    # take flattened dataframe and make it serializable
+                    data = {}
+                    for name in table_or_data.columns:
+                        column = table_or_data[name]
+                        d = column.values
+                        if numpy.issubdtype(column.dtype, numpy.datetime64):
+                            d = numpy.datetime_as_string(column.values, unit="ms")
+                        data[name] = d.tolist()
+                self._data = data
         else:
             #  If an empty dataset is provided, don't call `load()`
             if table_or_data is None:
