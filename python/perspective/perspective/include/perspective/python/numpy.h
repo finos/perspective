@@ -65,14 +65,14 @@ namespace numpy {
             /**
              * When memory cannot be copied (for dtype=object arrays, for example), fill the column through iteration.
              */
-            void fill_column_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_column_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
 
             // Fill helpers
-            void fill_numeric_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);       
-            void fill_date_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_datetime_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_string_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_bool_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_numeric_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);       
+            void fill_date_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_datetime_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_string_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_bool_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
 
             /**
              * Extract a numpy array from src and copy it into dest.

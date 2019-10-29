@@ -102,6 +102,40 @@ class TestTablePandas(object):
         table.update(df)
         assert table.view().to_dict()["a"] == data
 
+    def test_table_pandas_from_schema_float_all_nan(self):
+        data = [np.nan, np.nan, np.nan, np.nan]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": float
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [None, None, None, None]
+
+    def test_table_pandas_from_schema_float_to_int(self):
+        data = [None, 1.5, None, 2.5, None, 3.5, 4.5]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": int
+        })
+        table.update(df)
+        # truncates decimal
+        assert table.view().to_dict()["a"] == [None, 1, None, 2, None, 3, 4]
+
+    def test_table_pandas_from_schema_int_to_float(self):
+        data = [None, 1, None, 2, None, 3, 4]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": float
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
+
     def test_table_pandas_from_schema_date(self):
         data = [date(2019, 8, 15), None, date(2019, 8, 16)]
         df = pd.DataFrame({
