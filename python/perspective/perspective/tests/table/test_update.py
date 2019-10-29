@@ -58,6 +58,17 @@ class TestUpdate(object):
             "a": [1, 2, 3, 4, 5, 6, 7, 8]
         }
 
+    def test_update_np_one_col(self):
+        tbl = Table({
+            "a": np.array([1, 2, 3, 4]),
+            "b": np.array([2, 3, 4, 5])
+        })
+        tbl.update({"a": np.array([5, 6, 7, 8])})
+        assert tbl.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6, 7, 8],
+            "b": [2, 3, 4, 5, None, None, None, None]
+        }
+
     def test_update_np_datetime(self):
         tbl = Table({
             "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]
@@ -65,6 +76,19 @@ class TestUpdate(object):
 
         tbl.update({
             "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=datetime)
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_update_np_datetime_str(self):
+        tbl = Table({
+            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]
+        })
+
+        tbl.update({
+            "a": np.array(["2019/7/12 11:00:00"])
         })
 
         assert tbl.view().to_dict() == {
@@ -293,6 +317,23 @@ class TestUpdate(object):
         assert tbl.view().to_dict() == {
             "a": [datetime(2019, 7, 12, 11, 0)],
             "b": [1]
+        }
+
+    def test_update_df_one_col(self):
+        tbl = Table({
+            "a": [1, 2, 3, 4],
+            "b": ["a", "b", "c", "d"]
+        })
+
+        update_data = pd.DataFrame({
+            "a": [5, 6, 7]
+        })
+
+        tbl.update(update_data)
+
+        assert tbl.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6, 7],
+            "b": ["a", "b", "c", "d", None, None, None]
         }
 
     def test_update_df_nonseq_partial(self):

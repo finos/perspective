@@ -80,6 +80,7 @@ is_floating_point(t_dtype dtype) {
 bool
 is_deterministic_sized(t_dtype dtype) {
     switch (dtype) {
+        case DTYPE_OBJECT:
         case DTYPE_PTR:
         case DTYPE_INT64:
         case DTYPE_UINT64:
@@ -108,6 +109,7 @@ is_deterministic_sized(t_dtype dtype) {
 t_uindex
 get_dtype_size(t_dtype dtype) {
     switch (dtype) {
+        case DTYPE_OBJECT:
         case DTYPE_PTR: {
             return sizeof(void*);
         }
@@ -261,6 +263,9 @@ dtype_to_str(t_dtype dtype) {
         } break;
         case DTYPE_STR: {
             ss << "string";
+        } break;
+        case DTYPE_OBJECT: {
+            ss << "object";
         } break;
         case DTYPE_NONE: {
             ss << "none";

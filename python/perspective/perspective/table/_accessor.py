@@ -11,6 +11,7 @@ import numpy
 from math import isnan
 from ._date_validator import _PerspectiveDateValidator
 from ..core.data import deconstruct_numpy
+from ..core.exception import PerspectiveError
 
 try:
     from .libbinding import t_dtype
@@ -48,8 +49,7 @@ def _type_to_format(data_or_schema):
                 return False, 2, data_or_schema
             elif isinstance(v, list) or iter(v):
                 # if columns entries are iterable, type 1
-                # TODO: parse dict of numpy arrays as numpy
-                return False, 1, data_or_schema
+                return isinstance(v, numpy.ndarray), 1, data_or_schema
             else:
                 # Can't process
                 raise NotImplementedError("Dict values must be list or type!")
@@ -69,7 +69,7 @@ def _type_to_format(data_or_schema):
             df, _ = deconstruct_pandas(data_or_schema)
 
             # try to squash object dtype as much as possible
-            df.fillna(value=pandas.np.nan, inplace=True)
+            df.fillna(value=numpy.nan, inplace=True)
 
             return True, 1, {c: df[c].values for c in df.columns}
 
@@ -92,7 +92,10 @@ class _PerspectiveAccessor(object):
 
         # if pandas dataframe, use types from dataframe
         if self._is_numpy:
-            self._types = [col.dtype for col in self._data_or_schema.values()]
+            try:
+                self._types = [col.dtype for col in self._data_or_schema.values()]
+            except AttributeError:
+                raise PerspectiveError("Perspective does not support mixed dictionaries of numpy.ndarray and list.")
         else:
             self._types = []
 

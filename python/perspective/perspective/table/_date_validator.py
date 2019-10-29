@@ -42,60 +42,58 @@ class _PerspectiveDateValidator(object):
         except (ValueError, OverflowError):
             return None
 
-    def to_date_components(self, d):
+    def to_date_components(self, obj):
         '''Return a dictionary of string keys and integer values for `year`, `month`, and `day`.
 
         This method converts both datetime.date and numpy.datetime64 objects that contain datetime.date.
         '''
-        if d is None:
-            return d
+        if obj is None:
+            return obj
 
-        if isinstance(d, numpy.datetime64):
-            if str(d) == "NaT":
+        if isinstance(obj, numpy.datetime64):
+            if str(obj) == "NaT":
                 return None
-            dt = d.astype(datetime)
-            return {
-                "year": dt.year,
-                "month": dt.month,
-                "day": dt.day
-            }
+            obj = obj.astype(datetime)
+
+            if (six.PY2 and isinstance(obj, long)) or isinstance(obj, int):
+                obj = datetime.fromtimestamp(obj / 1000000000)
 
         return {
-            "year": d.year,
-            "month": d.month,
-            "day": d.day
+            "year": obj.year,
+            "month": obj.month,
+            "day": obj.day
         }
 
-    def to_timestamp(self, d):
+    def to_timestamp(self, obj):
         '''Return an integer that corresponds to the Unix timestamp, i.e. number of milliseconds since epoch.
 
         This method converts both datetime.datetime and numpy.datetime64 objects.
         '''
-        if d is None:
-            return d
+        if obj is None:
+            return obj
 
         if six.PY2:
-            if isinstance(d, long):
+            if isinstance(obj, long):
                 # compat with python2 long from datetime.datetime
-                d = d / 1000000000
-                return long(d)
+                obj = obj / 1000000000
+                return long(obj)
 
-        if isinstance(d, numpy.datetime64):
-            if str(d) == "NaT":
+        if isinstance(obj, numpy.datetime64):
+            if str(obj) == "NaT":
                 return None
 
-            d = d.astype(datetime)
+            obj = obj.astype(datetime)
 
             if six.PY2:
-                if isinstance(d, long):
-                    return long(round(d / 1000000))
+                if isinstance(obj, long):
+                    return long(round(obj / 1000000))
 
-            if isinstance(d, int):
+            if isinstance(obj, int):
                 # sometimes `astype(datetime)` returns an int timestamp in nanoseconds - parse this.
-                return round(d / 1000000)
+                return round(obj / 1000000)
 
         # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
-        return int((time.mktime(d.timetuple()) + d.microsecond / 1000000.0) * 1000)
+        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)
 
     def format(self, s):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on the format of the parsed date.

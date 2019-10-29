@@ -7,6 +7,8 @@
 #
 
 import numpy as np
+from pytest import raises
+from perspective import PerspectiveError
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -60,6 +62,10 @@ class TestTableNumpy(object):
         data = {"a": np.array([True, False]), "b": np.array([False, True])}
         tbl = Table(data)
         assert tbl.size() == 2
+        assert tbl.view().to_dict() == {
+            "a": [True, False],
+            "b": [False, True]
+        }
 
     def test_table_bool8(self):
         data = {"a": np.array([True, False]).astype(np.bool8), "b": np.array([False, True]).astype(np.bool8)}
@@ -75,13 +81,182 @@ class TestTableNumpy(object):
             "b": date
         }
 
-    def test_table_datetime(self):
-        data = {"a": np.array([datetime.now()]), "b": np.array([datetime.now()])}
+    def test_table_np_datetime(self):
+        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=np.datetime64)}
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
             "a": datetime,
             "b": datetime
+        }
+        assert tbl.view().to_numpy() == data
+
+    def test_table_np_datetime_mixed_dtype(self):
+        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)}
+        tbl = Table(data)
+        assert tbl.size() == 1
+        assert tbl.schema() == {
+            "a": datetime,
+            "b": datetime
+        }
+        assert tbl.view().to_numpy() == data
+
+    def test_table_np_datetime_default(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=np.datetime64)
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_table_np_datetime_string_dtype(self):
+        tbl = Table({
+            "a": np.array(["2019/07/11 15:30:05", "2019/07/11 15:30:05"])
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 11, 15, 30, 5), datetime(2019, 7, 11, 15, 30, 5)]
+        }
+
+    def test_table_np_datetime_ns(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_table_np_datetime_us(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[us]")
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_table_np_datetime_ms(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ms]")
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_table_np_datetime_s(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[s]")
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_table_np_timedelta(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[ns]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["950400000000000 nanoseconds"]
+        }
+
+    def test_table_np_timedelta_us(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[us]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[us]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["950400000000 microseconds"]
+        }
+
+    def test_table_np_timedelta_ms(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ms]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[ms]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["950400000 milliseconds"]
+        }
+
+    def test_table_np_timedelta_s(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[s]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[s]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["950400 seconds"]
+        }
+
+    def test_table_np_timedelta_m(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[m]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[m]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["15840 minutes"]
+        }
+
+    def test_table_np_timedelta_h(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[h]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[h]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["264 hours"]
+        }
+
+    def test_table_np_timedelta_d(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[D]") - np.array([datetime(2019, 7, 1, 11, 0)], dtype="datetime64[D]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": ["11 days"]
+        }
+
+    def test_table_np_timedelta_with_none(self):
+        tbl = Table({
+            "a": np.array([None, datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]") - np.array([datetime(2019, 7, 1, 11, 0), None], dtype="datetime64[ns]")
+        })
+
+        assert tbl.schema() == {
+            "a": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": [None, None]  # two `NaT` values
         }
 
     def test_table_np_mixed(self):
@@ -90,12 +265,80 @@ class TestTableNumpy(object):
             "b": np.full(5, np.nan),
             "c": ["a", "b", "c", "d", "e"]
         }
-        tbl = Table(data)
+
+        # should not be able to parse mixed dicts of numpy array with list
+        with raises(PerspectiveError):
+            Table(data)
+
+    def test_table_np_promote(self):
+        data = {
+            "a": np.arange(5),
+            "b": np.full(5, np.nan),
+            "c": np.array([1, 2, 3, 2147483648, 5])
+        }
+        tbl = Table({
+            "a": int,
+            "b": float,
+            "c": int
+        })
+        tbl.update(data)
         assert tbl.size() == 5
         assert tbl.schema() == {
             "a": int,
             "b": float,
+            "c": int
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": [0, 1, 2, 3, 4],
+            "b": [None, None, None, None, None],
+            "c": [1.0, 2.0, 3.0, 2147483648.0, 5.0]
+        }
+
+    def test_table_np_promote_to_string(self):
+        data = {
+            "a": np.arange(5),
+            "b": np.array([1, 2, 3, "abc", 5]),
+            "c": np.array([1, 2, 3, 2147483648, "abcdef"])
+        }
+        tbl = Table({
+            "a": int,
+            "b": float,
+            "c": int
+        })
+        tbl.update(data)
+        assert tbl.size() == 5
+        assert tbl.schema() == {
+            "a": int,
+            "b": str,
             "c": str
+        }
+
+        assert tbl.view().to_dict() == {
+            "a": [0, 1, 2, 3, 4],
+            "b": ["1", "2", "3", "4", "5"],
+            "c": ["1.0", "2.0", "3.0", "2147483648.0", "?"]
+        }
+
+    def test_table_np_implicit_index(self):
+        data = {
+            "a": np.array(["a", "b", "c", "d", "e"]),
+            "b": np.array([1, 2, 3, 4, 5])
+        }
+        tbl = Table(data)
+        assert tbl.size() == 5
+        assert tbl.schema() == {
+            "a": str,
+            "b": int
+        }
+        tbl.update({
+            "__INDEX__": np.array([1, 2, 3, 4]),
+            "a": np.array(["bb", "cc", "dd", "ee"])
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": ["a", "bb", "cc", "dd", "ee"],
+            "b": [1, 2, 3, 4, 5]
         }
 
     def test_table_recarray(self):

@@ -67,11 +67,14 @@ namespace numpy {
              */
             void fill_column_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
 
-            // Fill helpers
+            // Fill object arrays using accessor and cast<T>
+            template <typename T>
+            void fill_object_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
+
+            // Fill arrays with defined numpy dtypes that are not `object`
             void fill_numeric_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);       
             void fill_date_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
             void fill_datetime_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_string_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
             void fill_bool_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update);
 
             /**

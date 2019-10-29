@@ -46,7 +46,8 @@ enum t_dtype {
     DTYPE_STR,
     DTYPE_USER_VLEN,
     DTYPE_LAST_VLEN,
-    DTYPE_LAST
+    DTYPE_LAST,
+    DTYPE_OBJECT
 };
 
 #ifdef PSP_ENABLE_WASM

@@ -290,7 +290,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED Interpreter Development )
 		include_directories( ${Python_INCLUDE_DIRS} )
 
-
 		find_package(Boost)
 		if(NOT Boost_FOUND)
 			message("${Red}Boost could not be located${ColorReset}")

@@ -310,7 +310,8 @@ PYBIND11_MODULE(libbinding, m)
         .value("DTYPE_STR", DTYPE_STR)
         .value("DTYPE_USER_VLEN", DTYPE_USER_VLEN)
         .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
-        .value("DTYPE_LAST", DTYPE_LAST);
+        .value("DTYPE_LAST", DTYPE_LAST)
+        .value("DTYPE_OBJECT", DTYPE_OBJECT);
 
      /******************************************************************************
      *
