@@ -45,16 +45,12 @@ def superstore(count=50):
     return pd.DataFrame(data)
 
 
-DF = superstore()
+DF = superstore(200)
 
 
 class TestWidgetPandas:
 
     def test_widget_load_table_df(self):
-        '''Flaky on Python 2 - sometimes unicode encoding errors occur.
-
-        `UnicodeEncodeError: 'ascii' codec can't encode character u'\u2022' in position 3: ordinal not in range(128)`
-        '''
         table = Table(DF)
         widget = PerspectiveWidget(table)
         assert widget.table.schema() == {'Country': str, 'index': int, 'Region': str, 'Category': str, 'City': str, 'Customer ID': str, 'Discount': float,
@@ -69,7 +65,6 @@ class TestWidgetPandas:
         assert view.num_columns() == len(DF.columns) + 1  # index column
 
     def test_widget_load_data_df(self):
-        '''Flaky on Python 2 - sometimes unicode encoding errors occur.'''
         widget = PerspectiveWidget(DF)
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'index', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
@@ -100,7 +95,6 @@ class TestWidgetPandas:
         assert view.num_columns() == 6
 
     def test_widget_load_pivot_table_with_user_pivots(self):
-        '''Flaky on Python 2 - sometimes unicode encoding errors occur.'''
         pivot_table = pd.pivot_table(DF, values='Discount', index=['Country', 'Region'], columns='Category')
         widget = PerspectiveWidget(pivot_table, row_pivots=["Category", "Segment"])
         assert widget.row_pivots == ['Country', 'Region']
@@ -119,13 +113,12 @@ class TestWidgetPandas:
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
-        assert widget.table.size() == 50
+        assert widget.table.size() == 200
         view = widget.table.view()
         assert view.num_rows() == len(DF)
         assert view.num_columns() == len(DF.columns) + 1  # index column
 
     def test_widget_load_row_pivots_with_user_pivots(self):
-        '''Flaky on Python 2 - sometimes unicode encoding errors occur.'''
         df_pivoted = DF.set_index(['Country', 'Region'])
         widget = PerspectiveWidget(df_pivoted, row_pivots=["Category", "Segment"])
         assert widget.row_pivots == ['Country', 'Region']  # dataframe pivots should overwrite user pivots
@@ -133,7 +126,7 @@ class TestWidgetPandas:
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
-        assert widget.table.size() == 50
+        assert widget.table.size() == 200
         view = widget.table.view()
         assert view.num_rows() == len(DF)
         assert view.num_columns() == len(DF.columns) + 1  # index column

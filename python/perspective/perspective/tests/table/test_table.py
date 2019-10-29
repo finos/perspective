@@ -7,6 +7,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import six
+import sys
 from perspective.table.libbinding import t_filter_op
 from perspective.table import Table
 from datetime import date, datetime
@@ -27,6 +28,16 @@ class TestTable(object):
             "a": int,
             "b": int
         }
+
+    def test_table_int_overflow(self):
+        if six.PY2:
+            maxint = sys.maxint + 1
+            data = {"a": [i for i in range(100)] + [maxint, maxint, maxint]}
+            tbl = Table(data)
+            # two promotions later
+            assert tbl.schema() == {
+                "a": str
+            }
 
     def test_table_nones(self):
         none_data = [{"a": 1, "b": None}, {"a": None, "b": 2}]
