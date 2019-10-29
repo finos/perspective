@@ -21,6 +21,11 @@
 namespace perspective {
 namespace numpy {
 
+    enum t_fill_status {
+        FILL_SUCCESS,
+        FILL_FAIL
+    };
+
     /**
      * NumpyLoader fast-tracks the loading of Numpy arrays into Perspective, utilizing memcpy whenever possible.
      */
@@ -43,7 +48,9 @@ namespace numpy {
             /**
              * Fill a column with a Numpy array by copying it wholesale into the column without iteration.
              * 
-             * @param array
+             * If the copy operation fails, fill the column iteratively.
+             * 
+             * @param tbl
              * @param col
              * @param length
              * @param type
@@ -58,19 +65,21 @@ namespace numpy {
             /**
              * When memory cannot be copied (for dtype=object arrays, for example), fill the column through iteration.
              */
-            void fill_column_iter(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_column_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
 
             // Fill helpers
-            void fill_numeric_iter(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);       
-            void fill_date_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_datetime_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_string_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
-            void fill_bool_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_numeric_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);       
+            void fill_date_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_datetime_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_string_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_bool_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
 
             /**
              * Extract a numpy array from src and copy it into dest.
+             * 
+             * Returns a `t_fill_status` enum indicating success or failure of the copy operation.
              */
-            void copy_array(py::object src, std::shared_ptr<t_column> dest, t_dtype np_dtype, const std::uint64_t offset);
+            t_fill_status try_copy_array(const py::array& src, std::shared_ptr<t_column> dest, t_dtype np_dtype, const std::uint64_t offset);
 
             // Return the column names from the Python data accessor
             std::vector<std::string> make_names();
