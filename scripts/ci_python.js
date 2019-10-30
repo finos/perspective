@@ -41,12 +41,7 @@ try {
     let build_cmd = `${python} -m pip install -r requirements-dev.txt &&\
         ${python} setup.py build &&\
         ${python} -m flake8 perspective && echo OK &&\
-        ${python} -m pytest -v perspective --cov=perspective &&\
-        make -C ./docs html &&\
-        ${python} -m pip install . &&\
-        codecov --token 0f25973b-091f-42fe-a469-95d1c6f7a957 &&\
-        ${python} setup.py sdist &&\
-        cd dist/ && ${python} -m pip install -U ./perspective*`;
+        ${python} -m pytest -v perspective --cov=perspective`;
 
     if (process.env.PSP_DOCKER) {
         cmd = `cd python/perspective && ${build_cmd}`;
