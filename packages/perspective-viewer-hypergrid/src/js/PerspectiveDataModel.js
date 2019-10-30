@@ -31,6 +31,17 @@ function find_row(rows, index) {
     return -1;
 }
 
+const _wrapper = function(f) {
+    return async function(_, resolve) {
+        try {
+            const is_error = await f.call(this);
+            resolve(is_error);
+        } catch (e) {
+            resolve(e);
+        }
+    };
+};
+
 export default require("datasaur-local").extend("PerspectiveDataModel", {
     isTreeCol: function(x) {
         return x === TREE_COLUMN_INDEX && this.isTree();
@@ -70,7 +81,6 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         }
         this._dirty = true;
         this._nrows = nrows;
-        this._grid.behaviorChanged();
     },
 
     // Called when clicking on a row group expand
@@ -136,50 +146,41 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         }
     },
 
-    fetchData: async function(_, resolve) {
+    fetchData: _wrapper(async function() {
         if (this._view === undefined) {
-            resolve(true);
-            return;
+            return true;
         }
 
         let rect = get_rect.call(this._grid.renderer);
 
-        if (!this._dirty && !uncachedRow.call(this._data_window, rect)) {
-            resolve(false);
+        if (!this._dirty && !is_cache_miss(rect, this._data_window)) {
             return;
         }
 
         this._grid.renderer.needsComputeCellsBounds = true;
 
-        if (this._outstanding_rect && !uncachedRow.call(this._oustanding_rect, rect)) {
-            resolve(true);
-            return;
+        if (this._outstanding && !is_cache_miss(rect, this._outstanding.rect)) {
+            await this._outstanding.req;
+            this._grid.renderer.needsComputeCellsBounds = true;
+            return true;
         }
 
-        this._outstanding_rect = rect;
         this._dirty = false;
+        const req = this.pspFetch(rect);
+        this._outstanding = {rect, req};
+        this._update_select_index();
 
-        const action = this.pspFetch({
-            start_row: rect.origin.y,
-            end_row: rect.corner.y,
-            start_col: rect.origin.x,
-            end_col: rect.corner.x + 1
-        });
+        await req;
 
-        try {
-            this._update_select_index();
-            await action;
-            this._data_window = rect;
-            this._outstanding_rect = undefined;
-            const new_index = this._update_editor(rect);
-            this._update_selection(new_index);
-            rect = get_rect.call(this._grid.renderer);
-            this._grid.renderer.needsComputeCellsBounds = !!uncachedRow.call(this._data_window, rect);
-            resolve(this._grid.renderer.needsComputeCellsBounds);
-        } catch (e) {
-            resolve(e);
-        }
-    },
+        this._data_window = rect;
+        this._outstanding = undefined;
+        this._update_selection(this._update_editor(rect));
+
+        rect = get_rect.call(this._grid.renderer);
+        const ret = is_cache_miss(rect, this._data_window);
+        this._grid.renderer.needsComputeCellsBounds = ret;
+        return ret;
+    }),
 
     getCellEditorAt: function(columnIndex, rowIndex, declaredEditorName, options) {
         if (!declaredEditorName) {
@@ -221,8 +222,8 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
     pspFetch: async function() {}
 });
 
-function uncachedRow(rect) {
-    return !this || this.top !== rect.top || this.height !== rect.height || this.left !== rect.left || this.width !== rect.width;
+function is_cache_miss(req, cache) {
+    return !cache || req.top !== cache.top || req.top + req.height !== cache.top + cache.height || req.left !== cache.left || req.left + req.width !== cache.left + cache.width;
 }
 
 function cellStyle(gridCellConfig) {

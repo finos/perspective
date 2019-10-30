@@ -17,9 +17,9 @@ VersionInfo = namedtuple('VersionInfo', [
 ])
 
 # DO NOT EDIT THIS DIRECTLY!  It is managed by bumpversion
-version_info = VersionInfo(0, 1, 11, 'final', 0)
+version_info = VersionInfo(0, 4, 0, 'rc', 1)
 
-_specifier_ = {'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'final': ''}
+_specifier_ = {'alpha': 'alpha', 'beta': 'beta', 'rc': 'rc', 'final': ''}
 
 __version__ = '{}.{}.{}{}'.format(
     version_info.major,
@@ -27,4 +27,4 @@ __version__ = '{}.{}.{}{}'.format(
     version_info.micro,
     (''
      if version_info.releaselevel == 'final'
-     else _specifier_[version_info.releaselevel] + str(version_info.serial)))
+     else _specifier_[version_info.releaselevel] + "." + str(version_info.serial)))

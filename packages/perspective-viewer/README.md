@@ -15,6 +15,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
         * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>string</code>
         * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
         * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
+        * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>boolean</code>
         * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
         * [.table](#module_perspective-viewer..PerspectiveViewer+table)
         * [.view](#module_perspective-viewer..PerspectiveViewer+view)
@@ -52,6 +53,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
     * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>string</code>
     * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
     * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
+    * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>boolean</code>
     * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
     * [.table](#module_perspective-viewer..PerspectiveViewer+table)
     * [.view](#module_perspective-viewer..PerspectiveViewer+view)
@@ -220,6 +222,16 @@ Sets this `perspective.table.view`'s `column_pivots` property.
 
 #### perspectiveViewer.row-pivots : <code>array.&lt;string&gt;</code>
 Sets this `perspective.table.view`'s `row_pivots` property.
+
+**Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
+**Emits**: <code>PerspectiveViewer#event:perspective-config-update</code>  
+
+* * *
+
+<a name="module_perspective-viewer..PerspectiveViewer+editable"></a>
+
+#### perspectiveViewer.editable : <code>boolean</code>
+Determines whether this viewer is editable or not (though it isultimately up to the plugin as to whether editing is implemented).
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Emits**: <code>PerspectiveViewer#event:perspective-config-update</code>  

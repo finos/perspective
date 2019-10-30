@@ -19,7 +19,7 @@ function page2hypergrid(data, row_pivots, columns) {
     }
 
     const is_tree = !!row_pivots.length;
-    const flat_columns = row_pivots.length ? columns.slice(1) : columns;
+    const flat_columns = row_pivots.length ? columns.filter(x => x !== "__ROW_PATH__") : columns;
     const data_indices = data_columns.map(x => flat_columns.indexOf(x));
     const rows = [];
 
@@ -71,7 +71,7 @@ function psp2hypergrid(data, schema, tschema, row_pivots, columns) {
         };
     }
 
-    const flat_columns = row_pivots.length ? columns.slice(1) : columns;
+    const flat_columns = row_pivots.length ? columns.filter(x => x !== "__ROW_PATH__") : columns;
     const columnPaths = flat_columns.map(row => row.split(COLUMN_SEPARATOR_STRING));
     const is_tree = !!row_pivots.length;
     const rows = page2hypergrid(data, row_pivots, columns);
