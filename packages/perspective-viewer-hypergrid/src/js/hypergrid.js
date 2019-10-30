@@ -43,6 +43,7 @@ bindTemplate(TEMPLATE, style)(
                 host.setAttribute("hidden", true);
                 this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
                 this.grid.canvas.stopResizeLoop();
+                this.grid.canvas.stopPaintLoop();
                 host.removeAttribute("hidden");
                 this.grid.get_styles = () => get_styles(this);
 
@@ -88,9 +89,10 @@ async function grid_update(div, view, task) {
         return;
     }
     const dataModel = hypergrid.behavior.dataModel;
-    dataModel.setDirty(nrows);
     dataModel._view = view;
     dataModel._table = this._table;
+    dataModel.setDirty(nrows);
+    hypergrid.behaviorChanged();
     hypergrid.canvas.paintNow();
 }
 
@@ -140,12 +142,32 @@ async function getOrCreateHypergrid(div) {
     return perspectiveHypergridElement;
 }
 
+function pad_data_window(rect, rowPivots = [], colPivots = [], settings = true) {
+    const range = {
+        start_row: rect.origin.y,
+        end_row: rect.corner.y,
+        start_col: rect.origin.x,
+        end_col: rect.corner.x + 1
+    };
+    range.end_row += settings ? 8 : 2;
+    range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
+    range.index = rowPivots.length === 0 && colPivots.length === 0;
+    return range;
+}
+
+function suppress_paint(hypergrid, f) {
+    const canvas = hypergrid.divCanvas;
+    hypergrid.divCanvas = undefined;
+    f();
+    hypergrid.divCanvas = canvas;
+}
+
 async function grid_create(div, view, task, max_rows, max_cols, force) {
     let hypergrid = get_hypergrid.call(this);
     if (hypergrid) {
         hypergrid.behavior.dataModel._view = undefined;
         hypergrid.behavior.dataModel._table = undefined;
-        hypergrid.allowEvents(false);
+        suppress_paint(hypergrid, () => hypergrid.allowEvents(false));
     }
 
     const config = await view.get_config();
@@ -156,13 +178,13 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
 
     const colPivots = config.column_pivots;
     const rowPivots = config.row_pivots;
-    const window = {
+    const data_window = {
         start_row: 0,
-        end_row: Math.max(colPivots.length + 1, rowPivots.length + 1),
+        end_row: 1,
         index: rowPivots.length === 0 && colPivots.length === 0
     };
 
-    const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(window), view.schema(), this._table.schema()]);
+    const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(data_window), view.schema(), this._table.schema()]);
 
     if (task.cancelled) {
         return;
@@ -186,13 +208,11 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel._config = config;
     dataModel._viewer = this;
 
-    dataModel.pspFetch = async range => {
-        range.end_row += this.hasAttribute("settings") ? 8 : 2;
-        range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
-        range.index = rowPivots.length === 0 && colPivots.length === 0;
+    dataModel.pspFetch = async rect => {
+        const range = pad_data_window(rect, rowPivots, colPivots, this.hasAttribute("settings"));
         let next_page = await dataModel._view.to_columns(range);
         if (columns.length === 0) {
-            columns = Object.keys(await view.to_columns(window));
+            columns = Object.keys(await view.to_columns(data_window));
         }
         dataModel.data = [];
         const rows = page2hypergrid(next_page, rowPivots, columns);
@@ -200,13 +220,13 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         const data = dataModel.data;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
+    hypergrid.renderer.needsComputeCellsBounds = true;
+    suppress_paint(hypergrid, () => perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns, force));
+    if (hypergrid.behavior.dataModel._outstanding) {
+        await hypergrid.behavior.dataModel._outstanding.req;
+    }
 
-    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns, force);
-    hypergrid.allowEvents(false);
-    hypergrid.renderer.computeCellsBounds(true);
     await hypergrid.canvas.resize(true);
-    hypergrid.renderer.computeCellsBounds(true);
-    hypergrid.canvas.paintNow();
     hypergrid.allowEvents(true);
 }
 

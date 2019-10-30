@@ -271,9 +271,9 @@ export default function(Module) {
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = Math.min(max_rows, options.end_row || (viewport.height ? start_row + viewport.height : max_rows));
+        const end_row = Math.min(max_rows, options.end_row !== undefined ? options.end_row : viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
+        const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
         let date_format;
         if (options.date_format) {
             date_format = new Intl.DateTimeFormat(options.date_format);

@@ -484,7 +484,6 @@ export const install = function(grid) {
 
         this.bounds = new rectangular.Rectangle(0, 0, width, height);
         this.component.setBounds(this.bounds);
-        this.resizeNotification();
 
         let render = true;
         if (height * ratio !== this.canvas.height || width * ratio !== this.canvas.width || force) {
@@ -499,6 +498,7 @@ export const install = function(grid) {
 
         this.bounds = new rectangular.Rectangle(0, 0, width, height);
         this.component.setBounds(this.bounds);
+        this.resizeNotification();
 
         this.buffer.width = this.canvas.width = width * ratio;
         this.buffer.height = this.canvas.height = height * ratio;
