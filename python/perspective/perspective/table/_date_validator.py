@@ -24,6 +24,8 @@ if six.PY2:
 class _PerspectiveDateValidator(object):
     '''Validate and parse dates using the `dateutil` package.'''
 
+    EPOCH = datetime(1970, 1, 1)
+
     def parse(self, str):
         '''Return a datetime.datetime object containing the parsed date, or None if the date is invalid.
 
@@ -91,6 +93,18 @@ class _PerspectiveDateValidator(object):
             if isinstance(obj, int):
                 # sometimes `astype(datetime)` returns an int timestamp in nanoseconds - parse this.
                 return round(obj / 1000000)
+
+        # TODO: full support for unix/second timestamps
+        if isinstance(obj, (int, float)):
+            # figure out whether the timestamp is in seconds or milliseconds
+            try:
+                # TODO: this sucks, but milliseconds will overflow, seconds will fit
+                datetime(obj)
+                # convert to milliseconds
+                return obj * 1000
+            except (ValueError, OverflowError):
+                # milliseconds
+                return obj
 
         # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
         return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)

@@ -90,14 +90,22 @@ class _PerspectiveAccessor(object):
         elif isinstance(self._data_or_schema, dict):
             self._names = list(self._data_or_schema.keys())
 
-        # if pandas dataframe, use types from dataframe
+        self._types = []
+
+        # store the transformed arrays and null mappings in a separate location
+        self._numpy_meta = {}
+
+        # Additional transformations for numpy array-backed datasets
         if self._is_numpy:
+            # try to normalize column data as much as we can
             try:
-                self._types = [col.dtype for col in self._data_or_schema.values()]
+                for name in self._data_or_schema:
+                    array = self._data_or_schema[name]
+                    deconstructed = deconstruct_numpy(array)
+                    self._numpy_meta[name] = deconstructed
+                    self._types.append(deconstructed["array"].dtype)
             except AttributeError:
                 raise PerspectiveError("Perspective does not support mixed dictionaries of numpy.ndarray and list.")
-        else:
-            self._types = []
 
     def data(self):
         return self._data_or_schema
@@ -141,7 +149,7 @@ class _PerspectiveAccessor(object):
         except (KeyError, IndexError):
             return None
 
-    def marshal(self, cidx, ridx, type):
+    def marshal(self, cidx, ridx, dtype):
         '''Returns the element at the specified column and row index, and marshals it into an object compatible with the core engine's `fill` method.
 
         If DTYPE_DATE or DTYPE_TIME is specified for a string value, attempt to parse the string value or return `None`.
@@ -149,7 +157,7 @@ class _PerspectiveAccessor(object):
         Args:
             cidx (int)
             ridx (int)
-            type (.libbinding.t_dtype)
+            dtype (.libbinding.t_dtype)
 
         Returns:
             object or None
@@ -166,29 +174,29 @@ class _PerspectiveAccessor(object):
         elif isinstance(val, list) and len(val) == 1:
             # strip out values encased lists
             val = val[0]
-        elif type == t_dtype.DTYPE_INT32 or type == t_dtype.DTYPE_INT64:
-            if not isinstance(val, bool) and isinstance(val, float):
+        elif dtype == t_dtype.DTYPE_INT32 or dtype == t_dtype.DTYPE_INT64:
+            if not isinstance(val, bool) and isinstance(val, (float, numpy.floating)):
                 # should be able to update int columns with either ints or floats
                 val = int(val)
-        elif type == t_dtype.DTYPE_FLOAT32 or type == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(val, int):
+        elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
+            if not isinstance(val, bool) and isinstance(val, (int, numpy.integer)):
                 # should be able to update float columns with either ints or floats
                 val = float(val)
-        elif type == t_dtype.DTYPE_DATE:
+        elif dtype == t_dtype.DTYPE_DATE:
             # return datetime.date
             if isinstance(val, str):
                 parsed = self._date_validator.parse(val)
                 val = self._date_validator.to_date_components(parsed)
             else:
                 val = self._date_validator.to_date_components(val)
-        elif type == t_dtype.DTYPE_TIME:
+        elif dtype == t_dtype.DTYPE_TIME:
             # return unix timestamps for time
             if isinstance(val, str):
                 parsed = self._date_validator.parse(val)
                 val = self._date_validator.to_timestamp(parsed)
             else:
                 val = self._date_validator.to_timestamp(val)
-        elif type == t_dtype.DTYPE_STR:
+        elif dtype == t_dtype.DTYPE_STR:
             if isinstance(val, (bytes, bytearray)):
                 val = val.decode("utf-8")
             else:
@@ -197,15 +205,7 @@ class _PerspectiveAccessor(object):
                     val = unicode(val)  # noqa: F821
                 else:
                     val = str(val)
-
         return val
-
-    def _is_numpy_column(self, name):
-        '''For columnar datasets, return whether the underlying data is a Numpy array.'''
-        if self._format == 1:
-            data = self._data_or_schema.get(name, None)
-            return isinstance(data, numpy.ndarray)
-        return False
 
     def _get_numpy_column(self, name):
         '''For columnar datasets, return the list/Numpy array that contains the data for a single column.
@@ -216,8 +216,7 @@ class _PerspectiveAccessor(object):
         Returns:
             list/numpy.array/None : returns the column's data, or None if it cannot be found.
         '''
-        if self._is_numpy_column(name):
-            return deconstruct_numpy(self._data_or_schema.get(name, None))
+        return self._numpy_meta.get(name, None)
 
     def _has_column(self, ridx, name):
         '''Given a column name, validate that it is in the row.

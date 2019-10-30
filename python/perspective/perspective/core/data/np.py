@@ -5,13 +5,9 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from perspective.table.libbinding import t_dtype
-from perspective.table._date_validator import _PerspectiveDateValidator
-
-date_validator = _PerspectiveDateValidator()
 
 
 def deconstruct_numpy(array):
@@ -24,8 +20,10 @@ def deconstruct_numpy(array):
         dict : `array` is the original array, and `mask` is an array of booleans where `True` represents a nan/None value.
     '''
     is_object_or_string = pd.api.types.is_object_dtype(array.dtype) or pd.api.types.is_string_dtype(array.dtype)
+
     # use `isnull` or `isnan` depending on dtype
-    if is_object_or_string:
+    if is_object_or_string or six.PY2:
+        # python3 masked_invalid compares datetimes, but not in python2
         data = array
         mask = np.argwhere(pd.isnull(array)).flatten()
     else:
@@ -33,15 +31,7 @@ def deconstruct_numpy(array):
         data = masked.data
         mask = np.argwhere(masked.mask).flatten()
 
-    if is_object_or_string:
-        # do our best to clean object arrays
-        # if data[0] is a nan, then it'll either end up being a float or promoted to string
-        # so work with the assumption that data[0] is a non-null value
-        if isinstance(data[0], datetime) or isinstance(data[0], np.datetime64):
-            data = data.astype("datetime64[us]", copy=False).view("int64") / 1000000
-        elif isinstance(data[0], str) and date_validator.format(data[0]) == t_dtype.DTYPE_TIME:
-            data = np.array([date_validator.parse(d) for d in data]).astype("datetime64[us]", copy=False).view("int64") / 1000000
-    elif data.dtype == bool or data.dtype == "?":
+    if data.dtype == bool or data.dtype == "?":
         # bool => byte
         data = data.astype("b", copy=False)
     elif np.issubdtype(data.dtype, np.datetime64):
@@ -52,12 +42,12 @@ def deconstruct_numpy(array):
             data = data.astype("int64", copy=False) / 1000000000
         elif data.dtype == np.dtype("datetime64[ms]"):
             data = data.astype("int64", copy=False)
-            print("MS", data, data.dtype)
         elif data.dtype == np.dtype("datetime64[s]"):
             data = data.astype("int64", copy=False) * 1000
-            print("S", data, data.dtype)
     elif np.issubdtype(data.dtype, np.timedelta64):
         data = data.astype("int64", copy=False)
+
+    print(data.dtype)
 
     return {
             "array": data,

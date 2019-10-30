@@ -67,7 +67,10 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
          */
         numpy_loader.init();
         column_names = numpy_loader.names();
-        data_types = get_data_types(accessor.attr("data")(), 1, column_names, accessor.attr("date_validator")().cast<t_val>());
+
+        // composite array and inferred `data_types` for the Table
+        std::vector<t_dtype> inferred_types = get_data_types(accessor.attr("data")(), 1, column_names, accessor.attr("date_validator")().cast<t_val>());
+        data_types = numpy_loader.reconcile_dtypes(inferred_types);
     }  else {
         // Infer names and types
         t_val data = accessor.attr("data")();

@@ -17,6 +17,7 @@ namespace numpy {
 
     NumpyLoader::NumpyLoader(py::object accessor)
         : m_init(false)
+        , m_has_numeric_dtype(false)
         , m_accessor(accessor) {}
 
     NumpyLoader::~NumpyLoader() {}
@@ -27,6 +28,35 @@ namespace numpy {
         m_types = make_types();
         m_init = true;
     }
+
+    bool
+    NumpyLoader::has_numeric_dtype() const {
+        PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+        return m_has_numeric_dtype;
+    }
+
+    std::vector<t_dtype> 
+    NumpyLoader::reconcile_dtypes(const std::vector<t_dtype>& inferred_types) const {
+        PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+        std::vector<t_dtype> reconciled_types;
+        std::uint32_t num_columns = m_names.size();
+
+        for (auto i = 0; i < num_columns; ++i) {
+            t_dtype numpy_type = m_types[i];
+            t_dtype inferred_type = inferred_types[i];
+            switch (numpy_type) {
+                case DTYPE_OBJECT: {
+                    // inferred type has the correct underlying type for the array
+                    reconciled_types.push_back(inferred_type);
+                } break;
+                default: {
+                    reconciled_types.push_back(numpy_type);
+                }
+            }
+        }
+
+        return reconciled_types;
+    };
 
     std::vector<std::string>
     NumpyLoader::names() const {
@@ -92,45 +122,45 @@ namespace numpy {
     void 
     NumpyLoader::fill_column(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update) {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-        std::cout << "filling " << name << std::endl;
+
         // Use name index instead of column index - prevents off-by-one errors with the "index" column.
         auto name_it = std::find(m_names.begin(), m_names.end(), name); 
         
-        // If the column name is not in the dataset, break
+        // If the column name is not in the dataset, return and move on.
         if (name_it == m_names.end()) {
             return;
         }
 
         auto nidx = std::distance(m_names.begin(), name_it);
 
-        /**
-         * np_dtype is used to attempt `memcpy` of the numpy array into perspective.
-         * if memcpy fails, it is most likely a numpy array with `dtype=object`, so use the inferred type from perspective.
-         */
+        // np_dtype is one of the integer/float/bool dtypes, or `DTYPE_OBJECT`.
         t_dtype np_dtype = m_types[nidx];
        
         py::dict source = m_accessor.attr("_get_numpy_column")(name);
         py::array array = source["array"].cast<py::array>();
         py::array_t<std::uint64_t> mask = source["mask"].cast<py::array_t<std::uint64_t>>();
 
-        std::cout << name << ", npt: " << dtype_to_str(np_dtype) << ", t: " << dtype_to_str(type) << std::endl;
+        std::cout << name << ", npd: " << dtype_to_str(np_dtype) << ", d: " << dtype_to_str(type) << std::endl;
 
          /**
          * Catch common type mismatches and fill iteratively when a numpy dtype is of greater bit width than the Perspective t_dtype:
          * - when `np_dtype` is int64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_FLOAT64`
          * - when `np_dtype` is float64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_INT64`
-         * These errors occur frqeuently when a Table is created from non-numpy data, then updated with a numpy array.
+         * - when `type` is float64 and `np_dtype` is `DTYPE_FLOAT32` or `DTYPE_FLOAT64`
+         * 
+         * These errors occur frqeuently when a Table is created from non-numpy data or schema, then updated with a numpy array.
          * In these cases, the `t_dtype` of the Table supercedes the array dtype.
          */
         bool should_iter = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
-            (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64));
+            (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
+            (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
         if (should_iter) {
             // Skip straight to numeric fill
             fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
             return;
         }
 
-        bool copy_status = try_copy_array(array, col, np_dtype, 0);
+        bool copy_status = try_copy_array(array, col, np_dtype, type, 0);
 
         if (copy_status == t_fill_status::FILL_FAIL) {
             fill_column_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
@@ -151,37 +181,11 @@ namespace numpy {
                 }
             }
         }
-
-        col->pprint();
-    }
-
-    void
-    NumpyLoader::fill_column_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
-        PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-        std::cout << name << " iterating" << std::endl;
-        switch (type) {
-            case DTYPE_TIME: {
-                fill_datetime_iter(array, col, name, np_dtype, type, cidx, is_update);
-            } break;
-            case DTYPE_DATE: {
-                fill_date_iter(array, col, name, np_dtype, type, cidx, is_update);
-            } break;
-            case DTYPE_BOOL: {
-                fill_bool_iter(array, col, name, np_dtype, type, cidx, is_update);
-            } break;
-            case DTYPE_STR: {
-                fill_object_iter<std::string>(col, name, np_dtype, type, cidx, is_update);
-            } break;
-            default: {
-                fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
-                break;
-            }
-        }
     }
 
     template <typename T>
     void
-    NumpyLoader::fill_object_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+    NumpyLoader::fill_object_iter(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
         t_uindex nrows = col->size();
 
         for (auto i = 0; i < nrows; ++i) {
@@ -200,14 +204,155 @@ namespace numpy {
         }
     }
 
+    // Add explicit instantiations for int32, int64, and float64 as they have promotion logic
+    template <>
     void
-    NumpyLoader::fill_datetime_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+    NumpyLoader::fill_object_iter<std::int32_t>(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+        t_uindex nrows = col->size();
+
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = m_accessor.attr("marshal")(cidx, i, type);
+
+            if (item.is_none()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
+                }
+                continue;
+            }
+
+            double fval = item.cast<double>();
+            if (fval > 2147483647 || fval < -2147483648) {
+                binding::WARN("Promoting %s to float from int32", name);
+                tbl.promote_column(name, DTYPE_FLOAT64, i, true);
+                col = tbl.get_column(name);
+                type = DTYPE_FLOAT64;
+                col->set_nth(i, fval);
+            } else if (isnan(fval)) {
+                binding::WARN("Promoting column %s to string from int32", name);
+                tbl.promote_column(name, DTYPE_STR, i, false);
+                col = tbl.get_column(name);
+                fill_object_iter<std::string>(
+                    tbl, col, name, np_dtype, DTYPE_STR, cidx, is_update);
+                return;
+            } else {
+                col->set_nth(i, static_cast<std::int32_t>(fval));
+            }
+        }
+    }
+
+    template <>
+    void
+    NumpyLoader::fill_object_iter<std::int64_t>(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+        t_uindex nrows = col->size();
+
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = m_accessor.attr("marshal")(cidx, i, type);
+
+            if (item.is_none()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
+                }
+                continue;
+            }
+
+            double fval = item.cast<double>();
+            if (isnan(fval)) {
+                binding::WARN("Promoting %s to string from int64", name);
+                tbl.promote_column(name, DTYPE_STR, i, false);
+                col = tbl.get_column(name);
+                fill_object_iter<std::string>(
+                    tbl, col, name, np_dtype, DTYPE_STR, cidx, is_update);
+                return;
+            } else {
+                col->set_nth(i, static_cast<std::int64_t>(fval));
+            }
+        }
+    }
+
+    template <>
+    void
+    NumpyLoader::fill_object_iter<double>(t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+        t_uindex nrows = col->size();
+
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = m_accessor.attr("marshal")(cidx, i, type);
+
+            if (item.is_none()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
+                }
+                continue;
+            }
+
+            bool is_float = py::isinstance<py::float_>(item);
+            bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
+            if (!is_float || is_numpy_nan) {
+                binding::WARN("Promoting column %s to string from float64", name);
+                tbl.promote_column(name, DTYPE_STR, i, false);
+                col = tbl.get_column(name);
+                fill_object_iter<std::string>(
+                    tbl, col, name, np_dtype, DTYPE_STR, cidx, is_update);
+                return;
+            }
+            col->set_nth(i, item.cast<double>());
+        }
+    }
+
+    // Must be below `fill_object_iter` explicit instantiations.
+    void
+    NumpyLoader::fill_column_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+        PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+        // Numpy arrays are guaranteed to be continous and valid by the time they enter this block,
+        // but if they're of dtype object, then we need to pass it through `m_accessor.marshal`.
+        switch (type) {
+            case DTYPE_TIME: {
+                // covers dtype `datetime64[us/ns/ms/s]`
+                if (np_dtype == DTYPE_OBJECT) {
+                    fill_object_iter<std::int64_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                } else {
+                    fill_datetime_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
+                }
+            } break;
+            case DTYPE_DATE: {
+                // `datetime.date` objects or `datetime64[D/W/M/Y]`, always fill by using `marshal`.
+                fill_date_iter(col, name, np_dtype, type, cidx, is_update);
+            } break;
+            case DTYPE_BOOL: {
+                if (np_dtype == DTYPE_OBJECT) {
+                    fill_object_iter<bool>(tbl, col, name, np_dtype, type, cidx, is_update);
+                } else {
+                    fill_bool_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
+                }
+            } break;
+            case DTYPE_STR: {
+                // dtype `U`
+                fill_object_iter<std::string>(tbl, col, name, np_dtype, type, cidx, is_update);
+            } break;
+            default: {
+                // TODO: do we need to check for object fill again here
+                // dtype `i/u/f`
+                fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
+                break;
+            }
+        }
+    }
+
+    // `array.dtype=datetime64[ns/us/ms/s]`
+    void
+    NumpyLoader::fill_datetime_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, 
+        const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
         t_uindex nrows = col->size();
 
         if (np_dtype == DTYPE_OBJECT) {
             // handle object arrays
-            fill_object_iter<std::int64_t>(col, name, np_dtype, type, cidx, is_update); 
+            fill_object_iter<std::int64_t>(tbl, col, name, np_dtype, type, cidx, is_update); 
         } else {
             double* ptr = (double*) array.data(); // read as double to handle nan
 
@@ -219,7 +364,7 @@ namespace numpy {
     }
 
     void
-    NumpyLoader::fill_date_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+    NumpyLoader::fill_date_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
         t_uindex nrows = col->size();
 
@@ -243,14 +388,14 @@ namespace numpy {
     }
 
     void
-    NumpyLoader::fill_bool_iter(const py::array& array, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
+    NumpyLoader::fill_bool_iter(const py::array& array, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name, t_dtype np_dtype, t_dtype type, std::uint32_t cidx, bool is_update) {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
         t_uindex nrows = col->size();
 
         // handle Nan/None in boolean array with dtype=object
         if (np_dtype == DTYPE_OBJECT) {
             // handle object arrays
-            fill_object_iter<bool>(col, name, np_dtype, type, cidx, is_update); 
+            fill_object_iter<bool>(tbl, col, name, np_dtype, type, cidx, is_update); 
         } else {
             bool* ptr = (bool*) array.data(); 
 
@@ -267,7 +412,59 @@ namespace numpy {
         t_uindex nrows = col->size();
         const void* ptr = array.data();
 
-        // we can always fill numeric columns with C++ iteration
+        // We fill by object when `np_dtype`=object, or if there are type mismatches between `np_dtype` and `type`.
+        bool types_mismatched = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
+            (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
+
+        if (types_mismatched || np_dtype == DTYPE_OBJECT) {
+            switch (type) {
+                case DTYPE_UINT8: {
+                    fill_object_iter<std::uint8_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_UINT16: {
+                    fill_object_iter<std::uint16_t> (tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_UINT32: {
+                    fill_object_iter<std::uint32_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_UINT64: {
+                    fill_object_iter<std::uint64_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_INT8: {
+                    fill_object_iter<std::int8_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_INT16: {
+                    fill_object_iter<std::int16_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_INT32: {
+                    fill_object_iter<std::int32_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_INT64: {
+                    fill_object_iter<std::int64_t>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_FLOAT32: {
+                    fill_object_iter<float>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                case DTYPE_FLOAT64: {
+                    fill_object_iter<double>(tbl, col, name, np_dtype, type, cidx, is_update);
+                    return;
+                } break;
+                default:
+                    PSP_COMPLAIN_AND_ABORT("Unable to fill non-numeric column in `fill_numeric_iter`.")
+            }
+        }
+
+        // Iterate through the C++ array and try to cast. Array is guaranteed to be of the correct dtype and consistent in its values.
         for (auto i = 0; i < nrows; ++i) {
             if (isnan(((double*) ptr)[i]) || npy_isnan(((double*) ptr)[i])) {
                 if (is_update) {
@@ -298,69 +495,17 @@ namespace numpy {
                     col->set_nth(i, ((std::int16_t*)ptr)[i]);
                 } break;
                 case DTYPE_INT32: {
-                    std::int32_t item = ((std::int32_t*) ptr)[i];
-
-                    if (np_dtype == DTYPE_INT64) {
-                        item = ((std::int64_t*) ptr)[i]; // c++ automatically handles conversion
-                    } else if (np_dtype == DTYPE_FLOAT64) {
-                        item = ((double*) ptr)[i]; // truncate decimal
-                    } 
-
-                    // This handles cases where a long sequence of e.g. 0 precedes a clearly
-                    // float value in an inferred column. Would not be needed if the type
-                    // inference checked the entire column/we could reset parsing.
-                    double fval = ((double*) ptr)[i];
-                    if (fval > 2147483647 || fval < -2147483648) {
-                        binding::WARN("Promoting %s to float from int32", name);
-                        tbl.promote_column(name, DTYPE_FLOAT64, i, true);
-                        col = tbl.get_column(name);
-                        type = DTYPE_FLOAT64;
-                        col->set_nth(i, fval);
-                    } else if (isnan(fval) || npy_isnan(fval)) {
-                        binding::WARN("Promoting %s to string from int32", name);
-                        tbl.promote_column(name, DTYPE_STR, i, false);
-                        col = tbl.get_column(name);
-                        fill_object_iter<std::string>(col, name, np_dtype, DTYPE_STR, cidx, is_update);
-                        return;
-                    } else {
-                        col->set_nth(i, item);
-                    }
+                    // No need for promotion logic if array is consistent
+                    col->set_nth<std::int32_t>(i, ((std::int32_t*) ptr)[i]);
                 } break;
                 case DTYPE_INT64: {
-                    std::int64_t item = ((std::int64_t*) ptr)[i];
-                    if (np_dtype == DTYPE_FLOAT64) {
-                        item = ((double*) ptr)[i];
-                    }
-                    
-                    double fval = ((double*) ptr)[i];
-                    if (isnan(fval) || npy_isnan(fval)) {
-                        binding::WARN("Promoting %s to string from int64", name);
-                        tbl.promote_column(name, DTYPE_STR, i, false);
-                        col = tbl.get_column(name);
-                        fill_object_iter<std::string>(col, name, np_dtype, DTYPE_STR, cidx, is_update);
-                        return;
-                    } 
-                    
-                    col->set_nth<std::int64_t>(i, item);
+                    col->set_nth<std::int64_t>(i, ((std::int64_t*) ptr)[i]);
                 } break;
                 case DTYPE_FLOAT32: {
                     col->set_nth(i, ((float*) ptr)[i]);
                 } break;
                 case DTYPE_FLOAT64: {
-                    double item = ((double*)ptr)[i];
-                    if (np_dtype == DTYPE_INT64) {
-                        item = ((std::int64_t*) ptr)[i];
-                    }
-                    // if the value is a nan, or if the numpy dtype is string (i.e. not a copyable type), promote
-                    bool is_numeric_type = np_dtype == DTYPE_INT64 || np_dtype == DTYPE_FLOAT64;
-                    if (!is_numeric_type || isnan(item) || npy_isnan(item)) {
-                        binding::WARN("Promoting %s to string from float64", name);
-                        tbl.promote_column(name, DTYPE_STR, i, false);
-                        col = tbl.get_column(name);
-                        fill_object_iter<std::string>(col, name, np_dtype, DTYPE_STR, cidx, is_update);
-                        return;
-                    }
-                    col->set_nth<double>(i, item);
+                    col->set_nth<double>(i, ((double*)ptr)[i]);
                 } break;
                 default:
                     break;
@@ -373,7 +518,7 @@ namespace numpy {
      * Copy numpy arrays into columns
      */
     t_fill_status 
-    NumpyLoader::try_copy_array(const py::array& src, std::shared_ptr<t_column> dest, t_dtype np_dtype, const std::uint64_t offset) {
+    NumpyLoader::try_copy_array(const py::array& src, std::shared_ptr<t_column> dest, t_dtype np_dtype, t_dtype type, const std::uint64_t offset) {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
         std::int64_t length = src.size();
 
@@ -402,6 +547,7 @@ namespace numpy {
             } break;
             case DTYPE_INT64:
             case DTYPE_TIME: {
+                std::cout << "copying int64/time" << std::endl;
                 copy_array_helper<std::int64_t>(src.data(), dest, offset);
             } break;
             case DTYPE_FLOAT32: {

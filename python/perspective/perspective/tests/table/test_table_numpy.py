@@ -297,27 +297,19 @@ class TestTableNumpy(object):
 
     def test_table_np_promote_to_string(self):
         data = {
-            "a": np.arange(5),
-            "b": np.array([1, 2, 3, "abc", 5]),
-            "c": np.array([1, 2, 3, 2147483648, "abcdef"])
+            "a": np.arange(4),
+            "b": np.array([1, 2, "abc", "abc"]),
         }
-        tbl = Table({
-            "a": int,
-            "b": float,
-            "c": int
-        })
-        tbl.update(data)
-        assert tbl.size() == 5
+        tbl = Table(data)
+        assert tbl.size() == 4
         assert tbl.schema() == {
             "a": int,
             "b": str,
-            "c": str
         }
 
         assert tbl.view().to_dict() == {
-            "a": [0, 1, 2, 3, 4],
-            "b": ["1", "2", "3", "4", "5"],
-            "c": ["1.0", "2.0", "3.0", "2147483648.0", "?"]
+            "a": [0, 1, 2, 3],
+            "b": ["1", "2", "abc", "abc"],
         }
 
     def test_table_np_implicit_index(self):
@@ -342,7 +334,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray(self):
-        table = Table(np.array([(1.0, 2), (3.0, 4)], dtype=[('x', '<f8'), ('y', '<i8')]).view(np.recarray))
+        d = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', '<f8'), ('y', '<i8')]).view(np.recarray)
+        table = Table(d)
         assert table.schema() == {
             "x": float,
             "y": int
