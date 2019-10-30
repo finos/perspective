@@ -287,8 +287,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# PYTHON BINDINGS BUILD #
 		#########################
 		include_directories("${PSP_PYTHON_SRC}/perspective/include")
-		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED )
-		include_directories( ${PYTHON_INCLUDE_DIRS} )
+		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED Interpreter Development )
+		include_directories( ${Python_INCLUDE_DIRS} )
 
 
 		find_package(Boost)
