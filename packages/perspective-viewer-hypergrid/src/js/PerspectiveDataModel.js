@@ -161,6 +161,7 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
 
         if (this._outstanding && !is_cache_miss(rect, this._outstanding.rect)) {
             await this._outstanding.req;
+            this._grid.renderer.needsComputeCellsBounds = true;
             return true;
         }
 
