@@ -5,11 +5,16 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import pandas
 import numpy
 from math import isnan
-from .libbinding import t_dtype
 from ._date_validator import _PerspectiveDateValidator
+
+try:
+    from .libbinding import t_dtype
+except ImportError:
+    pass
 
 
 def _type_to_format(data_or_schema):
@@ -165,7 +170,11 @@ class _PerspectiveAccessor(object):
             if isinstance(val, (bytes, bytearray)):
                 val = val.decode("utf-8")
             else:
-                val = str(val)
+                if six.PY2:
+                    # six.u mangles quotes with escape sequences - use native unicode()
+                    val = unicode(val)  # noqa: F821
+                else:
+                    val = str(val)
 
         return val
 

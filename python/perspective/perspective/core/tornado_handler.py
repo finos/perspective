@@ -9,16 +9,21 @@ import json
 import tornado.websocket
 from datetime import datetime
 from .exception import PerspectiveError
+from ..table._date_validator import _PerspectiveDateValidator
+
+
+_date_validator = _PerspectiveDateValidator()
 
 
 class DateTimeEncoder(json.JSONEncoder):
     '''Create a custom JSON encoder that allows serialization of datetime and date objects.'''
 
     def default(self, obj):
-        if isinstance(obj, datetime):
+        if isinstance(obj, datetime.datetime):
             # Convert to milliseconds - perspective.js expects millisecond timestamps, but python generates them in seconds.
-            return obj.timestamp() * 1000
-        return super(DateTimeEncoder, self).default(obj)
+            return _date_validator.to_timestamp(obj)
+        else:
+            return super(DateTimeEncoder, self).default(obj)
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
@@ -65,8 +70,11 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         self._session.process(message, self.post)
 
     def post(self, message):
-        '''When `post` is called by `PerspectiveManager`, serialize the data to JSON and send it to the client.'''
-        message = json.dumps(message, cls=DateTimeEncoder)
+        '''When `post` is called by `PerspectiveManager`, serialize the data to JSON and send it to the client.
+
+        Args:
+            message (str) : a JSON-serialized string containing a message to the front-end `perspective-viewer`.
+        '''
         self.write_message(message)
 
     def on_close(self):

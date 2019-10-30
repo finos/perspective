@@ -407,9 +407,9 @@ RUN mkdir -p /usr/share/man/man1
 RUN touch /usr/share/man/man1/rmid.1.gz.dpkg-tmp
 RUN apt-get -qq -y update && apt-get -qq install -y --no-install-recommends openjdk-8-jre-headless
 
-RUN wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh -q
+RUN wget https://cmake.org/files/v3.15/cmake-3.15.4-Linux-x86_64.sh -q
 RUN mkdir /opt/cmake
-RUN printf "y\nn\n" | sh cmake-3.7.2-Linux-x86_64.sh --prefix=/opt/cmake > /dev/null
+RUN printf "y\nn\n" | sh cmake-3.15.4-Linux-x86_64.sh --prefix=/opt/cmake > /dev/null
 RUN rm -fr cmake*.sh /opt/cmake/doc
 RUN rm -fr /opt/cmake/bin/cmake-gui
 RUN rm -fr /opt/cmake/bin/ccmake

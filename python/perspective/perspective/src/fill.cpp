@@ -232,11 +232,7 @@ _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::s
                 continue;
             }
 
-            // convert to a python string first
-            std::wstring welem = item.cast<std::wstring>();
-            std::wstring_convert<utf16convert_type, wchar_t> converter;
-            std::string elem = converter.to_bytes(welem);
-            col->set_nth(i, elem);
+            col->set_nth(i, item.cast<std::string>());
         }
     }
 }
@@ -323,11 +319,7 @@ set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, t_val value) {
             break;
         }
         case DTYPE_STR: {
-            std::wstring welem = value.cast<std::wstring>();
-
-            std::wstring_convert<utf16convert_type, wchar_t> converter;
-            std::string elem = converter.to_bytes(welem);
-            col->set_nth(idx, elem, STATUS_VALID);
+            col->set_nth(idx, value.cast<std::string>(), STATUS_VALID);
             break;
         }
         case DTYPE_DATE: {

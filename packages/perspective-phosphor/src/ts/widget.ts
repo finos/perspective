@@ -21,6 +21,7 @@ let _increment = 0;
 
 export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     dark?: boolean;
+    client?: boolean;
     title?: string;
     bindto?: HTMLElement;
     plugin_config?: PerspectiveViewerOptions;
@@ -67,7 +68,9 @@ export class PerspectiveWidget extends Widget {
         const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
+        const client: boolean = options.client || false;
 
+        this.client = client;
         this.dark = dark;
         this.editable = editable;
         this.plugin = plugin;
@@ -258,6 +261,16 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
+     * True if the widget is in client-only mode, i.e. the browser has ownership of the widget's data.
+     */
+    get client(): boolean {
+        return this._client;
+    }
+    set client(client: boolean) {
+        this._client = client;
+    }
+
+    /**
      * Enable or disable dark mode by re-rendering the viewer.
      */
     get dark(): boolean {
@@ -328,6 +341,7 @@ export class PerspectiveWidget extends Widget {
 
     private _viewer: PerspectiveViewer;
     private _plugin_config: PerspectiveViewerOptions;
+    private _client: boolean;
     private _dark: boolean;
     private _editable: boolean;
     private _displayed: boolean;

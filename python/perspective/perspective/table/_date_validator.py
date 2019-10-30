@@ -5,12 +5,20 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import time
 import numpy
 from datetime import datetime
 from re import search
 from dateutil.parser import parse
-from .libbinding import t_dtype
+
+try:
+    from .libbinding import t_dtype
+except ImportError:
+    pass
+
+if six.PY2:
+    from past.builtins import long
 
 
 class _PerspectiveDateValidator(object):
@@ -66,11 +74,21 @@ class _PerspectiveDateValidator(object):
         if d is None:
             return d
 
+        if six.PY2:
+            if isinstance(d, long):
+                # compat with python2 long from datetime.datetime
+                d = d / 1000000000
+                return long(d)
+
         if isinstance(d, numpy.datetime64):
             if str(d) == "NaT":
                 return None
 
             d = d.astype(datetime)
+
+            if six.PY2:
+                if isinstance(d, long):
+                    return long(round(d / 1000000))
 
             if isinstance(d, int):
                 # sometimes `astype(datetime)` returns an int timestamp in nanoseconds - parse this.

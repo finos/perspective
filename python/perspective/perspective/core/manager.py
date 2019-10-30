@@ -11,20 +11,30 @@ import random
 import string
 import datetime
 from functools import partial
-from ..table import Table, PerspectiveCppError
+from ..table._date_validator import _PerspectiveDateValidator
+from ..table import Table
 from ..table.view import View
 from .exception import PerspectiveError
 from .session import PerspectiveSession
+
+try:
+    from ..table import PerspectiveCppError
+except ImportError:
+    pass
 
 
 def gen_name(size=10, chars=string.ascii_uppercase + string.digits):
     return "".join(random.choice(chars) for x in range(size))
 
 
+_date_validator = _PerspectiveDateValidator()
+
+
 class DateTimeEncoder(json.JSONEncoder):
+
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
-            return obj.timestamp() * 1000
+            return _date_validator.to_timestamp(obj)
         else:
             return super(DateTimeEncoder, self).default(obj)
 
@@ -85,14 +95,14 @@ class PerspectiveManager(object):
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):
-            raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.loads()`.")
+            raise PerspectiveError("Message passed into `_process` should either be a JSON-serialized string or a dict.")
 
         cmd = msg["cmd"]
 
         try:
             if cmd == "init":
                 # return empty response
-                post_callback(self._make_message(msg["id"], None))
+                post_callback(json.dumps(self._make_message(msg["id"], None), cls=DateTimeEncoder))
             elif cmd == "table":
                 try:
                     # create a new Table and track it
@@ -109,7 +119,7 @@ class PerspectiveManager(object):
                 self._process_method_call(msg, post_callback)
         except(PerspectiveError, PerspectiveCppError) as e:
             # Catch errors and return them to client
-            post_callback(self._make_error_message(msg["id"], str(e)))
+            post_callback(json.dumps(self._make_error_message(msg["id"], str(e))), cls=DateTimeEncoder)
 
     def _process_method_call(self, msg, post_callback):
         '''When the client calls a method, validate the instance it calls on and return the result.'''
@@ -148,7 +158,7 @@ class PerspectiveManager(object):
                 # return the result to the client
                 post_callback(json.dumps(self._make_message(msg["id"], result), cls=DateTimeEncoder))
         except Exception as error:
-            post_callback(self._make_error_message(msg["id"], str(error)))
+            post_callback(json.dumps(self._make_error_message(msg["id"], str(error)), cls=DateTimeEncoder))
 
     def _process_subscribe(self, msg, table_or_view, post_callback):
         '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
@@ -176,7 +186,7 @@ class PerspectiveManager(object):
             else:
                 logging.info("callback not found for remote call {}".format(msg))
         except Exception as error:
-            post_callback(self._make_error_message(msg["id"], error))
+            post_callback(json.dumps(self._make_error_message(msg["id"], error), cls=DateTimeEncoder))
 
     def callback(self, **kwargs):
         '''Return a message to the client using the `post_callback` method.'''

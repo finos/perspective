@@ -1,3 +1,11 @@
+# *****************************************************************************
+#
+# Copyright (c) 2019, the Perspective Authors.
+#
+# This file is part of the Perspective library, distributed under the terms of
+# the Apache License 2.0.  The full license can be found in the LICENSE file.
+#
+import six
 import numpy as np
 import pandas as pd
 import pytz
@@ -365,7 +373,13 @@ class TestToFormat(object):
         tbl = Table(df)
         view = tbl.view()
         df2 = view.to_df()
-        assert np.array_equal(df2.columns, pd.Index(["index", "a", "b"], dtype=object))
+        if six.PY2:
+            # order not guaranteed if columns are inferred using aggregate dict keys
+            for col in df2.columns:
+                assert col in ["index", "a", "b"]
+        else:
+            assert np.array_equal(df2.columns, pd.Index(["index", "a", "b"], dtype=object))
+
         assert np.array_equal(df2["a"].values, df["a"].values)
         assert np.array_equal(df2["b"].values, df["b"].values)
 
@@ -376,7 +390,12 @@ class TestToFormat(object):
         tbl = Table(inp)
         view = tbl.view()
         df2 = view.to_df()
-        assert np.array_equal(df2.columns, pd.Index(["index", "a"], dtype=object))
+        if six.PY2:
+            # order not guaranteed if columns are inferred using aggregate dict keys
+            for col in df2.columns:
+                assert col in ["index", "a"]
+        else:
+            assert np.array_equal(df2.columns, pd.Index(["index", "a"], dtype=object))
         assert np.array_equal(df2["a"].values, df["a"].values)
 
     # start_row/end_row
@@ -533,16 +552,28 @@ class TestToFormat(object):
             start_col=1,
             end_col=2
         )
-        assert records == [{"b": 2}, {"b": 4}]
+        # start_col and end_col access columns at that index - dict key order not guaranteed in python2
+        if six.PY2:
+            # in this test, column c comes before b
+            assert records == [{"c": 3}, {"c": 5}]
+            # assert that in the general dataset, just to see if it holds true
+            assert view.to_records() == [{"a": 1, "c": 3, "b": 2}, {"a": 3, "c": 5, "b": 4}]
+        else:
+            assert records == [{"b": 2}, {"b": 4}]
 
     # to csv
 
     def test_to_csv_symmetric(self):
         csv = "a,b\n1,2\n3,4"
+        if six.PY2:
+            csv = unicode(csv)
         df = pd.read_csv(StringIO(csv))
         tbl = Table(df)
         view = tbl.view()
-        assert view.to_csv() == ",index,a,b\n0,0,1,2\n1,1,3,4\n"
+        if six.PY2:
+            assert view.to_csv() == ",a,b,index\n0,1,2,0\n1,3,4,1\n"
+        else:
+            assert view.to_csv() == ",index,a,b\n0,0,1,2\n1,1,3,4\n"
 
     def test_to_csv_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -632,7 +663,10 @@ class TestToFormat(object):
         view = tbl.view(
             row_pivots=["a"]
         )
-        assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,['1'],2,4\n"
+        if six.PY2:
+            assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,[u'1'],2,4\n"
+        else:
+            assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,['1'],2,4\n"
 
     def test_to_csv_two(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -641,7 +675,10 @@ class TestToFormat(object):
             row_pivots=["a"],
             column_pivots=["b"]
         )
-        assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\n0,[],2,4\n1,['1'],2,4\n"
+        if six.PY2:
+            assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\n0,2,4,[]\n1,2,4,[u'1']\n"
+        else:
+            assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\n0,[],2,4\n1,['1'],2,4\n"
 
     def test_to_csv_column_only(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -658,7 +695,10 @@ class TestToFormat(object):
             row_pivots=["a"],
             columns=[]
         )
-        assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
+        if six.PY2:
+            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
+        else:
+            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
 
     def test_to_csv_two_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -668,7 +708,10 @@ class TestToFormat(object):
             column_pivots=["b"],
             columns=[]
         )
-        assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
+        if six.PY2:
+            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
+        else:
+            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
 
     def test_to_csv_column_only_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]

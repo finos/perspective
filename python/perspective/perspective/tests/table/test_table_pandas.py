@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 from io import StringIO
 from datetime import date, datetime
 import numpy as np
@@ -179,7 +180,10 @@ class TestTablePandas(object):
         }
 
     def test_table_correct_csv_nan_end(self):
-        csv = StringIO("str,int\n,1\n,2\nabc,3")
+        s = "str,int\n,1\n,2\nabc,3"
+        if six.PY2:
+            s = unicode(s)
+        csv = StringIO(s)
         data = pd.read_csv(csv)
         tbl = Table(data)
         assert tbl.schema() == {
@@ -195,7 +199,10 @@ class TestTablePandas(object):
         }
 
     def test_table_correct_csv_nan_intermittent(self):
-        csv = StringIO("str,float\nabc,\n,2\nghi,")
+        s = "str,float\nabc,\n,2\nghi,"
+        if six.PY2:
+            s = unicode(s)
+        csv = StringIO(s)
         data = pd.read_csv(csv)
         tbl = Table(data)
         assert tbl.schema() == {

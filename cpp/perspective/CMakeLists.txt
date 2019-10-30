@@ -17,6 +17,16 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
 endif()
 
+
+## Helper function
+function(string_starts_with str search)
+  string(FIND "${str}" "${search}" out)
+  if("${out}" EQUAL 0)
+    return(true)
+  endif()
+  return(false)
+endfunction()
+
 ##############################
 # helper to grab gtest et al #
 ##############################
@@ -101,6 +111,9 @@ if (NOT DEFINED PSP_PYTHON_BUILD)
 	set(PSP_PYTHON_BUILD OFF)
 elseif(PSP_PYTHON_BUILD)
 	set(PSP_CPP_BUILD ON)
+	if(NOT DEFINED PSP_PYTHON_VERSION)
+		set(PSP_PYTHON_VERSION 3.7)
+	endif()
 endif()
 
 if (NOT DEFINED PSP_CPP_BUILD_TESTS)
@@ -130,7 +143,7 @@ if (PSP_PYTHON_BUILD)
 	if(NOT DEFINED PSP_PYTHON_SRC)
 		set(PSP_PYTHON_SRC "${CMAKE_SOURCE_DIR}/../../python/perspective/perspective")
 	endif()
-	message(WARNING "${Cyan}Building Python binding${ColorReset}")
+	message(WARNING "${Cyan}Building Python ${Red}${PSP_PYTHON_VERSION}${Cyan} binding${ColorReset}")
 else()
 	message(WARNING "${Cyan}Skipping Python binding${ColorReset}")
 endif()
@@ -273,11 +286,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		#########################
 		# PYTHON BINDINGS BUILD #
 		#########################
-		include_directories("/usr/local/include/python3.7m")  # FIXME
 		include_directories("${PSP_PYTHON_SRC}/perspective/include")
-		find_package( PythonInterp 3.7 REQUIRED )
-		find_package( PythonLibs 3.7 REQUIRED )
-		include_directories( ${PYTHON_INCLUDE_DIRS} )
+		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED Interpreter Development )
+		include_directories( ${Python_INCLUDE_DIRS} )
 
 
 		find_package(Boost)
@@ -323,6 +334,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	endif()
 endif()
 
+psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 

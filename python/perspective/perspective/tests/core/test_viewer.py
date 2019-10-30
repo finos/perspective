@@ -85,7 +85,8 @@ class TestViewer:
             "c": bool,
             "d": str
         })
-        assert viewer.columns == ["a", "b", "c", "d"]
+        for col in viewer.columns:
+            assert col in ["a", "b", "c", "d"]
 
     def test_viewer_load_table_with_options(self):
         table = Table({"a": [1, 2, 3]})
@@ -127,13 +128,15 @@ class TestViewer:
         table = Table(pd.DataFrame({"a": np.arange(1, 100)}))
         viewer = PerspectiveViewer()
         viewer.load(table)
-        assert viewer.columns == ["index", "a"]
+        for col in viewer.columns:
+            assert col in ["index", "a"]
         assert viewer.table.size() == 99
 
     def test_viewer_load_df_data(self):
         viewer = PerspectiveViewer()
         viewer.load(pd.DataFrame({"a": np.arange(1, 100)}))
-        assert viewer.columns == ["index", "a"]
+        for col in viewer.columns:
+            assert col in ["index", "a"]
 
     # update
 

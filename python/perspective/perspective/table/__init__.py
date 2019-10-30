@@ -7,8 +7,10 @@
 #
 from .table import Table
 
-# `PerspectiveCppError` is the error type raised from the C++ binding.
-# To catch all exceptions from Perspective, catch `PerspectiveError` and `PerspectiveCppError`.
-from .libbinding import PerspectiveCppError
+__all__ = ["Table"]
 
-__all__ = ["Table", "PerspectiveCppError"]
+try:
+    from .libbinding import PerspectiveCppError  # noqa: F401
+    __all__.append("PerspectiveCppError")
+except ImportError:
+    pass

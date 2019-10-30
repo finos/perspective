@@ -16,6 +16,7 @@ class TestPerspectiveManager(object):
 
     def post(self, msg):
         '''boilerplate callback to simulate a client's `post()` method.'''
+        msg = json.loads(msg)
         assert msg["id"] is not None
 
     def test_manager_host_table(self):
@@ -192,12 +193,11 @@ class TestPerspectiveManager(object):
 
     # serialization
 
-    def test_manager_to_dict(self):
-        sentinel = False
+    def test_manager_to_dict(self, sentinel):
+        s = sentinel(False)
 
         def handle_to_dict(msg):
-            nonlocal sentinel
-            sentinel = True
+            s.set(True)
             message = json.loads(msg)
             assert message["data"] == data
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
@@ -207,14 +207,13 @@ class TestPerspectiveManager(object):
         manager._process(message, self.post)
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
         manager._process(to_dict_message, handle_to_dict)
-        assert sentinel is True
+        assert s.get() is True
 
-    def test_manager_to_dict_with_options(self):
-        sentinel = False
+    def test_manager_to_dict_with_options(self, sentinel):
+        s = sentinel(False)
 
         def handle_to_dict(msg):
-            nonlocal sentinel
-            sentinel = True
+            s.set(True)
             message = json.loads(msg)
             assert message["data"] == {"a": [1], "b": ["a"]}
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
@@ -224,7 +223,7 @@ class TestPerspectiveManager(object):
         manager._process(message, self.post)
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict", "args": [{"start_row": 0, "end_row": 1}]}
         manager._process(to_dict_message, handle_to_dict)
-        assert sentinel is True
+        assert s.get() is True
 
     def test_manager_create_view_and_update_table(self):
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
@@ -235,12 +234,11 @@ class TestPerspectiveManager(object):
         table.update([{"a": 4, "b": "d"}])
         assert manager._views["view1"].num_rows() == 4
 
-    def test_manager_on_update(self):
-        sentinel = 0
+    def test_manager_on_update(self, sentinel):
+        s = sentinel(0)
 
         def update_callback():
-            nonlocal sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         # create a table and view using manager
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
@@ -258,14 +256,13 @@ class TestPerspectiveManager(object):
         update2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
         manager._process(update1, self.post)
         manager._process(update2, self.post)
-        assert sentinel == 2
+        assert s.get() == 2
 
-    def test_manager_remove_update(self):
-        sentinel = 0
+    def test_manager_remove_update(self, sentinel):
+        s = sentinel(0)
 
         def update_callback():
-            nonlocal sentinel
-            sentinel += 1
+            s.set(s.get() + 1)
 
         # create a table and view using manager
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
@@ -284,7 +281,7 @@ class TestPerspectiveManager(object):
         update2 = {"id": 5, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
         manager._process(update1, self.post)
         manager._process(update2, self.post)
-        assert sentinel == 0
+        assert s.get() == 0
 
     def test_manager_delete_view(self):
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}

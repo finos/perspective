@@ -8,6 +8,7 @@
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
+from distutils import sysconfig
 from codecs import open
 import io
 import os
@@ -16,8 +17,12 @@ import re
 import platform
 import sys
 import subprocess
-import shutil
-
+from shutil import rmtree
+import logging
+try:
+    from shutil import which
+except ImportError:
+    from backports.shutil_which import which
 here = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -56,9 +61,9 @@ class PSPBuild(build_ext):
         self.run_node()
 
     def run_node(self):
-        self.npm_cmd = shutil.which('yarn')
+        self.npm_cmd = which('yarn')
         if not self.npm_cmd:
-            self.npm_cmd = shutil.which('npm')
+            self.npm_cmd = which('npm')
             if not self.npm_cmd:
                 raise RuntimeError(
                     "Yarn or npm must be installed to build the following extensions: " +
@@ -74,7 +79,7 @@ class PSPBuild(build_ext):
         self.build_extension_node()
 
     def run_cmake(self):
-        self.cmake_cmd = shutil.which('cmake')
+        self.cmake_cmd = which('cmake')
         try:
             out = subprocess.check_output([self.cmake_cmd, '--version'])
         except OSError:
@@ -113,6 +118,9 @@ class PSPBuild(build_ext):
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
             '-DPSP_CPP_BUILD_TESTS=1',
+            '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
+            '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
+            '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
             '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
             '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, 'perspective'))
@@ -143,12 +151,12 @@ class PSPBuild(build_ext):
             subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out = e.output.decode()
-            print(out)
+            logging.critical(out)
 
             # if stale cmake build, or issues with python inside python, rerun with shell=true
-            if "The current CMakeCache.txt directory"in out:
+            if "The current CMakeCache.txt directory" in out:
                 # purge temporary folder
-                shutil.rmtree(self.build_temp)
+                rmtree(self.build_temp)
                 os.makedirs(self.build_temp)
                 subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
                 subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
@@ -167,9 +175,11 @@ setup(
     author_email='open_source@jpmorgan.com',
     license='Apache 2.0',
     install_requires=requires,
-    python_requires='>=3.7',
+    python_requires='>=2.7,>=3.7',
     classifiers=[
         'Development Status :: 3 - Alpha',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

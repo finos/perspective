@@ -54,3 +54,11 @@ class TestWidget:
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data, limit=1)
         assert widget.table.size() == 1
+
+    # client-only mode
+
+    def test_widget_client(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, client=True)
+        assert widget.table is None
+        assert widget._data == data

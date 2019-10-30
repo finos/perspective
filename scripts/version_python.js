@@ -41,6 +41,9 @@ const parse_version = function(version) {
         let optional_versions = split[split.length - 2].split("-");
         patch = optional_versions[0];
         release_level = optional_versions[1];
+        if (release_level === "rc") {
+            release_level = "candidate"; // 'candidate' maps into bumpversion, 'rc' does not
+        }
         serial = split[split.length - 1];
     }
 

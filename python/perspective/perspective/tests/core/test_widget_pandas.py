@@ -45,7 +45,7 @@ def superstore(count=50):
     return pd.DataFrame(data)
 
 
-DF = superstore()
+DF = superstore(200)
 
 
 class TestWidgetPandas:
@@ -113,7 +113,7 @@ class TestWidgetPandas:
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
-        assert widget.table.size() == 50
+        assert widget.table.size() == 200
         view = widget.table.view()
         assert view.num_rows() == len(DF)
         assert view.num_columns() == len(DF.columns) + 1  # index column
@@ -126,7 +126,7 @@ class TestWidgetPandas:
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
-        assert widget.table.size() == 50
+        assert widget.table.size() == 200
         view = widget.table.view()
         assert view.num_rows() == len(DF)
         assert view.num_columns() == len(DF.columns) + 1  # index column
@@ -139,6 +139,20 @@ class TestWidgetPandas:
         index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second', 'third'])
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         widget = PerspectiveWidget(df_both)
+        assert widget.columns == [' ']
+        assert widget.column_pivots == ['first', 'second', 'third']
+        assert widget.row_pivots == ['index']
+
+    def test_widget_load_column_pivots_client(self):
+        # behavior should not change for client mode
+        arrays = [np.array(['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux']),
+                  np.array(['one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two']),
+                  np.array(['X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y'])]
+        tuples = list(zip(*arrays))
+        index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second', 'third'])
+        df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
+        widget = PerspectiveWidget(df_both, client=True)
+        assert widget.table is None
         assert widget.columns == [' ']
         assert widget.column_pivots == ['first', 'second', 'third']
         assert widget.row_pivots == ['index']

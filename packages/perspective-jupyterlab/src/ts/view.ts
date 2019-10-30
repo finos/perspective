@@ -17,7 +17,7 @@ import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
  */
 export class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveWidget;
-    client: PerspectiveJupyterClient;
+    perspective_client: PerspectiveJupyterClient;
 
     _createElement(tagName: string) {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
@@ -30,13 +30,14 @@ export class PerspectiveView extends DOMWidgetView {
             filters: this.model.get("filters"),
             plugin_config: this.model.get("plugin_config"),
             computed_columns: [],
+            client: this.model.get("client"),
             dark: this.model.get("dark"),
             editable: this.model.get("editable"),
             bindto: this.el,
             view: this
         });
 
-        this.client = new PerspectiveJupyterClient(this);
+        this.perspective_client = new PerspectiveJupyterClient(this);
 
         return this.pWidget.node;
     }
@@ -108,7 +109,7 @@ export class PerspectiveView extends DOMWidgetView {
          *
          * If a table hasn't been loaded, the viewer won't get a response back and simply waits until it receives a table name.
          */
-        this.client.send({
+        this.perspective_client.send({
             id: -2,
             cmd: "table"
         });
@@ -122,24 +123,29 @@ export class PerspectiveView extends DOMWidgetView {
      * @param msg {PerspectiveJupyterMessage}
      */
     _handle_message(msg: PerspectiveJupyterMessage) {
-        // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
-        const message = JSON.parse(JSON.stringify(msg));
-        if (message.type === "table") {
-            const new_table = this.client.open_table(message.data);
-            this.pWidget.load(new_table);
-
-            // Only call `init` after the viewer has a table.
-            this.client.send({
-                id: -1,
-                cmd: "init"
-            });
+        // If in client-only mode (no Table on the python widget), message data is a JSON-serialized dataset
+        if (this.pWidget.client === true && msg.data) {
+            this.pWidget.load(msg.data);
         } else {
-            // Conform message to format expected by the perspective client
-            delete message.type;
-            if (typeof message.data === "string") {
-                message.data = JSON.parse(message.data);
+            // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
+            const message = JSON.parse(JSON.stringify(msg));
+            if (message.type === "table") {
+                const new_table = this.perspective_client.open_table(message.data);
+                this.pWidget.load(new_table);
+
+                // Only call `init` after the viewer has a table.
+                this.perspective_client.send({
+                    id: -1,
+                    cmd: "init"
+                });
+            } else {
+                // Conform message to format expected by the perspective client
+                delete message.type;
+                if (typeof message.data === "string") {
+                    message.data = JSON.parse(message.data);
+                }
+                this.perspective_client._handle(message);
             }
-            this.client._handle(message);
         }
     }
 
