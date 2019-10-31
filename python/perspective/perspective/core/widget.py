@@ -15,7 +15,7 @@ from traitlets import observe, Unicode
 from .data import deconstruct_pandas
 from .exception import PerspectiveError
 from .viewer import PerspectiveViewer
-from ..table import Table
+from ..table import Table, is_libpsp
 
 
 class DateTimeStringEncoder(json.JSONEncoder):
@@ -63,7 +63,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                  table_or_data,
                  index=None,
                  limit=None,
-                 client=False,
+                 client=not is_libpsp(),
                  **kwargs):
         '''Initialize an instance of `PerspectiveWidget` with the given table/data and viewer configuration.
 
@@ -84,6 +84,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                     sort=[["b", "desc"]],
                     filter=[["a", ">", 1]])
         '''
+
         # If `self.client` is True, the front-end `perspective-viewer` is given a copy of the data serialized to Arrow,
         # and changes made in Python do not reflect to the front-end.
         self.client = client
