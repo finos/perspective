@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-phosphor",
-    "version": "0.4.0-rc.1",
+    "version": "0.4.0-rc.2",
     "description": "Perspective.js",
     "files": [
         "dist/**/*",
@@ -25,15 +25,15 @@
         "test": "jest --silent --color 2>&1"
     },
     "dependencies": {
-        "@finos/perspective": "^0.4.0-rc.1",
-        "@finos/perspective-viewer": "^0.4.0-rc.1",
+        "@finos/perspective": "^0.4.0-rc.2",
+        "@finos/perspective-viewer": "^0.4.0-rc.2",
         "@phosphor/application": "^1.5.0",
         "@phosphor/default-theme": "0.1.0",
         "@phosphor/widgets": "^1.6.0",
         "lodash.uniqby": "^4.7.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.4.0-rc.1",
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.2",
         "@types/jest": "^24.0.19",
         "@types/lodash.uniqby": "^4.7.6",
         "document-register-element": "^1.14.3",

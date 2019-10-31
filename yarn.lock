@@ -6108,10 +6108,10 @@ fastparse@^1.1.1:
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.2.tgz#91728c5a5942eced8531283c79441ee4122c35a9"
   integrity sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==
 
-faux-hypergrid@3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/faux-hypergrid/-/faux-hypergrid-3.2.1.tgz#0da5edb9609001141eea4793d592ad487ebb9d02"
-  integrity sha512-mFaclvZYA260FAo8edGKe/mwK5sNyBYb1FreJKP+G/GuXAGAK5bR+tKyss0kFLSuib/Cj/QN3mjyHGkNahtpAw==
+faux-hypergrid@3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/faux-hypergrid/-/faux-hypergrid-3.2.2.tgz#1112e699f55a8eb0affcc0ff4c21bbf44e3450f0"
+  integrity sha512-woaUgCD7FLdJBH3M/a6QGb1g3mJZWKsHEJYydDdqbne+UQDVuiykO39+1O8yxvkebAnYCgX/SBQPKkWuTtUEqA==
   dependencies:
     datasaur-base "^3.0.0"
     datasaur-local "^3.0.0"
