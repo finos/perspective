@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
     <channel>
-        <title>Perspective Blog</title>
+        <title> Blog</title>
         <link>https://perspective.finos.org//blog</link>
-        <description>The best place to stay up-to-date with the latest Perspective news and events.</description>
+        <description>The best place to stay up-to-date with the latest  news and events.</description>
         <lastBuildDate>Mon, 10 Jun 2019 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
-            <title>Perspective Blog</title>
-            <url>https://perspective.finos.org//undefined</url>
+            <title> Blog</title>
+            <url>https://perspective.finos.org//img/logo.png</url>
             <link>https://perspective.finos.org//blog</link>
         </image>
         <copyright>Copyright © 2019 Perspective Authors</copyright>
