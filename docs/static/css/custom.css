@@ -4,6 +4,11 @@
 }
 
 @media only screen and (min-width: 1024px) {
+    body {
+        left: 0;
+        right: 0;
+    }
+    
 }
 
 @media only screen and (max-width: 1023px) {
@@ -15,12 +20,19 @@
 @media only screen and (min-width: 1500px) {
 }
 
+
+
+
 .promoSection .buttonWrapper {
    transition: color 0.2s ease-in-out;
 }
 
 .nav-footer {
     background: #242526;
+}
+
+body {
+    position: absolute; /* mobile fix */
 }
 
 .homeContainer .buttonWrapper.selected a {
@@ -64,10 +76,15 @@
     color: #1A7DA1 !important;
 }
 
-h2.headerTitle, h2.headerTitleWithLogo {
+h2.headerTitle, h2.headerTitleWithLogo, .logo {
     font-family: "Montserrat";
     color: #f9f9f9 !important;
     transition: opacity 0.1s ease-in;
+}
+
+.logo {
+    height: 50% !important;
+    opacity: 0;
 }
 
 .mainContainer .blockImage img {
@@ -77,6 +94,10 @@ h2.headerTitle, h2.headerTitleWithLogo {
 .homeContainer {
     background-color: #242526;
     padding-bottom: 96px;
+}
+
+.projectTitle small {
+    margin: 0em 0 2em;
 }
 
 .homeContainer .projectTitle {

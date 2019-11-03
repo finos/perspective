@@ -1,16 +1,15 @@
-# [![Perspective](https://perspective.finos.org/img/title.png)](https://perspective.finos.org/)
+# [![Perspective](https://perspective.finos.org/img/logo_inverted_tiny.png)](https://perspective.finos.org/)
 
 [![Build Status](https://travis-ci.org/finos/perspective.svg?branch=master)](https://travis-ci.org/finos/perspective)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/github/finos/perspective?svg=true)](https://ci.appveyor.com/project/neilslinger/perspective)
 [![npm](https://img.shields.io/npm/v/@finos/perspective.svg?style=flat-square)](https://www.npmjs.com/package/@finos/perspective)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![FINOS - Operating](https://cdn.rawgit.com/finos/contrib-toolbox/master/images/badge-operating.svg)](https://finosfoundation.atlassian.net/wiki/display/FINOS/Operating)
 
 
 A streaming data visualization engine for Javascript, Perspective makes it
 simple to build real-time & user configurable analytics entirely in the browser.
 
-<img src="https://perspective.finos.org/img/demo.gif">
+<img src="https://perspective.finos.org/img/demo_small.gif">
 
 ## Features
 
