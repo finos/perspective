@@ -7,16 +7,12 @@
  *
  */
 
-const args = process.argv.slice(2);
+const rimraf = require("rimraf");
 const resolve = require("path").resolve;
 const mkdir = require("mkdirp");
 const fs = require("fs-extra");
 const execSync = require("child_process").execSync;
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
-
-const VALID_TARGETS = ["node", "table"];
-const HAS_TARGET = args.indexOf("--target") != -1;
-const VERBOSE = args.indexOf("--verbose") != -1;
 
 function docker(target = "perspective", image = "emsdk") {
     console.log(`-- Creating ${image} docker image`);
@@ -30,12 +26,11 @@ function docker(target = "perspective", image = "emsdk") {
 
 try {
     // copy C++ assets
+    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "cmake"));
     mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
-    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"),
-        resolve(__dirname, "..", "python", "perspective"));
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"));
 
-    fs.copySync(resolve(__dirname, "..", "cmake"),
-        resolve(__dirname, "..", "python", "perspective", "cmake"));
+    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"));
 
     let cmd;
 

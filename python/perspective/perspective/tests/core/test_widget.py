@@ -62,3 +62,10 @@ class TestWidget:
         widget = PerspectiveWidget(data, client=True)
         assert widget.table is None
         assert widget._data == data
+
+    def test_widget_client_update(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, client=True)
+        widget.update(data)
+        assert widget.table is None
+        assert widget._data == data

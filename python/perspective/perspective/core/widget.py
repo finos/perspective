@@ -18,6 +18,30 @@ from .viewer import PerspectiveViewer
 from ..table import Table, is_libpsp
 
 
+def _serialize(data):
+    # Attempt to serialize data and pass it to the front-end as JSON
+    if isinstance(data, list) or isinstance(data, dict):
+        # grab reference to data if trivially serializable
+        return data
+    elif isinstance(data, numpy.recarray):
+        # flatten numpy record arrays
+        columns = [data[col] for col in data.dtype.names]
+        return dict(zip(data.dtype.names, columns))
+    elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+        # take flattened dataframe and make it serializable
+        d = {}
+        for name in data.columns:
+            column = data[name]
+            values = column.values
+            if numpy.issubdtype(column.dtype, numpy.datetime64):
+                # put it into a format parsable by perspective.js
+                values = numpy.datetime_as_string(column.values, unit="ms")
+            d[name] = values.tolist()
+        return d
+    else:
+        raise NotImplementedError("Cannot serialize an invalid dataset.")
+
+
 class DateTimeStringEncoder(json.JSONEncoder):
 
     def default(self, obj):
@@ -117,24 +141,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
             # cache self._data so creating multiple views don't reserialize the same data
             if not hasattr(self, "_data") or self._data is None:
-                # Attempt to serialize data and pass it to the front-end as JSON
-                if isinstance(table_or_data, list) or isinstance(table_or_data, dict):
-                    # grab reference to data if trivially serializable
-                    data = table_or_data
-                elif isinstance(table_or_data, numpy.recarray):
-                    # flatten numpy record arrays
-                    columns = [table_or_data[col] for col in table_or_data.dtype.names]
-                    data = dict(zip(table_or_data.dtype.names, columns))
-                elif isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
-                    # take flattened dataframe and make it serializable
-                    data = {}
-                    for name in table_or_data.columns:
-                        column = table_or_data[name]
-                        d = column.values
-                        if numpy.issubdtype(column.dtype, numpy.datetime64):
-                            d = numpy.datetime_as_string(column.values, unit="ms")
-                        data[name] = d.tolist()
-                self._data = data
+                self._data = _serialize(table_or_data)
         else:
             #  If an empty dataset is provided, don't call `load()`
             if table_or_data is None:
@@ -148,6 +155,22 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                     kwargs.update({"limit": limit})
 
                 self.load(table_or_data, **kwargs)
+
+    def update(self, data):
+        '''Update the widget with new data. If running in client mode, this method serializes the data
+        and calls the browser viewer's update method. Otherwise, it calls `Viewer.update()` using `super()`.
+        '''
+        if self.client is True:
+            # serialize the data and send a custom message to the browser
+            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+                data, _ = deconstruct_pandas(data)
+            d = _serialize(data)
+            self.post({
+                "cmd": "update",
+                "data": d
+            }, -3)
+        else:
+            super(PerspectiveWidget, self).update(data)
 
     def post(self, msg, id=None):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.

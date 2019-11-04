@@ -16,7 +16,7 @@ import {Client} from "@finos/perspective/dist/esm/api/client";
 export interface PerspectiveJupyterMessage {
     id: number;
     type: string;
-    data: string;
+    data: any;
 }
 
 /**

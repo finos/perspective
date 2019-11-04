@@ -144,6 +144,15 @@ export class PerspectiveWidget extends Widget {
         this.viewer.load(table);
     }
 
+    /**
+     * Update the viewer with new data.
+     * 
+     * @param data 
+     */
+    _update(data: TableData): void {
+        this.viewer.update(data);
+    }
+
     get table(): Table {
         return this.viewer.table;
     }
