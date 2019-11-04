@@ -290,7 +290,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED Interpreter Development )
 		include_directories( ${Python_INCLUDE_DIRS} )
 
-
 		find_package(Boost)
 		if(NOT Boost_FOUND)
 			message("${Red}Boost could not be located${ColorReset}")
@@ -449,6 +448,7 @@ set (PYTHON_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
 	${PSP_PYTHON_SRC}/src/fill.cpp
+	${PSP_PYTHON_SRC}/src/numpy.cpp
 	${PSP_PYTHON_SRC}/src/python.cpp
 	${PSP_PYTHON_SRC}/src/serialization.cpp
 	${PSP_PYTHON_SRC}/src/table.cpp

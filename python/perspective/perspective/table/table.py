@@ -252,8 +252,6 @@ class Table(object):
         '''Delete this table and clean up associated resources in the core engine.
 
         Tables with associated views cannot be deleted.
-
-        Called when `__del__` is called by GC.
         '''
         if len(self._views) > 0:
             raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")

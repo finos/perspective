@@ -322,8 +322,8 @@ namespace arrow {
     }
 
     std::uint32_t
-    ArrowLoader::num_rows() const {
-        return  m_table->num_rows();
+    ArrowLoader::row_count() const {
+        return m_table->num_rows();
     }
 
     std::vector<std::string>

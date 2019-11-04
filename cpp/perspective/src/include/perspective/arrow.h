@@ -33,7 +33,7 @@ namespace arrow {
 
         std::vector<std::string> names() const;
         std::vector<t_dtype> types() const;
-        std::uint32_t num_rows() const;
+        std::uint32_t row_count() const;
 
     private:
         void fill_column(t_data_table& tbl, std::shared_ptr<t_column> col,

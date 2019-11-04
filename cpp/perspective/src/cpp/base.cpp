@@ -80,6 +80,7 @@ is_floating_point(t_dtype dtype) {
 bool
 is_deterministic_sized(t_dtype dtype) {
     switch (dtype) {
+        case DTYPE_OBJECT:
         case DTYPE_PTR:
         case DTYPE_INT64:
         case DTYPE_UINT64:
@@ -108,6 +109,7 @@ is_deterministic_sized(t_dtype dtype) {
 t_uindex
 get_dtype_size(t_dtype dtype) {
     switch (dtype) {
+        case DTYPE_OBJECT:
         case DTYPE_PTR: {
             return sizeof(void*);
         }
@@ -227,6 +229,9 @@ get_dtype_descr(t_dtype dtype) {
         case DTYPE_F64PAIR: {
             return "f64pair";
         } break;
+        case DTYPE_OBJECT: {
+            return "object";
+        }
         default: { PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype"); }
     }
     return std::string("dummy");
@@ -234,34 +239,44 @@ get_dtype_descr(t_dtype dtype) {
 
 std::string
 dtype_to_str(t_dtype dtype) {
-    std::stringstream str_dtype;
+    std::stringstream ss;
     switch (dtype) {
         case DTYPE_FLOAT32:
         case DTYPE_FLOAT64: {
-            str_dtype << "float";
+            ss << "float";
         } break;
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_UINT32:
+        case DTYPE_UINT64:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_INT32:
+        case DTYPE_INT32: 
         case DTYPE_INT64: {
-            str_dtype << "integer";
+            ss << "integer";
         } break;
         case DTYPE_BOOL: {
-            str_dtype << "boolean";
+            ss << "boolean";
         } break;
         case DTYPE_DATE: {
-            str_dtype << "date";
+            ss << "date";
         } break;
         case DTYPE_TIME: {
-            str_dtype << "datetime";
+            ss << "datetime";
         } break;
         case DTYPE_STR: {
-            str_dtype << "string";
+            ss << "string";
+        } break;
+        case DTYPE_OBJECT: {
+            ss << "object";
+        } break;
+        case DTYPE_NONE: {
+            ss << "none";
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
     }
 
-    return str_dtype.str();
+    return ss.str();
 }
 
 t_dtype

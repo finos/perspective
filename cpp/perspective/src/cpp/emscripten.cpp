@@ -1219,7 +1219,7 @@ namespace binding {
 
         std::uint32_t row_count = 0;
         if (is_arrow) {
-            row_count = loader.num_rows();
+            row_count = loader.row_count();
         } else {
             row_count = accessor["row_count"].as<std::int32_t>();
         }
@@ -1876,7 +1876,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("DTYPE_STR", DTYPE_STR)
         .value("DTYPE_USER_VLEN", DTYPE_USER_VLEN)
         .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
-        .value("DTYPE_LAST", DTYPE_LAST);
+        .value("DTYPE_LAST", DTYPE_LAST)
+        .value("DTYPE_OBJECT", DTYPE_OBJECT);
 
     /******************************************************************************
      *
