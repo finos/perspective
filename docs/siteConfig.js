@@ -6,7 +6,7 @@
  */
 
 const siteConfig = {
-    title: "Perspective" /* title for your website */,
+    title: "" /* title for your website */,
     tagline: "Streaming Analytics via WebAssembly",
     url: "https://perspective.finos.org/" /* your website url */,
     cname: "perspective.finos.org",
@@ -22,13 +22,13 @@ const siteConfig = {
         {href: "https://github.com/finos/perspective/", label: "GitHub"}
     ],
 
-    //headerIcon: "img/perspective2.svg",
+    headerIcon: "img/logo.png",
     // footerIcon: "img/perspective2.svg",
     favicon: "img/favicon.png",
 
     colors: {
-        primaryColor: "#1A7DA1",
-        secondaryColor: "#1A7DA1"
+        primaryColor: "#242526",
+        secondaryColor: "#242526"
     },
 
     copyright: "Copyright © " + new Date().getFullYear() + " Perspective Authors",
@@ -43,14 +43,16 @@ const siteConfig = {
         "https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js",
         "https://unpkg.com/@finos/perspective-viewer-hypergrid/dist/umd/perspective-viewer-hypergrid.js",
         "https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js",
-        "js/animation.js"
+        "js/animation.js",
+        "js/logo.js"
     ],
 
     stylesheets: [
         "https://fonts.googleapis.com/css?family=Montserrat:300",
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",
-        "https://fonts.googleapis.com/css?family=Roboto+Mono"
+        "https://fonts.googleapis.com/css?family=Roboto+Mono",
+        "https://fonts.googleapis.com/css?family=Source+Code+Pro:900&display=swap"
     ],
 
     onPageNav: "separate",

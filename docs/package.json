@@ -6,8 +6,9 @@
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
         "start": "npm run build:arrow && npm run theme && docusaurus-start",
+        "build:logo": "webpack --config logo.config.js --color",
         "build:arrow": "cpx ../examples/simple/superstore.arrow static/arrow/",
-        "docs": "npm run build:arrow && npm run theme && docusaurus-build",
+        "docs": "npm run build:arrow && npm run build:logo && npm run theme && docusaurus-build",
         "publish-gh-pages": "npm run theme && docusaurus-publish",
         "write-translations": "docusaurus-write-translations"
     },
@@ -19,6 +20,7 @@
         "less": "^3.9.0"
     },
     "dependencies": {
-        "@babel/preset-react": "^7.0.0"
+        "@babel/preset-react": "^7.0.0",
+        "lit-html": "^1.1.2"
     }
 }

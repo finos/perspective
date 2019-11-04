@@ -20,7 +20,9 @@ function imgUrl(img) {
 }
 
 function docUrl(doc, language) {
-    return siteConfig.baseUrl + "docs/" + (language ? language + "/" : "") + doc;
+    return (
+        siteConfig.baseUrl + "docs/" + (language ? language + "/" : "") + doc
+    );
 }
 
 function pageUrl(page, language) {
@@ -57,7 +59,7 @@ const Logo = props => (
 
 const ProjectTitle = props => (
     <h2 className="projectTitle">
-        {siteConfig.title}
+        <perspective-logo />
         <small>
             Streaming Analytics <i>via</i> WebAssembly
         </small>
@@ -96,7 +98,11 @@ class HomeSplash extends React.Component {
 }
 
 const Block = props => (
-    <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
+    <Container
+        padding={["bottom", "top"]}
+        id={props.id}
+        background={props.background}
+    >
         <GridBlock contents={props.children} layout={props.layout} />
     </Container>
 );
@@ -118,8 +124,19 @@ const PerspectiveBlock = props => {
         );
     }
     return (
-        <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
-            <div className={classNames({imageAlignRight: !!afterImage, imageAlignLeft: !!beforeImage, imageAlignSide: true})} key={block.title}>
+        <Container
+            padding={["bottom", "top"]}
+            id={props.id}
+            background={props.background}
+        >
+            <div
+                className={classNames({
+                    imageAlignRight: !!afterImage,
+                    imageAlignLeft: !!beforeImage,
+                    imageAlignSide: true
+                })}
+                key={block.title}
+            >
                 {beforeImage}
                 <div className="blockContent">
                     <h2>
@@ -137,19 +154,22 @@ const Features = props => (
     <Block layout="fourColumn">
         {[
             {
-                content: "Quickly answer any question about your data through a set of flexible transforms, such as pivots, filters, and aggregations",
+                content:
+                    "Quickly answer any question about your data through a set of flexible transforms, such as pivots, filters, and aggregations",
                 image: imgUrl("baseline-settings-20px.svg"),
                 imageAlign: "top",
                 title: "Simple"
             },
             {
-                content: "Utilizing bleeding-edge browser technology such as Web Assembly and Apache Arrow, Perspective is unmatched in browser performance",
+                content:
+                    "Utilizing bleeding-edge browser technology such as Web Assembly and Apache Arrow, Perspective is unmatched in browser performance",
                 image: imgUrl("baseline-trending_up-24px.svg"),
                 imageAlign: "top",
                 title: "Powerful"
             },
             {
-                content: "Engineered for reliability and production-vetted on the J.P. Morgan trading floor, now available to the development community as Open Source",
+                content:
+                    "Engineered for reliability and production-vetted on the J.P. Morgan trading floor, now available to the development community as Open Source",
                 image: imgUrl("baseline-security-24px.svg"),
                 imageAlign: "top",
                 title: "Industrial"
@@ -162,13 +182,19 @@ const FeatureCallout = props => (
     <Container padding={["bottom", "top"]} background="dark">
         <h2>Features</h2>
         <MarkdownBlock background="dark">
-            A fast, memory efficient streaming pivot engine written principally in C++ and compiled to WebAssembly via the [emscripten](https://github.com/kripken/emscripten) compiler.
+            A fast, memory efficient streaming pivot engine written principally
+            in C++ and compiled to WebAssembly via the
+            [emscripten](https://github.com/kripken/emscripten) compiler.
         </MarkdownBlock>
         <MarkdownBlock>
-            An embeddable, framework-agnostic configuration UI, based on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for responsiveness at high frequency.
+            An embeddable, framework-agnostic configuration UI, based on [Web
+            Components](https://www.webcomponents.org/), and a WebWorker engine
+            host for responsiveness at high frequency.
         </MarkdownBlock>
         <MarkdownBlock>
-            A suite of simple visualization plugins for some common Javascript libraries such as [D3FC](), [Hypergrid](https://github.com/fin-hypergrid/core) and
+            A suite of simple visualization plugins for some common Javascript
+            libraries such as [D3FC](),
+            [Hypergrid](https://github.com/fin-hypergrid/core) and
             [HighCharts](https://github.com/highcharts/highcharts).
         </MarkdownBlock>
         <MarkdownBlock>Integration with Jupyterlab.</MarkdownBlock>
@@ -239,7 +265,11 @@ const Showcase = props => {
         .map((user, i) => {
             return (
                 <a href={user.infoLink} key={i}>
-                    <img src={user.image} alt={user.caption} title={user.caption} />
+                    <img
+                        src={user.image}
+                        alt={user.caption}
+                        title={user.caption}
+                    />
                 </a>
             );
         });
@@ -250,7 +280,10 @@ const Showcase = props => {
             <p>This project is used by all these people</p>
             <div className="logos">{showcase}</div>
             <div className="more-users">
-                <a className="button" href={pageUrl("users.html", props.language)}>
+                <a
+                    className="button"
+                    href={pageUrl("users.html", props.language)}
+                >
                     More {siteConfig.title} Users
                 </a>
             </div>
