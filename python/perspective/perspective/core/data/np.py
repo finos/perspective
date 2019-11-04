@@ -8,6 +8,9 @@
 import six
 import numpy as np
 import pandas as pd
+from datetime import datetime
+
+DATE_DTYPES = [np.dtype("datetime64[D]"), np.dtype("datetime64[W]"), np.dtype("datetime64[M]"), np.dtype("datetime64[Y]")]
 
 
 def deconstruct_numpy(array):
@@ -35,6 +38,11 @@ def deconstruct_numpy(array):
         # bool => byte
         data = data.astype("b", copy=False)
     elif np.issubdtype(data.dtype, np.datetime64):
+
+        # treat days/weeks/months/years as datetime objects - avoid idiosyncracy with days of month, etc.
+        if data.dtype in DATE_DTYPES:
+            data = data.astype(datetime)
+
         # cast datetimes to millisecond timestamps
         # because datetime64("nat") is a double, cast to float64 here - C++ handles the rest
         if data.dtype == np.dtype("datetime64[us]"):
@@ -45,6 +53,10 @@ def deconstruct_numpy(array):
             data = data.astype(np.float64, copy=False)
         elif data.dtype == np.dtype("datetime64[s]"):
             data = data.astype(np.float64, copy=False) * 1000
+        elif data.dtype == np.dtype("datetime64[m]"):
+            data = data.astype(np.float64, copy=False) * 60000
+        elif data.dtype == np.dtype("datetime64[h]"):
+            data = data.astype(np.float64, copy=False) * 3600000
     elif np.issubdtype(data.dtype, np.timedelta64):
         data = data.astype(np.float64, copy=False)
 

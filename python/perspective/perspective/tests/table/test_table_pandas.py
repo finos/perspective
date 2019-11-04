@@ -555,7 +555,6 @@ class TestTablePandas(object):
 
     def test_table_read_nan_bool_col(self):
         data = pd.DataFrame({"bool": [np.nan, True, np.nan], "bool2": [False, np.nan, True]})
-        print(data.dtypes)
         tbl = Table(data)
         # if np.nan begins a column, it is inferred as float and then can be promoted. if np.nan is in the values (but not at start), the column type is whatever is inferred.
         assert tbl.schema() == {

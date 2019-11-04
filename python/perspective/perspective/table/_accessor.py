@@ -19,6 +19,16 @@ except ImportError:
     pass
 
 
+def _flatten_structure(array):
+    '''Flatten numpy.recarray or structured arrays into a dict.'''
+    if six.PY2:
+        # recarrays/structured arrays have weird bit offsets in py2 - make a copy of the array to fix
+        columns = [numpy.copy(array[col]) for col in array.dtype.names]
+    else:
+        columns = [array[col] for col in array.dtype.names]
+    return dict(zip(array.dtype.names, columns))
+
+
 def _type_to_format(data_or_schema):
     '''Deconstructs data passed in by the user into a standard format:
 
@@ -55,13 +65,15 @@ def _type_to_format(data_or_schema):
                 raise NotImplementedError("Dict values must be list or type!")
         # Can't process
         raise NotImplementedError("Dict values must be list or type!")
-    elif isinstance(data_or_schema, numpy.recarray):
-        columns = [data_or_schema[col] for col in data_or_schema.dtype.names]
-        return True, 1, dict(zip(data_or_schema.dtype.names, columns))
+    elif isinstance(data_or_schema, numpy.ndarray):
+        # structured or record array
+        if not isinstance(data_or_schema.dtype.names, tuple):
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+        return True, 1, _flatten_structure(data_or_schema)
     else:
         if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
-            raise NotImplementedError("Must be dict or list!")
+            raise NotImplementedError("Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.")
         else:
             from ..core.data import deconstruct_pandas
 

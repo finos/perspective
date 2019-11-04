@@ -229,6 +229,9 @@ get_dtype_descr(t_dtype dtype) {
         case DTYPE_F64PAIR: {
             return "f64pair";
         } break;
+        case DTYPE_OBJECT: {
+            return "object";
+        }
         default: { PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype"); }
     }
     return std::string("dummy");
@@ -238,11 +241,9 @@ std::string
 dtype_to_str(t_dtype dtype) {
     std::stringstream ss;
     switch (dtype) {
-        case DTYPE_FLOAT32: {
-            ss << "float";
-        } break;
+        case DTYPE_FLOAT32:
         case DTYPE_FLOAT64: {
-            ss << "float64";
+            ss << "float";
         } break;
         case DTYPE_UINT8:
         case DTYPE_UINT16:
@@ -250,12 +251,9 @@ dtype_to_str(t_dtype dtype) {
         case DTYPE_UINT64:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_INT32:{
-            ss << "integer";
-        } break;
+        case DTYPE_INT32: 
         case DTYPE_INT64: {
-            // TODO: undo
-            ss << "int64";
+            ss << "integer";
         } break;
         case DTYPE_BOOL: {
             ss << "boolean";

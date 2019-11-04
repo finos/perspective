@@ -8,7 +8,7 @@
 import six
 import time
 import numpy
-from datetime import datetime
+from datetime import date, datetime
 from re import search
 from dateutil.parser import parse
 
@@ -86,6 +86,10 @@ class _PerspectiveDateValidator(object):
 
             # astype(datetime) returns an int or a long (in python 2)
             obj = obj.astype(datetime)
+
+            if isinstance(obj, date) and not isinstance(obj, datetime):
+                # handle numpy "datetime64[D/W/M/Y]" - mktime output in seconds
+                return int((time.mktime(obj.timetuple())) * 1000)
 
             if six.PY2:
                 if isinstance(obj, long):

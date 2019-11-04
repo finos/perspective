@@ -120,8 +120,10 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
                 return py::cast(time_point);
             }
         }
-        case DTYPE_FLOAT64:
         case DTYPE_FLOAT32: {
+            return py::cast(scalar.get<float>());
+        }
+        case DTYPE_FLOAT64: {
             if (cast_double) {
                 auto x = scalar.to_uint64();
                 double y = *reinterpret_cast<double*>(&x);
@@ -142,12 +144,9 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         case DTYPE_UINT32:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_INT32: {
-            return py::cast(scalar.to_int64());
-        }
+        case DTYPE_INT32:
         case DTYPE_UINT64:
         case DTYPE_INT64: {
-            // This could potentially lose precision
             return py::cast(scalar.to_int64());
         }
         case DTYPE_NONE: {

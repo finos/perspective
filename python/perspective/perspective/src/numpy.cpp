@@ -55,6 +55,10 @@ namespace numpy {
             }
         }
 
+        for (auto d : reconciled_types) {
+            std::cout << get_dtype_descr(d) << std::endl;
+        }
+
         return reconciled_types;
     };
 
@@ -142,7 +146,13 @@ namespace numpy {
         std::uint64_t* mask_ptr = (std::uint64_t*) mask.data();
         std::size_t mask_size = mask.size();
 
-        // Datetime values are not trivially copyable - iterate and fill
+        // Check array dtype to make sure that `deconstruct_numpy` didn't cast it to an object.
+        if (array.dtype().kind() == 'O') {
+            fill_column_iter(array, tbl, col, name, DTYPE_OBJECT, type, cidx, is_update);
+            return;
+        }
+
+        // Datetimes are not trivially copyable - they are float64 values that need to be read as int64
         if (type == DTYPE_TIME) {
             fill_column_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
             fill_validity_map(col, mask_ptr, mask_size, is_update);
@@ -331,8 +341,7 @@ namespace numpy {
                 fill_object_iter<std::string>(tbl, col, name, np_dtype, type, cidx, is_update);
             } break;
             default: {
-                // TODO: do we need to check for object fill again here
-                // dtype `i/u/f`
+                // dtype `i/u/f` - fill_numeric_iter checks again for `dtype=object`
                 fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
                 break;
             }
@@ -606,8 +615,8 @@ namespace numpy {
                 // datetime64
                 rval.push_back(DTYPE_TIME);
                 continue;
-            } else if (dtype_code == 'm' || dtype_code == 'U') {
-                // timedelta and string
+            } else if (dtype_code == 'm') {
+                // coerce timedelta to string
                 rval.push_back(DTYPE_STR);
                 continue;
             }
@@ -636,7 +645,7 @@ namespace numpy {
             } else if (py::isinstance<py::array_t<bool>>(array)) {
                 rval.push_back(DTYPE_BOOL);
             } else {
-                // ptr dtype as catch-all type only used for numpy
+                // DTYPE_OBJECT defers to the inferred type: this allows parsing of datetime strings, boolean strings, etc.
                 rval.push_back(DTYPE_OBJECT);
             }
         }

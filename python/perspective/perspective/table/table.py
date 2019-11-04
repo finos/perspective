@@ -164,7 +164,6 @@ class Table(object):
                 self._accessor._types.append(index_dtype)
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
-            print(self._accessor.names(), self._accessor.types())
 
         self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
 
