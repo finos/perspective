@@ -6,15 +6,22 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import six
+import time
 from io import StringIO
 from datetime import date, datetime
 import numpy as np
-from pytest import mark
+import pandas as pd
 from perspective.table import Table
 from random import random, randint, choice
 from faker import Faker
-import pandas as pd
 fake = Faker()
+
+
+def _to_timestamp(obj):
+    if six.PY2:
+        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0))
+    else:
+        return obj.timestamp()
 
 
 def superstore(count=10):
@@ -177,6 +184,44 @@ class TestTablePandas(object):
         })
         table.update(df)
         assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_from_schema_datetime_timestamp_s(self):
+        data = [_to_timestamp(datetime(2019, 7, 11, 12, 30, 5)), np.nan, _to_timestamp(datetime(2019, 7, 11, 13, 30, 5)), np.nan]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": datetime
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [
+            datetime(2019, 7, 11, 12, 30, 5),
+            None,
+            datetime(2019, 7, 11, 13, 30, 5),
+            None
+        ]
+
+    def test_table_pandas_from_schema_datetime_timestamp_ms(self):
+        data = [
+            _to_timestamp(datetime(2019, 7, 11, 12, 30, 5)) * 1000,
+            np.nan,
+            _to_timestamp(datetime(2019, 7, 11, 13, 30, 5)) * 1000,
+            np.nan
+        ]
+
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": datetime
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [
+            datetime(2019, 7, 11, 12, 30, 5),
+            None,
+            datetime(2019, 7, 11, 13, 30, 5),
+            None
+        ]
 
     def test_table_pandas_from_schema_str(self):
         data = ["a", None, "b", None, "c"]
@@ -481,7 +526,6 @@ class TestTablePandas(object):
             "D": float
         }
 
-    @mark.skip
     def test_table_pandas_period(self):
         df = pd.DataFrame({"a": [pd.Period("1Q2019"), pd.Period("2Q2019"), pd.Period("3Q2019"), pd.Period("4Q2019")]})
         tbl = Table(df)

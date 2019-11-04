@@ -7,11 +7,19 @@
 #
 
 import six
+import time
 import numpy as np
 from pytest import raises
 from perspective import PerspectiveError
 from perspective.table import Table
 from datetime import date, datetime
+
+
+def _to_timestamp(obj):
+    if six.PY2:
+        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0))
+    else:
+        return obj.timestamp()
 
 
 class TestTableNumpy(object):
@@ -140,6 +148,7 @@ class TestTableNumpy(object):
         }
 
     # strings
+
     def test_table_str_object(self):
         data = {"a": np.array(["abc", "def"], dtype=object), "b": np.array(["hij", "klm"], dtype=object)}
         tbl = Table(data)
@@ -541,6 +550,127 @@ class TestTableNumpy(object):
             "a": ["a", "bb", "cc", "dd", "ee"],
             "b": [1, 2, 3, 4, 5]
         }
+
+    # from schema
+
+    def test_table_numpy_from_schema_int(self):
+        df = {
+            "a": np.array([1, None, 2, None, 3, 4])
+        }
+        table = Table({
+            "a": int
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [1, None, 2, None, 3, 4]
+
+    def test_table_numpy_from_schema_bool(self):
+        data = [True, False, True, False]
+        df = {
+            "a": data
+        }
+        table = Table({
+            "a": bool
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_numpy_from_schema_float(self):
+        data = [1.5, None, 2.5, None, 3.5, 4.5]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": float
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_numpy_from_schema_float_all_nan(self):
+        data = [np.nan, np.nan, np.nan, np.nan]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": float
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [None, None, None, None]
+
+    def test_table_numpy_from_schema_float_to_int(self):
+        data = [None, 1.5, None, 2.5, None, 3.5, 4.5]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": int
+        })
+        table.update(df)
+        # truncates decimal
+        assert table.view().to_dict()["a"] == [None, 1, None, 2, None, 3, 4]
+
+    def test_table_numpy_from_schema_int_to_float(self):
+        data = [None, 1, None, 2, None, 3, 4]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": float
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
+
+    def test_table_numpy_from_schema_date(self):
+        data = [date(2019, 8, 15), None, date(2019, 8, 16)]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": date
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [datetime(2019, 8, 15, 0, 0), None, datetime(2019, 8, 16, 0, 0)]
+
+    def test_table_numpy_from_schema_datetime(self):
+        data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": datetime
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_numpy_from_schema_datetime_timestamp_s(self):
+        data = [_to_timestamp(datetime(2019, 7, 11, 12, 30, 5)), np.nan, _to_timestamp(datetime(2019, 7, 11, 13, 30, 5)), np.nan]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": datetime
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [
+            datetime(2019, 7, 11, 12, 30, 5),
+            None,
+            datetime(2019, 7, 11, 13, 30, 5),
+            None
+        ]
+
+    def test_table_numpy_from_schema_datetime_timestamp_ms(self):
+        data = [
+            _to_timestamp(datetime(2019, 7, 11, 12, 30, 5)) * 1000,
+            np.nan,
+            _to_timestamp(datetime(2019, 7, 11, 13, 30, 5)) * 1000,
+            np.nan
+        ]
+
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": datetime
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [
+            datetime(2019, 7, 11, 12, 30, 5),
+            None,
+            datetime(2019, 7, 11, 13, 30, 5),
+            None
+        ]
+
+    def test_table_numpy_from_schema_str(self):
+        data = ["a", None, "b", None, "c"]
+        df = {"a": np.array(data)}
+        table = Table({
+            "a": str
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
 
     # structured array
 

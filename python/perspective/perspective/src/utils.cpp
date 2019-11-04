@@ -82,6 +82,9 @@ t_dtype type_string_to_t_dtype(std::string value, std::string name){
         // Python date
         // TODO inheritance
         type = t_dtype::DTYPE_DATE;
+    } else if (value == "timedelta64") {
+        // cast timedelta to string to preserve units
+        type = t_dtype::DTYPE_STR;
     } else {
         CRITICAL("Unknown type '%s' for key '%s'", value, name);
     }

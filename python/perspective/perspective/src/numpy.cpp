@@ -55,10 +55,6 @@ namespace numpy {
             }
         }
 
-        for (auto d : reconciled_types) {
-            std::cout << get_dtype_descr(d) << std::endl;
-        }
-
         return reconciled_types;
     };
 
@@ -318,8 +314,8 @@ namespace numpy {
         // but if they're of dtype object, then we need to pass it through `m_accessor.marshal`.
         switch (type) {
             case DTYPE_TIME: {
-                // covers dtype `datetime64[us/ns/ms/s]` and parses date strings
-                if (np_dtype == DTYPE_OBJECT || np_dtype == DTYPE_STR) {
+                // covers dtype `datetime64[us/ns/ms/s]`, date strings, and integer timestamps in ms or s since epoch
+                if (np_dtype != DTYPE_TIME) {
                     fill_object_iter<std::int64_t>(tbl, col, name, np_dtype, type, cidx, is_update);
                 } else {
                     fill_datetime_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);

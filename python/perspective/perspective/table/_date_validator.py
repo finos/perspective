@@ -8,6 +8,7 @@
 import six
 import time
 import numpy
+from pandas import Period
 from datetime import date, datetime
 from re import search
 from dateutil.parser import parse
@@ -74,6 +75,10 @@ class _PerspectiveDateValidator(object):
         if obj is None:
             return obj
 
+        if isinstance(obj, Period):
+            # extract the start of the Period
+            obj = obj.to_timestamp()
+
         if six.PY2:
             if isinstance(obj, long):
                 # compat with python2 long from datetime.datetime
@@ -98,17 +103,15 @@ class _PerspectiveDateValidator(object):
             if isinstance(obj, int):
                 return round(obj / 1000000)
 
-        # TODO: full support for unix/second timestamps
         if isinstance(obj, (int, float)):
             # figure out whether the timestamp is in seconds or milliseconds
             try:
-                # TODO: this sucks, but milliseconds will overflow, seconds will fit
-                datetime(obj)
-                # convert to milliseconds
-                return obj * 1000
+                # if it overflows, it's milliseconds - otherwise convert from seconds to milliseconds.
+                datetime.fromtimestamp(obj)
+                return int(obj * 1000)
             except (ValueError, OverflowError):
                 # milliseconds
-                return obj
+                return int(obj)
 
         # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
         return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)
