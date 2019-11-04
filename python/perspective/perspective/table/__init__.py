@@ -7,10 +7,19 @@
 #
 from .table import Table
 
-__all__ = ["Table"]
+
+def is_libpsp():
+    """Was libbinding successfully loaded in this module?"""
+    return __is_libpsp__
+
+
+__all__ = ["Table", "is_libpsp"]
+
+__is_libpsp__ = True
 
 try:
     from .libbinding import PerspectiveCppError  # noqa: F401
     __all__.append("PerspectiveCppError")
 except ImportError:
+    __is_libpsp__ = False
     pass
