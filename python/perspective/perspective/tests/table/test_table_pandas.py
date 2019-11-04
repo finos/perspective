@@ -423,6 +423,14 @@ class TestTablePandas(object):
         table = Table(df)
         assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
 
+    def test_table_pandas_timestamp_explicit_dtype(self):
+        data = [pd.Timestamp(2019, 7, 11, 12, 30, 5), None, pd.Timestamp(2019, 7, 11, 13, 30, 5), None]
+        df = pd.DataFrame({
+            "a": np.array(data, dtype="datetime64[ns]")
+        })
+        table = Table(df)
+        assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+
     def test_table_pandas_update_datetime_with_timestamp(self):
         data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
         df = pd.DataFrame({
@@ -435,6 +443,18 @@ class TestTablePandas(object):
         table.update(df2)
         assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None,
                                                datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+
+    def test_tables_pandas_timedf(self):
+        data = pd.util.testing.makeTimeDataFrame(5)
+        table = Table(data)
+        assert table.size() == 5
+        assert table.view().to_dict()["index"] == [
+            datetime(2000, 1, 3, 0, 0),
+            datetime(2000, 1, 4, 0, 0),
+            datetime(2000, 1, 5, 0, 0),
+            datetime(2000, 1, 6, 0, 0),
+            datetime(2000, 1, 7, 0, 0)
+        ]
     # Timeseries/Period index
 
     def test_table_pandas_timeseries(self):

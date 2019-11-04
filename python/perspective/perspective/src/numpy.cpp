@@ -139,9 +139,16 @@ namespace numpy {
         py::dict source = m_accessor.attr("_get_numpy_column")(name);
         py::array array = source["array"].cast<py::array>();
         py::array_t<std::uint64_t> mask = source["mask"].cast<py::array_t<std::uint64_t>>();
+        std::uint64_t* mask_ptr = (std::uint64_t*) mask.data();
+        std::size_t mask_size = mask.size();
 
-        std::cout << name << ", npd: " << dtype_to_str(np_dtype) << ", d: " << dtype_to_str(type) << std::endl;
-
+        // Datetime values are not trivially copyable - iterate and fill
+        if (type == DTYPE_TIME) {
+            fill_column_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
+            fill_validity_map(col, mask_ptr, mask_size, is_update);
+            return;
+        }
+        
          /**
          * Catch common type mismatches and fill iteratively when a numpy dtype is of greater bit width than the Perspective t_dtype:
          * - when `np_dtype` is int64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_FLOAT64`
@@ -154,6 +161,7 @@ namespace numpy {
         bool should_iter = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
+
         if (should_iter) {
             // Skip straight to numeric fill
             fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
@@ -162,25 +170,13 @@ namespace numpy {
 
         bool copy_status = try_copy_array(array, col, np_dtype, type, 0);
 
+        // Iterate if copy is not supported for the numpy array
         if (copy_status == t_fill_status::FILL_FAIL) {
             fill_column_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
-        } 
-        
-        // Validity map needs to be filled each time - None/np.nan/float('nan') might not have been parsed correctly
-        col->valid_raw_fill();
-        auto num_invalid = mask.request().size;
-
-        if (num_invalid > 0) {
-            std::uint64_t* ptr = (std::uint64_t*) mask.data();
-            for (auto i = 0; i < num_invalid; ++i) {
-                std::uint64_t idx = ptr[i];
-                if (is_update) {
-                    col->unset(idx);
-                } else {
-                    col->clear(idx);
-                }
-            }
         }
+        
+        // Fill validity map using null mask
+        fill_validity_map(col, mask_ptr, mask_size, is_update);
     }
 
     template <typename T>
@@ -312,8 +308,8 @@ namespace numpy {
         // but if they're of dtype object, then we need to pass it through `m_accessor.marshal`.
         switch (type) {
             case DTYPE_TIME: {
-                // covers dtype `datetime64[us/ns/ms/s]`
-                if (np_dtype == DTYPE_OBJECT) {
+                // covers dtype `datetime64[us/ns/ms/s]` and parses date strings
+                if (np_dtype == DTYPE_OBJECT || np_dtype == DTYPE_STR) {
                     fill_object_iter<std::int64_t>(tbl, col, name, np_dtype, type, cidx, is_update);
                 } else {
                     fill_datetime_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
@@ -350,16 +346,12 @@ namespace numpy {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
         t_uindex nrows = col->size();
 
-        if (np_dtype == DTYPE_OBJECT) {
-            // handle object arrays
-            fill_object_iter<std::int64_t>(tbl, col, name, np_dtype, type, cidx, is_update); 
-        } else {
-            double* ptr = (double*) array.data(); // read as double to handle nan
+        // read the array as a double array because of `numpy.nat`
+        double* ptr = (double*) array.data();
 
-            for (auto i = 0; i < nrows; ++i) {
-                std::int64_t item = ptr[i];
-                col->set_nth(i, item * 1000); // convert to milliseconds here because we aren't using the timestamp function
-            }
+        for (auto i = 0; i < nrows; ++i) {
+            std::int64_t item = ptr[i]; // Perspective stores datetimes using int64
+            col->set_nth(i, item);
         }
     }
 
@@ -545,9 +537,7 @@ namespace numpy {
             case DTYPE_INT32: {
                 copy_array_helper<std::int32_t>(src.data(), dest, offset);
             } break;
-            case DTYPE_INT64:
-            case DTYPE_TIME: {
-                std::cout << "copying int64/time" << std::endl;
+            case DTYPE_INT64: {
                 copy_array_helper<std::int64_t>(src.data(), dest, offset);
             } break;
             case DTYPE_FLOAT32: {
@@ -564,10 +554,26 @@ namespace numpy {
         return t_fill_status::FILL_SUCCESS;
     }
 
+    void
+    NumpyLoader::fill_validity_map(
+        std::shared_ptr<t_column> col, std::uint64_t* mask_ptr, std::size_t mask_size, bool is_update) {
+        // Validity map needs to be filled each time - None/np.nan/float('nan') might not have been parsed correctly
+        col->valid_raw_fill();
+
+        if (mask_size > 0) {
+            for (auto i = 0; i < mask_size; ++i) {
+                std::uint64_t idx = mask_ptr[i];
+                if (is_update) {
+                    col->unset(idx);
+                } else {
+                    col->clear(idx);
+                }
+            }
+        }
+    }
+
     template <typename T>
     void copy_array_helper(const void* src, std::shared_ptr<t_column> dest, const std::uint64_t offset) {
-        // TODO: use two templates, one for input and one for output type
-        // thus if we want to copy an int64 array but read it as double, we can
         std::memcpy(dest->get_nth<T>(offset), src, dest->size() * sizeof(T));
     }
 
@@ -590,9 +596,23 @@ namespace numpy {
             py::array array = py::array::ensure(a);
 
             if (!array) {
-                PSP_COMPLAIN_AND_ABORT("Cannot infer the type of a non-numpy array.");
+                PSP_COMPLAIN_AND_ABORT("Perspective does not support the mixing of ndarrays and lists.");
             }
 
+            // can't use isinstance on datetime/timedelta array, so check the dtype
+            char dtype_code = array.dtype().kind();
+
+            if (dtype_code == 'M') {
+                // datetime64
+                rval.push_back(DTYPE_TIME);
+                continue;
+            } else if (dtype_code == 'm' || dtype_code == 'U') {
+                // timedelta and string
+                rval.push_back(DTYPE_STR);
+                continue;
+            }
+
+            // isinstance checks equality of underlying dtype, not just pointer equality
             if (py::isinstance<py::array_t<std::uint8_t>>(array)) {
                 rval.push_back(DTYPE_UINT8);
             } else if (py::isinstance<py::array_t<std::uint16_t>>(array)) {

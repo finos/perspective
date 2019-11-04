@@ -35,19 +35,18 @@ def deconstruct_numpy(array):
         # bool => byte
         data = data.astype("b", copy=False)
     elif np.issubdtype(data.dtype, np.datetime64):
-        # cast datetimes to timestamps
+        # cast datetimes to millisecond timestamps
+        # because datetime64("nat") is a double, cast to float64 here - C++ handles the rest
         if data.dtype == np.dtype("datetime64[us]"):
-            data = data.astype("int64", copy=False) / 1000000
+            data = data.astype(np.float64, copy=False) / 1000
         elif data.dtype == np.dtype("datetime64[ns]"):
-            data = data.astype("int64", copy=False) / 1000000000
+            data = data.astype(np.float64, copy=False) / 1000000
         elif data.dtype == np.dtype("datetime64[ms]"):
-            data = data.astype("int64", copy=False)
+            data = data.astype(np.float64, copy=False)
         elif data.dtype == np.dtype("datetime64[s]"):
-            data = data.astype("int64", copy=False) * 1000
+            data = data.astype(np.float64, copy=False) * 1000
     elif np.issubdtype(data.dtype, np.timedelta64):
-        data = data.astype("int64", copy=False)
-
-    print(data.dtype)
+        data = data.astype(np.float64, copy=False)
 
     return {
             "array": data,

@@ -125,6 +125,8 @@ namespace numpy {
              */
             t_fill_status try_copy_array(const py::array& src, std::shared_ptr<t_column> dest, t_dtype np_dtype, t_dtype type, const std::uint64_t offset);
 
+            void fill_validity_map(std::shared_ptr<t_column> col, std::uint64_t* mask_ptr, std::size_t mask_size, bool is_update);
+
             // Return the column names from the Python data accessor
             std::vector<std::string> make_names();
 
@@ -144,6 +146,9 @@ namespace numpy {
             std::vector<t_dtype> m_types;
     };
 
+    /**
+     * Copy the data of a numpy array into a `t_column`.
+     */
     template <typename T>
     void copy_array_helper(const void* src, std::shared_ptr<t_column> dest, const std::uint64_t offset);
 

@@ -92,21 +92,6 @@ class _PerspectiveAccessor(object):
 
         self._types = []
 
-        # store the transformed arrays and null mappings in a separate location
-        self._numpy_meta = {}
-
-        # Additional transformations for numpy array-backed datasets
-        if self._is_numpy:
-            # try to normalize column data as much as we can
-            try:
-                for name in self._data_or_schema:
-                    array = self._data_or_schema[name]
-                    deconstructed = deconstruct_numpy(array)
-                    self._numpy_meta[name] = deconstructed
-                    self._types.append(deconstructed["array"].dtype)
-            except AttributeError:
-                raise PerspectiveError("Perspective does not support mixed dictionaries of numpy.ndarray and list.")
-
     def data(self):
         return self._data_or_schema
 
@@ -216,7 +201,12 @@ class _PerspectiveAccessor(object):
         Returns:
             list/numpy.array/None : returns the column's data, or None if it cannot be found.
         '''
-        return self._numpy_meta.get(name, None)
+        data = self._data_or_schema.get(name, None)
+        if data is None:
+            raise PerspectiveError("Column `{0}` does not exist.".format(name))
+        if not isinstance(data, numpy.ndarray):
+            raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
+        return deconstruct_numpy(data)
 
     def _has_column(self, ridx, name):
         '''Given a column name, validate that it is in the row.

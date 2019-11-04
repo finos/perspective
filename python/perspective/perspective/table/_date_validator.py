@@ -84,6 +84,7 @@ class _PerspectiveDateValidator(object):
             if str(obj) == "NaT":
                 return None
 
+            # astype(datetime) returns an int or a long (in python 2)
             obj = obj.astype(datetime)
 
             if six.PY2:
@@ -91,7 +92,6 @@ class _PerspectiveDateValidator(object):
                     return long(round(obj / 1000000))
 
             if isinstance(obj, int):
-                # sometimes `astype(datetime)` returns an int timestamp in nanoseconds - parse this.
                 return round(obj / 1000000)
 
         # TODO: full support for unix/second timestamps

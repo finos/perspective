@@ -111,9 +111,22 @@ class TestTableNumpy(object):
         }
 
     def test_table_np_datetime_string_dtype(self):
+        data = ["2019/07/11 15:30:05", "2019/07/11 15:30:05"]
         tbl = Table({
-            "a": np.array(["2019/07/11 15:30:05", "2019/07/11 15:30:05"])
+            "a": np.array(data)
         })
+
+        assert tbl.view().to_dict() == {
+            "a": data
+        }
+
+    def test_table_np_datetime_string_on_schema(self):
+        data = ["2019/07/11 15:30:05", "2019/07/11 15:30:05"]
+        tbl = Table({
+            "a": datetime
+        })
+
+        tbl.update({"a": data})
 
         assert tbl.view().to_dict() == {
             "a": [datetime(2019, 7, 11, 15, 30, 5), datetime(2019, 7, 11, 15, 30, 5)]
@@ -153,6 +166,24 @@ class TestTableNumpy(object):
 
         assert tbl.view().to_dict() == {
             "a": [datetime(2019, 7, 12, 11, 0)]
+        }
+
+    def test_table_np_datetime_ms_nat(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0), np.datetime64("nat")], dtype="datetime64[ms]")
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0), None]
+        }
+
+    def test_table_np_datetime_s_nat(self):
+        tbl = Table({
+            "a": np.array([datetime(2019, 7, 12, 11, 0), np.datetime64("nat")], dtype="datetime64[s]")
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 12, 11, 0), None]
         }
 
     def test_table_np_timedelta(self):
