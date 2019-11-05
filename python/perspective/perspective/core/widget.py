@@ -113,6 +113,18 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         # and changes made in Python do not reflect to the front-end.
         self.client = client
 
+        # Pass table load options to the front-end in client mode
+        self._client_options = {}
+
+        if index is not None and limit is not None:
+            raise PerspectiveError("Index and Limit cannot be set at the same time!")
+
+        if index is not None:
+            self._client_options["index"] = index
+
+        if limit is not None:
+            self._client_options["limit"] = limit
+
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
             data, pivots = deconstruct_pandas(table_or_data)
@@ -204,11 +216,18 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             elif parsed["cmd"] == "table":
                 if self.client and self._data is not None:
                     # Send data to the client, transferring ownership to the browser
-                    self.send({
+                    msg = {
                         "id": -2,
                         "type": "data",
-                        "data": self._data
-                    })
+                        "data": {
+                            "data": self._data,
+                        }
+                    }
+
+                    if len(self._client_options.keys()) > 0:
+                        msg["data"]["options"] = self._client_options
+
+                    self.send(msg)
                 elif self.table_name is not None:
                     # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
                     self.send({

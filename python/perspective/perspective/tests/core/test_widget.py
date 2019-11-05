@@ -55,6 +55,11 @@ class TestWidget:
         widget = PerspectiveWidget(data, limit=1)
         assert widget.table.size() == 1
 
+    def test_widget_pass_options_invalid(self):
+        data = {"a": np.arange(0, 50)}
+        with raises(PerspectiveError):
+            PerspectiveWidget(data, index="index", limit=1)
+
     # client-only mode
 
     def test_widget_client(self):

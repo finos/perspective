@@ -10,7 +10,7 @@
 
 import "@finos/perspective-viewer";
 
-import {Table, TableData} from "@finos/perspective";
+import {Table, TableData, TableOptions} from "@finos/perspective";
 import {Message} from "@phosphor/messaging";
 import {Widget} from "@phosphor/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
@@ -140,8 +140,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table a `perspective.table` object.
      */
-    load(table: TableData | Table): void {
-        this.viewer.load(table);
+    load(table: (TableData | Table), options?: TableOptions): void {
+        this.viewer.load(table, options);
     }
 
     /**
