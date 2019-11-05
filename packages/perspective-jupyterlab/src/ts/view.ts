@@ -123,9 +123,13 @@ export class PerspectiveView extends DOMWidgetView {
      * @param msg {PerspectiveJupyterMessage}
      */
     _handle_message(msg: PerspectiveJupyterMessage) {
-        // If in client-only mode (no Table on the python widget), message data is a JSON-serialized dataset
-        if (this.pWidget.client === true && msg.data) {
-            this.pWidget.load(msg.data);
+        // If in client-only mode (no Table on the python widget), message.data is an object containing "data" and "options". 
+        if (this.pWidget.client === true && msg.data["data"]) {
+            if (msg.data["cmd"] === "update") {
+                this.pWidget._update(msg.data["data"]);
+            } else {
+                this.pWidget.load(msg.data["data"], msg.data["options"]);
+            }
         } else {
             // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
             const message = JSON.parse(JSON.stringify(msg));
