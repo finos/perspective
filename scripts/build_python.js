@@ -11,7 +11,6 @@ const args = process.argv.slice(2);
 const resolve = require("path").resolve;
 const execSync = require("child_process").execSync;
 const fs = require("fs-extra");
-const mkdir = require("mkdirp");
 const rimraf = require("rimraf");
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
@@ -33,9 +32,7 @@ try {
     rimraf.sync(resolve(__dirname, "..", "python", "perspective", "obj")); // unused obj folder
     fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"), {overwrite: true});
 
-    // travis sometimes caches this folder between py3 and py2 builds
     rimraf.sync(resolve(__dirname, "..", "python", "perspective", "cmake"));
-    mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
     fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"), {overwrite: true});
 
     let cmd;
