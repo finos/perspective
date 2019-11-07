@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import {PerspectiveWorkspace} from "../../dist/esm/workspace";
+import {PerspectiveWorkspace} from "../../../dist/esm/workspace";
 import {toArray} from "@phosphor/algorithm";
-import {PerspectiveWidget} from "../../dist/esm/widget";
+import {PerspectiveWidget} from "../../../dist/esm/widget";
 
 describe("workspace", () => {
     test("addViewer adds widget to underlying dockpanel", () => {
