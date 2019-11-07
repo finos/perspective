@@ -82,7 +82,7 @@ class TestTablePandas(object):
         assert tbl.size() == 4
         assert tbl.schema() == {
             "index": int,
-            "a": float,
+            "a": int,
             "b": float
         }
 
@@ -282,7 +282,7 @@ class TestTablePandas(object):
             "a": [1, 2, 3, 4],
             "b": [1.5, 2.5, 3.5, 4.5],
             "c": [np.nan, np.nan, "abc", np.nan],
-            "d": [np.nan, True, np.nan, False],
+            "d": [None, True, None, False],
             "e": [float("nan"), datetime(2019, 7, 11, 12, 30), float("nan"), datetime(2019, 7, 11, 12, 30)]
         })
 
@@ -306,7 +306,7 @@ class TestTablePandas(object):
         table = Table(df)
         assert table.schema() == {
             "index": int,
-            "a": float
+            "a": int
         }
         assert table.view().to_dict()["a"] == [1, 2, None, 2, None, 3, 4]
 
@@ -317,7 +317,7 @@ class TestTablePandas(object):
         table = Table(df)
         assert table.schema() == {
             "index": int,
-            "a": float  # None -> np.nan which is a float
+            "a": int
         }
         assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
 
