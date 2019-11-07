@@ -73,7 +73,7 @@ class TestUpdatePandas(object):
 
         tbl.update(update_data)
         assert tbl.view().to_dict() == {
-            "a": [date(2019, 7, 11), date(2019, 7, 12)]
+            "a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]
         }
 
     def test_update_df_date_timestamp(self, util):
@@ -89,7 +89,7 @@ class TestUpdatePandas(object):
 
         tbl.update(update_data)
         assert tbl.view().to_dict() == {
-            "a": [date(2019, 7, 11), date(2019, 7, 12)]
+            "a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]
         }
 
     def test_update_df_datetime(self):

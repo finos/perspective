@@ -44,7 +44,7 @@ class TestUpdateNumpy(object):
         })
 
         assert tbl.view().to_dict() == {
-            "a": [date(2019, 7, 11), date(2019, 7, 12)]
+            "a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]
         }
 
     def test_update_np_date_timestamp(self, util):
@@ -56,17 +56,14 @@ class TestUpdateNumpy(object):
             "a": date
         }
 
-        ts = util.to_timestamp(date(2019, 7, 12))
-        print("TS", ts)
+        ts = util.to_timestamp(datetime(2019, 7, 12))
 
         tbl.update({
             "a": np.array([ts])
         })
 
-        print(tbl.size())
-
         assert tbl.view().to_dict() == {
-            "a": [date(2019, 7, 11), date(2019, 7, 12)]
+            "a": [datetime(2019, 7, 11), datetime(2019, 7, 12)]
         }
 
     def test_update_np_datetime(self):

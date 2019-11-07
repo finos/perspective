@@ -36,8 +36,6 @@ def _normalize_timestamp(obj):
 class _PerspectiveDateValidator(object):
     '''Validate and parse dates using the `dateutil` package.'''
 
-    EPOCH = datetime(1970, 1, 1)
-
     def parse(self, str):
         '''Return a datetime.datetime object containing the parsed date, or None if the date is invalid.
 

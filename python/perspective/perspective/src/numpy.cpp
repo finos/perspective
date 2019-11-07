@@ -45,14 +45,10 @@ namespace numpy {
             t_dtype numpy_type = m_types[i];
             t_dtype inferred_type = inferred_types[i];
 
-            switch (numpy_type) {
-                case DTYPE_OBJECT: {
-                    // inferred type has the correct underlying type for the array
-                    reconciled_types.push_back(inferred_type);
-                } break;
-                default: {
-                    reconciled_types.push_back(numpy_type);
-                }
+            if (inferred_type == DTYPE_DATE || numpy_type == DTYPE_OBJECT) {
+                reconciled_types.push_back(inferred_type);
+            } else {
+                reconciled_types.push_back(numpy_type);
             }
         }
 

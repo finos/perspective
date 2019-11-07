@@ -56,16 +56,16 @@ class TestUpdate(object):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": date(2019, 7, 12)}])
         assert tbl.view().to_records() == [
-            {"a": date(2019, 7, 11)},
-            {"a": date(2019, 7, 12)}
+            {"a": datetime(2019, 7, 11)},
+            {"a": datetime(2019, 7, 12)}
         ]
 
     def test_update_date_np(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": np.datetime64(date(2019, 7, 12))}])
         assert tbl.view().to_records() == [
-            {"a": date(2019, 7, 11)},
-            {"a": date(2019, 7, 12)}
+            {"a": datetime(2019, 7, 11)},
+            {"a": datetime(2019, 7, 12)}
         ]
 
     def test_update_datetime(self):
@@ -115,12 +115,12 @@ class TestUpdate(object):
     def test_update_date_partial(self):
         tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": date(2019, 7, 12), "b": 1}])
-        assert tbl.view().to_records() == [{"a": date(2019, 7, 12), "b": 1}]
+        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12), "b": 1}]
 
     def test_update_date_np_partial(self):
         tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "b": 1}])
-        assert tbl.view().to_records() == [{"a": date(2019, 7, 12), "b": 1}]
+        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12), "b": 1}]
 
     def test_update_datetime_partial(self):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
@@ -158,12 +158,12 @@ class TestUpdate(object):
     def test_update_date_partial_implicit(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": date(2019, 7, 12), "__INDEX__": 0}])
-        assert tbl.view().to_records() == [{"a": date(2019, 7, 12)}]
+        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12)}]
 
     def test_update_date_np_partial_implicit(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "__INDEX__": 0}])
-        assert tbl.view().to_records() == [{"a": date(2019, 7, 12)}]
+        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12)}]
 
     def test_update_datetime_partial_implicit(self):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})

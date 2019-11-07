@@ -38,10 +38,16 @@ class TestTableInfer(object):
         tbl = Table(data)
         assert tbl.schema() == {"a": str}
 
+    def test_table_infer_time_as_string(self):
+        # time objects are inferred as string
+        data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11, 12, 30, 5).time()]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": str}
+
     def test_table_infer_date_from_datetime(self):
         data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11)]}
         tbl = Table(data)
-        assert tbl.schema() == {"a": datetime}
+        assert tbl.schema() == {"a": date}
 
     def test_table_infer_valid_date(self):
         data = {"a": [None, None, None, None, None, None, "08/31/2019"]}
