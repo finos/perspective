@@ -45,12 +45,6 @@ namespace numpy {
             t_dtype numpy_type = m_types[i];
             t_dtype inferred_type = inferred_types[i];
 
-            if (inferred_type == DTYPE_DATE) {
-                // numpy can't infer dates vs. datetime - prefer inferred type
-                reconciled_types.push_back(inferred_type);
-                continue;
-            }
-
             switch (numpy_type) {
                 case DTYPE_OBJECT: {
                     // inferred type has the correct underlying type for the array

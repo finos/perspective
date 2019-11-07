@@ -7,28 +7,8 @@
 #
 import six
 import time
-import numpy as np
-import pandas as pd
 from datetime import datetime
 from pytest import fixture
-
-
-def _make_date_time_index(size, time_unit):
-    return pd.date_range("2000-01-01", periods=size, freq=time_unit)
-
-
-def _make_period_index(size, time_unit):
-    return pd.period_range(start="2000", periods=size, freq=time_unit)
-
-
-def _make_dataframe(index, size=10):
-    '''Create a new random dataframe of `size` and with a DateTimeIndex of frequency `time_unit`.'''
-    return pd.DataFrame(index=index, data={
-        "a": np.random.rand(size),
-        "b": np.random.rand(size),
-        "c": np.random.rand(size),
-        "d": np.random.rand(size)
-    })
 
 
 class Util:
@@ -48,21 +28,6 @@ class Util:
                 return obj.timestamp()
         else:
             return -1
-
-    @staticmethod
-    def make_time_dataframe(size=10):
-        index = _make_date_time_index(size, "H")
-        return _make_dataframe(index, size)
-
-    @staticmethod
-    def make_date_dataframe(size=10):
-        index = _make_date_time_index(size, "M")
-        return _make_dataframe(index, size)
-
-    @staticmethod
-    def make_period_dataframe(size=10):
-        index = _make_period_index(size, "M")
-        return _make_dataframe(index, size)
 
 
 class Sentinel(object):
