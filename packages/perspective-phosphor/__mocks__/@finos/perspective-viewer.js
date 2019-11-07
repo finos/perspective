@@ -1,14 +1,17 @@
-class MockPerspectiveViewer extends HTMLElement {
-    restore(config) {
-        this.config = {...config};
-    }
-    save() {
-        return this.config;
-    }
-    load(table) {
-        this.table = table;
-    }
-    restyleElement(){}
-}
+const originalCreateElement = document.createElement;
 
-window.customElements.define("perspective-viewer", MockPerspectiveViewer);
+document.createElement = name => {
+    const element = originalCreateElement.call(document, name);
+    return name === "perspective-viewer" ? patchUnknownElement(element) : element;
+};
+
+const patchUnknownElement = element => {
+    let config = {};
+    element.save = () => config;
+    element.restore = value => {
+        config = {...config, ...value};
+    };
+
+    element.restyleElement = jest.fn();
+    return element;
+};

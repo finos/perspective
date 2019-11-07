@@ -13,8 +13,7 @@ import {Menu} from "@phosphor/widgets";
 import {createCommands} from "./contextmenu";
 import {PerspectiveTabBar, TabMaximizeArgs} from "./tabbar";
 import {PerspectiveTabBarRenderer} from "./tabbarrenderer";
-import {PerspectiveWidget, PerspectiveWidgetOptions} from "./widget";
-import {mapWidgets} from "./utils";
+import {PerspectiveWidget, PerspectiveWidgetOptions} from "../widget";
 import {Signal} from "@phosphor/signaling";
 import {CommandRegistry} from "@phosphor/commands";
 
@@ -46,6 +45,7 @@ class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
 
 export interface PerspectiveDockPanelOptions extends DockPanel.IOptions {
     enableContextMenu: boolean;
+    node?: HTMLElement;
 }
 
 export interface ContextMenuArgs {
@@ -79,6 +79,7 @@ export class PerspectiveDockPanel extends DockPanel {
         if (this.enableContextMenu) {
             this._onContextMenu.connect(this.showMenu);
         }
+        options.node && Widget.attach(this, options.node);
     }
 
     public duplicate(widget: PerspectiveWidget): void {
@@ -95,14 +96,14 @@ export class PerspectiveDockPanel extends DockPanel {
         super.addWidget(widget, options);
     }
 
-    public deserialize(layout: SerilizableILayoutConfig): void {
-        const newLayout = mapWidgets((config: PerspectiveWidgetOptions) => this.createWidget(config.title, config), layout);
+    public restore(layout: SerilizableILayoutConfig): void {
+        const newLayout = PerspectiveDockPanel.mapWidgets((config: PerspectiveWidgetOptions) => this.createWidget(config.title, config), layout);
         this.restoreLayout(newLayout);
     }
 
-    public serialize(): SerilizableILayoutConfig {
+    public save(): SerilizableILayoutConfig {
         const layout = this.saveLayout();
-        return mapWidgets((widget: PerspectiveWidget) => widget.save(), layout);
+        return PerspectiveDockPanel.mapWidgets((widget: PerspectiveWidget) => widget.save(), layout);
     }
 
     public onToggleConfigRequested = (sender: PerspectiveTabBar, args: TabMaximizeArgs): void => {
@@ -204,4 +205,15 @@ export class PerspectiveDockPanel extends DockPanel {
         this.addWidgetEventListeners(widget);
         return widget;
     };
+
+    public static mapWidgets(widgetFunc: any, layout: any): any {
+        if (layout.main) {
+            layout.main = PerspectiveDockPanel.mapWidgets(widgetFunc, layout.main);
+        } else if (layout.children) {
+            layout.children = layout.children.map((x: DockLayout.ITabAreaConfig | DockLayout.ISplitAreaConfig) => PerspectiveDockPanel.mapWidgets(widgetFunc, x));
+        } else if (layout.widgets) {
+            layout.widgets = layout.widgets.map((x: PerspectiveWidget | PerspectiveWidgetOptions) => widgetFunc(x));
+        }
+        return layout;
+    }
 }

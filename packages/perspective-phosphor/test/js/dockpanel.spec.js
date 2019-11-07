@@ -1,10 +1,11 @@
 import {PerspectiveDockPanel} from "../../dist/esm/dockpanel";
 import {PerspectiveWidget} from "../../dist/esm/widget";
-import {mapWidgets} from "../../dist/esm/utils";
+import {Widget} from "@phosphor/widgets";
 
 describe("dockpanel", () => {
     test("serialise returns a correct widget state", () => {
         const dockpanel = new PerspectiveDockPanel("name");
+        Widget.attach(dockpanel, document.body);
 
         // eslint-disable-next-line @typescript-eslint/camelcase
         const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
@@ -17,11 +18,12 @@ describe("dockpanel", () => {
                 currentIndex: 0
             }
         };
-        expect(dockpanel.serialize()).toStrictEqual(expectedConfig);
+        expect(dockpanel.save()).toStrictEqual(expectedConfig);
     });
 
     test("deserialise restore correct dockpanel state", () => {
-        const dockpanel = new PerspectiveDockPanel("name");
+        const dockpanel = new PerspectiveDockPanel("name", {node: document.body});
+
         const config = {
             main: {
                 type: "tab-area",
@@ -30,10 +32,10 @@ describe("dockpanel", () => {
             }
         };
 
-        dockpanel.deserialize(config);
+        dockpanel.restore(config);
 
         const widgets = [];
-        mapWidgets(widget => {
+        PerspectiveDockPanel.mapWidgets(widget => {
             widgets.push(widget);
         }, dockpanel.saveLayout());
 
