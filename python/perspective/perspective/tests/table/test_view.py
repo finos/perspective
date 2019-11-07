@@ -302,7 +302,7 @@ class TestView(object):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(sort=[["a", "desc"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}, {"a": datetime(2019, 7, 11), "b": 2}]
+        assert view.to_records() == [{"a": date(2019, 7, 12), "b": 4}, {"a": date(2019, 7, 11), "b": 2}]
 
     def test_view_sort_datetime(self):
         data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
@@ -382,37 +382,37 @@ class TestView(object):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", date(2019, 7, 12)]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
+        assert view.to_records() == [{"a": date(2019, 7, 12), "b": 4}]
 
     def test_view_filter_date_neq(self):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", date(2019, 7, 12)]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
+        assert view.to_records() == [{"a": date(2019, 7, 11), "b": 2}]
 
     def test_view_filter_date_np_eq(self):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", np.datetime64(date(2019, 7, 12))]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
+        assert view.to_records() == [{"a": date(2019, 7, 12), "b": 4}]
 
     def test_view_filter_date_np_neq(self):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", np.datetime64(date(2019, 7, 12))]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
+        assert view.to_records() == [{"a": date(2019, 7, 11), "b": 2}]
 
     def test_view_filter_date_str_eq(self):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", "2019/7/12"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
+        assert view.to_records() == [{"a": date(2019, 7, 12), "b": 4}]
 
     def test_view_filter_date_str_neq(self):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", "2019/7/12"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
+        assert view.to_records() == [{"a": date(2019, 7, 11), "b": 2}]
 
     def test_view_filter_datetime_eq(self):
         data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]

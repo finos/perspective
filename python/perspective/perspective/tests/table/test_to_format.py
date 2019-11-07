@@ -41,8 +41,7 @@ class TestToFormat(object):
         data = [{"a": today, "b": "string2"}, {"a": today, "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        dt = datetime(today.year, today.month, today.day)
-        assert view.to_records() == [{"a": dt, "b": "string2"}, {"a": dt, "b": "string4"}]
+        assert view.to_records() == data
 
     def test_to_records_date_no_dst(self):
         # make sure that DST does not affect the way we read dates - if tm_dst in `t_date::get_tm()` isn't set to -1, it could reverse 1hr by assuming DST is not in effect.
@@ -50,28 +49,27 @@ class TestToFormat(object):
         data = [{"a": today, "b": "string2"}, {"a": today, "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        dt = datetime(today.year, today.month, today.day)
-        assert view.to_records() == [{"a": dt, "b": "string2"}, {"a": dt, "b": "string4"}]
+        assert view.to_records() == data
 
     def test_to_records_date_str(self):
         data = [{"a": "03/11/2019", "b": "string2"}, {"a": "03/12/2019", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_records() == [{"a": datetime(2019, 3, 11), "b": "string2"}, {"a": datetime(2019, 3, 12), "b": "string4"}]
+        assert view.to_records() == [{"a": date(2019, 3, 11), "b": "string2"}, {"a": date(2019, 3, 12), "b": "string4"}]
 
     def test_to_records_date_str_month_first(self):
         data = [{"a": "1/2/2019", "b": "string2"}, {"a": "3/4/2019", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.schema() == {"a": date, "b": str}
-        assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {"a": datetime(2019, 3, 4), "b": "string4"}]
+        assert view.to_records() == [{"a": date(2019, 1, 2), "b": "string2"}, {"a": date(2019, 3, 4), "b": "string4"}]
 
     def test_to_records_date_str_month_ymd(self):
         data = [{"a": "2019/01/02", "b": "string2"}, {"a": "2019/03/04", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.schema() == {"a": date, "b": str}
-        assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {"a": datetime(2019, 3, 4), "b": "string4"}]
+        assert view.to_records() == [{"a": date(2019, 1, 2), "b": "string2"}, {"a": date(2019, 3, 4), "b": "string4"}]
 
     def test_to_records_datetime(self):
         dt = datetime(2019, 9, 10, 19, 30, 59, 515000)
@@ -163,12 +161,11 @@ class TestToFormat(object):
 
     def test_to_dict_date(self):
         today = date.today()
-        dt = datetime(today.year, today.month, today.day)
         data = [{"a": today, "b": 2}, {"a": today, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
         assert view.to_dict() == {
-            "a": [dt, dt],
+            "a": [today, today],
             "b": [2, 4]
         }
 
@@ -589,20 +586,21 @@ class TestToFormat(object):
 
     def test_to_csv_date(self):
         today = date.today()
-        dt = datetime(today.year, today.month, today.day)
-        dt_str = dt.strftime("%Y/%m/%d %H:%M:%S")
+        dt_str = today.strftime("%Y-%m-%d")
         data = [{"a": today, "b": 2}, {"a": today, "b": 4}]
         tbl = Table(data)
+        assert tbl.schema()["a"] == date
         view = tbl.view()
         assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
-    def test_to_csv_date_custom_format(self):
+    def test_to_csv_date_ignore_custom_format(self):
         today = date.today()
-        dt = datetime(today.year, today.month, today.day)
-        dt_str = dt.strftime("%Y")
+        dt_str = today.strftime("%Y-%m-%d")
         data = [{"a": today, "b": 2}, {"a": today, "b": 4}]
         tbl = Table(data)
+        assert tbl.schema()["a"] == date
         view = tbl.view()
+        # date_format only applies to `datetime`
         assert view.to_csv(date_format="%Y") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_datetime(self):

@@ -13,13 +13,6 @@ from datetime import date, datetime
 from perspective.table import Table
 
 
-def _to_timestamp(obj):
-    if six.PY2:
-        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0))
-    else:
-        return obj.timestamp()
-
-
 class TestUpdate(object):
 
     def test_update_from_schema(self):
@@ -58,486 +51,21 @@ class TestUpdate(object):
         tbl.update({"a": ["abc"], "b": [456]})
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
 
-    # numpy array updates
-
-    def test_update_np(self):
-        tbl = Table({"a": [1, 2, 3, 4]})
-        tbl.update({"a": np.array([5, 6, 7, 8])})
-        assert tbl.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6, 7, 8]
-        }
-
-    def test_update_np_one_col(self):
-        tbl = Table({
-            "a": np.array([1, 2, 3, 4]),
-            "b": np.array([2, 3, 4, 5])
-        })
-        tbl.update({"a": np.array([5, 6, 7, 8])})
-        assert tbl.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6, 7, 8],
-            "b": [2, 3, 4, 5, None, None, None, None]
-        }
-
-    def test_update_np_datetime(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]
-        })
-
-        tbl.update({
-            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=datetime)
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_np_datetime_str(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]
-        })
-
-        tbl.update({
-            "a": np.array(["2019/7/12 11:00:00"])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_np_datetime_timestamp_s(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]
-        })
-
-        tbl.update({
-            "a": np.array([_to_timestamp(datetime(2019, 7, 12, 11, 0))])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_np_datetime_timestamp_ms(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]
-        })
-
-        tbl.update({
-            "a": np.array([_to_timestamp(datetime(2019, 7, 12, 11, 0)) * 1000])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_np_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3, 4],
-            "b": ["a", "b", "c", "d"]
-        }, index="b")
-
-        tbl.update({
-            "a": np.array([5, 6, 7, 8]),
-            "b": np.array(["a", "b", "c", "d"], dtype=object)
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 6, 7, 8],
-            "b": ["a", "b", "c", "d"]
-        }
-
-    def test_update_np_partial_implicit(self):
-        tbl = Table({"a": [1, 2, 3, 4]})
-
-        tbl.update({
-            "a": np.array([5, 6, 7, 8]),
-            "__INDEX__": np.array([0, 1, 2, 3])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 6, 7, 8]
-        }
-
-    def test_update_np_datetime_partial_implicit_timestamp_s(self):
-        tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
-
-        tbl.update({
-            "a": np.array([_to_timestamp(datetime(2019, 7, 12, 11, 0))]),
-            "__INDEX__": np.array([0])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_np_datetime_partial_implicit_timestamp_ms(self):
-        tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
-
-        tbl.update({
-            "a": np.array([_to_timestamp(datetime(2019, 7, 12, 11, 0)) * 1000]),
-            "__INDEX__": np.array([0])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_np_datetime_partial(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))],
-            "b": [1]
-        }, index="b")
-
-        tbl.update({
-            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=datetime),
-            "b": np.array([1])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 12, 11, 0)],
-            "b": [1]
-        }
-
-    def test_update_np_datetime_partial_timestamp_s(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))],
-            "idx": [1]
-        }, index="idx")
-
-        tbl.update({
-            "a": np.array([_to_timestamp(datetime(2019, 7, 12, 11, 0))]),
-            "idx": np.array([1])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 12, 11, 0)],
-            "idx": [1]
-        }
-
-    def test_update_np_datetime_partial_timestamp_ms(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))],
-            "idx": [1]
-        }, index="idx")
-
-        tbl.update({
-            "a": np.array([_to_timestamp(datetime(2019, 7, 12, 11, 0)) * 1000]),
-            "idx": np.array([1])
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 12, 11, 0)],
-            "idx": [1]
-        }
-
-    def test_update_np_nonseq_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3, 4],
-            "b": ["a", "b", "c", "d"]
-        }, index="b")
-
-        tbl.update({
-            "a": np.array([5, 6, 7]),
-            "b": np.array(["a", "c", "d"], dtype=object)}
-        )
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 2, 6, 7],
-            "b": ["a", "b", "c", "d"]
-        }
-
-    def test_update_np_with_none_partial(self):
-        tbl = Table({
-            "a": [1, np.nan, 3],
-            "b": ["a", None, "d"]
-        }, index="b")
-
-        tbl.update({
-            "a": np.array([4, 5]),
-            "b": np.array(["a", "d"], dtype=object)
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [None, 4, 5],
-            "b": [None, "a", "d"]  # pkeys are ordered
-        }
-
-    def test_update_np_unset_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3],
-            "b": ["a", "b", "c"]
-        }, index="b")
-
-        tbl.update({
-            "a": np.array([None, None]),
-            "b": np.array(["a", "c"], dtype=object)
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [None, 2, None],
-            "b": ["a", "b", "c"]
-        }
-
-    def test_update_np_nan_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3],
-            "b": ["a", "b", "c"]
-        }, index="b")
-
-        tbl.update({
-            "a": np.array([None, None]),
-            "b": np.array(["a", "c"], dtype=object)
-        })
-
-        assert tbl.view().to_dict() == {
-            "a": [None, 2, None],
-            "b": ["a", "b", "c"]
-        }
-
-    # pandas dataframe updates
-
-    def test_update_df(self):
-        tbl = Table({"a": [1, 2, 3, 4]})
-
-        update_data = pd.DataFrame({
-            "a": [5, 6, 7, 8]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6, 7, 8]
-        }
-
-    def test_update_df_i32_vs_i64(self):
-        tbl = Table({"a": int})
-
-        update_data = pd.DataFrame({
-            "a": np.array([5, 6, 7, 8], dtype="int64")
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 6, 7, 8]
-        }
-
-    def test_update_df_bool(self):
-        tbl = Table({"a": [True, False, True, False]})
-
-        update_data = pd.DataFrame({
-            "a": [True, False, True, False]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [True, False, True, False, True, False, True, False]
-        }
-
-    def test_update_df_str(self):
-        tbl = Table({"a": ["a", "b", "c", "d"]})
-
-        update_data = pd.DataFrame({
-            "a": ["a", "b", "c", "d"]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": ["a", "b", "c", "d", "a", "b", "c", "d"]
-        }
-
-    def test_update_df_datetime(self):
-        tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
-
-        update_data = pd.DataFrame({
-            "a": [datetime(2019, 7, 12, 11, 0)]
-        })
-
-        tbl.update(update_data)
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_df_datetime_timestamp_seconds(self):
-        tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
-
-        update_data = pd.DataFrame({
-            "a": [_to_timestamp(datetime(2019, 7, 12, 11, 0))]
-        })
-
-        tbl.update(update_data)
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_df_datetime_timestamp_ms(self):
-        tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
-
-        update_data = pd.DataFrame({
-            "a": [_to_timestamp(datetime(2019, 7, 12, 11, 0)) * 1000]
-        })
-
-        tbl.update(update_data)
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 11, 0), datetime(2019, 7, 12, 11, 0)]
-        }
-
-    def test_update_df_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3, 4],
-            "b": ["a", "b", "c", "d"]
-        }, index="b")
-
-        update_data = pd.DataFrame({
-            "a": [5, 6, 7, 8],
-            "b": ["a", "b", "c", "d"]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 6, 7, 8],
-            "b": ["a", "b", "c", "d"]
-        }
-
-    def test_update_df_partial_implicit(self):
-        tbl = Table({"a": [1, 2, 3, 4]})
-
-        update_data = pd.DataFrame({
-            "a": [5, 6, 7, 8],
-            "__INDEX__": [0, 1, 2, 3]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 6, 7, 8]
-        }
-
-    def test_update_df_datetime_partial(self):
-        tbl = Table({
-            "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))],
-            "b": [1]
-        }, index="b")
-
-        update_data = pd.DataFrame({
-            "a": [datetime(2019, 7, 12, 11, 0)],
-            "b": [1]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 12, 11, 0)],
-            "b": [1]
-        }
-
-    def test_update_df_one_col(self):
-        tbl = Table({
-            "a": [1, 2, 3, 4],
-            "b": ["a", "b", "c", "d"]
-        })
-
-        update_data = pd.DataFrame({
-            "a": [5, 6, 7]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6, 7],
-            "b": ["a", "b", "c", "d", None, None, None]
-        }
-
-    def test_update_df_nonseq_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3, 4],
-            "b": ["a", "b", "c", "d"]
-        }, index="b")
-
-        update_data = pd.DataFrame({
-            "a": [5, 6, 7],
-            "b": ["a", "c", "d"]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [5, 2, 6, 7],
-            "b": ["a", "b", "c", "d"]
-        }
-
-    def test_update_df_with_none_partial(self):
-        tbl = Table({
-            "a": [1, np.nan, 3],
-            "b": ["a", None, "d"]
-        }, index="b")
-
-        update_data = pd.DataFrame({
-            "a": [4, 5],
-            "b": ["a", "d"]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [None, 4, 5],
-            "b": [None, "a", "d"]  # pkeys are ordered
-        }
-
-    def test_update_df_unset_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3],
-            "b": ["a", "b", "c"]
-        }, index="b")
-
-        update_data = pd.DataFrame({
-            "a": [None, None],
-            "b": ["a", "c"]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [None, 2, None],
-            "b": ["a", "b", "c"]
-        }
-
-    def test_update_df_nan_partial(self):
-        tbl = Table({
-            "a": [1, 2, 3],
-            "b": ["a", "b", "c"]
-        }, index="b")
-
-        update_data = pd.DataFrame({
-            "a": [None, None],
-            "b": ["a", "c"]
-        })
-
-        tbl.update(update_data)
-
-        assert tbl.view().to_dict() == {
-            "a": [None, 2, None],
-            "b": ["a", "b", "c"]
-        }
-
     # dates and datetimes
     def test_update_date(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": date(2019, 7, 12)}])
         assert tbl.view().to_records() == [
-            {"a": datetime(2019, 7, 11, 0, 0)},
-            {"a": datetime(2019, 7, 12, 0, 0)}
+            {"a": date(2019, 7, 11)},
+            {"a": date(2019, 7, 12)}
         ]
 
     def test_update_date_np(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": np.datetime64(date(2019, 7, 12))}])
         assert tbl.view().to_records() == [
-            {"a": datetime(2019, 7, 11, 0, 0)},
-            {"a": datetime(2019, 7, 12, 0, 0)}
+            {"a": date(2019, 7, 11)},
+            {"a": date(2019, 7, 12)}
         ]
 
     def test_update_datetime(self):
@@ -564,8 +92,8 @@ class TestUpdate(object):
             {"a": datetime(2019, 7, 12, 11, 0)}
         ]
 
-    def test_update_datetime_timestamp_seconds(self):
-        ts = _to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
+    def test_update_datetime_timestamp_seconds(self, util):
+        ts = util.to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
         tbl.update([{"a": ts}])
         assert tbl.view().to_records() == [
@@ -573,8 +101,8 @@ class TestUpdate(object):
             {"a": datetime(2019, 7, 12, 11, 0)}
         ]
 
-    def test_update_datetime_timestamp_ms(self):
-        ts = _to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
+    def test_update_datetime_timestamp_ms(self, util):
+        ts = util.to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})
         tbl.update([{"a": ts}])
         assert tbl.view().to_records() == [
@@ -587,12 +115,12 @@ class TestUpdate(object):
     def test_update_date_partial(self):
         tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": date(2019, 7, 12), "b": 1}])
-        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 0, 0), "b": 1}]
+        assert tbl.view().to_records() == [{"a": date(2019, 7, 12), "b": 1}]
 
     def test_update_date_np_partial(self):
         tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "b": 1}])
-        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 0, 0), "b": 1}]
+        assert tbl.view().to_records() == [{"a": date(2019, 7, 12), "b": 1}]
 
     def test_update_datetime_partial(self):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
@@ -609,16 +137,16 @@ class TestUpdate(object):
         tbl.update([{"a": np.datetime64("2019-07-12T11:00"), "b": 1}])
         assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 11, 0), "b": 1}]
 
-    def test_update_datetime_timestamp_seconds_partial(self):
-        ts = _to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
+    def test_update_datetime_timestamp_seconds_partial(self, util):
+        ts = util.to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "idx": [1]}, index="idx")
         tbl.update([{"a": ts, "idx": 1}])
         assert tbl.view().to_records() == [
             {"a": datetime(2019, 7, 12, 11, 0), "idx": 1}
         ]
 
-    def test_update_datetime_timestamp_ms_partial(self):
-        ts = _to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
+    def test_update_datetime_timestamp_ms_partial(self, util):
+        ts = util.to_timestamp(datetime(2019, 7, 12, 11, 0, 0))
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "idx": [1]}, index="idx")
         tbl.update([{"a": ts, "idx": 1}])
         assert tbl.view().to_records() == [
@@ -630,12 +158,12 @@ class TestUpdate(object):
     def test_update_date_partial_implicit(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": date(2019, 7, 12), "__INDEX__": 0}])
-        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 0, 0)}]
+        assert tbl.view().to_records() == [{"a": date(2019, 7, 12)}]
 
     def test_update_date_np_partial_implicit(self):
         tbl = Table({"a": [date(2019, 7, 11)]})
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "__INDEX__": 0}])
-        assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 0, 0)}]
+        assert tbl.view().to_records() == [{"a": date(2019, 7, 12)}]
 
     def test_update_datetime_partial_implicit(self):
         tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)]})

@@ -149,7 +149,7 @@ namespace numpy {
         }
 
         // Datetimes are not trivially copyable - they are float64 values that need to be read as int64
-        if (type == DTYPE_TIME) {
+        if (type == DTYPE_TIME || type == DTYPE_DATE) {
             fill_column_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
             fill_validity_map(col, mask_ptr, mask_size, is_update);
             return;
@@ -376,7 +376,6 @@ namespace numpy {
                 }
                 continue;
             }
-
 
             auto date_components = item.cast<std::map<std::string, std::int32_t>>();
             t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);

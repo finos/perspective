@@ -22,6 +22,17 @@ if six.PY2:
     from past.builtins import long
 
 
+def _normalize_timestamp(obj):
+    '''Convert a timestamp in seconds to milliseconds.'''
+    try:
+        # if it overflows, it's milliseconds - otherwise convert from seconds to milliseconds.
+        datetime.fromtimestamp(obj)
+        return int(obj * 1000)
+    except (ValueError, OverflowError):
+        # milliseconds
+        return int(obj)
+
+
 class _PerspectiveDateValidator(object):
     '''Validate and parse dates using the `dateutil` package.'''
 
@@ -53,6 +64,13 @@ class _PerspectiveDateValidator(object):
         if obj is None:
             return obj
 
+        if isinstance(obj, (int, float)):
+            obj = datetime.fromtimestamp(_normalize_timestamp(obj) / 1000)
+
+        if six.PY2:
+            if isinstance(obj, (long)):
+                obj = datetime.fromtimestamp(long(obj))
+
         if isinstance(obj, numpy.datetime64):
             if str(obj) == "NaT":
                 return None
@@ -74,6 +92,10 @@ class _PerspectiveDateValidator(object):
         '''
         if obj is None:
             return obj
+
+        if obj.__class__.__name__ == "date":
+            # handle updating datetime with date object
+            obj = datetime(obj.year, obj.month, obj.day)
 
         if isinstance(obj, Period):
             # extract the start of the Period
@@ -104,14 +126,7 @@ class _PerspectiveDateValidator(object):
                 return round(obj / 1000000)
 
         if isinstance(obj, (int, float)):
-            # figure out whether the timestamp is in seconds or milliseconds
-            try:
-                # if it overflows, it's milliseconds - otherwise convert from seconds to milliseconds.
-                datetime.fromtimestamp(obj)
-                return int(obj * 1000)
-            except (ValueError, OverflowError):
-                # milliseconds
-                return int(obj)
+            return _normalize_timestamp(obj)
 
         # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
         return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)

@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import numpy as np
+from datetime import date
 from math import trunc
 from ._constants import COLUMN_SEPARATOR_STRING
 
@@ -27,6 +28,7 @@ def _mod(a, b):
 
 
 def to_format(options, view, output_format):
+    schema = view.schema()
     options, column_names, data_slice = _to_format_helper(view, options)
 
     if output_format == 'records':
@@ -69,6 +71,8 @@ def to_format(options, view, output_format):
                     data[name] = []
                 if view._sides == 0:
                     value = get_from_data_slice_zero(data_slice, ridx, cidx)
+                    if value is not None and schema[name] == date:
+                        value = date(value.year, value.month, value.day)
                 elif view._sides == 1:
                     value = get_from_data_slice_one(data_slice, ridx, cidx)
                 else:

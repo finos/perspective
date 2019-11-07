@@ -17,13 +17,6 @@ from faker import Faker
 fake = Faker()
 
 
-def _to_timestamp(obj):
-    if six.PY2:
-        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0))
-    else:
-        return obj.timestamp()
-
-
 def superstore(count=10):
     data = []
     for id in range(count):
@@ -172,7 +165,7 @@ class TestTablePandas(object):
             "a": date
         })
         table.update(df)
-        assert table.view().to_dict()["a"] == [datetime(2019, 8, 15, 0, 0), None, datetime(2019, 8, 16, 0, 0)]
+        assert table.view().to_dict()["a"] == [date(2019, 8, 15), None, date(2019, 8, 16)]
 
     def test_table_pandas_from_schema_datetime(self):
         data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
@@ -185,8 +178,8 @@ class TestTablePandas(object):
         table.update(df)
         assert table.view().to_dict()["a"] == data
 
-    def test_table_pandas_from_schema_datetime_timestamp_s(self):
-        data = [_to_timestamp(datetime(2019, 7, 11, 12, 30, 5)), np.nan, _to_timestamp(datetime(2019, 7, 11, 13, 30, 5)), np.nan]
+    def test_table_pandas_from_schema_datetime_timestamp_s(self, util):
+        data = [util.to_timestamp(datetime(2019, 7, 11, 12, 30, 5)), np.nan, util.to_timestamp(datetime(2019, 7, 11, 13, 30, 5)), np.nan]
         df = pd.DataFrame({
             "a": data
         })
@@ -201,11 +194,11 @@ class TestTablePandas(object):
             None
         ]
 
-    def test_table_pandas_from_schema_datetime_timestamp_ms(self):
+    def test_table_pandas_from_schema_datetime_timestamp_ms(self, util):
         data = [
-            _to_timestamp(datetime(2019, 7, 11, 12, 30, 5)) * 1000,
+            util.to_timestamp(datetime(2019, 7, 11, 12, 30, 5)) * 1000,
             np.nan,
-            _to_timestamp(datetime(2019, 7, 11, 13, 30, 5)) * 1000,
+            util.to_timestamp(datetime(2019, 7, 11, 13, 30, 5)) * 1000,
             np.nan
         ]
 
@@ -348,7 +341,7 @@ class TestTablePandas(object):
             "index": int,
             "a": date
         }
-        assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 0, 0), datetime(2019, 7, 12, 0, 0), None]
+        assert table.view().to_dict()["a"] == [date(2019, 7, 11), date(2019, 7, 12), None]
 
     def test_table_pandas_object_to_datetime(self):
         df = pd.DataFrame({
@@ -436,22 +429,22 @@ class TestTablePandas(object):
         }
 
         assert table.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 0, 0)]
+            "a": [date(2019, 7, 11)]
         }
 
     def test_table_pandas_update_datetime_schema_with_date(self):
         df = pd.DataFrame({
-            "a": np.array([datetime(2019, 7, 11, 11, 12, 30)])
+            "a": np.array([date(2019, 7, 11)])
         })
 
         table = Table({
-            "a": date
+            "a": datetime
         })
 
         table.update(df)
 
         assert table.schema() == {
-            "a": date
+            "a": datetime
         }
 
         assert table.view().to_dict() == {
