@@ -21,11 +21,8 @@ except ImportError:
 
 def _flatten_structure(array):
     '''Flatten numpy.recarray or structured arrays into a dict.'''
-    if six.PY2:
-        # recarrays/structured arrays have weird bit offsets in py2 - make a copy of the array to fix
-        columns = [numpy.copy(array[col]) for col in array.dtype.names]
-    else:
-        columns = [array[col] for col in array.dtype.names]
+    # recarrays/structured arrays do not have guaranteed bit offsets - make a copy of the array to fix
+    columns = [numpy.copy(array[col]) for col in array.dtype.names]
     return dict(zip(array.dtype.names, columns))
 
 
