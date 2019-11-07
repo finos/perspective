@@ -22,7 +22,7 @@ def deconstruct_numpy(array):
     Returns:
         dict : `array` is the original array, and `mask` is an array of booleans where `True` represents a nan/None value.
     '''
-    is_object_or_string = pd.api.types.is_object_dtype(array.dtype) or pd.api.types.is_string_dtype(array.dtype)
+    is_object_or_string = array.dtype.type is np.string_ or array.dtype.type is np.object_
 
     # use `isnull` or `isnan` depending on dtype
     if is_object_or_string or six.PY2:
