@@ -300,12 +300,11 @@ class TestToFormat(object):
 
     def test_to_numpy_date(self):
         today = date.today()
-        dt = datetime(today.year, today.month, today.day)
-        data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
+        data = [{"a": today, "b": 2}, {"a": today, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
         v = view.to_numpy()
-        assert np.array_equal(v["a"], np.array([dt, dt]))
+        assert np.array_equal(v["a"], np.array([today, today]))
 
     def test_to_numpy_datetime(self):
         dt = datetime(2019, 3, 15, 20, 30, 59, 6000)

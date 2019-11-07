@@ -38,7 +38,6 @@ def deconstruct_numpy(array):
         # bool => byte
         data = data.astype("b", copy=False)
     elif np.issubdtype(data.dtype, np.datetime64):
-
         # treat days/weeks/months/years as datetime objects - avoid idiosyncracy with days of month, etc.
         if data.dtype in DATE_DTYPES:
             data = data.astype(datetime)
