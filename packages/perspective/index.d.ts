@@ -141,7 +141,7 @@ declare module '@finos/perspective' {
 
     export type Client = {
         open_table(name: string): Table,
-        open_view(name): View,
+        open_view(name: string): View,
     }
 
     type perspective = {
