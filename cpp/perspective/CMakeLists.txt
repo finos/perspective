@@ -15,6 +15,8 @@ set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
+else()
+    set(WIN32 OFF)
 endif()
 
 
@@ -322,7 +324,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
 			message(WARNING "${Cyan}PyArrow found: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
-			if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+            if (NOT WIN32)
 				message(WARNING "${Cyan}Using pre-built libarrow from: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
 			endif()
 		endif()
@@ -338,7 +340,7 @@ psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
 # For all non-MacOS builds, or if building WASM/CPP, build minimal arrow from source
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR NOT PSP_PYTHON_BUILD)
+if (WIN32 OR NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
@@ -361,6 +363,10 @@ set(CMAKE_C_FLAGS " \
 	${EXTENDED_FLAGS} \
 	${OPT_FLAGS} \
 	")
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++1y")
+endif()
 
 set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/aggregate.cpp
@@ -476,7 +482,7 @@ if (PSP_WASM_BUILD)
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    if(NOT WIN32)
 		# Look for the binary using @loader_path (relative to binary location) instead of @rpath
 		# and include arrow in @rpath so it can be found by libbinding/libpsp
 		set(PSP_INSTALL_PATH "@loader_path" ${PYTHON_PYARROW_LIBRARY_DIR})
