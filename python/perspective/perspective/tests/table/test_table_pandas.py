@@ -90,7 +90,7 @@ class TestTablePandas(object):
         assert data["b"].tolist() == [1.5, None, 2.5, None]
 
     def test_table_date_series(self, util):
-        data = util.make_date_series()
+        data = util.make_series(freq="D")
         tbl = Table(data)
         assert tbl.size() == 10
         assert tbl.schema() == {
@@ -111,7 +111,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_time_series(self, util):
-        data = util.make_time_series()
+        data = util.make_series(freq="H")
         tbl = Table(data)
         assert tbl.size() == 10
         assert tbl.schema() == {
@@ -132,7 +132,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_dataframe_infer_date(self, util):
-        data = util.make_date_dataframe()
+        data = util.make_dataframe(freq="M")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -158,7 +158,7 @@ class TestTablePandas(object):
         ]
 
     def test_table_dataframe_infer_time(self, util):
-        data = util.make_time_dataframe()
+        data = util.make_dataframe(freq="H")
 
         tbl = Table(data)
         assert tbl.size() == 10
@@ -181,6 +181,73 @@ class TestTablePandas(object):
             datetime(2000, 1, 1, 7, 0, 0),
             datetime(2000, 1, 1, 8, 0, 0),
             datetime(2000, 1, 1, 9, 0, 0)
+        ]
+
+    def test_table_dataframe_year_start_index(self, util):
+        data = util.make_dataframe(freq="AS")
+
+        tbl = Table(data)
+        assert tbl.size() == 10
+        assert tbl.schema() == {
+            "index": date,
+            "a": float,
+            "b": float,
+            "c": float,
+            "d": float
+        }
+
+        assert tbl.view().to_dict()["index"] == [
+            datetime(2000, 1, 1, 0, 0, 0),
+            datetime(2001, 1, 1, 0, 0, 0),
+            datetime(2002, 1, 1, 0, 0, 0),
+            datetime(2003, 1, 1, 0, 0, 0),
+            datetime(2004, 1, 1, 0, 0, 0),
+            datetime(2005, 1, 1, 0, 0, 0),
+            datetime(2006, 1, 1, 0, 0, 0),
+            datetime(2007, 1, 1, 0, 0, 0),
+            datetime(2008, 1, 1, 0, 0, 0),
+            datetime(2009, 1, 1, 0, 0, 0)
+        ]
+
+    def test_table_dataframe_quarter_index(self, util):
+        data = util.make_dataframe(size=4, freq="Q")
+
+        tbl = Table(data)
+        assert tbl.size() == 4
+        assert tbl.schema() == {
+            "index": date,
+            "a": float,
+            "b": float,
+            "c": float,
+            "d": float
+        }
+
+        assert tbl.view().to_dict()["index"] == [
+            datetime(2000, 3, 31, 0, 0, 0),
+            datetime(2000, 6, 30, 0, 0, 0),
+            datetime(2000, 9, 30, 0, 0, 0),
+            datetime(2000, 12, 31, 0, 0, 0)
+        ]
+
+    def test_table_dataframe_minute_index(self, util):
+        data = util.make_dataframe(size=5, freq="min")
+
+        tbl = Table(data)
+        assert tbl.size() == 5
+        assert tbl.schema() == {
+            "index": datetime,
+            "a": float,
+            "b": float,
+            "c": float,
+            "d": float
+        }
+
+        assert tbl.view().to_dict()["index"] == [
+            datetime(2000, 1, 1, 0, 0),
+            datetime(2000, 1, 1, 0, 1),
+            datetime(2000, 1, 1, 0, 2),
+            datetime(2000, 1, 1, 0, 3),
+            datetime(2000, 1, 1, 0, 4)
         ]
 
     def test_table_pandas_periodindex(self, util):

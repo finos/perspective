@@ -50,13 +50,8 @@ class Util:
             return -1
 
     @staticmethod
-    def make_time_dataframe(size=10):
-        index = _make_date_time_index(size, "H")
-        return _make_dataframe(index, size)
-
-    @staticmethod
-    def make_date_dataframe(size=10):
-        index = _make_date_time_index(size, "M")
+    def make_dataframe(size=10, freq="D"):
+        index = _make_date_time_index(size, freq)
         return _make_dataframe(index, size)
 
     @staticmethod
@@ -65,13 +60,8 @@ class Util:
         return _make_dataframe(index, size)
 
     @staticmethod
-    def make_date_series(size=10):
-        index = _make_date_time_index(size, "D")
-        return pd.Series(data=np.random.rand(size), index=index)
-
-    @staticmethod
-    def make_time_series(size=10):
-        index = _make_date_time_index(size, "H")
+    def make_series(size=10, freq="D"):
+        index = _make_date_time_index(size, freq)
         return pd.Series(data=np.random.rand(size), index=index)
 
 

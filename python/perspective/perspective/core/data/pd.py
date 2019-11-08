@@ -25,23 +25,24 @@ def _parse_datetime_index(index):
     if index.freq is None:
         return np.dtype("datetime64[ns]")
 
-    freq = str(index.freq)
+    freq = str(index.freq).lower()
     new_type = None
 
-    if "B" in freq or "D" in freq or freq == "SM":
+    if any(s in freq for s in ["businessday", "day"]) or freq == "sm" or freq == "sms":
         # days
         new_type = "D"
-    elif "W" in freq:
+    elif freq == "w" or "week" in freq:
         # weeks
         new_type = "W"
-    elif "Q" in freq or "M" in freq:
+    elif any(s in freq for s in ["month", "quarter"]):
         # months
         new_type = "M"
-    elif "Y" in freq or freq == "A":
+    elif "year" in freq or freq == "a":
         new_type = "Y"
     else:
         # default to datetime
         new_type = "ns"
+
     return np.dtype("datetime64[{0}]".format(new_type))
 
 
