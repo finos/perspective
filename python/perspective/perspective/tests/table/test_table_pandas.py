@@ -89,6 +89,49 @@ class TestTablePandas(object):
         assert data["a"].tolist() == [None, 1, None, 2]
         assert data["b"].tolist() == [1.5, None, 2.5, None]
 
+    def test_table_date_series(self, util):
+        data = util.make_date_series()
+        tbl = Table(data)
+        assert tbl.size() == 10
+        assert tbl.schema() == {
+            "index": date,
+            "0": float
+        }
+        assert tbl.view().to_dict()["index"] == [
+            datetime(2000, 1, 1),
+            datetime(2000, 1, 2),
+            datetime(2000, 1, 3),
+            datetime(2000, 1, 4),
+            datetime(2000, 1, 5),
+            datetime(2000, 1, 6),
+            datetime(2000, 1, 7),
+            datetime(2000, 1, 8),
+            datetime(2000, 1, 9),
+            datetime(2000, 1, 10)
+        ]
+
+    @mark.skip
+    def test_table_time_series(self, util):
+        data = util.make_time_series()
+        tbl = Table(data)
+        assert tbl.size() == 10
+        assert tbl.schema() == {
+            "index": date,
+            "0": float
+        }
+        assert tbl.view().to_dict()["index"] == [
+            datetime(2000, 1, 1, 0, 0, 0),
+            datetime(2000, 1, 1, 1, 0, 0),
+            datetime(2000, 1, 1, 2, 0, 0),
+            datetime(2000, 1, 1, 3, 0, 0),
+            datetime(2000, 1, 1, 4, 0, 0),
+            datetime(2000, 1, 1, 5, 0, 0),
+            datetime(2000, 1, 1, 6, 0, 0),
+            datetime(2000, 1, 1, 7, 0, 0),
+            datetime(2000, 1, 1, 8, 0, 0),
+            datetime(2000, 1, 1, 9, 0, 0)
+        ]
+
     def test_table_dataframe_infer_date(self, util):
         data = util.make_date_dataframe()
 

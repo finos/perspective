@@ -64,6 +64,16 @@ class Util:
         index = _make_period_index(size, "M")
         return _make_dataframe(index, size)
 
+    @staticmethod
+    def make_date_series(size=10):
+        index = _make_date_time_index(size, "D")
+        return pd.Series(data=np.random.rand(size), index=index)
+
+    @staticmethod
+    def make_time_series(size=10):
+        index = _make_date_time_index(size, "H")
+        return pd.Series(data=np.random.rand(size), index=index)
+
 
 class Sentinel(object):
     '''Generic sentinel class for testing side-effectful code in Python 2 and 3.'''

@@ -8,7 +8,9 @@
 #
 import six
 import sys
+from pytest import raises
 from perspective.table import Table
+from perspective.core.exception import PerspectiveError
 from datetime import date, datetime
 
 try:
@@ -32,6 +34,14 @@ class TestTable(object):
             "a": int,
             "b": int
         }
+
+    def test_table_int_column_names(self):
+        data = {
+            "a": [1, 2, 3],
+            0: [4, 5, 6]
+        }
+        with raises(PerspectiveError):
+            Table(data)
 
     def test_table_int_overflow(self):
         if six.PY2:

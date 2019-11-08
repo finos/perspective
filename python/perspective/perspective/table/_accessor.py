@@ -96,6 +96,11 @@ class _PerspectiveAccessor(object):
         elif isinstance(self._data_or_schema, dict):
             self._names = list(self._data_or_schema.keys())
 
+        for name in self._names:
+            if not isinstance(name, str):
+                raise PerspectiveError(
+                    "Column names should be strings, not type `{0}`".format(type(name).__name__))
+
         self._types = []
 
     def data(self):

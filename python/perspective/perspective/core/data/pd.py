@@ -53,6 +53,9 @@ def deconstruct_pandas(data):
             # preserve name from series
             flattened.name = data.name
 
+            # make sure all columns are strings
+            flattened.columns = [str(c) for c in flattened.columns]
+
         # use explicit index column as primary key
         kwargs["index"] = "index"
         data = flattened
