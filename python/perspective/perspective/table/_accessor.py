@@ -97,12 +97,8 @@ class _PerspectiveAccessor(object):
         self._types = []
 
         # Verify that column names are strings, and that numpy arrays are of type `ndarray`
-        if six.PY2:
-            valid_name_types = (str, unicode)  # noqa: F821
-        else:
-            valid_name_types = (str)
         for name in self._names:
-            if not isinstance(name, valid_name_types):
+            if not isinstance(name, six.string_types):
                 raise PerspectiveError(
                     "Column names should be strings, not type `{0}`".format(type(name).__name__))
             if self._is_numpy:
