@@ -10,12 +10,14 @@ import {toArray} from "@phosphor/algorithm";
 
 export interface PerspectiveWorkspaceOptions {
     node?: HTMLElement;
+    side?: "left" | "right";
 }
 
 export class PerspectiveWorkspace extends SplitPanel {
     private dockpanel: PerspectiveDockPanel;
     private masterpanel: SplitPanel;
     private commands: CommandRegistry;
+    private side: string;
 
     constructor(options: PerspectiveWorkspaceOptions = {}) {
         super({orientation: "horizontal"});
@@ -25,7 +27,10 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.addWidget(this.dockpanel);
         this.commands = this.createCommands();
         this.dockpanel.onContextMenu.connect(this.showContextMenu.bind(this));
-        options.node && Widget.attach(this, options.node);
+        this.side = options.side || "left";
+        if (options.node) {
+            Widget.attach(this, options.node);
+        }
     }
 
     addViewer(widget: PerspectiveWidget, options: DockLayout.IAddOptions): void {
@@ -81,9 +86,15 @@ export class PerspectiveWorkspace extends SplitPanel {
 
         if (this.masterpanel.widgets.length === 0) {
             this.dockpanel.close();
-            this.addWidget(this.masterpanel);
-            this.addWidget(this.dockpanel);
-            this.setRelativeSizes([1, 3]);
+            if (this.side === "left") {
+                this.addWidget(this.masterpanel);
+                this.addWidget(this.dockpanel);
+                this.setRelativeSizes([1, 3]);
+            } else {
+                this.addWidget(this.dockpanel);
+                this.addWidget(this.masterpanel);
+                this.setRelativeSizes([3, 1]);
+            }
         }
 
         this.masterpanel.addWidget(widget);
