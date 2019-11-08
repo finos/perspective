@@ -110,13 +110,12 @@ class TestTablePandas(object):
             datetime(2000, 1, 10)
         ]
 
-    @mark.skip
     def test_table_time_series(self, util):
         data = util.make_time_series()
         tbl = Table(data)
         assert tbl.size() == 10
         assert tbl.schema() == {
-            "index": date,
+            "index": datetime,
             "0": float
         }
         assert tbl.view().to_dict()["index"] == [
@@ -158,15 +157,13 @@ class TestTablePandas(object):
             datetime(2000, 10, 31)
         ]
 
-    @mark.skip
     def test_table_dataframe_infer_time(self, util):
-        # need to add in proper sampling for this functionality to work
         data = util.make_time_dataframe()
 
         tbl = Table(data)
         assert tbl.size() == 10
         assert tbl.schema() == {
-            "index": date,
+            "index": datetime,
             "a": float,
             "b": float,
             "c": float,
@@ -213,13 +210,13 @@ class TestTablePandas(object):
         assert tbl.size() == 4
         assert tbl.schema() == {
             "index": int,
-            "a": date
+            "a": datetime
         }
         assert tbl.view().to_dict()["a"] == [
-            datetime(2019, 3, 31),
-            datetime(2019, 6, 30),
-            datetime(2019, 9, 30),
-            datetime(2019, 12, 31),
+            datetime(2019, 1, 1),
+            datetime(2019, 4, 1),
+            datetime(2019, 7, 1),
+            datetime(2019, 10, 1),
         ]
 
     def test_table_pandas_from_schema_int(self):

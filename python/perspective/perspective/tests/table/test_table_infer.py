@@ -45,7 +45,14 @@ class TestTableInfer(object):
         assert tbl.schema() == {"a": str}
 
     def test_table_infer_date_from_datetime(self):
+        # inferrence on non-pandas datasets defaults to datetime
         data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11)]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": datetime}
+
+    def test_table_infer_date_from_date(self):
+        # pass in a `date` to make sure it infers as date
+        data = {"a": [None, None, None, None, None, None, date(2019, 7, 11)]}
         tbl = Table(data)
         assert tbl.schema() == {"a": date}
 

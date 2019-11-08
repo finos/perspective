@@ -5,11 +5,48 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import numpy as np
+import pandas as pd
+
+
+def _parse_datetime_index(index):
+    '''Given an instance of `pandas.DatetimeIndex`, parse its `freq` and return a `numpy.dtype`
+    that corresponds to the unit it should be parsed in.
+
+    Because Pandas DataFrames cannot store datetimes in anything other than `datetime64[ns]`, we need
+    to examine the `DatetimeIndex` itself to understand what unit it needs to be parsed as.
+
+    Args:
+        index (pandas.DatetimeIndex)
+
+    Returns:
+        numpy.dtype : a datetime64 dtype with the correct units depending on `index.freq`.
+    '''
+    if index.freq is None:
+        return np.dtype("datetime64[ns]")
+
+    freq = str(index.freq)
+    new_type = None
+
+    if "B" in freq or "D" in freq or freq == "SM":
+        # days
+        new_type = "D"
+    elif "W" in freq:
+        # weeks
+        new_type = "W"
+    elif "Q" in freq or "M" in freq:
+        # months
+        new_type = "M"
+    elif "Y" in freq or freq == "A":
+        new_type = "Y"
+    else:
+        # default to datetime
+        new_type = "ns"
+    return np.dtype("datetime64[{0}]".format(new_type))
 
 
 def deconstruct_pandas(data):
     '''Remove pivots from the passed-in dataframe.'''
-    import pandas as pd
     kwargs = {}
 
     # level unstacking
@@ -56,8 +93,6 @@ def deconstruct_pandas(data):
             # make sure all columns are strings
             flattened.columns = [str(c) for c in flattened.columns]
 
-        # use explicit index column as primary key
-        kwargs["index"] = "index"
         data = flattened
 
     return data, kwargs

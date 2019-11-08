@@ -92,49 +92,6 @@ infer_type(t_val x, t_val date_validator) {
         }
     } else {
         t = type_string_to_t_dtype(type_string);
-
-        if (t == t_dtype::DTYPE_TIME) {
-            std::int32_t hour = 0;
-            std::int32_t minute = 0;
-            std::int32_t second = 0;
-            std::int32_t microsecond = 0;
-
-            if (type_string == "datetime64") {
-                // datetime64 API is a little more opaque - get an integer first
-                t_val ts = date_validator.attr("to_timestamp")(x);
-
-                if (ts.is_none()) {
-                    return t;
-                }
-
-                // Create a time point from the unix timestamp
-                auto _ms = std::chrono::milliseconds(ts.cast<std::int64_t>());
-                auto _tp = std::chrono::time_point<std::chrono::system_clock>(_ms);
-
-                // Subtract y/m/d from the datetime to return a std::chrono::time_of_day object
-                auto datetime = date::floor<std::chrono::milliseconds>(_tp);
-                auto days = date::floor<date::days>(datetime);
-                auto time = date::make_time(datetime - days);
-
-                hour = time.hours().count();
-                minute = time.minutes().count();
-                second = time.seconds().count();
-                microsecond = time.subseconds().count();   
-            } else {
-                // Use datetime/Timestamp API to get values
-                hour = x.attr("hour").cast<std::int32_t>();
-                minute = x.attr("minute").cast<std::int32_t>();
-                second = x.attr("second").cast<std::int32_t>();
-
-                if (type_string != "Period") {
-                    microsecond = x.attr("microsecond").cast<std::int32_t>();
-                }
-            }
-
-            if (hour == 0 && minute == 0 && second == 0 && microsecond == 0) {
-                return t_dtype::DTYPE_DATE;
-            }
-        }
     }
 
     return t;
