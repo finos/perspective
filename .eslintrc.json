@@ -17,6 +17,17 @@
         "sourceType": "module",
         "experimentalObjectRestSpread": true
     },
+    "overrides": [{
+        "files": ["*.ts", "*.tsx"],
+        "plugins": [
+            "prettier",
+            "@typescript-eslint/eslint-plugin"
+        ],
+        "parser": "@typescript-eslint/parser",
+        "extends":  [
+            "plugin:@typescript-eslint/recommended"
+        ]
+    }],
     "rules": {
         "prettier/prettier": ["error", {
             "printWidth": 200,
