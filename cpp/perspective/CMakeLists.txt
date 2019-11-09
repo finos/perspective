@@ -487,7 +487,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# and include arrow in @rpath so it can be found by libbinding/libpsp
 		set(PSP_INSTALL_PATH "@loader_path" ${PYTHON_PYARROW_LIBRARY_DIR})
 		set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-		set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		    set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
+        endif()
 	endif()
 
 	if(PSP_PYTHON_BUILD)
@@ -510,7 +512,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 			target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
 		endif()
-
+        include_directories(/usr/local/include/python3.7m)
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
 
