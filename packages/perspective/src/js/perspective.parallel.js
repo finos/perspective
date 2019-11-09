@@ -124,13 +124,13 @@ class WebWorkerClient extends Client {
  * If the message has a transferable asset, set the `pending_arrow` flag to tell the worker the next message is an ArrayBuffer.
  */
 class WebSocketClient extends Client {
-    constructor(url, autoreconnect=true, reconnectInterval=1000) {
+    constructor(url, autoreconnect = true, reconnectInterval = 1000) {
         super();
 
         // function to construct a new websocket
         // and plug in to perspective
-        // 
-        // standalone function so that we can 
+        //
+        // standalone function so that we can
         // completely reconstruct on disconnect/reconnect
         const open = async () => {
             this._ws = new WebSocket(url);
@@ -138,7 +138,7 @@ class WebSocketClient extends Client {
 
             this._ws.onopen = () => {
                 this.send({id: -1, cmd: "init"});
-            }
+            };
 
             const heartbeat = () => {
                 this._ws.send("heartbeat");
@@ -171,29 +171,30 @@ class WebSocketClient extends Client {
 
             // on disconnect, rebuild websocket
             this._ws.onerror = async e => {
-                switch (e.code){
-                case 'ECONNREFUSED':
-                    if (autoreconnect){
-                        await new Promise(resolve => setTimeout(resolve, reconnectInterval));
-                        open();
-                    }
-                    break;
-                default:
-                    break;
+                switch (e.code) {
+                    case "ECONNREFUSED":
+                        if (autoreconnect) {
+                            await new Promise(resolve => setTimeout(resolve, reconnectInterval));
+                            open();
+                        }
+                        break;
+                    default:
+                        break;
                 }
             };
 
             // on abnormal closure, rebuild websocket
             this._ws.onclose = async e => {
-                switch (e.code){
-                case 1000:    // CLOSE_NORMAL
-                    break;
-                default:    // Abnormal closure
-                    if (autoreconnect){
-                        await new Promise(resolve => setTimeout(resolve, reconnectInterval));
-                        open();
-                    }
-                    break;
+                switch (e.code) {
+                    case 1000: // CLOSE_NORMAL
+                        break;
+                    default:
+                        // Abnormal closure
+                        if (autoreconnect) {
+                            await new Promise(resolve => setTimeout(resolve, reconnectInterval));
+                            open();
+                        }
+                        break;
                 }
             };
         };
