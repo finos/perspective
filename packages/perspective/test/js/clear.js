@@ -51,5 +51,18 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("Preserves sort order with 2-sided pivot", async function() {
+            const input = [{x: 1, y: 7, z: "a"}, {x: 1, y: 6, z: "b"}, {x: 2, y: 5, z: "a"}, {x: 2, y: 4, z: "b"}, {x: 3, y: 3, z: "a"}, {x: 3, y: 2, z: "b"}];
+            const table = perspective.table(input);
+            const view = table.view({row_pivots: ["z"], column_pivots: ["x"], sort: [["y", "asc"]], columns: ["y"]});
+            setTimeout(() => table.replace(input));
+            let json = await view.to_json();
+            await new Promise(setTimeout);
+            let json2 = await view.to_json();
+            expect(json).toEqual(json2);
+            view.delete();
+            table.delete();
+        });
     });
 };

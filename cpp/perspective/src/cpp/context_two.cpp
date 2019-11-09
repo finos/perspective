@@ -892,6 +892,9 @@ t_ctx2::notify(const t_data_table& flattened) {
                 std::vector<t_sortspec>(), flattened, m_config, *m_state);
         }
     }
+     if (!m_sortby.empty()) {
+        sort_by(m_sortby);
+    }
 }
 
 void
