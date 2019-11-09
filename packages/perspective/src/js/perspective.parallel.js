@@ -124,39 +124,82 @@ class WebWorkerClient extends Client {
  * If the message has a transferable asset, set the `pending_arrow` flag to tell the worker the next message is an ArrayBuffer.
  */
 class WebSocketClient extends Client {
-    constructor(url) {
+    constructor(url, autoreconnect=true, reconnectInterval=1000) {
         super();
-        this._ws = new WebSocket(url);
-        this._ws.binaryType = "arraybuffer";
-        this._ws.onopen = () => {
-            this.send({id: -1, cmd: "init"});
-        };
-        const heartbeat = () => {
-            this._ws.send("heartbeat");
-            setTimeout(heartbeat, HEARTBEAT_TIMEOUT);
-        };
-        setTimeout(heartbeat, 15000);
-        this._ws.onmessage = msg => {
-            if (msg.data === "heartbeat") {
-                return;
-            }
-            if (this._pending_arrow) {
-                this._handle({data: {id: this._pending_arrow, data: msg.data}});
-                delete this._pending_arrow;
-            } else {
-                msg = JSON.parse(msg.data);
 
-                // If the `is_transferable` flag is set, the worker expects the
-                // next message to be a transferable object.
-                // This sets the `_pending_arrow` flag, which triggers a special
-                // handler for the ArrayBuffer containing arrow data.
-                if (msg.is_transferable) {
-                    this._pending_arrow = msg.id;
-                } else {
-                    this._handle({data: msg});
-                }
+        // function to construct a new websocket
+        // and plug in to perspective
+        // 
+        // standalone function so that we can 
+        // completely reconstruct on disconnect/reconnect
+        const open = async () => {
+            this._ws = new WebSocket(url);
+            this._ws.binaryType = "arraybuffer";
+
+            this._ws.onopen = () => {
+                this.send({id: -1, cmd: "init"});
             }
+
+            const heartbeat = () => {
+                this._ws.send("heartbeat");
+                setTimeout(heartbeat, HEARTBEAT_TIMEOUT);
+            };
+
+            setTimeout(heartbeat, 15000);
+
+            this._ws.onmessage = msg => {
+                if (msg.data === "heartbeat") {
+                    return;
+                }
+                if (this._pending_arrow) {
+                    this._handle({data: {id: this._pending_arrow, data: msg.data}});
+                    delete this._pending_arrow;
+                } else {
+                    msg = JSON.parse(msg.data);
+
+                    // If the `is_transferable` flag is set, the worker expects the
+                    // next message to be a transferable object.
+                    // This sets the `_pending_arrow` flag, which triggers a special
+                    // handler for the ArrayBuffer containing arrow data.
+                    if (msg.is_transferable) {
+                        this._pending_arrow = msg.id;
+                    } else {
+                        this._handle({data: msg});
+                    }
+                }
+            };
+
+            // on disconnect, rebuild websocket
+            this._ws.onerror = async e => {
+                switch (e.code){
+                case 'ECONNREFUSED':
+                    if (autoreconnect){
+                        await new Promise(resolve => setTimeout(resolve, reconnectInterval));
+                        open();
+                    }
+                    break;
+                default:
+                    break;
+                }
+            };
+
+            // on abnormal closure, rebuild websocket
+            this._ws.onclose = async e => {
+                switch (e.code){
+                case 1000:    // CLOSE_NORMAL
+                    break;
+                default:    // Abnormal closure
+                    if (autoreconnect){
+                        await new Promise(resolve => setTimeout(resolve, reconnectInterval));
+                        open();
+                    }
+                    break;
+                }
+            };
         };
+
+        // do initial construction in constructor
+        open();
     }
 
     send(msg) {
