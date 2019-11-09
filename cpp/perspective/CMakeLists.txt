@@ -15,8 +15,16 @@ set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
+    set(MACOS OFF)
+    set(LINUX OFF)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(WIN32 OFF)
+    set(MACOS ON)
+    set(LINUX OFF)
 else()
     set(WIN32 OFF)
+    set(MACOS OFF)
+    set(LINUX ON)
 endif()
 
 
@@ -194,9 +202,16 @@ if (PSP_WASM_BUILD)
 	set(CMAKE_RANLIB emranlib)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 	list(APPEND CMAKE_PREFIX_PATH /usr/local)
-	include_directories("/usr/local/Homebrew/include")
-	include_directories("/usr/local/include" SYSTEM)
+
+    if(MACOS)
+        # use standard /usr/local homebrew install on mac
+	    include_directories("/usr/local/include" SYSTEM)
+    endif()
+
+    # Include this docker-only directory
 	include_directories("/boost_includes")
+    
+    # bundle rapidjson for wasm build
 	psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 
 	set(EXTENDED_FLAGS " \
@@ -292,13 +307,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package( Python ${PSP_PYTHON_VERSION} REQUIRED Interpreter Development )
 		include_directories( ${Python_INCLUDE_DIRS} )
 
+        # already found from before
 		find_package(Boost)
-		if(NOT Boost_FOUND)
-			message("${Red}Boost could not be located${ColorReset}")
-		else()
-			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
-		endif()
-		include_directories( ${Boost_INCLUDE_DIRS} )
 
 		find_package(pybind11)
 		if(NOT pybind11_FOUND)
@@ -330,7 +340,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
 		link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
-
 		#####################
 	endif()
 endif()
@@ -339,7 +348,7 @@ psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
-# For all non-MacOS builds, or if building WASM/CPP, build minimal arrow from source
+# For all non-MacOS and non-linux builds, or if building WASM/CPP, build minimal arrow from source
 if (WIN32 OR NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
@@ -501,18 +510,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories(${PSP_PYTHON_SRC}/include)
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 
-		# On MacOS, link against libarrow 0.15.0 in pyarrow directory
-		# This does not work for Linux or Windows - prebuilt binaries for Linux must be backward compatible with GCC 4.8,
-		# which means they use the old ABI: https://github.com/blue-yonder/turbodbc/issues/102#issuecomment-312222949
-		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
-			set_target_properties(psp PROPERTIES INSTALL_RPATH "${PSP_INSTALL_PATH}")
-		else()
+        # Link against libarrow 0.15.0 in pyarrow directory for linux and windows
+        if (WIN32)
 			target_link_libraries(psp arrow)
 			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 			target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
+		else()
+			target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
+			set_target_properties(psp PROPERTIES INSTALL_RPATH "${PSP_INSTALL_PATH}")
 		endif()
-        include_directories(/usr/local/include/python3.7m)
+
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
 
@@ -525,7 +532,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
 
-		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        if (MACOS)
 			# Add custom @rpath to binding
 			set_target_properties(binding PROPERTIES INSTALL_RPATH "${PSP_INSTALL_PATH}")
 		else()
