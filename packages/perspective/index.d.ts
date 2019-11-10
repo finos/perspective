@@ -139,6 +139,11 @@ declare module '@finos/perspective' {
     }
 
 
+    export type Client = {
+        open_table(name: string): Table,
+        open_view(name: string): View,
+    }
+
     type perspective = {
         TYPE_AGGREGATES: ValuesByType,
         TYPE_FILTERS: ValuesByType,
@@ -146,6 +151,7 @@ declare module '@finos/perspective' {
         table(data_or_schema : TableData | Schema, options: TableOptions): Table,
         worker(): PerspectiveWorker,
         shared_worker(): PerspectiveWorker,
+        websocket(url: string): Client;
         override: (x: any) => void
     }
 
