@@ -1,12 +1,12 @@
-import {SplitPanel, DockLayout} from "@phosphor/widgets";
-import {PerspectiveDockPanel, ContextMenuArgs} from "./dockpanel";
-import {PerspectiveWidget} from "./widget";
-import {mapWidgets} from "./utils";
+import {SplitPanel, DockLayout, Widget} from "@phosphor/widgets";
+import {PerspectiveDockPanel, ContextMenuArgs} from "../dockpanel/dockpanel";
 import {uniqBy} from "lodash";
 import {Menu} from "@phosphor/widgets";
-import {createCommands} from "./contextmenu";
+import {createCommands} from "../dockpanel/contextmenu";
 import {CommandRegistry} from "@phosphor/commands";
 import PerspectiveViewer from "@finos/perspective-viewer";
+import {PerspectiveWidget} from "../widget";
+import {toArray} from "@phosphor/algorithm";
 
 export interface PerspectiveWorkspaceOptions {
     node?: HTMLElement;
@@ -17,7 +17,7 @@ export class PerspectiveWorkspace extends SplitPanel {
     private masterpanel: SplitPanel;
     private commands: CommandRegistry;
 
-    constructor({}: PerspectiveWorkspaceOptions = {}) {
+    constructor(options: PerspectiveWorkspaceOptions = {}) {
         super({orientation: "horizontal"});
         this.dockpanel = new PerspectiveDockPanel("main", {enableContextMenu: false});
         this.masterpanel = new SplitPanel({orientation: "vertical"});
@@ -25,6 +25,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.addWidget(this.dockpanel);
         this.commands = this.createCommands();
         this.dockpanel.onContextMenu.connect(this.showContextMenu.bind(this));
+        options.node && Widget.attach(this, options.node);
     }
 
     addViewer(widget: PerspectiveWidget, options: DockLayout.IAddOptions): void {
@@ -54,7 +55,7 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     private filterWidget(candidates: Set<string>, filters: string[][]): void {
-        mapWidgets(async (widget: PerspectiveWidget): Promise<void> => {
+        toArray(this.dockpanel.widgets()).forEach(async (widget: PerspectiveWidget): Promise<void> => {
             const config = widget.save();
             const availableColumns = Object.keys(await (widget.table as any).schema());
             const currentFilters = config.filters || [];
@@ -88,7 +89,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.masterpanel.addWidget(widget);
         widget.viewer.restyleElement();
 
-        widget.node.addEventListener("perspective-click", this.onPerspectiveClick);
+        widget.viewer.addEventListener("perspective-click", this.onPerspectiveClick);
     }
 
     private makeDetail(widget: PerspectiveWidget): void {
@@ -104,7 +105,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
 
         widget.viewer.restyleElement();
-        widget.node.removeEventListener("perspective-click", this.onPerspectiveClick);
+        widget.viewer.removeEventListener("perspective-click", this.onPerspectiveClick);
     }
 
     private toggleMasterDetail(widget: PerspectiveWidget): void {

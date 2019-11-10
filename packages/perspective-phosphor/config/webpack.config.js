@@ -32,6 +32,6 @@ module.exports = {
     output: {
         filename: "index.js",
         libraryTarget: "commonjs",
-        path: path.resolve(__dirname, "dist/cjs")
+        path: path.resolve(__dirname, "../dist/cjs")
     }
 };
