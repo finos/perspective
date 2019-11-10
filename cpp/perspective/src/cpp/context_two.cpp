@@ -108,10 +108,10 @@ t_ctx2::open(t_header header, t_index idx) {
             return 0;
         m_row_depth_set = false;
         m_row_depth = 0;
-        if (m_row_sortby.empty()) {
+        if (m_sortby.empty()) {
             retval = m_rtraversal->expand_node(idx);
         } else {
-            retval = m_rtraversal->expand_node(m_row_sortby, idx);
+            retval = m_rtraversal->expand_node(m_sortby, idx);
         }
         m_rows_changed = (retval > 0);
     } else {
@@ -370,7 +370,7 @@ t_ctx2::notify(const t_data_table& flattened, const t_data_table& delta,
     for (t_uindex tree_idx = 0, loop_end = m_trees.size(); tree_idx < loop_end; ++tree_idx) {
         if (is_rtree_idx(tree_idx)) {
             notify_sparse_tree(rtree(), m_rtraversal, true, m_config.get_aggregates(),
-                m_config.get_sortby_pairs(), m_row_sortby, flattened, delta, prev, current,
+                m_config.get_sortby_pairs(), m_sortby, flattened, delta, prev, current,
                 transitions, existed, m_config, *m_state);
         } else if (is_ctree_idx(tree_idx)) {
             notify_sparse_tree(ctree(), m_ctraversal, true, m_config.get_aggregates(),
@@ -630,7 +630,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
             if (m_config.get_num_rpivots() == 0)
                 return;
             new_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
-            m_rtraversal->set_depth(m_row_sortby, new_depth);
+            m_rtraversal->set_depth(m_sortby, new_depth);
             m_row_depth = new_depth;
             m_row_depth_set = true;
         } break;
@@ -882,7 +882,7 @@ t_ctx2::notify(const t_data_table& flattened) {
     for (t_uindex tree_idx = 0, loop_end = m_trees.size(); tree_idx < loop_end; ++tree_idx) {
         if (is_rtree_idx(tree_idx)) {
             notify_sparse_tree(rtree(), m_rtraversal, true, m_config.get_aggregates(),
-                m_config.get_sortby_pairs(), m_row_sortby, flattened, m_config, *m_state);
+                m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_state);
         } else if (is_ctree_idx(tree_idx)) {
             notify_sparse_tree(ctree(), m_ctraversal, true, m_config.get_aggregates(),
                 m_config.get_sortby_pairs(), m_column_sortby, flattened, m_config, *m_state);
@@ -891,6 +891,9 @@ t_ctx2::notify(const t_data_table& flattened) {
                 m_config.get_aggregates(), m_config.get_sortby_pairs(),
                 std::vector<t_sortspec>(), flattened, m_config, *m_state);
         }
+    }
+     if (!m_sortby.empty()) {
+        sort_by(m_sortby);
     }
 }
 
