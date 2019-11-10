@@ -294,7 +294,8 @@ class View(object):
                 - end_col: defaults to the total columns in the view
                 - index: whether to return an implicit pkey for each row. Defaults to False
                 - leaves_only: whether to return only the data at the end of the tree. Defaults to False
-                - date_format: how `date` and `datetime` objects should be formatted in the CSV. Must be a valid date formatting string.
+                - date_format: how `datetime` objects should be formatted in the CSV. Formatting does not
+                    apply to `date` objects. Must be a valid date formatting string.
 
         Returns:
             str : a CSV-formatted string containing the serialized data.
