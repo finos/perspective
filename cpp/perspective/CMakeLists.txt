@@ -241,7 +241,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	#####################
 	if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		set(OPT_FLAGS " \
-			-O1 \
+			-O0 \
 			-g3 \
 			")
 	else()
