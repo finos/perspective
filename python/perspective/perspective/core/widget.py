@@ -5,10 +5,11 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import numpy
 import pandas
 import json
-from datetime import datetime
+from datetime import date, datetime
 from functools import partial, wraps
 from ipywidgets import Widget
 from traitlets import observe, Unicode
@@ -18,11 +19,39 @@ from .viewer import PerspectiveViewer
 from ..table import Table, is_libpsp
 
 
+def _type_to_string(t):
+    '''Convert a type object to a string representing a Perspective-supported type.
+
+    Redefine here as we can't have any dependencies on libbinding in client mode.
+    '''
+    if t in six.integer_types:
+        return "integer"
+    elif t is float:
+        return "float"
+    elif t is bool:
+        return "boolean"
+    elif t is date:
+        return "date"
+    elif t is datetime:
+        return "datetime"
+    elif t in six.string_types:
+        return "string"
+    else:
+        raise PerspectiveError(
+            "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str`.".format(str(t)))
+
+
 def _serialize(data):
     # Attempt to serialize data and pass it to the front-end as JSON
-    if isinstance(data, list) or isinstance(data, dict):
-        # grab reference to data if trivially serializable
+    if isinstance(data, list):
         return data
+    elif isinstance(data, dict):
+        for v in data.values():
+            # serialize schema values to string
+            if isinstance(v, type):
+                return {k: _type_to_string(data[k]) for k in data}
+            else:
+                return data
     elif isinstance(data, numpy.recarray):
         # flatten numpy record arrays
         columns = [data[col] for col in data.dtype.names]
