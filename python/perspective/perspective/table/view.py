@@ -13,6 +13,7 @@ from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
+from ._date_validator import _PerspectiveDateValidator
 
 try:
     from .libbinding import make_view_zero, make_view_one, make_view_two
@@ -37,7 +38,12 @@ class View(object):
         self._config = ViewConfig(**config)
         self._sides = self.sides()
 
-        date_validator = self._table._accessor._date_validator
+        date_validator = None
+        if hasattr(self._table._accessor, "_data_validator"):
+            date_validator = self._table._accessor._date_validator
+        else:
+            date_validator = _PerspectiveDateValidator()
+
         if self._sides == 0:
             self._view = make_view_zero(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
         elif self._sides == 1:
