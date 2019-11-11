@@ -34,11 +34,11 @@ def _type_to_string(t):
         return "date"
     elif t is datetime:
         return "datetime"
-    elif t in six.string_types:
+    elif t is six.binary_type or t is six.text_type:
         return "string"
     else:
         raise PerspectiveError(
-            "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str`.".format(str(t)))
+            "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(str(t)))
 
 
 def _serialize(data):
