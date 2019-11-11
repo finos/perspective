@@ -148,3 +148,4 @@ python/perspective/perspective/node/assets/*
 # sometimes created by mistake
 python/cmake
 python/cpp
+python/perspective/perspective_python.egg-info

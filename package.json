@@ -3,7 +3,8 @@
     "workspaces": [
         "packages/*",
         "examples/*",
-        "docs"
+        "docs",
+        "python/perspective"
     ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "0.4.0",
