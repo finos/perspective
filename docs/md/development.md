@@ -5,7 +5,7 @@ title: Developer Guide
 
 Thank you for your interest in contributing to Perspective!  This guide will
 teach you everything you need to know to get started hacking on the Perspective
-codebase.  If you're coming to this project as principally a Javascript
+codebase. If you're coming to this project as principally a Javascript
 developer, please be aware that Perspective is quite a bit more complex than
 a typical NPM package due to the mixed-language nature of the project;  we've
 done quite a bit to make sure the newcomer experience is as straightforward as
@@ -40,26 +40,58 @@ packages, e.g. `examples/simple` like so:
 yarn start simple
 ```
 
-For the WebAssembly compilation step, [Emscripten](https://github.com/kripken/emscripten)
-is required, which can has a few pre-requisites.
+### Docker
 
-### Building via Docker
+[Docker](https://docs.docker.com/install/) images with pre-built development environments are provided for the Javascript and Python libraries.
 
-For convenience, Perspective provides a Docker container for
-this.  To use it, you only need to install [Docker](https://docs.docker.com/install/)
-itself.
+To build Perspective using Docker, select the option in `yarn setup`.
 
-### Building via EMSDK
+### Perspective.js
 
-If you don't want to use Docker for the build, you'll need to install the
-emscripten SDK, then activate and export the latest `emsdk` environment via
-[`emsdk_env.sh`](https://github.com/juj/emsdk):
+To build the Javascript library, which includes WebAssembly compilation, [Emscripten](https://github.com/kripken/emscripten)
+and its prerequisites are required. A Docker image is provided with the correct environment and prerequisites.
+
+#### Building via EMSDK
+
+To build using local Emscripten, [install](https://emscripten.org/docs/getting_started/downloads.html) the Emscripten SDK,
+then activate and export the latest `emsdk` environment via [`emsdk_env.sh`](https://github.com/juj/emsdk):
 
 ```bash
 source emsdk/emsdk_env.sh
 ```
 
-#### OSX specific instructions
+We currently use Emscripten version `1.38.47` — deviating from this specific version of Emscripten
+can introduce various errors that are extremely difficult to debug.
+
+To install this specific version of Emscripten:
+
+```bash
+./emsdk install 1.38.47
+```
+
+### perspective-python
+
+To build the Python library, navigate to the python source folder (`python/perspective`) and install the dependencies using `pip`:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-dev.txt
+```
+
+Make sure that TBB is installed, as it is a system dependency:
+
+```bash
+brew install TBB
+```
+
+`perspective-python` supports Python 3.7 and upwards, as well as Python 2.7.17. To build the Python 2 version of the library,
+use the `--python2` flag:
+
+```bash
+yarn build --python2
+```
+
+#### MacOS/OSX specific instructions
 
 Installing and activating the latest [emscripten SDK](https://github.com/kripken/emscripten):
 
@@ -68,11 +100,19 @@ Installing and activating the latest [emscripten SDK](https://github.com/kripken
 ./emsdk activate latest
 ```
 
-You'll also need FlatBuffers and CMake, which can be installed from Homebrew:
+You'll also need TBB, FlatBuffers and CMake, which can be installed from Homebrew:
 
 ```bash
+brew install tbb
 brew install cmake
 brew install flatbuffers
+```
+
+If building the Python 2 version of the library, make sure your version of Python 2 is the latest version (`2.7.17`) supplied by Homebrew,
+and not the earlier version that ships with MacOS. To install Python 2 using Homebrew:
+
+```bash
+brew install python2
 ```
 
 #### Windows 10 specific instructions
@@ -81,7 +121,7 @@ You need to use bash in order to build Perspective packages. To successfully
 build on Windows 10, enable [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 (WSL) and install the linux distribution of your choice.
 
-Create symbolic link to easily access Windows directories and projects modified
+Create symbolic links to easily access Windows directories and projects modified
 via Windows. This way you can modify any of the Perspective files using your
 favorite editors on Windows and build via Linux.
 
@@ -123,10 +163,10 @@ A Test name regex can be passed to `jest` via the same `-t` flag:
 
 ```bash
 yarn test -t 'button test (A|B)'
-``` 
+```
 
 The test suite is composed of two sections:  a Node.js test which asserts
-behavior of the `@finos/perspective` library, and a suite of 
+behavior of the `@finos/perspective` library, and a suite of
 [Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests which 
 assert the behavior of the rest of the UI facing packages.  For the latter,
 you'll need Docker installed, as these tests use a Puppeteer and Chrome build
@@ -165,6 +205,9 @@ yarn toggle_puppeteer
 
 This will install a local copy of puppeteer via `yarn` the first time it is run, 
 if a local puppeteer is not found.
+
+Python tests are configured to use the `UTC` timezone. If running tests locally, you might find that datetime-related tests fail to assert
+the correct values. To correct this, run tests with the `TZ=UTC`.
 
 ## Benchmarking
 
