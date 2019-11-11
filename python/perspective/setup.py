@@ -48,6 +48,8 @@ def get_version(file, name='__version__'):
 
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
+ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
+Run `yarn add zerorpc` to fix."""
 
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -100,11 +102,18 @@ class PSPBuild(build_ext):
         env = os.environ.copy()
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        install = [self.npm_cmd] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install']
-        build = [self.npm_cmd, 'build'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'build']
-
-        subprocess.check_call(install, cwd=self.build_temp, env=env)
-        subprocess.check_call(build, cwd=self.build_temp, env=env)
+        try:
+            if not os.path.exists("node_modules"):
+                install = [self.npm_cmd] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install']
+                subprocess.check_call(install, cwd=self.build_temp, env=env)
+                # if not os.path.exists(os.path.join("node_modules", "zerorpc")):
+                install = [self.npm_cmd, "add", "zerorpc"] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install', 'zerorpc']
+                subprocess.check_call(install, cwd=self.build_temp, env=env)
+            build = [self.npm_cmd, 'build'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'build']
+            subprocess.check_call(build, cwd=self.build_temp, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print("ZeroMQ node client built successfully")
+        except (subprocess.CalledProcessError, OSError):
+            print(ZMQ_ERROR)
         print()  # Add an empty line for cleaner output
 
     def build_extension_cmake(self, ext):
