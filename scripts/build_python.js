@@ -28,12 +28,10 @@ function docker(target = "perspective", image = "python") {
 }
 
 try {
-    // copy C++ assets
-    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "obj")); // unused obj folder
-    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"), {overwrite: true});
-
-    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "cmake"));
-    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"), {overwrite: true});
+    fs.mkdirp(resolve(__dirname, "..", "python", "perspective", "dist"));
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective", "dist"), {preserveTimestamps: true});
+    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "dist", "cmake"), {preserveTimestamps: true});
+    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "dist", "obj"));
 
     let cmd;
     let python = PY2 ? "python2" : "python3";

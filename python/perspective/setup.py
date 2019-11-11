@@ -52,7 +52,7 @@ ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
 Run `yarn add zerorpc` to fix."""
 
 class PSPExtension(Extension):
-    def __init__(self, name, sourcedir=''):
+    def __init__(self, name, sourcedir='dist'):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
@@ -132,7 +132,7 @@ class PSPBuild(build_ext):
             '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
             '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
-            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, 'perspective'))
+            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, "..", 'perspective'))
         ]
 
         build_args = ['--config', cfg]
