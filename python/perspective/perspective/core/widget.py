@@ -198,7 +198,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
                 self.load(table_or_data, **kwargs)
 
-    def load(self, data):
+    def load(self, data, **options):
         '''Load the widget with data. If running in client mode, this method serializes the data
         and calls the browser viewer's load method. Otherwise, it calls `Viewer.load()` using `super()`.
         '''
@@ -209,7 +209,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             d = _serialize(data)
             self._data = d
         else:
-            super(PerspectiveWidget, self).load(data)
+            super(PerspectiveWidget, self).load(data, **options)
 
         # proactively notify front-end of new data
         msg = self._make_load_message()
