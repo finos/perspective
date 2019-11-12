@@ -192,6 +192,7 @@ private:
     std::vector<std::string> m_columns;
     std::vector<t_fterm> m_filter;
     std::vector<t_sortspec> m_sort;
+    std::vector<std::string> m_hidden_sort;
     bool m_column_only;
     t_uindex m_row_offset;
     t_uindex m_col_offset;

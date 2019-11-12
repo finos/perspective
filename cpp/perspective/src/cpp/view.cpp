@@ -29,6 +29,22 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     m_filter = m_view_config.get_fterm();
     m_sort = m_view_config.get_sortspec();
 
+    // Store hidden sorts in a separate array
+    std::vector<std::string> sort_names;
+
+    for (auto& sort : m_sort) {
+        sort_names.push_back(sort.m_colname);
+    }
+
+    for (const std::string& name : sort_names) {
+        // Remove undisplayed column names used to sort
+        bool hidden = std::find(m_columns.begin(), m_columns.end(), name) == m_columns.end();
+        if (hidden) {
+            // Store the actual column, not the composite column name
+            m_hidden_sort.push_back(name);
+        }
+    }
+
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
 }
@@ -170,28 +186,20 @@ View<CTX_T>::column_paths() const {
         names.insert(names.begin(), std::vector<t_tscalar>{row_path});
     }
 
-    if (m_sort.size() > 0) {
-        std::vector<std::string> sort_names;
-
+    if (m_hidden_sort.size() > 0) {
         // make a new vector so we don't have to erase while iterating
-        std::vector<std::vector<t_tscalar>> cleaned_names;
-        
-        for (auto sort : m_sort) {
-            sort_names.push_back(sort.m_colname);
-        }
+        std::vector<std::vector<t_tscalar>> visible_column_paths;
 
-        for (auto it = names.begin(); it != names.end(); ++it) {
+        for (const auto& column : names) {
             // Remove undisplayed column names used to sort
-            std::string name = it->back().to_string();
-            bool sorted = std::find(sort_names.begin(), sort_names.end(), name) != sort_names.end();
-            bool hidden = std::find(m_columns.begin(), m_columns.end(), name) == m_columns.end();
-            if (sorted && hidden) {
-                continue;
+            std::string name = column.back().to_string();
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name) == m_hidden_sort.end()) {
+                visible_column_paths.push_back(column);
             }
-            cleaned_names.push_back(*it);
         }
 
-        return cleaned_names;
+        return visible_column_paths;
+        
     }
 
     return names;
