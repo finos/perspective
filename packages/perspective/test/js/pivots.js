@@ -785,6 +785,37 @@ module.exports = perspective => {
     });
 
     describe("Column paths", function() {
+        it("Should return all columns, 0-sided view from schema", async function() {
+            const table = perspective.table(meta);
+            const view = table.view();
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["x", "y", "z"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns in specified order, 0-sided view from schema", async function() {
+            const table = perspective.table(meta);
+            const view = table.view({
+                columns: ["z", "y", "x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["z", "y", "x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return specified visible columns, 0-sided view from schema", async function() {
+            const table = perspective.table(meta);
+            const view = table.view({
+                columns: ["x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["x"]);
+            view.delete();
+            table.delete();
+        });
+
         it("Should return all columns, 0-sided view", async function() {
             const table = perspective.table(data);
             const view = table.view();

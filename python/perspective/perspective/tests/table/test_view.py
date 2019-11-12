@@ -83,6 +83,36 @@ class TestView(object):
         paths = view.column_paths()
         assert paths == ["a", "b"]
 
+    def test_view_column_path_zero_schema(self):
+        data = {
+            "a": int,
+            "b": float
+        }
+        tbl = Table(data)
+        view = tbl.view()
+        paths = view.column_paths()
+        assert paths == ["a", "b"]
+
+    def test_view_column_path_zero_hidden(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5]
+        }
+        tbl = Table(data)
+        view = tbl.view(columns=["b"])
+        paths = view.column_paths()
+        assert paths == ["b"]
+
+    def test_view_column_path_zero_respects_order(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5]
+        }
+        tbl = Table(data)
+        view = tbl.view(columns=["b", "a"])
+        paths = view.column_paths()
+        assert paths == ["b", "a"]
+
     def test_view_column_path_one(self):
         data = {
             "a": [1, 2, 3],
@@ -101,7 +131,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(row_pivots=["a"], column_pivots=["b"])
         paths = view.column_paths()
-        assert paths == ["__ROW_PATH__", "a|a", "b|a", "a|b", "b|b"]
+        assert paths == ["__ROW_PATH__", "1.5|a", "1.5|b", "2.5|a", "2.5|b", "3.5|a", "3.5|b"]
 
     def test_view_column_path_two_column_only(self):
         data = {
@@ -111,7 +141,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(column_pivots=["b"])
         paths = view.column_paths()
-        assert paths == ["__ROW_PATH__", "a|b", "b|a"]
+        assert paths == ["1.5|a", "1.5|b", "2.5|a", "2.5|b", "3.5|a", "3.5|b"]
 
     def test_view_column_path_hidden_sort(self):
         data = {
@@ -133,7 +163,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(column_pivots=["a"], columns=["a", "b"], sort=[["c", "col desc"]])
         paths = view.column_paths()
-        assert paths == ["a|a", "a|b", "b|a", "b|b"]
+        assert paths == ["1|a", "1|b", "2|a", "2|b", "3|a", "3|b"]
 
     # schema correctness
 
