@@ -109,7 +109,7 @@ class PSPBuild(build_ext):
                 # if not os.path.exists(os.path.join("node_modules", "zerorpc")):
                 install = [self.npm_cmd, "add", "zerorpc"] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install', 'zerorpc']
                 subprocess.check_call(install, cwd=self.build_temp, env=env)
-            build = [self.npm_cmd, 'build'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'build']
+            build = [self.npm_cmd, 'webpack'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'webpack']
             subprocess.check_call(build, cwd=self.build_temp, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             print("ZeroMQ node client built successfully")
         except (subprocess.CalledProcessError, OSError):

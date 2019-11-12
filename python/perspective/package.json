@@ -21,9 +21,8 @@
     "zerorpc": "^0.9.8"
   },
   "scripts": {
-    "build": "webpack --color --config ./webpack.config.js ./js/* && cpx \"node_modules/@finos/perspective/build/*.wasm\" \"perspective/node/assets\"&& cpx \"node_modules/zeromq/build/Release/zmq.node\" \"perspective/node/assets\"",
-    "clean": "rimraf build",
-    "test": "NODE_ENV=test jest -i --coverage --no-cache --collectCoverageFrom=ts/**/*.{ts}"
+    "webpack": "webpack --color --config ./webpack.config.js ./js/* && cpx \"node_modules/@finos/perspective/build/*.wasm\" \"perspective/node/assets\"&& cpx \"node_modules/zeromq/build/Release/zmq.node\" \"perspective/node/assets\"",
+    "clean": "rimraf build"
   },
   "files": [
     "src/server.js"
