@@ -71,6 +71,70 @@ class TestView(object):
             {"2|a": None, "2|b": None, "4|a": 3, "4|b": 4}
         ]
 
+    # column path
+
+    def test_view_column_path_zero(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5]
+        }
+        tbl = Table(data)
+        view = tbl.view()
+        paths = view.column_paths()
+        assert paths == ["a", "b"]
+
+    def test_view_column_path_one(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5]
+        }
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"])
+        paths = view.column_paths()
+        assert paths == ["__ROW_PATH__", "a", "b"]
+
+    def test_view_column_path_two(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5]
+        }
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        paths = view.column_paths()
+        assert paths == ["__ROW_PATH__", "a|a", "b|a", "a|b", "b|b"]
+
+    def test_view_column_path_two_column_only(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5]
+        }
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["b"])
+        paths = view.column_paths()
+        assert paths == ["__ROW_PATH__", "a|b", "b|a"]
+
+    def test_view_column_path_hidden_sort(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5],
+            "c": [3, 2, 1]
+        }
+        tbl = Table(data)
+        view = tbl.view(columns=["a", "b"], sort=[["c", "desc"]])
+        paths = view.column_paths()
+        assert paths == ["a", "b"]
+
+    def test_view_column_path_hidden_col_sort(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5],
+            "c": [3, 2, 1]
+        }
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"], columns=["a", "b"], sort=[["c", "col desc"]])
+        paths = view.column_paths()
+        assert paths == ["a|a", "a|b", "b|a", "b|b"]
+
     # schema correctness
 
     def test_string_view_schema(self):

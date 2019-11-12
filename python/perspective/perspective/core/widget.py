@@ -122,6 +122,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         If a pivoted DataFrame or MultiIndex table is passed in, the widget preserves pivots and applies them.
 
+        See `PerspectiveViewer.__init__` for arguments that transform the view shown in the widget.
+
         Args:
             table_or_data (perspective.Table|dict|list|pandas.DataFrame) : the table or data that will be viewed in the widget.
             index (str) : a column name to be used as the primary key. Ignored if a `Table` is passed in.

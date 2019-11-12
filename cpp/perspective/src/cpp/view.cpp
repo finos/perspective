@@ -29,21 +29,16 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     m_filter = m_view_config.get_fterm();
     m_sort = m_view_config.get_sortspec();
 
-    // Store hidden sorts in a separate array
-    std::vector<std::string> sort_names;
-
-    for (auto& sort : m_sort) {
-        sort_names.push_back(sort.m_colname);
+    // Add hidden columns used in sorts to the `m_hidden_sort` vector.
+    if (m_sort.size() > 0) {
+        _find_hidden_sort(m_sort);
     }
 
-    for (const std::string& name : sort_names) {
-        // Remove undisplayed column names used to sort
-        bool hidden = std::find(m_columns.begin(), m_columns.end(), name) == m_columns.end();
-        if (hidden) {
-            // Store the actual column, not the composite column name
-            m_hidden_sort.push_back(name);
-        }
+    if (m_column_pivots.size() > 0) {
+        auto column_sort = m_view_config.get_col_sortspec();
+        _find_hidden_sort(column_sort);
     }
+
 
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
@@ -545,6 +540,18 @@ View<CTX_T>::_map_aggregate_types(
     }
 
     return typestring;
+}
+
+template <typename CTX_T>
+void
+View<CTX_T>::_find_hidden_sort(const std::vector<t_sortspec>& sort) {
+    for (const t_sortspec& s : sort) {
+        bool hidden = std::find(m_columns.begin(), m_columns.end(), s.m_colname) == m_columns.end();
+        if (hidden) {
+            // Store the actual column, not the composite column path
+            m_hidden_sort.push_back(s.m_colname);
+        }
+    }
 }
 
 // Explicitly instantiate View for each context

@@ -181,6 +181,12 @@ private:
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
 
+    /**
+     * @brief Find columns used in sort-by that are not specified in the `m_columns` array,
+     * and add each column name to `m_hidden_sort`. 
+     */
+    void _find_hidden_sort(const std::vector<t_sortspec>& sort);
+
     std::shared_ptr<Table> m_table;
     std::shared_ptr<CTX_T> m_ctx;
     std::string m_name;
