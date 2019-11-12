@@ -50,11 +50,15 @@ def _serialize(data):
             # serialize schema values to string
             if isinstance(v, type):
                 return {k: _type_to_string(data[k]) for k in data}
+            elif isinstance(v, numpy.ndarray):
+                return {k: data[k].tolist() for k in data}
             else:
                 return data
-    elif isinstance(data, numpy.recarray):
-        # flatten numpy record arrays
-        columns = [data[col] for col in data.dtype.names]
+    elif isinstance(data, numpy.ndarray):
+        # structured or record array
+        if not isinstance(data.dtype.names, tuple):
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+        columns = [data[col].tolist() for col in data.dtype.names]
         return dict(zip(data.dtype.names, columns))
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
         # take flattened dataframe and make it serializable
