@@ -23,16 +23,18 @@ The main API module for Perspective.
         * [.set_depth()](#module_perspective..view+set_depth)
         * [.on_update(callback)](#module_perspective..view+on_update)
         * [.on_delete(callback)](#module_perspective..view+on_delete)
+        * [.remove_delete(callback)](#module_perspective..view+remove_delete)
     * [~table](#module_perspective..table)
         * [new table()](#new_module_perspective..table_new)
         * [.clear()](#module_perspective..table+clear)
         * [.replace()](#module_perspective..table+replace)
         * [.delete()](#module_perspective..table+delete)
         * [.on_delete(callback)](#module_perspective..table+on_delete)
+        * [.remove_delete(callback)](#module_perspective..table+remove_delete)
         * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-        * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>Promise.&lt;boolean&gt;</code>
+        * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
         * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
         * [.update(data)](#module_perspective..table+update)
         * [.remove(data)](#module_perspective..table+remove)
@@ -65,6 +67,7 @@ The main API module for Perspective.
     * [.set_depth()](#module_perspective..view+set_depth)
     * [.on_update(callback)](#module_perspective..view+on_update)
     * [.on_delete(callback)](#module_perspective..view+on_delete)
+    * [.remove_delete(callback)](#module_perspective..view+remove_delete)
 
 
 * * *
@@ -353,9 +356,20 @@ is deleted, this callback will be invoked.
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 **Params**
 
-- callback <code>function</code> - A callback function invoked on update.  The
-    parameter to this callback shares a structure with the return type of
-    [to_json](#module_perspective..view+to_json).
+- callback <code>function</code> - A callback function invoked on delete.
+
+
+* * *
+
+<a name="module_perspective..view+remove_delete"></a>
+
+#### view.remove\_delete(callback)
+Unregister a previously registered delete callback with this [view](#module_perspective..view).
+
+**Kind**: instance method of [<code>view</code>](#module_perspective..view)  
+**Params**
+
+- callback <code>function</code> - A delete callback function to be removed
 
 
 * * *
@@ -371,10 +385,11 @@ is deleted, this callback will be invoked.
     * [.replace()](#module_perspective..table+replace)
     * [.delete()](#module_perspective..table+delete)
     * [.on_delete(callback)](#module_perspective..table+on_delete)
+    * [.remove_delete(callback)](#module_perspective..table+remove_delete)
     * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
     * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-    * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
     * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
     * [.update(data)](#module_perspective..table+update)
     * [.remove(data)](#module_perspective..table+remove)
@@ -431,15 +446,28 @@ they are garbage collected - you must call this method to reclaim these.
 <a name="module_perspective..table+on_delete"></a>
 
 #### table.on\_delete(callback)
-Register a callback with this [table](#module_perspective..table).  Whenever the [view](#module_perspective..view)
+Register a callback with this [table](#module_perspective..table).  Whenever the [table](#module_perspective..table)
 is deleted, this callback will be invoked.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Params**
 
-- callback <code>function</code> - A callback function invoked on update.  The
+- callback <code>function</code> - A callback function invoked on delete.  The
     parameter to this callback shares a structure with the return type of
     [module:perspective~table#to_json](module:perspective~table#to_json).
+
+
+* * *
+
+<a name="module_perspective..table+remove_delete"></a>
+
+#### table.remove\_delete(callback)
+Unregister a previously registered delete callback with this [table](#module_perspective..table).
+
+**Kind**: instance method of [<code>table</code>](#module_perspective..table)  
+**Params**
+
+- callback <code>function</code> - A delete callback function to be removed
 
 
 * * *
@@ -486,14 +514,13 @@ Object containing the associated column_name, column_type, and computation.
 
 <a name="module_perspective..table+is_valid_filter"></a>
 
-#### table.is\_valid\_filter([filter]) ⇒ <code>Promise.&lt;boolean&gt;</code>
-Determines whether a given filter is valid.
+#### table.is\_valid\_filter([filter])
+Validates a filter configuration, i.e. that the value to filter by is not null or undefined.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>Promise.&lt;boolean&gt;</code> - Whether the filter is valid  
 **Params**
 
-- [filter] <code>Array.&lt;string&gt;</code> - A filter configuration array to test
+- [filter] <code>Array.&lt;string&gt;</code> - a filter configuration to test.
 
 
 * * *

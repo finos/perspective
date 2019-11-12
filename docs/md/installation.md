@@ -52,6 +52,29 @@ CDN by simply adding these scripts to your `.html`'s `<head>` section:
 <script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
 ```
 
+Once added to your page, you can access the Javascript API through the `perspective` symbol:
+
+```javascript
+const worker = perspective.worker();
+const table = worker.table({"A": [1, 2, 3]});
+const view = table.view({sort: [["A", "desc"]]});
+```
+
+Or create a `<perspective-viewer>` in HTML:
+
+```html
+<perspective-viewer columns="['Sales', 'Profit']">`
+<script>
+const data = {
+    "Sales": [500, 1000, 1500],
+    "Profit": [100.25, 200.5, 300.75]
+};
+// The `<perspective-viewer>` HTML element exposes the viewer API
+const el = document.getElementsByTagName('perspective-viewer')[0];
+el.load(data);
+</script>
+```
+
 Ultimately, for production you'll want Perspective incorporated directly into your
 application's build script for load performance, via another option below.
 
@@ -59,7 +82,7 @@ application's build script for load performance, via another option below.
 
 For using Perspective from Node.js, or as a depedency in a `package.json` based
 `webpack` or other browser application build toolchain, Perspective is available
-via NPM
+via NPM:
 
 ```bash
 yarn add @finos/perspective-viewer
@@ -76,25 +99,31 @@ package, so if you're not looking to hack on Perspective itself, you are likely
 better off choosing the CDN or NPM methods above. See the
 [developer docs](development.html) for details.
 
-## Jupyterlab
+## Python
 
-Perspective comes bundled with a complete Jupyterlab plugin which can be
-accessed from Python via the complementary 
-[`perspective-python`](https://github.com/timkpaine/perspective-python)
-package.  `perspective-python` implements mostly the same API as 
-`<perspective-viewer>`, and works with static `pandas.DataFrame` objects as well
-as streaming incremental updates via the `update()` method (as in Javascript).
+`perspective-python` contains full bindings to the Perspective API, a JupyterLab widget,
+and a [Tornado](http://www.tornadoweb.org/en/stable/) WebSocket handler that allows you to
+host Perspective using server-side Python.
 
-<img src="https://perspective.finos.org/img/jupyterlab.png"></img>
+In addition to supporting row/columnar formats of data using `dict` and `list`, `pandas.DataFrame`,
+dictionaries of NumPy arrays, NumPy structured arrays, and NumPy record arrays are all supported in `perspective-python`.
 
-You'll need to install both to utilize Perspective from Python in Jupyterlab.
-Assuming you've already installed the latter 3, you can install the Perspective 
-plugin as below, or follow the install from source instructions from the 
-`perspective-python` 
-[documentation](https://perspective-python.readthedocs.io/en/latest/index.html).
+`perspective-python` can be installed from `pip`:
 
 ```bash
 pip install perspective-python
-jupyter labextension install @finos/perspective-jupyterlab
 ```
 
+### Jupyterlab
+
+`PerspectiveWidget` is a JupyterLab widget that implements the same API as `<perspective-viewer>`,
+allowing for fast, intuitive transformations/visualizations of various data formats within JupyterLab.
+
+<img src="https://perspective.finos.org/img/jupyterlab.png"></img>
+
+To use the JupyterLab plugin, make sure you have installed `perspective-python` and install from the 
+Jupyter lab extension directory:
+
+```bash
+jupyter labextension install @finos/perspective-jupyterlab
+```

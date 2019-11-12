@@ -5,7 +5,9 @@ title: Developer Guide
 
 Thank you for your interest in contributing to Perspective!  This guide will
 teach you everything you need to know to get started hacking on the Perspective
-codebase. If you're coming to this project as principally a Javascript
+codebase.
+
+If you're coming to this project as principally a Javascript
 developer, please be aware that Perspective is quite a bit more complex than
 a typical NPM package due to the mixed-language nature of the project;  we've
 done quite a bit to make sure the newcomer experience is as straightforward as
@@ -13,10 +15,13 @@ possible, but some things might not work the way you're used to!
 
 Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md),
 and uses [lerna](https://lernajs.io/) to manage dependencies. The
-`@finos/perspective` modules has an additional, unmanaged dependency
-however; the [Emscripten](https://github.com/kripken/emscripten) compiler, which
+`@finos/perspective` modules has an additional, unmanaged dependency—the [Emscripten](https://github.com/kripken/emscripten) compiler, which
 is used to compile the core C++ engine to WebAssembly, and must be installed
 independently.
+
+This guide provides instructions for both the Javascript and Python libraries. To switch your development toolchain between the two,
+use `yarn setup`. Once the setup script has been run, common commands like `yarn build` and `yarn test` automatically call
+the correct build and test tools.
 
 ## Building
 
@@ -40,13 +45,13 @@ packages, e.g. `examples/simple` like so:
 yarn start simple
 ```
 
-### Docker
+#### Docker
 
 [Docker](https://docs.docker.com/install/) images with pre-built development environments are provided for the Javascript and Python libraries.
 
 To build Perspective using Docker, select the option in `yarn setup`.
 
-### Perspective.js
+### `Perspective.js`
 
 To build the Javascript library, which includes WebAssembly compilation, [Emscripten](https://github.com/kripken/emscripten)
 and its prerequisites are required. A Docker image is provided with the correct environment and prerequisites.
@@ -69,7 +74,7 @@ To install this specific version of Emscripten:
 ./emsdk install 1.38.47
 ```
 
-### perspective-python
+### `perspective-python`
 
 To build the Python library, navigate to the python source folder (`python/perspective`) and install the dependencies using `pip`:
 
@@ -93,7 +98,7 @@ yarn build --python2
 
 #### MacOS/OSX specific instructions
 
-Installing and activating the latest [emscripten SDK](https://github.com/kripken/emscripten):
+Installing and activating the latest [Emscripten SDK](https://github.com/kripken/emscripten):
 
 ```bash
 ./emsdk install latest
@@ -134,7 +139,7 @@ When installing Emscripten, make sure to follow [Linux specific instructions](ht
 
 On Ubuntu, cmake will mistakenly resolve the system headers in `/usr/include`
 rather than the emscripten supplied versions. You can resolve this by moving
-`boost` and `flatbuffers` dependencies to somewhere other than `/use/include` - into 
+`boost` and `flatbuffers` dependencies to somewhere other than `/usr/include` - into 
 perspective's own `src` dir, for example (as per [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html)).
 
 ```bash
@@ -165,7 +170,9 @@ A Test name regex can be passed to `jest` via the same `-t` flag:
 yarn test -t 'button test (A|B)'
 ```
 
-The test suite is composed of two sections:  a Node.js test which asserts
+### Javascript
+
+The Javascript test suite is composed of two sections:  a Node.js test which asserts
 behavior of the `@finos/perspective` library, and a suite of
 [Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests which 
 assert the behavior of the rest of the UI facing packages.  For the latter,
@@ -206,8 +213,23 @@ yarn toggle_puppeteer
 This will install a local copy of puppeteer via `yarn` the first time it is run, 
 if a local puppeteer is not found.
 
+### Python
+
+The Python test suite is built on Pytest, and it asserts the correct behavior of the Python library.
+
+If you have built the library with the `--python2` flag, make sure to run the test suite using the `--python2` flag as well.
+Running a version of perspective-python built against Python 2 in Python 3 (and vice versa) is not supported.
+
+Verbosity in the tests can be enabled with the `--verbose` flag.
+
+#### Timezones in Python Tests
+
 Python tests are configured to use the `UTC` timezone. If running tests locally, you might find that datetime-related tests fail to assert
-the correct values. To correct this, run tests with the `TZ=UTC`.
+the correct values. To correct this, run tests with the `TZ=UTC`, i.e.
+
+```bash
+TZ=UTC yarn test --verbose
+```
 
 ## Benchmarking
 

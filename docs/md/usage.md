@@ -7,14 +7,20 @@ title: User Guide
 
 The core concepts of Perspective are the `table()`, `view()` and
 `<perspective-viewer>` web component, though your project need not necessarily
-use them all. A `table()` represents a single data set, and is the interface
+use them all.
+
+A `table()` represents a single data set, and is the interface
 used to input static and streaming data into Perspective; in the Browser,
 `table()`s live in a Web Worker to isolate their runtime from the renderer.
+
 A `view()` represents a specific continuous query of a `table()`, and is
 used to read data or calculate analytics from a `table()`; `view()`s also
 live in a Web Worker when used in a Browser, and a single `table()` may have
-many `view()`s attached at once. `<perspective-viewer>` is a UI widget
-which allows the user to interact and create `view()`s on a loaded `table()`.
+many `view()`s attached at once. 
+
+`<perspective-viewer>` is a UI widget which allows the user to interact and 
+create `view()`s on a loaded `table()`.
+
 Each `<perspective-viewer>` encapsulates and manages a single `view()` at a
 time, and optionally manages it's underlying `table()` for simple use cases,
 though you can instantiate this separately if you wish - this is helpful for
@@ -613,7 +619,7 @@ elem.restore(state);
 
 Whenever a `<perspective-viewer>`s underlying `table()` is changed via the
 `load()` or `update()` methods, a `perspective-view-update` DOM event is fired.
-Similarly, `view()` updates instigated either throught he Attribute API, or
+Similarly, `view()` updates instigated either through the Attribute API, or
 through user interaction will fire a `perspective-config-update` event.
 
 ```javascript
@@ -628,9 +634,11 @@ elem.addEventListener("perspective-config-update", function() {
 Whenever a `<perspective-viewer>`'s grid or chart are clicked, a 
 `perspective-click` DOM event is fired containing a detail object with `config`,
 `column_names` and `row`.
+
 The `config` object contains an array of `filters` that can be applied to a 
 `<perspective-viewer>` through the use of `restore()` updating it to show the 
 filtered subset of data.
+
 The `column_names` property contains an array of matching columns and the `row` 
 property returns the associated row data.
 
@@ -639,4 +647,213 @@ elem.addEventListener("perspective-click", function(event) {
     var config = event.detail.config;
     elem.restore(config);
 });
+```
+
+## `perspective-python`
+
+The Python library consists of the same abstractions and API as the Javascript library, along with
+some Python-specific APIs to support data from NumPy and Pandas, as well as an integration with
+[`tornado.websocket`](https://www.tornadoweb.org/en/stable/websocket.html).
+
+Organizationally, the library is split into two main sections:
+
+- `perspective.table`, which implements the `table` and `view` API in the same manner as the Javascript library.
+- `perspective.core`, which contains the JupyterLab `PerspectiveWidget`, an implementation of the `<perspective-viewer>` API in `PerspectiveViewer`, and `PerspectiveTornadoHandler` for use with Tornado websockets.
+
+This user's guide provides an overview of the most common ways to use Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado handler.
+For more detailed API documentation, see the `API` section of this site or refer to docstrings through the `help()` function in Python.
+
+### `perspective.Table`
+
+A `perspective.Table` can be created from a dataset or a schema, the specifics of which are [discussed](#loading-data-with-table) in the Javascript section of the user's guide. In Python, however, Perspective supports additional data types that are commonly used when processing data:
+
+- `pandas.DataFrame`
+- `numpy.ndarray`
+- NumPy Structured Arrays & Record Arrays
+
+A `Table` is created in a similar fashion to its Javascript equivalent:
+
+```python
+from datetime import date, datetime
+import numpy as np
+import pandas as pd
+import perspective
+
+data = pd.DataFrame({
+    "int": np.arange(100),
+    "float": [i * 1.5 for i in range(100)],
+    "bool": [True for i in range(100)],
+    "date": [date.today() for i in range(100)],
+    "datetime": [datetime.now() for i in range(100)],
+    "string": [str(i) for i in range(100)]
+})
+table = perspective.Table(data, index="float")
+```
+
+And so is the `View`:
+
+```python
+view = table.view(row_pivots=["float"], filter=[["bool", "==", True]])
+column_data = view.to_dict()
+row_data = view.to_records()
+```
+
+Instead of passing in `config` as an object, however, you can use keyword arguments to configure both the Table and the View.
+
+### Numpy Support
+
+Perspective supports dictionaries of 1-dimensional `numpy.ndarray`, as well as structured arrays and record arrays. Multi-dimensional arrays are not supported at this time.
+
+When passing in dictionaries of NumPy arrays, make sure that your dataset contains *ONLY* NumPy arrays, and not a mixture of arrays and Python lists—this will raise an exception.
+
+Numpy structured/record arrays are parsed according to their field name and dtype.
+
+### Pandas Support
+
+Perspective supports `pandas.DataFrame` and `pandas.Series` objects. Because Perspective is designed for applying its own transformations on top of a flat dataset, dataframes that are passed in will be flattened and have its `index` treated as another column (through the [`reset_index`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html) method).
+
+If the dataframe does not have an index set, an integer-typed column named "index" is created
+
+If you want to preserve the indexing behavior of the dataframe passed into Perspective, simply create the `Table` with `index="index"` as a keyword argument. This tells Perspective to once again treat the index as a primary key:
+
+```python
+data.set_index("datetime")
+table = perspective.Table(data, index="index")
+```
+
+### Schemas & Supported Data Types
+
+Unlike Javascript, where schemas must be created using string representations of their types, `perspective-python` leverages Python's type system for schema creation.
+
+A schema can be created with the following types:
+
+- `int` (and `long` in Python 2)
+- `float`
+- `bool`
+- `datetime.date`
+- `datetime.datetime`
+- `str` (and `unicode` in Python 2)
+
+Once the `Table` has been created with a schema, however, Perspective will cast the data that it ingests to conform with the schema. This allows for a lot of flexibility; a column that is typed as a `datetime`, for example, can be updated with `date` objects, `datetime` objects, `pandas.Timestamp`, `numpy.datetime64`, and even valid millisecond/seconds from epoch timestamps. Similarly, updating string columns with integer data will cause a cast to string, updating floats with ints cause a float cast, and etc.
+
+Type inferrence works similarly—a column that contains `pandas.Timestamp` objects will have its type inferred as `datetime`, which allows it to be updated with any of the datetime types that were just mentioned. Thus, Perspective is aware of the basic type primitives that it supports, but agnostic towards the actual Python `type` of the data that it receives.
+
+### Callbacks and Events
+
+`perspective.Table` allows for `on_update` and `on_delete` callbacks to be set—simply call `on_update` or `on_delete` with a reference to a function or a lambda without any parameters:
+
+```python
+def callback():
+    print("Updated!")
+view.on_update(callback)
+view.on_delete(lambda: print("Updated again!"))
+```
+
+If the callback is a named reference to a function, it can be removed with `remove_update` or `remove_delete`. Callbacks defined with a lambda function cannot be removed at this time.
+
+```python
+view.remove_update(callback)
+```
+
+### `perspective.PerspectiveWidget`
+
+Building on top of the API provided by `perspective.Table`, the `PerspectiveWidget` is a JupyterLab plugin that offers the entire functionality of Perspective within the Jupyter environment. It supports the same API semantics of `<perspective-viewer>`, along with the additional data types supported by `perspective.Table`.
+
+Additionally, when created with `client=true` as a keyword argument to `__init__`, it can be used without accessing the built C++ binary.
+
+### Client Mode
+
+For certain systems, it may be difficult or infeasible to build the C++ library for Perspective, which `perspective.Table` depends on. However, we can leverage `Perspective.js` in the browser to provide the same widget experience to users. If created with `client=true`, `PerspectiveWidget` will serialize the data to the best of its ability and pass it off to the browser's Perspective engine to load.
+
+If `perspective-python` cannot find the built C++ libraries, it automatically defaults to client mode when initializing the widget.
+
+### `PerspectiveWidget.__init__`
+
+Similar to the viewer API, `__init__` takes keyword arguments that transform the `View` under management by the `PerspectiveWidget`:
+
+- `plugin`
+- `row_pivots`
+- `column_pivots`
+- `columns`
+- `aggregates`
+- `sort`
+- `filters`
+
+Arguments that will be passed to the `perspective.Table` constructor if a dataset or schema is passed in:
+
+- [`index`](#index-and-limit)
+- [`limit`](#index-and-limit)
+
+As well as keyword arguments specific to `PerspectiveWidget` itself:
+
+- `client`: a boolean that determines whether the Widget will depend on `perspective.Table` in Python, or if it sends data to the front-end WASM engine for processing.
+
+Several Enums are provided to make lookup of specific plugin types, aggregate types, etc. much easier:
+
+- [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py) : aggregate operations
+- [`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py) : sort directions
+- [`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py) : plugins (grid/chart types, etc.)
+
+These can be used as replacements to string values in the API:
+
+```python
+from perspective import PerspectiveWidget, Aggregate, Sort, Plugin
+w = perspective.PerspectiveWidget(
+    data, plugin=Plugin.XBAR, aggregates={"datetime": Aggregate.ANY})
+w.sort = [["date", Sort.DESC]]
+```
+
+### Creating a widget
+
+A widget is created through the `PerspectiveWidget` constructor, which takes as its first, required parameter a `perspective.Table`, a dataset, a schema, or `None`, which serves as a special value that tells the Widget to defer loading any data until later. In maintaining consistency with the Javascript API, Widgets cannot be created with empty dictionaries or lists—`None` should be used if the intention is to await data for loading later on.
+
+A widget can be constructed from a dataset:
+
+```python
+from perspective import PerspectiveWidget, Table
+widget = PerspectiveWidget(data, row_pivots=["date"])
+```
+
+Or a schema:
+
+```python
+widget = PerspectiveWidget({"a": int, "b": str})
+```
+
+Or an instance of a `perspective.Table`:
+
+```python
+table = Table(data)
+widget = PerspectiveWidget(table)
+```
+
+Or `None`:
+
+```python
+widget = PerspectiveWidget(None)
+```
+
+Once the widget has been created, simply call it in order to render the widget's front-end `<perspective-viewer>`:
+
+```python
+widget
+```
+
+### `load()`
+
+Calling `load()` on the widget provides it with a dataset. If the widget already has a dataset, and the new data has different columns to the old one, then the widget state (pivots, sort, etc.) is cleared to prevent applying settings on columns that don't exist.
+
+Like `__init__`, load accepts a `perspective.Table`, a dataset, or a schema. If running in client mode, `load` defers to the browser's Perspective engine. This means that loading Python-only datasets, especially ones that cannot be serialized into JSON, may cause some issues.
+
+```python
+widget = PerspectiveWidget(None)
+widget.load(data)
+```
+
+### `update()`
+
+Call `update()` on the widget to update it with new data. When called in client mode, this method serializes the data and passes it off to the Perspective engine running in the browser.
+
+```python
+widget.update(data)
 ```
