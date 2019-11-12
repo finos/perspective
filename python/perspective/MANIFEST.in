@@ -32,17 +32,17 @@ prune docs/dist
 # Webapp files
 include package.json
 include webpack.config.js
-graft src
+graft dist/src
 graft style
 graft js
 
 # C++ build
-graft cmake
-graft src
+graft dist/cmake
+graft dist/src
 graft perspective/src
 graft perspective/include
-graft test
-include CMakeLists.txt
+graft dist/test
+include dist/CMakeLists.txt
 
 # Patterns to exclude from any directory
 global-exclude *~

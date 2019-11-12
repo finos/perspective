@@ -19,6 +19,11 @@ module.exports = {
     },
     externals: [/^[a-z0-9@]/],
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
+    },
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     module: {
         rules: [

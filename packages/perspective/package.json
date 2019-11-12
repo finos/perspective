@@ -64,9 +64,6 @@
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
     },
-    "optionalDependencies": {
-        "bufferutil": "~4.0.1"
-    },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.4.0-rc.3"
     }
