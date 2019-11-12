@@ -85,6 +85,17 @@ public:
      */
     std::vector<std::vector<t_tscalar>> column_names(
         bool skip = false, std::int32_t depth = 0) const;
+    
+    /**
+     * @brief The aggregated column names of this View, showing the columns that
+     * have been composed through the addition of a pivot as they appear in the view.
+     * 
+     * If the view is pivoted, "__ROW_PATH__" will be prepended to the front of the vector
+     * because it is part of the column path.
+     * 
+     * @return std::vector<std::vector<t_tscalar>>>
+     */
+    std::vector<std::vector<t_tscalar>> column_paths() const;
 
     /**
      * @brief Returns shared pointer to a t_data_slice object, which contains the

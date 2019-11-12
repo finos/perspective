@@ -197,7 +197,8 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         return;
     }
 
-    let columns = Object.keys(json).filter(x => x !== "__INDEX__");
+    let columns = await view.column_paths();
+    columns = columns.filter(x => x !== "__INDEX__");
     const dataModel = hypergrid.behavior.dataModel;
     dataModel._grid = hypergrid;
 

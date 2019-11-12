@@ -158,6 +158,46 @@ View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
 }
 
 template <typename CTX_T>
+std::vector<std::vector<t_tscalar>>
+View<CTX_T>::column_paths() const {
+    auto num_column_pivots = m_column_pivots.size();
+    auto names = column_names(true, num_column_pivots);
+
+    if (sides() > 0 && !is_column_only()) {
+        // prepend `__ROW_PATH__` to the output vector
+        t_tscalar row_path;
+        row_path.set("__ROW_PATH__");
+        names.insert(names.begin(), std::vector<t_tscalar>{row_path});
+    }
+
+    if (m_sort.size() > 0) {
+        std::vector<std::string> sort_names;
+
+        // make a new vector so we don't have to erase while iterating
+        std::vector<std::vector<t_tscalar>> cleaned_names;
+        
+        for (auto sort : m_sort) {
+            sort_names.push_back(sort.m_colname);
+        }
+
+        for (auto it = names.begin(); it != names.end(); ++it) {
+            // Remove undisplayed column names used to sort
+            std::string name = it->back().to_string();
+            bool sorted = std::find(sort_names.begin(), sort_names.end(), name) != sort_names.end();
+            bool hidden = std::find(m_columns.begin(), m_columns.end(), name) == m_columns.end();
+            if (sorted && hidden) {
+                continue;
+            }
+            cleaned_names.push_back(*it);
+        }
+
+        return cleaned_names;
+    }
+
+    return names;
+}
+
+template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
     auto schema = m_table->get_schema();
