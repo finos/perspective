@@ -110,7 +110,7 @@ class PSPBuild(build_ext):
                 install = [self.npm_cmd, "add", "zerorpc"] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install', 'zerorpc']
                 subprocess.check_call(install, cwd=self.build_temp, env=env)
             build = [self.npm_cmd, 'webpack'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'webpack']
-            subprocess.check_call(build, cwd=self.build_temp, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call(build, cwd=self.build_temp, env=env, stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
             print("ZeroMQ node client built successfully")
         except (subprocess.CalledProcessError, OSError):
             print(ZMQ_ERROR)
