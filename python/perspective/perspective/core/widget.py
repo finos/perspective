@@ -10,7 +10,7 @@ import numpy
 import pandas
 import json
 from datetime import date, datetime
-from functools import partial, wraps
+from functools import partial
 from ipywidgets import Widget
 from traitlets import observe, Unicode
 from .data import deconstruct_pandas
@@ -68,7 +68,7 @@ def _serialize(data):
             d[name] = values.tolist()
         return d
     else:
-        raise NotImplementedError("Cannot serialize an invalid dataset.")
+        raise NotImplementedError("Cannot serialize a dataset of `{0}`.".format(str(type(data))))
 
 
 class DateTimeStringEncoder(json.JSONEncoder):
@@ -111,7 +111,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
     _view_module = Unicode('@finos/perspective-jupyterlab').tag(sync=True)
     _view_module_version = Unicode('^0.4.0-rc.2').tag(sync=True)
 
-    @wraps(PerspectiveViewer.__init__)
     def __init__(self,
                  table_or_data,
                  index=None,
@@ -199,6 +198,23 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
                 self.load(table_or_data, **kwargs)
 
+    def load(self, data):
+        '''Load the widget with data. If running in client mode, this method serializes the data
+        and calls the browser viewer's load method. Otherwise, it calls `Viewer.load()` using `super()`.
+        '''
+        if self.client is True:
+            # serialize the data and send a custom message to the browser
+            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+                data, _ = deconstruct_pandas(data)
+            d = _serialize(data)
+            self._data = d
+        else:
+            super(PerspectiveWidget, self).load(data)
+
+        # proactively notify front-end of new data
+        msg = self._make_load_message()
+        self.send(msg)
+
     def update(self, data):
         '''Update the widget with new data. If running in client mode, this method serializes the data
         and calls the browser viewer's update method. Otherwise, it calls `Viewer.update()` using `super()`.
@@ -245,28 +261,37 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if parsed["cmd"] == "init":
                 self.post({'id': -1, 'data': None})
             elif parsed["cmd"] == "table":
-                if self.client and self._data is not None:
-                    # Send data to the client, transferring ownership to the browser
-                    msg = {
-                        "id": -2,
-                        "type": "data",
-                        "data": {
-                            "data": self._data,
-                        }
-                    }
-
-                    if len(self._client_options.keys()) > 0:
-                        msg["data"]["options"] = self._client_options
-
-                    self.send(msg)
-                elif self.table_name is not None:
-                    # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
-                    self.send({
-                        "id": -2,
-                        "type": "table",
-                        "data": self.table_name
-                    })
+                # return the dataset or table name to the front-end
+                msg = self._make_load_message()
+                self.send(msg)
             else:
                 # For all calls to Perspective, process it in the manager.
                 post_callback = partial(self.post, id=parsed["id"])
                 self.manager._process(parsed, post_callback)
+
+    def _make_load_message(self):
+        '''Send a message to the front-end either containing the name of a Table in python, or the serialized
+        dataset with options while in client mode.'''
+        msg = None
+        if self.client and self._data is not None:
+            # Send data to the client, transferring ownership to the browser
+            msg = {
+                "id": -2,
+                "type": "data",
+                "data": {
+                    "data": self._data,
+                }
+            }
+
+            if len(self._client_options.keys()) > 0:
+                msg["data"]["options"] = self._client_options
+
+        elif self.table_name is not None:
+            # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
+            msg = {
+                "id": -2,
+                "type": "table",
+                "data": self.table_name
+            }
+
+        return msg
