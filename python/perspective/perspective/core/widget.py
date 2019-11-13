@@ -75,16 +75,6 @@ def _serialize(data):
         raise NotImplementedError("Cannot serialize an invalid dataset.")
 
 
-class DateTimeStringEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        '''Create a stringified representation of a datetime object.'''
-        if isinstance(obj, datetime.datetime):
-            return obj.strftime("%Y-%m-%d %H:%M:%S.%f")
-        else:
-            return super(DateTimeStringEncoder, self).default(obj)
-
-
 class PerspectiveWidget(Widget, PerspectiveViewer):
     '''`PerspectiveWidget` allows for Perspective to be used in the form of a JupyterLab IPython widget.
 
@@ -216,6 +206,25 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             }, -3)
         else:
             super(PerspectiveWidget, self).update(data)
+
+    def clear(self):
+        '''Clears the widget's underlying `Table` - does not function in client mode.'''
+        if self.client is False:
+            super(PerspectiveWidget, self).clear()
+
+    def replace(self, data):
+        '''Replaces the widget's `Table` with new data conforming to the same schema. Does not clear
+        user-set state. If in client mode, serializes the data and sends it to the browser.'''
+        if self.client is True:
+            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+                data, _ = deconstruct_pandas(data)
+            d = _serialize(data)
+            self.post({
+                "cmd": "replace",
+                "data": d
+            })
+        else:
+            super(PerspectiveWidget, self).replace(data)
 
     def post(self, msg, id=None):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.

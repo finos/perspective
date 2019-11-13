@@ -144,6 +144,30 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         '''
         self.table.update(data)
 
+    def clear(self):
+        '''Clears the rows of this viewer's `Table`.'''
+        if self.table is not None:
+            self.table.clear()
+
+    def replace(self, data):
+        '''Replaces the rows of this viewer's `Table` with new data.
+
+        Args:
+            data : new data to set into the table - must conform to the table's schema.
+        '''
+        if self.table is not None:
+            self.table.replace(data)
+
+    def reset(self):
+        '''Resets the viewer's attributes and state, but does not delete or modify the underlying `Table`.'''
+        self.row_pivots = []
+        self.column_pivots = []
+        self.filters = []
+        self.sort = []
+        self.aggregates = {}
+        self.columns = []
+        self.plugin = "hypergrid"
+
     def _new_view(self):
         '''Create a new View, and assign its name to the viewer.
 

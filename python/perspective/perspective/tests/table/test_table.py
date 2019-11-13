@@ -404,5 +404,3 @@ class TestTable(object):
         tbl = Table(data)
         tbl.replace(data2)
         assert tbl.view().to_records() == data2
-
-    

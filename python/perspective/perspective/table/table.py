@@ -57,7 +57,7 @@ class Table(object):
         self._table.reset_gnode(self._gnode_id)
 
     def replace(self, data):
-        '''Replaces all rows in the Table with the new data.
+        '''Replaces all rows in the Table with the new data that conforms to the Table's schema.
 
         Args:
             data (dict|list|dataframe) the new data with which to fill the Table

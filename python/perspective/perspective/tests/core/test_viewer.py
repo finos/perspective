@@ -184,3 +184,41 @@ class TestViewer:
             "a": [1, 2, 3],
             "b": [8, 9, 10]
         }
+
+    # clear
+
+    def test_viewer_clear(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer()
+        viewer.load(table)
+        viewer.clear()
+        assert viewer.table.size() == 0
+        assert viewer.table.schema() == {
+            "a": int
+        }
+
+    # replace
+
+    def test_viewer_replace(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer()
+        viewer.load(table)
+        viewer.replace({"a": [4, 5, 6]})
+        assert viewer.table.size() == 3
+        assert viewer.table.schema() == {
+            "a": int
+        }
+        assert viewer.table.view().to_dict() == {
+            "a": [4, 5, 6]
+        }
+
+    # reset
+
+    def test_viewer_reset(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table)
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.reset()
+        assert viewer.plugin == "hypergrid"
+        assert viewer.filters == []
