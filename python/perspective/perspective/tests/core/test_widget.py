@@ -104,7 +104,7 @@ class TestWidget:
         }
 
     def test_widget_client_np_recarray(self):
-        data = np.recarray([(1, 2), (3, 4)], dtype=[("a", "int64"), ("b", "int64")])
+        data = np.array([(1, 2), (3, 4)], dtype=[("a", "int64"), ("b", "int64")]).view(np.recarray)
         widget = PerspectiveWidget(data, client=True)
         assert widget.table is None
         assert widget._data == {
@@ -156,4 +156,6 @@ class TestWidget:
         widget = PerspectiveWidget(data, client=True)
         widget.update(data)
         assert widget.table is None
-        assert widget._data == data
+        assert widget._data == {
+            "a": [i for i in range(50)]
+        }
