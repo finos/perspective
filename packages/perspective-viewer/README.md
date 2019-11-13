@@ -7,27 +7,27 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
 * [perspective-viewer](#module_perspective-viewer)
     * [~PerspectiveViewer](#module_perspective-viewer..PerspectiveViewer) ⇐ <code>HTMLElement</code>
         * [new PerspectiveViewer()](#new_module_perspective-viewer..PerspectiveViewer_new)
-        * [.sort](#module_perspective-viewer..PerspectiveViewer+sort) : <code>array.&lt;string&gt;</code>
+        * [.sort](#module_perspective-viewer..PerspectiveViewer+sort) : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
         * [.columns](#module_perspective-viewer..PerspectiveViewer+columns)
         * [.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns)
         * [.aggregates](#module_perspective-viewer..PerspectiveViewer+aggregates)
         * [.filters](#module_perspective-viewer..PerspectiveViewer+filters) : <code>array</code>
         * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>string</code>
-        * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
-        * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
+        * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
+        * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
         * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>boolean</code>
         * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
         * [.table](#module_perspective-viewer..PerspectiveViewer+table)
         * [.view](#module_perspective-viewer..PerspectiveViewer+view)
-        * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
         * [.update(data)](#module_perspective-viewer..PerspectiveViewer+update)
         * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
         * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
-        * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
+        * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;boolean&gt;</code>
         * [.restyleElement()](#module_perspective-viewer..PerspectiveViewer+restyleElement)
         * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
-        * [.restore(config)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>Promise.&lt;void&gt;</code>
-        * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.restore(config)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
+        * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
         * [.clear()](#module_perspective-viewer..PerspectiveViewer+clear)
         * [.replace()](#module_perspective-viewer..PerspectiveViewer+replace)
         * [.reset()](#module_perspective-viewer..PerspectiveViewer+reset)
@@ -45,27 +45,27 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
 
 * [~PerspectiveViewer](#module_perspective-viewer..PerspectiveViewer) ⇐ <code>HTMLElement</code>
     * [new PerspectiveViewer()](#new_module_perspective-viewer..PerspectiveViewer_new)
-    * [.sort](#module_perspective-viewer..PerspectiveViewer+sort) : <code>array.&lt;string&gt;</code>
+    * [.sort](#module_perspective-viewer..PerspectiveViewer+sort) : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
     * [.columns](#module_perspective-viewer..PerspectiveViewer+columns)
     * [.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns)
     * [.aggregates](#module_perspective-viewer..PerspectiveViewer+aggregates)
     * [.filters](#module_perspective-viewer..PerspectiveViewer+filters) : <code>array</code>
     * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>string</code>
-    * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
-    * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
+    * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
+    * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
     * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>boolean</code>
     * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
     * [.table](#module_perspective-viewer..PerspectiveViewer+table)
     * [.view](#module_perspective-viewer..PerspectiveViewer+view)
-    * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
     * [.update(data)](#module_perspective-viewer..PerspectiveViewer+update)
     * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
     * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
-    * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;boolean&gt;</code>
     * [.restyleElement()](#module_perspective-viewer..PerspectiveViewer+restyleElement)
     * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
-    * [.restore(config)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.restore(config)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
+    * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
     * [.clear()](#module_perspective-viewer..PerspectiveViewer+clear)
     * [.replace()](#module_perspective-viewer..PerspectiveViewer+replace)
     * [.reset()](#module_perspective-viewer..PerspectiveViewer+reset)
@@ -89,7 +89,7 @@ HTMLElement class for `<perspective-viewer>` custom element.  This class isnot 
 
 <a name="module_perspective-viewer..PerspectiveViewer+sort"></a>
 
-#### perspectiveViewer.sort : <code>array.&lt;string&gt;</code>
+#### perspectiveViewer.sort : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
 Sets this `perspective.table.view`'s `sort` property, an array of columnnames.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
@@ -210,7 +210,7 @@ Sets the currently selected plugin, via its `name` field.
 
 <a name="module_perspective-viewer..PerspectiveViewer+column-pivots"></a>
 
-#### perspectiveViewer.column-pivots : <code>Array.&lt;String&gt;</code>
+#### perspectiveViewer.column-pivots : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
 Sets this `perspective.table.view`'s `column_pivots` property.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
@@ -220,7 +220,7 @@ Sets this `perspective.table.view`'s `column_pivots` property.
 
 <a name="module_perspective-viewer..PerspectiveViewer+row-pivots"></a>
 
-#### perspectiveViewer.row-pivots : <code>array.&lt;string&gt;</code>
+#### perspectiveViewer.row-pivots : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
 Sets this `perspective.table.view`'s `row_pivots` property.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
@@ -274,11 +274,11 @@ This element's `perspective.table.view` instance.  The instance itselfwill chan
 
 <a name="module_perspective-viewer..PerspectiveViewer+load"></a>
 
-#### perspectiveViewer.load(data) ⇒ <code>Promise.&lt;void&gt;</code>
+#### perspectiveViewer.load(data) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
 Load data.  If `load` or `update` have already been called on thiselement, its internal `perspective.table` will also be deleted.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Returns**: <code>Promise.&lt;void&gt;</code> - A promise which resolves once the data isloaded and a `perspective.view` has been created.  
+**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code> - A promise which resolves once the data isloaded and a `perspective.view` has been created.  
 **Emits**: <code>module:perspective\_viewer~PerspectiveViewer#perspective-click PerspectiveViewer#event:perspective-view-update</code>  
 **Params**
 
@@ -348,11 +348,11 @@ Duplicate an existing `<perspective-element>`, including data and viewsettings.
 
 <a name="module_perspective-viewer..PerspectiveViewer+delete"></a>
 
-#### perspectiveViewer.delete(delete_table) ⇒ <code>Promise.&lt;boolean&gt;</code>
+#### perspectiveViewer.delete(delete_table) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;boolean&gt;</code>
 Deletes this element's data and clears it's internal state (but not itsuser state).  This (or the underlying `perspective.table`'s equivalentmethod) must be called in order for its memory to be reclaimed.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Returns**: <code>Promise.&lt;boolean&gt;</code> - Whether or not this call resulted in theunderlying `perspective.table` actually being deleted.  
+**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;boolean&gt;</code> - Whether or not this call resulted in theunderlying `perspective.table` actually being deleted.  
 **Params**
 
 - delete_table <code>boolean</code> <code> = true</code> - Should a delete call also be made to theunderlying `table()`.
@@ -381,11 +381,11 @@ Serialize this element's attribute/interaction state.
 
 <a name="module_perspective-viewer..PerspectiveViewer+restore"></a>
 
-#### perspectiveViewer.restore(config) ⇒ <code>Promise.&lt;void&gt;</code>
+#### perspectiveViewer.restore(config) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
 Restore this element to a state as generated by a reciprocal call to`save` or `serialize`.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Returns**: <code>Promise.&lt;void&gt;</code> - A promise which resolves when the changes havebeen applied.  
+**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code> - A promise which resolves when the changes havebeen applied.  
 **Params**
 
 - config <code>object</code> | <code>string</code> - returned by `save` or `serialize`.
@@ -395,11 +395,11 @@ Restore this element to a state as generated by a reciprocal call to`save` or `
 
 <a name="module_perspective-viewer..PerspectiveViewer+flush"></a>
 
-#### perspectiveViewer.flush() ⇒ <code>Promise.&lt;void&gt;</code>
+#### perspectiveViewer.flush() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
 Flush any pending attribute modifications to this element.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Returns**: <code>Promise.&lt;void&gt;</code> - A promise which resolves when the currentattribute state has been applied.  
+**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code> - A promise which resolves when the currentattribute state has been applied.  
 
 * * *
 

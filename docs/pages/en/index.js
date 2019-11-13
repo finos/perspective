@@ -192,7 +192,7 @@ const FeatureCallout = props => (
             [HighCharts](https://github.com/highcharts/highcharts).
         </MarkdownBlock>
         <MarkdownBlock>Integration with Jupyterlab.</MarkdownBlock>
-        <MarkdownBlock>Runtimes for the Browser and Node.js.</MarkdownBlock>
+        <MarkdownBlock>Runtimes for the browser, Python, and Node.js.</MarkdownBlock>
     </Container>
 );
 
@@ -205,7 +205,8 @@ Perspective comes with:
 * A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
 * A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
 * A suite of simple, context-aware visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/) and [Hypergrid](https://github.com/fin-hypergrid/core).
-* Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/), Runtimes for the Browser and Node.js.
+* Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+* Runtimes for the browser, Python, and Node.js.
 `;
 
 const Description = props => (

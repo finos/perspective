@@ -47,7 +47,14 @@ def _parse_datetime_index(index):
 
 
 def deconstruct_pandas(data):
-    '''Remove pivots from the passed-in dataframe.'''
+    '''Given a dataframe, flatten it by resetting the index and memoizing the pivots that were applied.
+
+    Args:
+        data (pandas.dataframe) : a Pandas DataFrame to parse
+
+    Returns:
+        (pandas.DataFrame, dict) : a Pandas DataFrame and a dictionary containing optional members `columns`, `row_pivots`, and `column_pivots`.
+    '''
     kwargs = {}
 
     # level unstacking

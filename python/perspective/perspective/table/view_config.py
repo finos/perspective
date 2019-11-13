@@ -13,8 +13,13 @@ class ViewConfig(object):
     def __init__(self, **config):
         '''Receives a user-provided config dict and standardizes it for consumption by the python client and the core engine.
 
-        Args:
-            config (dict) : optional keyword args that configure the view.
+        Keyword Args:
+            columns (list) : a list of column names to be shown
+            row_pivots (list) : a list of column names to use as row pivots
+            column_pivots (list) : a list of column names to use as column pivots
+            aggregates (dict) : a dictionary of column names to aggregate types to specify aggregates for individual columns
+            sort (list) : a list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc)
+            filter (list) : a list of lists, each list containing a column name, a filter comparator, and a value to filter by
         '''
         self._config = config
         self._row_pivots = self._config.get('row_pivots', [])
@@ -66,7 +71,7 @@ class ViewConfig(object):
         "none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", and "col desc abs".
 
         Returns:
-            list[list] : the sort configurations of the view stored in a list of lists
+            list : the sort configurations of the view stored in a list of lists
         '''
         return self._sort
 
@@ -76,7 +81,7 @@ class ViewConfig(object):
         A filter configuration is a list of three elements: a string column name, a filter comparison string (i.e. "===", ">"), and a value to compare.
 
         Returns:
-            list[list] : the filter configurations of the view stored in a list of lists
+            list : the filter configurations of the view stored in a list of lists
         '''
         return self._filter
 

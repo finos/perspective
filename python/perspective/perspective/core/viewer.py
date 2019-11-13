@@ -86,8 +86,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         If a `perspective.Table` is passed into `table_or_data`, `**options` is ignored as the options already set on the `Table` take precedence.
 
-        If data is passed in, a `perspective.Table` is automatically created by this function,
-        and the options passed to `**config` are extended to the new Table.
+        If data is passed in, a `perspective.Table` is automatically created by this function, and the options passed to `**config` are extended to the new Table.
 
         Args:
             table_or_data (Table|dict|list|pandas.DataFrame) : a `perspective.Table` instance or a dataset to be displayed in the viewer.
@@ -95,7 +94,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 - name (str) : an optional name to reference the table by so it can be accessed from the front-end.
                 - index (str) : the name of a column that will be the dataset's primary key. This sorts the dataset in ascending order based on primary key.
                 - limit (int) : cannot be applied at the same time as `index` - the total number of rows that will be loaded into Perspective.
-                    If the table is updated and the number of rows is greater than `limit`, updates begin overwriting at row 0.
 
         Examples:
             >>> from perspective import Table, PerspectiveViewer

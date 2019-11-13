@@ -27,10 +27,11 @@ class Table(object):
         If a schema is provided, the table will be empty. Subsequent updates MUST conform to the column names and data types provided in the schema.
 
         Args:
-            data_or_schema (dict/list/dataframe)
-            config (dict) : optional configurations for the Table:
-                - limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
-                - index (string) : a string column name to use as the Table's primary key.
+            data_or_schema (dict/list/dataframe) : data or schema that initializes the table.
+
+        Keyword Args:
+            limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
+            index (string) : a string column name to use as the Table's primary key.
         '''
         self._is_arrow = isinstance(data_or_schema, (bytes, bytearray))
         if (self._is_arrow):
@@ -60,7 +61,7 @@ class Table(object):
         '''Replaces all rows in the Table with the new data that conforms to the Table's schema.
 
         Args:
-            data (dict|list|dataframe) the new data with which to fill the Table
+            data (dict|list|dataframe) : New data that will be filled into the Table.
         '''
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
@@ -107,7 +108,7 @@ class Table(object):
         '''Returns a schema of computed columns added by the user.
 
         Returns:
-            dict[string:dict] : a key-value mapping of column names to computed columns. Each value is a dictionary that contains `column_name`, `column_type`, and `computation`.
+            dict : a key-value mapping of column names to computed columns. Each value is a dictionary that contains ``column_name``, ``column_type``, and ``computation``.
         '''
         return {}
 
@@ -137,9 +138,9 @@ class Table(object):
     def update(self, data):
         '''Update the Table with new data.
 
-        Updates on tables without an explicit `index` are treated as appends.
+        Updates on tables without an explicit ``index`` are treated as appends.
 
-        Updates on tables with an explicit `index` should have the index as part of the `data` param, as this instructs the engine
+        Updates on tables with an explicit ``index`` should have the index as part of the ``data`` param, as this instructs the engine
         to locate the indexed row and write into it. If an index is not provided, the update is treated as an append.
 
         Example:
@@ -168,9 +169,9 @@ class Table(object):
         self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
 
     def remove(self, pkeys):
-        '''Removes the rows with the primary keys specified in `pkeys`.
+        '''Removes the rows with the primary keys specified in ``pkeys``.
 
-        If the table does not have an index, `remove()` has no effect. Removes propagate to views derived from the table.
+        If the table does not have an index, ``remove()`` has no effect. Removes propagate to views derived from the table.
 
         Example:
             >>> tbl = Table({"a": [1, 2, 3]}, index="a")
@@ -196,17 +197,16 @@ class Table(object):
         A View is an immutable set of transformations on the underlying Table, which allows
         for querying, pivoting, aggregating, sorting, and filtering of data.
 
-        Args:
-            **config (dict) : optional keyword arguments that configure and transform the view:
-            - "columns" (list[str]) : a list of column names to be shown
-            - "row_pivots" (list[str]) : a list of column names to use as row pivots
-            - "column_pivots" (list[str]) : a list of column names to use as column pivots
-            - "aggregates" (dict[str:str]) : a dictionary of column names to aggregate types to specify aggregates for individual columns
-            - "sort" (list(list[str]))
-            - "filter" (list(list[str]))
+        Keyword Args:
+            columns (list) : a list of column names to be shown
+            row_pivots (list) : a list of column names to use as row pivots
+            column_pivots (list) : a list of column names to use as column pivots
+            aggregates (dict) : a dictionary of column names to aggregate types to specify aggregates for individual columns
+            sort (list) : a list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc)
+            filter (list) : a list of lists, each list containing a column name, a filter comparator, and a value to filter by
 
         Returns:
-            View : a new instance of the `View` class.
+            perspective.table.view.View : a new ``perspective.View`` instance.
 
         Examples:
             >>> tbl = Table({"a": [1, 2, 3]})
@@ -221,7 +221,7 @@ class Table(object):
         return view
 
     def on_delete(self, callback):
-        '''Register a callback with the table that will be invoked when the `delete()` method is called on the Table.
+        '''Register a callback with the table that will be invoked when the ``delete()`` method is called on the Table.
 
         Examples:
             >>> def deleter():

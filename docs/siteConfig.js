@@ -6,7 +6,7 @@
  */
 
 const siteConfig = {
-    title: "" /* title for your website */,
+    title: "Perspective" /* title for your website */,
     tagline: "Streaming Analytics via WebAssembly",
     url: "https://perspective.finos.org/" /* your website url */,
     cname: "perspective.finos.org",
@@ -22,7 +22,7 @@ const siteConfig = {
         {href: "https://github.com/finos/perspective/", label: "GitHub"}
     ],
 
-    headerIcon: "img/logo.png",
+    headerTitle: "Perspective",
     // footerIcon: "img/perspective2.svg",
     favicon: "img/favicon.png",
 
@@ -48,10 +48,11 @@ const siteConfig = {
     ],
 
     stylesheets: [
-        "https://fonts.googleapis.com/css?family=Montserrat:300",
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",
+        "https://fonts.googleapis.com/css?family=Public+Sans",
         "https://fonts.googleapis.com/css?family=Roboto+Mono",
+        "https://fonts.googleapis.com/css?family=Inconsolata",
         "https://fonts.googleapis.com/css?family=Source+Code+Pro:900&display=swap"
     ],
 
