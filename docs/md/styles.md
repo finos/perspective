@@ -3,8 +3,6 @@ id: styles
 title: CSS Styles
 ---
 
-# CSS Styles
-
 The `<perspective-viewer>` custom element supports a variety of styling options
 via custom CSS rules, which can be used almost exactly like traditional CSS.
 Note that it may be necessary to invoke `restyleElement()` on the custom element
@@ -19,13 +17,13 @@ elem.restyleElement();
 
 In addition to the [custom rules](styles) supported, `<perspective-viewer>` can be
 further styled by column type for certain parameters (where noted), and even
-by [custom defined types]().
+by custom defined types.
 
 ```css
 perspective-viewer {
 
     /* Set the color */
-    color: #ff0000;   
+    color: #ff0000;
 
     /* Override the color for hypergrid */
     --hypergrid--color: #00ff00; 
