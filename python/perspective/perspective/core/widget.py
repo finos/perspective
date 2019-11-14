@@ -118,10 +118,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         See `PerspectiveViewer.__init__` for arguments that transform the view shown in the widget.
 
         Args:
-            table_or_data (perspective.Table|dict|list|pandas.DataFrame) : the table or data that will be viewed in the widget.
-            index (str) : a column name to be used as the primary key. Ignored if a `Table` is passed in.
-            limit (int) : a upper limit on the number of rows in the Table. Cannot be set at the same time as `index`, ignored if a `Table` is passed in.
-            client (bool) : If True, convert the dataset into an Apache Arrow binary and create the Table in Javascript using a copy of the data. Defaults to False.
+            table_or_data (perspective.Table|dict|list|pandas.DataFrame): the table or data that will be viewed in the widget.
+            index (str): a column name to be used as the primary key. Ignored if a `Table` is passed in.
+            limit (int): a upper limit on the number of rows in the Table. Cannot be set at the same time as `index`, ignored if a `Table` is passed in.
+            client (bool): If True, convert the dataset into an Apache Arrow binary and create the Table in Javascript using a copy of the data. Defaults to False.
             **kwargs : configuration options for the `PerspectiveViewer`, and `Table` constructor if `table_or_data` is a dataset.
 
         Example:
@@ -250,8 +250,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         The posted message should conform to the `PerspectiveJupyterMessage` interface as defined in `@finos/perspective-jupyterlab`.
 
         Args:
-            msg (dict) : a message from `PerspectiveManager` for the front-end viewer to process.
-            id (int) : an integer id that allows the client to process the message.
+            msg (dict): a message from `PerspectiveManager` for the front-end viewer to process.
+            id (int): an integer id that allows the client to process the message.
         '''
         self.send({
             "id": id,
@@ -265,7 +265,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         Args:
             widget : a reference to the `Widget` instance that received the message.
-            content (dict) : the message from the front-end. Automatically de-serialized by ipywidgets.
+            content (dict): the message from the front-end. Automatically de-serialized by ipywidgets.
             buffers : optional arraybuffers from the front-end, if any.
         '''
         if content["type"] == "cmd":

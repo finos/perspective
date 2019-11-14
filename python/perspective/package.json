@@ -27,8 +27,8 @@
     "docs:prebuild": "echo \"cleaning docs build folder\" && rimraf ./docs/build",
     "docs:build": "sphinx-build -b markdown docs docs/build",
     "docs:deploy": "npm-run-all docs:deploy:core docs:deploy:table",
-    "docs:deploy:core": "(echo \"---\nid: perspective-python-core\ntitle: \\`perspective.core\\` Python API\n---\n\n\"; cat ./docs/build/perspective.core.md) > ../../docs/obj/perspective-python-core.md",
-    "docs:deploy:table": "(echo \"---\nid: perspective-python-table\ntitle: \\`perspective.table\\` Python API\n---\n\n\"; cat ./docs/build/perspective.table.md) > ../../docs/obj/perspective-python-table.md"
+    "docs:deploy:core": "(echo \"---\nid: perspective-python-core\ntitle: perspective.core Python API\n---\n\n\"; cat ./docs/build/perspective.core.md) > ../../docs/obj/perspective-python-core.md",
+    "docs:deploy:table": "(echo \"---\nid: perspective-python-table\ntitle: perspective.table Python API\n---\n\n\"; cat ./docs/build/perspective.table.md) > ../../docs/obj/perspective-python-table.md"
   },
   "files": [
     "src/server.js"

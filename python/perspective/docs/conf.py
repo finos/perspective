@@ -89,6 +89,11 @@ todo_include_todos = False
 # Order autodoc by source code
 autodoc_member_order = 'bysource'
 
+# Napoleon
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+napoleon_include_init_with_doc = True
+
 # Exclude node from API documentation
 exclude_patterns = ["perspective.node.rst"]
 

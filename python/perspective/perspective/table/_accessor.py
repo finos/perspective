@@ -219,7 +219,7 @@ class _PerspectiveAccessor(object):
         '''For columnar datasets, return the list/Numpy array that contains the data for a single column.
 
         Args:
-            name (str) : the column name to look up
+            name (str): the column name to look up
 
         Returns:
             list/numpy.array/None : returns the column's data, or None if it cannot be found.

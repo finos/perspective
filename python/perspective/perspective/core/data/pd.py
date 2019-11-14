@@ -50,10 +50,10 @@ def deconstruct_pandas(data):
     '''Given a dataframe, flatten it by resetting the index and memoizing the pivots that were applied.
 
     Args:
-        data (pandas.dataframe) : a Pandas DataFrame to parse
+        data (pandas.dataframe): a Pandas DataFrame to parse
 
     Returns:
-        (pandas.DataFrame, dict) : a Pandas DataFrame and a dictionary containing optional members `columns`, `row_pivots`, and `column_pivots`.
+        (pandas.DataFrame, dict): a Pandas DataFrame and a dictionary containing optional members `columns`, `row_pivots`, and `column_pivots`.
     '''
     kwargs = {}
 

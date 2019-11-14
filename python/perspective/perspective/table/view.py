@@ -23,7 +23,7 @@ except ImportError:
 
 class View(object):
     def __init__(self, Table, **config):
-        '''Private constructor for a View object - use the Table.view() method to create Views.
+        '''Use the ``Table.view()`` method to create Views.
 
         A View object represents a specific transform (configuration or pivot,
         filter, sort, etc) configuration on an underlying Table. A View
@@ -103,7 +103,7 @@ class View(object):
         return self._view.expand(idx, len(self._config.get_row_pivots()))
 
     def collapse(self, idx):
-        '''Collapses the row at 'idx', i.e. hiding its leaf rows'''
+        '''Collapses the row at 'idx', i.e. hiding its leaf rows.'''
         return self._view.collapse(idx)
 
     def set_depth(self, depth):
@@ -128,7 +128,7 @@ class View(object):
         If the columns are aggregated, their aggregated types will be shown.
 
         Args:
-            as_string (bool) : returns data types as string representations, if True
+            as_string (bool): returns data types as string representations, if True
 
         Returns:
             schema : a map of strings to strings
@@ -146,7 +146,7 @@ class View(object):
         Callback must be a callable function that takes no parameters.
 
         Args:
-            callback (callable) : a callable function reference that will be called when ``update()`` is called.
+            callback (callable): a callable function reference that will be called when ``update()`` is called.
 
         Examples:
             >>> def updater():
@@ -178,7 +178,7 @@ class View(object):
         '''Given a callback function, remove it from the list of callbacks.
 
         Args:
-            callback (func) : a function reference that will be removed.
+            callback (func): a function reference that will be removed.
 
         Example:
             >>> table = perspective.Table(data)
@@ -201,7 +201,7 @@ class View(object):
         '''Set a callback to be run when the ``delete()`` method is called on the View.
 
         Args:
-            callback (callable) : a callback to run after ``delete()`` has been called.
+            callback (callable): a callback to run after ``delete()`` has been called.
 
         Examples:
             >>> def deleter():
@@ -233,7 +233,7 @@ class View(object):
         '''Remove the delete callback associated with this view.
 
         Args:
-            callback (callable) : a reference to a callable function that will be removed from delete callbacks.
+            callback (callable): a reference to a callable function that will be removed from delete callbacks.
 
         Example:
             >>> table = perspective.Table(data)
@@ -253,17 +253,23 @@ class View(object):
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def to_records(self, **options):
-        '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.
+        '''Serialize the view's dataset into a ``list`` of ``dict`` containing each individual row.
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Keyword Args:
-            start_row (int) : defaults to 0
-            end_row (int) : defaults to the number of total rows in the view
-            start_col (int) : defaults to 0
-            end_col (int) : defaults to the total columns in the view
-            index (int) : whether to return an implicit pkey for each row. Defaults to False
-            leaves_only (int) : whether to return only the data at the end of the tree. Defaults to False
+        - Keyword Arguments:
+
+        start_row (int): defaults to 0
+
+        end_row (int): defaults to the number of total rows in the view
+
+        start_col (int): defaults to 0
+
+        end_col (int): defaults to the total columns in the view
+
+        index (int): whether to return an implicit pkey for each row. Defaults to False
+
+        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
 
         Returns:
             list : A list of dictionaries, where each dict represents a new row of the dataset
@@ -276,13 +282,19 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Keyword Args:
-            start_row (int) : defaults to 0
-            end_row (int) : defaults to the number of total rows in the view
-            start_col (int) : defaults to 0
-            end_col (int) : defaults to the total columns in the view
-            index (int) : whether to return an implicit pkey for each row. Defaults to False
-            leaves_only (int) : whether to return only the data at the end of the tree. Defaults to False
+        - Keyword Arguments:
+
+        start_row (int): defaults to 0
+
+        end_row (int): defaults to the number of total rows in the view
+
+        start_col (int): defaults to 0
+
+        end_col (int): defaults to the total columns in the view
+
+        index (int): whether to return an implicit pkey for each row. Defaults to False
+
+        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
 
         Returns:
             dict : a dictionary with string keys and list values, where key = column name and value = column values
@@ -293,13 +305,19 @@ class View(object):
         '''Serialize the view's dataset into a ``dict`` of ``str`` keys and ``numpy.array`` values.
         Each key is a column name, and the associated value is the column's data packed into a numpy array.
 
-        Keyword Args:
-            start_row (int) : defaults to 0
-            end_row (int) : defaults to the number of total rows in the view
-            start_col (int) : defaults to 0
-            end_col (int) : defaults to the total columns in the view
-            index (int) : whether to return an implicit pkey for each row. Defaults to False
-            leaves_only (int) : whether to return only the data at the end of the tree. Defaults to False
+        - Keyword Arguments:
+
+        start_row (int): defaults to 0
+
+        end_row (int): defaults to the number of total rows in the view
+
+        start_col (int): defaults to 0
+
+        end_col (int): defaults to the total columns in the view
+
+        index (int): whether to return an implicit pkey for each row. Defaults to False
+
+        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
 
         Returns:
             dict : a dictionary with string keys and numpy array values, where key = column name and value = column values
@@ -314,13 +332,19 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Keyword Args:
-            start_row (int) : defaults to 0
-            end_row (int) : defaults to the number of total rows in the view
-            start_col (int) : defaults to 0
-            end_col (int) : defaults to the total columns in the view
-            index (int) : whether to return an implicit pkey for each row. Defaults to False
-            leaves_only (int) : whether to return only the data at the end of the tree. Defaults to False
+        - Keyword Arguments:
+
+        start_row (int): defaults to 0
+
+        end_row (int): defaults to the number of total rows in the view
+
+        start_col (int): defaults to 0
+
+        end_col (int): defaults to the total columns in the view
+
+        index (int): whether to return an implicit pkey for each row. Defaults to False
+
+        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
 
         Returns:
             pandas.DataFrame : a pandas dataframe containing the serialized data.
@@ -331,14 +355,21 @@ class View(object):
     def to_csv(self, **options):
         '''Serialize the view's dataset into a CSV string.
 
-        Keyword Args:
-            start_row (int) : defaults to 0
-            end_row (int) : defaults to the number of total rows in the view
-            start_col (int) : defaults to 0
-            end_col (int) : defaults to the total columns in the view
-            index (int) : whether to return an implicit pkey for each row. Defaults to False
-            leaves_only (int) : whether to return only the data at the end of the tree. Defaults to False
-            date_format (str) : how ``datetime`` objects should be formatted in the CSV.
+        - Keyword Arguments:
+
+        start_row (int): defaults to 0
+
+        end_row (int): defaults to the number of total rows in the view
+
+        start_col (int): defaults to 0
+
+        end_col (int): defaults to the total columns in the view
+
+        index (int): whether to return an implicit pkey for each row. Defaults to False
+
+        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
+
+        date_format (str): how ``datetime`` objects should be formatted in the CSV.
 
         Returns:
             str : a CSV-formatted string containing the serialized data.

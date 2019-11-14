@@ -45,9 +45,9 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         '''Create a new instance of the PerspectiveTornadoHandler with the given Manager instance.
 
         Args:
-            **kwargs (dict) : keyword arguments for the Tornado handler.
-                - manager (PerspectiveViewer) : a `PerspectiveViewer` instance. Must be provided on initialization.
-                - check_origin (bool) : if True, all requests will be accepted regardless of origin. Defaults to False.
+            **kwargs (dict): keyword arguments for the Tornado handler.
+                - manager (PerspectiveViewer): a `PerspectiveViewer` instance. Must be provided on initialization.
+                - check_origin (bool): if True, all requests will be accepted regardless of origin. Defaults to False.
         '''
         self._manager = kwargs.pop("manager", None)
         self._session = self._manager.new_session()
@@ -73,7 +73,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         '''When `post` is called by `PerspectiveManager`, serialize the data to JSON and send it to the client.
 
         Args:
-            message (str) : a JSON-serialized string containing a message to the front-end `perspective-viewer`.
+            message (str): a JSON-serialized string containing a message to the front-end `perspective-viewer`.
         '''
         self.write_message(message)
 

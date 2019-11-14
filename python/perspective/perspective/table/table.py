@@ -26,12 +26,15 @@ class Table(object):
 
         If a schema is provided, the table will be empty. Subsequent updates MUST conform to the column names and data types provided in the schema.
 
-        Args:
-            data_or_schema (dict/list/dataframe) : data or schema that initializes the table.
+        - Keyword Arguments:
 
-        Keyword Args:
-            limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
-            index (string) : a string column name to use as the Table's primary key.
+        ::
+
+            data_or_schema (dict/list/dataframe): data or schema that initializes the table.
+
+            limit (int): the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
+
+            index (string): a string column name to use as the Table's primary key.
         '''
         self._is_arrow = isinstance(data_or_schema, (bytes, bytearray))
         if (self._is_arrow):
@@ -61,7 +64,7 @@ class Table(object):
         '''Replaces all rows in the Table with the new data that conforms to the Table's schema.
 
         Args:
-            data (dict|list|dataframe) : New data that will be filled into the Table.
+            data (dict|list|dataframe): New data that will be filled into the Table.
         '''
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
@@ -76,7 +79,7 @@ class Table(object):
         A schema provides the mapping of string column names to python data types.
 
         Args:
-            as_string (bool) : returns the data types as string representations, if True
+            as_string (bool): returns the data types as string representations, if True
 
         Returns:
             dict : A key-value mapping of column names to data types.
@@ -97,7 +100,7 @@ class Table(object):
         '''Returns the column names of this dataset.
 
         Args:
-            computed (bool) : whether to include computed columns in this array. Defaults to False.
+            computed (bool): whether to include computed columns in this array. Defaults to False.
 
         Returns:
             list : a list of string column names
@@ -150,7 +153,7 @@ class Table(object):
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
 
         Args:
-            data (dict|list|dataframe) : the data with which to update the Table
+            data (dict|list|dataframe): the data with which to update the Table
         '''
         columns = self.columns()
         types = self._table.get_schema().types()
@@ -180,7 +183,7 @@ class Table(object):
             [{"a": 1}]
 
         Args:
-            pkeys (list) : a list of primary keys to indicate the rows that should be removed.
+            pkeys (list): a list of primary keys to indicate the rows that should be removed.
         '''
         if self._index == "":
             return
@@ -197,13 +200,21 @@ class Table(object):
         A View is an immutable set of transformations on the underlying Table, which allows
         for querying, pivoting, aggregating, sorting, and filtering of data.
 
-        Keyword Args:
-            columns (list) : a list of column names to be shown
-            row_pivots (list) : a list of column names to use as row pivots
-            column_pivots (list) : a list of column names to use as column pivots
-            aggregates (dict) : a dictionary of column names to aggregate types to specify aggregates for individual columns
-            sort (list) : a list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc)
-            filter (list) : a list of lists, each list containing a column name, a filter comparator, and a value to filter by
+        - Keyword Arguments:
+
+        ::
+
+            columns (list of str): a list of column names to be visible to the user.
+
+            row_pivots (list of str): a list of column names to use as row pivots.
+
+            column_pivots (list of str): a list of column names to use as column pivots.
+
+            aggregates (dict of str to str): a dictionary of column names to aggregate types to specify aggregates for individual columns.
+
+            sort (list of list of str): a list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc).
+
+            filter (list of list of str): a list of lists, each list containing a column name, a filter comparator, and a value to filter by.
 
         Returns:
             perspective.table.view.View : a new ``perspective.View`` instance.

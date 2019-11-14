@@ -44,7 +44,7 @@ class _PerspectiveDateValidator(object):
         it is constructed with the timestamp, thus any timezone set on the input data will not apply to the output data.
 
         Args:
-            str (str) : the datestring to parse
+            str (str): the datestring to parse
 
         Returns:
             A datetime.date or datetime.datetime object if parse is successful, None otherwise
@@ -137,7 +137,7 @@ class _PerspectiveDateValidator(object):
         Attempt to use heuristics about dates to minimize false positives, i.e. do not parse dates without separators.
 
         Args:
-            str (str) : the datestring to parse
+            str (str): the datestring to parse
         '''
         if isinstance(s, (bytes, bytearray)):
             s = s.decode("utf-8")
