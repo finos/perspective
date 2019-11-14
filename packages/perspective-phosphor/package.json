@@ -23,7 +23,10 @@
         "build:styles": "webpack --color --config config/webpack.theme.config.js",
         "build:umd": "webpack --color --config config/webpack.umd.config.js",
         "clean": "rimraf dist",
-        "test": "jest --silent --color 2>&1"
+        "test": "yarn test:run",
+        "test:run": "npm-run-all test:unit test:integration",
+        "test:unit": "jest  --color --silent --config=./config/jest.unit.config.js 2>&1",
+        "test:integration": "jest --color --silent --config=./config/jest.integration.config.js 2>&1"
     },
     "dependencies": {
         "@finos/perspective": "^0.4.0-rc.3",
@@ -46,10 +49,5 @@
         "source-map-support": "^0.5.9",
         "typescript": "^3.6.0",
         "webpack-fix-style-only-entries": "^0.4.0"
-    },
-    "jest": {
-        "transform": {
-            ".js$": "@finos/perspective-test/src/js/transform.js"
-        }
     }
 }

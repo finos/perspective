@@ -1,5 +1,5 @@
-import {PerspectiveDockPanel} from "../../dist/esm/dockpanel";
-import {PerspectiveWidget} from "../../dist/esm/widget";
+import {PerspectiveDockPanel} from "../../../dist/esm/dockpanel";
+import {PerspectiveWidget} from "../../../dist/esm/widget";
 import {Widget} from "@phosphor/widgets";
 
 describe("dockpanel", () => {

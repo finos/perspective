@@ -54,8 +54,8 @@ function jest() {
 }
 
 function slow_jest() {
-    if (!process.env.PACKAGE || minimatch("perspective-phosphor", process.env.PACKAGE) || minimatch("perspective-jupyterlab", process.env.PACKAGE)) {
-        return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
+    if (!process.env.PACKAGE || minimatch("perspective-phosphor", process.env.PACKAGE)) {
+        return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-jupyterlab" --concurrency 1 --no-bail -- yarn --silent test:run';
     } else {
         return 'echo ""';
     }
