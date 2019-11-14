@@ -633,7 +633,6 @@ class PerspectiveViewer extends ActionElement {
      * Reset's this element's view state and attributes to default.  Does not
      * delete this element's `perspective.table` or otherwise modify the data
      * state.
-     *
      */
     reset() {
         this.removeAttribute("row-pivots");

@@ -778,7 +778,7 @@ namespace binding {
             }
 
             double fval = item.as<double>();
-            if (isnan(fval)) {
+            if (!is_update && isnan(fval)) {
                 std::cout << "Promoting to string" << std::endl;
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -823,13 +823,13 @@ namespace binding {
                     // float value in an inferred column. Would not be needed if the type
                     // inference checked the entire column/we could reset parsing.
                     double fval = item.as<double>();
-                    if (fval > 2147483647 || fval < -2147483648) {
+                    if (!is_update && (fval > 2147483647 || fval < -2147483648)) {
                         std::cout << "Promoting to float" << std::endl;
                         tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                         col = tbl.get_column(name);
                         type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
-                    } else if (isnan(fval)) {
+                    } else if (!is_update && isnan(fval)) {
                         std::cout << "Promoting to string" << std::endl;
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);

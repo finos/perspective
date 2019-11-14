@@ -11,5 +11,6 @@ from .aggregate import Aggregate  # noqa: F401
 from .exception import PerspectiveError  # noqa: F401
 from .manager import PerspectiveManager  # noqa: F401
 from .tornado_handler import PerspectiveTornadoHandler  # noqa: F401
+from .sort import Sort  # noqa: F401
 from .viewer import PerspectiveViewer  # noqa: F401
 from .widget import PerspectiveWidget  # noqa: F401

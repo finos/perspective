@@ -50,11 +50,15 @@ def _serialize(data):
             # serialize schema values to string
             if isinstance(v, type):
                 return {k: _type_to_string(data[k]) for k in data}
+            elif isinstance(v, numpy.ndarray):
+                return {k: data[k].tolist() for k in data}
             else:
                 return data
-    elif isinstance(data, numpy.recarray):
-        # flatten numpy record arrays
-        columns = [data[col] for col in data.dtype.names]
+    elif isinstance(data, numpy.ndarray):
+        # structured or record array
+        if not isinstance(data.dtype.names, tuple):
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+        columns = [data[col].tolist() for col in data.dtype.names]
         return dict(zip(data.dtype.names, columns))
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
         # take flattened dataframe and make it serializable
@@ -69,16 +73,6 @@ def _serialize(data):
         return d
     else:
         raise NotImplementedError("Cannot serialize a dataset of `{0}`.".format(str(type(data))))
-
-
-class DateTimeStringEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        '''Create a stringified representation of a datetime object.'''
-        if isinstance(obj, datetime.datetime):
-            return obj.strftime("%Y-%m-%d %H:%M:%S.%f")
-        else:
-            return super(DateTimeStringEncoder, self).default(obj)
 
 
 class PerspectiveWidget(Widget, PerspectiveViewer):
@@ -230,6 +224,25 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             }, -3)
         else:
             super(PerspectiveWidget, self).update(data)
+
+    def clear(self):
+        '''Clears the widget's underlying `Table` - does not function in client mode.'''
+        if self.client is False:
+            super(PerspectiveWidget, self).clear()
+
+    def replace(self, data):
+        '''Replaces the widget's `Table` with new data conforming to the same schema. Does not clear
+        user-set state. If in client mode, serializes the data and sends it to the browser.'''
+        if self.client is True:
+            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+                data, _ = deconstruct_pandas(data)
+            d = _serialize(data)
+            self.post({
+                "cmd": "replace",
+                "data": d
+            })
+        else:
+            super(PerspectiveWidget, self).replace(data)
 
     def post(self, msg, id=None):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.

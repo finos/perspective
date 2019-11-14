@@ -124,11 +124,18 @@ export class PerspectiveView extends DOMWidgetView {
      */
     _handle_message(msg: PerspectiveJupyterMessage) {
         // If in client-only mode (no Table on the python widget), message.data is an object containing "data" and "options". 
-        if (this.pWidget.client === true && msg.data["data"]) {
-            if (msg.data["cmd"] === "update") {
-                this.pWidget._update(msg.data["data"]);
-            } else {
-                this.pWidget.load(msg.data["data"], msg.data["options"]);
+        if (this.pWidget.client === true) {
+            if(msg.data["data"]) {
+                // either an update or a load
+                if (msg.data["cmd"] === "update") {
+                    this.pWidget._update(msg.data["data"]);
+                } else if (msg.data["cmd"] === "replace") {
+                    this.pWidget.replace(msg.data["data"]);
+                } else {
+                    this.pWidget.load(msg.data["data"], msg.data["options"]);
+                }
+            } else if (msg.data["cmd"] == "clear") {
+                this.pWidget.clear();
             }
         } else {
             // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
