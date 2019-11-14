@@ -499,7 +499,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		    set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
         endif()
-	endif()
+    endif()
 
 	if(PSP_PYTHON_BUILD)
 		########################

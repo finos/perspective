@@ -147,8 +147,7 @@ class PSPBuild(build_ext):
             os.makedirs(self.build_temp)
 
         try:
-            subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
-            subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+            out1 = subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out = e.output.decode()
             logging.critical(out)
@@ -160,8 +159,16 @@ class PSPBuild(build_ext):
                 os.makedirs(self.build_temp)
                 subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
                 subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+                print()
+                return
             else:
                 raise
+ 
+        try:
+            out2 = subprocess.check_output([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            out = e.output.decode()
+            logging.critical(out)
         print()  # Add an empty line for cleaner output
 
 
