@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-bench",
-    "version": "0.4.0-rc.3",
+    "version": "0.4.0-rc.4",
     "description": "Benchmark utility based on perspective",
     "private": true,
     "main": "src/js/bench.js",
@@ -26,12 +26,12 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@finos/perspective": "^0.4.0-rc.3",
-        "@finos/perspective-viewer": "^0.4.0-rc.3",
-        "@finos/perspective-viewer-d3fc": "^0.4.0-rc.3",
-        "@finos/perspective-viewer-hypergrid": "^0.4.0-rc.3"
+        "@finos/perspective": "^0.4.0-rc.4",
+        "@finos/perspective-viewer": "^0.4.0-rc.4",
+        "@finos/perspective-viewer-d3fc": "^0.4.0-rc.4",
+        "@finos/perspective-viewer-hypergrid": "^0.4.0-rc.4"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.4.0-rc.3"
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.4"
     }
 }

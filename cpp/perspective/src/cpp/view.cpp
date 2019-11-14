@@ -29,6 +29,17 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     m_filter = m_view_config.get_fterm();
     m_sort = m_view_config.get_sortspec();
 
+    // Add hidden columns used in sorts to the `m_hidden_sort` vector.
+    if (m_sort.size() > 0) {
+        _find_hidden_sort(m_sort);
+    }
+
+    if (m_column_pivots.size() > 0) {
+        auto column_sort = m_view_config.get_col_sortspec();
+        _find_hidden_sort(column_sort);
+    }
+
+
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
 }
@@ -152,6 +163,38 @@ View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
         std::vector<t_tscalar> col_path;
         col_path.push_back(name);
         names.push_back(col_path);
+    }
+
+    return names;
+}
+
+template <typename CTX_T>
+std::vector<std::vector<t_tscalar>>
+View<CTX_T>::column_paths() const {
+    auto num_column_pivots = m_column_pivots.size();
+    auto names = column_names(true, num_column_pivots);
+
+    if (sides() > 0 && !is_column_only()) {
+        // prepend `__ROW_PATH__` to the output vector
+        t_tscalar row_path;
+        row_path.set("__ROW_PATH__");
+        names.insert(names.begin(), std::vector<t_tscalar>{row_path});
+    }
+
+    if (m_hidden_sort.size() > 0) {
+        // make a new vector so we don't have to erase while iterating
+        std::vector<std::vector<t_tscalar>> visible_column_paths;
+
+        for (const auto& column : names) {
+            // Remove undisplayed column names used to sort
+            std::string name = column.back().to_string();
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name) == m_hidden_sort.end()) {
+                visible_column_paths.push_back(column);
+            }
+        }
+
+        return visible_column_paths;
+        
     }
 
     return names;
@@ -497,6 +540,18 @@ View<CTX_T>::_map_aggregate_types(
     }
 
     return typestring;
+}
+
+template <typename CTX_T>
+void
+View<CTX_T>::_find_hidden_sort(const std::vector<t_sortspec>& sort) {
+    for (const t_sortspec& s : sort) {
+        bool hidden = std::find(m_columns.begin(), m_columns.end(), s.m_colname) == m_columns.end();
+        if (hidden) {
+            // Store the actual column, not the composite column path
+            m_hidden_sort.push_back(s.m_colname);
+        }
+    }
 }
 
 // Explicitly instantiate View for each context

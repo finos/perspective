@@ -93,6 +93,7 @@ infer_type(t_val x, t_val date_validator) {
     } else {
         t = type_string_to_t_dtype(type_string);
     }
+
     return t;
 }
 
@@ -147,7 +148,6 @@ get_data_types(t_val data, std::int32_t format, std::vector<std::string> names,
 
     if (format == 2) {
         py::dict data_dict = data.cast<py::dict>();
-
 
         for (auto tup : data_dict) {
             auto name = tup.first.cast<std::string>();

@@ -15,9 +15,14 @@ module.exports = {
         }),
         new FixStyleOnlyEntriesPlugin()
     ],
-
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
+    },
+    stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     output: {
-        path: path.resolve(__dirname, "dist/themes/")
+        path: path.resolve(__dirname, "../dist/themes/")
     },
     module: {
         rules: [

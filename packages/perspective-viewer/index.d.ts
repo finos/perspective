@@ -7,6 +7,8 @@ declare module '@finos/perspective-viewer' {
         update(data: TableData): void;
         notifyResize(): void;
         delete(): Promise<void>;
+        clear() : void;
+        replace(data: TableData) : void;
         flush(): Promise<void>;
         toggleConfig(): void;
         save(): PerspectiveViewerOptions;

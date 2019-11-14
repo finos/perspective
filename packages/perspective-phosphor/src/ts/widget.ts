@@ -153,6 +153,23 @@ export class PerspectiveWidget extends Widget {
         this.viewer.update(data);
     }
 
+    /**
+     * Removes all rows from the viewer's table. Does not reset viewer state.
+     */
+    clear(): void {
+        this.viewer.clear();
+    }
+
+    /**
+     * Replaces the data of the viewer's table with new data. New data must conform
+     * to the schema of the Table.
+     * 
+     * @param data
+     */
+    replace(data: TableData): void {
+        this.viewer.replace(data);
+    }
+
     get table(): Table {
         return this.viewer.table;
     }

@@ -20,17 +20,17 @@ function clean_screenshots() {
 }
 
 try {
+    if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
+        clean("cpp/perspective/obj");
+    }
     if (process.env.PSP_PROJECT === "python") {
-        clean("cpp/perspective/obj", "cpp/perspective/cppbuild", "python/perspective/build");
+        clean("cpp/perspective/obj", "cpp/perspective/cppbuild", "python/perspective/dist", "python/perspective/build", "python/perspective/perspective_python.egg-info");
         return;
     }
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
         clean("cpp/perspective/cppbuild");
         let files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
         clean(...files.map(x => `cpp/perspective/obj/${x}`));
-    }
-    if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
-        clean("cpp/perspective/obj");
     }
     if (!IS_SCREENSHOTS) {
         execute(bash`lerna run clean --scope=@finos/${process.env.PACKAGE}`);

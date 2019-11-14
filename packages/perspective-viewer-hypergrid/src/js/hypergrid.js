@@ -184,7 +184,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         index: rowPivots.length === 0 && colPivots.length === 0
     };
 
-    const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(data_window), view.schema(), this._table.schema()]);
+    const [nrows, json, schema, tschema, all_columns] = await Promise.all([view.num_rows(), view.to_columns(data_window), view.schema(), this._table.schema(), view.column_paths()]);
 
     if (task.cancelled) {
         return;
@@ -197,7 +197,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         return;
     }
 
-    let columns = Object.keys(json).filter(x => x !== "__INDEX__");
+    const columns = all_columns.filter(x => x !== "__INDEX__");
     const dataModel = hypergrid.behavior.dataModel;
     dataModel._grid = hypergrid;
 
@@ -211,9 +211,6 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel.pspFetch = async rect => {
         const range = pad_data_window(rect, rowPivots, colPivots, this.hasAttribute("settings"));
         let next_page = await dataModel._view.to_columns(range);
-        if (columns.length === 0) {
-            columns = Object.keys(await view.to_columns(data_window));
-        }
         dataModel.data = [];
         const rows = page2hypergrid(next_page, rowPivots, columns);
         const base = range.start_row;

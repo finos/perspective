@@ -251,6 +251,15 @@ export default function(Module) {
         return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
 
+    /**
+     * Returns an array of strings containing the column paths of the View without any of the source columns.
+     *
+     * A column path shows the columns that a given cell belongs to after pivots are applied.
+     */
+    view.prototype.column_paths = function() {
+        return extract_vector_scalar(this._View.column_paths()).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+    };
+
     view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];

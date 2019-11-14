@@ -260,28 +260,58 @@
 :host {
     .integer:before,
     .float:before {
-        content: var(--float--column-type--content, var(--column-type--content, "123"));
-        color: var(--float--column-type--color, var(--column-type--color, #016bc6));
+        content: var(
+            --float--column-type--content,
+            var(--column-type--content, "123")
+        );
+        color: var(
+            --float--column-type--color,
+            var(--column-type--color, #016bc6)
+        );
     }
 
     .string:before {
-        content: var(--string--column-type--content, var(--column-type--content, "abc"));
-        color: var(--string--column-type--color, var(--column-type--color, #fe9292));
+        content: var(
+            --string--column-type--content,
+            var(--column-type--content, "abc")
+        );
+        color: var(
+            --string--column-type--color,
+            var(--column-type--color, #fe9292)
+        );
     }
 
     .boolean:before {
-        content: var(--boolean--column-type--content, var(--column-type--content, "t/f"));
-        color: var(--boolean--column-type--color, var(--column-type--color, #999999));
+        content: var(
+            --boolean--column-type--content,
+            var(--column-type--content, "t/f")
+        );
+        color: var(
+            --boolean--column-type--color,
+            var(--column-type--color, #999999)
+        );
     }
 
     .date:before {
-        content: var(--date--column-type--content, var(--column-type--content, "mdy"));
-        color: var(--date--column-type--color, var(--column-type--color,  #999999));
+        content: var(
+            --date--column-type--content,
+            var(--column-type--content, "mdy")
+        );
+        color: var(
+            --date--column-type--color,
+            var(--column-type--color, #999999)
+        );
     }
 
     .datetime:before {
-        content: var(--datetime--column-type--content, var(--column-type--content, "mdy"));
-        color: var(--datetime--column-type--color, var(--column-type--color,  #999999));
+        content: var(
+            --datetime--column-type--content,
+            var(--column-type--content, "mdy")
+        );
+        color: var(
+            --datetime--column-type--color,
+            var(--column-type--color, #999999)
+        );
     }
 }
 

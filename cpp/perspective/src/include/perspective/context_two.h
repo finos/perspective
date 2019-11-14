@@ -77,7 +77,6 @@ private:
     std::vector<t_sortspec> m_sortby;
     bool m_rows_changed;
     std::vector<std::shared_ptr<t_stree>> m_trees;
-    std::vector<t_sortspec> m_row_sortby;
     std::vector<t_sortspec> m_column_sortby;
     t_depth m_row_depth;
     bool m_row_depth_set;

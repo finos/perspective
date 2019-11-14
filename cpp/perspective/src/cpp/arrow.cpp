@@ -180,15 +180,16 @@ namespace arrow {
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
                     case ::arrow::Int8Type::type_id: {
-                        iter_col_copy<::arrow::Int8Array, uint32_t>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);
                     } break;
                     case ::arrow::Int16Type::type_id: {
-                        iter_col_copy<::arrow::Int16Array, uint32_t>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::Int16Array, t_uindex>(dest, indices, offset, len);
                     } break;
                     case ::arrow::Int32Type::type_id: {
-                        auto sindices = std::static_pointer_cast<::arrow::Int32Array>(indices);
-                        std::memcpy(dest->get_nth<std::int32_t>(offset),
-                            (void*)sindices->raw_values(), len * 4);
+                        iter_col_copy<::arrow::Int32Array, t_uindex>(dest, indices, offset, len);
+                    } break;
+                    case ::arrow::Int64Type::type_id: {
+                         iter_col_copy<::arrow::Int64Array, t_uindex>(dest, indices, offset, len);
                     } break;
                     default:
                         std::stringstream ss;

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-phosphor",
-    "version": "0.4.0-rc.3",
+    "version": "0.4.0-rc.4",
     "description": "Perspective.js",
     "files": [
         "dist/**/*",
@@ -17,43 +17,37 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build": "npm-run-all build:esm build:cjs build:styles",
+        "build": "npm-run-all build:esm build:cjs build:styles build:umd",
         "build:esm": "tsc --p ./config --outDir dist/esm",
         "build:cjs": "webpack --color --config config/webpack.config.js",
         "build:styles": "webpack --color --config config/webpack.theme.config.js",
+        "build:umd": "webpack --color --config config/webpack.umd.config.js",
         "clean": "rimraf dist",
-        "test": "jest --silent --color 2>&1"
+        "test": "yarn test:run",
+        "test:run": "npm-run-all test:unit test:integration",
+        "test:unit": "jest  --color --silent --config=./config/jest.unit.config.js 2>&1",
+        "test:integration": "jest --color --silent --config=./config/jest.integration.config.js 2>&1"
     },
     "dependencies": {
-        "@finos/perspective": "^0.4.0-rc.3",
-        "@finos/perspective-viewer": "^0.4.0-rc.3",
+        "@finos/perspective": "^0.4.0-rc.4",
+        "@finos/perspective-viewer": "^0.4.0-rc.4",
         "@phosphor/application": "^1.5.0",
         "@phosphor/default-theme": "0.1.0",
         "@phosphor/widgets": "^1.6.0",
         "lodash.uniqby": "^4.7.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.4.0-rc.3",
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.4",
         "@types/jest": "^24.0.19",
         "@types/lodash.uniqby": "^4.7.6",
-        "document-register-element": "^1.14.3",
         "file-loader": "^0.11.1",
         "identity-obj-proxy": "^3.0.0",
         "isomorphic-fetch": "^2.2.1",
         "jest-transform-css": "^2.0.0",
         "mini-css-extract-plugin": "^0.8.0",
-        "mutationobserver-shim": "^0.3.3",
         "rimraf": "^2.5.2",
         "source-map-support": "^0.5.9",
         "typescript": "^3.6.0",
         "webpack-fix-style-only-entries": "^0.4.0"
-    },
-    "jest": {
-        "transform": {
-            ".js$": "@finos/perspective-test/src/js/transform.js"
-        },
-        "setupFiles": [
-            "./test/setup-jest.js"
-        ]
     }
 }

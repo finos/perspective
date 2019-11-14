@@ -5,7 +5,10 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import numpy as np
+import pandas as pd
+from datetime import date, datetime
 from pytest import raises
 from perspective import PerspectiveError, PerspectiveWidget, Table
 
@@ -63,14 +66,96 @@ class TestWidget:
     # client-only mode
 
     def test_widget_client(self):
-        data = {"a": np.arange(0, 50)}
+        data = {"a": [i for i in range(50)]}
         widget = PerspectiveWidget(data, client=True)
         assert widget.table is None
         assert widget._data == data
+
+    def test_widget_client_np(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, client=True)
+        assert widget.table is None
+        assert widget._data == {
+            "a": [i for i in range(50)]
+        }
+
+    def test_widget_client_df(self):
+        data = pd.DataFrame({
+            "a": np.arange(10),
+            "b": [True for i in range(10)],
+            "c": [str(i) for i in range(10)]
+        })
+        widget = PerspectiveWidget(data, client=True)
+        assert widget.table is None
+        assert widget._data == {
+            "index": [i for i in range(10)],
+            "a": [i for i in range(10)],
+            "b": [True for i in range(10)],
+            "c": [str(i) for i in range(10)]
+        }
+
+    def test_widget_client_np_structured_array(self):
+        data = np.array([(1, 2), (3, 4)], dtype=[("a", "int64"), ("b", "int64")])
+        widget = PerspectiveWidget(data, client=True)
+        assert widget.table is None
+        assert widget._data == {
+            "a": [1, 3],
+            "b": [2, 4]
+        }
+
+    def test_widget_client_np_recarray(self):
+        data = np.array([(1, 2), (3, 4)], dtype=[("a", "int64"), ("b", "int64")]).view(np.recarray)
+        widget = PerspectiveWidget(data, client=True)
+        assert widget.table is None
+        assert widget._data == {
+            "a": [1, 3],
+            "b": [2, 4]
+        }
+
+    def test_widget_client_schema(self):
+        widget = PerspectiveWidget({
+            "a": int,
+            "b": float,
+            "c": bool,
+            "d": date,
+            "e": datetime,
+            "f": str
+        }, client=True)
+        assert widget.table is None
+        assert widget._data == {
+            "a": "integer",
+            "b": "float",
+            "c": "boolean",
+            "d": "date",
+            "e": "datetime",
+            "f": "string"
+        }
+
+    def test_widget_client_schema_py2_types(self):
+        if six.PY2:
+            widget = PerspectiveWidget({
+                "a": long,  # noqa: F821
+                "b": float,
+                "c": bool,
+                "d": date,
+                "e": datetime,
+                "f": unicode  # noqa: F821
+            }, client=True)
+            assert widget.table is None
+            assert widget._data == {
+                "a": "integer",
+                "b": "float",
+                "c": "boolean",
+                "d": "date",
+                "e": "datetime",
+                "f": "string"
+            }
 
     def test_widget_client_update(self):
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data, client=True)
         widget.update(data)
         assert widget.table is None
-        assert widget._data == data
+        assert widget._data == {
+            "a": [i for i in range(50)]
+        }

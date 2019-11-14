@@ -11,6 +11,7 @@
         "outDir": "dist/esm",
         "sourceMap": true,
         "inlineSourceMap": false,
+        "inlineSources": true,
         "rootDir": "../src/ts",
         "lib": [
             "es2016",

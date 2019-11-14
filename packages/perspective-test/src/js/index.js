@@ -234,7 +234,7 @@ expect.extend({
     }
 });
 
-test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true} = {}) {
+test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true} = {}) {
     const _url = page_url;
     const _reload_page = page_reload;
     test(
@@ -333,7 +333,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                         await new Promise(f => setTimeout(f, 1000000));
                     }
                 }
-                expect(errors).toNotError();
+                if (fail_on_errors) {
+                    expect(errors).toNotError();
+                }
                 expect(hash).toBe(results[_url + "/" + name]);
             }
         },

@@ -182,19 +182,13 @@ const FeatureCallout = props => (
     <Container padding={["bottom", "top"]} background="dark">
         <h2>Features</h2>
         <MarkdownBlock background="dark">
-            A fast, memory efficient streaming pivot engine written principally
-            in C++ and compiled to WebAssembly via the
-            [emscripten](https://github.com/kripken/emscripten) compiler.
+            A fast, memory efficient streaming pivot engine written principally in C++ and compiled to WebAssembly via the [emscripten](https://github.com/kripken/emscripten) compiler.
         </MarkdownBlock>
         <MarkdownBlock>
-            An embeddable, framework-agnostic configuration UI, based on [Web
-            Components](https://www.webcomponents.org/), and a WebWorker engine
-            host for responsiveness at high frequency.
+            An embeddable, framework-agnostic configuration UI, based on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for responsiveness at high frequency.
         </MarkdownBlock>
         <MarkdownBlock>
-            A suite of simple visualization plugins for some common Javascript
-            libraries such as [D3FC](),
-            [Hypergrid](https://github.com/fin-hypergrid/core) and
+            A suite of simple visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/), [Hypergrid](https://github.com/fin-hypergrid/core) and
             [HighCharts](https://github.com/highcharts/highcharts).
         </MarkdownBlock>
         <MarkdownBlock>Integration with Jupyterlab.</MarkdownBlock>
@@ -208,10 +202,10 @@ Originally developed for J.P. Morgan's trading business, Perspective is
 an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
 datasets.  Use it to build reports, dashboards, notebooks and applications.
 Perspective comes with:
-* A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](), with read/write/stream support for [Apache Arrow]().
+* A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
 * A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
 * A suite of simple, context-aware visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/) and [Hypergrid](https://github.com/fin-hypergrid/core).
-* Integration with [Jupyterlab](), Runtimes for the Browser and Node.js.
+* Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/), Runtimes for the Browser and Node.js.
 `;
 
 const Description = props => (

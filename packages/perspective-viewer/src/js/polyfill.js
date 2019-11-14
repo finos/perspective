@@ -755,7 +755,7 @@ function polyfill(override) {
     return true;
 }
 
-function tryFindDraggableTarget(event, composePath) {
+function tryFindDraggableTarget_override(event, composePath) {
     const cp = composePath || event.composedPath();
     for (let o of cp) {
         let el = o;
@@ -790,7 +790,7 @@ function dragStartConditionOverride(event) {
 }
 
 polyfill({
-    tryFindDraggableTarget: tryFindDraggableTarget,
+    tryFindDraggableTarget: tryFindDraggableTarget_override,
     elementFromPoint: elementFromPoint,
     dragStartConditionOverride: dragStartConditionOverride,
     holdToDrag: 500

@@ -4,7 +4,8 @@ module.exports = {
         "packages/perspective-viewer/test/js",
         "packages/perspective-viewer-hypergrid/test/js",
         "packages/perspective-viewer-highcharts/test/js",
-        "packages/perspective-viewer-d3fc/test/js"
+        "packages/perspective-viewer-d3fc/test/js",
+        "packages/perspective-phosphor/test/"
     ],
     verbose: true,
     testURL: "http://localhost/",

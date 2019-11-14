@@ -5,11 +5,12 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import six
 import numpy
 import pandas
 import json
-from datetime import datetime
-from functools import partial, wraps
+from datetime import date, datetime
+from functools import partial
 from ipywidgets import Widget
 from traitlets import observe, Unicode
 from .data import deconstruct_pandas
@@ -18,14 +19,46 @@ from .viewer import PerspectiveViewer
 from ..table import Table, is_libpsp
 
 
+def _type_to_string(t):
+    '''Convert a type object to a string representing a Perspective-supported type.
+
+    Redefine here as we can't have any dependencies on libbinding in client mode.
+    '''
+    if t in six.integer_types:
+        return "integer"
+    elif t is float:
+        return "float"
+    elif t is bool:
+        return "boolean"
+    elif t is date:
+        return "date"
+    elif t is datetime:
+        return "datetime"
+    elif t is six.binary_type or t is six.text_type:
+        return "string"
+    else:
+        raise PerspectiveError(
+            "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(str(t)))
+
+
 def _serialize(data):
     # Attempt to serialize data and pass it to the front-end as JSON
-    if isinstance(data, list) or isinstance(data, dict):
-        # grab reference to data if trivially serializable
+    if isinstance(data, list):
         return data
-    elif isinstance(data, numpy.recarray):
-        # flatten numpy record arrays
-        columns = [data[col] for col in data.dtype.names]
+    elif isinstance(data, dict):
+        for v in data.values():
+            # serialize schema values to string
+            if isinstance(v, type):
+                return {k: _type_to_string(data[k]) for k in data}
+            elif isinstance(v, numpy.ndarray):
+                return {k: data[k].tolist() for k in data}
+            else:
+                return data
+    elif isinstance(data, numpy.ndarray):
+        # structured or record array
+        if not isinstance(data.dtype.names, tuple):
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+        columns = [data[col].tolist() for col in data.dtype.names]
         return dict(zip(data.dtype.names, columns))
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
         # take flattened dataframe and make it serializable
@@ -39,17 +72,7 @@ def _serialize(data):
             d[name] = values.tolist()
         return d
     else:
-        raise NotImplementedError("Cannot serialize an invalid dataset.")
-
-
-class DateTimeStringEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        '''Create a stringified representation of a datetime object.'''
-        if isinstance(obj, datetime.datetime):
-            return obj.strftime("%Y-%m-%d %H:%M:%S.%f")
-        else:
-            return super(DateTimeStringEncoder, self).default(obj)
+        raise NotImplementedError("Cannot serialize a dataset of `{0}`.".format(str(type(data))))
 
 
 class PerspectiveWidget(Widget, PerspectiveViewer):
@@ -82,7 +105,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
     _view_module = Unicode('@finos/perspective-jupyterlab').tag(sync=True)
     _view_module_version = Unicode('^0.4.0-rc.2').tag(sync=True)
 
-    @wraps(PerspectiveViewer.__init__)
     def __init__(self,
                  table_or_data,
                  index=None,
@@ -92,6 +114,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         '''Initialize an instance of `PerspectiveWidget` with the given table/data and viewer configuration.
 
         If a pivoted DataFrame or MultiIndex table is passed in, the widget preserves pivots and applies them.
+
+        See `PerspectiveViewer.__init__` for arguments that transform the view shown in the widget.
 
         Args:
             table_or_data (perspective.Table|dict|list|pandas.DataFrame) : the table or data that will be viewed in the widget.
@@ -168,6 +192,23 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
                 self.load(table_or_data, **kwargs)
 
+    def load(self, data, **options):
+        '''Load the widget with data. If running in client mode, this method serializes the data
+        and calls the browser viewer's load method. Otherwise, it calls `Viewer.load()` using `super()`.
+        '''
+        if self.client is True:
+            # serialize the data and send a custom message to the browser
+            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+                data, _ = deconstruct_pandas(data)
+            d = _serialize(data)
+            self._data = d
+        else:
+            super(PerspectiveWidget, self).load(data, **options)
+
+        # proactively notify front-end of new data
+        msg = self._make_load_message()
+        self.send(msg)
+
     def update(self, data):
         '''Update the widget with new data. If running in client mode, this method serializes the data
         and calls the browser viewer's update method. Otherwise, it calls `Viewer.update()` using `super()`.
@@ -183,6 +224,25 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             }, -3)
         else:
             super(PerspectiveWidget, self).update(data)
+
+    def clear(self):
+        '''Clears the widget's underlying `Table` - does not function in client mode.'''
+        if self.client is False:
+            super(PerspectiveWidget, self).clear()
+
+    def replace(self, data):
+        '''Replaces the widget's `Table` with new data conforming to the same schema. Does not clear
+        user-set state. If in client mode, serializes the data and sends it to the browser.'''
+        if self.client is True:
+            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+                data, _ = deconstruct_pandas(data)
+            d = _serialize(data)
+            self.post({
+                "cmd": "replace",
+                "data": d
+            })
+        else:
+            super(PerspectiveWidget, self).replace(data)
 
     def post(self, msg, id=None):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.
@@ -214,28 +274,37 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if parsed["cmd"] == "init":
                 self.post({'id': -1, 'data': None})
             elif parsed["cmd"] == "table":
-                if self.client and self._data is not None:
-                    # Send data to the client, transferring ownership to the browser
-                    msg = {
-                        "id": -2,
-                        "type": "data",
-                        "data": {
-                            "data": self._data,
-                        }
-                    }
-
-                    if len(self._client_options.keys()) > 0:
-                        msg["data"]["options"] = self._client_options
-
-                    self.send(msg)
-                elif self.table_name is not None:
-                    # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
-                    self.send({
-                        "id": -2,
-                        "type": "table",
-                        "data": self.table_name
-                    })
+                # return the dataset or table name to the front-end
+                msg = self._make_load_message()
+                self.send(msg)
             else:
                 # For all calls to Perspective, process it in the manager.
                 post_callback = partial(self.post, id=parsed["id"])
                 self.manager._process(parsed, post_callback)
+
+    def _make_load_message(self):
+        '''Send a message to the front-end either containing the name of a Table in python, or the serialized
+        dataset with options while in client mode.'''
+        msg = None
+        if self.client and self._data is not None:
+            # Send data to the client, transferring ownership to the browser
+            msg = {
+                "id": -2,
+                "type": "data",
+                "data": {
+                    "data": self._data,
+                }
+            }
+
+            if len(self._client_options.keys()) > 0:
+                msg["data"]["options"] = self._client_options
+
+        elif self.table_name is not None:
+            # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
+            msg = {
+                "id": -2,
+                "type": "table",
+                "data": self.table_name
+            }
+
+        return msg

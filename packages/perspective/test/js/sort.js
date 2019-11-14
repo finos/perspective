@@ -17,6 +17,46 @@ const data = {
 module.exports = perspective => {
     describe("Sorts", function() {
         describe("On hidden columns", function() {
+            it("Column path should not emit hidden sorts", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w", "y"],
+                    sort: [["x", "desc"]]
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["w", "y"]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Column path should not emit hidden column sorts", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w"],
+                    row_pivots: ["y"],
+                    column_pivots: ["z"],
+                    sort: [["x", "col desc"]]
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Column path should not emit hidden regular and column sorts", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w"],
+                    row_pivots: ["y"],
+                    column_pivots: ["z"],
+                    sort: [["x", "col desc"], ["y", "desc"]]
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
+                view.delete();
+                table.delete();
+            });
+
             it("unpivoted", async function() {
                 var table = perspective.table(data);
                 var view = table.view({
@@ -49,6 +89,30 @@ module.exports = perspective => {
                 var view = table.view({
                     columns: ["w"],
                     column_pivots: ["y"],
+                    sort: [["x", "desc"]]
+                });
+                var answer = [
+                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 4.5},
+                    {"a|w": 5.5, "b|w": null, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": null, "c|w": 3.5, "d|w": null},
+                    {"a|w": null, "b|w": 6.5, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": 2.5, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": null, "c|w": 7.5, "d|w": null},
+                    {"a|w": 1.5, "b|w": null, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 8.5}
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
+            it("column pivot ['y'] with overridden aggregates", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w"],
+                    column_pivots: ["y"],
+                    aggregates: {x: "count"},
                     sort: [["x", "desc"]]
                 });
                 var answer = [

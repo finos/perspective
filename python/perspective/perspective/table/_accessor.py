@@ -10,7 +10,8 @@ import pandas
 import numpy
 from math import isnan
 from ._date_validator import _PerspectiveDateValidator
-from ..core.data import deconstruct_numpy
+from ..core.data import deconstruct_numpy, deconstruct_pandas
+from ..core.data.pd import _parse_datetime_index
 from ..core.exception import PerspectiveError
 
 try:
@@ -21,11 +22,8 @@ except ImportError:
 
 def _flatten_structure(array):
     '''Flatten numpy.recarray or structured arrays into a dict.'''
-    if six.PY2:
-        # recarrays/structured arrays have weird bit offsets in py2 - make a copy of the array to fix
-        columns = [numpy.copy(array[col]) for col in array.dtype.names]
-    else:
-        columns = [array[col] for col in array.dtype.names]
+    # recarrays/structured arrays do not have guaranteed bit offsets - make a copy of the array to fix
+    columns = [numpy.copy(array[col]) for col in array.dtype.names]
     return dict(zip(array.dtype.names, columns))
 
 
@@ -75,14 +73,8 @@ def _type_to_format(data_or_schema):
             # if pandas not installed or is not a dataframe or series
             raise NotImplementedError("Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.")
         else:
-            from ..core.data import deconstruct_pandas
-
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
-
-            # try to squash object dtype as much as possible
-            df.fillna(value=numpy.nan, inplace=True)
-
             return True, 1, {c: df[c].values for c in df.columns}
 
 
@@ -103,6 +95,25 @@ class _PerspectiveAccessor(object):
             self._names = list(self._data_or_schema.keys())
 
         self._types = []
+
+        # Verify that column names are strings, and that numpy arrays are of type `ndarray`
+        for name in self._names:
+            if not isinstance(name, six.string_types):
+                raise PerspectiveError(
+                    "Column names should be strings, not type `{0}`".format(type(name).__name__))
+            if self._is_numpy:
+                array = self._data_or_schema[name]
+
+                if not isinstance(array, numpy.ndarray):
+                    raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
+
+                dtype = array.dtype
+                if name == "index" and isinstance(data_or_schema.index, pandas.DatetimeIndex):
+                    # use the index of the original, unflattened dataframe
+                    dtype = _parse_datetime_index(data_or_schema.index)
+
+                # keep a string representation of the dtype, as PyBind only has access to the char dtype code
+                self._types.append(str(dtype))
 
     def data(self):
         return self._data_or_schema
@@ -216,8 +227,6 @@ class _PerspectiveAccessor(object):
         data = self._data_or_schema.get(name, None)
         if data is None:
             raise PerspectiveError("Column `{0}` does not exist.".format(name))
-        if not isinstance(data, numpy.ndarray):
-            raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
         return deconstruct_numpy(data)
 
     def _has_column(self, ridx, name):

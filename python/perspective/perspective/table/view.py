@@ -13,6 +13,7 @@ from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
+from ._date_validator import _PerspectiveDateValidator
 
 try:
     from .libbinding import make_view_zero, make_view_one, make_view_two
@@ -37,7 +38,12 @@ class View(object):
         self._config = ViewConfig(**config)
         self._sides = self.sides()
 
-        date_validator = self._table._accessor._date_validator
+        date_validator = None
+        if hasattr(self._table._accessor, "_data_validator"):
+            date_validator = self._table._accessor._date_validator
+        else:
+            date_validator = _PerspectiveDateValidator()
+
         if self._sides == 0:
             self._view = make_view_zero(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
         elif self._sides == 1:
@@ -103,6 +109,18 @@ class View(object):
     def set_depth(self, depth):
         '''Sets the expansion depth of the pivot tree.'''
         return self._view.set_depth(depth, len(self._config.get_row_pivots()))
+
+    def column_paths(self):
+        '''Returns the names of the columns as they show in the view, i.e. the composed columns
+        when a column pivot is applied.
+        '''
+        paths = self._view.column_paths()
+        string_paths = []
+
+        for path in paths:
+            string_paths.append(COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path]))
+
+        return string_paths
 
     def schema(self, as_string=False):
         '''The schema of this view, which is a key-value map that contains the column names and their Python data types.
@@ -294,7 +312,8 @@ class View(object):
                 - end_col: defaults to the total columns in the view
                 - index: whether to return an implicit pkey for each row. Defaults to False
                 - leaves_only: whether to return only the data at the end of the tree. Defaults to False
-                - date_format: how `date` and `datetime` objects should be formatted in the CSV. Must be a valid date formatting string.
+                - date_format: how `datetime` objects should be formatted in the CSV. Formatting does not
+                    apply to `date` objects. Must be a valid date formatting string.
 
         Returns:
             str : a CSV-formatted string containing the serialized data.

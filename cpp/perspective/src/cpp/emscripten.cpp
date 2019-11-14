@@ -778,7 +778,7 @@ namespace binding {
             }
 
             double fval = item.as<double>();
-            if (isnan(fval)) {
+            if (!is_update && isnan(fval)) {
                 std::cout << "Promoting to string" << std::endl;
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -823,13 +823,13 @@ namespace binding {
                     // float value in an inferred column. Would not be needed if the type
                     // inference checked the entire column/we could reset parsing.
                     double fval = item.as<double>();
-                    if (fval > 2147483647 || fval < -2147483648) {
+                    if (!is_update && (fval > 2147483647 || fval < -2147483648)) {
                         std::cout << "Promoting to float" << std::endl;
                         tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                         col = tbl.get_column(name);
                         type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
-                    } else if (isnan(fval)) {
+                    } else if (!is_update && isnan(fval)) {
                         std::cout << "Promoting to string" << std::endl;
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
@@ -1628,6 +1628,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
         .function("schema", &View<t_ctx0>::schema)
         .function("column_names", &View<t_ctx0>::column_names)
+        .function("column_paths", &View<t_ctx0>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx0>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx0>::get_context, allow_raw_pointers())
@@ -1654,6 +1655,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("set_depth", &View<t_ctx1>::set_depth)
         .function("schema", &View<t_ctx1>::schema)
         .function("column_names", &View<t_ctx1>::column_names)
+        .function("column_paths", &View<t_ctx1>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx1>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx1>::get_context, allow_raw_pointers())
@@ -1680,6 +1682,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("set_depth", &View<t_ctx2>::set_depth)
         .function("schema", &View<t_ctx2>::schema)
         .function("column_names", &View<t_ctx2>::column_names)
+        .function("column_paths", &View<t_ctx2>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx2>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx2>::get_context, allow_raw_pointers())

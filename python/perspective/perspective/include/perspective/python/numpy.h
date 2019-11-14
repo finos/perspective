@@ -75,6 +75,11 @@ namespace numpy {
             std::vector<std::string> names() const;
             std::vector<t_dtype> types() const;
             std::uint32_t row_count() const;
+
+            /**
+             * Keep a list of numpy datetime64 units that we should treat as dates and not datetimes.
+             */
+            static const std::vector<std::string> DATE_UNITS;
         private:
             /**
              * When memory cannot be copied for dtype=object arrays, for example), fill the column through iteration.

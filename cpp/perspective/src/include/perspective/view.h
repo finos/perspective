@@ -85,6 +85,17 @@ public:
      */
     std::vector<std::vector<t_tscalar>> column_names(
         bool skip = false, std::int32_t depth = 0) const;
+    
+    /**
+     * @brief The aggregated column names of this View, showing the columns that
+     * have been composed through the addition of a pivot as they appear in the view.
+     * 
+     * If the view is pivoted, "__ROW_PATH__" will be prepended to the front of the vector
+     * because it is part of the column path.
+     * 
+     * @return std::vector<std::vector<t_tscalar>>>
+     */
+    std::vector<std::vector<t_tscalar>> column_paths() const;
 
     /**
      * @brief Returns shared pointer to a t_data_slice object, which contains the
@@ -170,6 +181,12 @@ private:
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
 
+    /**
+     * @brief Find columns used in sort-by that are not specified in the `m_columns` array,
+     * and add each column name to `m_hidden_sort`. 
+     */
+    void _find_hidden_sort(const std::vector<t_sortspec>& sort);
+
     std::shared_ptr<Table> m_table;
     std::shared_ptr<CTX_T> m_ctx;
     std::string m_name;
@@ -181,6 +198,7 @@ private:
     std::vector<std::string> m_columns;
     std::vector<t_fterm> m_filter;
     std::vector<t_sortspec> m_sort;
+    std::vector<std::string> m_hidden_sort;
     bool m_column_only;
     t_uindex m_row_offset;
     t_uindex m_col_offset;
