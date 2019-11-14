@@ -192,10 +192,10 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
             t_aggtype agg_type;
 
             // use the `any` agg for columns used as pivots/column_only views
-            if (m_aggregates.count(column) > 0) {
-                agg_type = str_to_aggtype(m_aggregates.at(column));
-            } else  if (is_pivot || m_row_pivots.size() == 0 || m_column_only) {
+            if (is_pivot || m_row_pivots.size() == 0 || m_column_only) {
                 agg_type = t_aggtype::AGGTYPE_ANY;
+            } else if (m_aggregates.count(column) > 0) {
+                agg_type = str_to_aggtype(m_aggregates.at(column));
             } else {
                 t_dtype dtype = schema.get_dtype(column);
                 agg_type = _get_default_aggregate(dtype);

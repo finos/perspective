@@ -107,6 +107,30 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("column pivot ['y'] with overridden aggregates", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w"],
+                    column_pivots: ["y"],
+                    aggregates: {x: "count"},
+                    sort: [["x", "desc"]]
+                });
+                var answer = [
+                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 4.5},
+                    {"a|w": 5.5, "b|w": null, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": null, "c|w": 3.5, "d|w": null},
+                    {"a|w": null, "b|w": 6.5, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": 2.5, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": null, "c|w": 7.5, "d|w": null},
+                    {"a|w": 1.5, "b|w": null, "c|w": null, "d|w": null},
+                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 8.5}
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
             it("column pivot ['y'] with extra aggregates", async function() {
                 var table = perspective.table(data);
                 var view = table.view({
