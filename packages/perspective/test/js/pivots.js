@@ -783,4 +783,141 @@ module.exports = perspective => {
             expect(expanded_idx).toEqual(2);
         });
     });
+
+    describe("Column paths", function() {
+        it("Should return all columns, 0-sided view from schema", async function() {
+            const table = perspective.table(meta);
+            const view = table.view();
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["x", "y", "z"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns in specified order, 0-sided view from schema", async function() {
+            const table = perspective.table(meta);
+            const view = table.view({
+                columns: ["z", "y", "x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["z", "y", "x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return specified visible columns, 0-sided view from schema", async function() {
+            const table = perspective.table(meta);
+            const view = table.view({
+                columns: ["x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns, 0-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view();
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["x", "y", "z"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns in specified order, 0-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                columns: ["z", "y", "x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["z", "y", "x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return specified visible columns, 0-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                columns: ["x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns with __ROW_PATH__, 1-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                row_pivots: ["x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "x", "y", "z"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns in specified order, 1-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                row_pivots: ["x"],
+                columns: ["z", "y", "x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "z", "y", "x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return specified visible columns with __ROW_PATH__, 1-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                columns: ["x"],
+                row_pivots: ["x"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return all columns with __ROW_PATH__, 2-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                row_pivots: ["x"],
+                column_pivots: ["y"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "a|x", "a|y", "a|z", "b|x", "b|y", "b|z", "c|x", "c|y", "c|z", "d|x", "d|y", "d|z"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return specified visible columns with __ROW_PATH__, 2-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                columns: ["z", "y", "x"],
+                row_pivots: ["x"],
+                column_pivots: ["y"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "a|z", "a|y", "a|x", "b|z", "b|y", "b|x", "c|z", "c|y", "c|x", "d|z", "d|y", "d|x"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return specified visible columns with __ROW_PATH__, 2-sided view", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                columns: ["x"],
+                row_pivots: ["x"],
+                column_pivots: ["y"]
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "a|x", "b|x", "c|x", "d|x"]);
+            view.delete();
+            table.delete();
+        });
+    });
 };

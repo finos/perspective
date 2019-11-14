@@ -17,6 +17,46 @@ const data = {
 module.exports = perspective => {
     describe("Sorts", function() {
         describe("On hidden columns", function() {
+            it("Column path should not emit hidden sorts", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w", "y"],
+                    sort: [["x", "desc"]]
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["w", "y"]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Column path should not emit hidden column sorts", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w"],
+                    row_pivots: ["y"],
+                    column_pivots: ["z"],
+                    sort: [["x", "col desc"]]
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Column path should not emit hidden regular and column sorts", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["w"],
+                    row_pivots: ["y"],
+                    column_pivots: ["z"],
+                    sort: [["x", "col desc"], ["y", "desc"]]
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
+                view.delete();
+                table.delete();
+            });
+
             it("unpivoted", async function() {
                 var table = perspective.table(data);
                 var view = table.view({

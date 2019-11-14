@@ -110,6 +110,18 @@ class View(object):
         '''Sets the expansion depth of the pivot tree.'''
         return self._view.set_depth(depth, len(self._config.get_row_pivots()))
 
+    def column_paths(self):
+        '''Returns the names of the columns as they show in the view, i.e. the composed columns
+        when a column pivot is applied.
+        '''
+        paths = self._view.column_paths()
+        string_paths = []
+
+        for path in paths:
+            string_paths.append(COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path]))
+
+        return string_paths
+
     def schema(self, as_string=False):
         '''The schema of this view, which is a key-value map that contains the column names and their Python data types.
 

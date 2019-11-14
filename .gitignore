@@ -142,10 +142,15 @@ docs/static/img
 docs/static/arrow/
 .perspectiverc
 
-python/perspective/perspective/tests/table/psp_test
-python/perspective/perspective/node/assets/*
+# Python
+*.pyc
 
-# sometimes created by mistake
+# Copied C++ source folders
+python/perspective/cmake
+python/perspective/src
+python/perspective/test
 python/cmake
 python/cpp
 python/perspective/perspective_python.egg-info
+python/perspective/perspective/tests/table/psp_test
+python/perspective/perspective/node/assets/*
