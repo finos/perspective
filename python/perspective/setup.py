@@ -20,8 +20,13 @@ import subprocess
 from shutil import rmtree
 try:
     from shutil import which
+    CPU_COUNT = os.cpu_count()
 except ImportError:
+    # Python2
     from backports.shutil_which import which
+    import multiprocessing
+    CPU_COUNT = multiprocessing.cpu_count()
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -145,7 +150,7 @@ class PSPBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(os.cpu_count())]
+            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(CPU_COUNT)]
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
