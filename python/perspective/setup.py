@@ -156,10 +156,11 @@ class PSPBuild(build_ext):
         try:
             out1 = subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            print(e.output.decode())
+            out1 = e.output.decode()
+            print(out1)
 
             # if stale cmake build, or issues with python inside python, rerun with shell=true
-            if "The current CMakeCache.txt directory" in out:
+            if "The current CMakeCache.txt directory" in out1:
                 # purge temporary folder
                 rmtree(self.build_temp)
                 os.makedirs(self.build_temp)
