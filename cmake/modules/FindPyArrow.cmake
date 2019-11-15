@@ -31,7 +31,7 @@ if (PYTHON_EXECUTABLE)
   # And the lib dirs
   execute_process(
     COMMAND "${PYTHON_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_libraries()[1], end='')\nexcept:pass"
+            "from __future__ import print_function\ntry: import pyarrow; print(' '.join(pyarrow.get_libraries()), end='')\nexcept:pass"
     OUTPUT_VARIABLE __pyarrow_libraries)
 
   # And the version
@@ -50,17 +50,20 @@ set(PYTHON_PYARROW_LIBRARY_DIR ${__pyarrow_library_dirs})
 
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
   # Link against pre-built libarrow on MacOS
-  set(PYTHON_PYARROW_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow.15${CMAKE_SHARED_LIBRARY_SUFFIX})
+  set(PYTHON_PYARROW_PYTHON_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow_python.15${CMAKE_SHARED_LIBRARY_SUFFIX})
+  set(PYTHON_PYARROW_ARROW_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow.15${CMAKE_SHARED_LIBRARY_SUFFIX})
+else()
+  # linux
+  set(PYTHON_PYARROW_PYTHON_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow_python${CMAKE_SHARED_LIBRARY_SUFFIX}.15)
+  set(PYTHON_PYARROW_ARROW_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow${CMAKE_SHARED_LIBRARY_SUFFIX}.15)
 endif()
 
-# DONT USE, could conflict on arrow lib
-# set(PYTHON_PYARROW_LIBRARIES ${__pyarrow_libraries})
-set(PYTHON_PYARROW_LIBRARIES "arrow_python")
+set(PYTHON_PYARROW_LIBRARIES ${__pyarrow_libraries})
 
-if(PYTHON_PYARROW_INCLUDE_DIR)
+if(PYTHON_PYARROW_INCLUDE_DIR AND PYTHON_PYARROW_LIBRARIES)
   set(PYTHON_PYARROW_FOUND 1 CACHE INTERNAL "Python pyarrow found")
-endif(PYTHON_PYARROW_INCLUDE_DIR)
+endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(PyArrow REQUIRED_VARS PYTHON_PYARROW_INCLUDE_DIR
+find_package_handle_standard_args(PyArrow REQUIRED_VARS PYTHON_PYARROW_INCLUDE_DIR PYTHON_PYARROW_LIBRARIES
                                         VERSION_VAR __pyarrow_version)

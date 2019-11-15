@@ -37,11 +37,6 @@ find_program(FLATBUFFERS_COMPILER flatc
   NO_CMAKE_SYSTEM_PATH
   NO_SYSTEM_ENVIRONMENT_PATH)
 
-if(NOT ${FLATBUFFERS_INCLUDE_DIR})
-  # HACK
-  set(FLATBUFFERS_INCLUDE_DIR /usr/local/include)
-endif()
-
 message("${FLATBUFFERS_COMPILER}")
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FLATBUFFERS REQUIRED_VARS

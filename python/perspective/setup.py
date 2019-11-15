@@ -18,7 +18,6 @@ import platform
 import sys
 import subprocess
 from shutil import rmtree
-import logging
 try:
     from shutil import which
 except ImportError:
@@ -146,7 +145,7 @@ class PSPBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j4']
+            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(os.cpu_count())]
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
@@ -154,30 +153,31 @@ class PSPBuild(build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-
         try:
             out1 = subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            out = e.output.decode()
-            logging.critical(out)
+            print(e.output.decode())
 
             # if stale cmake build, or issues with python inside python, rerun with shell=true
             if "The current CMakeCache.txt directory" in out:
                 # purge temporary folder
                 rmtree(self.build_temp)
                 os.makedirs(self.build_temp)
-                subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
-                subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+                out1 = subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
+                out2 = subprocess.check_output([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
                 print()
                 return
             else:
+                print(out1.decode())
+                print(out2.decode())
                 raise
  
         try:
             out2 = subprocess.check_output([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            out = e.output.decode()
-            logging.critical(out)
+            print(out1.decode())  # output previous result
+            print(e.output.decode())
+            raise
         print()  # Add an empty line for cleaner output
 
 
