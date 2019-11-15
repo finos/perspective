@@ -13,21 +13,25 @@ class ViewConfig(object):
     def __init__(self, **config):
         '''Receives a user-provided config dict and standardizes it for consumption by the python client and the core engine.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        ::
+        columns ``(list[str])``
+        - A list of column names to be visible to the user.
 
-            columns (list of str): a list of column names to be visible to the user
+        row_pivots ``(list[str])``
+        - A list of column names to use as row pivots, thus grouping data by row.
 
-            row_pivots (list of str): a list of column names to use as row pivots
+        column_pivots ``(list[str])``
+        - A list of column names to use as column pivots, thus grouping data by column.
 
-            column_pivots (list of str): a list of column names to use as column pivots
+        aggregates ``(dict[str:str])``
+        - A dictionary of column names to aggregate types, which specify aggregates for individual columns.
 
-            aggregates (dict of str to str): a dictionary of column names to aggregate types to specify aggregates for individual columns
+        sort ``(list[list[str]])``
+        - A list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc).
 
-            sort (list of list of str): a list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc)
-
-            filter (list of list of str): a list of lists, each list containing a column name, a filter comparator, and a value to filter by
+        filter ``(list[list[str]])``
+        - A list of lists, each list containing a column name, a filter comparator, and a value to filter by.
         '''
         self._config = config
         self._row_pivots = self._config.get('row_pivots', [])

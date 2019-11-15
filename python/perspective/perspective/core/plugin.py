@@ -13,7 +13,7 @@ class Plugin(Enum):
 
     Pass these into the `plugin` arg in `PerspectiveWidget` or `PerspectiveViewer`.
 
-    Example:
+    Examples:
         >>> widget = PerspectiveWidget(data, plugin=Plugin.TREEMAP)
     '''
     HYPERGRID = 'hypergrid'  # hypergrid

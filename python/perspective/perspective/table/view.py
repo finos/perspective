@@ -180,7 +180,7 @@ class View(object):
         Args:
             callback (func): a function reference that will be removed.
 
-        Example:
+        Examples:
             >>> table = perspective.Table(data)
             >>> view = table.view()
             >>> view2 = table.view()
@@ -219,7 +219,7 @@ class View(object):
 
         This method must be called to clean up resources used by the View.
 
-        Example:
+        Examples:
             >>> table = perspective.Table(data)
             >>> view = table.view()
             >>> view.delete()
@@ -235,7 +235,7 @@ class View(object):
         Args:
             callback (callable): a reference to a callable function that will be removed from delete callbacks.
 
-        Example:
+        Examples:
             >>> table = perspective.Table(data)
             >>> view = table.view()
             >>> view2 = table.view()
@@ -257,19 +257,25 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        start_row (int): defaults to 0
+        start_row ``(int)``
+        - The row at which to begin serializing. Defaults to 0.
 
-        end_row (int): defaults to the number of total rows in the view
+        end_row ``(int)``
+        - The non-inclusive row to end serialization at. Defaults to the number of total rows in the view.
 
-        start_col (int): defaults to 0
+        start_col ``(int)``
+        - The column at which to begin serializing. Defaults to 0.
 
-        end_col (int): defaults to the total columns in the view
+        end_col ``(int)``
+        - The non-inclusive column to end serialization at. Defaults to the number of total rows in the view.
 
-        index (int): whether to return an implicit pkey for each row. Defaults to False
+        index ``(int)``
+        - Whether to return an implicit pkey for each row. Defaults to False.
 
-        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
+        leaves_only ``(int)``
+        - Whether to return only the data at the end of the tree. Defaults to False.
 
         Returns:
             list : A list of dictionaries, where each dict represents a new row of the dataset
@@ -282,19 +288,25 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        start_row (int): defaults to 0
+        start_row ``(int)``
+        - The row at which to begin serializing. Defaults to 0.
 
-        end_row (int): defaults to the number of total rows in the view
+        end_row ``(int)``
+        - The non-inclusive row to end serialization at. Defaults to the number of total rows in the view.
 
-        start_col (int): defaults to 0
+        start_col ``(int)``
+        - The column at which to begin serializing. Defaults to 0.
 
-        end_col (int): defaults to the total columns in the view
+        end_col ``(int)``
+        - The non-inclusive column to end serialization at. Defaults to the number of total rows in the view.
 
-        index (int): whether to return an implicit pkey for each row. Defaults to False
+        index ``(int)``
+        - Whether to return an implicit pkey for each row. Defaults to False.
 
-        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
+        leaves_only ``(int)``
+        - Whether to return only the data at the end of the tree. Defaults to False.
 
         Returns:
             dict : a dictionary with string keys and list values, where key = column name and value = column values
@@ -305,19 +317,25 @@ class View(object):
         '''Serialize the view's dataset into a ``dict`` of ``str`` keys and ``numpy.array`` values.
         Each key is a column name, and the associated value is the column's data packed into a numpy array.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        start_row (int): defaults to 0
+        start_row ``(int)``
+        - The row at which to begin serializing. Defaults to 0.
 
-        end_row (int): defaults to the number of total rows in the view
+        end_row ``(int)``
+        - The non-inclusive row to end serialization at. Defaults to the number of total rows in the view.
 
-        start_col (int): defaults to 0
+        start_col ``(int)``
+        - The column at which to begin serializing. Defaults to 0.
 
-        end_col (int): defaults to the total columns in the view
+        end_col ``(int)``
+        - The non-inclusive column to end serialization at. Defaults to the number of total rows in the view.
 
-        index (int): whether to return an implicit pkey for each row. Defaults to False
+        index ``(int)``
+        - Whether to return an implicit pkey for each row. Defaults to False.
 
-        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
+        leaves_only ``(int)``
+        - Whether to return only the data at the end of the tree. Defaults to False.
 
         Returns:
             dict : a dictionary with string keys and numpy array values, where key = column name and value = column values
@@ -332,19 +350,25 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        start_row (int): defaults to 0
+        start_row ``(int)``
+        - The row at which to begin serializing. Defaults to 0.
 
-        end_row (int): defaults to the number of total rows in the view
+        end_row ``(int)``
+        - The non-inclusive row to end serialization at. Defaults to the number of total rows in the view.
 
-        start_col (int): defaults to 0
+        start_col ``(int)``
+        - The column at which to begin serializing. Defaults to 0.
 
-        end_col (int): defaults to the total columns in the view
+        end_col ``(int)``
+        - The non-inclusive column to end serialization at. Defaults to the number of total rows in the view.
 
-        index (int): whether to return an implicit pkey for each row. Defaults to False
+        index ``(int)``
+        - Whether to return an implicit pkey for each row. Defaults to False.
 
-        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
+        leaves_only ``(int)``
+        - Whether to return only the data at the end of the tree. Defaults to False.
 
         Returns:
             pandas.DataFrame : a pandas dataframe containing the serialized data.
@@ -355,21 +379,28 @@ class View(object):
     def to_csv(self, **options):
         '''Serialize the view's dataset into a CSV string.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        start_row (int): defaults to 0
+        start_row ``(int)``
+        - The row at which to begin serializing. Defaults to 0.
 
-        end_row (int): defaults to the number of total rows in the view
+        end_row ``(int)``
+        - The non-inclusive row to end serialization at. Defaults to the number of total rows in the view.
 
-        start_col (int): defaults to 0
+        start_col ``(int)``
+        - The column at which to begin serializing. Defaults to 0.
 
-        end_col (int): defaults to the total columns in the view
+        end_col ``(int)``
+        - The non-inclusive column to end serialization at. Defaults to the number of total rows in the view.
 
-        index (int): whether to return an implicit pkey for each row. Defaults to False
+        index ``(int)``
+        - Whether to return an implicit pkey for each row. Defaults to False.
 
-        leaves_only (int): whether to return only the data at the end of the tree. Defaults to False
+        leaves_only ``(int)``
+        - Whether to return only the data at the end of the tree. Defaults to False.
 
-        date_format (str): how ``datetime`` objects should be formatted in the CSV.
+        date_format ``(str)``
+        - How ``datetime`` objects should be formatted in the CSV.
 
         Returns:
             str : a CSV-formatted string containing the serialized data.

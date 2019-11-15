@@ -31,22 +31,35 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         Do not pass a `Table` or data into the constructor - use the `load()` method to provide the viewer with data.
 
-        Args:
-            plugin (str): the grid or visualization that will be displayed on render. Defaults to "hypergrid".
-            columns (list[str]): column names that will be actively displayed to the user. Columns not in this list will exist on the viewer sidebar
-                but not in the visualization. If not specified, all colummns present in the dataset will be shown.
-            row_pivots (list[str]): columns that will be used to group data together by row.
-            column_pivots (list[str]): columns that will be used to group data together by unique column value.
-            aggregates (dict{str:str}): a mapping of column names to aggregate types, specifying how data should be aggregated when pivots are applied.
-            sort (list[list[str]]): a list of sort specifications to apply to the view.
-                Sort specifications are lists of two elements: a string column name to sort by, and a string sort direction ("asc", "desc").
-            filters (list[list[str]]): a list of filter configurations to apply to the view.
-                Filter configurations are lists of three elements: a string column name, a string filter operator ("<", ">", "==", "not null", etc.),
-                and a value to filter by. Make sure the type of the filter value is the same as the column type, i.e. a string column should not be filtered by integer.
-            plugin_config (dict): an optional configuration containing the interaction state of a `perspective-viewer`.
-            dark (bool): enables/disables dark mode on the viewer. Defaults to `False`.
+        Keyword Args:
+        plugin ``(str|perspective.Plugin)``
+        - The grid or visualization that will be displayed on render. Defaults to "hypergrid".
 
-        Example:
+        columns ``(list[str])``
+        - A list of column names to be visible to the user.
+
+        row_pivots ``(list[str])``
+        - A list of column names to use as row pivots, thus grouping data by row.
+
+        column_pivots ``(list[str])``
+        - A list of column names to use as column pivots, thus grouping data by column.
+
+        aggregates ``(dict[str:str])``
+        - A dictionary of column names to aggregate types, which specify aggregates for individual columns.
+
+        sort ``(list[list[str]])``
+        - A list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc).
+
+        filter ``(list[list[str]])``
+        - A list of lists, each list containing a column name, a filter comparator, and a value to filter by.
+
+        plugin_config ``(dict)``
+        - An optional configuration containing the interaction state of a `perspective-viewer`.
+
+        dark ``(bool)``
+        - Enables/disables dark mode on the viewer. Defaults to ``False``.
+
+        Examples:
             >>> viewer = PerspectiveViewer(aggregates={"a": "avg"}, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
         '''
 
@@ -90,10 +103,19 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         Args:
             table_or_data (Table|dict|list|pandas.DataFrame): a `perspective.Table` instance or a dataset to be displayed in the viewer.
-            **options : optional keyword arguments that will be parsed by the `perspective.Table` constructor if data is passed in.
-                - name (str): an optional name to reference the table by so it can be accessed from the front-end.
-                - index (str): the name of a column that will be the dataset's primary key. This sorts the dataset in ascending order based on primary key.
-                - limit (int): cannot be applied at the same time as `index` - the total number of rows that will be loaded into Perspective.
+
+        Keyword Arguments:
+
+        name ``(str)``
+        - An optional name to reference the table by so it can be accessed from the front-end. If not provided, a name will be generated.
+
+        index ``(str)``
+        - The name of a column that will be the dataset's primary key. This sorts the dataset in ascending order based on primary key.
+
+        limit ``(int)``
+        - The total number of rows that will be loaded into Perspective.
+        - Cannot be applied at the same time as index
+        - Updates past ``limit`` begin writing at row 0.
 
         Examples:
             >>> from perspective import Table, PerspectiveViewer

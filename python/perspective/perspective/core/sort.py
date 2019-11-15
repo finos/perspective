@@ -12,7 +12,7 @@ class Sort(Enum):
     '''The sort directions available for use in Perspective. Pass these into the `sort` argument of `PerspectiveWidget` or
     `PerspectiveViewer`.
 
-    Example:
+    Examples:
         >>> widget = PerspectiveWidget(data, sort=[["a", Sort.DESC]])
     '''
     ASC = 'asc'

@@ -15,6 +15,7 @@ View
    :members:
    :undoc-members:
    :show-inheritance:
+   :exclude-members: to_arrow
 
 View Config
 ===========

@@ -26,15 +26,18 @@ class Table(object):
 
         If a schema is provided, the table will be empty. Subsequent updates MUST conform to the column names and data types provided in the schema.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        ::
+        data_or_schema ``(dict/list/dataframe)``
+        - data or schema that initializes the table.
 
-            data_or_schema (dict/list/dataframe): data or schema that initializes the table.
+        index ``(string)``
+        - a string column name to use as the Table's primary key.
 
-            limit (int): the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
-
-            index (string): a string column name to use as the Table's primary key.
+        limit ``(int)``
+        - the maximum number of rows the Table should have.
+        - Cannot be set at the same time as ``index``.
+        - Updates past the limit will begin writing at row 0.
         '''
         self._is_arrow = isinstance(data_or_schema, (bytes, bytearray))
         if (self._is_arrow):
@@ -146,7 +149,7 @@ class Table(object):
         Updates on tables with an explicit ``index`` should have the index as part of the ``data`` param, as this instructs the engine
         to locate the indexed row and write into it. If an index is not provided, the update is treated as an append.
 
-        Example:
+        Examples:
             >>> tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="a")
             >>> tbl.update({"a": [2, 3], "b": ["a", "a"]})
             >>> tbl.view().to_dict()
@@ -200,21 +203,25 @@ class Table(object):
         A View is an immutable set of transformations on the underlying Table, which allows
         for querying, pivoting, aggregating, sorting, and filtering of data.
 
-        - Keyword Arguments:
+        Keyword Arguments:
 
-        ::
+        columns ``(list[str])``
+        - A list of column names to be visible to the user.
 
-            columns (list of str): a list of column names to be visible to the user.
+        row_pivots ``(list[str])``
+        - A list of column names to use as row pivots.
 
-            row_pivots (list of str): a list of column names to use as row pivots.
+        column_pivots ``(list[str])``
+        - A list of column names to use as column pivots.
 
-            column_pivots (list of str): a list of column names to use as column pivots.
+        aggregates ``(dict[str:str])``
+        - A dictionary of column names to aggregate types, which specify aggregates for individual columns.
 
-            aggregates (dict of str to str): a dictionary of column names to aggregate types to specify aggregates for individual columns.
+        sort ``(list[list[str]])``
+        - A list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc).
 
-            sort (list of list of str): a list of lists, each list containing a column name and a sort direction (asc, desc, col asc, col desc).
-
-            filter (list of list of str): a list of lists, each list containing a column name, a filter comparator, and a value to filter by.
+        filter ``(list[list[str]])``
+        - A list of lists, each list containing a column name, a filter comparator, and a value to filter by.
 
         Returns:
             perspective.table.view.View : a new ``perspective.View`` instance.

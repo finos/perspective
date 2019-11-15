@@ -12,7 +12,7 @@ class Aggregate(Enum):
     '''The aggregation operators available in Perspective. Pass these into the `aggregates` arg in `PerspectiveWidget` or
     `PerspectiveViewer`.
 
-    Example:
+    Examples:
         >>> widget = PerspectiveWidget(data, aggregates={"a": Aggregate.LAST})
     '''
     AND = 'and'

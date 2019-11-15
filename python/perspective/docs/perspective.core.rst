@@ -16,8 +16,8 @@ PerspectiveWidget
 
 .. automodule:: perspective.core.widget
    :members:
-   :undoc-members:
    :show-inheritance:
+   :exclude-members: post, send
 
 
 PerspectiveTornadoHandler
@@ -64,10 +64,11 @@ These enums provide a listing of the available aggregate operators, plugins, and
 Pass these into a ``PerspectiveWidget`` or ``PerspectiveViewer`` instead of strings:
 
 .. code-block:: python
-    from perspective import PerspectiveWidget, Aggregate, Plugin, Sort
-    widget = PerspectiveWidget(data, plugin=Plugin.YLINE, aggregates={"a": Aggregate.AVG}, sort=[["a", Sort.DESC]])
+
+    >>> from perspective import PerspectiveWidget, Aggregate, Plugin, Sort
+    >>> widget = PerspectiveWidget(data, plugin=Plugin.YLINE, aggregates={"a": Aggregate.AVG}, sort=[["a", Sort.DESC]])
     # the above is equivalent to:
-    widget = PerspectiveWidget(data, plugin="y_line, aggregates={"a": "avg}, sort=[["a", "desc"]])
+    >>> widget = PerspectiveWidget(data, plugin="y_line, aggregates={"a": "avg}, sort=[["a", "desc"]])
 
 .. automodule:: perspective.core.aggregate
    :members:
@@ -93,6 +94,7 @@ PerspectiveViewer is the base class for ``PerspectiveWidget``. It implements a s
 .. automodule:: perspective.core.viewer
    :members:
    :show-inheritance:
+   :exclude-members: random
 
 
 PerspectiveViewer Traitlets
