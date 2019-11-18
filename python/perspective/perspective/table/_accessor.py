@@ -81,6 +81,8 @@ def _type_to_format(data_or_schema):
 class _PerspectiveAccessor(object):
     '''A uniform accessor that wraps data/schemas of varying formats with a common `marshal` function.'''
 
+    INTEGER_TYPES = six.integer_types + (numpy.integer,)
+
     def __init__(self, data_or_schema):
         self._is_numpy, self._format, self._data_or_schema = _type_to_format(data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
@@ -187,7 +189,7 @@ class _PerspectiveAccessor(object):
                 # should be able to update int columns with either ints or floats
                 val = int(val)
         elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(val, (int, numpy.integer)):
+            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
                 # should be able to update float columns with either ints or floats
                 val = float(val)
         elif dtype == t_dtype.DTYPE_DATE:
@@ -213,6 +215,7 @@ class _PerspectiveAccessor(object):
                     val = unicode(val)  # noqa: F821
                 else:
                     val = str(val)
+
         return val
 
     def _get_numpy_column(self, name):

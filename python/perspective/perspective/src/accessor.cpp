@@ -74,6 +74,8 @@ infer_type(t_val x, t_val date_validator) {
     } else if (py::isinstance<py::bool_>(x) || type_string == "bool") {
         // booleans are both instances of bool_ and int_ -  check for bool first
         t = t_dtype::DTYPE_BOOL;
+    } else if (type_string == "long") {
+        t = t_dtype::DTYPE_INT64;
     } else if (py::isinstance<py::float_>(x)) {
         t = t_dtype::DTYPE_FLOAT64;
     } else if (py::isinstance<py::int_>(x)) {

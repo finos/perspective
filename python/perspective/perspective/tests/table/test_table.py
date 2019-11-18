@@ -46,12 +46,38 @@ class TestTable(object):
     def test_table_int_overflow(self):
         if six.PY2:
             maxint = sys.maxint + 1
+            # overflows into float
             data = {"a": [i for i in range(100)] + [maxint, maxint, maxint]}
             tbl = Table(data)
             # two promotions later
             assert tbl.schema() == {
-                "a": str
+                "a": float
             }
+
+    def test_table_long(self):
+        if six.PY2:
+            # don't overflow in this test
+            data = [long(100), long(200), long(300)]  # noqa: F821
+            tbl = Table({
+                "a": data
+            })
+            assert tbl.schema() == {
+                "a": int
+            }
+            assert tbl.view().to_dict()["a"] == [int(d) for d in data]
+
+    def test_table_long_overflow(self):
+        if six.PY2:
+            maxint = sys.maxint
+            # don't overflow in this test
+            data = [maxint, maxint + 1, maxint + 2]
+            tbl = Table({
+                "a": data
+            })
+            assert tbl.schema() == {
+                "a": float
+            }
+            assert tbl.view().to_dict()["a"] == [float(d) for d in data]
 
     def test_table_nones(self):
         none_data = [{"a": 1, "b": None}, {"a": None, "b": 2}]
@@ -298,6 +324,30 @@ class TestTable(object):
         tbl2 = Table(schema)
 
         assert tbl2.schema(True) == schema
+
+    def test_table_long_schema(self):
+        if six.PY2:
+            schema = {
+                "a": long,  # noqa: F821
+                "b": int
+            }
+            tbl = Table(schema)
+            assert tbl.schema() == {
+                "a": int,
+                "b": int
+            }
+
+    def test_table_unicode_schema(self):
+        if six.PY2:
+            schema = {
+                "a": unicode,  # noqa: F821
+                "b": int
+            }
+            tbl = Table(schema)
+            assert tbl.schema() == {
+                "a": str,
+                "b": int
+            }
 
     # is_valid_filter
 

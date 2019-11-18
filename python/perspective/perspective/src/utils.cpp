@@ -20,8 +20,8 @@ t_dtype type_string_to_t_dtype(std::string value, std::string name){
     auto type = t_dtype::DTYPE_STR;
 
     // TODO consider refactor
-    if (value == "int" || value == "integer") {
-        // Python int
+    if (value == "int" || value == "integer" || value == "int64" || value == "long") {
+        // Python int, long, and Numpy int64
         type = t_dtype::DTYPE_INT64;
     } else if (value == "int8") {
         // Numpy int8
@@ -32,9 +32,6 @@ t_dtype type_string_to_t_dtype(std::string value, std::string name){
     } else if (value == "int32") {
         // Numpy int32
         type = t_dtype::DTYPE_INT32;
-    } else if (value == "int64") {
-        // Numpy int64
-        type = t_dtype::DTYPE_INT64;
     } else if (value == "float") {
         // Python float
         type = t_dtype::DTYPE_FLOAT64;
@@ -53,7 +50,7 @@ t_dtype type_string_to_t_dtype(std::string value, std::string name){
         // TODO
         // Numpy float128
         type = t_dtype::DTYPE_FLOAT64;
-    } else if (value == "str" || value == "string") {
+    } else if (value == "str" || value == "string" || value == "unicode") {
         // Python unicode str
         type = t_dtype::DTYPE_STR;
     } else if (value == "bool" || value == "boolean") {
@@ -150,6 +147,7 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         case DTYPE_INT32:
         case DTYPE_UINT64:
         case DTYPE_INT64: {
+            std::cout << scalar.to_int64() << std::endl;
             return py::cast(scalar.to_int64());
         }
         case DTYPE_NONE: {
