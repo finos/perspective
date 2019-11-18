@@ -154,3 +154,4 @@ python/cpp
 python/perspective/perspective_python.egg-info
 python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
+/__pycache__
