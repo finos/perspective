@@ -151,7 +151,7 @@ class Table(object):
         Args:
             data (dict|list|dataframe) : the data with which to update the Table
         '''
-        columns = self.columns()
+        columns = [name for name in self._table.get_schema().columns() if name != "psp_okey"]
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
         self._accessor._names = columns + [name for name in self._accessor._names if name == "__INDEX__"]
