@@ -77,17 +77,30 @@ module.exports = perspective => {
             await table.delete();
         });
 
-        it("properly removes a failed delete callback on a table", async function() {
+        it("properly removes a failed delete callback on a table", async function(done) {
             const table = perspective.table([{x: 1}]);
 
             // when a callback throws, it should delete that callback
-            const cb = function() {
+            table.on_delete(() => {
                 throw new Error("something went wrong!");
-            };
-
-            table.on_delete(cb);
+            });
 
             table.delete();
+            done();
+        });
+
+        it("properly removes a failed delete callback on a view", async function(done) {
+            const table = perspective.table([{x: 1}]);
+            const view = table.view();
+
+            // when a callback throws, it should delete that callback
+            view.on_delete(() => {
+                throw new Error("something went wrong!");
+            });
+
+            view.delete();
+            table.delete();
+            done();
         });
     });
 };

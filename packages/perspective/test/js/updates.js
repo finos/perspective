@@ -364,6 +364,39 @@ module.exports = perspective => {
             );
             table1.update(data);
         });
+
+        it("properly removes a failed update callback on a table", async function(done) {
+            const table = perspective.table({x: "integer"});
+            const view = table.view();
+            let size = await table.size();
+            let counter = 0;
+
+            // when a callback throws, it should delete that callback
+            view.on_update(() => {
+                counter++;
+                throw new Error("something went wrong!");
+            });
+
+            view.on_update(async () => {
+                // failed callback gets removed; non-failing callback gets called
+                let sz = await table.size();
+                expect(counter).toEqual(1);
+                expect(sz).toEqual(size++);
+            });
+
+            table.update([{x: 1}]);
+            table.update([{x: 2}]);
+            table.update([{x: 3}]);
+
+            const view2 = table.view(); // create a new view to make sure we process every update transacation.
+            const final_size = await table.size();
+            expect(final_size).toEqual(3);
+
+            view2.delete();
+            view.delete();
+            table.delete();
+            done();
+        });
     });
 
     describe("Limit", function() {
