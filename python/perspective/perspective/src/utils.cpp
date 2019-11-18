@@ -147,7 +147,6 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         case DTYPE_INT32:
         case DTYPE_UINT64:
         case DTYPE_INT64: {
-            std::cout << scalar.to_int64() << std::endl;
             return py::cast(scalar.to_int64());
         }
         case DTYPE_NONE: {

@@ -79,7 +79,11 @@ infer_type(t_val x, t_val date_validator) {
     } else if (py::isinstance<py::float_>(x)) {
         t = t_dtype::DTYPE_FLOAT64;
     } else if (py::isinstance<py::int_>(x)) {
-        t = t_dtype::DTYPE_INT32;
+        if (PY_MAJOR_VERSION < 3) {
+            t = t_dtype::DTYPE_INT32;
+        } else {
+            t = t_dtype::DTYPE_INT64;
+        }
     } else if (py::isinstance<py::str>(x) || type_string == "str") {
         t_dtype parsed_type = date_validator.attr("format")(x).cast<t_dtype>();
         if (parsed_type == t_dtype::DTYPE_DATE || parsed_type == t_dtype::DTYPE_TIME) {
