@@ -26,6 +26,13 @@ class TestTable(object):
         tbl = Table([])
         assert tbl.size() == 0
 
+    def test_table_not_iterable(self):
+        data = {
+            "a": 1
+        }
+        with raises(NotImplementedError):
+            Table(data)
+
     def test_table_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -78,6 +85,36 @@ class TestTable(object):
                 "a": float
             }
             assert tbl.view().to_dict()["a"] == [float(d) for d in data]
+
+    def test_table_int_to_long(self):
+        if six.PY2:
+            # don't overflow in this test
+            data = [int(100), int(200), int(300)]
+            tbl = Table({
+                "a": long  # noqa: F821
+            })
+            assert tbl.schema() == {
+                "a": int
+            }
+            tbl.update({
+                "a": data
+            })
+            assert tbl.view().to_dict()["a"] == data
+
+    def test_table_float_to_long(self):
+        if six.PY2:
+            # don't overflow in this test
+            data = [1.5, 2.5, 3.5]  # noqa: F821
+            tbl = Table({
+                "a": long  # noqa: F821
+            })
+            assert tbl.schema() == {
+                "a": int
+            }
+            tbl.update({
+                "a": data
+            })
+            assert tbl.view().to_dict()["a"] == [1, 2, 3]
 
     def test_table_nones(self):
         none_data = [{"a": 1, "b": None}, {"a": None, "b": 2}]

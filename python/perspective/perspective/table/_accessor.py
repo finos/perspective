@@ -55,14 +55,17 @@ def _type_to_format(data_or_schema):
             if isinstance(v, type) or isinstance(v, str):
                 # schema maps name -> type
                 return False, 2, data_or_schema
-            elif isinstance(v, list) or iter(v):
-                # if columns entries are iterable, type 1
-                return isinstance(v, numpy.ndarray), 1, data_or_schema
+            elif isinstance(v, list):
+                # a dict of iterables = type 1
+                return False, 1, data_or_schema
             else:
-                # Can't process
-                raise NotImplementedError("Dict values must be list or type!")
-        # Can't process
-        raise NotImplementedError("Dict values must be list or type!")
+                # See if iterable
+                try:
+                    iter(v)
+                except TypeError:
+                    raise NotImplementedError("Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
+                else:
+                    return isinstance(v, numpy.ndarray), 1, data_or_schema
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
