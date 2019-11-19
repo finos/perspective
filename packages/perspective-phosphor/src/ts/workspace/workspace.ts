@@ -98,6 +98,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
 
         this.masterpanel.addWidget(widget);
+        widget.isHidden && widget.show();
         widget.viewer.restyleElement();
 
         widget.viewer.addEventListener("perspective-click", this.onPerspectiveClick);

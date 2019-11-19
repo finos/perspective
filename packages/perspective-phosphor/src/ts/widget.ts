@@ -86,8 +86,6 @@ export class PerspectiveWidget extends Widget {
         // do computed last
         this.computed_columns = computed_columns;
         this.filters = filters;
-
-        this._displayed = false;
     }
 
     /**********************/
@@ -120,9 +118,7 @@ export class PerspectiveWidget extends Widget {
     }
 
     notifyResize(): void {
-        if (this.isAttached && !this.displayed) {
-            this._displayed = true;
-        } else if (this.isAttached) {
+        if (this.isVisible) {
             this.viewer.notifyResize();
         }
     }
@@ -140,14 +136,14 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table a `perspective.table` object.
      */
-    load(table: (TableData | Table), options?: TableOptions): void {
+    load(table: TableData | Table, options?: TableOptions): void {
         this.viewer.load(table, options);
     }
 
     /**
      * Update the viewer with new data.
-     * 
-     * @param data 
+     *
+     * @param data
      */
     _update(data: TableData): void {
         this.viewer.update(data);
@@ -163,7 +159,7 @@ export class PerspectiveWidget extends Widget {
     /**
      * Replaces the data of the viewer's table with new data. New data must conform
      * to the schema of the Table.
-     * 
+     *
      * @param data
      */
     replace(data: TableData): void {
@@ -311,7 +307,7 @@ export class PerspectiveWidget extends Widget {
             this.node.classList.add(PSP_CONTAINER_CLASS);
             this.node.classList.remove(PSP_CONTAINER_CLASS_DARK);
         }
-        if (this._displayed) {
+        if (this.isAttached) {
             this.viewer.restyleElement();
         }
     }
@@ -328,12 +324,8 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    toggleConfig() {
+    toggleConfig(): void {
         this._viewer.toggleConfig();
-    }
-
-    get displayed(): boolean {
-        return this._displayed;
     }
 
     static createNode(node: HTMLDivElement): PerspectiveViewer {
@@ -370,5 +362,4 @@ export class PerspectiveWidget extends Widget {
     private _client: boolean;
     private _dark: boolean;
     private _editable: boolean;
-    private _displayed: boolean;
 }
