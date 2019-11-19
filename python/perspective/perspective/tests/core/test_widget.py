@@ -171,7 +171,20 @@ class TestWidget:
         widget.post = MethodType(mocked_post, widget)
         widget.update(data)
         assert widget.table is None
-        assert widget._data == comparison_data
+
+    def test_widget_client_update_cached(self):
+        data = {"a": [1, 2]}
+        widget = PerspectiveWidget(data, client=True)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "update",
+            "data": data
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.update(data)
+        assert widget._predisplay_update_cache == [data]
+        widget._displayed = True
+        widget.update(data)
+        assert widget._predisplay_update_cache == [data]
 
     # clear
 

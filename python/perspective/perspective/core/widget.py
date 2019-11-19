@@ -166,22 +166,22 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                     sort=[["b", "desc"]],
                     filter=[["a", ">", 1]])
         '''
+        self._displayed = False
+        self.on_displayed(self._on_display)
 
         # If `self.client` is True, the front-end `perspective-viewer` is given a copy of the data serialized to Arrow,
         # and changes made in Python do not reflect to the front-end.
         self.client = client
 
-        # Pass table load options to the front-end in client mode
-        self._client_options = {}
+        if self.client:
+            # Pass table load options to the front-end in client mode
+            self._client_options = {}
+
+            # Cache calls to `update()` before the widget has been displayed.
+            self._predisplay_update_cache = []
 
         if index is not None and limit is not None:
             raise PerspectiveError("Index and Limit cannot be set at the same time!")
-
-        if index is not None:
-            self._client_options["index"] = index
-
-        if limit is not None:
-            self._client_options["limit"] = limit
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
@@ -208,6 +208,12 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         if self.client:
             if isinstance(table_or_data, Table):
                 raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
+
+            if index is not None:
+                self._client_options["index"] = index
+
+            if limit is not None:
+                self._client_options["limit"] = limit
 
             # cache self._data so creating multiple views don't reserialize the same data
             if not hasattr(self, "_data") or self._data is None:
@@ -249,6 +255,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         and calls the browser viewer's update method. Otherwise, it calls `Viewer.update()` using `super()`.
         '''
         if self.client is True:
+            if self._displayed is False:
+                self._predisplay_update_cache.append(data)
+                return
+
             # serialize the data and send a custom message to the browser
             if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
                 data, _ = deconstruct_pandas(data)
@@ -257,7 +267,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 "cmd": "update",
                 "data": d
             })
-            self._data = d
         else:
             super(PerspectiveWidget, self).update(data)
 
@@ -335,6 +344,12 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 # return the dataset or table name to the front-end
                 msg = self._make_load_message()
                 self.send(msg.to_dict())
+
+                # In client mode, users can call `update()` before the widget is visible.
+                # This applies the updates after the viewer has loaded the initial dataset.
+                if self.client is True and len(self._predisplay_update_cache) > 0:
+                    for data in self._predisplay_update_cache:
+                        self.update(data)
             else:
                 # For all calls to Perspective, process it in the manager.
                 post_callback = partial(self.post, msg_id=parsed["id"])
@@ -362,3 +377,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
             raise PerspectiveError("Widget could not find a dataset or a `Table` to load.")
+
+    def _on_display(self, widget, **kwargs):
+        '''When the widget has been displayed, make sure `displayed` is set to True so updates stop being cached.'''
+        self._displayed = True
