@@ -13,10 +13,10 @@ from datetime import date, datetime
 from functools import partial
 from ipywidgets import Widget
 from traitlets import observe, Unicode
-from .data import deconstruct_pandas
-from .exception import PerspectiveError
-from .viewer import PerspectiveViewer
+from ..core.data import deconstruct_pandas
+from ..core.exception import PerspectiveError
 from ..table import Table, is_libpsp
+from ..viewer import PerspectiveViewer
 
 
 def _type_to_string(t):

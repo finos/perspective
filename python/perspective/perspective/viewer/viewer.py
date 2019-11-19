@@ -10,7 +10,7 @@ from random import random
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
 from .viewer_traitlets import PerspectiveTraitlets
-from .manager import PerspectiveManager
+from ..manager import PerspectiveManager
 from ..table import Table
 
 

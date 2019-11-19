@@ -8,7 +8,7 @@
 import json
 import tornado.websocket
 from datetime import datetime
-from .exception import PerspectiveError
+from ..core.exception import PerspectiveError
 from ..table._date_validator import _PerspectiveDateValidator
 
 
