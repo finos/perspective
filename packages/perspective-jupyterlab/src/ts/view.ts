@@ -123,40 +123,58 @@ export class PerspectiveView extends DOMWidgetView {
      * @param msg {PerspectiveJupyterMessage}
      */
     _handle_message(msg: PerspectiveJupyterMessage) {
-        // If in client-only mode (no Table on the python widget), message.data is an object containing "data" and "options". 
-        if (this.pWidget.client === true) {
-            if(msg.data["data"]) {
-                // either an update or a load
-                if (msg.data["cmd"] === "update") {
-                    this.pWidget._update(msg.data["data"]);
-                } else if (msg.data["cmd"] === "replace") {
-                    this.pWidget.replace(msg.data["data"]);
-                } else {
-                    this.pWidget.load(msg.data["data"], msg.data["options"]);
-                }
-            } else if (msg.data["cmd"] == "clear") {
-                this.pWidget.clear();
-            }
+        // If in client-only mode (no Table on the python widget), message.data is an object containing "data" and "options".
+        if (msg.type === "table") {
+            this._handle_load_message(msg);
         } else {
-            // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
-            const message = JSON.parse(JSON.stringify(msg));
-            if (message.type === "table") {
-                const new_table = this.perspective_client.open_table(message.data);
-                this.pWidget.load(new_table);
+            if (msg.data["cmd"] === "delete") {
+                // Regardless of client mode, if `delete()` is called we need to clean up the Viewer.
+                this.pWidget.delete();
+                return;
+            }
 
-                // Only call `init` after the viewer has a table.
-                this.perspective_client.send({
-                    id: -1,
-                    cmd: "init"
-                });
+            if (this.pWidget.client === true) {
+                // In client mode, we need to directly call the methods on the viewer
+                const command = msg.data["cmd"];
+                if (command === "update") {
+                    this.pWidget._update(msg.data["data"]);
+                } else if (command === "replace") {
+                    this.pWidget.replace(msg.data["data"]);
+                } else if (command === "clear") {
+                    this.pWidget.clear();
+                }
             } else {
-                // Conform message to format expected by the perspective client
+                // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
+                const message = JSON.parse(JSON.stringify(msg));
+
                 delete message.type;
                 if (typeof message.data === "string") {
                     message.data = JSON.parse(message.data);
                 }
+
                 this.perspective_client._handle(message);
             }
+        }
+    }
+
+    /**
+     * Given a message that commands the widget to load a dataset or table, process it.
+     * @param {PerspectiveJupyterMessage} msg 
+     */
+    _handle_load_message(msg: PerspectiveJupyterMessage) {
+        if (this.pWidget.client === true) {
+            const data = msg.data["data"];
+            const options = msg.data["options"] || {};
+            this.pWidget.load(data, options);
+        } else {
+            const new_table = this.perspective_client.open_table(msg.data["table_name"]);
+            this.pWidget.load(new_table);
+
+            // Only call `init` after the viewer has a table.
+            this.perspective_client.send({
+                id: -1,
+                cmd: "init"
+            });
         }
     }
 

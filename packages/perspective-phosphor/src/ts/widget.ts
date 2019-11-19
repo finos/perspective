@@ -170,6 +170,20 @@ export class PerspectiveWidget extends Widget {
         this.viewer.replace(data);
     }
 
+    /**
+     * Deletes this element's data and clears it's internal state (but not its
+     * user state). This (or the underlying `perspective.table`'s equivalent
+     * method) must be called in order for its memory to be reclaimed.
+     * 
+     * If not running in client mode, delete_table defaults to false and the server should
+     * handle memory cleanup.
+     *
+     * @param {boolean} delete_table Whether `delete()` should be called on the underlying `Table`.
+     */
+    delete(delete_table: boolean = true) {
+        this.viewer.delete(delete_table || this.client);
+    }
+
     get table(): Table {
         return this.viewer.table;
     }

@@ -188,6 +188,27 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.columns = []
         self.plugin = "hypergrid"
 
+    def delete(self, delete_table=True):
+        '''Delete the Viewer's data and clears its internal state. If `delete_table` is True,
+        the underlying `perspective.Table` and all associated `View`s will be deleted.
+
+        Args:
+            delete_table (bool) : whether the underlying `Table` will be deleted. Defaults to True.
+        '''
+        if self.view:
+            self.view.delete()
+            self.view_name = None
+
+        for view in self.manager._views.values():
+            view.delete()
+
+        if delete_table:
+            self.table.delete()
+            self.manager._tables.pop(self.table_name)
+            self.table_name = None
+
+        self.reset()
+
     def _new_view(self):
         '''Create a new View, and assign its name to the viewer.
 
