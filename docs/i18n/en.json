@@ -20,11 +20,14 @@
       "md/installation": {
         "title": "Installation"
       },
+      "md/js": {
+        "title": "Javascript User Guide"
+      },
+      "md/python": {
+        "title": "Python User Guide"
+      },
       "md/styles": {
         "title": "CSS Styles"
-      },
-      "md/usage": {
-        "title": "User Guide"
       },
       "obj/perspective-python-core": {
         "title": "perspective.core Python API"

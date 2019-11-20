@@ -77,15 +77,19 @@ body {
 }
 
 h2.headerTitle, h2.headerTitleWithLogo {
-    font-family: "Public Sans";
+    font-family: "Open Sans";
     color: #f9f9f9 !important;
     transition: opacity 0.1s ease-in;
 }
 
+.sideNavVisible .logo {
+    opacity: 1;
+}
 .logo {
-    font-family: "Public Sans";
+    font-family: "Open Sans";
     height: 50% !important;
     opacity: 0;
+    transition: opacity 0.2s;
 }
 
 .mainContainer .blockImage img {
@@ -103,7 +107,7 @@ h2.headerTitle, h2.headerTitleWithLogo {
 
 .homeContainer .projectTitle {
     color: #f9f9f9;
-    font-family: "Public Sans";
+    font-family: "Open Sans";
 }
 
 .homeContainer .projectTitle i {
@@ -179,12 +183,12 @@ ol li::before {
     font-weight: bold;
     font-size: 2rem;
     margin-right: 0.5rem;
-    font-family: "Public Sans", Helvetica;
+    font-family: "Open Sans", Helvetica;
     line-height: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Roboto Mono", monospace;
+    font-family: "Open Sans", monospace;
 }
 
 h1, h2 {
@@ -192,7 +196,7 @@ h1, h2 {
 }
 
 p, span, oi, li {
-    font-family: "Public Sans";
+    font-family: "Open Sans";
 }
 
 code *, pre * {
