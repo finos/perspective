@@ -5,7 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-import logging
+
 from random import random
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
@@ -133,20 +133,9 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         self.manager.host_table(name, table)
 
-        # If columns are different between the tables, then remove viewer state.
-        # - sorting is expensive, but it prevents errors from applying pivots, etc. on columns that don't exist in the dataset.
+        # Reset the viewer when `load()` is called again.
         if self.table_name is not None:
-            old_columns = sorted(self.manager.get_table(self.table_name).columns())
-            new_columns = sorted(table.columns())
-
-            if str(new_columns) != str(old_columns):
-                logging.warning("New dataset has different columns - resetting viewer state.")
-                self.columns = table.columns()
-                self.row_pivots = []
-                self.column_pivots = []
-                self.aggregates = {}
-                self.sort = []
-                self.filters = []
+            self.reset()
 
         # If the user does not set columns to show, synchronize viewer state with dataset.
         if len(self.columns) == 0:
