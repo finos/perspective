@@ -23,12 +23,7 @@
   "scripts": {
     "webpack": "webpack --color --config ./webpack.config.js ./js/* && cpx \"node_modules/@finos/perspective/build/*.wasm\" \"perspective/node/assets\"&& cpx \"node_modules/zeromq/build/Release/zmq.node\" \"perspective/node/assets\"",
     "clean": "rimraf build",
-    "docs": "npm-run-all docs:prebuild docs:build docs:deploy",
-    "docs:prebuild": "echo \"cleaning docs build folder\" && rimraf ./docs/build",
-    "docs:build": "sphinx-build -b markdown docs docs/build",
-    "docs:deploy": "npm-run-all docs:deploy:core docs:deploy:table",
-    "docs:deploy:core": "(echo \"---\nid: perspective-python-core\ntitle: perspective.core Python API\n---\n\n\"; cat ./docs/build/perspective.core.md) > ../../docs/obj/perspective-python-core.md",
-    "docs:deploy:table": "(echo \"---\nid: perspective-python-table\ntitle: perspective.table Python API\n---\n\n\"; cat ./docs/build/perspective.table.md) > ../../docs/obj/perspective-python-table.md"
+    "docs": "python3 docs/generate.py"
   },
   "files": [
     "src/server.js"
