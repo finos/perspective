@@ -16,11 +16,3 @@ View
    :undoc-members:
    :show-inheritance:
    :exclude-members: to_arrow
-
-View Config
-===========
-.. autoclass:: perspective.table.view_config.ViewConfig
-   :members:
-   :undoc-members:
-   :show-inheritance:
-

@@ -190,17 +190,18 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 self._data = _serialize(table_or_data)
         else:
             #  If an empty dataset is provided, don't call `load()`
+            load_kwargs = {}
             if table_or_data is None:
                 if index is not None or limit is not None:
                     raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
             else:
                 if index is not None:
-                    kwargs.update({"index": index})
+                    load_kwargs.update({"index": index})
 
                 if limit is not None:
-                    kwargs.update({"limit": limit})
+                    load_kwargs.update({"limit": limit})
 
-                self.load(table_or_data, **kwargs)
+                self.load(table_or_data, **load_kwargs)
 
     def load(self, data, **options):
         '''Load the widget with data. If running in client mode, this method serializes the data

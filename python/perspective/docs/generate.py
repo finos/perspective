@@ -1,15 +1,14 @@
+################################################################################
+#
+# Copyright (c) 2019, the Perspective Authors.
+#
+# This file is part of the Perspective library, distributed under the terms of
+# the Apache License 2.0.  The full license can be found in the LICENSE file.
+#
 
 import os
 import shutil
 import re
-
-
-#   "docs:prebuild": "echo \"cleaning docs build folder\" && rimraf ./docs/build",
-#     "docs:build": "sphinx-build -b markdown docs docs/build",
-#     "docs:deploy": "npm-run-all docs:deploy:core docs:deploy:table",
-#     "docs:deploy:core": "(echo \"---\nid: perspective-python-core\ntitle: perspective.core Python API\n---\n\n\"; cat ./docs/build/perspective.core.md) > ../../docs/obj/perspective-python-core.md",
-#     "docs:deploy:table": "(echo \"---\nid: perspective-python-table\ntitle: perspective.table Python API\n---\n\n\"; cat ./docs/build/perspective.table.md) > ../../docs/obj/perspective-python-table.md"
- 
 
 HEADER = """---
 id: "perspective-python"
@@ -17,6 +16,23 @@ title: "perspective-python API"
 ---
 
 """
+
+def fix_param_lists(txt):
+    return re.sub("^ *?\n    \\* ", "    * ", txt, flags=re.DOTALL | re.MULTILINE)
+
+def fix_headers(txt):
+    txt = re.sub("^# ", "## ", txt, flags=re.DOTALL | re.MULTILINE)
+    txt = re.sub("^### Examples?", "##### Examples", txt, flags=re.DOTALL | re.MULTILINE)
+    return txt
+
+def fix_returns(txt):
+    offset = 0
+    for match in re.finditer("^\\* \\*\\*Returns\\*\\*.+?\\* \\*\\*Return type\\*\\*", txt, flags=re.DOTALL | re.MULTILINE):
+        group = match.group(0)
+        new_group = re.sub("        ", "    ", group)
+        txt = txt[:match.start(0) - offset] + new_group + txt[match.end(0) - offset:]
+        offset += len(group) - len(new_group)
+    return txt
 
 def main():
     cwd = os.path.dirname(os.path.realpath(__file__))
@@ -31,15 +47,10 @@ def main():
         if filename.endswith(".md"):
             with open(os.path.join(build_dir, filename), "r+") as file:
                 txt = file.read()
-                
-                # Fix parameter lists
-                fixed = re.sub("^ *?\n    \\* ", "    * ", txt, flags=re.DOTALL | re.MULTILINE)
-
-                # Fix headers
-                fixed = re.sub("^# ", "## ", fixed, flags=re.DOTALL | re.MULTILINE)
-                fixed = re.sub("^### Examples?", "##### Examples", fixed, flags=re.DOTALL | re.MULTILINE)
-
-                output += fixed
+                txt = fix_param_lists(txt)
+                txt = fix_headers(txt)
+                txt = fix_returns(txt)
+                output += txt
 
     output_dir = os.path.join(cwd, "..", "..", "..", "docs", "obj")
     with open(os.path.join(output_dir, "perspective-python.md"), "w+") as file:
