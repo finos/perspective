@@ -134,7 +134,16 @@ class Suite {
         const context = this._context[0];
         const stack = this._context.slice();
         context._benchmarks.push(
-            new Benchmark(desc, body, context._indent, () => unwind(stack), () => context._after_each && context._after_each(), () => context._iterations, () => context._timeout, () => context._toss)
+            new Benchmark(
+                desc,
+                body,
+                context._indent,
+                () => unwind(stack),
+                () => context._after_each && context._after_each(),
+                () => context._iterations,
+                () => context._timeout,
+                () => context._toss
+            )
         );
     }
 
