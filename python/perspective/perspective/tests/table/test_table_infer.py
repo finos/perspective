@@ -5,7 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-
+import six
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -23,10 +23,18 @@ class TestTableInfer(object):
         assert tbl.schema() == {"a": float}
 
     def test_table_promote_float(self):
-        data = {"a": [1, 2, 3, 4, 2147483648]}
-        tbl = Table(data)
-        assert tbl.schema() == {"a": float}
-        assert tbl.view().to_dict() == {"a": [1.0, 2.0, 3.0, 4.0, 2147483648.0]}
+        if six.PY2:
+            data = {"a": [1.5, 2.5, 3.5, 4.5, "abc"]}
+            tbl = Table(data)
+            assert tbl.schema() == {"a": str}
+            assert tbl.view().to_dict() == {"a": ["1.5", "2.5", "3.5", "4.5", "abc"]}
+
+    def test_table_promote_float_py2(self):
+        if six.PY2:
+            data = {"a": [1, 2, 3, 4, 2147483648]}
+            tbl = Table(data)
+            assert tbl.schema() == {"a": float}
+            assert tbl.view().to_dict() == {"a": [1.0, 2.0, 3.0, 4.0, 2147483648.0]}
 
     def test_table_infer_bool(self):
         data = {"a": [None, None, None, None, True, True, True]}
