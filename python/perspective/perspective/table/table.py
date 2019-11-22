@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from datetime import date, datetime
 from .view import View
 from ._accessor import _PerspectiveAccessor
@@ -19,27 +20,35 @@ except ImportError:
 
 
 class Table(object):
-    def __init__(self, data_or_schema, **config):
-        '''Construct a Table using the provided data or schema and optional configuration dictionary.
+    def __init__(self, data, limit=None, index=None):
+        '''Construct a :class:`~perspective.Table` using the provided data or
+        schema and optional configuration dictionary.
 
-        Tables are immutable - column names and data types cannot be changed after creation.
-
-        If a schema is provided, the table will be empty. Subsequent updates MUST conform to the column names and data types provided in the schema.
+        :class:`~perspective.Table` instances are immutable - column names and
+        data types cannot be changed after creation. If a schema is provided,
+        the :class:`~perspective.Table` will be empty.  Subsequent updates MUST
+        conform to the column names and data types provided in the schema.
 
         Args:
-            data_or_schema (dict/list/dataframe)
-            config (dict) : optional configurations for the Table:
-                - limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
-                - index (string) : a string column name to use as the Table's primary key.
-        '''
-        self._is_arrow = isinstance(data_or_schema, (bytes, bytearray))
-        if (self._is_arrow):
-            self._accessor = data_or_schema
-        else:
-            self._accessor = _PerspectiveAccessor(data_or_schema)
+            data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): Data or
+                schema which initializes the :class:`~perspective.Table`.
 
-        self._limit = config.get("limit", 4294967295)
-        self._index = config.get("index", "")
+        Keyword Args:
+            index (:obj:`str`): A string column name to use as the
+                :class:`~perspective.Table` primary key.
+            limit (:obj:`int`): The maximum number of rows the
+                :class:`~perspective.Table` should have.  Cannot be set at the
+                same time as ``index``. Updates past the limit will begin
+                writing at row 0.
+        '''
+        self._is_arrow = isinstance(data, (bytes, bytearray))
+        if (self._is_arrow):
+            self._accessor = data
+        else:
+            self._accessor = _PerspectiveAccessor(data)
+
+        self._limit = limit or 4294967295
+        self._index = index or ""
         self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, self._is_arrow)
         self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
@@ -53,32 +62,37 @@ class Table(object):
         return False
 
     def clear(self):
-        '''Removes all the rows in the Table, but preserves the schema and configuration.'''
+        '''Removes all the rows in the :class:`~perspective.Table`, but
+        preserves everything else including the schema and any callbacks or
+        registered :class:`~perspective.View`.
+        '''
         self._table.reset_gnode(self._gnode_id)
 
     def replace(self, data):
-        '''Replaces all rows in the Table with the new data that conforms to the Table's schema.
+        '''Replaces all rows in the :class:`~perspective.Table` with the new
+        data that conforms to the :class:`~perspective.Table` schema.
 
         Args:
-            data (dict|list|dataframe) the new data with which to fill the Table
+            data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): New data
+                that will be filled into the :class:`~perspective.Table`.
         '''
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
 
     def size(self):
-        '''Returns the row count of the Table.'''
+        '''Returns the row count of the :class:`~perspective.Table`.'''
         return self._table.size()
 
     def schema(self, as_string=False):
-        '''Returns the schema of this Table.
+        '''Returns the schema of this :class:`~perspective.Table`, a :obj:`dict`
+        mapping of string column names to python data types.
 
-        A schema provides the mapping of string column names to python data types.
-
-        Args:
-            as_string (bool) : returns the data types as string representations, if True
+        Keyword Args:
+            as_string (:obj:`bool`): returns the data types as string
+                representations, if True
 
         Returns:
-            dict : A key-value mapping of column names to data types.
+            :obj:`dict`: A key-value mapping of column names to data types.
         '''
         s = self._table.get_schema()
         columns = s.columns()
@@ -93,13 +107,14 @@ class Table(object):
         return schema
 
     def columns(self, computed=False):
-        '''Returns the column names of this dataset.
+        '''Returns the column names of this :class:`~perspective.Table`.
 
-        Args:
-            computed (bool) : whether to include computed columns in this array. Defaults to False.
+        Keyword Args:
+            computed (:obj:`bool`): Whether to include computed columns in this
+                array. Defaults to False.
 
         Returns:
-            list : a list of string column names
+            :obj:`list`: a list of string column names
         '''
         return list(self.schema().keys())
 
@@ -107,12 +122,22 @@ class Table(object):
         '''Returns a schema of computed columns added by the user.
 
         Returns:
-            dict[string:dict] : a key-value mapping of column names to computed columns. Each value is a dictionary that contains `column_name`, `column_type`, and `computation`.
+            :obj:`dict`: a key-value mapping of column names to computed
+                columns. Each value is a dictionary that contains
+                ``column_name``, ``column_type``, and ``computation``.
         '''
         return {}
 
     def is_valid_filter(self, filter):
-        '''Tests whether a given filter configuration is valid - that the filter term is not None or an unparsable date/datetime.'''
+        '''Tests whether a given filter expression string is valid, e.g. that
+        the filter term is not None or an unparsable date/datetime.
+
+        Args:
+            filter (:obj:`string`): The filter expression to validate.
+
+        Returns:
+            :obj:`bool`: Whether this filter is valid.
+        '''
         if isinstance(filter[1], str):
             filter_op = str_to_filter_op(filter[1])
         else:
@@ -135,21 +160,24 @@ class Table(object):
         return value is not None
 
     def update(self, data):
-        '''Update the Table with new data.
+        '''Update the :class:`~perspective.Table` with new data.
 
-        Updates on tables without an explicit `index` are treated as appends.
+        Updates on :class:`~perspective.Table` without an explicit ``index``
+        are treated as appends.  Updates on :class:`~perspective.Table` with
+        an explicit ``index`` should have the index as part of the ``data``
+        param, as this instructs the engine to locate the indexed row and write
+        into it.  If an index is not provided, the update is treated as an
+        append.
 
-        Updates on tables with an explicit `index` should have the index as part of the `data` param, as this instructs the engine
-        to locate the indexed row and write into it. If an index is not provided, the update is treated as an append.
+        Args:
+            data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): The data
+                with which to update the :class:`~perspective.Table`.
 
-        Example:
+        Examples:
             >>> tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="a")
             >>> tbl.update({"a": [2, 3], "b": ["a", "a"]})
             >>> tbl.view().to_dict()
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
-
-        Args:
-            data (dict|list|dataframe) : the data with which to update the Table
         '''
         columns = [name for name in self._table.get_schema().columns() if name != "psp_okey"]
         types = self._table.get_schema().types()
@@ -168,18 +196,20 @@ class Table(object):
         self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
 
     def remove(self, pkeys):
-        '''Removes the rows with the primary keys specified in `pkeys`.
+        '''Removes the rows with the primary keys specified in ``pkeys``.
 
-        If the table does not have an index, `remove()` has no effect. Removes propagate to views derived from the table.
+        If the :class:`~perspective.Table` does not have an index, ``remove()``
+        has no effect.  Removes propagate to views derived from the table.
+
+        Args:
+            pkeys (:obj:`list`): a list of primary keys to indicate the rows
+                that should be removed.
 
         Example:
             >>> tbl = Table({"a": [1, 2, 3]}, index="a")
             >>> tbl.remove([2, 3])
             >>> tbl.view().to_records()
             [{"a": 1}]
-
-        Args:
-            pkeys (list) : a list of primary keys to indicate the rows that should be removed.
         '''
         if self._index == "":
             return
@@ -190,23 +220,35 @@ class Table(object):
         self._accessor._types = types
         make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_DELETE, True, False)
 
-    def view(self, **config):
-        ''' Create a new View from this table with the configuration options in `config`.
+    def view(self, columns=None, row_pivots=None, column_pivots=None, aggregates=None, sort=None, filter=None):
+        ''' Create a new :class:`~perspective.View` from this
+        :class:`~perspective.Table` via the supplied keyword arguments.
 
-        A View is an immutable set of transformations on the underlying Table, which allows
-        for querying, pivoting, aggregating, sorting, and filtering of data.
+        A View is an immutable set of transformations applied to the data stored
+        in a :class:`~perspective.Table`, which can be used for querying,
+        pivoting, aggregating, sorting, and filtering.
 
-        Args:
-            **config (dict) : optional keyword arguments that configure and transform the view:
-            - "columns" (list[str]) : a list of column names to be shown
-            - "row_pivots" (list[str]) : a list of column names to use as row pivots
-            - "column_pivots" (list[str]) : a list of column names to use as column pivots
-            - "aggregates" (dict[str:str]) : a dictionary of column names to aggregate types to specify aggregates for individual columns
-            - "sort" (list(list[str]))
-            - "filter" (list(list[str]))
+        Keyword Arguments:
+            columns (:obj:`list` of :obj:`str`): A list of column names to be
+                visible to the user.
+            row_pivots (:obj:`list` of :obj:`str`): A list of column names to
+                use as row pivots.
+            column_pivots (:obj:`list` of :obj:`str`): A list of column names
+                to use as column pivots.
+            aggregates (:obj:`dict` of :obj:`str` to :obj:`str`):  A dictionary
+                of column names to aggregate types, which specify aggregates
+                for individual columns.
+            sort (:obj:`list` of :obj:`list` of :obj:`str`): A list of lists,
+                each list containing a column name and a sort direction
+                (``asc``, ``desc``, ``asc abs``, ``desc abs``, ``col asc``,
+                ``col desc``, ``col asc abs``, ``col desc abs``).
+            filter (:obj:`list` of :obj:`list` of :obj:`str`):  A list of lists,
+                each list containing a column name, a filter comparator, and a
+                value to filter by.
 
         Returns:
-            View : a new instance of the `View` class.
+            :class:`~perspective.View`: A new :class:`~perspective.View`
+                instance bound to this :class:`~perspective.Table`.
 
         Examples:
             >>> tbl = Table({"a": [1, 2, 3]})
@@ -214,18 +256,36 @@ class Table(object):
             >>> view.to_dict()
             >>> {"a": [1]}
         '''
-        if config.get("columns") is None:
+        config = {}
+        if columns is None:
             config["columns"] = self.columns()  # TODO: push into C++
+        else:
+            config["columns"] = columns
+        if row_pivots is not None:
+            config["row_pivots"] = row_pivots
+        if column_pivots is not None:
+            config["column_pivots"] = column_pivots
+        if aggregates is not None:
+            config["aggregates"] = aggregates
+        if sort is not None:
+            config["sort"] = sort
+        if filter is not None:
+            config["filter"] = filter
         view = View(self, **config)
         self._views.append(view._name)
         return view
 
     def on_delete(self, callback):
-        '''Register a callback with the table that will be invoked when the `delete()` method is called on the Table.
+        '''Register a callback to be invoked when the
+        :func:`~perspective.Table.delete()` method is called on this
+        :class:`~perspective.Table`.
+
+        Args:
+            callback (:obj:`func`): A callback function to invoke on delete.
 
         Examples:
             >>> def deleter():
-            >>>     print("Delete called!")
+            ...     print("Delete called!")
             >>> table.on_delete(deleter)
             >>> table.delete()
             >>> Delete called!
@@ -235,11 +295,13 @@ class Table(object):
         self._delete_callbacks.add_callback(callback)
 
     def remove_delete(self, callback):
-        '''Remove the delete callback associated with this table.
+        '''De-register the supplied callback from the
+        :func:`~perspective.Table.delete()` event for this
+        :class:`~perspective.Table`
 
         Examples:
             >>> def deleter():
-            >>>     print("Delete called!")
+            ...     print("Delete called!")
             >>> table.on_delete(deleter)
             >>> table.remove_delete(deleter)
             >>> table.delete()
@@ -249,9 +311,9 @@ class Table(object):
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def delete(self):
-        '''Delete this table and clean up associated resources in the core engine.
-
-        Tables with associated views cannot be deleted.
+        '''Delete this :class:`~perspective.Table` and clean up associated
+        resources, assuming it has no :class:`~perspective.View` instances
+        registered to it (which must be deleted first).
         '''
         if len(self._views) > 0:
             raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
@@ -259,7 +321,6 @@ class Table(object):
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 
     def _update_callback(self):
-        '''When the table is updated with new data, call each of the callbacks associated with the views.'''
         cache = {}
         for callback in self._callbacks.get_callbacks():
             callback["callback"](cache=cache)

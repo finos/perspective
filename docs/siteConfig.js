@@ -48,7 +48,6 @@ const siteConfig = {
     ],
 
     stylesheets: [
-        "https://fonts.googleapis.com/css?family=Montserrat:300",
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",
         "https://fonts.googleapis.com/css?family=Roboto+Mono",

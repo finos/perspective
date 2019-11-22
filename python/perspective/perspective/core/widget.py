@@ -118,13 +118,23 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         See `PerspectiveViewer.__init__` for arguments that transform the view shown in the widget.
 
         Args:
-            table_or_data (perspective.Table|dict|list|pandas.DataFrame) : the table or data that will be viewed in the widget.
-            index (str) : a column name to be used as the primary key. Ignored if a `Table` is passed in.
-            limit (int) : a upper limit on the number of rows in the Table. Cannot be set at the same time as `index`, ignored if a `Table` is passed in.
-            client (bool) : If True, convert the dataset into an Apache Arrow binary and create the Table in Javascript using a copy of the data. Defaults to False.
-            **kwargs : configuration options for the `PerspectiveViewer`, and `Table` constructor if `table_or_data` is a dataset.
+            table_or_data (perspective.Table|dict|list|pandas.DataFrame): The ``Table`` or data that will be viewed in the widget.
 
-        Example:
+        Keyword Arguments:
+
+        index ``(str)``
+        - A column name to be used as the primary key. Ignored if a `Table` is passed in.
+
+        limit ``(int)``
+        - A upper limit on the number of rows in the Table. Cannot be set at the same time as `index`, ignored if a `Table` is passed in.
+
+        client ``(bool)``
+        - If True, convert the dataset into an Apache Arrow binary and create the Table in Javascript using a copy of the data. Defaults to False.
+
+        kwargs
+        - configuration options for the `PerspectiveViewer`, and `Table` constructor if `table_or_data` is a dataset.
+
+        Examples:
             >>> widget = PerspectiveWidget(
                     {"a": [1, 2, 3]},
                     aggregates={"a": "avg"},
@@ -180,17 +190,18 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 self._data = _serialize(table_or_data)
         else:
             #  If an empty dataset is provided, don't call `load()`
+            load_kwargs = {}
             if table_or_data is None:
                 if index is not None or limit is not None:
                     raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
             else:
                 if index is not None:
-                    kwargs.update({"index": index})
+                    load_kwargs.update({"index": index})
 
                 if limit is not None:
-                    kwargs.update({"limit": limit})
+                    load_kwargs.update({"limit": limit})
 
-                self.load(table_or_data, **kwargs)
+                self.load(table_or_data, **load_kwargs)
 
     def load(self, data, **options):
         '''Load the widget with data. If running in client mode, this method serializes the data
@@ -250,8 +261,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         The posted message should conform to the `PerspectiveJupyterMessage` interface as defined in `@finos/perspective-jupyterlab`.
 
         Args:
-            msg (dict) : a message from `PerspectiveManager` for the front-end viewer to process.
-            id (int) : an integer id that allows the client to process the message.
+            msg (dict): a message from `PerspectiveManager` for the front-end viewer to process.
+            id (int): an integer id that allows the client to process the message.
         '''
         self.send({
             "id": id,
@@ -265,7 +276,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         Args:
             widget : a reference to the `Widget` instance that received the message.
-            content (dict) : the message from the front-end. Automatically de-serialized by ipywidgets.
+            content (dict): the message from the front-end. Automatically de-serialized by ipywidgets.
             buffers : optional arraybuffers from the front-end, if any.
         '''
         if content["type"] == "cmd":

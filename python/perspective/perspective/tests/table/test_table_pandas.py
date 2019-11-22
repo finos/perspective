@@ -297,6 +297,18 @@ class TestTablePandas(object):
         table.update(df)
         assert table.view().to_dict()["a"] == data
 
+    def test_table_pandas_from_schema_long(self):
+        if six.PY2:
+            data = [None, 1, None, 2, None, 3, 4]
+            df = pd.DataFrame({
+                "a": data
+            })
+            table = Table({
+                "a": long  # noqa: F821
+            })
+            table.update(df)
+            assert table.view().to_dict()["a"] == data
+
     def test_table_pandas_from_schema_bool(self):
         data = [True, False, True, False]
         df = pd.DataFrame({
