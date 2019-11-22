@@ -86,8 +86,8 @@ class PerspectiveManager(object):
         '''Given a message from the client, process it through the Perspective engine.
 
         Args:
-            msg (dict) : a message from the client with instructions that map to engine operations
-            post_callback (callable) : a function that returns data to the client
+            msg (dict): a message from the client with instructions that map to engine operations
+            post_callback (callable): a function that returns data to the client
         '''
         if isinstance(msg, str):
             if msg == "heartbeat":   # TODO fix this
@@ -164,9 +164,9 @@ class PerspectiveManager(object):
         '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
 
         Args:
-            msg (dict) : the message from the client
+            msg (dict): the message from the client
             table_or_view {Table|View} : the instance that the subscription will be called on
-            post_callback (callable) : a method that notifies the client with new data
+            post_callback (callable): a method that notifies the client with new data
         '''
         try:
             callback = None

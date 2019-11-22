@@ -20,9 +20,7 @@ function imgUrl(img) {
 }
 
 function docUrl(doc, language) {
-    return (
-        siteConfig.baseUrl + "docs/" + (language ? language + "/" : "") + doc
-    );
+    return siteConfig.baseUrl + "docs/" + (language ? language + "/" : "") + doc;
 }
 
 function pageUrl(page, language) {
@@ -98,11 +96,7 @@ class HomeSplash extends React.Component {
 }
 
 const Block = props => (
-    <Container
-        padding={["bottom", "top"]}
-        id={props.id}
-        background={props.background}
-    >
+    <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
         <GridBlock contents={props.children} layout={props.layout} />
     </Container>
 );
@@ -124,11 +118,7 @@ const PerspectiveBlock = props => {
         );
     }
     return (
-        <Container
-            padding={["bottom", "top"]}
-            id={props.id}
-            background={props.background}
-        >
+        <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
             <div
                 className={classNames({
                     imageAlignRight: !!afterImage,
@@ -154,22 +144,19 @@ const Features = props => (
     <Block layout="fourColumn">
         {[
             {
-                content:
-                    "Quickly answer any question about your data through a set of flexible transforms, such as pivots, filters, and aggregations",
+                content: "Quickly answer any question about your data through a set of flexible transforms, such as pivots, filters, and aggregations",
                 image: imgUrl("baseline-settings-20px.svg"),
                 imageAlign: "top",
                 title: "Simple"
             },
             {
-                content:
-                    "Utilizing bleeding-edge browser technology such as Web Assembly and Apache Arrow, Perspective is unmatched in browser performance",
+                content: "Utilizing bleeding-edge browser technology such as Web Assembly and Apache Arrow, Perspective is unmatched in browser performance",
                 image: imgUrl("baseline-trending_up-24px.svg"),
                 imageAlign: "top",
                 title: "Powerful"
             },
             {
-                content:
-                    "Engineered for reliability and production-vetted on the J.P. Morgan trading floor, now available to the development community as Open Source",
+                content: "Engineered for reliability and production-vetted on the J.P. Morgan trading floor, now available to the development community as Open Source",
                 image: imgUrl("baseline-security-24px.svg"),
                 imageAlign: "top",
                 title: "Industrial"
@@ -192,7 +179,7 @@ const FeatureCallout = props => (
             [HighCharts](https://github.com/highcharts/highcharts).
         </MarkdownBlock>
         <MarkdownBlock>Integration with Jupyterlab.</MarkdownBlock>
-        <MarkdownBlock>Runtimes for the Browser and Node.js.</MarkdownBlock>
+        <MarkdownBlock>Runtimes for the browser, Python, and Node.js.</MarkdownBlock>
     </Container>
 );
 
@@ -205,7 +192,8 @@ Perspective comes with:
 * A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
 * A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
 * A suite of simple, context-aware visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/) and [Hypergrid](https://github.com/fin-hypergrid/core).
-* Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/), Runtimes for the Browser and Node.js.
+* Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+* Runtimes for the browser, Python, and Node.js.
 `;
 
 const Description = props => (
@@ -259,28 +247,15 @@ const Showcase = props => {
         .map((user, i) => {
             return (
                 <a href={user.infoLink} key={i}>
-                    <img
-                        src={user.image}
-                        alt={user.caption}
-                        title={user.caption}
-                    />
+                    <img src={user.image} alt={user.caption} title={user.caption} />
                 </a>
             );
         });
 
     return (
         <div className="productShowcaseSection paddingBottom">
-            <h2>{"Who's Using This?"}</h2>
-            <p>This project is used by all these people</p>
+            <h2>{""}</h2>
             <div className="logos">{showcase}</div>
-            <div className="more-users">
-                <a
-                    className="button"
-                    href={pageUrl("users.html", props.language)}
-                >
-                    More {siteConfig.title} Users
-                </a>
-            </div>
         </div>
     );
 };
