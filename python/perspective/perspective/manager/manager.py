@@ -172,7 +172,7 @@ class PerspectiveManager(object):
                     # make sure schema returns string types
                     args["as_string"] = True
                 elif msg["method"].startswith("to_"):
-                    # TODO
+                    # parse options in `to_format` calls
                     for d in msg.get("args", []):
                         args.update(d)
                 else:

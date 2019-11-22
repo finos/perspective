@@ -9,6 +9,7 @@
 import numpy as np
 from math import trunc
 from ._constants import COLUMN_SEPARATOR_STRING
+from ._state import clear_process
 
 try:
     from .libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
@@ -29,6 +30,7 @@ def _mod(a, b):
 
 
 def to_format(options, view, output_format):
+    clear_process(view._table._table.get_id())
     options, column_names, data_slice = _to_format_helper(view, options)
 
     if output_format == 'records':
