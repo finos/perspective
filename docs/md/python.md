@@ -3,36 +3,48 @@ id: python
 title: Python User Guide
 ---
 
-The Python library consists of the same abstractions and API as the Javascript
-library, along with some Python-specific APIs to support data from NumPy and
-Pandas, as well as an integration with
-[`tornado.websocket`](https://www.tornadoweb.org/en/stable/websocket.html).
+Perspective for Python uses the exact same C++ data engine used by the
+[WebAssembly version](https://perspective.finos.org/docs/md/js.html)
+The library consists of many of the same abstractions and API as in Javascript,
+as well as Python-specific data loading support for [NumPy](https://numpy.org/),
+[Pandas](https://pandas.pydata.org/) (and
+[Apache Arrow](https://arrow.apache.org/), as in Javascript).
 
-Organizationally, the library is split into two main sections:
+Additionally, `perspective-python` provides a session manager suitable for
+integration into server systems such as [Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html),
+which allows fully _virtual_ Perspective tables to be interacted with by
+multiple `<perspective-viewer>` in a Web Browser.  As `<perspective-viewer>`
+will only consume the data necessary to render the current screen, this runtime
+mode allows _ludicrous_ _size_ datasets with instant-load after they've been
+manifest on the server (at the expense of network latency on UI interaction).
+The included `PerspectiveWidget` allows running such a viewer in
+[Jupyter Lab](https://jupyterlab.readthedocs.io/en/stable/) in either server or
+client (via WebAssembly) mode, and the included `PerspectiveTornadoHandler`
+makes it simple to extend a Tornado server with virtual Perspective support.
 
-- `perspective.table`, which implements the `table` and `view` API in the same
-  manner as the Javascript library.
-- `perspective.core`, which contains the JupyterLab `PerspectiveWidget`, an
-  implementation of the `<perspective-viewer>` API in `PerspectiveViewer`, and
-  `PerspectiveTornadoHandler` for use with Tornado websockets.
+The `perspective` module exports several tools:
+
+- `Table`, the table constructor for Perspective, which implements the `table`
+  and `view` API in the same manner as the Javascript library.
+- `PerspectiveWidget` the JupyterLab widget for interactive visualization.
+- `PerspectiveManager` the session manager for shared server deployment, with a
+  reference implementation in [Tornado](https://www.tornadoweb.org/).
 
 This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
-handler.
+handler.  For more information, see [Python API](https://perspective.finos.org/docs/obj/perspective-viewer.html).
 
-For more detailed API documentation, see the `API` section of this site or refer
-to docstrings through the `help()` function in Python.
+## `Table`
 
-## `perspective.Table`
-
-A `perspective.Table` can be created from a dataset or a schema, the specifics
+A `Table` can be created from a dataset or a schema, the specifics
 of which are [discussed](#loading-data-with-table) in the Javascript section of
 the user's guide. In Python, however, Perspective supports additional data types
 that are commonly used when processing data:
 
 - `pandas.DataFrame`
 - `numpy.ndarray`
-- NumPy Structured Arrays & Record Arrays
+- `numpy.ndarray`
+- `bytes` (encoding an Apache Arrow)
 
 A `Table` is created in a similar fashion to its Javascript equivalent:
 
@@ -53,7 +65,7 @@ data = pd.DataFrame({
 table = perspective.Table(data, index="float")
 ```
 
-And so is the `View`:
+Likewise, a `View` can be created via the `view()` method:
 
 ```python
 view = table.view(row_pivots=["float"], filter=[["bool", "==", True]])
@@ -61,44 +73,30 @@ column_data = view.to_dict()
 row_data = view.to_records()
 ```
 
-Instead of passing in `config` as an object, however, you can use keyword
-arguments to configure both the Table and the View.
-
-## Numpy Support
+### Pandas & Numpy Support
 
 Perspective supports dictionaries of 1-dimensional `numpy.ndarray`, as well as
-structured arrays and record arrays. Multi-dimensional arrays are not supported
-at this time.
+structured arrays and record arrays.  When passing in dictionaries of NumPy
+arrays, make sure that your dataset contains only NumPy arrays, and not a
+mixture of arrays and Python lists — this will raise an exception. Numpy
+structured/record arrays are parsed according to their field name and dtype.
 
-When passing in dictionaries of NumPy arrays, make sure that your dataset
-contains _ONLY_ NumPy arrays, and not a mixture of arrays and Python lists—this
-will raise an exception.
-
-Numpy structured/record arrays are parsed according to their field name and
-dtype.
-
-## Pandas Support
-
-Perspective supports `pandas.DataFrame` and `pandas.Series` objects. Because
-Perspective is designed for applying its own transformations on top of a flat
-dataset, dataframes that are passed in will be flattened and have its `index`
-treated as another column (through the
-[`reset_index`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html)
-method).
-
-If the dataframe does not have an index set, an integer-typed column named
-"index" is created
-
-If you want to preserve the indexing behavior of the dataframe passed into
-Perspective, simply create the `Table` with `index="index"` as a keyword
-argument. This tells Perspective to once again treat the index as a primary key:
+`Table` can aslo be constructed from `pandas.DataFrame` and `pandas.Series`
+objects. Because Perspective is designed for applying its own transformations on
+top of a flat dataset, dataframes that are passed in will be flattened and have
+its `index` treated as another column (through the [`reset_index()`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html)
+method).  If the dataframe does not have an index set, an integer-typed column
+named `"index"` is created.  If you want to preserve the indexing behavior of the
+dataframe passed into Perspective, simply create the `Table` with
+`index="index"` as a keyword argument. This tells Perspective to once again
+treat the index as a primary key:
 
 ```python
 data.set_index("datetime")
 table = perspective.Table(data, index="index")
 ```
 
-## Schemas & Supported Data Types
+### Schemas & Supported Data Types
 
 Unlike Javascript, where schemas must be created using string representations of
 their types, `perspective-python` leverages Python's type system for schema
@@ -148,20 +146,7 @@ cannot be removed at this time.
 view.remove_update(callback)
 ```
 
-### Exception Handling
-
-Perspective raises two classes of exceptions:
-
-- `PerspectiveError`, which is raised from Python
-- `PerspectiveCppError`, which is raised from the C++ binding
-
-To handle all exceptions that are explicitly raised by Perspective simply run:
-
-```python
-from perspective import PerspectiveError, PerspectiveCppError
-```
-
-## `perspective.PerspectiveWidget`
+## `PerspectiveWidget`
 
 Building on top of the API provided by `perspective.Table`, the
 `PerspectiveWidget` is a JupyterLab plugin that offers the entire functionality
@@ -184,10 +169,10 @@ load.
 If `perspective-python` cannot find the built C++ libraries, it automatically
 defaults to client mode when initializing the widget.
 
-## `PerspectiveWidget.__init__`
+## `PerspectiveWidget`
 
-Similar to the viewer API, `__init__` takes keyword arguments that transform the
-`View` under management by the `PerspectiveWidget`:
+Similar to the viewer API, `PerspectiveWidget` takes keyword arguments that
+transform the `View` under ownsership:
 
 - `plugin`
 - `row_pivots`
@@ -197,7 +182,7 @@ Similar to the viewer API, `__init__` takes keyword arguments that transform the
 - `sort`
 - `filters`
 
-Arguments that will be passed to the `perspective.Table` constructor if a
+Arguments that will be passed to the `Table` constructor if a
 dataset or schema is passed in:
 
 - [`index`](#index-and-limit)
@@ -206,7 +191,7 @@ dataset or schema is passed in:
 As well as keyword arguments specific to `PerspectiveWidget` itself:
 
 - `client`: a boolean that determines whether the Widget will depend on
-  `perspective.Table` in Python, or if it sends data to the front-end WASM
+  `Table` in Python, or if it sends data to the front-end WebAssembly
   engine for processing.
 
 Several Enums are provided to make lookup of specific plugin types, aggregate
@@ -385,21 +370,27 @@ for more details.
 ### Javascript setup
 
 Once the server is up and running, you can access the Table you just hosted
-using `perspective.websocket` and `open_table()`:
+using `perspective.websocket` and `open_table()`.  First create a client that
+expects a Perspective server to accept connections at the specified URL:
 
 ```javascript
-// Create a client that expects a Perspective server to accept connections at the specified URL.
 const websocket = perspective.websocket("ws://localhost:8888/websocket");
+```
 
-/* `table` is a proxy for the `Table` we created on the server.
+Next open the `Table` we created on the server by name:
 
-All operations that are possible through the Javascript API are possible on the Python API as well,
-thus calling `view()`, `schema()`, `update()` etc on `const table` will pass those operations to the
-Python `Table`, execute the commands, and return the result back to Javascript.
-*/
+```javascript
 const table = websocket.open_table("data_source_one");
+```
 
-// Load this in the `<perspective-viewer>`.
+`table` is a proxy for the `Table` we created on the server.  All operations
+that are possible through the Javascript API are possible on the Python API as
+well, thus calling `view()`, `schema()`, `update()` etc on `const table` will
+pass those operations to the Python `Table`, execute the commands, and return
+the result back to Javascript.  Similarly, providing this `table` to a
+`<perspective-viewer>` instance will allow virtual rendering:
+
+```javascript
 viewer.load(table);
 viewer.toggleConfig();
 ```
@@ -410,8 +401,13 @@ request is sent through the socket to fetch the Table. No actual Table instance
 is passed inbetween the runtimes; all instructions are proxied through
 websockets.
 
-This provides for great flexibility—while `Perspective.js` is full of features,
-WASM runtimes have a hard 2GB memory limit, and cannot process instructions in
-parallel. The Python runtime does not suffer from any memory limits, and
+This provides for great flexibility — while `Perspective.js` is full of
+features, browser WebAssembly runtimes currently have some performance
+restrictions on memory and CPU feature utilization, and the architecture in
+general suffers when the dataset itself is too large to download to the client
+in full.
+
+The Python runtime does not suffer from memory limitations,
 utilizes [TBB](https://github.com/intel/tbb) for threading and parallel
-processing, which makes it more suitable as a server-side runtime.
+processing, and generates architecture optimized code, 
+which currently makes it more suitable as a server-side runtime than `node.js`.

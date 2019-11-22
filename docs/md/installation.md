@@ -134,4 +134,3 @@ so is quite a bit more complex than a standard pure Javascript NPM package, so
 if you're not looking to hack on Perspective itself, you are likely better off
 choosing the CDN or NPM methods above. See the
 [developer docs](development.html) for details.
-
