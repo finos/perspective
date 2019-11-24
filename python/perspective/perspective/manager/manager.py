@@ -11,10 +11,10 @@ import random
 import string
 import datetime
 from functools import partial
+from ..core.exception import PerspectiveError
 from ..table._date_validator import _PerspectiveDateValidator
 from ..table import Table
 from ..table.view import View
-from .exception import PerspectiveError
 from .session import PerspectiveSession
 
 try:

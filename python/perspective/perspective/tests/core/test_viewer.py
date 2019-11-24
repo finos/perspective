@@ -222,3 +222,24 @@ class TestViewer:
         viewer.reset()
         assert viewer.plugin == "hypergrid"
         assert viewer.filters == []
+
+    # delete
+
+    def test_viewer_delete(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table)
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.delete()
+        assert viewer.table_name is None
+        assert viewer.table is None
+
+    def test_viewer_delete_without_table(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table)
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.delete(delete_table=False)
+        assert viewer.table_name is not None
+        assert viewer.table is not None
+        assert viewer.filters == []

@@ -14,12 +14,12 @@ PerspectiveWidget
 
 ``PerspectiveWidget`` is a Perspective integration into [JupyterLab](https://jupyterlab.readthedocs.io/en/stable).
 
-.. automodule:: perspective.core.widget
+.. automodule:: perspective.widget.widget
    :members:
    :show-inheritance:
    :exclude-members: post, send
 
-.. automodule:: perspective.core.viewer
+.. automodule:: perspective.viewer.viewer
    :members:
    :show-inheritance:
    :exclude-members: random
@@ -30,12 +30,12 @@ PerspectiveManager
 ``PerspectiveManager`` implements a communication protocol between Perspective runtimes in different languages.
 Through its ``process()`` method, it allows runtimes to communicate instructions and interoperate.
 
-.. automodule:: perspective.core.manager
+.. automodule:: perspective.manager.manager
    :members:
    :show-inheritance:
    :exclude-members: DateTimeEncoder
 
-.. automodule:: perspective.core.session
+.. automodule:: perspective.manager.session
    :members:
    :show-inheritance:
 
