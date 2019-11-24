@@ -1,107 +1,201 @@
-import {Widget} from '@phosphor/widgets';
-import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
+import {ActivityMonitor} from '@jupyterlab/coreutils';
+import {ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin} from '@jupyterlab/application';
+import {IThemeManager, WidgetTracker, Dialog, showDialog} from '@jupyterlab/apputils';
+import {ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget} from '@jupyterlab/docregistry';
+import {PerspectiveWidget} from "@finos/perspective-phosphor";
 
-export class RenderedPlotlyEditor extends Widget
-  implements IRenderMime.IRenderer {
-  /**
-   * Create a new widget for rendering.
-   */
-  constructor(options: IRenderMime.IRendererOptions) {
-    super();
-    this._mimeType = options.mimeType;
-  }
+/**
+ * The name of the factories that creates widgets.
+ */
+const FACTORY_CSV = 'CSVPerspective';
+const FACTORY_JSON = 'JSONPerspective';
 
-  /**
-   * Dispose of the resources used by the widget.
-   */
-  dispose(): void {
-    super.dispose();
-  }
+const RENDER_TIMEOUT = 1000;
 
-  /**
-   * Render into this widget's node.
-   */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const state = model.data[this._mimeType] as any | PlotlyEditorState;
-      try {
-        const handleUpdate = (
-          state: PlotlyEditorState | ReadonlyJSONObject
-        ) => {
-          const newData = {
-            [this._mimeType]: state as any | PlotlyEditorState
-          };
-          model.setData({ data: newData });
-        };
-        this._ref = ReactDOM.render(
-          <ChartEditor
-            state={state}
-            handleUpdate={handleUpdate}
-            plotly={Plotly}
-          />,
-          this.node,
-          () => {
-            resolve(undefined);
-          }
-        ) as ChartEditor;
-      } catch (error) {
-        reject(error);
-      }
+type IPerspectiveDocumentType = "csv" | "json";
+
+
+export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
+  constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, 
+              type: IPerspectiveDocumentType = "csv") {
+    super({ content: new PerspectiveWidget("test"), context: options.context, reveal: options.reveal});
+
+    this._psp = this.content;
+    this._type = type;
+    this._context = options.context;
+
+    this._context.ready.then(() => {
+      this._update();
+      this._monitor = new ActivityMonitor({
+        signal: this.context.model.contentChanged,
+        timeout: RENDER_TIMEOUT
+      });
+      this._monitor.activityStopped.connect(this._update, this);
     });
   }
 
-  /**
-   * A message handler invoked on a `'resize'` message.
-   */
-  protected onResize(msg: Widget.ResizeMessage): void {
-    this.update();
-  }
+  private _update(): void {
+    try {
+      if(this._type === "csv") {
+        const data: string = this._context.model.toString();
+        this._psp._update(data);
 
-  /**
-   * A message handler invoked on an `'update-request'` message.
-   */
-  protected onUpdateRequest(): void {
-    if (this.isVisible && this._ref) {
-      this._ref.handleResize();
+      } else if (this._type === "json") {
+        const data = this._context.model.toJSON();
+        this._psp._update(data as any);
+      } else {
+        throw "Not handled";
+      }
+    } catch {
+        showDialog({
+          body: "Perspective could not render the data",
+          buttons: [Dialog.okButton({ label: "Dismiss" })],
+          focusNodeSelector: "input",
+          title: "Error"});
     }
   }
 
-  private _mimeType: string;
-  private _ref: ChartEditor;
+  dispose(): void {
+    if (this._monitor) {
+      this._monitor.dispose();
+    }
+    super.dispose();
+  }
+
+  private _type: IPerspectiveDocumentType;
+  private _context: DocumentRegistry.Context;
+  private _psp: PerspectiveWidget;
+  private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null = null;
+}
+
+
+/**
+ * A widget factory for CSV widgets.
+ */
+export class PerspectiveCSVFactory extends ABCWidgetFactory<IDocumentWidget<PerspectiveWidget> > {
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<PerspectiveWidget> {
+    return new PerspectiveDocumentWidget({context}, "csv");
+  }
 }
 
 /**
- * A mime renderer factory for Plotly Editor.
+ * A widget factory for JSON widgets.
  */
-export const rendererFactory: IRenderMime.IRendererFactory = {
-  safe: true,
-  mimeTypes: [MIME_TYPE],
-  createRenderer: options => new RenderedPlotlyEditor(options)
+export class PerspectiveJSONFactory extends ABCWidgetFactory<IDocumentWidget<PerspectiveWidget> > {
+  protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<PerspectiveWidget> {
+    return new PerspectiveDocumentWidget({context}, "json");
+  }
+}
+
+/**
+ * The perspective extension for files 
+ */
+export
+const perspectiveRenderers: JupyterFrontEndPlugin<void> = {
+  activate: activate,
+  id: '@finos/perspective-jupyterlab:renderers',
+  requires: [],
+  optional: [
+    ILayoutRestorer,
+    IThemeManager
+  ],
+  autoStart: true
 };
 
-const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] | any = [
-  {
-    id: 'jupyterlab-chart-editor:factory',
-    name: 'jupyterlab-chart-editor:factory',
-    rendererFactory,
-    rank: 0,
-    dataType: 'json',
-    fileTypes: [
-      {
-        name: 'plotlyeditor',
-        mimeTypes: [MIME_TYPE],
-        extensions: ['.plotly', '.plotly.json'],
-        iconClass: CSS_ICON_CLASS
-      }
-    ],
-    documentWidgetFactoryOptions: {
-      name: 'Plotly Editor',
-      primaryFileType: 'plotlyeditor',
-      // The 'plotly' type is defined in @jupyterlab/plotly-extension
-      fileTypes: ['plotly', 'plotlyeditor', 'json'],
-      defaultFor: ['plotlyeditor']
-    }
-  }
-];
+/**
+ * Activate cssviewer extension for CSV files
+ */
+function activate(
+  app: JupyterFrontEnd,
+  restorer: ILayoutRestorer | null,
+  themeManager: IThemeManager | null
+): void {
 
-export default extensions;
+  const factorycsv = new PerspectiveCSVFactory({
+    name: FACTORY_CSV,
+    fileTypes: ['csv'],
+    defaultFor: ['csv'],
+    readOnly: true
+  });
+
+  const factoryjson = new PerspectiveJSONFactory({
+    name: FACTORY_JSON,
+    fileTypes: ['json', 'jsonl'],
+    defaultFor: ['json', 'jsonl'],
+    readOnly: true
+  });
+
+
+  const trackercsv = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
+    namespace: 'csvperspective'
+  });
+
+  const trackerjson = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
+    namespace: 'jsonperspective'
+  });
+
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(trackercsv, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY_CSV }),
+      name: widget => widget.context.path
+    });
+
+    void restorer.restore(trackerjson, {
+      command: 'docmanager:open',
+      args: widget => ({ path: widget.context.path, factory: FACTORY_JSON }),
+      name: widget => widget.context.path
+    });
+  }
+
+  app.docRegistry.addWidgetFactory(factorycsv);
+  app.docRegistry.addWidgetFactory(factoryjson);
+
+  let ftcsv = app.docRegistry.getFileType('csv');
+  let ftjson = app.docRegistry.getFileType('json');
+
+  factorycsv.widgetCreated.connect((sender, widget) => {
+    // Track the widget.
+    void trackercsv.add(widget);
+    // Notify the widget tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => {
+      void trackercsv.save(widget);
+    });
+
+    if (ftcsv) {
+      widget.title.iconClass = ftcsv.iconClass!;
+      widget.title.iconLabel = ftcsv.iconLabel!;
+    }
+  });
+
+  factoryjson.widgetCreated.connect((sender, widget) => {
+    // Track the widget.
+    void trackerjson.add(widget);
+    // Notify the widget tracker if restore data needs to update.
+    widget.context.pathChanged.connect(() => {
+      void trackerjson.save(widget);
+    });
+
+    if (ftjson) {
+      widget.title.iconClass = ftjson.iconClass!;
+      widget.title.iconLabel = ftjson.iconLabel!;
+    }
+  });
+
+
+  // Keep the themes up-to-date.
+  const updateThemes = () => {
+    // const isLight = themeManager && themeManager.theme ? themeManager.isLight(themeManager.theme) : true;
+    // style = isLight ? Private.LIGHT_STYLE : Private.DARK_STYLE;
+    // rendererConfig = isLight ? Private.LIGHT_TEXT_CONFIG : Private.DARK_TEXT_CONFIG;
+    // tracker.forEach(grid => {
+    //   grid.content.style = style;
+    //   grid.content.rendererConfig = rendererConfig;
+    // });
+  };
+  if (themeManager) {
+    themeManager.themeChanged.connect(updateThemes);
+  }
+}
+
