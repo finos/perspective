@@ -85,7 +85,12 @@ utils.with_server({}, () => {
 
                         const detail = await click_details(page);
                         expect(detail.config).toEqual({
-                            filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Madison"], ["Region", "==", "Central"]]
+                            filters: [
+                                ["Segment", "==", "Consumer"],
+                                ["Country", "==", "United States"],
+                                ["City", "==", "Madison"],
+                                ["Region", "==", "Central"]
+                            ]
                         });
                     });
 
@@ -101,7 +106,11 @@ utils.with_server({}, () => {
 
                         const detail = await click_details(page, 100);
                         expect(detail.config).toEqual({
-                            filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Madison"]]
+                            filters: [
+                                ["Segment", "==", "Consumer"],
+                                ["Country", "==", "United States"],
+                                ["City", "==", "Madison"]
+                            ]
                         });
                     });
                 });

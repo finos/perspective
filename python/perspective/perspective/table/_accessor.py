@@ -55,14 +55,17 @@ def _type_to_format(data_or_schema):
             if isinstance(v, type) or isinstance(v, str):
                 # schema maps name -> type
                 return False, 2, data_or_schema
-            elif isinstance(v, list) or iter(v):
-                # if columns entries are iterable, type 1
-                return isinstance(v, numpy.ndarray), 1, data_or_schema
+            elif isinstance(v, list):
+                # a dict of iterables = type 1
+                return False, 1, data_or_schema
             else:
-                # Can't process
-                raise NotImplementedError("Dict values must be list or type!")
-        # Can't process
-        raise NotImplementedError("Dict values must be list or type!")
+                # See if iterable
+                try:
+                    iter(v)
+                except TypeError:
+                    raise NotImplementedError("Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
+                else:
+                    return isinstance(v, numpy.ndarray), 1, data_or_schema
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
@@ -80,6 +83,8 @@ def _type_to_format(data_or_schema):
 
 class _PerspectiveAccessor(object):
     '''A uniform accessor that wraps data/schemas of varying formats with a common `marshal` function.'''
+
+    INTEGER_TYPES = six.integer_types + (numpy.integer,)
 
     def __init__(self, data_or_schema):
         self._is_numpy, self._format, self._data_or_schema = _type_to_format(data_or_schema)
@@ -187,7 +192,7 @@ class _PerspectiveAccessor(object):
                 # should be able to update int columns with either ints or floats
                 val = int(val)
         elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(val, (int, numpy.integer)):
+            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
                 # should be able to update float columns with either ints or floats
                 val = float(val)
         elif dtype == t_dtype.DTYPE_DATE:
@@ -213,13 +218,14 @@ class _PerspectiveAccessor(object):
                     val = unicode(val)  # noqa: F821
                 else:
                     val = str(val)
+
         return val
 
     def _get_numpy_column(self, name):
         '''For columnar datasets, return the list/Numpy array that contains the data for a single column.
 
         Args:
-            name (str) : the column name to look up
+            name (str): the column name to look up
 
         Returns:
             list/numpy.array/None : returns the column's data, or None if it cannot be found.

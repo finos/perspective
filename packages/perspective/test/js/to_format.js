@@ -114,16 +114,25 @@ module.exports = perspective => {
         });
 
         it("column-only views should not have header rows", async function() {
-            let table = perspective.table([{x: 1, y: "a"}, {x: 2, y: "b"}]);
+            let table = perspective.table([
+                {x: 1, y: "a"},
+                {x: 2, y: "b"}
+            ]);
             let view = table.view({
                 column_pivots: ["x"]
             });
             let json = await view.to_json();
-            expect(json).toEqual([{"1|x": 1, "1|y": "a", "2|x": null, "2|y": null}, {"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}]);
+            expect(json).toEqual([
+                {"1|x": 1, "1|y": "a", "2|x": null, "2|y": null},
+                {"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}
+            ]);
         });
 
         it("column-only views should return correct windows of data", async function() {
-            let table = perspective.table([{x: 1, y: "a"}, {x: 2, y: "b"}]);
+            let table = perspective.table([
+                {x: 1, y: "a"},
+                {x: 2, y: "b"}
+            ]);
             let view = table.view({
                 column_pivots: ["x"]
             });
@@ -245,12 +254,22 @@ module.exports = perspective => {
         });
 
         it("does not break when booleans are undefined", async function() {
-            let table = perspective.table([{int: 1, bool: true}, {int: 2, bool: false}, {int: 3, bool: true}, {int: 4, bool: undefined}]);
+            let table = perspective.table([
+                {int: 1, bool: true},
+                {int: 2, bool: false},
+                {int: 3, bool: true},
+                {int: 4, bool: undefined}
+            ]);
             let view = table.view();
             let arrow = await view.to_arrow();
             let json = await view.to_json();
 
-            expect(json).toEqual([{int: 1, bool: true}, {int: 2, bool: false}, {int: 3, bool: true}, {int: 4, bool: null}]);
+            expect(json).toEqual([
+                {int: 1, bool: true},
+                {int: 2, bool: false},
+                {int: 3, bool: true},
+                {int: 4, bool: null}
+            ]);
 
             let table2 = perspective.table(arrow);
             let view2 = table2.view();
@@ -449,7 +468,10 @@ module.exports = perspective => {
 
                 it("should return correct pkey for date indexed table", async function() {
                     // default data generates the same datetime for each row, thus pkeys get collapsed
-                    const data = [{int: 1, datetime: new Date()}, {int: 2, datetime: new Date()}];
+                    const data = [
+                        {int: 1, datetime: new Date()},
+                        {int: 2, datetime: new Date()}
+                    ];
                     data[1].datetime.setDate(data[1].datetime.getDate() + 1);
                     let table = perspective.table(data, {index: "datetime"});
                     let view = table.view();

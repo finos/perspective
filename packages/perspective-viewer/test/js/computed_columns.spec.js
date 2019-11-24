@@ -101,7 +101,10 @@ utils.with_server({}, () => {
                         await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
                         await page.evaluate(element => {
                             let com = element.shadowRoot.querySelector("perspective-computed-column");
-                            const columns = [{name: "Quantity", type: "integer"}, {name: "Row ID", type: "integer"}];
+                            const columns = [
+                                {name: "Quantity", type: "integer"},
+                                {name: "Row ID", type: "integer"}
+                            ];
                             com.state.func_name = "add";
                             com._apply_state(columns, com.computations["add"], "new_cc");
                         }, viewer);

@@ -20,17 +20,29 @@
       "md/installation": {
         "title": "Installation"
       },
+      "md/js": {
+        "title": "Javascript User Guide"
+      },
+      "md/python": {
+        "title": "Python User Guide"
+      },
       "md/styles": {
         "title": "CSS Styles"
       },
-      "md/usage": {
-        "title": "User Guide"
+      "obj/perspective-python-core": {
+        "title": "perspective.core Python API"
+      },
+      "obj/perspective-python-table": {
+        "title": "perspective.table Python API"
+      },
+      "obj/perspective-python": {
+        "title": "perspective-python API"
       },
       "obj/perspective-viewer": {
-        "title": "`perspective-viewer` API"
+        "title": "perspective-viewer API"
       },
       "obj/perspective": {
-        "title": "`perspective` API"
+        "title": "perspective API"
       },
       "README": {
         "title": "README"
@@ -43,7 +55,8 @@
     },
     "categories": {
       "Getting Started": "Getting Started",
-      "API": "API"
+      "Javascript API": "Javascript API",
+      "Python API": "Python API"
     }
   },
   "pages-strings": {

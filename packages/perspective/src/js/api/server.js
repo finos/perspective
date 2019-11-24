@@ -166,8 +166,9 @@ export class Server {
 
                         this.post(result);
                     } catch (e) {
-                        console.error("Removing callback after failed on_update() (presumably due to closed connection)");
-                        obj["remove_update"](callback);
+                        console.error(`Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`);
+                        const remove_method = msg.method.substring(3);
+                        obj[`remove_${remove_method}`](callback);
                     }
                 };
                 if (msg.callback_id) {

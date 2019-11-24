@@ -100,16 +100,93 @@ export const COMPUTATIONS = {
     week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", week_bucket, ["Time"]),
     month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", month_bucket, ["Time"]),
     year_bucket: new Computation("Bucket (Y)", x => `year_bucket(${x})`, "datetime", "date", year_bucket, ["Time"]),
-    add: new Computation("+", (x, y) => `${x} + ${y}`, "float", "float", (a, b) => a + b, ["Math"], 2),
-    subtract: new Computation("-", (x, y) => `${x} - ${y}`, "float", "float", (a, b) => a - b, ["Math"], 2),
-    multiply: new Computation("*", (x, y) => `${x} * ${y}`, "float", "float", (a, b) => a * b, ["Math"], 2),
-    divide: new Computation("/", (x, y) => `${x} / ${y}`, "float", "float", (a, b) => a / b, ["Math"], 2),
-    percent_a_of_b: new Computation("%", (x, y) => `${x} %% ${y}`, "float", "float", (a, b) => (a / b) * 100, ["Math"], 2),
-    uppercase: new Computation("Uppercase", x => `uppercase(${x})`, "string", "string", x => x.toUpperCase(), ["Text"]),
-    lowercase: new Computation("Lowercase", x => `lowercase(${x})`, "string", "string", x => x.toLowerCase(), ["Text"]),
-    length: new Computation("length", x => `length(${x})`, "string", "integer", x => x.length, ["Text"]),
-    concat_space: new Computation("concat_space", x => `concat_space(${x})`, "string", "string", (a, b) => a + " " + b, ["Text"], 2),
-    concat_comma: new Computation("concat_comma", x => `concat_comma(${x})`, "string", "string", (a, b) => a + ", " + b, ["Text"], 2)
+    add: new Computation(
+        "+",
+        (x, y) => `${x} + ${y}`,
+        "float",
+        "float",
+        (a, b) => a + b,
+        ["Math"],
+        2
+    ),
+    subtract: new Computation(
+        "-",
+        (x, y) => `${x} - ${y}`,
+        "float",
+        "float",
+        (a, b) => a - b,
+        ["Math"],
+        2
+    ),
+    multiply: new Computation(
+        "*",
+        (x, y) => `${x} * ${y}`,
+        "float",
+        "float",
+        (a, b) => a * b,
+        ["Math"],
+        2
+    ),
+    divide: new Computation(
+        "/",
+        (x, y) => `${x} / ${y}`,
+        "float",
+        "float",
+        (a, b) => a / b,
+        ["Math"],
+        2
+    ),
+    percent_a_of_b: new Computation(
+        "%",
+        (x, y) => `${x} %% ${y}`,
+        "float",
+        "float",
+        (a, b) => (a / b) * 100,
+        ["Math"],
+        2
+    ),
+    uppercase: new Computation(
+        "Uppercase",
+        x => `uppercase(${x})`,
+        "string",
+        "string",
+        x => x.toUpperCase(),
+        ["Text"]
+    ),
+    lowercase: new Computation(
+        "Lowercase",
+        x => `lowercase(${x})`,
+        "string",
+        "string",
+        x => x.toLowerCase(),
+        ["Text"]
+    ),
+    length: new Computation(
+        "length",
+        x => `length(${x})`,
+        "string",
+        "integer",
+        x => x.length,
+        ["Text"]
+    ),
+    concat_space: new Computation(
+        "concat_space",
+        x => `concat_space(${x})`,
+        "string",
+        "string",
+        (a, b) => a + " " + b,
+        ["Text"],
+        2
+    ),
+    concat_comma: new Computation(
+        "concat_comma",
+        x => `concat_comma(${x})`,
+        "string",
+        "string",
+        (a, b) => a + ", " + b,
+        ["Text"],
+        2
+    )
 };
 
 function _insert_tree(name, elem, tree) {

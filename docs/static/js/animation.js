@@ -1,15 +1,4 @@
-var SECURITIES = [
-    "AAPL.N",
-    "AMZN.N",
-    "QQQ.N",
-    "NVDA.N",
-    "TSLA.N",
-    "FB.N",
-    "MSFT.N",
-    "CSCO.N",
-    "GOOGL.N",
-    "PCLN.N"
-];
+var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
 var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie"];
 var id = 0;
 
@@ -68,9 +57,7 @@ function update() {
 }
 
 function select(id) {
-    Array.prototype.slice
-        .call(document.querySelectorAll(".buttonWrapper"))
-        .map(x => x.classList.remove("selected"));
+    Array.prototype.slice.call(document.querySelectorAll(".buttonWrapper")).map(x => x.classList.remove("selected"));
     document.querySelector(id).classList.add("selected");
     const viewer = document.querySelector("perspective-viewer");
     viewer.restore(
@@ -141,9 +128,7 @@ window.addEventListener("WebComponentsReady", function() {
     for (var x = 0; x < 100; x++) {
         data.push(newRow());
     }
-    elem = Array.prototype.slice.call(
-        document.querySelectorAll("perspective-viewer")
-    )[0];
+    elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
     var worker = elem.worker;
     var tbl = worker.table(data, {index: "id"});
     elem.load(tbl);
@@ -153,24 +138,12 @@ window.addEventListener("WebComponentsReady", function() {
         update(0);
     });
 
-    document
-        .querySelector("#grid")
-        .addEventListener("mouseenter", () => select("#grid"));
-    document
-        .querySelector("#cyclone")
-        .addEventListener("mouseenter", () => select("#cyclone"));
-    document
-        .querySelector("#pivot")
-        .addEventListener("mouseenter", () => select("#pivot"));
-    document
-        .querySelector("#crosssect")
-        .addEventListener("mouseenter", () => select("#crosssect"));
-    document
-        .querySelector("#intersect")
-        .addEventListener("mouseenter", () => select("#intersect"));
-    document
-        .querySelector("#enhance")
-        .addEventListener("mouseenter", () => select("#enhance"));
+    document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
+    document.querySelector("#cyclone").addEventListener("mouseenter", () => select("#cyclone"));
+    document.querySelector("#pivot").addEventListener("mouseenter", () => select("#pivot"));
+    document.querySelector("#crosssect").addEventListener("mouseenter", () => select("#crosssect"));
+    document.querySelector("#intersect").addEventListener("mouseenter", () => select("#intersect"));
+    document.querySelector("#enhance").addEventListener("mouseenter", () => select("#enhance"));
 
     select("#grid");
 
@@ -195,10 +168,6 @@ window.addEventListener("WebComponentsReady", function() {
             aggregates: {Profit: "low"}
         });
     });
-});
-
-setTimeout(() => {
-    document.querySelector(".logo").style.opacity = 0;
 });
 
 window.addEventListener("scroll", () => {

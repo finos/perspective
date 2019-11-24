@@ -18,7 +18,7 @@ class _PerspectiveCallBackCache(object):
         '''Remove callback functions that satisfy the given condition.
 
         Args:
-            condition (func) : a function that returns either True or False. If True is returned, filter the item out.
+            condition (func): a function that returns either True or False. If True is returned, filter the item out.
         '''
         if not callable(condition):
             raise ValueError("callback filter condition must be a callable function!")
