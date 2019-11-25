@@ -93,9 +93,6 @@ class PerspectiveManager(object):
     def new_session(self):
         return PerspectiveSession(self)
 
-    def set_event_loop(self, loop):
-        pass
-
     def _process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective
         engine.
