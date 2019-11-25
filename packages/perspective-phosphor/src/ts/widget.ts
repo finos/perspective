@@ -374,7 +374,8 @@ export class PerspectiveWidget extends Widget {
         if (!viewer.notifyResize) {
             console.warn("Warning: not bound to real element");
         } else {
-            viewer.notifyResize = viewer.notifyResize.bind(viewer);
+            const resize_observer = new MutationObserver(viewer.notifyResize.bind(viewer));
+            resize_observer.observe(node, { attributes: true });
         }
         return viewer;
     }
