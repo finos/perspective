@@ -7,34 +7,19 @@
 #
 
 import json
+from datetime import timedelta
 import tornado.websocket
-from datetime import datetime
+from tornado.ioloop import IOLoop
 from ..core.exception import PerspectiveError
-from ..table._date_validator import _PerspectiveDateValidator
-
-
-_date_validator = _PerspectiveDateValidator()
-
-
-class DateTimeEncoder(json.JSONEncoder):
-    '''Create a custom JSON encoder that allows serialization of datetime and
-    date objects.
-    '''
-
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
-            # Convert to milliseconds - perspective.js expects millisecond
-            # timestamps, but python generates them in seconds.
-            return _date_validator.to_timestamp(obj)
-        else:
-            return super(DateTimeEncoder, self).default(obj)
+from ..table._state import _PerspectiveStateManager
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     '''PerspectiveTornadoHandler is a drop-in implementation of Perspective.
 
-    Use it inside Tornado routing to create a server-side Perspective that is
-    ready to receive websocket messages from the front-end `perspective-viewer`.
+    Use it inside Tornado routing to create a server-side Perspective that is ready to receive websocket messages from
+    the front-end `perspective-viewer`. Because Tornado implements an event loop, this handler links Perspective
+    with `IOLoop.current()` in order to defer expensive operations until the next free iteration of the event loop.
 
     Examples:
         >>> MANAGER = PerspectiveViewer()
@@ -67,6 +52,15 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
             raise PerspectiveError("A `PerspectiveManager` instance must be provided to the tornado handler!")
 
         super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
+
+        # Redefine `queue_process` to take advantage of `tornado.ioloop`
+        @classmethod
+        def _queue_process_tornado(cls, table_id):
+            loop = IOLoop.current()
+            print(self._session.client_id)
+            loop.add_timeout(timedelta(milliseconds=100), cls.clear_process, table_id=table_id)
+
+        setattr(_PerspectiveStateManager, "queue_process", _queue_process_tornado)
 
     def check_origin(self, origin):
         '''Returns whether the handler allows requests from origins outside

@@ -64,14 +64,11 @@ class Table(object):
         pool.set_update_delegate(self)
         pool._process()
 
-        # if `set_process` is not implemented, it means that an event loop
+        # if `queue_process` is not implemented, it means that an event loop
         # isn't present/not set in this case, simply call `process()`
         # immediately and allow to execute.
-        try:
-            _PerspectiveStateManager.set_process(pool, self._table.get_id())
-        except NotImplementedError:
-            _PerspectiveStateManager.set_process = \
-                _PerspectiveStateManager._set_process_immediate
+        if not hasattr(_PerspectiveStateManager, "queue_process"):
+            setattr(_PerspectiveStateManager, "queue_process", _PerspectiveStateManager._queue_process_immediate)
 
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''
