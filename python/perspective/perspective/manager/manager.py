@@ -93,14 +93,16 @@ class PerspectiveManager(object):
     def new_session(self):
         return PerspectiveSession(self)
 
+    def set_event_loop(self, loop):
+        pass
+
     def _process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective
         engine.
 
         Args:
-            msg (dict): a message from the client with instructions that map to
-                engine operations post_callback (callable): a function that
-                returns data to the client
+            msg (:obj`dict`): a message from the client with instructions that map to engine operations
+            post_callback (:obj`callable`): a function that returns data to the client
         '''
         if isinstance(msg, str):
             if msg == "heartbeat":   # TODO fix this

@@ -75,12 +75,7 @@ utils.with_server({}, () => {
 
                         const detail = await click_details(page);
                         expect(detail.config).toEqual({
-                            filters: [
-                                ["Segment", "==", "Consumer"],
-                                ["Country", "==", "United States"],
-                                ["City", "==", "Houston"],
-                                ["Region", "==", "Central"]
-                            ]
+                            filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Houston"], ["Region", "==", "Central"]]
                         });
                         expect(detail.column_names).toEqual(["Profit"]);
                     });

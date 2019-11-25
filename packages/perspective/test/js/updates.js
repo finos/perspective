@@ -10,19 +10,9 @@
 const _ = require("lodash");
 const arrows = require("./test_arrows.js");
 
-var data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false}
-];
+var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 
-let computed_data = [
-    {x: 1, y: 2},
-    {x: 2, y: 4},
-    {x: 3, y: 6},
-    {x: 4, y: 8}
-];
+let computed_data = [{x: 1, y: 2}, {x: 2, y: 4}, {x: 3, y: 6}, {x: 4, y: 8}];
 
 var col_data = {
     x: [1, 2, 3, 4],
@@ -36,12 +26,7 @@ var meta = {
     z: "boolean"
 };
 
-var data_2 = [
-    {x: 3, y: "c", z: false},
-    {x: 4, y: "d", z: true},
-    {x: 5, y: "g", z: false},
-    {x: 6, y: "h", z: true}
-];
+var data_2 = [{x: 3, y: "c", z: false}, {x: 4, y: "d", z: true}, {x: 5, y: "g", z: false}, {x: 6, y: "h", z: true}];
 
 const arrow_result = [
     {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
@@ -122,12 +107,7 @@ module.exports = perspective => {
             table.update(data);
             var view = table.view();
             let result = await view.to_json();
-            expect(result).toEqual([
-                {x: 1, y: "a"},
-                {x: 2, y: "b"},
-                {x: 3, y: "c"},
-                {x: 4, y: "d"}
-            ]);
+            expect(result).toEqual([{x: 1, y: "a"}, {x: 2, y: "b"}, {x: 3, y: "c"}, {x: 4, y: "d"}]);
             view.delete();
             table.delete();
         });
@@ -137,12 +117,7 @@ module.exports = perspective => {
             table.update(data);
             var view = table.view();
             let result = await view.to_json();
-            expect(result).toEqual([
-                {x: "1", y: "a", z: "true"},
-                {x: "2", y: "b", z: "false"},
-                {x: "3", y: "c", z: "true"},
-                {x: "4", y: "d", z: "false"}
-            ]);
+            expect(result).toEqual([{x: "1", y: "a", z: "true"}, {x: "2", y: "b", z: "false"}, {x: "3", y: "c", z: "true"}, {x: "4", y: "d", z: "false"}]);
             view.delete();
             table.delete();
         });
@@ -193,13 +168,7 @@ module.exports = perspective => {
                 z: [false, true, false]
             };
 
-            var expected = [
-                {x: 1, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "h", z: false},
-                {x: 4, y: "i", z: true},
-                {x: 5, y: "j", z: false}
-            ];
+            var expected = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "h", z: false}, {x: 4, y: "i", z: true}, {x: 5, y: "j", z: false}];
 
             var table = perspective.table(col_data, {index: "x"});
             table.update(colUpdate);
@@ -832,16 +801,8 @@ module.exports = perspective => {
         });
 
         it("partial update", function(done) {
-            var partial = [
-                {x: 5, y: "a"},
-                {y: "b", z: true}
-            ];
-            var expected = [
-                {x: 5, y: "a", z: true},
-                {x: 2, y: "b", z: true},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false}
-            ];
+            var partial = [{x: 5, y: "a"}, {y: "b", z: true}];
+            var expected = [{x: 5, y: "a", z: true}, {x: 2, y: "b", z: true}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(data);
@@ -866,12 +827,7 @@ module.exports = perspective => {
                 z: [undefined, true]
             };
 
-            var expected = [
-                {x: 5, y: "a", z: true},
-                {x: 2, y: "b", z: true},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false}
-            ];
+            var expected = [{x: 5, y: "a", z: true}, {x: 2, y: "b", z: true}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(col_data);
@@ -895,12 +851,7 @@ module.exports = perspective => {
                 z: [false, true]
             };
 
-            var expected = [
-                {x: 1, y: "a", z: false},
-                {x: 2, y: "b", z: true},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false}
-            ];
+            var expected = [{x: 1, y: "a", z: false}, {x: 2, y: "b", z: true}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(col_data);
@@ -921,24 +872,14 @@ module.exports = perspective => {
 
     describe("null handling", function() {
         it("recalculates sum aggregates when a null unsets a value", async function() {
-            var table = perspective.table(
-                [
-                    {x: 1, y: 1},
-                    {x: 2, y: 1}
-                ],
-                {index: "x"}
-            );
+            var table = perspective.table([{x: 1, y: 1}, {x: 2, y: 1}], {index: "x"});
             table.update([{x: 2, y: null}]);
             var view = table.view({
                 row_pivots: ["x"],
                 columns: ["y"]
             });
             let json = await view.to_json();
-            expect(json).toEqual([
-                {__ROW_PATH__: [], y: 1},
-                {__ROW_PATH__: [1], y: 1},
-                {__ROW_PATH__: [2], y: 0}
-            ]);
+            expect(json).toEqual([{__ROW_PATH__: [], y: 1}, {__ROW_PATH__: [1], y: 1}, {__ROW_PATH__: [2], y: 0}]);
             view.delete();
             table.delete();
         });
@@ -956,12 +897,7 @@ module.exports = perspective => {
 
         it("partial update with null unsets value", async function() {
             var partial = [{x: null, y: "a", z: false}];
-            var expected = [
-                {x: null, y: "a", z: false},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false}
-            ];
+            var expected = [{x: null, y: "a", z: false}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(data);
@@ -974,13 +910,7 @@ module.exports = perspective => {
 
         it("update by adding rows (new pkeys) with partials/nulls", async function() {
             var update = [{x: null, y: "e", z: null}];
-            var expected = [
-                {x: 1, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
-                {x: null, y: "e", z: null}
-            ];
+            var expected = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}, {x: null, y: "e", z: null}];
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(data);
@@ -997,12 +927,7 @@ module.exports = perspective => {
                 y: ["a"]
             };
 
-            var expected = [
-                {x: null, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false}
-            ];
+            var expected = [{x: null, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(col_data);
@@ -1103,18 +1028,10 @@ module.exports = perspective => {
                 }
             ]);
             table2.update(computed_data);
-            table2.update([
-                {__INDEX__: 0, x: 10},
-                {__INDEX__: 2, x: 10}
-            ]);
+            table2.update([{__INDEX__: 0, x: 10}, {__INDEX__: 2, x: 10}]);
             let view = table2.view();
             let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 10, y: 2, multiply: 20},
-                {x: 2, y: 4, multiply: 8},
-                {x: 10, y: 6, multiply: 60},
-                {x: 4, y: 8, multiply: 32}
-            ]);
+            expect(json).toEqual([{x: 10, y: 2, multiply: 20}, {x: 2, y: 4, multiply: 8}, {x: 10, y: 6, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
         });
 
         it("partial update on single computed source column", async function() {
@@ -1130,12 +1047,7 @@ module.exports = perspective => {
             table2.update([{__INDEX__: 0, x: 10}]);
             let view = table2.view();
             let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 10, y: 2, multiply: 20},
-                {x: 2, y: 4, multiply: 8},
-                {x: 3, y: 6, multiply: 18},
-                {x: 4, y: 8, multiply: 32}
-            ]);
+            expect(json).toEqual([{x: 10, y: 2, multiply: 20}, {x: 2, y: 4, multiply: 8}, {x: 3, y: 6, multiply: 18}, {x: 4, y: 8, multiply: 32}]);
         });
 
         it("partial update on non-contiguous computed source columns", async function() {
@@ -1148,18 +1060,10 @@ module.exports = perspective => {
                     inputs: ["x", "y"]
                 }
             ]);
-            table2.update([
-                {__INDEX__: 0, x: 1, y: 10},
-                {__INDEX__: 2, x: 3, y: 20}
-            ]);
+            table2.update([{__INDEX__: 0, x: 1, y: 10}, {__INDEX__: 2, x: 3, y: 20}]);
             let view = table2.view();
             let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 1, y: 10, multiply: 10},
-                {x: 2, y: 4, multiply: 8},
-                {x: 3, y: 20, multiply: 60},
-                {x: 4, y: 8, multiply: 32}
-            ]);
+            expect(json).toEqual([{x: 1, y: 10, multiply: 10}, {x: 2, y: 4, multiply: 8}, {x: 3, y: 20, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
         });
 
         it("partial update on non-contiguous computed source columns, indexed table", async function() {
@@ -1172,18 +1076,10 @@ module.exports = perspective => {
                     inputs: ["x", "y"]
                 }
             ]);
-            table2.update([
-                {x: 1, y: 10},
-                {x: 3, y: 20}
-            ]);
+            table2.update([{x: 1, y: 10}, {x: 3, y: 20}]);
             let view = table2.view();
             let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 1, y: 10, multiply: 10},
-                {x: 2, y: 4, multiply: 8},
-                {x: 3, y: 20, multiply: 60},
-                {x: 4, y: 8, multiply: 32}
-            ]);
+            expect(json).toEqual([{x: 1, y: 10, multiply: 10}, {x: 2, y: 4, multiply: 8}, {x: 3, y: 20, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
         });
 
         it("multiple partial update on single computed source column", async function() {
@@ -1197,27 +1093,13 @@ module.exports = perspective => {
                 }
             ]);
 
-            table2.update([
-                {__INDEX__: 0, x: 10},
-                {__INDEX__: 2, x: 10}
-            ]);
-            table2.update([
-                {__INDEX__: 0, x: 20},
-                {__INDEX__: 2, x: 20}
-            ]);
-            table2.update([
-                {__INDEX__: 0, x: 30},
-                {__INDEX__: 2, x: 30}
-            ]);
+            table2.update([{__INDEX__: 0, x: 10}, {__INDEX__: 2, x: 10}]);
+            table2.update([{__INDEX__: 0, x: 20}, {__INDEX__: 2, x: 20}]);
+            table2.update([{__INDEX__: 0, x: 30}, {__INDEX__: 2, x: 30}]);
 
             let view = table2.view();
             let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 30, y: 2, multiply: 60},
-                {x: 2, y: 4, multiply: 8},
-                {x: 30, y: 6, multiply: 180},
-                {x: 4, y: 8, multiply: 32}
-            ]);
+            expect(json).toEqual([{x: 30, y: 2, multiply: 60}, {x: 2, y: 4, multiply: 8}, {x: 30, y: 6, multiply: 180}, {x: 4, y: 8, multiply: 32}]);
         });
 
         it("multiple computed columns with updates on source columns", async function() {
@@ -1241,22 +1123,14 @@ module.exports = perspective => {
                 }
             ]);
 
-            table3.update([
-                {__INDEX__: 0, x: 5},
-                {__INDEX__: 2, x: 10}
-            ]);
+            table3.update([{__INDEX__: 0, x: 5}, {__INDEX__: 2, x: 10}]);
 
             let view = table2.view({
                 columns: ["add", "multiply"]
             });
 
             let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 7, multiply: 10},
-                {add: 6, multiply: 8},
-                {add: 16, multiply: 60},
-                {add: 12, multiply: 32}
-            ]);
+            expect(json).toEqual([{add: 7, multiply: 10}, {add: 6, multiply: 8}, {add: 16, multiply: 60}, {add: 12, multiply: 32}]);
         });
 
         it("maintain previous computed columns when creating new ones", async function() {
@@ -1294,12 +1168,7 @@ module.exports = perspective => {
             });
 
             let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 3, subtract: 1, multiply: 2},
-                {add: 6, subtract: 2, multiply: 8},
-                {add: 9, subtract: 3, multiply: 18},
-                {add: 12, subtract: 4, multiply: 32}
-            ]);
+            expect(json).toEqual([{add: 3, subtract: 1, multiply: 2}, {add: 6, subtract: 2, multiply: 8}, {add: 9, subtract: 3, multiply: 18}, {add: 12, subtract: 4, multiply: 32}]);
         });
 
         it("propagate updates to all computed columns", async function() {
@@ -1339,12 +1208,7 @@ module.exports = perspective => {
             });
 
             let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 2, subtract: 0, multiply: 1},
-                {add: 4, subtract: 0, multiply: 4},
-                {add: 6, subtract: 0, multiply: 9},
-                {add: 8, subtract: 0, multiply: 16}
-            ]);
+            expect(json).toEqual([{add: 2, subtract: 0, multiply: 1}, {add: 4, subtract: 0, multiply: 4}, {add: 6, subtract: 0, multiply: 9}, {add: 8, subtract: 0, multiply: 16}]);
         });
 
         it("propagate appends to all computed columns", async function() {

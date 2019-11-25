@@ -7,12 +7,7 @@
  *
  */
 
-var data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false}
-];
+var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 
 var meta = {
     x: "integer",
@@ -20,12 +15,7 @@ var meta = {
     z: "boolean"
 };
 
-var data2 = [
-    {x: 1, y: 1, z: true},
-    {x: 2, y: 1, z: false},
-    {x: 3, y: 2, z: true},
-    {x: 4, y: 2, z: false}
-];
+var data2 = [{x: 1, y: 1, z: true}, {x: 2, y: 1, z: false}, {x: 3, y: 2, z: true}, {x: 4, y: 2, z: false}];
 
 var data_7 = {
     w: [1.5, 2.5, 3.5, 4.5],
@@ -49,11 +39,7 @@ module.exports = perspective => {
                 aggregate: [{column: "x", op: "sum"}],
                 row_pivots: ["z"]
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 10},
-                {__ROW_PATH__: [false], x: 6},
-                {__ROW_PATH__: [true], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -66,11 +52,7 @@ module.exports = perspective => {
                 row_pivots: ["z"],
                 columns: ["x"]
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 10},
-                {__ROW_PATH__: [false], x: 6},
-                {__ROW_PATH__: [true], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -83,11 +65,7 @@ module.exports = perspective => {
                 row_pivots: ["z"],
                 aggregate: [{op: "weighted mean", column: ["x", "y"]}]
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 2.8333333333333335},
-                {__ROW_PATH__: [false], x: 3.3333333333333335},
-                {__ROW_PATH__: [true], x: 2.3333333333333335}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 2.8333333333333335}, {__ROW_PATH__: [false], x: 3.3333333333333335}, {__ROW_PATH__: [true], x: 2.3333333333333335}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -101,11 +79,7 @@ module.exports = perspective => {
                 columns: ["x"],
                 aggregates: {x: "mean"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [false], x: 3},
-                {__ROW_PATH__: [true], x: 2}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [false], x: 3}, {__ROW_PATH__: [true], x: 2}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -119,11 +93,7 @@ module.exports = perspective => {
                 columns: ["x"],
                 aggregates: {x: "first by index"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 1},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 1}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 1}, {__ROW_PATH__: [false], x: 2}, {__ROW_PATH__: [true], x: 1}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -137,11 +107,7 @@ module.exports = perspective => {
                 columns: ["x"],
                 aggregates: {x: "last by index"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 4},
-                {__ROW_PATH__: [false], x: 4},
-                {__ROW_PATH__: [true], x: 3}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 4}, {__ROW_PATH__: [false], x: 4}, {__ROW_PATH__: [true], x: 3}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -155,23 +121,12 @@ module.exports = perspective => {
                 columns: ["x"],
                 aggregates: {x: "last"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [false], x: 4},
-                {__ROW_PATH__: [true], x: 3}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [false], x: 4}, {__ROW_PATH__: [true], x: 3}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
 
-            table.update([
-                {x: 1, y: "c", z: true},
-                {x: 2, y: "d", z: false}
-            ]);
-            var answerAfterUpdate = [
-                {__ROW_PATH__: [], x: 1},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 1}
-            ];
+            table.update([{x: 1, y: "c", z: true}, {x: 2, y: "d", z: false}]);
+            var answerAfterUpdate = [{__ROW_PATH__: [], x: 1}, {__ROW_PATH__: [false], x: 2}, {__ROW_PATH__: [true], x: 1}];
             let result2 = await view.to_json();
             expect(result2).toEqual(answerAfterUpdate);
             view.delete();
@@ -181,24 +136,13 @@ module.exports = perspective => {
 
     describe("Aggregates with nulls", function() {
         it("mean", async function() {
-            var table = perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2}
-            ]);
+            var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [1], x: 2.5},
-                {__ROW_PATH__: [2], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -206,25 +150,13 @@ module.exports = perspective => {
         });
 
         it("mean with 0", async function() {
-            var table = perspective.table([
-                {x: 3, y: 1},
-                {x: 3, y: 1},
-                {x: 0, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2}
-            ]);
+            var table = perspective.table([{x: 3, y: 1}, {x: 3, y: 1}, {x: 0, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [1], x: 2},
-                {__ROW_PATH__: [2], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -233,25 +165,13 @@ module.exports = perspective => {
 
         it("mean with 0.0 (floats)", async function() {
             var table = perspective.table({x: "float", y: "integer"});
-            table.update([
-                {x: 3, y: 1},
-                {x: 3, y: 1},
-                {x: 0, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2}
-            ]);
+            table.update([{x: 3, y: 1}, {x: 3, y: 1}, {x: 0, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [1], x: 2},
-                {__ROW_PATH__: [2], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -259,23 +179,12 @@ module.exports = perspective => {
         });
 
         it("sum", async function() {
-            var table = perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2}
-            ]);
+            var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
                 columns: ["x"]
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 9},
-                {__ROW_PATH__: [1], x: 5},
-                {__ROW_PATH__: [2], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 9}, {__ROW_PATH__: [1], x: 5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -283,26 +192,14 @@ module.exports = perspective => {
         });
 
         it("mean after update", async function() {
-            var table = perspective.table([
-                {x: 3, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 2}
-            ]);
-            table.update([
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2}
-            ]);
+            var table = perspective.table([{x: 3, y: 1}, {x: null, y: 1}, {x: null, y: 2}]);
+            table.update([{x: 2, y: 1}, {x: null, y: 1}, {x: 4, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [1], x: 2.5},
-                {__ROW_PATH__: [2], x: 4}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -310,24 +207,9 @@ module.exports = perspective => {
         });
 
         it("mean at aggregate level", async function() {
-            var table = perspective.table([
-                {x: 4, y: 1, z: "a"},
-                {x: null, y: 1, z: "a"},
-                {x: null, y: 2, z: "a"}
-            ]);
-            table.update([
-                {x: 1, y: 1, z: "b"},
-                {x: 1, y: 1, z: "b"},
-                {x: null, y: 1, z: "b"},
-                {x: 4, y: 2, z: "b"},
-                {x: null, y: 2, z: "b"}
-            ]);
-            table.update([
-                {x: 2, y: 2, z: "c"},
-                {x: 3, y: 2, z: "c"},
-                {x: null, y: 2, z: "c"},
-                {x: 7, y: 2, z: "c"}
-            ]);
+            var table = perspective.table([{x: 4, y: 1, z: "a"}, {x: null, y: 1, z: "a"}, {x: null, y: 2, z: "a"}]);
+            table.update([{x: 1, y: 1, z: "b"}, {x: 1, y: 1, z: "b"}, {x: null, y: 1, z: "b"}, {x: 4, y: 2, z: "b"}, {x: null, y: 2, z: "b"}]);
+            table.update([{x: 2, y: 2, z: "c"}, {x: 3, y: 2, z: "c"}, {x: null, y: 2, z: "c"}, {x: 7, y: 2, z: "c"}]);
             var view = table.view({
                 row_pivots: ["y", "z"],
                 columns: ["x"],
@@ -356,12 +238,7 @@ module.exports = perspective => {
                 columns: ["x"],
                 aggregates: {x: "distinct count"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [null], x: 1},
-                {__ROW_PATH__: ["x"], x: 1},
-                {__ROW_PATH__: ["y"], x: 1}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [null], x: 1}, {__ROW_PATH__: ["x"], x: 1}, {__ROW_PATH__: ["y"], x: 1}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -369,19 +246,12 @@ module.exports = perspective => {
         });
 
         it.skip("weighted mean", async function() {
-            var table = perspective.table([
-                {a: "a", x: 1, y: 200},
-                {a: "a", x: 2, y: 100},
-                {a: "a", x: 3, y: null}
-            ]);
+            var table = perspective.table([{a: "a", x: 1, y: 200}, {a: "a", x: 2, y: 100}, {a: "a", x: 3, y: null}]);
             var view = table.view({
                 row_pivots: ["a"],
                 aggregate: [{op: "weighted mean", column: ["y", "x"], name: "y"}]
             });
-            var answer = [
-                {__ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2)},
-                {__ROW_PATH__: ["a"], y: (1 * 200 + 2 * 100) / (1 + 2)}
-            ];
+            var answer = [{__ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2)}, {__ROW_PATH__: ["a"], y: (1 * 200 + 2 * 100) / (1 + 2)}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -391,24 +261,13 @@ module.exports = perspective => {
 
     describe("Aggregates with negatives", function() {
         it("sum abs", async function() {
-            var table = perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: 1, y: 1},
-                {x: -1, y: 1},
-                {x: -2, y: 2},
-                {x: -3, y: 2}
-            ]);
+            var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: 1, y: 1}, {x: -1, y: 1}, {x: -2, y: 2}, {x: -3, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
                 aggregates: {x: "sum abs"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 12},
-                {__ROW_PATH__: [1], x: 7},
-                {__ROW_PATH__: [2], x: 5}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 12}, {__ROW_PATH__: [1], x: 7}, {__ROW_PATH__: [2], x: 5}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
             view.delete();
@@ -443,11 +302,7 @@ module.exports = perspective => {
                 chg: "float",
                 pos: "integer"
             };
-            const rec1 = [
-                {id: 1, name: "John", pos: 100, chg: 1},
-                {id: 2, name: "Mary", pos: 200, chg: 2},
-                {id: 3, name: "Tom", pos: 300, chg: 3}
-            ];
+            const rec1 = [{id: 1, name: "John", pos: 100, chg: 1}, {id: 2, name: "Mary", pos: 200, chg: 2}, {id: 3, name: "Tom", pos: 300, chg: 3}];
             const table = perspective.table(schema, {index: "id"});
             table.update(rec1);
             let view = table.view({
@@ -457,12 +312,7 @@ module.exports = perspective => {
             let rec2 = [{id: 1, chg: 3}];
             table.update(rec2);
             let result2 = await view.to_json();
-            var answer = [
-                {__ROW_PATH__: [], pos: 600},
-                {__ROW_PATH__: [1], pos: 100},
-                {__ROW_PATH__: [2], pos: 200},
-                {__ROW_PATH__: [3], pos: 300}
-            ];
+            var answer = [{__ROW_PATH__: [], pos: 600}, {__ROW_PATH__: [1], pos: 100}, {__ROW_PATH__: [2], pos: 200}, {__ROW_PATH__: [3], pos: 300}];
             expect(result2).toEqual(answer);
             view.delete();
             table.delete();
@@ -470,12 +320,7 @@ module.exports = perspective => {
 
         describe("pivoting on column containing null values", function() {
             it("shows one pivot for the nulls on initial load", async function() {
-                const dataWithNulls = [
-                    {name: "Homer", value: 1},
-                    {name: null, value: 1},
-                    {name: null, value: 1},
-                    {name: "Krusty", value: 1}
-                ];
+                const dataWithNulls = [{name: "Homer", value: 1}, {name: null, value: 1}, {name: null, value: 1}, {name: "Krusty", value: 1}];
 
                 var table = perspective.table(dataWithNulls);
 
@@ -498,14 +343,8 @@ module.exports = perspective => {
             });
 
             it("shows one pivot for the nulls after updating with a null", async function() {
-                const dataWithNull1 = [
-                    {name: "Homer", value: 1},
-                    {name: null, value: 1}
-                ];
-                const dataWithNull2 = [
-                    {name: null, value: 1},
-                    {name: "Krusty", value: 1}
-                ];
+                const dataWithNull1 = [{name: "Homer", value: 1}, {name: null, value: 1}];
+                const dataWithNull2 = [{name: null, value: 1}, {name: "Krusty", value: 1}];
 
                 var table = perspective.table(dataWithNull1);
                 table.update(dataWithNull2);
@@ -607,11 +446,7 @@ module.exports = perspective => {
                 row_pivots: ["z"],
                 aggregates: {y: "distinct count", z: "distinct count"}
             });
-            var answer = [
-                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
-                {__ROW_PATH__: [false], x: 6, y: 2, z: 1},
-                {__ROW_PATH__: [true], x: 4, y: 2, z: 1}
-            ];
+            var answer = [{__ROW_PATH__: [], x: 10, y: 4, z: 2}, {__ROW_PATH__: [false], x: 6, y: 2, z: 1}, {__ROW_PATH__: [true], x: 4, y: 2, z: 1}];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
             view.delete();

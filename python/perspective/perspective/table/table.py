@@ -11,11 +11,12 @@ from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
-from ._state import set_process, clear_process, reset_process
+from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 try:
-    from .libbinding import make_table, str_to_filter_op, t_filter_op, t_op, t_dtype
+    from .libbinding import make_table, str_to_filter_op, t_filter_op, \
+                            t_op, t_dtype
 except ImportError:
     pass
 
@@ -50,15 +51,27 @@ class Table(object):
 
         self._limit = limit or 4294967295
         self._index = index or ""
-        self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, self._is_arrow)
+        self._table = make_table(None, self._accessor, None, self._limit,
+                                 self._index, t_op.OP_INSERT, False,
+                                 self._is_arrow)
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
         self._delete_callbacks = _PerspectiveCallBackCache()
         self._views = []
         self._delete_callback = None
 
-        self._table.get_pool().set_update_delegate(self)
-        self._table.get_pool()._process()
+        pool = self._table.get_pool()
+        pool.set_update_delegate(self)
+        pool._process()
+
+        # if `set_process` is not implemented, it means that an event loop
+        # isn't present/not set in this case, simply call `process()`
+        # immediately and allow to execute.
+        try:
+            _PerspectiveStateManager.set_process(pool, self._table.get_id())
+        except NotImplementedError:
+            _PerspectiveStateManager.set_process = \
+                _PerspectiveStateManager._set_process_immediate
 
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''
@@ -79,10 +92,10 @@ class Table(object):
             data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): New data
                 that will be filled into the :class:`~perspective.Table`.
         '''
-        reset_process(self._table.get_id())
+        _PerspectiveStateManager.reset_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
-        clear_process(self._table.get_id())
+        _PerspectiveStateManager.clear_process(self._table.get_id())
 
     def size(self):
         '''Returns the row count of the :class:`~perspective.Table`.'''
@@ -150,7 +163,8 @@ class Table(object):
         else:
             filter_op = filter[1]
 
-        if filter_op == t_filter_op.FILTER_OP_IS_NULL or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
+        if filter_op == t_filter_op.FILTER_OP_IS_NULL or \
+           filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
             # null/not null operators don't need a comparison value
             return True
 
@@ -196,7 +210,8 @@ class Table(object):
         columns = self.columns()
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
-        self._accessor._names = columns + [name for name in self._accessor._names if name == "__INDEX__"]
+        self._accessor._names = columns + \
+            [name for name in self._accessor._names if name == "__INDEX__"]
         self._accessor._types = types[:len(columns)]
 
         if "__INDEX__" in self._accessor._names:
@@ -207,8 +222,10 @@ class Table(object):
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
-        set_process(self._table.get_pool(), self._table.get_id())
+        self._table = make_table(self._table, self._accessor, None, self._limit,
+                                 self._index, t_op.OP_INSERT, True, False)
+        _PerspectiveStateManager.set_process(
+            self._table.get_pool(), self._table.get_id())
 
     def remove(self, pkeys):
         '''Removes the rows with the primary keys specified in ``pkeys``.
@@ -233,10 +250,12 @@ class Table(object):
         self._accessor = _PerspectiveAccessor(pkeys)
         self._accessor._names = [self._index]
         self._accessor._types = types
-        t = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_DELETE, True, False)
-        set_process(t.get_pool(), t.get_id())
+        t = make_table(self._table, self._accessor, None, self._limit,
+                       self._index, t_op.OP_DELETE, True, False)
+        _PerspectiveStateManager.set_process(t.get_pool(), t.get_id())
 
-    def view(self, columns=None, row_pivots=None, column_pivots=None, aggregates=None, sort=None, filter=None):
+    def view(self, columns=None, row_pivots=None, column_pivots=None,
+             aggregates=None, sort=None, filter=None):
         ''' Create a new :class:`~perspective.View` from this
         :class:`~perspective.Table` via the supplied keyword arguments.
 
@@ -272,7 +291,7 @@ class Table(object):
             >>> view.to_dict()
             >>> {"a": [1]}
         '''
-        clear_process(self._table.get_id())
+        _PerspectiveStateManager.clear_process(self._table.get_id())
         config = {}
         if columns is None:
             config["columns"] = self.columns()  # TODO: push into C++
@@ -323,9 +342,10 @@ class Table(object):
             >>> table.remove_delete(deleter)
             >>> table.delete()
         '''
-        reset_process(self._table.get_id())
+        _PerspectiveStateManager.reset_process(self._table.get_id())
         if not callable(callback):
-            return ValueError("remove_delete callback should be a callable function!")
+            return ValueError(
+                "remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def delete(self):
@@ -334,7 +354,9 @@ class Table(object):
         registered to it (which must be deleted first).
         '''
         if len(self._views) > 0:
-            raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
+            raise PerspectiveError(
+                "Cannot delete a Table with active views still linked to it " +
+                "- call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 

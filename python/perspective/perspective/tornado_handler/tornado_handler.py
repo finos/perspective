@@ -53,12 +53,11 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         '''Create a new instance of the PerspectiveTornadoHandler with the
         given Manager instance.
 
-        Keyword Arguments:
-        manager (`PerspectiveManager`):  A `PerspectiveManager` instance.
-            Must be provided on initialization.
-
-        check_origin (`bool`): If True, all requests will be accepted
-            regardless of origin. Defaults to False.
+        Keyword Args:
+            manager (:obj`PerspectiveManager`): A `PerspectiveManager` instance.
+                Must be provided on initialization.
+            check_origin (:obj`bool`): If True, all requests will be accepted regardless of origin.
+                Defaults to False.
         '''
         self._manager = kwargs.pop("manager", None)
         self._session = self._manager.new_session()

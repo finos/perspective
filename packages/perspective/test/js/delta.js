@@ -7,29 +7,12 @@
  *
  */
 
-let data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false}
-];
+let data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 //let partial_change_x = [{x: 5, y: "a"}, {x: 6, y: "b"}];
-let partial_change_y = [
-    {x: 1, y: "string1"},
-    {x: 2, y: "string2"}
-];
-let partial_change_z = [
-    {x: 1, z: false},
-    {x: 2, z: true}
-];
-let partial_change_y_z = [
-    {x: 1, y: "string1", z: false},
-    {x: 2, y: "string2", z: true}
-];
-let partial_change_nonseq = [
-    {x: 1, y: "string1", z: false},
-    {x: 4, y: "string2", z: true}
-];
+let partial_change_y = [{x: 1, y: "string1"}, {x: 2, y: "string2"}];
+let partial_change_z = [{x: 1, z: false}, {x: 2, z: true}];
+let partial_change_y_z = [{x: 1, y: "string1", z: false}, {x: 2, y: "string2", z: true}];
+let partial_change_nonseq = [{x: 1, y: "string1", z: false}, {x: 4, y: "string2", z: true}];
 
 async function match_delta(perspective, delta, expected) {
     let table = perspective.table(delta);
@@ -47,10 +30,7 @@ module.exports = perspective => {
             let view = table.view();
             view.on_update(
                 function(new_data) {
-                    expect(new_data).toEqual([
-                        {x: 1, y: "string1", z: true},
-                        {x: 2, y: "string2", z: false}
-                    ]);
+                    expect(new_data).toEqual([{x: 1, y: "string1", z: true}, {x: 2, y: "string2", z: false}]);
                     view.delete();
                     table.delete();
                     done();
@@ -65,10 +45,7 @@ module.exports = perspective => {
             let view = table.view();
             view.on_update(
                 function(new_data) {
-                    expect(new_data).toEqual([
-                        {x: 1, y: "string1", z: true},
-                        {x: 4, y: "string2", z: false}
-                    ]);
+                    expect(new_data).toEqual([{x: 1, y: "string1", z: true}, {x: 4, y: "string2", z: false}]);
                     view.delete();
                     table.delete();
                     done();
@@ -86,10 +63,7 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        const expected = [
-                            {x: 1, y: "string1", z: true},
-                            {x: 2, y: "string2", z: false}
-                        ];
+                        const expected = [{x: 1, y: "string1", z: true}, {x: 2, y: "string2", z: false}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -105,10 +79,7 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        const expected = [
-                            {x: 1, y: "string1", z: null},
-                            {x: 2, y: "string2", z: null}
-                        ];
+                        const expected = [{x: 1, y: "string1", z: null}, {x: 2, y: "string2", z: null}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -124,10 +95,7 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        const expected = [
-                            {x: 1, y: null, z: true},
-                            {x: 4, y: null, z: false}
-                        ];
+                        const expected = [{x: 1, y: null, z: true}, {x: 4, y: null, z: false}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -135,10 +103,7 @@ module.exports = perspective => {
                     },
                     {mode: "row"}
                 );
-                table.update([
-                    {x: 1, y: null},
-                    {x: 4, y: null}
-                ]);
+                table.update([{x: 1, y: null}, {x: 4, y: null}]);
             });
 
             it("returns changed rows in sorted context", async function(done) {
@@ -148,10 +113,7 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        const expected = [
-                            {x: 2, y: "string2", z: false},
-                            {x: 1, y: "string1", z: true}
-                        ];
+                        const expected = [{x: 2, y: "string2", z: false}, {x: 1, y: "string1", z: true}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -188,10 +150,7 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        const expected = [
-                            {x: 1, y: 1, z: 1},
-                            {x: 2, y: 1, z: 1}
-                        ];
+                        const expected = [{x: 1, y: 1, z: 1}, {x: 2, y: 1, z: 1}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -228,11 +187,7 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        const expected = [
-                            {x: 13, y: 6, z: 3},
-                            {x: 1, y: 1, z: 1},
-                            {x: 2, y: 1, z: 1}
-                        ];
+                        const expected = [{x: 13, y: 6, z: 3}, {x: 1, y: 1, z: 1}, {x: 2, y: 1, z: 1}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -260,10 +215,7 @@ module.exports = perspective => {
                     },
                     {mode: "row"}
                 );
-                table.update([
-                    {x: 1, y: null},
-                    {x: 4, y: null}
-                ]);
+                table.update([{x: 1, y: null}, {x: 4, y: null}]);
             });
 
             it("returns changed rows in non-sequential update", async function(done) {
@@ -275,10 +227,7 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
-                        const expected = [
-                            {x: 1, y: 1, z: 1},
-                            {x: 4, y: 1, z: 1}
-                        ];
+                        const expected = [{x: 1, y: 1, z: 1}, {x: 4, y: 1, z: 1}];
                         await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
@@ -425,11 +374,7 @@ module.exports = perspective => {
                     },
                     {mode: "row"}
                 );
-                table.update([
-                    {x: 1, y: null},
-                    {x: 2, y: null},
-                    {x: 4, y: null}
-                ]);
+                table.update([{x: 1, y: null}, {x: 2, y: null}, {x: 4, y: null}]);
             });
 
             it("returns changed rows in non-sequential update", async function(done) {

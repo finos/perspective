@@ -16,7 +16,7 @@ from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
-from ._state import clear_process
+from ._state import _PerspectiveStateManager
 
 try:
     from .libbinding import make_view_zero, make_view_one, make_view_two
@@ -204,7 +204,7 @@ class View(object):
             >>> table.update({"a": [1]})'
             >>> Update fired!
         '''
-        clear_process(self._table._table.get_id())
+        _PerspectiveStateManager.clear_process(self._table._table.get_id())
         mode = mode or "none"
 
         if not callable(callback):
@@ -243,7 +243,7 @@ class View(object):
             >>> view2.remove_update(callback)
             >>> table.update(new_data) # callback removed and will not fire
         '''
-        clear_process(self._table._table.get_id())
+        _PerspectiveStateManager.clear_process(self._table._table.get_id())
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
         self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] != callback)

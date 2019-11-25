@@ -25,10 +25,7 @@ import {set_formatters} from "./formatters.js";
 import {set_editors} from "./editors.js";
 import {treeLineRendererPaint} from "./hypergrid-tree-cell-renderer";
 
-bindTemplate(
-    TEMPLATE,
-    style
-)(
+bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
         set_data(data, schema, tschema, row_pivots, columns, force = false) {
             const hg_data = psp2hypergrid(data, schema, tschema, row_pivots, columns);

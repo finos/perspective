@@ -49,10 +49,7 @@ module.exports = perspective => {
                     columns: ["w"],
                     row_pivots: ["y"],
                     column_pivots: ["z"],
-                    sort: [
-                        ["x", "col desc"],
-                        ["y", "desc"]
-                    ]
+                    sort: [["x", "col desc"], ["y", "desc"]]
                 });
                 const paths = await view.column_paths();
                 expect(paths).toEqual(["__ROW_PATH__", "false|w", "true|w"]);
@@ -66,16 +63,7 @@ module.exports = perspective => {
                     columns: ["w", "y"],
                     sort: [["x", "desc"]]
                 });
-                var answer = [
-                    {w: 4.5, y: "d"},
-                    {w: 5.5, y: "a"},
-                    {w: 3.5, y: "c"},
-                    {w: 6.5, y: "b"},
-                    {w: 2.5, y: "b"},
-                    {w: 7.5, y: "c"},
-                    {w: 1.5, y: "a"},
-                    {w: 8.5, y: "d"}
-                ];
+                var answer = [{w: 4.5, y: "d"}, {w: 5.5, y: "a"}, {w: 3.5, y: "c"}, {w: 6.5, y: "b"}, {w: 2.5, y: "b"}, {w: 7.5, y: "c"}, {w: 1.5, y: "a"}, {w: 8.5, y: "d"}];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
                 view.delete();
@@ -89,13 +77,7 @@ module.exports = perspective => {
                     row_pivots: ["y"],
                     sort: [["x", "desc"]]
                 });
-                var answer = [
-                    {__ROW_PATH__: [], w: 40},
-                    {__ROW_PATH__: ["a"], w: 7},
-                    {__ROW_PATH__: ["b"], w: 9},
-                    {__ROW_PATH__: ["c"], w: 11},
-                    {__ROW_PATH__: ["d"], w: 13}
-                ];
+                var answer = [{__ROW_PATH__: [], w: 40}, {__ROW_PATH__: ["a"], w: 7}, {__ROW_PATH__: ["b"], w: 9}, {__ROW_PATH__: ["c"], w: 11}, {__ROW_PATH__: ["d"], w: 13}];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
                 view.delete();
