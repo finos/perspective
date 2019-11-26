@@ -53,7 +53,7 @@ class TestUpdate(object):
 
     # bool
 
-    def test_table_bool_from_schema(self):
+    def test_update_bool_from_schema(self):
         bool_data = [{"a": True, "b": False}, {"a": True, "b": True}]
         tbl = Table({
             "a": bool,
@@ -63,7 +63,7 @@ class TestUpdate(object):
         assert tbl.size() == 2
         assert tbl.view().to_records() == bool_data
 
-    def test_table_bool_str_from_schema(self):
+    def test_update_bool_str_from_schema(self):
         bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
         tbl = Table({
             "a": bool,
@@ -75,7 +75,7 @@ class TestUpdate(object):
             {"a": True, "b": False},
             {"a": True, "b": True}]
 
-    def test_table_bool_str_all_formats_from_schema(self):
+    def test_update_bool_str_all_formats_from_schema(self):
         bool_data = [
             {"a": "True", "b": "False"},
             {"a": "t", "b": "f"},
@@ -94,7 +94,7 @@ class TestUpdate(object):
             "b": [False, False, False, False, False]
         }
 
-    def test_table_bool_int_from_schema(self):
+    def test_update_bool_int_from_schema(self):
         bool_data = [{"a": 1, "b": 0}, {"a": 1, "b": 0}]
         tbl = Table({
             "a": bool,

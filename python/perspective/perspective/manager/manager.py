@@ -212,7 +212,7 @@ class PerspectiveManager(object):
         for name in names:
             self._views.pop(name)
 
-        print("GC {} views in memory".format(count))
+        logging.warn("GC {} views in memory".format(count))
 
     def _make_message(self, id, result):
         '''Return a serializable message for a successful result.'''

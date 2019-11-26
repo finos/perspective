@@ -186,7 +186,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
             data, pivots = deconstruct_pandas(table_or_data)
-            print(data, pivots)
             table_or_data = data
 
             if pivots.get("row_pivots", None):

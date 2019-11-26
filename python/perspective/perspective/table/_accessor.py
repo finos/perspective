@@ -79,7 +79,6 @@ def _type_to_format(data_or_schema):
         else:
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
-            print(df, _)
             return True, 1, {c: df[c].values for c in df.columns}
 
 

@@ -40,6 +40,25 @@ class TestTableInfer(object):
             "b": bool
         }
 
+    def test_table_bool_infer_str_all_formats_from_schema(self):
+        bool_data = [
+            {"a": "True", "b": "False"},
+            {"a": "t", "b": "f"},
+            {"a": "true", "b": "false"},
+            {"a": 1, "b": 0},
+            {"a": "on", "b": "off"}
+        ]
+        tbl = Table(bool_data)
+        assert tbl.schema() == {
+            "a": bool,
+            "b": bool
+        }
+        assert tbl.size() == 5
+        assert tbl.view().to_dict() == {
+            "a": [True, True, True, True, True],
+            "b": [False, False, False, False, False]
+        }
+
     def test_table_promote_float(self):
         if six.PY2:
             data = {"a": [1.5, 2.5, 3.5, 4.5, "abc"]}
