@@ -172,7 +172,7 @@ class TestView(object):
             "c": [3, 2, 1]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(column_pivots=["b"], columns=["a", "b", "c"])
         paths = view.column_paths()
         assert paths == ["false|a", "false|b", "false|c", "true|a", "true|b", "true|c"]
 
