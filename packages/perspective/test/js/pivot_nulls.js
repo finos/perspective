@@ -10,7 +10,12 @@
 module.exports = perspective => {
     describe("Pivotting with nulls", function() {
         it("shows one pivot for the nulls on initial load", async function() {
-            const dataWithNulls = [{name: "Homer", value: 1}, {name: null, value: 1}, {name: null, value: 1}, {name: "Krusty", value: 1}];
+            const dataWithNulls = [
+                {name: "Homer", value: 1},
+                {name: null, value: 1},
+                {name: null, value: 1},
+                {name: "Krusty", value: 1}
+            ];
 
             var table = perspective.table(dataWithNulls);
 
@@ -33,8 +38,14 @@ module.exports = perspective => {
         });
 
         it("shows one pivot for the nulls after updating with a null", async function() {
-            const dataWithNull1 = [{name: "Homer", value: 1}, {name: null, value: 1}];
-            const dataWithNull2 = [{name: null, value: 1}, {name: "Krusty", value: 1}];
+            const dataWithNull1 = [
+                {name: "Homer", value: 1},
+                {name: null, value: 1}
+            ];
+            const dataWithNull2 = [
+                {name: null, value: 1},
+                {name: "Krusty", value: 1}
+            ];
 
             var table = perspective.table(dataWithNull1);
             table.update(dataWithNull2);
@@ -58,7 +69,12 @@ module.exports = perspective => {
         });
 
         it("aggregates that return NaN render correctly", async function() {
-            const dataWithNull1 = [{name: "Homer", value: 3}, {name: "Homer", value: 1}, {name: "Marge", value: null}, {name: "Marge", value: null}];
+            const dataWithNull1 = [
+                {name: "Homer", value: 3},
+                {name: "Homer", value: 1},
+                {name: "Marge", value: null},
+                {name: "Marge", value: null}
+            ];
 
             var table = perspective.table(dataWithNull1);
 
@@ -67,7 +83,11 @@ module.exports = perspective => {
                 aggregates: {value: "avg"}
             });
 
-            const answer = [{__ROW_PATH__: [], name: 4, value: 2}, {__ROW_PATH__: ["Homer"], name: 2, value: 2}, {__ROW_PATH__: ["Marge"], name: 2, value: null}];
+            const answer = [
+                {__ROW_PATH__: [], name: 4, value: 2},
+                {__ROW_PATH__: ["Homer"], name: 2, value: 2},
+                {__ROW_PATH__: ["Marge"], name: 2, value: null}
+            ];
 
             let results = await view.to_json();
             expect(results).toEqual(answer);

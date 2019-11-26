@@ -10,7 +10,12 @@ const papaparse = require("papaparse");
 const moment = require("moment");
 const arrows = require("./test_arrows.js");
 
-var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
+var data = [
+    {x: 1, y: "a", z: true},
+    {x: 2, y: "b", z: false},
+    {x: 3, y: "c", z: true},
+    {x: 4, y: "d", z: false}
+];
 
 var col_data = {
     x: [1, 2, 3, 4],
@@ -24,7 +29,12 @@ var meta = {
     z: "boolean"
 };
 
-var data_3 = [{w: 1.5, x: 1, y: "a", z: true}, {w: 2.5, x: 2, y: "b", z: false}, {w: 3.5, x: 3, y: "c", z: true}, {w: 4.5, x: 4, y: "d", z: false}];
+var data_3 = [
+    {w: 1.5, x: 1, y: "a", z: true},
+    {w: 2.5, x: 2, y: "b", z: false},
+    {w: 3.5, x: 3, y: "c", z: true},
+    {w: 4.5, x: 4, y: "d", z: false}
+];
 
 var data_7 = {
     w: [1.5, 2.5, 3.5, 4.5],
@@ -202,9 +212,24 @@ var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 
 var data_6 = [{x: "š"}];
 
-var int_float_data = [{int: 1, float: 2.25}, {int: 2, float: 3.5}, {int: 3, float: 4.75}, {int: 4, float: 5.25}];
-var int_float_string_data = [{int: 1, float: 2.25, string: "a"}, {int: 2, float: 3.5, string: "b"}, {int: 3, float: 4.75, string: "c"}, {int: 4, float: 5.25, string: "d"}];
-var datetime_data = [{datetime: new Date(), int: 1}, {datetime: new Date(), int: 1}, {datetime: new Date(), int: 2}, {datetime: new Date(), int: 2}];
+var int_float_data = [
+    {int: 1, float: 2.25},
+    {int: 2, float: 3.5},
+    {int: 3, float: 4.75},
+    {int: 4, float: 5.25}
+];
+var int_float_string_data = [
+    {int: 1, float: 2.25, string: "a"},
+    {int: 2, float: 3.5, string: "b"},
+    {int: 3, float: 4.75, string: "c"},
+    {int: 4, float: 5.25, string: "d"}
+];
+var datetime_data = [
+    {datetime: new Date(), int: 1},
+    {datetime: new Date(), int: 1},
+    {datetime: new Date(), int: 2},
+    {datetime: new Date(), int: 2}
+];
 
 // utility for checking typed arrays
 function validate_typed_array(typed_array, column_data) {
@@ -229,11 +254,21 @@ module.exports = perspective => {
                 z: "boolean"
             });
             table.execute(t => {
-                t.update([{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}]);
+                t.update([
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 4, y: "d", z: false}
+                ]);
             });
             let view = table.view({});
             let js = await view.to_json();
-            expect(js).toEqual([{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}]);
+            expect(js).toEqual([
+                {x: 1, y: "a", z: true},
+                {x: 2, y: "b", z: false},
+                {x: 3, y: "c", z: true},
+                {x: 4, y: "d", z: false}
+            ]);
             view.delete();
             table.delete();
         });
@@ -631,7 +666,12 @@ module.exports = perspective => {
         });
 
         it("Infers correct type for empty string columns", async function() {
-            var table = perspective.table([{x: "", y: 1}, {x: "", y: 2}, {x: "", y: 3}, {x: "", y: 4}]);
+            var table = perspective.table([
+                {x: "", y: 1},
+                {x: "", y: 2},
+                {x: "", y: 3},
+                {x: "", y: 4}
+            ]);
             var view = table.view();
             let result = await view.schema();
             expect(result).toEqual({x: "string", y: "integer"});
@@ -654,11 +694,17 @@ module.exports = perspective => {
         });
 
         it.skip("Handles inconsistent rows with same width", async function() {
-            const int_to_float = [{x: 1, y: 2}, {y: 2, z: 3}];
+            const int_to_float = [
+                {x: 1, y: 2},
+                {y: 2, z: 3}
+            ];
             var table = perspective.table(int_to_float);
             var view = table.view();
             var json = await view.to_json();
-            expect(json).toEqual([{x: 1, y: 2, z: null}, {x: null, y: 2, z: 3}]);
+            expect(json).toEqual([
+                {x: 1, y: 2, z: null},
+                {x: null, y: 2, z: 3}
+            ]);
             view.delete();
             table.delete();
         });
@@ -670,7 +716,10 @@ module.exports = perspective => {
             expect(schema).toEqual({x: "integer", y: "integer", z: "integer"});
             var view = table.view();
             var json = await view.to_json();
-            expect(json).toEqual([{x: 1, y: null, z: null}, {x: null, y: 2, z: 3}]);
+            expect(json).toEqual([
+                {x: 1, y: null, z: null},
+                {x: null, y: 2, z: 3}
+            ]);
             view.delete();
             table.delete();
         });
@@ -966,11 +1015,21 @@ module.exports = perspective => {
 
                 table2.update(data_3);
 
-                let delta_upd = [{y: "a", z: false}, {y: "b", z: true}, {y: "c", z: false}, {y: "d", z: true}];
+                let delta_upd = [
+                    {y: "a", z: false},
+                    {y: "b", z: true},
+                    {y: "c", z: false},
+                    {y: "d", z: true}
+                ];
                 table2.update(delta_upd);
                 let view = table2.view({columns: ["y", "ratio"], aggregates: {y: "count", ratio: "count"}});
                 let result = await view.to_json();
-                let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
+                let expected = [
+                    {y: "a", ratio: 1.5},
+                    {y: "b", ratio: 1.25},
+                    {y: "c", ratio: 1.1666666666666667},
+                    {y: "d", ratio: 1.125}
+                ];
                 expect(result).toEqual(expected);
                 view.delete();
                 table2.delete();

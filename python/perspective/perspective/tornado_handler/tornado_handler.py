@@ -7,7 +7,6 @@
 #
 
 import json
-from datetime import timedelta
 import tornado.websocket
 from tornado.ioloop import IOLoop
 from ..core.exception import PerspectiveError
@@ -57,8 +56,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         @classmethod
         def _queue_process_tornado(cls, table_id):
             loop = IOLoop.current()
-            print(self._session.client_id)
-            loop.add_timeout(timedelta(milliseconds=100), cls.clear_process, table_id=table_id)
+            loop.add_callback(cls.clear_process, table_id=table_id)
 
         setattr(_PerspectiveStateManager, "queue_process", _queue_process_tornado)
 
