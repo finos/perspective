@@ -280,6 +280,7 @@ class View(object):
             >>> view = table.view()
             >>> view.delete()
         '''
+        _PerspectiveStateManager.reset_process(self._table._table.get_id())
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
         self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)

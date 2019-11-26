@@ -79,6 +79,7 @@ class Table(object):
         preserves everything else including the schema and any callbacks or
         registered :class:`~perspective.View`.
         '''
+        _PerspectiveStateManager.reset_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
 
     def replace(self, data):
@@ -354,6 +355,7 @@ class Table(object):
             raise PerspectiveError(
                 "Cannot delete a Table with active views still linked to it " +
                 "- call delete() on each view, and try again.")
+        _PerspectiveStateManager.reset_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 

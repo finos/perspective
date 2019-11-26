@@ -58,6 +58,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
             loop = IOLoop.current()
             loop.add_callback(cls.clear_process, table_id=table_id)
 
+        # if `queue_process` is not set as an attribute, Perspective will call `process()` after every operation.
         setattr(_PerspectiveStateManager, "queue_process", _queue_process_tornado)
 
     def check_origin(self, origin):

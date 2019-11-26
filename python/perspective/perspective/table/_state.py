@@ -8,6 +8,18 @@
 
 
 class _PerspectiveStateManager(object):
+    """Internal state management class that controls when `_process` is called within
+    the C++ Table internals.
+
+    `_process()` notifies the engine to clear its queue of pending updates to be applied
+    and reconciled. When Perspective runs within an event loop, we should use the loop
+    whenever possible to batch calls to `_process()`. For this class to work, callers must
+    implement `queue_process` and add it as an attribute to the class (not on an instance).
+
+    The guarantee of `queue_process` is that `clear_process` will be called, either on the
+    next iteration of the event loop or before output is generated (through a serialization
+    method, for example).
+    """
 
     TO_PROCESS = {}
 
@@ -30,7 +42,8 @@ class _PerspectiveStateManager(object):
     @classmethod
     def clear_process(cls, table_id):
         """Given a table_id, find the corresponding pool and call `process()`
-        on it.
+        on it, which takes all the updates that have been queued, applies each
+        update to the global Table state, and then clears the queue.
 
         Args:
             cls (:obj`_PerspectiveStateManager`): an instance of _PerspectiveStateManager
