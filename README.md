@@ -26,7 +26,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 - Integration with [Jupyterlab](https://github.com/finos/perspective/tree/master/packages/perspective-jupyterlab).
 
-- Runtimes for the Browser and Node.js.
+- Runtimes for the Browser, Python, and Node.js.
 
 ## Examples
 |||
@@ -48,7 +48,9 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 * [Project Site](https://perspective.finos.org/)
 * [Installation](https://perspective.finos.org/docs/md/installation.html)
-* [User's Guide](https://perspective.finos.org/docs/md/usage.html)
+* [Javascript User's Guide](https://perspective.finos.org/docs/md/js.html)
+* [Python User's Guide](https://perspective.finos.org/docs/md/python.html)
 * [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
+* [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
