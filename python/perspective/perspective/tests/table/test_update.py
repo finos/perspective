@@ -51,6 +51,62 @@ class TestUpdate(object):
         tbl.update({"a": ["abc"], "b": [456]})
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
 
+    # bool
+
+    def test_table_bool_from_schema(self):
+        bool_data = [{"a": True, "b": False}, {"a": True, "b": True}]
+        tbl = Table({
+            "a": bool,
+            "b": bool
+        })
+        tbl.update(bool_data)
+        assert tbl.size() == 2
+        assert tbl.view().to_records() == bool_data
+
+    def test_table_bool_str_from_schema(self):
+        bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
+        tbl = Table({
+            "a": bool,
+            "b": bool
+        })
+        tbl.update(bool_data)
+        assert tbl.size() == 2
+        assert tbl.view().to_records() == [
+            {"a": True, "b": False},
+            {"a": True, "b": True}]
+
+    def test_table_bool_str_all_formats_from_schema(self):
+        bool_data = [
+            {"a": "True", "b": "False"},
+            {"a": "t", "b": "f"},
+            {"a": "true", "b": "false"},
+            {"a": 1, "b": 0},
+            {"a": "on", "b": "off"}
+        ]
+        tbl = Table({
+            "a": bool,
+            "b": bool
+        })
+        tbl.update(bool_data)
+        assert tbl.size() == 5
+        assert tbl.view().to_dict() == {
+            "a": [True, True, True, True, True],
+            "b": [False, False, False, False, False]
+        }
+
+    def test_table_bool_int_from_schema(self):
+        bool_data = [{"a": 1, "b": 0}, {"a": 1, "b": 0}]
+        tbl = Table({
+            "a": bool,
+            "b": bool
+        })
+        tbl.update(bool_data)
+        assert tbl.size() == 2
+        assert tbl.view().to_dict() == {
+            "a": [True, True],
+            "b": [False, False]
+        }
+
     # dates and datetimes
     def test_update_date(self):
         tbl = Table({"a": [date(2019, 7, 11)]})

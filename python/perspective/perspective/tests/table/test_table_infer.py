@@ -22,6 +22,24 @@ class TestTableInfer(object):
         tbl = Table(data)
         assert tbl.schema() == {"a": float}
 
+    def test_table_infer_bool(self):
+        bool_data = [{"a": True, "b": False}, {"a": True, "b": True}]
+        tbl = Table(bool_data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": bool,
+            "b": bool
+        }
+
+    def test_table_infer_bool_str(self):
+        bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
+        tbl = Table(bool_data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": bool,
+            "b": bool
+        }
+
     def test_table_promote_float(self):
         if six.PY2:
             data = {"a": [1.5, 2.5, 3.5, 4.5, "abc"]}

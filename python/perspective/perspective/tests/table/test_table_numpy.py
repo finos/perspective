@@ -152,6 +152,19 @@ class TestTableNumpy(object):
             "b": [False, True, False]
         }
 
+    def test_table_bool_str(self):
+        data = {"a": np.array(["True", "False"]), "b": np.array(["False", "True"])}
+        tbl = Table(data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": bool,
+            "b": bool
+        }
+        assert tbl.view().to_dict() == {
+            "a": [True, False],
+            "b": [False, True]
+        }    
+
     # strings
 
     def test_table_str_object(self):
