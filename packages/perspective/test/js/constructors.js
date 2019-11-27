@@ -12,6 +12,8 @@ const papaparse = require("papaparse");
 const moment = require("moment");
 const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
 const chunked = fs.readFileSync(path.join(__dirname, "..", "arrow", "chunked.arrow")).buffer;
+const date32_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "date32.arrow")).buffer;
+const date64_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "date64.arrow")).buffer;
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -128,6 +130,70 @@ var arrow_result = [
         "datetime(us)": null,
         "datetime(ns)": null
     }
+];
+
+const arrow_date_col_1 = [
+    "2019-01-01",
+    "2019-01-02",
+    "2019-01-03",
+    "2019-01-04",
+    "2019-01-05",
+    "2019-01-06",
+    "2019-01-07",
+    "2019-01-08",
+    "2019-01-09",
+    "2019-01-10",
+    "2019-01-11",
+    "2019-01-12",
+    "2019-01-13",
+    "2019-01-14",
+    "2019-01-15",
+    "2019-01-16",
+    "2019-01-17",
+    "2019-01-18",
+    "2019-01-19",
+    "2019-01-20",
+    "2019-01-21",
+    "2019-01-22",
+    "2019-01-23",
+    "2019-01-24",
+    "2019-01-25",
+    "2019-01-26",
+    "2019-01-27",
+    "2019-01-28",
+    "2019-01-29"
+];
+
+const arrow_date_col_2 = [
+    "2005-11-01",
+    "2005-11-02",
+    "2005-11-03",
+    "2005-11-04",
+    "2005-11-05",
+    "2005-11-06",
+    "2005-11-07",
+    "2005-11-08",
+    "2005-11-09",
+    "2005-11-10",
+    "2005-11-11",
+    "2005-11-12",
+    "2005-11-13",
+    "2005-11-14",
+    "2005-11-15",
+    "2005-11-16",
+    "2005-11-17",
+    "2005-11-18",
+    "2005-11-19",
+    "2005-11-20",
+    "2005-11-21",
+    "2005-11-22",
+    "2005-11-23",
+    "2005-11-24",
+    "2005-11-25",
+    "2005-11-26",
+    "2005-11-27",
+    "2005-11-28",
+    "2005-11-29"
 ];
 
 var dt = () => {
@@ -511,6 +577,34 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result.length).toEqual(10);
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("Arrow date32 constructor", async function() {
+            var table = perspective.table(date32_arrow.slice());
+            var view = table.view();
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: arrow_date_col_1,
+                b: arrow_date_col_2,
+                c: arrow_date_col_1,
+                d: arrow_date_col_2
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("Arrow date64 constructor", async function() {
+            var table = perspective.table(date64_arrow.slice());
+            var view = table.view();
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: arrow_date_col_1,
+                b: arrow_date_col_2,
+                c: arrow_date_col_1,
+                d: arrow_date_col_2
+            });
             view.delete();
             table.delete();
         });
