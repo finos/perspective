@@ -1,0 +1,59 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <script src="perspective-viewer.js"></script>
+    <script src="perspective-viewer-hypergrid.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
+
+    <script src="perspective.js"></script>
+
+    <link rel='stylesheet' href="index.css">
+    <link rel='stylesheet' href="material.css" is="custom-style">
+    
+
+</head>
+
+<body>
+
+    <perspective-viewer id="viewer">
+
+    </perspective-viewer>
+
+    <script>
+        window.addEventListener('WebComponentsReady', function() {
+            const elem = document.getElementById("viewer");
+            fetch("date32.arrow").then((response) => {
+                if (!response.ok) {
+                    throw new Error("Error: status " + status);
+                }
+
+                const date32 = response.arrayBuffer();
+                date32.then(buffer => elem.load(buffer));
+            })
+            fetch("date64.arrow").then((response) => {
+                if (!response.ok) {
+                    throw new Error("Error: status " + status);
+                }
+
+                const date64 = response.arrayBuffer();
+                date64.then(buffer => elem.update(buffer));
+            })
+        });
+    </script>
+
+</body>
+
+</html>
