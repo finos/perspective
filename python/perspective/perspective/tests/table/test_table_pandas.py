@@ -320,6 +320,19 @@ class TestTablePandas(object):
         table.update(df)
         assert table.view().to_dict()["a"] == data
 
+    def test_table_pandas_from_schema_bool_str(self):
+        data = ["True", "False", "True", "False"]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": bool
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [
+            True, False, True, False
+        ]
+
     def test_table_pandas_from_schema_float(self):
         data = [None, 1.5, None, 2.5, None, 3.5, 4.5]
         df = pd.DataFrame({

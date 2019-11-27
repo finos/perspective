@@ -8,6 +8,7 @@
 import six
 import pandas
 import numpy
+from distutils.util import strtobool
 from math import isnan
 from ._date_validator import _PerspectiveDateValidator
 from ..core.data import deconstruct_numpy, deconstruct_pandas
@@ -187,6 +188,9 @@ class _PerspectiveAccessor(object):
         elif isinstance(val, list) and len(val) == 1:
             # strip out values encased lists
             val = val[0]
+        elif dtype == t_dtype.DTYPE_BOOL:
+            # True values are y, yes, t, true, on and 1; false values are n, no, f, false, off and 0.
+            val = bool(strtobool(str(val)))
         elif dtype == t_dtype.DTYPE_INT32 or dtype == t_dtype.DTYPE_INT64:
             if not isinstance(val, bool) and isinstance(val, (float, numpy.floating)):
                 # should be able to update int columns with either ints or floats

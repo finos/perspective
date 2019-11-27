@@ -30,6 +30,23 @@ class TestUpdateNumpy(object):
             "b": [2, 3, 4, 5, None, None, None, None]
         }
 
+    def test_update_np_bool_str(self):
+        tbl = Table({
+            "a": [True]
+        })
+
+        assert tbl.schema() == {
+            "a": bool
+        }
+
+        tbl.update({
+            "a": np.array(["False"])
+        })
+
+        assert tbl.view().to_dict() == {
+            "a": [True, False]
+        }
+
     def test_update_np_date(self):
         tbl = Table({
             "a": [date(2019, 7, 11)]

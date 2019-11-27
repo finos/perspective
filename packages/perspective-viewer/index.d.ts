@@ -2,8 +2,8 @@ import {Table, TableData, TableOptions, Schema, View, ViewConfig} from '@finos/p
 
 declare module '@finos/perspective-viewer' {
     export interface PerspectiveViewer extends PerspectiveViewerOptions, HTMLElement {
-        load(data: TableData | Table, options: TableOptions): void;
-        load(schema: Schema, options: TableOptions): void;
+        load(data: TableData | Table, options?: TableOptions): void;
+        load(schema: Schema, options?: TableOptions): void;
         update(data: TableData): void;
         notifyResize(): void;
         delete(delete_table: boolean): Promise<void>;

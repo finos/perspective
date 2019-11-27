@@ -661,7 +661,7 @@ t_tscalar::to_string(bool for_expr) const {
             return ss.str();
         } break;
         case DTYPE_BOOL: {
-            ss << get<bool>();
+            ss << std::boolalpha << get<bool>();
             return ss.str();
         } break;
         case DTYPE_INT8: {

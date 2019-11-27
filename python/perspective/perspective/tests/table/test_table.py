@@ -134,6 +134,19 @@ class TestTable(object):
             "b": bool
         }
 
+    def test_table_bool_str(self):
+        bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
+        tbl = Table(bool_data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": bool,
+            "b": bool
+        }
+        assert tbl.view().to_dict() == {
+            "a": [True, True],
+            "b": [False, True]
+        }
+
     def test_table_float(self):
         float_data = [{"a": 1.5, "b": 2.5}, {"a": 3.2, "b": 3.1}]
         tbl = Table(float_data)

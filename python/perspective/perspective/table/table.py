@@ -116,7 +116,8 @@ class Table(object):
         Returns:
             :obj:`list`: a list of string column names
         '''
-        return list(self.schema().keys())
+        return [name for name in self._table.get_schema().columns()
+                if name != "psp_okey"]
 
     def computed_schema(self):
         '''Returns a schema of computed columns added by the user.
@@ -179,7 +180,7 @@ class Table(object):
             >>> tbl.view().to_dict()
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
         '''
-        columns = [name for name in self._table.get_schema().columns() if name != "psp_okey"]
+        columns = self.columns()
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
         self._accessor._names = columns + [name for name in self._accessor._names if name == "__INDEX__"]
