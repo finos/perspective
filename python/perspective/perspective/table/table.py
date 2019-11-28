@@ -181,6 +181,13 @@ class Table(object):
             >>> tbl.view().to_dict()
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
         '''
+        _is_arrow = isinstance(data, (bytes, bytearray))
+
+        if (_is_arrow):
+            self._accessor = data
+            self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, True)
+            return
+
         columns = self.columns()
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)

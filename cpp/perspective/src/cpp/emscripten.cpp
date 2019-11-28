@@ -1130,16 +1130,14 @@ namespace binding {
 
         // Determine metadata
         bool is_delete = op == OP_DELETE;
-        if (is_arrow) {
-
-            // Get details of the Typed Array from JS
+        if (is_arrow && !is_delete) {
             t_val constructor = accessor["constructor"];
             std::int32_t length = accessor["byteLength"].as<std::int32_t>();
 
             // Allocate memory 
             ptr = reinterpret_cast<std::uintptr_t>(malloc(length));
             if (ptr == NULL) {
-                std::cout << "ERROR" << std::endl;
+                std::cout << "Unable to load arrow of size 0" << std::endl;
                 return nullptr;
             }
 
@@ -1147,8 +1145,8 @@ namespace binding {
             t_val memory = t_val::module_property("HEAP8")["buffer"];
             t_val memoryView = constructor.new_(memory, ptr, length);
             memoryView.call<void>("set", accessor);
-            
-            // Dispatch to the core library
+
+            // Parse the arrow and get its metadata
             loader.initialize(ptr, length);
             column_names = loader.names();
             data_types = loader.types();
@@ -1181,17 +1179,30 @@ namespace binding {
 
             // use gnode metadata to help decide if we need to update
             is_update = (is_update || current_gnode->mapping_size() > 0);
-
-            // if performing an arrow schema update, promote columns
+            
             auto current_data_table = current_gnode->get_table();
 
             if (is_arrow && is_update && current_data_table->size() == 0) {
                 auto current_schema = current_data_table->get_schema();
-                for (auto idx = 0; idx < current_schema.m_types.size(); ++idx) {
-                    if (data_types[idx] == DTYPE_INT64) {
-                        std::cout << "Promoting int64 `" << column_names[idx] << "`"
-                                  << std::endl;
-                        current_gnode->promote_column(column_names[idx], DTYPE_INT64);
+                auto schema_names = current_schema.columns();
+                auto schema_types = current_schema.types();
+                for (auto idx = 0; idx < schema_names.size(); ++idx) {
+                    const std::string& name = schema_names[idx];
+                    if (name != "psp_okey" && name != "psp_pkey" && name != "psp_op") {
+                        t_dtype arrow_dtype = data_types[idx];
+                        switch (arrow_dtype) {
+                            case DTYPE_INT64:
+                            case DTYPE_FLOAT64: {
+                                std::cout << "Promoting column `" 
+                                            << column_names[idx] 
+                                            << "` to maintain consistency with Arrow type."
+                                            << std::endl;
+                                current_gnode->promote_column(name, arrow_dtype);
+                            } break;
+                            default: {
+                                continue;
+                            }
+                        }
                     }
                 }
             }

@@ -11,7 +11,7 @@ import * as defaults from "./config/constants.js";
 import {get_type_config} from "./config/index.js";
 import {DataAccessor} from "./data_accessor";
 import {DateParser} from "./data_accessor/date_parser.js";
-import {extract_map, fill_vector} from "./emscripten.js";
+import {extract_vector, extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
@@ -1247,7 +1247,7 @@ export default function(Module) {
             }
             accessor.init(papaparse.parse(data.trim(), {header: true}).data);
             accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
-            accessor.types = accessor.extract_typevec(types).slice(0, accessor.names.length);
+            accessor.types = extract_vector(types).slice(0, accessor.names.length);
 
             if (meter) {
                 meter(accessor.row_count);
@@ -1255,7 +1255,7 @@ export default function(Module) {
         } else {
             accessor.init(data);
             accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
-            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            accessor.types = extract_vector(types).slice(0, cols.length);
 
             if (meter) {
                 meter(accessor.row_count);
@@ -1292,7 +1292,6 @@ export default function(Module) {
             console.error(`Update failed: ${e}`);
         } finally {
             schema.delete();
-            types.delete();
         }
     };
 
@@ -1319,7 +1318,7 @@ export default function(Module) {
         } else {
             accessor.init(data);
             accessor.names = [this.index];
-            accessor.types = [accessor.extract_typevec(types)[cols.indexOf(this.index)]];
+            accessor.types = [extract_vector(types)[cols.indexOf(this.index)]];
             pdata = accessor;
         }
 
@@ -1333,7 +1332,6 @@ export default function(Module) {
             console.error(`Remove failed`, e);
         } finally {
             schema.delete();
-            types.delete();
         }
     };
 

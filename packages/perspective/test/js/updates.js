@@ -299,6 +299,22 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it.skip("schema constructor then arrow `update()`", async function() {
+            var table = perspective.table({
+                a: "integer",
+                b: "float"
+            });
+            table.update(small_arrow.slice());
+            var view = table.view();
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                b: [1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5]
+            });
+            view.delete();
+            table.delete();
+        });
+
         it.skip("arrow partial `update()` a single column", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_arrow.slice());

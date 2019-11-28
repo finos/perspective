@@ -43,9 +43,8 @@ namespace arrow {
         } else if (src == "date32" || src == "date64") {
             return DTYPE_DATE;
         }
-        // TODO: remove and decide what to do when we can't parse the type
         std::stringstream ss;
-        ss << "Could not convert arrow type: " << src << std::endl;
+        ss << "Could not load arrow column of type `" << src << "`" << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
         return DTYPE_STR;
     }

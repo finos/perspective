@@ -41,7 +41,7 @@
                 }
 
                 const date32 = response.arrayBuffer();
-                //date32.then(buffer => elem.load(buffer));
+                date32.then(buffer => elem.load(buffer));
             })
             fetch("date64.arrow").then((response) => {
                 if (!response.ok) {

@@ -38,7 +38,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
 
     // Determine metadata
     bool is_delete = op == OP_DELETE;
-    if (is_arrow) {
+    if (is_arrow && !is_delete) {
         py::bytes bytes = accessor.cast<py::bytes>();
         std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
         void * ptr = malloc(size);
@@ -99,15 +99,31 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         // use gnode metadata to help decide if we need to update
         is_update = (is_update || current_gnode->mapping_size() > 0);
 
-        // if performing an arrow schema update, promote columns
+        // If updating a table created from schema, a column typed as int32
+        // needs to be promoted to int64 if the arrow specifies int64.
         auto current_data_table = current_gnode->get_table();
 
         if (is_arrow && is_update && current_data_table->size() == 0) {
             auto current_schema = current_data_table->get_schema();
-            for (auto idx = 0; idx < current_schema.m_types.size(); ++idx) {
-                if (data_types[idx] == DTYPE_INT64) {
-                    WARN("Promoting %s to int64", column_names[idx]);
-                    current_gnode->promote_column(column_names[idx], DTYPE_INT64);
+            auto schema_names = current_schema.columns();
+            auto schema_types = current_schema.types();
+            for (auto idx = 0; idx < schema_names.size(); ++idx) {
+                const std::string& name = schema_names[idx];
+                if (name != "psp_okey" && name != "psp_pkey" && name != "psp_op") {
+                    t_dtype arrow_dtype = data_types[idx];
+                    switch (arrow_dtype) {
+                        case DTYPE_INT64:
+                        case DTYPE_FLOAT64: {
+                            std::cout << "Promoting column `" 
+                                        << column_names[idx] 
+                                        << "` to maintain consistency with Arrow type."
+                                        << std::endl;
+                            current_gnode->promote_column(name, arrow_dtype);
+                        } break;
+                        default: {
+                            continue;
+                        }
+                    }
                 }
             }
         }
