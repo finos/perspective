@@ -42,7 +42,7 @@ dist:  ## dist to pypi
 	rm -rf dist build
 	python3 setup.py sdist
 	python3 setup.py bdist_wheel
-	twine check dist/* && twine upload dist/*
+	twine check dist/* && twine upload dist/*.tgz
 
 # Thanks to Francoise at marmelab.com for this
 .DEFAULT_GOAL := help

@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from __future__ import print_function
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
@@ -18,11 +19,15 @@ import platform
 import sys
 import subprocess
 from shutil import rmtree
-import logging
 try:
     from shutil import which
+    CPU_COUNT = os.cpu_count()
 except ImportError:
+    # Python2
     from backports.shutil_which import which
+    import multiprocessing
+    CPU_COUNT = multiprocessing.cpu_count()
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -50,6 +55,7 @@ version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
 ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
 Run `yarn add zerorpc` to fix."""
+
 
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir='dist'):
@@ -126,7 +132,7 @@ class PSPBuild(build_ext):
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
-            '-DPSP_CPP_BUILD_TESTS=1',
+            '-DPSP_CPP_BUILD_TESTS=0',
             '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
             '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
             '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX),
@@ -146,7 +152,7 @@ class PSPBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j4']
+            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(CPU_COUNT)]
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
@@ -154,23 +160,33 @@ class PSPBuild(build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-
         try:
-            subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
-            subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+            out1 = subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            out = e.output.decode()
-            logging.critical(out)
+            out1 = e.output.decode()
+            print(out1)
 
             # if stale cmake build, or issues with python inside python, rerun with shell=true
-            if "The current CMakeCache.txt directory" in out:
+            if "The current CMakeCache.txt directory" in out1:
                 # purge temporary folder
                 rmtree(self.build_temp)
                 os.makedirs(self.build_temp)
-                subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
-                subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+                out1 = subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
+                out2 = subprocess.check_output([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+                print()
+                return
             else:
+                print(out1)
                 raise
+        print(out1.decode())
+
+        try:
+            out2 = subprocess.check_output([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            print(out1.decode())  # output previous result
+            print(e.output.decode())
+            raise
+        print(out2.decode())
         print()  # Add an empty line for cleaner output
 
 

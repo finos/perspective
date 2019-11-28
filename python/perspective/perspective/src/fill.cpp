@@ -8,6 +8,7 @@
  */
 #ifdef PSP_ENABLE_PYTHON
 
+#include <math.h>
 #include <perspective/base.h>
 #include <perspective/binding.h>
 #include <perspective/python/base.h>
@@ -241,7 +242,7 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     col = tbl.get_column(name);
                     type = DTYPE_FLOAT64;
                     col->set_nth(i, fval);
-                } else if (!is_update && isnan(fval)) {
+                } else if (!is_update && std::isnan(fval)) {
                     WARN("Promoting column `%s` to string from int32", name);
                     tbl.promote_column(name, DTYPE_STR, i, false);
                     col = tbl.get_column(name);
@@ -254,7 +255,7 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
             } break;
             case DTYPE_INT64: {
                 double fval = item.cast<double>();
-                if (!is_update && isnan(fval)) {
+                if (!is_update && std::isnan(fval)) {
                     WARN("Promoting column `%s` to string from int64", name);
                     tbl.promote_column(name, DTYPE_STR, i, false);
                     col = tbl.get_column(name);
@@ -270,7 +271,7 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
             } break;
             case DTYPE_FLOAT64: {
                 bool is_float = py::isinstance<py::float_>(item);
-                bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
+                bool is_numpy_nan = is_float && std::isnan(item.cast<double>());
                 if (!is_update && (!is_float || is_numpy_nan)) {
                     WARN("Promoting column `%s` to string from float64", name);
                     tbl.promote_column(name, DTYPE_STR, i, false);

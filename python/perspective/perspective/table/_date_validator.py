@@ -51,7 +51,7 @@ class _PerspectiveDateValidator(object):
         '''
         try:
             return parse(str)
-        except (ValueError, OverflowError):
+        except (ValueError, OverflowError, IndexError):
             return None
 
     def to_date_components(self, obj):
@@ -152,7 +152,7 @@ class _PerspectiveDateValidator(object):
                     dtype = t_dtype.DTYPE_DATE
                 else:
                     dtype = t_dtype.DTYPE_TIME
-            except (ValueError, OverflowError):
+            except (ValueError, OverflowError, TypeError, IndexError):
                 # unparsable dates should be coerced to string
                 dtype = t_dtype.DTYPE_STR
 

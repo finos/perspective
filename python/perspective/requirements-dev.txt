@@ -1,3 +1,4 @@
+backports.shutil-which
 codecov>=2.0.15
 Faker>=1.0.0
 flake8>=3.7.8
@@ -16,4 +17,3 @@ Sphinx>=1.8.4
 sphinx-markdown-builder>=0.5.2
 traitlets>=4.3.2
 zerorpc>=0.6.1
-backports.shutil-which;python_version < '3'
