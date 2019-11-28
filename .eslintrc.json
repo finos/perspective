@@ -30,10 +30,15 @@
     }],
     "rules": {
         "prettier/prettier": ["error", {
-            "printWidth": 200,
+            "printWidth": 80,
             "tabWidth": 4,
             "bracketSpacing": false
         }],
+        // "max-len": ["warn", {
+        //     "code": 200,
+        //     "comments": 80,
+        //     "ignoreTrailingComments": true
+        // }],
         "no-const-assign": "error",
         "no-this-before-super": "error",
         "no-undef": "error",
