@@ -52,7 +52,7 @@ class TestTable(object):
 
     def test_table_int_overflow(self):
         if six.PY2:
-            maxint = sys.maxint + 1
+            maxint = sys.maxsize + 1
             # overflows into float
             data = {"a": [i for i in range(100)] + [maxint, maxint, maxint]}
             tbl = Table(data)
@@ -75,7 +75,7 @@ class TestTable(object):
 
     def test_table_long_overflow(self):
         if six.PY2:
-            maxint = sys.maxint
+            maxint = sys.maxsize
             # don't overflow in this test
             data = [maxint, maxint + 1, maxint + 2]
             tbl = Table({
@@ -166,7 +166,8 @@ class TestTable(object):
         }
 
     def test_table_str_with_escape(self):
-        str_data = [{"a": "abc\"def\"", "b": "abc\"def\""}, {"a": 'abc\'def\'', "b": 'abc\'def\''}]
+        str_data = [{"a": "abc\"def\"", "b": "abc\"def\""},
+                    {"a": 'abc\'def\'', "b": 'abc\'def\''}]
         tbl = Table(str_data)
         assert tbl.size() == 2
         assert tbl.schema() == {
@@ -224,7 +225,8 @@ class TestTable(object):
             "a": float,
             "b": float
         }
-        assert tbl.view().to_records() == [{"a": 1.5, "b": 2.5}, {"a": 3.2, "b": None}]
+        assert tbl.view().to_records() == [
+            {"a": 1.5, "b": 2.5}, {"a": 3.2, "b": None}]
 
     # schema
 

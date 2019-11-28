@@ -30,7 +30,18 @@ sunburst(highcharts);
 grouped_categories(highcharts);
 boost(highcharts);
 
-export const COLORS_10 = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
+export const COLORS_10 = [
+    "#1f77b4",
+    "#ff7f0e",
+    "#2ca02c",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#e377c2",
+    "#7f7f7f",
+    "#bcbd22",
+    "#17becf"
+];
 export const COLORS_20 = [
     "#1f77b4",
     "#aec7e8",
@@ -73,7 +84,8 @@ Highcharts.setOptions({
     var colorSeriesMixin = {
         optionalAxis: "colorAxis",
         colorKey: "colorValue",
-        translateColors: seriesTypes.heatmap && seriesTypes.heatmap.prototype.translateColors
+        translateColors:
+            seriesTypes.heatmap && seriesTypes.heatmap.prototype.translateColors
     };
     plotOptions.coloredColumn = merge(plotOptions.column, {});
     seriesTypes.coloredColumn = extendClass(
@@ -101,7 +113,10 @@ Highcharts.setOptions({
     );
 
     // draw points and add setting colors
-    H.wrap(H.seriesTypes.sunburst.prototype, "translate", function(p, positions) {
+    H.wrap(H.seriesTypes.sunburst.prototype, "translate", function(
+        p,
+        positions
+    ) {
         p.call(this, positions);
         this.translateColors();
     });
@@ -162,7 +177,9 @@ Highcharts.setOptions({
         // use default tickLength for not-grouped axis
         // and generate grid on grouped axes,
         // use tiny number to force highcharts to hide tick
-        this.options.tickLength = this.isGrouped ? 0.001 : this.originalTickLength;
+        this.options.tickLength = this.isGrouped
+            ? 0.001
+            : this.originalTickLength;
 
         protoAxisRender.call(this);
 
@@ -215,7 +232,10 @@ Highcharts.setOptions({
             if (!tick) {
                 return false;
             }
-            if (tick.startAt + tick.leaves - 1 < axis.min || tick.startAt > axis.max) {
+            if (
+                tick.startAt + tick.leaves - 1 < axis.min ||
+                tick.startAt > axis.max
+            ) {
                 tick.label.hide();
                 tick.destroyed = 0;
             } else {

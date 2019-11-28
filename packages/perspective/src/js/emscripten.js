@@ -7,7 +7,8 @@
  *
  */
 
-/** Translation layer
+/**
+ * Translation layer
  * Interface between C++ and JS to handle conversions/data structures that
  * were previously handled in non-portable perspective.js
  */
@@ -37,8 +38,9 @@ export const extract_map = function(map) {
 };
 
 /**
- * Given a C++ vector constructed in Emscripten, fill it with data. Assume that data types are already validated,
- * thus Emscripten will throw an error if the vector is filled with the wrong type of data.
+ * Given a C++ vector constructed in Emscripten, fill it with data. Assume that
+ * data types are already validated, thus Emscripten will throw an error if the
+ * vector is filled with the wrong type of data.
  *
  * @param {*} vector the `std::vector` to be filled
  * @param {Array} arr the `Array` from which to draw data

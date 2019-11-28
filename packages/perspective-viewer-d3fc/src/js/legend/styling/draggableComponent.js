@@ -26,7 +26,11 @@ export function draggableComponent() {
         }
 
         const drag = d3.drag().on("drag", function() {
-            const offsets = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
+            const offsets = enforceContainerBoundaries(
+                this,
+                d3.event.dx,
+                d3.event.dy
+            );
             this.style.left = `${this.offsetLeft + offsets.x}px`;
             this.style.top = `${this.offsetTop + offsets.y}px`;
             const position = {
@@ -85,5 +89,8 @@ function isNodeInTopRight(node) {
 
     const fuzz = 5;
 
-    return nodeRect.right + margin + fuzz >= containerRect.right && nodeRect.top - margin - fuzz <= containerRect.top;
+    return (
+        nodeRect.right + margin + fuzz >= containerRect.right &&
+        nodeRect.top - margin - fuzz <= containerRect.top
+    );
 }

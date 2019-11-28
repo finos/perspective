@@ -21,8 +21,10 @@ class _PerspectiveCallBackCache(object):
             condition (func): a function that returns either True or False. If True is returned, filter the item out.
         '''
         if not callable(condition):
-            raise ValueError("callback filter condition must be a callable function!")
-        self._callbacks = [callback for callback in self._callbacks if condition(callback) is True]
+            raise ValueError(
+                "callback filter condition must be a callable function!")
+        self._callbacks = [
+            callback for callback in self._callbacks if condition(callback) is True]
 
     def get_callbacks(self):
         return self._callbacks

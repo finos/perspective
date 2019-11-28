@@ -23,9 +23,7 @@ void
 psp_abort(const std::string& message) {
 #ifdef PSP_ENABLE_WASM
     std::cerr << "Abort(): " << message << std::endl;
-    EM_ASM({
-        throw new Error('abort()');
-    });
+    EM_ASM({ throw new Error('abort()'); });
 #else
     throw PerspectiveException(message.c_str());
 #endif
@@ -46,7 +44,9 @@ is_numeric_type(t_dtype dtype) {
         case DTYPE_FLOAT64: {
             return true;
         } break;
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
 }
 
@@ -68,7 +68,9 @@ is_linear_order_type(t_dtype dtype) {
         case DTYPE_BOOL: {
             return true;
         } break;
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
 }
 
@@ -99,7 +101,9 @@ is_deterministic_sized(t_dtype dtype) {
         case DTYPE_F64PAIR: {
             return true;
         }
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
 
     PSP_COMPLAIN_AND_ABORT("Reached unreachable");
@@ -149,7 +153,9 @@ get_dtype_size(t_dtype dtype) {
         case DTYPE_F64PAIR: {
             return sizeof(std::pair<double, double>);
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown dtype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown dtype");
+        }
     }
 
     PSP_COMPLAIN_AND_ABORT("Reached unreachable");
@@ -232,7 +238,9 @@ get_dtype_descr(t_dtype dtype) {
         case DTYPE_OBJECT: {
             return "object";
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype");
+        }
     }
     return std::string("dummy");
 }
@@ -251,7 +259,7 @@ dtype_to_str(t_dtype dtype) {
         case DTYPE_UINT64:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_INT32: 
+        case DTYPE_INT32:
         case DTYPE_INT64: {
             ss << "integer";
         } break;
@@ -273,7 +281,9 @@ dtype_to_str(t_dtype dtype) {
         case DTYPE_NONE: {
             ss << "none";
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!");
+        }
     }
 
     return ss.str();
@@ -493,7 +503,9 @@ _get_default_aggregate(t_dtype dtype) {
         case DTYPE_INT64: {
             agg_op = t_aggtype::AGGTYPE_SUM;
         } break;
-        default: { agg_op = t_aggtype::AGGTYPE_COUNT; }
+        default: {
+            agg_op = t_aggtype::AGGTYPE_COUNT;
+        }
     }
     return agg_op;
 }
@@ -514,7 +526,9 @@ _get_default_aggregate_string(t_dtype dtype) {
         case DTYPE_INT64: {
             agg_op_str = "sum";
         } break;
-        default: { agg_op_str = "count"; }
+        default: {
+            agg_op_str = "count";
+        }
     }
     return agg_op_str;
 }
@@ -531,7 +545,9 @@ get_status_descr(t_status status) {
         case STATUS_CLEAR: {
             return "c";
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected status found"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected status found");
+        }
     }
     return "";
 }

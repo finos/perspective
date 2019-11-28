@@ -19,7 +19,12 @@ function get_rect(nrows) {
         return [];
     }
     const dw = this.dataWindow;
-    return this.grid.newRectangle(dw.left, dw.top, dw.width, nrows ? Math.min(nrows - dw.top, dw.height) : dw.height); // convert from InclusiveRect
+    return this.grid.newRectangle(
+        dw.left,
+        dw.top,
+        dw.width,
+        nrows ? Math.min(nrows - dw.top, dw.height) : dw.height
+    ); // convert from InclusiveRect
 }
 
 function find_row(rows, index) {
@@ -96,10 +101,14 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
                     if (this.data[row][col].rowPath.length === 1) {
                         this._view.collapse(row);
                     } else {
-                        this._view.set_depth(this.data[row][col].rowPath.length - 2);
+                        this._view.set_depth(
+                            this.data[row][col].rowPath.length - 2
+                        );
                     }
                 } else {
-                    this._view.set_depth(this.data[row][col].rowPath.length - 1);
+                    this._view.set_depth(
+                        this.data[row][col].rowPath.length - 1
+                    );
                 }
             } else {
                 if (is_expanded) {
@@ -117,7 +126,9 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
     _update_select_index: function() {
         const has_selections = this._grid.selectionModel.hasSelections();
         if (has_selections) {
-            const row = this.data[this._grid.selectionModel.getLastSelection().origin.y];
+            const row = this.data[
+                this._grid.selectionModel.getLastSelection().origin.y
+            ];
             if (row) {
                 this._select_index = row.__INDEX__;
             }
@@ -129,7 +140,10 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         let new_index;
         if (editor) {
             new_index = find_row(this.data, editor._index);
-            editor.event.resetGridXY(editor.event.dataCell.x, new_index - rect.origin.y + 1);
+            editor.event.resetGridXY(
+                editor.event.dataCell.x,
+                new_index - rect.origin.y + 1
+            );
             editor.moveEditor();
         }
         return new_index;
@@ -140,7 +154,8 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         if (has_selections) {
             new_index = new_index || find_row(this.data, this._select_index);
             if (new_index !== -1) {
-                const col = this._grid.selectionModel.getLastSelection().origin.x;
+                const col = this._grid.selectionModel.getLastSelection().origin
+                    .x;
                 this._grid.selectionModel.select(col, new_index, 0, 0);
             }
         }
@@ -182,14 +197,24 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         return ret;
     }),
 
-    getCellEditorAt: function(columnIndex, rowIndex, declaredEditorName, options) {
+    getCellEditorAt: function(
+        columnIndex,
+        rowIndex,
+        declaredEditorName,
+        options
+    ) {
         if (!declaredEditorName) {
             return;
         }
         const offset = this._grid.renderer.dataWindow.top;
-        const editor = this._grid.cellEditors.create(declaredEditorName, options);
+        const editor = this._grid.cellEditors.create(
+            declaredEditorName,
+            options
+        );
         this._grid.selectionModel.select(columnIndex, rowIndex + offset - 1);
-        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
+        editor.el.addEventListener("blur", () =>
+            setTimeout(() => editor.cancelEditing())
+        );
         const args = {
             start_row: rowIndex + offset - 1,
             end_row: rowIndex + offset,
@@ -211,10 +236,15 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
             cellStyle.call(this, config, rendererName);
         } else if (config.dataCell.x === TREE_COLUMN_INDEX && config.value) {
             nextRow = this.getRow(config.dataCell.y + 1);
-            depthDelta = nextRow ? config.value.rowPath.length - nextRow[TREE_COLUMN_INDEX].rowPath.length : 1;
+            depthDelta = nextRow
+                ? config.value.rowPath.length -
+                  nextRow[TREE_COLUMN_INDEX].rowPath.length
+                : 1;
             config.last = depthDelta !== 0;
             config.expanded = depthDelta < 0;
-            config._type = this.schema[-1].type[config.value.rowPath.length - 2];
+            config._type = this.schema[-1].type[
+                config.value.rowPath.length - 2
+            ];
         }
         return config.grid.cellRenderers.get(rendererName);
     },
@@ -223,7 +253,13 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
 });
 
 function is_cache_miss(req, cache) {
-    return !cache || req.top !== cache.top || req.top + req.height !== cache.top + cache.height || req.left !== cache.left || req.left + req.width !== cache.left + cache.width;
+    return (
+        !cache ||
+        req.top !== cache.top ||
+        req.top + req.height !== cache.top + cache.height ||
+        req.left !== cache.left ||
+        req.left + req.width !== cache.left + cache.width
+    );
 }
 
 function cellStyle(gridCellConfig) {
@@ -242,15 +278,31 @@ function cellStyle(gridCellConfig) {
                 gridCellConfig.value = "-";
             } else {
                 if (gridCellConfig.value > 0) {
-                    gridCellConfig.color = gridCellConfig.columnColorNumberPositive || "rgb(160,207,255)";
-                    gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberPositive ? gridCellConfig.columnBackgroundColorNumberPositive : gridCellConfig.backgroundColor;
-                    gridCellConfig.borderBottom = gridCellConfig.borderBottomPositive ? gridCellConfig.borderBottomPositive : gridCellConfig.borderBottom;
-                    gridCellConfig.borderRight = gridCellConfig.borderRightPositive ? gridCellConfig.borderRightPositive : gridCellConfig.borderRight;
+                    gridCellConfig.color =
+                        gridCellConfig.columnColorNumberPositive ||
+                        "rgb(160,207,255)";
+                    gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberPositive
+                        ? gridCellConfig.columnBackgroundColorNumberPositive
+                        : gridCellConfig.backgroundColor;
+                    gridCellConfig.borderBottom = gridCellConfig.borderBottomPositive
+                        ? gridCellConfig.borderBottomPositive
+                        : gridCellConfig.borderBottom;
+                    gridCellConfig.borderRight = gridCellConfig.borderRightPositive
+                        ? gridCellConfig.borderRightPositive
+                        : gridCellConfig.borderRight;
                 } else {
-                    gridCellConfig.color = gridCellConfig.columnColorNumberNegative || "rgb(255,136,136)";
-                    gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberNegative ? gridCellConfig.columnBackgroundColorNumberNegative : gridCellConfig.backgroundColor;
-                    gridCellConfig.borderBottom = gridCellConfig.borderBottomNegative ? gridCellConfig.borderBottomNegative : gridCellConfig.borderBottom;
-                    gridCellConfig.borderRight = gridCellConfig.borderRightNegative ? gridCellConfig.borderRightNegative : gridCellConfig.borderRight;
+                    gridCellConfig.color =
+                        gridCellConfig.columnColorNumberNegative ||
+                        "rgb(255,136,136)";
+                    gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberNegative
+                        ? gridCellConfig.columnBackgroundColorNumberNegative
+                        : gridCellConfig.backgroundColor;
+                    gridCellConfig.borderBottom = gridCellConfig.borderBottomNegative
+                        ? gridCellConfig.borderBottomNegative
+                        : gridCellConfig.borderBottom;
+                    gridCellConfig.borderRight = gridCellConfig.borderRightNegative
+                        ? gridCellConfig.borderRightNegative
+                        : gridCellConfig.borderRight;
                 }
             }
         } else if (type === "boolean") {

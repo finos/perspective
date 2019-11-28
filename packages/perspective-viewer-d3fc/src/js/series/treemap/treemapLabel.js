@@ -12,7 +12,8 @@ import {isElementOverlapping, isElementOverflowing} from "../../utils/utils";
 
 const minTextSize = 7;
 
-export const labelMapExists = d => (d.target && d.target.textAttributes ? true : false);
+export const labelMapExists = d =>
+    d.target && d.target.textAttributes ? true : false;
 
 export const toggleLabels = (nodes, treemapLevel, crossValues) => {
     nodes
@@ -44,21 +45,46 @@ export const preventTextCollisions = nodes => {
     const topNodes = [];
     nodes
         .selectAll("text")
-        .filter((_, i, nodes) => select(nodes[i]).attr("class") === textVisability.high)
+        .filter(
+            (_, i, nodes) =>
+                select(nodes[i]).attr("class") === textVisability.high
+        )
         .each((_, i, nodes) => topNodes.push(nodes[i]));
 
     nodes
         .selectAll("text")
-        .filter((_, i, nodes) => select(nodes[i]).attr("class") === textVisability.low)
+        .filter(
+            (_, i, nodes) =>
+                select(nodes[i]).attr("class") === textVisability.low
+        )
         .each((_, i, nodes) => {
             const lowerNode = nodes[i];
             topNodes
-                .filter(topNode => isElementOverlapping("x", rect(topNode), rect(lowerNode)) && isElementOverlapping("y", rect(topNode), rect(lowerNode), textCollisionFuzzFactorPx))
-                .forEach(() => select(lowerNode).attr("dy", Number(select(lowerNode).attr("dy")) + textAdjustPx));
+                .filter(
+                    topNode =>
+                        isElementOverlapping(
+                            "x",
+                            rect(topNode),
+                            rect(lowerNode)
+                        ) &&
+                        isElementOverlapping(
+                            "y",
+                            rect(topNode),
+                            rect(lowerNode),
+                            textCollisionFuzzFactorPx
+                        )
+                )
+                .forEach(() =>
+                    select(lowerNode).attr(
+                        "dy",
+                        Number(select(lowerNode).attr("dy")) + textAdjustPx
+                    )
+                );
         });
 };
 
-export const lockTextOpacity = d => select(d).style("opacity", textOpacity[select(d).attr("class")]);
+export const lockTextOpacity = d =>
+    select(d).style("opacity", textOpacity[select(d).attr("class")]);
 
 export const unlockTextOpacity = d => select(d).style("opacity", null);
 
@@ -72,9 +98,11 @@ export const selectVisibleNodes = nodes =>
                 .attr("class") !== textVisability.zero
     );
 
-export const adjustLabelsThatOverflow = nodes => nodes.selectAll("text").each((_, i, nodes) => shrinkOrHideText(nodes[i]));
+export const adjustLabelsThatOverflow = nodes =>
+    nodes.selectAll("text").each((_, i, nodes) => shrinkOrHideText(nodes[i]));
 
-const centerLabels = nodes => nodes.selectAll("text").each((_, i, nodes) => centerText(nodes[i]));
+const centerLabels = nodes =>
+    nodes.selectAll("text").each((_, i, nodes) => centerText(nodes[i]));
 
 const centerText = d => {
     const nodeSelect = select(d);
@@ -89,7 +117,10 @@ const shrinkOrHideText = d => {
     const textRect = d.getBoundingClientRect();
     const rectRect = rect.getBoundingClientRect();
 
-    if (!needsToShrinkOrHide(d, rectRect, textRect, "left") && !needsToShrinkOrHide(d, rectRect, textRect, "bottom")) {
+    if (
+        !needsToShrinkOrHide(d, rectRect, textRect, "left") &&
+        !needsToShrinkOrHide(d, rectRect, textRect, "bottom")
+    ) {
         select(d).attr("class", select(d).attr("class"));
     }
 };
@@ -111,7 +142,12 @@ const needsToShrinkOrHide = (d, rectRect, textRect, direction) => {
 };
 
 const textLevelHelper = (d, treemapLevel, crossValues) => {
-    if (!crossValues.filter(x => x !== "").every(x => d.crossValue.split("|").includes(x))) return textVisability.zero;
+    if (
+        !crossValues
+            .filter(x => x !== "")
+            .every(x => d.crossValue.split("|").includes(x))
+    )
+        return textVisability.zero;
     switch (d.depth) {
         case treemapLevel + 1:
             return textVisability.high;

@@ -102,7 +102,11 @@ describe("tooltip generateHTML should", () => {
         };
 
         generateHtml(tooltip, data, settings);
-        expect(getContent()).toEqual(["cross-1: tc-1", "cross-2: 1,001", "main-1: 101"]);
+        expect(getContent()).toEqual([
+            "cross-1: tc-1",
+            "cross-2: 1,001",
+            "main-1: 101"
+        ]);
     });
 
     test("show with single splitValue", () => {
@@ -125,6 +129,10 @@ describe("tooltip generateHTML should", () => {
         };
 
         generateHtml(tooltip, data, settings);
-        expect(getContent()).toEqual(["split-1: ts-1", "split-2: 1,001", "main-1: 101"]);
+        expect(getContent()).toEqual([
+            "split-1: ts-1",
+            "split-2: 1,001",
+            "main-1: 101"
+        ]);
     });
 });

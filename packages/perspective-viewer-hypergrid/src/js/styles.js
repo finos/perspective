@@ -182,6 +182,10 @@ const light_theme_overrides = {
 };
 
 export function default_grid_properties() {
-    const properties = Object.assign({}, cloneDeep(base_grid_properties), cloneDeep(light_theme_overrides));
+    const properties = Object.assign(
+        {},
+        cloneDeep(base_grid_properties),
+        cloneDeep(light_theme_overrides)
+    );
     return properties;
 }

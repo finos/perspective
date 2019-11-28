@@ -10,7 +10,8 @@ import * as d3 from "d3";
 import {groupFromKey} from "./seriesKey";
 
 export function seriesColors(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
     return colorScale()
         .settings(settings)
@@ -18,7 +19,8 @@ export function seriesColors(settings) {
 }
 
 export function seriesColorsFromGroups(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = [];
     Object.keys(col).forEach(key => {
         if (key !== "__ROW_PATH__") {
@@ -37,7 +39,8 @@ export function colorScale() {
     let domain = null;
     let defaultColors = null;
     let settings = {};
-    let mapFunction = d => withOpacity(d, settings.colorStyles && settings.colorStyles.opacity);
+    let mapFunction = d =>
+        withOpacity(d, settings.colorStyles && settings.colorStyles.opacity);
 
     const colors = () => {
         const styles = settings.colorStyles;

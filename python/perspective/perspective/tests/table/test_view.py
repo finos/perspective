@@ -52,8 +52,10 @@ class TestView(object):
         }
         assert view.to_records() == [
             {"2|a": 1, "2|b": 2, "4|a": 3, "4|b": 4, "__ROW_PATH__": []},
-            {"2|a": 1, "2|b": 2, "4|a": None, "4|b": None, "__ROW_PATH__": ["1"]},
-            {"2|a": None, "2|b": None, "4|a": 3, "4|b": 4, "__ROW_PATH__": ["3"]}
+            {"2|a": 1, "2|b": 2, "4|a": None,
+                "4|b": None, "__ROW_PATH__": ["1"]},
+            {"2|a": None, "2|b": None, "4|a": 3,
+                "4|b": 4, "__ROW_PATH__": ["3"]}
         ]
 
     def test_view_two_column_only(self):
@@ -131,7 +133,14 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(row_pivots=["a"], column_pivots=["b"])
         paths = view.column_paths()
-        assert paths == ["__ROW_PATH__", "1.5|a", "1.5|b", "2.5|a", "2.5|b", "3.5|a", "3.5|b"]
+        assert paths == [
+            "__ROW_PATH__",
+            "1.5|a",
+            "1.5|b",
+            "2.5|a",
+            "2.5|b",
+            "3.5|a",
+            "3.5|b"]
 
     def test_view_column_path_two_column_only(self):
         data = {
@@ -161,7 +170,8 @@ class TestView(object):
             "c": [3, 2, 1]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"], columns=["a", "b"], sort=[["c", "col desc"]])
+        view = tbl.view(column_pivots=["a"], columns=[
+                        "a", "b"], sort=[["c", "col desc"]])
         paths = view.column_paths()
         assert paths == ["1|a", "1|b", "2|a", "2|b", "3|a", "3|b"]
 
@@ -174,7 +184,13 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(column_pivots=["b"], columns=["a", "b", "c"])
         paths = view.column_paths()
-        assert paths == ["false|a", "false|b", "false|c", "true|a", "true|b", "true|c"]
+        assert paths == [
+            "false|a",
+            "false|b",
+            "false|c",
+            "true|a",
+            "true|b",
+            "true|c"]
 
     # schema correctness
 
@@ -230,11 +246,13 @@ class TestView(object):
         assert view.to_records() == [{}, {}]
 
     def test_view_specific_column(self):
-        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4},
+                {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(columns=["a", "c", "d"])
         assert view.num_columns() == 3
-        assert view.to_records() == [{"a": 1, "c": 3, "d": 4}, {"a": 3, "c": 5, "d": 6}]
+        assert view.to_records() == [{"a": 1, "c": 3, "d": 4}, {
+            "a": 3, "c": 5, "d": 6}]
 
     def test_view_column_order(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -249,7 +267,8 @@ class TestView(object):
         In the Python 2 runtime, order cannot be guaranteed without the usage of OrderedMap in C++.
         '''
         import six
-        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4},
+                {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(
             row_pivots=["a"],
@@ -278,7 +297,8 @@ class TestView(object):
                     assert keys[i] == order[i]
 
     def test_view_aggregates_with_no_columns(self):
-        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4},
+                {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(
             row_pivots=["a"],
@@ -294,7 +314,8 @@ class TestView(object):
     def test_view_aggregates_column_order(self):
         '''Again, dict insertion order is not guaranteed in Python <3.7.'''
         import six
-        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4},
+                {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(
             row_pivots=["a"],
@@ -329,7 +350,9 @@ class TestView(object):
         view = tbl.view(column_pivots=["a"])
         cols = list(view.to_dict().keys())
         for col in cols:
-            assert col in ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
+            assert col in [
+                "2019-07-11 12:30:00.000|a",
+                "2019-07-11 12:30:00.000|b"]
 
     # aggregate
 
@@ -360,7 +383,8 @@ class TestView(object):
         ]
 
     def test_view_aggregate_datetime(self):
-        data = [{"a": datetime(2019, 10, 1, 11, 30)}, {"a": datetime(2019, 10, 1, 11, 30)}]
+        data = [{"a": datetime(2019, 10, 1, 11, 30)}, {
+            "a": datetime(2019, 10, 1, 11, 30)}]
         tbl = Table(data)
         view = tbl.view(
             aggregates={"a": "distinct count"},
@@ -372,7 +396,8 @@ class TestView(object):
         ]
 
     def test_view_aggregate_datetime_leading_zeroes(self):
-        data = [{"a": datetime(2019, 1, 1, 5, 5, 5)}, {"a": datetime(2019, 1, 1, 5, 5, 5)}]
+        data = [{"a": datetime(2019, 1, 1, 5, 5, 5)}, {
+            "a": datetime(2019, 1, 1, 5, 5, 5)}]
         tbl = Table(data)
         view = tbl.view(
             aggregates={"a": "distinct count"},
@@ -404,16 +429,20 @@ class TestView(object):
         assert view.to_records() == [{"a": "def", "b": 4}, {"a": "abc", "b": 2}]
 
     def test_view_sort_date(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(sort=[["a", "desc"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}, {"a": datetime(2019, 7, 11), "b": 2}]
+        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}, {
+            "a": datetime(2019, 7, 11), "b": 2}]
 
     def test_view_sort_datetime(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
         view = tbl.view(sort=[["a", "desc"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}, {"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}, {
+            "a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_sort_hidden(self):
         data = [{"a": 1.1, "b": 2}, {"a": 1.2, "b": 4}]
@@ -484,76 +513,96 @@ class TestView(object):
         assert view.to_records() == [{"a": "abc", "b": 2}]
 
     def test_view_filter_date_eq(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", date(2019, 7, 12)]])
         assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
 
     def test_view_filter_date_neq(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", date(2019, 7, 12)]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
 
     def test_view_filter_date_np_eq(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", np.datetime64(date(2019, 7, 12))]])
         assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
 
     def test_view_filter_date_np_neq(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", np.datetime64(date(2019, 7, 12))]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
 
     def test_view_filter_date_str_eq(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", "2019/7/12"]])
         assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
 
     def test_view_filter_date_str_neq(self):
-        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        data = [{"a": date(2019, 7, 11), "b": 2}, {
+            "a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", "2019/7/12"]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
 
     def test_view_filter_datetime_eq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", datetime(2019, 7, 11, 8, 15)]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_filter_datetime_neq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", datetime(2019, 7, 11, 8, 15)]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
 
     def test_view_filter_datetime_np_eq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
-        view = tbl.view(filter=[["a", "==", np.datetime64(datetime(2019, 7, 11, 8, 15))]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+        view = tbl.view(
+            filter=[["a", "==", np.datetime64(datetime(2019, 7, 11, 8, 15))]])
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_filter_datetime_np_neq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
-        view = tbl.view(filter=[["a", "!=", np.datetime64(datetime(2019, 7, 11, 8, 15))]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        view = tbl.view(
+            filter=[["a", "!=", np.datetime64(datetime(2019, 7, 11, 8, 15))]])
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
 
     def test_view_filter_datetime_str_eq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", "2019/7/11 8:15"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_filter_datetime_str_neq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {
+            "a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", "2019/7/11 8:15"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
 
     def test_view_filter_string_is_none(self):
         data = [{"a": None, "b": 2}, {"a": "abc", "b": 4}]

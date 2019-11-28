@@ -15,78 +15,140 @@ exports.default = function(method = "capture") {
     test[method]("pivots by a row.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("row-pivots", '["State"]'),
+            viewer
+        );
     });
 
     test[method]("pivots by two rows.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("row-pivots", '["Category","Sub-Category"]'), viewer);
+        await page.evaluate(
+            element =>
+                element.setAttribute(
+                    "row-pivots",
+                    '["Category","Sub-Category"]'
+                ),
+            viewer
+        );
     });
 
     test[method]("pivots by a column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("column-pivots", '["Category"]'),
+            viewer
+        );
     });
 
     test[method]("pivots by a row and a column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("row-pivots", '["State"]'),
+            viewer
+        );
         await page.waitForSelector("perspective-viewer:not([updating])");
-        await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("column-pivots", '["Category"]'),
+            viewer
+        );
     });
 
     test[method]("pivots by two rows and two columns.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("row-pivots", '["Region","State"]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("row-pivots", '["Region","State"]'),
+            viewer
+        );
         await page.waitForSelector("perspective-viewer:not([updating])");
-        await page.evaluate(element => element.setAttribute("column-pivots", '["Category","Sub-Category"]'), viewer);
+        await page.evaluate(
+            element =>
+                element.setAttribute(
+                    "column-pivots",
+                    '["Category","Sub-Category"]'
+                ),
+            viewer
+        );
     });
 
     test[method]("sorts by a hidden column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-        await page.evaluate(element => element.setAttribute("sort", '[["Sales", "asc"]]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("columns", '["Row ID","Quantity"]'),
+            viewer
+        );
+        await page.evaluate(
+            element => element.setAttribute("sort", '[["Sales", "asc"]]'),
+            viewer
+        );
     });
 
     test[method]("sorts by a numeric column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("sort", '[["Sales", "asc"]]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("sort", '[["Sales", "asc"]]'),
+            viewer
+        );
     });
 
     test[method]("filters by a numeric column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("filters", '[["Sales", ">", 500]]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("filters", '[["Sales", ">", 500]]'),
+            viewer
+        );
     });
 
     test[method]("filters by a datetime column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("filters", '[["Order Date", ">", "01/01/2012"]]'), viewer);
+        await page.evaluate(
+            element =>
+                element.setAttribute(
+                    "filters",
+                    '[["Order Date", ">", "01/01/2012"]]'
+                ),
+            viewer
+        );
     });
 
     test[method]("highlights invalid filter.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("filters", '[["Sales", "==", null]]'), viewer);
+        await page.evaluate(
+            element =>
+                element.setAttribute("filters", '[["Sales", "==", null]]'),
+            viewer
+        );
     });
 
     test[method]("sorts by an alpha column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("sort", '[["State", "asc"]]'), viewer);
+        await page.evaluate(
+            element => element.setAttribute("sort", '[["State", "asc"]]'),
+            viewer
+        );
     });
 
     test[method]("displays visible columns.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales","Quantity"]'), viewer);
+        await page.evaluate(
+            element =>
+                element.setAttribute(
+                    "columns",
+                    '["Discount","Profit","Sales","Quantity"]'
+                ),
+            viewer
+        );
     });
 
     test.skip("pivots by row when drag-and-dropped.", async page => {

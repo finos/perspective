@@ -16,11 +16,11 @@
 #include <atomic>
 
 #if defined PSP_ENABLE_WASM
-    #include <emscripten/val.h>
-    typedef emscripten::val t_val;
+#include <emscripten/val.h>
+typedef emscripten::val t_val;
 #elif defined PSP_ENABLE_PYTHON
-    #include <pybind11/pybind11.h>
-    typedef py::object t_val;
+#include <pybind11/pybind11.h>
+typedef py::object t_val;
 #endif
 
 namespace perspective {
@@ -48,11 +48,11 @@ public:
 #endif
 
 #ifdef PSP_ENABLE_WASM
-    void register_context(
-        t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr);
+    void register_context(t_uindex gnode_id, const std::string& name,
+        t_ctx_type type, std::int32_t ptr);
 #else
-    void register_context(
-        t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
+    void register_context(t_uindex gnode_id, const std::string& name,
+        t_ctx_type type, std::int64_t ptr);
 #endif
 
     void notify_userspace();
@@ -66,7 +66,8 @@ public:
 
     void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table);
 
-    void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table, const std::vector<t_computed_column_def>& computed_lambdas);
+    void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table,
+        const std::vector<t_computed_column_def>& computed_lambdas);
 
     void _process();
     void _process_helper();

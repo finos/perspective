@@ -22,7 +22,9 @@ const DEFAULT_PLUGIN_SETTINGS = {
 };
 
 export function register(...plugins) {
-    plugins = new Set(plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.type));
+    plugins = new Set(
+        plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.type)
+    );
     charts.forEach(chart => {
         if (plugins.has(chart.plugin.type)) {
             global.registerPlugin(chart.plugin.type, {
@@ -52,15 +54,28 @@ function drawChart(chart) {
             jsonp = view.to_json({leaves_only: true});
         }
 
-        let [tschema, schema, json, config] = await Promise.all([this._table.schema(false, false), view.schema(false), jsonp, view.get_config()]);
+        let [tschema, schema, json, config] = await Promise.all([
+            this._table.schema(false, false),
+            view.schema(false),
+            jsonp,
+            view.get_config()
+        ]);
 
         if (task.cancelled) {
             return;
         }
 
         const {columns, row_pivots, column_pivots, filter} = config;
-        const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
-        const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
+        const filtered =
+            row_pivots.length > 0
+                ? json.filter(
+                      col =>
+                          col.__ROW_PATH__ &&
+                          col.__ROW_PATH__.length == row_pivots.length
+                  )
+                : json;
+        const dataMap = (col, i) =>
+            !row_pivots.length ? {...col, __ROW_PATH__: [i]} : col;
         const mapped = filtered.map(dataMap);
 
         let settings = {
@@ -79,7 +94,9 @@ function getOrCreatePluginElement() {
     let perspective_d3fc_element;
     this[PRIVATE] = this[PRIVATE] || {};
     if (!this[PRIVATE].chart) {
-        perspective_d3fc_element = this[PRIVATE].chart = document.createElement("perspective-d3fc-chart");
+        perspective_d3fc_element = this[PRIVATE].chart = document.createElement(
+            "perspective-d3fc-chart"
+        );
     } else {
         perspective_d3fc_element = this[PRIVATE].chart;
     }

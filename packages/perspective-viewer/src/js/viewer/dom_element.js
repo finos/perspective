@@ -51,7 +51,9 @@ export class DomElement extends PerspectiveElement {
     }
 
     _get_type(name) {
-        let all = this._get_view_dom_columns("#inactive_columns perspective-row");
+        let all = this._get_view_dom_columns(
+            "#inactive_columns perspective-row"
+        );
         if (all.length > 0) {
             const type = all.find(x => x.getAttribute("name") === name);
             if (type) {
@@ -91,7 +93,10 @@ export class DomElement extends PerspectiveElement {
             row.setAttribute("filter", filter);
 
             if (type === "string") {
-                const view = this._table.view({row_pivots: [name], aggregates: {}});
+                const view = this._table.view({
+                    row_pivots: [name],
+                    aggregates: {}
+                });
                 view.to_json().then(json => {
                     row.choices(this._autocomplete_choices(json));
                 });
@@ -113,18 +118,33 @@ export class DomElement extends PerspectiveElement {
         row.setAttribute("name", name);
         row.setAttribute("aggregate", aggregate);
 
-        row.addEventListener("visibility-clicked", this._column_visibility_clicked.bind(this));
-        row.addEventListener("aggregate-selected", this._column_aggregate_clicked.bind(this));
-        row.addEventListener("filter-selected", this._column_filter_clicked.bind(this));
-        row.addEventListener("close-clicked", event => dragend.call(this, event.detail));
+        row.addEventListener(
+            "visibility-clicked",
+            this._column_visibility_clicked.bind(this)
+        );
+        row.addEventListener(
+            "aggregate-selected",
+            this._column_aggregate_clicked.bind(this)
+        );
+        row.addEventListener(
+            "filter-selected",
+            this._column_filter_clicked.bind(this)
+        );
+        row.addEventListener("close-clicked", event =>
+            dragend.call(this, event.detail)
+        );
         row.addEventListener("sort-order", this._sort_order_clicked.bind(this));
 
         row.addEventListener("row-drag", () => {
             this.classList.add("dragging");
             this._active_columns.style.overflow = "hidden";
-            this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute("name") === name);
+            this._original_index = Array.prototype.slice
+                .call(this._active_columns.children)
+                .findIndex(x => x.getAttribute("name") === name);
             if (this._original_index !== -1) {
-                this._drop_target_hover = this._active_columns.children[this._original_index];
+                this._drop_target_hover = this._active_columns.children[
+                    this._original_index
+                ];
                 setTimeout(() => row.setAttribute("drop-target", true));
             } else {
                 this._drop_target_hover = this._new_row(name, type, aggregate);
@@ -148,7 +168,9 @@ export class DomElement extends PerspectiveElement {
             columns = this._get_view_columns();
         }
         this.setAttribute("columns", JSON.stringify(columns));
-        const lis = this._get_view_dom_columns("#inactive_columns perspective-row");
+        const lis = this._get_view_dom_columns(
+            "#inactive_columns perspective-row"
+        );
         if (columns.length === lis.length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
@@ -166,7 +188,10 @@ export class DomElement extends PerspectiveElement {
             this._update_column_list(columns, this._active_columns, name => {
                 const ref = lis.find(x => x.getAttribute("name") === name);
                 if (ref) {
-                    return this._new_row(ref.getAttribute("name"), ref.getAttribute("type"));
+                    return this._new_row(
+                        ref.getAttribute("name"),
+                        ref.getAttribute("type")
+                    );
                 }
             });
         }
@@ -175,7 +200,11 @@ export class DomElement extends PerspectiveElement {
     _update_column_list(columns, container, callback, accessor) {
         accessor = accessor || ((x, y) => y.getAttribute("name") === x);
         const active_columns = Array.prototype.slice.call(container.children);
-        for (let i = 0, j = 0; i < active_columns.length || j < columns.length; i++, j++) {
+        for (
+            let i = 0, j = 0;
+            i < active_columns.length || j < columns.length;
+            i++, j++
+        ) {
             const name = columns[j];
             const col = active_columns[i];
             const next_col = active_columns[i + 1];
@@ -209,24 +238,32 @@ export class DomElement extends PerspectiveElement {
         if (this._plugin.initial && this._plugin.initial.names) {
             for (const nidx in this._plugin.initial.names) {
                 const name = this._plugin.initial.names[nidx];
-                style += `#active_columns perspective-row:nth-child(${parseInt(nidx) + 1}){margin-top:23px;}`;
-                style += `#active_columns perspective-row:nth-child(${parseInt(nidx) + 1}):before{content:"${name}";}`;
+                style += `#active_columns perspective-row:nth-child(${parseInt(
+                    nidx
+                ) + 1}){margin-top:23px;}`;
+                style += `#active_columns perspective-row:nth-child(${parseInt(
+                    nidx
+                ) + 1}):before{content:"${name}";}`;
             }
         }
         this.shadowRoot.querySelector("#psp_styles").innerHTML = style;
     }
 
     _show_column_container() {
-        this.shadowRoot.querySelector("#columns_container").style.visibility = "visible";
+        this.shadowRoot.querySelector("#columns_container").style.visibility =
+            "visible";
     }
 
     _show_side_panel_actions() {
-        this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
+        this.shadowRoot.querySelector("#side_panel__actions").style.visibility =
+            "visible";
     }
 
     // set viewer state
     _set_column_defaults() {
-        let cols = this._get_view_dom_columns("#inactive_columns perspective-row");
+        let cols = this._get_view_dom_columns(
+            "#inactive_columns perspective-row"
+        );
         let active_cols = this._get_view_dom_columns();
         if (cols.length > 0) {
             if (this._plugin.initial) {
@@ -251,9 +288,15 @@ export class DomElement extends PerspectiveElement {
                         }
                     }
                 }
-                this.setAttribute("columns", JSON.stringify(pref.slice(0, count)));
+                this.setAttribute(
+                    "columns",
+                    JSON.stringify(pref.slice(0, count))
+                );
             } else if (this._plugin.selectMode === "select") {
-                this.setAttribute("columns", JSON.stringify([cols[0].getAttribute("name")]));
+                this.setAttribute(
+                    "columns",
+                    JSON.stringify([cols[0].getAttribute("name")])
+                );
             }
         }
     }
@@ -262,7 +305,11 @@ export class DomElement extends PerspectiveElement {
         for (let col of cols) {
             let type = col.getAttribute("type");
             let name = col.getAttribute("name");
-            if (bypass || (["float", "integer"].indexOf(type) > -1 && pref.indexOf(name) === -1)) {
+            if (
+                bypass ||
+                (["float", "integer"].indexOf(type) > -1 &&
+                    pref.indexOf(name) === -1)
+            ) {
                 pref.push(name);
             }
         }
@@ -270,42 +317,77 @@ export class DomElement extends PerspectiveElement {
 
     _check_responsive_layout() {
         if (this.shadowRoot) {
-            if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
-                this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
+            if (
+                this.clientHeight < 500 &&
+                this.clientWidth > 600 &&
+                this._get_view_columns({active: false}).length >
+                    this._get_view_columns().length
+            ) {
+                this.shadowRoot
+                    .querySelector("#app")
+                    .classList.add("columns_horizontal");
             } else {
-                this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
+                this.shadowRoot
+                    .querySelector("#app")
+                    .classList.remove("columns_horizontal");
             }
         }
     }
 
     // setup functions
     _register_ids() {
-        this._aggregate_selector = this.shadowRoot.querySelector("#aggregate_selector");
+        this._aggregate_selector = this.shadowRoot.querySelector(
+            "#aggregate_selector"
+        );
         this._vis_selector = this.shadowRoot.querySelector("#vis_selector");
         this._filters = this.shadowRoot.querySelector("#filters");
         this._row_pivots = this.shadowRoot.querySelector("#row_pivots");
         this._column_pivots = this.shadowRoot.querySelector("#column_pivots");
         this._datavis = this.shadowRoot.querySelector("#pivot_chart");
         this._active_columns = this.shadowRoot.querySelector("#active_columns");
-        this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
-        this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
-        this._add_computed_column = this.shadowRoot.querySelector("#add-computed-column");
-        this._computed_column = this.shadowRoot.querySelector("perspective-computed-column");
-        this._computed_column_inputs = this._computed_column.querySelector("#psp-cc-computation-inputs");
-        this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
+        this._inactive_columns = this.shadowRoot.querySelector(
+            "#inactive_columns"
+        );
+        this._side_panel_actions = this.shadowRoot.querySelector(
+            "#side_panel__actions"
+        );
+        this._add_computed_column = this.shadowRoot.querySelector(
+            "#add-computed-column"
+        );
+        this._computed_column = this.shadowRoot.querySelector(
+            "perspective-computed-column"
+        );
+        this._computed_column_inputs = this._computed_column.querySelector(
+            "#psp-cc-computation-inputs"
+        );
+        this._inner_drop_target = this.shadowRoot.querySelector(
+            "#drop_target_inner"
+        );
         this._drop_target = this.shadowRoot.querySelector("#drop_target");
         this._config_button = this.shadowRoot.querySelector("#config_button");
         this._reset_button = this.shadowRoot.querySelector("#reset_button");
-        this._download_button = this.shadowRoot.querySelector("#download_button");
+        this._download_button = this.shadowRoot.querySelector(
+            "#download_button"
+        );
         this._copy_button = this.shadowRoot.querySelector("#copy_button");
         this._side_panel = this.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
-        this._transpose_button = this.shadowRoot.querySelector("#transpose_button");
-        this._plugin_information = this.shadowRoot.querySelector(".plugin_information");
-        this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
-        this._plugin_information_action_close = this.shadowRoot.querySelector(".plugin_information__action--close");
-        this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
+        this._transpose_button = this.shadowRoot.querySelector(
+            "#transpose_button"
+        );
+        this._plugin_information = this.shadowRoot.querySelector(
+            ".plugin_information"
+        );
+        this._plugin_information_action = this.shadowRoot.querySelector(
+            ".plugin_information__action"
+        );
+        this._plugin_information_action_close = this.shadowRoot.querySelector(
+            ".plugin_information__action--close"
+        );
+        this._plugin_information_message = this.shadowRoot.querySelector(
+            "#plugin_information_count"
+        );
         this._resize_bar = this.shadowRoot.querySelector("#resize_bar");
     }
 
@@ -331,6 +413,8 @@ export class DomElement extends PerspectiveElement {
         return json
             .slice(1, json.length)
             .map(x => x.__ROW_PATH__)
-            .filter(x => (Array.isArray(x) ? x.filter(v => !!v).length > 0 : !!x));
+            .filter(x =>
+                Array.isArray(x) ? x.filter(v => !!v).length > 0 : !!x
+            );
     }
 }

@@ -73,9 +73,14 @@ class WebWorkerClient extends Client {
         let _worker;
         const msg = {cmd: "init", config: get_config()};
         if (typeof WebAssembly === "undefined") {
-            throw new Error("WebAssembly not supported. Support for ASM.JS has been removed as of 0.3.1.");
+            throw new Error(
+                "WebAssembly not supported. Support for ASM.JS has been removed as of 0.3.1."
+            );
         } else {
-            [_worker, msg.buffer] = await Promise.all([override.worker(), override.wasm()]);
+            [_worker, msg.buffer] = await Promise.all([
+                override.worker(),
+                override.wasm()
+            ]);
         }
         for (var key in this._worker) {
             _worker[key] = this._worker[key];
@@ -92,7 +97,11 @@ class WebWorkerClient extends Client {
      * @param {*} msg
      */
     send(msg) {
-        if (this._worker.transferable && msg.args && msg.args[0] instanceof ArrayBuffer) {
+        if (
+            this._worker.transferable &&
+            msg.args &&
+            msg.args[0] instanceof ArrayBuffer
+        ) {
             this._worker.postMessage(msg, msg.args);
         } else {
             this._worker.postMessage(msg);
@@ -183,7 +192,9 @@ const WORKER_SINGLETON = (function() {
             }
             const config_str = JSON.stringify(config);
             if (__CONFIG__ && config_str !== __CONFIG__) {
-                throw new Error(`Confiuration object for shared_worker() has changed - this is probably a bug in your application.`);
+                throw new Error(
+                    `Confiuration object for shared_worker() has changed - this is probably a bug in your application.`
+                );
             }
             __CONFIG__ = config_str;
             return __WORKER__;

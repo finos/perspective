@@ -39,7 +39,16 @@ function quotechalk(x) {
 }
 
 class Benchmark {
-    constructor(desc, body, indent, categories, after_each, iterations, timeout, toss) {
+    constructor(
+        desc,
+        body,
+        indent,
+        categories,
+        after_each,
+        iterations,
+        timeout,
+        toss
+    ) {
         this._desc = quotechalk(desc);
         this._body = body;
         this._indent = indent;
@@ -56,11 +65,18 @@ class Benchmark {
         const time = t / 1000;
         const completed_per = completed / total;
         const time_per = time / completed;
-        const color = completed_per < 0.33 ? "redBright" : completed_per < 0.66 ? "yellowBright" : "greenBright";
+        const color =
+            completed_per < 0.33
+                ? "redBright"
+                : completed_per < 0.66
+                ? "yellowBright"
+                : "greenBright";
         let log = " ".repeat(this._indent + INDENT_LEVEL);
         log += `{${color} ${completed}}{whiteBright /${total} `;
         log += `({${color} ${(100 * completed_per).toFixed(2)}}%)}`;
-        log += `    {whiteBright ${time.toFixed(3)}}s {whiteBright ${time_per.toFixed(2)}} secs/op`;
+        log += `    {whiteBright ${time.toFixed(
+            3
+        )}}s {whiteBright ${time_per.toFixed(2)}} secs/op`;
         log += `    {whiteBright ${this._desc}}`;
 
         console.log(log);
@@ -117,7 +133,15 @@ function unwind(stack) {
 }
 
 class Suite {
-    constructor(name, body, context, indent = 0, iterations = ITERATIONS, timeout = ITERATION_TIME, toss = TOSS_ITERATIONS) {
+    constructor(
+        name,
+        body,
+        context,
+        indent = 0,
+        iterations = ITERATIONS,
+        timeout = ITERATION_TIME,
+        toss = TOSS_ITERATIONS
+    ) {
         this._benchmarks = [];
         this._indent = indent;
         this._promises = [];
@@ -177,7 +201,15 @@ class Suite {
 
     describe(description, body) {
         // todo closures here like Benchmark
-        const suite = new Suite(description, body, this._context, this._context[0]._indent + INDENT_LEVEL, this._context[0]._iterations, this._context[0]._timeout, this._context[0]._toss);
+        const suite = new Suite(
+            description,
+            body,
+            this._context,
+            this._context[0]._indent + INDENT_LEVEL,
+            this._context[0]._iterations,
+            this._context[0]._timeout,
+            this._context[0]._toss
+        );
         this._context[0]._benchmarks.push(suite);
     }
 
@@ -189,7 +221,9 @@ class Suite {
     async *run_all_cases() {
         this._context.unshift(this);
         if (this._name) {
-            console.log(`${" ".repeat(this._indent)}{whiteBright ${this._name}}`);
+            console.log(
+                `${" ".repeat(this._indent)}{whiteBright ${this._name}}`
+            );
         }
         if (this._body) {
             await this._body();
@@ -238,6 +272,12 @@ class Suite {
 
 window = window || global || {};
 const mod = (window.PerspectiveBench = new Suite("perspective"));
-for (const key of ["beforeAll", "afterAll", "afterEach", "describe", "benchmark"]) {
+for (const key of [
+    "beforeAll",
+    "afterAll",
+    "afterEach",
+    "describe",
+    "benchmark"
+]) {
     window[key] = mod[key].bind(mod);
 }

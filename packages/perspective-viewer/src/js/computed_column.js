@@ -24,11 +24,32 @@ const hour_of_day = function(val) {
 };
 
 const day_of_week = function(val) {
-    return ["1 Sunday", "2 Monday", "3 Tuesday", "4 Wednesday", "5 Thursday", "6 Friday", "7 Saturday"][new Date(val).getDay()];
+    return [
+        "1 Sunday",
+        "2 Monday",
+        "3 Tuesday",
+        "4 Wednesday",
+        "5 Thursday",
+        "6 Friday",
+        "7 Saturday"
+    ][new Date(val).getDay()];
 };
 
 const month_of_year = function(val) {
-    return ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"][new Date(val).getMonth()];
+    return [
+        "01 January",
+        "02 February",
+        "03 March",
+        "04 April",
+        "05 May",
+        "06 June",
+        "07 July",
+        "08 August",
+        "09 September",
+        "10 October",
+        "11 November",
+        "12 December"
+    ][new Date(val).getMonth()];
 };
 
 const second_bucket = function(val) {
@@ -90,16 +111,86 @@ const year_bucket = function(val) {
 };
 
 export const COMPUTATIONS = {
-    hour_of_day: new Computation("Hour of Day", x => `hour_of_day(${x})`, "datetime", "integer", hour_of_day, ["Time"]),
-    day_of_week: new Computation("Day of Week", x => `day_of_week(${x})`, "datetime", "string", day_of_week, ["Time"]),
-    month_of_year: new Computation("Month of Year", x => `month_of_year(${x})`, "datetime", "string", month_of_year, ["Time"]),
-    second_bucket: new Computation("Bucket (s)", x => `second_bucket(${x})`, "datetime", "datetime", second_bucket, ["Time"]),
-    minute_bucket: new Computation("Bucket (m)", x => `minute_bucket(${x})`, "datetime", "datetime", minute_bucket, ["Time"]),
-    hour_bucket: new Computation("Bueckt (h)", x => `hour_bucket(${x})`, "datetime", "datetime", hour_bucket, ["Time"]),
-    day_bucket: new Computation("Bucket (D)", x => `day_bucket(${x})`, "datetime", "date", day_bucket, ["Time"]),
-    week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", week_bucket, ["Time"]),
-    month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", month_bucket, ["Time"]),
-    year_bucket: new Computation("Bucket (Y)", x => `year_bucket(${x})`, "datetime", "date", year_bucket, ["Time"]),
+    hour_of_day: new Computation(
+        "Hour of Day",
+        x => `hour_of_day(${x})`,
+        "datetime",
+        "integer",
+        hour_of_day,
+        ["Time"]
+    ),
+    day_of_week: new Computation(
+        "Day of Week",
+        x => `day_of_week(${x})`,
+        "datetime",
+        "string",
+        day_of_week,
+        ["Time"]
+    ),
+    month_of_year: new Computation(
+        "Month of Year",
+        x => `month_of_year(${x})`,
+        "datetime",
+        "string",
+        month_of_year,
+        ["Time"]
+    ),
+    second_bucket: new Computation(
+        "Bucket (s)",
+        x => `second_bucket(${x})`,
+        "datetime",
+        "datetime",
+        second_bucket,
+        ["Time"]
+    ),
+    minute_bucket: new Computation(
+        "Bucket (m)",
+        x => `minute_bucket(${x})`,
+        "datetime",
+        "datetime",
+        minute_bucket,
+        ["Time"]
+    ),
+    hour_bucket: new Computation(
+        "Bueckt (h)",
+        x => `hour_bucket(${x})`,
+        "datetime",
+        "datetime",
+        hour_bucket,
+        ["Time"]
+    ),
+    day_bucket: new Computation(
+        "Bucket (D)",
+        x => `day_bucket(${x})`,
+        "datetime",
+        "date",
+        day_bucket,
+        ["Time"]
+    ),
+    week_bucket: new Computation(
+        "Bucket (W)",
+        x => `week_bucket(${x})`,
+        "datetime",
+        "date",
+        week_bucket,
+        ["Time"]
+    ),
+    month_bucket: new Computation(
+        "Bucket (M)",
+        x => `month_bucket(${x})`,
+        "datetime",
+        "date",
+        month_bucket,
+        ["Time"]
+    ),
+    year_bucket: new Computation(
+        "Bucket (Y)",
+        x => `year_bucket(${x})`,
+        "datetime",
+        "date",
+        year_bucket,
+        ["Time"]
+    ),
     add: new Computation(
         "+",
         (x, y) => `${x} + ${y}`,
@@ -234,7 +325,10 @@ class ComputedColumn extends HTMLElement {
 
     connectedCallback() {
         this._register_ids();
-        render(Array.from(this._selector_template()), this._computation_selector);
+        render(
+            Array.from(this._selector_template()),
+            this._computation_selector
+        );
         this._register_callbacks();
         this._update_computation(null);
         this._register_inputs();
@@ -242,7 +336,10 @@ class ComputedColumn extends HTMLElement {
 
     _register_computations() {
         TREE = _get_tree();
-        render(Array.from(this._selector_template()), this._computation_selector);
+        render(
+            Array.from(this._selector_template()),
+            this._computation_selector
+        );
     }
 
     *_selector_template(tree = TREE) {
@@ -253,7 +350,9 @@ class ComputedColumn extends HTMLElement {
                 `;
             } else {
                 yield html`
-                    <optgroup label=${category}>${Array.from(this._selector_template(comp))}</optgroup>
+                    <optgroup label=${category}
+                        >${Array.from(this._selector_template(comp))}</optgroup
+                    >
                 `;
             }
         }
@@ -315,18 +414,26 @@ class ComputedColumn extends HTMLElement {
         event.dataTransfer.dropEffect = "move";
 
         const drop_target = event.currentTarget;
-        const drop_target_hover = drop_target.querySelector(".psp-cc-computation__drop-target-hover");
+        const drop_target_hover = drop_target.querySelector(
+            ".psp-cc-computation__drop-target-hover"
+        );
         if (drop_target.className !== "dropping") {
             //event.currentTarget.classList.remove('dropped');
             drop_target.classList.add("dropping");
         }
-        if (drop_target_hover && !drop_target_hover.hasAttribute("drop-target")) {
+        if (
+            drop_target_hover &&
+            !drop_target_hover.hasAttribute("drop-target")
+        ) {
             drop_target_hover.toggleAttribute("drop-target", "true");
         }
 
         if (drop_target.children.length === 2) {
             // drop_target_hover is the blue box
-            drop_target.parentNode.insertBefore(drop_target_hover, drop_target.nextSibling);
+            drop_target.parentNode.insertBefore(
+                drop_target_hover,
+                drop_target.nextSibling
+            );
         }
     }
 
@@ -336,10 +443,14 @@ class ComputedColumn extends HTMLElement {
 
         target.classList.remove("dropping");
 
-        const is_swap = this.state.swap_target !== undefined && target.innerHTML.indexOf("perspective-row") > -1;
+        const is_swap =
+            this.state.swap_target !== undefined &&
+            target.innerHTML.indexOf("perspective-row") > -1;
 
         // column must match return type of computation
-        const data = this._parse_data_transfer(event.dataTransfer.getData("text"));
+        const data = this._parse_data_transfer(
+            event.dataTransfer.getData("text")
+        );
         if (!data) return;
 
         if (is_swap) {
@@ -349,7 +460,11 @@ class ComputedColumn extends HTMLElement {
             event.swapTarget = this.state.swap_target;
 
             // take the column at the drop target, and set it to the column being swapped
-            this._set_input_column(event, current_column_name, current_column_type);
+            this._set_input_column(
+                event,
+                current_column_name,
+                current_column_type
+            );
 
             // reset swap_target and currentTarget
             this.state.swap_target = false;
@@ -360,7 +475,9 @@ class ComputedColumn extends HTMLElement {
     }
 
     deselect_column(name) {
-        this.state.input_columns = this.state.input_columns.map(x => (x && x.name === name ? undefined : x));
+        this.state.input_columns = this.state.input_columns.map(x =>
+            x && x.name === name ? undefined : x
+        );
         this._apply_state(this.state.input_columns, this.state.computation);
     }
 
@@ -374,15 +491,20 @@ class ComputedColumn extends HTMLElement {
         const src = event.currentTarget;
         // are we inside the column? if we are, prevent further calls which cause flickering
         const bounds = src.getBoundingClientRect();
-        const inside_x = event.pageX >= bounds.left && event.pageX <= bounds.right - 2;
-        const inside_y = event.pageY >= bounds.top && event.pageY <= bounds.bottom - 2;
+        const inside_x =
+            event.pageX >= bounds.left && event.pageX <= bounds.right - 2;
+        const inside_y =
+            event.pageY >= bounds.top && event.pageY <= bounds.bottom - 2;
         if (inside_x && inside_y) {
             return;
         }
         if (src !== null && src.nodeName !== "SPAN") {
             src.classList.remove("dropping");
-            const drop_target_hover = src.querySelector(".psp-cc-computation__drop-target-hover");
-            if (drop_target_hover) drop_target_hover.removeAttribute("drop-target");
+            const drop_target_hover = src.querySelector(
+                ".psp-cc-computation__drop-target-hover"
+            );
+            if (drop_target_hover)
+                drop_target_hover.removeAttribute("drop-target");
         }
     }
 
@@ -394,7 +516,11 @@ class ComputedColumn extends HTMLElement {
 
         for (let i = 0; i < this.state["input_columns"].length; i++) {
             if (this.state["input_columns"][i] !== undefined) {
-                this._set_input_column({currentTarget: inputs[i]}, this.state["input_columns"][i].name, this.state["input_columns"][i].type);
+                this._set_input_column(
+                    {currentTarget: inputs[i]},
+                    this.state["input_columns"][i].name,
+                    this.state["input_columns"][i].type
+                );
             }
         }
 
@@ -429,11 +555,16 @@ class ComputedColumn extends HTMLElement {
         }
         if (this.state.input_columns.length > 0) {
             let names = [];
-            for (let column of this.state.input_columns) names.push(column.name);
+            for (let column of this.state.input_columns)
+                names.push(column.name);
             if (this.state.computation[FORMATTER]) {
-                this._column_name_input.innerText = this.state.computation[FORMATTER].apply(undefined, names);
+                this._column_name_input.innerText = this.state.computation[
+                    FORMATTER
+                ].apply(undefined, names);
             } else {
-                this._column_name_input.innerText = `${this.state.computation.name}(${names.join(", ")})`;
+                this._column_name_input.innerText = `${
+                    this.state.computation.name
+                }(${names.join(", ")})`;
             }
         } else {
             this._column_name_input.innerText = "";
@@ -464,9 +595,15 @@ class ComputedColumn extends HTMLElement {
         const index = Number.parseInt(target.getAttribute("data-index"));
 
         if (
-            (computation_type !== "float" && computation_type !== "datetime" && type !== computation_type) ||
-            (computation_type === "float" && type !== "float" && type !== "integer") ||
-            (computation_type === "datetime" && type !== "datetime" && type !== "date")
+            (computation_type !== "float" &&
+                computation_type !== "datetime" &&
+                type !== computation_type) ||
+            (computation_type === "float" &&
+                type !== "float" &&
+                type !== "integer") ||
+            (computation_type === "datetime" &&
+                type !== "datetime" &&
+                type !== "date")
         ) {
             this._register_inputs();
             target.classList.remove("dropped");
@@ -475,7 +612,9 @@ class ComputedColumn extends HTMLElement {
 
         target.classList.add("dropped");
 
-        const drop_target_hover = target.querySelector(".psp-cc-computation__drop-target-hover");
+        const drop_target_hover = target.querySelector(
+            ".psp-cc-computation__drop-target-hover"
+        );
         if (drop_target_hover) drop_target_hover.removeAttribute("drop-target");
 
         target.innerHTML = "";
@@ -529,7 +668,9 @@ class ComputedColumn extends HTMLElement {
 
         if (this.state["computation"]) {
             // do we need to reset the input? if types/num_params differ then yes
-            reset_inputs = input_type !== this.state["computation"].input_type || num_params !== this.state["computation"].num_params;
+            reset_inputs =
+                input_type !== this.state["computation"].input_type ||
+                num_params !== this.state["computation"].num_params;
         }
 
         this._computation_type.innerHTML = `<span class="${return_type}">${this.type_markers[return_type]}</span>`;
@@ -573,7 +714,10 @@ class ComputedColumn extends HTMLElement {
             const computed_column = this.state;
 
             if (this.column_names.includes(this.state.column_name)) {
-                this._set_error_message("Column names must be unique.", this._column_name_error);
+                this._set_error_message(
+                    "Column names must be unique.",
+                    this._column_name_error
+                );
                 return;
             }
 
@@ -601,33 +745,60 @@ class ComputedColumn extends HTMLElement {
         this._column_name_input.innerText = "";
         this._input_columns.innerHTML = "";
 
-        for (let child of this._input_columns.children) child.classList.remove("dropped");
+        for (let child of this._input_columns.children)
+            child.classList.remove("dropped");
 
         this.state = new State();
         this._update_computation();
     }
 
     _register_ids() {
-        this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
+        this._side_panel_actions = this.parentElement.querySelector(
+            "#side_panel__actions"
+        );
         this._close_button = this.shadowRoot.querySelector("#psp-cc__close");
         this._column_name_input = this.shadowRoot.querySelector("#psp-cc-name");
-        this._column_name_error = this.shadowRoot.querySelector("#psp-cc__error--name");
-        this._computation_selector = this.shadowRoot.querySelector("#psp-cc-computation__select");
-        this._computation_type = this.shadowRoot.querySelector("#psp-cc-computation__type");
-        this._input_columns = this.shadowRoot.querySelector("#psp-cc-computation-inputs");
+        this._column_name_error = this.shadowRoot.querySelector(
+            "#psp-cc__error--name"
+        );
+        this._computation_selector = this.shadowRoot.querySelector(
+            "#psp-cc-computation__select"
+        );
+        this._computation_type = this.shadowRoot.querySelector(
+            "#psp-cc-computation__type"
+        );
+        this._input_columns = this.shadowRoot.querySelector(
+            "#psp-cc-computation-inputs"
+        );
         //this._delete_button = this.shadowRoot.querySelector('#psp-cc-button-delete');
-        this._save_button = this.shadowRoot.querySelector("#psp-cc-button-save");
+        this._save_button = this.shadowRoot.querySelector(
+            "#psp-cc-button-save"
+        );
     }
 
     _register_callbacks() {
-        this._close_button.addEventListener("click", this._close_computed_column.bind(this));
-        this._computation_selector.addEventListener("change", this._update_computation.bind(this));
-        this._column_name_input.addEventListener("dragover", dragleave.bind(this));
+        this._close_button.addEventListener(
+            "click",
+            this._close_computed_column.bind(this)
+        );
+        this._computation_selector.addEventListener(
+            "change",
+            this._update_computation.bind(this)
+        );
+        this._column_name_input.addEventListener(
+            "dragover",
+            dragleave.bind(this)
+        );
         this._column_name_input.addEventListener("keyup", event => {
-            this.state["name_edited"] = this._column_name_input.innerText && this._column_name_input.innerText.length > 0;
+            this.state["name_edited"] =
+                this._column_name_input.innerText &&
+                this._column_name_input.innerText.length > 0;
             this._set_column_name(event);
         });
         //this._delete_button.addEventListener('click', this._delete_computed_column.bind(this));
-        this._save_button.addEventListener("click", this._save_computed_column.bind(this));
+        this._save_button.addEventListener(
+            "click",
+            this._save_computed_column.bind(this)
+        );
     }
 }

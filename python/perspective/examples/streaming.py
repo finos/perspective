@@ -1,3 +1,4 @@
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 import os
 import os.path
 import random
@@ -9,7 +10,6 @@ import tornado.ioloop
 from datetime import datetime
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -40,8 +40,30 @@ def data_source():
 
 
 '''Set up our data for this example.'''
-SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"]
-CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"]
+SECURITIES = [
+    "AAPL.N",
+    "AMZN.N",
+    "QQQ.N",
+    "NVDA.N",
+    "TSLA.N",
+    "FB.N",
+    "MSFT.N",
+    "TLT.N",
+    "XIV.N",
+    "YY.N",
+    "CSCO.N",
+    "GOOGL.N",
+    "PCLN.N"]
+CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty"]
 
 
 def make_app():
@@ -57,20 +79,23 @@ def make_app():
         "lastUpdate": datetime,
     }, limit=2500)
 
-    # Track the table with the name "data_source_one", which will be used in the front-end to access the Table.
+    # Track the table with the name "data_source_one", which will be used in
+    # the front-end to access the Table.
     MANAGER.host_table("data_source_one", TABLE)
 
     # update with new data every 50ms
     def updater():
         TABLE.update(data_source())
 
-    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=50)
+    callback = tornado.ioloop.PeriodicCallback(
+        callback=updater, callback_time=50)
     callback.start()
 
     return tornado.web.Application([
         (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
-        (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
+        (r"/websocket", PerspectiveTornadoHandler,
+         {"manager": MANAGER, "check_origin": True})
     ])
 
 

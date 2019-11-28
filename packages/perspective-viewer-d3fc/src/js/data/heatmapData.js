@@ -26,7 +26,10 @@ export function heatmapData(settings, data) {
                 const mainValue = getMainValues(key);
                 heatmapData.push({
                     crossValue: crossValue,
-                    mainValue: mainType === AXIS_TYPES.time ? new Date(mainValue) : mainValue,
+                    mainValue:
+                        mainType === AXIS_TYPES.time
+                            ? new Date(mainValue)
+                            : mainValue,
                     colorValue: col[key],
                     row: col
                 });

@@ -72,7 +72,8 @@ private:
 };
 
 template <typename TREE_T, typename CONTAINER_T>
-t_dtiter<TREE_T, CONTAINER_T>::t_dtiter(const TREE_T* tree, CONTAINER_T* queue, t_uindex count)
+t_dtiter<TREE_T, CONTAINER_T>::t_dtiter(
+    const TREE_T* tree, CONTAINER_T* queue, t_uindex count)
     : m_tree(tree)
     , m_queue(queue)
     , m_count(count) {}
@@ -119,7 +120,8 @@ t_dtiter<TREE_T, CONTAINER_T>::head(const std::vector<t_uindex>& q) const {
 
 template <typename TREE_T, typename CONTAINER_T>
 void
-t_dtiter<TREE_T, CONTAINER_T>::enqueue_children(const std::vector<t_uindex>& q, t_index idx) {
+t_dtiter<TREE_T, CONTAINER_T>::enqueue_children(
+    const std::vector<t_uindex>& q, t_index idx) {
     std::vector<t_index> children;
     m_tree->get_child_indices(idx, children);
     for (auto cidx : children) {
@@ -149,7 +151,8 @@ t_dtiter<TREE_T, CONTAINER_T>::head(const std::queue<t_uindex>& q) const {
 
 template <typename TREE_T, typename CONTAINER_T>
 void
-t_dtiter<TREE_T, CONTAINER_T>::enqueue_children(const std::queue<t_uindex>& q, t_index idx) {
+t_dtiter<TREE_T, CONTAINER_T>::enqueue_children(
+    const std::queue<t_uindex>& q, t_index idx) {
     std::vector<t_index> children;
     m_tree->get_child_indices(idx, children);
     for (auto cidx : children) {

@@ -102,7 +102,8 @@ class TestWidget:
         }
 
     def test_widget_client_np_structured_array(self):
-        data = np.array([(1, 2), (3, 4)], dtype=[("a", "int64"), ("b", "int64")])
+        data = np.array([(1, 2), (3, 4)], dtype=[
+                        ("a", "int64"), ("b", "int64")])
         widget = PerspectiveWidget(data, client=True)
         assert widget.table is None
         assert widget._data == {
@@ -111,7 +112,8 @@ class TestWidget:
         }
 
     def test_widget_client_np_recarray(self):
-        data = np.array([(1, 2), (3, 4)], dtype=[("a", "int64"), ("b", "int64")]).view(np.recarray)
+        data = np.array([(1, 2), (3, 4)], dtype=[
+                        ("a", "int64"), ("b", "int64")]).view(np.recarray)
         widget = PerspectiveWidget(data, client=True)
         assert widget.table is None
         assert widget._data == {

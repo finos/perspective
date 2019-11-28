@@ -21,13 +21,31 @@ utils.with_server({}, () => {
             describe("tooltip tests", () => {
                 test.capture("tooltip shows on hover.", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.shadow_click(
+                        "perspective-viewer",
+                        "#config_button"
+                    );
 
                     // set a row pivot and a column pivot so the graph will render
-                    await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(
+                        element =>
+                            element.setAttribute("row-pivots", '["State"]'),
+                        viewer
+                    );
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
+                    await page.evaluate(
+                        element =>
+                            element.setAttribute(
+                                "column-pivots",
+                                '["Category"]'
+                            ),
+                        viewer
+                    );
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
 
                     await utils.invoke_tooltip(".highcharts-point", page);
                 });

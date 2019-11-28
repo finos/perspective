@@ -10,7 +10,11 @@ import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {chartSvgFactory} from "../axis/chartFactory";
 import domainMatchOrigins from "../axis/domainMatchOrigins";
-import {axisSplitter, dataBlankFunction, groupedBlankFunction} from "../axis/axisSplitter";
+import {
+    axisSplitter,
+    dataBlankFunction,
+    groupedBlankFunction
+} from "../axis/axisSplitter";
 import {AXIS_TYPES} from "../axis/axisType";
 import {barSeries} from "../series/barSeries";
 import {seriesColors} from "../series/seriesColors";
@@ -48,13 +52,18 @@ function columnChart(container, settings) {
         .paddingStrategy(hardLimitZeroPadding());
 
     // Check whether we've split some values into a second y-axis
-    const blankFunction = settings.mainValues.length > 1 ? groupedBlankFunction : dataBlankFunction;
+    const blankFunction =
+        settings.mainValues.length > 1
+            ? groupedBlankFunction
+            : dataBlankFunction;
     const splitter = axisSplitter(settings, data, blankFunction).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
     // No grid lines if splitting y-axis
-    const plotSeries = splitter.haveSplit() ? series : withGridLines(series, settings).orient("vertical");
+    const plotSeries = splitter.haveSplit()
+        ? series
+        : withGridLines(series, settings).orient("vertical");
 
     const chart = chartSvgFactory(xAxis, yAxis1)
         .axisSplitter(splitter)

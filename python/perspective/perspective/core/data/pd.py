@@ -28,7 +28,8 @@ def _parse_datetime_index(index):
     freq = str(index.freq).lower()
     new_type = None
 
-    if any(s in freq for s in ["businessday", "day"]) or freq == "sm" or freq == "sms":
+    if any(s in freq for s in ["businessday", "day"]
+           ) or freq == "sm" or freq == "sms":
         # days
         new_type = "D"
     elif freq == "w" or "week" in freq:
@@ -58,7 +59,8 @@ def deconstruct_pandas(data):
     kwargs = {}
 
     # level unstacking
-    if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
+    if isinstance(data, pd.DataFrame) and isinstance(
+            data.columns, pd.MultiIndex):
         data = pd.DataFrame(data.unstack())
         columns = list(x for x in data.index.names if x)
         kwargs['column_pivots'] = list(x for x in data.index.names if x)
@@ -91,7 +93,8 @@ def deconstruct_pandas(data):
         kwargs['row_pivots'] = list(data.index.names)
         kwargs['columns'] = data.columns.tolist()
 
-    if isinstance(data, pd.Series) or 'index' not in map(lambda x: str(x).lower(), data.columns):
+    if isinstance(data, pd.Series) or 'index' not in map(
+            lambda x: str(x).lower(), data.columns):
         flattened = data.reset_index()
 
         if isinstance(data, pd.Series):

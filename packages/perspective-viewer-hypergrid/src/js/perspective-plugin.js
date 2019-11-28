@@ -92,7 +92,12 @@ function setPSP(payload, force = false) {
         if (payload.isTree && columnIndex === 0) {
             new_schema[-1] = {name, header, type};
         } else {
-            new_schema.push({name, header, type, index: columnIndex - (payload.isTree ? 1 : 0)});
+            new_schema.push({
+                name,
+                header,
+                type,
+                index: columnIndex - (payload.isTree ? 1 : 0)
+            });
         }
     });
 
@@ -107,7 +112,10 @@ function setPSP(payload, force = false) {
     if (
         !force &&
         this._memoized_schema &&
-        lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length)) &&
+        lodash.isEqual(
+            this._memoized_schema.slice(0, this._memoized_schema.length),
+            new_schema.slice(0, new_schema.length)
+        ) &&
         lodash.isEqual(payload.rowPivots, this._memoized_pivots)
     ) {
         this.grid.sbVScroller.index = 0;
@@ -158,8 +166,14 @@ function setColumnPropsByType(column) {
         props.format = `perspective-${column.type}`;
     }
     const config = this.grid.behavior.dataModel._config;
-    const isEditable = this.grid.behavior.dataModel._viewer.hasAttribute("editable");
-    if (isEditable && config.row_pivots.length === 0 && config.row_pivots.length === 0) {
+    const isEditable = this.grid.behavior.dataModel._viewer.hasAttribute(
+        "editable"
+    );
+    if (
+        isEditable &&
+        config.row_pivots.length === 0 &&
+        config.row_pivots.length === 0
+    ) {
         props.editor = {
             integer: "perspective-number",
             string: "perspective-text",
@@ -193,7 +207,9 @@ function formatColumnHeader(value) {
         const direction = config.sort[index][1];
 
         if (direction in this.charMap) {
-            value = `${value} ${this.charMap[direction]}${config.sort.length > 1 ? superscript(index + 1) : ""}`;
+            value = `${value} ${this.charMap[direction]}${
+                config.sort.length > 1 ? superscript(index + 1) : ""
+            }`;
         }
     }
 
@@ -230,23 +246,40 @@ function sortColumn(event) {
 
     const viewer = this.behavior.dataModel._viewer;
 
-    const item_index = config.sort.findIndex(item => item[0] === column_name.trim());
+    const item_index = config.sort.findIndex(
+        item => item[0] === column_name.trim()
+    );
     const already_sorted = item_index > -1;
 
     // shift key to enable abs sorting
     // alt key to not remove already sorted columns
-    const abs_sorting = event.detail.keys && (event.detail.keys.indexOf("ALTSHIFT") > -1 || event.detail.keys.indexOf("ALT") > -1) && column.type !== "string";
-    const shift_pressed = event.detail.keys && (event.detail.keys.indexOf("ALTSHIFT") > -1 || event.detail.keys.indexOf("SHIFT") > -1);
+    const abs_sorting =
+        event.detail.keys &&
+        (event.detail.keys.indexOf("ALTSHIFT") > -1 ||
+            event.detail.keys.indexOf("ALT") > -1) &&
+        column.type !== "string";
+    const shift_pressed =
+        event.detail.keys &&
+        (event.detail.keys.indexOf("ALTSHIFT") > -1 ||
+            event.detail.keys.indexOf("SHIFT") > -1);
     let new_sort_direction;
 
     // if the column is already sorted we increment the sort
     if (already_sorted) {
         const item = config.sort[item_index];
         const direction = item[1];
-        new_sort_direction = viewer._increment_sort(direction, column_sorting, abs_sorting);
+        new_sort_direction = viewer._increment_sort(
+            direction,
+            column_sorting,
+            abs_sorting
+        );
         item[1] = new_sort_direction;
     } else {
-        new_sort_direction = viewer._increment_sort("none", column_sorting, abs_sorting);
+        new_sort_direction = viewer._increment_sort(
+            "none",
+            column_sorting,
+            abs_sorting
+        );
     }
 
     //if alt pressed and column is already sorted, we change the sort for the column and leave the rest as is
@@ -276,7 +309,9 @@ export const install = function(grid) {
 
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
 
-    Object.getPrototypeOf(grid.behavior).formatColumnHeader = formatColumnHeader;
+    Object.getPrototypeOf(
+        grid.behavior
+    ).formatColumnHeader = formatColumnHeader;
 
     grid.addEventListener("fin-column-sort", sortColumn.bind(grid));
 
@@ -305,7 +340,9 @@ export const install = function(grid) {
         let column_names;
         if (column_paths) {
             const column_pivot_values = column_paths.split("|");
-            column_names = [column_pivot_values[column_pivot_values.length - 1]];
+            column_names = [
+                column_pivot_values[column_pivot_values.length - 1]
+            ];
             column_filters = column_pivots
                 .map((pivot, index) => {
                     const pivot_value = column_pivot_values[index];
@@ -315,7 +352,9 @@ export const install = function(grid) {
                 .filter(([, , value]) => value !== "__ROW_PATH__");
         }
 
-        const filters = config.filter.concat(row_filters).concat(column_filters);
+        const filters = config.filter
+            .concat(row_filters)
+            .concat(column_filters);
 
         this.grid.canvas.dispatchEvent(
             new CustomEvent("perspective-click", {
@@ -329,7 +368,11 @@ export const install = function(grid) {
             })
         );
 
-        return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
+        return this.dataModel.toggleRow(
+            event.dataCell.y,
+            event.dataCell.x,
+            event
+        );
     };
 
     // Prevents flashing of cell selection on scroll
@@ -346,17 +389,29 @@ export const install = function(grid) {
             return;
         }
         const grid_element = grid.div.parentNode.parentNode.host;
-        const view_shadow_root = grid_element.parentNode.parentNode.parentNode.parentNode.parentNode;
+        const view_shadow_root =
+            grid_element.parentNode.parentNode.parentNode.parentNode.parentNode;
         return view_shadow_root.activeElement === grid_element;
     };
 
     // Disable cell selection dragging
-    grid.lookupFeature("CellSelection").handleMouseDown = function(grid, event) {
+    grid.lookupFeature("CellSelection").handleMouseDown = function(
+        grid,
+        event
+    ) {
         var dx = event.gridCell.x,
             dy = event.dataCell.y,
-            isSelectable = grid.behavior.getCellProperty(event.dataCell.x, event.gridCell.y, "cellSelection");
+            isSelectable = grid.behavior.getCellProperty(
+                event.dataCell.x,
+                event.gridCell.y,
+                "cellSelection"
+            );
 
-        if (isSelectable && event.isDataCell && !event.primitiveEvent.detail.isRightClick) {
+        if (
+            isSelectable &&
+            event.isDataCell &&
+            !event.primitiveEvent.detail.isRightClick
+        ) {
             var dCell = grid.newPoint(dx, dy),
                 primEvent = event.primitiveEvent,
                 keys = primEvent.detail.keys;
@@ -367,7 +422,11 @@ export const install = function(grid) {
     };
 
     // Disable cell selection by shift-click
-    grid.lookupFeature("CellSelection").extendSelection = function(grid, gridCell, keys) {
+    grid.lookupFeature("CellSelection").extendSelection = function(
+        grid,
+        gridCell,
+        keys
+    ) {
         var hasCTRL = keys.indexOf("CTRL") >= 0,
             hasSHIFT = false,
             mousePoint = grid.getMouseDown(),
@@ -393,8 +452,15 @@ export const install = function(grid) {
 
         if (hasSHIFT) {
             grid.clearMostRecentSelection();
-            grid.select(mousePoint.x, mousePoint.y, x - mousePoint.x, y - mousePoint.y);
-            grid.setDragExtent(grid.newPoint(x - mousePoint.x, y - mousePoint.y));
+            grid.select(
+                mousePoint.x,
+                mousePoint.y,
+                x - mousePoint.x,
+                y - mousePoint.y
+            );
+            grid.setDragExtent(
+                grid.newPoint(x - mousePoint.x, y - mousePoint.y)
+            );
         } else {
             grid.select(x, y, 0, 0);
             grid.setMouseDown(grid.newPoint(x, y));
@@ -409,7 +475,10 @@ export const install = function(grid) {
         if (!grid.cellEditor) {
             const count = this.getAutoScrollAcceleration();
             let {x, y} = grid.selectionModel.getLastSelection().origin;
-            const max = grid.renderer.dataWindow.origin.y + grid.renderer.dataWindow.extent.y - 2;
+            const max =
+                grid.renderer.dataWindow.origin.y +
+                grid.renderer.dataWindow.extent.y -
+                2;
             if (y + count > max) {
                 grid.sbVScroller.index++;
             }
@@ -454,7 +523,10 @@ export const install = function(grid) {
         if (!grid.cellEditor) {
             const count = this.getAutoScrollAcceleration();
             let {x, y} = grid.selectionModel.getLastSelection().origin;
-            const max = grid.renderer.dataWindow.origin.x + grid.renderer.dataWindow.extent.x - 1;
+            const max =
+                grid.renderer.dataWindow.origin.x +
+                grid.renderer.dataWindow.extent.x -
+                1;
             if (x + count > max) {
                 grid.sbHScroller.index++;
             }
@@ -464,7 +536,11 @@ export const install = function(grid) {
         }
     };
 
-    grid.lookupFeature("CellSelection").moveShiftSelect = function(grid, offsetX, offsetY) {
+    grid.lookupFeature("CellSelection").moveShiftSelect = function(
+        grid,
+        offsetX,
+        offsetY
+    ) {
         grid.moveSingleSelect(offsetX, offsetY);
     };
 
@@ -476,11 +552,17 @@ export const install = function(grid) {
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
         //just add 'hdpi' as an attribute to the fin-canvas tag
         let ratio = 1;
-        const isHIDPI = window.devicePixelRatio && this.component.properties.useHiDPI;
+        const isHIDPI =
+            window.devicePixelRatio && this.component.properties.useHiDPI;
         if (isHIDPI) {
             const devicePixelRatio = window.devicePixelRatio || 1;
             const backingStoreRatio =
-                this.gc.webkitBackingStorePixelRatio || this.gc.mozBackingStorePixelRatio || this.gc.msBackingStorePixelRatio || this.gc.oBackingStorePixelRatio || this.gc.backingStorePixelRatio || 1;
+                this.gc.webkitBackingStorePixelRatio ||
+                this.gc.mozBackingStorePixelRatio ||
+                this.gc.msBackingStorePixelRatio ||
+                this.gc.oBackingStorePixelRatio ||
+                this.gc.backingStorePixelRatio ||
+                1;
 
             ratio = devicePixelRatio / backingStoreRatio;
         }
@@ -489,13 +571,22 @@ export const install = function(grid) {
         this.component.setBounds(this.bounds);
 
         let render = true;
-        if (height * ratio !== this.canvas.height || width * ratio !== this.canvas.width || force) {
+        if (
+            height * ratio !== this.canvas.height ||
+            width * ratio !== this.canvas.width ||
+            force
+        ) {
             while (render) {
                 if (!this.component.grid.behavior.dataModel._view) {
                     // If we are awaiting this grid's initialization, yield until it is ready.
                     await new Promise(setTimeout);
                 }
-                render = await new Promise(resolve => this.component.grid.behavior.dataModel.fetchData(undefined, resolve));
+                render = await new Promise(resolve =>
+                    this.component.grid.behavior.dataModel.fetchData(
+                        undefined,
+                        resolve
+                    )
+                );
             }
         }
 

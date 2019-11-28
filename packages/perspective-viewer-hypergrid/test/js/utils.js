@@ -16,7 +16,23 @@ exports.dblclick = async (page, x = 310, y = 300) => {
                 .shadowRoot.querySelector("canvas");
 
             const event = document.createEvent("MouseEvents");
-            event.initMouseEvent("dblclick", true, false, window, 0, x, y, x, y, false, false, false, false, 2, null);
+            event.initMouseEvent(
+                "dblclick",
+                true,
+                false,
+                window,
+                0,
+                x,
+                y,
+                x,
+                y,
+                false,
+                false,
+                false,
+                false,
+                2,
+                null
+            );
             example.dispatchEvent(event);
         },
         {x, y}
@@ -47,9 +63,16 @@ exports.capture_update = async function capture_update(page, viewer, body) {
     }, viewer);
     await body();
     try {
-        await page.waitFor(element => element.hasAttribute("test-updated"), {timeout: 3000}, viewer);
+        await page.waitFor(
+            element => element.hasAttribute("test-updated"),
+            {timeout: 3000},
+            viewer
+        );
     } catch (e) {
         console.error("Missing 'test-updated' attribute");
     }
-    await page.evaluate(element => element.removeAttribute("test-updated"), viewer);
+    await page.evaluate(
+        element => element.removeAttribute("test-updated"),
+        viewer
+    );
 };

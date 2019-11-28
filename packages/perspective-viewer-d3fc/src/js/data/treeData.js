@@ -27,13 +27,23 @@ export function treeData(settings) {
                     currentLevel.push(element);
                 }
                 if (settings.mainValues.length > 1) {
-                    const colorValue = getDataValue(d, settings.mainValues[1], split);
-                    element.color = element.color ? element.color + colorValue : colorValue;
+                    const colorValue = getDataValue(
+                        d,
+                        settings.mainValues[1],
+                        split
+                    );
+                    element.color = element.color
+                        ? element.color + colorValue
+                        : colorValue;
                 }
                 if (i === groups.length - 1) {
                     element.name = groups.slice(-1)[0];
                     if (groups.length === settings.crossValues.length) {
-                        const size = getDataValue(d, settings.mainValues[0], split);
+                        const size = getDataValue(
+                            d,
+                            settings.mainValues[0],
+                            split
+                        );
                         element.size = size > 0 ? size : 0;
                     }
                 }
@@ -45,10 +55,15 @@ export function treeData(settings) {
     const data = Object.entries(sets).map(set => {
         const tree = {name: "root", children: set[1]};
         const root = d3.hierarchy(tree).sum(d => d.size);
-        const chartData = d3.partition().size([2 * Math.PI, root.height + 1])(root);
+        const chartData = d3.partition().size([2 * Math.PI, root.height + 1])(
+            root
+        );
         chartData.each(d => {
             d.current = d;
-            d.mainValues = settings.mainValues.length === 1 ? d.value : [d.value, d.data.color];
+            d.mainValues =
+                settings.mainValues.length === 1
+                    ? d.value
+                    : [d.value, d.data.color];
             d.crossValue = d
                 .ancestors()
                 .slice(0, -1)
@@ -58,17 +73,26 @@ export function treeData(settings) {
             d.key = set[0];
         });
 
-        return {split: set[0], data: chartData, extents: getExtents(settings, set)};
+        return {
+            split: set[0],
+            data: chartData,
+            extents: getExtents(settings, set)
+        };
     });
 
     return data;
 }
 
-export const getDataValue = (d, aggregate, split) => (split.length ? d[`${split}|${aggregate.name}`] : d[aggregate.name]);
+export const getDataValue = (d, aggregate, split) =>
+    split.length ? d[`${split}|${aggregate.name}`] : d[aggregate.name];
 
 function getExtents(settings, [split, data]) {
     if (settings.mainValues.length > 1) {
-        const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
+        const min = Math.min(
+            ...settings.data.map(d =>
+                getDataValue(d, settings.mainValues[1], split)
+            )
+        );
         const max = Math.max(...data.map(d => d.color));
         return [min, max];
     }

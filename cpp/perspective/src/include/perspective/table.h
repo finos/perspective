@@ -19,25 +19,29 @@
 namespace perspective {
 
 /**
- * @brief the `Table` class encapsulates `t_data_table`, `t_pool` and `t_gnode`, offering
- * a unified public API for consumption by binding languages.
+ * @brief the `Table` class encapsulates `t_data_table`, `t_pool` and `t_gnode`,
+ * offering a unified public API for consumption by binding languages.
  *
  * By encapsulating business logic and the creation of internal structures,
- * the `Table` class handles data loading, table creation, and management of backend resources.
+ * the `Table` class handles data loading, table creation, and management of
+ * backend resources.
  */
 class PERSPECTIVE_EXPORT Table {
 public:
     PSP_NON_COPYABLE(Table);
 
     /**
-     * @brief Construct a `Table` object, which handles all operations related to `t_pool` and
-     * `t_gnode`, effectively acting as an orchestrator between those underlying components.
+     * @brief Construct a `Table` object, which handles all operations related
+     * to `t_pool` and `t_gnode`, effectively acting as an orchestrator between
+     * those underlying components.
      *
      * @param pool - the `t_pool` which manages the Table.
      * @param column_names
      * @param data_types
-     * @param limit - an upper bound on the number of rows in the Table (optional).
-     * @param index - a string column name to be used as a primary key. If not explicitly set, a primary key will be generated.
+     * @param limit - an upper bound on the number of rows in the Table
+     * (optional).
+     * @param index - a string column name to be used as a primary key. If not
+     * explicitly set, a primary key will be generated.
      * @param op
      */
     Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
@@ -45,8 +49,8 @@ public:
         std::string index);
 
     /**
-     * @brief Register the given `t_data_table` with the underlying pool and gnode, thus
-     * allowing operations on it.
+     * @brief Register the given `t_data_table` with the underlying pool and
+     * gnode, thus allowing operations on it.
      *
      * @param data_table
      * @param row_count
@@ -62,35 +66,40 @@ public:
     t_uindex size() const;
 
     /**
-     * @brief The schema of the underlying `t_data_table`, which contains the `psp_pkey`,
-     * `psp_op` and `psp_pkey` meta columns.
+     * @brief The schema of the underlying `t_data_table`, which contains the
+     * `psp_pkey`, `psp_op` and `psp_pkey` meta columns.
      *
-     * The output schema is generally subject to further processing before it is human-readable.
+     * The output schema is generally subject to further processing before it is
+     * human-readable.
      *
      * @return t_schema
      */
     t_schema get_schema() const;
 
     /**
-     * @brief Add computed columns to the `Table` by replacing `m_gnode` and the `t_data_table` that it tracks.
-     * 
-     * Given the new `computed_lambdas` property, which is a vector of lambdas that contain computed column functions
-     * to execute, append the new computed lambdas to the ones from the old `m_gnode` so as to maintain multiple
-     * computed columns.
+     * @brief Add computed columns to the `Table` by replacing `m_gnode` and the
+     * `t_data_table` that it tracks.
      *
-     * Used during construction of computed columns, as we don't need to create a new `Table`
-     * object each time.
+     * Given the new `computed_lambdas` property, which is a vector of lambdas
+     * that contain computed column functions to execute, append the new
+     * computed lambdas to the ones from the old `m_gnode` so as to maintain
+     * multiple computed columns.
+     *
+     * Used during construction of computed columns, as we don't need to create
+     * a new `Table` object each time.
      *
      * @param data_table
      * @param computed_lambdas
      */
-    void add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_def> computed_lambdas);
+    void add_computed_columns(std::shared_ptr<t_data_table> data_table,
+        std::vector<t_computed_column_def> computed_lambdas);
 
     /**
-     * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.
+     * @brief Given a schema, create a `t_gnode` that manages the
+     * `t_data_table`.
      *
-     * A `t_gnode` and `t_pool` must be created and registered in order for the core engine to
-     * work.
+     * A `t_gnode` and `t_pool` must be created and registered in order for the
+     * core engine to work.
      *
      * @param in_schema
      * @return std::shared_ptr<t_gnode>
@@ -105,26 +114,27 @@ public:
     void set_gnode(std::shared_ptr<t_gnode> gnode);
 
     /**
-     * @brief Unregister the gnode with the given `id` from this instance's `t_pool`, thus
-     * marking it for deletion.
+     * @brief Unregister the gnode with the given `id` from this instance's
+     * `t_pool`, thus marking it for deletion.
      *
      * @param id
      */
     void unregister_gnode(t_uindex id);
 
     /**
-     * @brief Reset the gnode with the given `id`, thus deregistering any `t_data_table`s
-     * associated with that gnode.
+     * @brief Reset the gnode with the given `id`, thus deregistering any
+     * `t_data_table`s associated with that gnode.
      *
      * @param id
      */
     void reset_gnode(t_uindex id);
 
     /**
-     * @brief The offset determines where we begin to write data into the Table. 
-     * Using `m_offset`, `m_limit`, and the length of the dataset, calculate the new position at which we write data.
-     * 
-     * @param row_count - the number of rows to write into the table 
+     * @brief The offset determines where we begin to write data into the Table.
+     * Using `m_offset`, `m_limit`, and the length of the dataset, calculate the
+     * new position at which we write data.
+     *
+     * @param row_count - the number of rows to write into the table
      */
     void calculate_offset(std::uint32_t row_count);
 
@@ -144,9 +154,10 @@ public:
 
 private:
     /**
-     * @brief Make sure that the table does not have an explicit index AND an implicit index (with the `__INDEX__` column in data).
-     * 
-     * @param column_names 
+     * @brief Make sure that the table does not have an explicit index AND an
+     * implicit index (with the `__INDEX__` column in data).
+     *
+     * @param column_names
      */
     void validate_columns(const std::vector<std::string>& column_names);
     /**
@@ -166,22 +177,25 @@ private:
     std::vector<t_dtype> m_data_types;
 
     /**
-     * @brief The row number at which we start to write into the Table. Recalculated on updates, removes, and inserts.
-     * 
+     * @brief The row number at which we start to write into the Table.
+     * Recalculated on updates, removes, and inserts.
+     *
      */
     std::uint32_t m_offset;
 
     /**
-     * @brief an upper bound on the number of total rows in the Table. 
-     * 
-     * When limit is set, new data that exceeds the limit will overwrite starting at row 0.
-     * Otherwise, limit is set to the highest number at 32 bits.
+     * @brief an upper bound on the number of total rows in the Table.
+     *
+     * When limit is set, new data that exceeds the limit will overwrite
+     * starting at row 0. Otherwise, limit is set to the highest number at 32
+     * bits.
      */
     const t_uindex m_limit;
 
     /**
-     * @brief The name of a column that should be used as the Table's primary key.
-     * 
+     * @brief The name of a column that should be used as the Table's primary
+     * key.
+     *
      */
     const std::string m_index;
     bool m_gnode_set;

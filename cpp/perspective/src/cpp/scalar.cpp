@@ -145,7 +145,9 @@ t_tscalar::canonical(t_dtype dtype) {
         case DTYPE_STR: {
             rval.m_type = DTYPE_STR;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Found unknown dtype."); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Found unknown dtype.");
+        }
     }
 
     return rval;
@@ -527,8 +529,8 @@ t_tscalar::mul(const t_tscalar& other) const {
 std::string
 t_tscalar::repr() const {
     std::stringstream ss;
-    ss << get_dtype_descr(static_cast<t_dtype>(m_type)) << ":" << get_status_descr(m_status)
-       << ":" << to_string();
+    ss << get_dtype_descr(static_cast<t_dtype>(m_type)) << ":"
+       << get_status_descr(m_status) << ":" << to_string();
     return ss.str();
 }
 
@@ -544,8 +546,8 @@ t_tscalar::is_floating_point() const {
 
 bool
 t_tscalar::is_signed() const {
-    return (m_type == DTYPE_INT64 || m_type == DTYPE_INT32 || m_type == DTYPE_INT16
-        || m_type == DTYPE_INT8);
+    return (m_type == DTYPE_INT64 || m_type == DTYPE_INT32
+        || m_type == DTYPE_INT16 || m_type == DTYPE_INT8);
 }
 
 t_tscalar::operator bool() const {
@@ -600,8 +602,8 @@ t_tscalar::operator bool() const {
         } break;
         default: {
 #ifdef PSP_DEBUG
-            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type " << m_type
-                      << std::endl;
+            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type "
+                      << m_type << std::endl;
 #endif
         }
     }
@@ -653,7 +655,8 @@ t_tscalar::to_string(bool for_expr) const {
         case DTYPE_DATE: {
             if (for_expr) {
                 auto d = get<t_date>();
-                ss << "date(" << d.year() << ", " << d.month() << ", " << d.day() << ")";
+                ss << "date(" << d.year() << ", " << d.month() << ", "
+                   << d.day() << ")";
             } else {
                 ss << get<t_date>();
             }
@@ -697,7 +700,9 @@ t_tscalar::to_string(bool for_expr) const {
             }
             return ss.str();
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unrecognized dtype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unrecognized dtype");
+        }
     }
     return std::string("null");
 }
@@ -745,7 +750,9 @@ t_tscalar::to_double() const {
             return get<bool>();
         } break;
         case DTYPE_NONE:
-        default: { return 0; }
+        default: {
+            return 0;
+        }
     }
 
     return 0;
@@ -787,7 +794,9 @@ t_tscalar::coerce_numeric_dtype(t_dtype dtype) const {
         case DTYPE_BOOL: {
             return coerce_numeric<bool>();
         } break;
-        default: { return *this; }
+        default: {
+            return *this;
+        }
     }
 
     return mknone();
@@ -836,7 +845,9 @@ t_tscalar::to_int64() const {
             return get<bool>();
         } break;
         case DTYPE_NONE:
-        default: { return 0; }
+        default: {
+            return 0;
+        }
     }
 
     return 0;
@@ -885,7 +896,9 @@ t_tscalar::to_uint64() const {
             return get<bool>();
         } break;
         case DTYPE_NONE:
-        default: { return 0; }
+        default: {
+            return 0;
+        }
     }
 
     return 0;
@@ -893,7 +906,8 @@ t_tscalar::to_uint64() const {
 
 bool
 t_tscalar::begins_with(const t_tscalar& other) const {
-    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR
+        || other.m_type != DTYPE_STR)
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
@@ -904,7 +918,8 @@ t_tscalar::begins_with(const t_tscalar& other) const {
 
 bool
 t_tscalar::ends_with(const t_tscalar& other) const {
-    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR
+        || other.m_type != DTYPE_STR)
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
@@ -916,7 +931,8 @@ t_tscalar::ends_with(const t_tscalar& other) const {
 
 bool
 t_tscalar::contains(const t_tscalar& other) const {
-    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR
+        || other.m_type != DTYPE_STR)
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
@@ -1087,7 +1103,9 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
         case FILTER_OP_IS_NOT_NULL: {
             return m_status == STATUS_VALID;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Invalid filter op"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Invalid filter op");
+        } break;
     }
 
     return false;

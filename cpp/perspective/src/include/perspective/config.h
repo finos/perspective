@@ -21,15 +21,16 @@
 namespace perspective {
 
 /**
- * @brief `t_config` contains metadata for the `View` and `t_ctx*` structures, containing
- * specifications for how pivots, columns, filters, and sorts should be constructed.
+ * @brief `t_config` contains metadata for the `View` and `t_ctx*` structures,
+ * containing specifications for how pivots, columns, filters, and sorts should
+ * be constructed.
  *
  */
 class PERSPECTIVE_EXPORT t_config {
 public:
     /**
-     * @brief Construct a config for a `View` object. Pivots are passed in as vectors of
-     * strings, which are converted to `t_pivot` objects.
+     * @brief Construct a config for a `View` object. Pivots are passed in as
+     * vectors of strings, which are converted to `t_pivot` objects.
      *
      * @param row_pivots
      * @param column_pivots
@@ -42,9 +43,11 @@ public:
      * @param column_only
      */
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& column_pivots, const std::vector<t_aggspec>& aggregates,
-        const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms,
+        const std::vector<std::string>& column_pivots,
+        const std::vector<t_aggspec>& aggregates,
+        const std::vector<t_sortspec>& sortspecs,
+        const std::vector<t_sortspec>& col_sortspecs, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms,
         const std::vector<std::string>& col_names, bool column_only);
 
     /**
@@ -54,12 +57,12 @@ public:
      * @param combiner
      * @param fterms specifications for filtering down the context
      */
-    t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+    t_config(const std::vector<std::string>& detail_columns,
+        t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
     /**
-     * @brief Construct a new config for a `t_ctx1` object, which has 1 or more `row_pivot`s
-     * applied.
+     * @brief Construct a new config for a `t_ctx1` object, which has 1 or more
+     * `row_pivot`s applied.
      *
      * @param row_pivots
      * @param aggregates
@@ -71,8 +74,8 @@ public:
         const std::vector<t_fterm>& fterms);
 
     /**
-     * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
-     * 1 or more `col_pivot`s applied.
+     * @brief Construct a new config for a `t_ctx2` object, which has 1 or more
+     * `row_pivot`s and 1 or more `col_pivot`s applied.
      *
      * @param row_pivots
      * @param col_pivots
@@ -83,22 +86,26 @@ public:
      * @param column_only
      */
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
+        const std::vector<std::string>& col_pivots,
+        const std::vector<t_aggspec>& aggregates, const t_totals totals,
+        t_filter_op combiner, const std::vector<t_fterm>& fterms,
         bool column_only);
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
+        const std::vector<std::string>& col_pivots,
+        const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
+        const std::vector<std::string>& col_pivots,
+        const std::vector<t_aggspec>& aggregates, const t_totals totals,
+        t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
+    t_config(const std::vector<t_pivot>& row_pivots,
+        const std::vector<t_aggspec>& aggregates);
 
-    t_config(
-        const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
 

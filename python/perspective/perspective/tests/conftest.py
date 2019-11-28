@@ -43,7 +43,8 @@ class Util:
                 return datetime(obj.year, obj.month, obj.day).timestamp()
         elif classname == "datetime":
             if six.PY2:
-                return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0))
+                return int((time.mktime(obj.timetuple()) +
+                            obj.microsecond / 1000000.0))
             else:
                 return obj.timestamp()
         else:

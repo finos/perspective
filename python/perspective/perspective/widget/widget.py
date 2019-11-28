@@ -57,7 +57,8 @@ def _serialize(data):
     elif isinstance(data, numpy.ndarray):
         # structured or record array
         if not isinstance(data.dtype.names, tuple):
-            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+            raise NotImplementedError(
+                "Data should be dict of numpy.ndarray or a structured array.")
         columns = [data[col].tolist() for col in data.dtype.names]
         return dict(zip(data.dtype.names, columns))
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
@@ -72,7 +73,8 @@ def _serialize(data):
             d[name] = values.tolist()
         return d
     else:
-        raise NotImplementedError("Cannot serialize a dataset of `{0}`.".format(str(type(data))))
+        raise NotImplementedError(
+            "Cannot serialize a dataset of `{0}`.".format(str(type(data))))
 
 
 class _PerspectiveWidgetMessage(object):
@@ -181,10 +183,12 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             self._predisplay_update_cache = []
 
         if index is not None and limit is not None:
-            raise PerspectiveError("Index and Limit cannot be set at the same time!")
+            raise PerspectiveError(
+                "Index and Limit cannot be set at the same time!")
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
-        if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
+        if isinstance(table_or_data, pandas.DataFrame) or isinstance(
+                table_or_data, pandas.Series):
             data, pivots = deconstruct_pandas(table_or_data)
             table_or_data = data
 
@@ -207,7 +211,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         if self.client:
             if isinstance(table_or_data, Table):
-                raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
+                raise PerspectiveError(
+                    "Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
 
             if index is not None:
                 self._client_options["index"] = index
@@ -215,7 +220,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if limit is not None:
                 self._client_options["limit"] = limit
 
-            # cache self._data so creating multiple views don't reserialize the same data
+            # cache self._data so creating multiple views don't reserialize the
+            # same data
             if not hasattr(self, "_data") or self._data is None:
                 self._data = _serialize(table_or_data)
         else:
@@ -223,7 +229,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             load_kwargs = {}
             if table_or_data is None:
                 if index is not None or limit is not None:
-                    raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
+                    raise PerspectiveError(
+                        "Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
             else:
                 if index is not None:
                     load_kwargs.update({"index": index})
@@ -239,7 +246,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         '''
         if self.client is True:
             # serialize the data and send a custom message to the browser
-            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+            if isinstance(data, pandas.DataFrame) or isinstance(
+                    data, pandas.Series):
                 data, _ = deconstruct_pandas(data)
             d = _serialize(data)
             self._data = d
@@ -260,7 +268,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 return
 
             # serialize the data and send a custom message to the browser
-            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+            if isinstance(data, pandas.DataFrame) or isinstance(
+                    data, pandas.Series):
                 data, _ = deconstruct_pandas(data)
             d = _serialize(data)
             self.post({
@@ -287,7 +296,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         '''Replaces the widget's `Table` with new data conforming to the same schema. Does not clear
         user-set state. If in client mode, serializes the data and sends it to the browser.'''
         if self.client is True:
-            if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+            if isinstance(data, pandas.DataFrame) or isinstance(
+                    data, pandas.Series):
                 data, _ = deconstruct_pandas(data)
             d = _serialize(data)
             self.post({
@@ -346,8 +356,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 self.send(msg.to_dict())
 
                 # In client mode, users can call `update()` before the widget is visible.
-                # This applies the updates after the viewer has loaded the initial dataset.
-                if self.client is True and len(self._predisplay_update_cache) > 0:
+                # This applies the updates after the viewer has loaded the
+                # initial dataset.
+                if self.client is True and len(
+                        self._predisplay_update_cache) > 0:
                     for data in self._predisplay_update_cache:
                         self.update(data)
             else:
@@ -368,7 +380,9 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if len(self._client_options.keys()) > 0:
                 msg_data["options"] = self._client_options
         elif self.table_name is not None:
-            # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
+            # Only pass back the table if it's been loaded. If the table isn't
+            # loaded, the `load()` method will handle synchronizing the
+            # front-end.
             msg_data = {
                 "table_name": self.table_name
             }
@@ -376,7 +390,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         if msg_data is not None:
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
-            raise PerspectiveError("Widget could not find a dataset or a `Table` to load.")
+            raise PerspectiveError(
+                "Widget could not find a dataset or a `Table` to load.")
 
     def _on_display(self, widget, **kwargs):
         '''When the widget has been displayed, make sure `displayed` is set to True so updates stop being cached.'''

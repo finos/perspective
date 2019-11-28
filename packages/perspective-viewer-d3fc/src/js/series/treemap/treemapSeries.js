@@ -7,17 +7,30 @@
  *
  */
 
-import {toggleLabels, adjustLabelsThatOverflow, selectVisibleNodes} from "./treemapLabel";
+import {
+    toggleLabels,
+    adjustLabelsThatOverflow,
+    selectVisibleNodes
+} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
 import {changeLevel, returnToLevel} from "./treemapTransitions";
 import {parentControls} from "./treemapControls";
 import {calculateRootLevelMap, saveLabelMap} from "./treemapLevelCalculation";
 
-export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
+export const nodeLevel = {
+    leaf: "leafnode",
+    branch: "branchnode",
+    root: "rootnode"
+};
 export const calcWidth = d => d.x1 - d.x0;
 export const calcHeight = d => d.y1 - d.y0;
 const isLeafNode = (maxDepth, d) => d.depth === maxDepth;
-const nodeLevelHelper = (maxDepth, d) => (d.depth === 0 ? nodeLevel.root : isLeafNode(maxDepth, d) ? nodeLevel.leaf : nodeLevel.branch);
+const nodeLevelHelper = (maxDepth, d) =>
+    d.depth === 0
+        ? nodeLevel.root
+        : isLeafNode(maxDepth, d)
+        ? nodeLevel.leaf
+        : nodeLevel.branch;
 
 export function treemapSeries() {
     let settings = null;
@@ -33,7 +46,10 @@ export function treemapSeries() {
         const maxDepth = data.height;
         if (!settings.treemapLevel) settings.treemapLevel = 0;
         if (!settings.treemapRoute) settings.treemapRoute = [];
-        const treemap = treemapLayout(treemapDiv.node().getBoundingClientRect().width, treemapDiv.node().getBoundingClientRect().height);
+        const treemap = treemapLayout(
+            treemapDiv.node().getBoundingClientRect().width,
+            treemapDiv.node().getBoundingClientRect().height
+        );
         treemap(data);
 
         const nodes = treemapSvg.selectAll("g").data(data.descendants());
@@ -43,7 +59,9 @@ export function treemapSeries() {
         nodesEnter.append("text");
 
         // Draw child nodes first
-        const nodesMerge = nodesEnter.merge(nodes).sort((a, b) => b.depth - a.depth);
+        const nodesMerge = nodesEnter
+            .merge(nodes)
+            .sort((a, b) => b.depth - a.depth);
 
         const rects = nodesMerge
             .select("rect")
@@ -68,10 +86,34 @@ export function treemapSeries() {
         adjustLabelsThatOverflow(selectVisibleNodes(nodesMerge));
         saveLabelMap(nodesMerge, 0);
 
-        if (settings.treemapRoute.length === 0) settings.treemapRoute.push(rootNode.crossValue);
-        rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls));
+        if (settings.treemapRoute.length === 0)
+            settings.treemapRoute.push(rootNode.crossValue);
+        rects
+            .filter(d => d.children)
+            .on("click", d =>
+                changeLevel(
+                    d,
+                    rects,
+                    nodesMerge,
+                    labels,
+                    settings,
+                    treemapDiv,
+                    treemapSvg,
+                    rootNode,
+                    parentCtrls
+                )
+            );
 
-        returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls);
+        returnToLevel(
+            rects,
+            nodesMerge,
+            labels,
+            settings,
+            treemapDiv,
+            treemapSvg,
+            rootNode,
+            parentCtrls
+        );
     };
 
     _treemapSeries.settings = (...args) => {

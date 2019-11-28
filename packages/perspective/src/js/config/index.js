@@ -9,7 +9,11 @@
 
 const DEFAULT_CONFIG = require("./settings.js").default;
 
-const NAMES = ["perspective.config.js", "perspective.config.json", "package.json"];
+const NAMES = [
+    "perspective.config.js",
+    "perspective.config.json",
+    "package.json"
+];
 
 module.exports.get_types = function() {
     return Object.keys(module.exports.get_config().types);
@@ -52,8 +56,10 @@ function mergeDeep(target, ...sources) {
 }
 
 function get_config_file() {
-    // eslint-disable-next-line no-undef
-    const REQUIRE = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__ : module.require;
+    const REQUIRE =
+        typeof __non_webpack_require__ !== "undefined"
+            ? __non_webpack_require__ // eslint-disable-line no-undef
+            : module.require;
     const path = REQUIRE("path");
     const fs = REQUIRE("fs");
     const [root, ...curr] = process.cwd().split(path.sep);
@@ -91,7 +97,12 @@ module.exports.override_config = function(config) {
 
 module.exports.get_config = function get_config() {
     if (!global.__PERSPECTIVE_CONFIG__) {
-        global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, typeof window === "undefined" ? get_config_file() : global.__TEMPLATE_CONFIG__ || {});
+        global.__PERSPECTIVE_CONFIG__ = mergeDeep(
+            DEFAULT_CONFIG,
+            typeof window === "undefined"
+                ? get_config_file()
+                : global.__TEMPLATE_CONFIG__ || {}
+        );
     }
     return global.__PERSPECTIVE_CONFIG__;
 };

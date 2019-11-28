@@ -81,7 +81,9 @@ function calc_rec(result, type, elem, types, iter, f) {
     for (const props of iter) {
         copy_defined(props, result[type], name => f(elem, name));
         for (const parent of types[type]) {
-            copy_defined(props, result[type], name => f(elem, `--${parent}${name}`));
+            copy_defined(props, result[type], name =>
+                f(elem, `--${parent}${name}`)
+            );
         }
     }
 }
@@ -131,13 +133,41 @@ export class PropsBuilder {
         if (!elem[STYLE_PROPERTIES]) {
             const types = get_type_deps();
             const result = (elem[STYLE_PROPERTIES] = {});
-            calc_rec(result, "", elem, types, this._staged_measures, get_measure);
+            calc_rec(
+                result,
+                "",
+                elem,
+                types,
+                this._staged_measures,
+                get_measure
+            );
             calc_rec(result, "", elem, types, this._staged_props, get_style);
             calc_rec(result, "", elem, types, this._staged_fonts, get_font);
             for (const type of get_types()) {
-                calc_rec(result, type, elem, types, this._staged_measures, get_measure);
-                calc_rec(result, type, elem, types, this._staged_props, get_style);
-                calc_rec(result, type, elem, types, this._staged_fonts, get_font);
+                calc_rec(
+                    result,
+                    type,
+                    elem,
+                    types,
+                    this._staged_measures,
+                    get_measure
+                );
+                calc_rec(
+                    result,
+                    type,
+                    elem,
+                    types,
+                    this._staged_props,
+                    get_style
+                );
+                calc_rec(
+                    result,
+                    type,
+                    elem,
+                    types,
+                    this._staged_fonts,
+                    get_font
+                );
             }
         }
         return elem[STYLE_PROPERTIES];

@@ -13,9 +13,19 @@ import * as sinon from "sinon";
 const settings = {
     colorStyles: {
         gradient: {
-            positive: [[0, "rgb(0, 0, 0)"], [1, "rgb(100, 0, 0)"]],
-            negative: [[0, "rgb(0, 0, 0)"], [1, "rgb(0, 100, 0)"]],
-            full: [[0, "rgb(100, 0, 0)"], [0.5, "rgb(0, 0, 0)"], [1, "rgb(0, 0, 100)"]]
+            positive: [
+                [0, "rgb(0, 0, 0)"],
+                [1, "rgb(100, 0, 0)"]
+            ],
+            negative: [
+                [0, "rgb(0, 0, 0)"],
+                [1, "rgb(0, 100, 0)"]
+            ],
+            full: [
+                [0, "rgb(100, 0, 0)"],
+                [0.5, "rgb(0, 0, 0)"],
+                [1, "rgb(0, 0, 100)"]
+            ]
         }
     }
 };
@@ -48,7 +58,11 @@ describe("seriesRange", () => {
         });
 
         test("create linear range from data extent", () => {
-            const result = seriesRange.seriesLinearRange(settings, [], "test-value");
+            const result = seriesRange.seriesLinearRange(
+                settings,
+                [],
+                "test-value"
+            );
 
             expect(result.domain()).toEqual([100, 1100]);
             result.range([0, 100]);
@@ -60,7 +74,12 @@ describe("seriesRange", () => {
         });
 
         test("create linear range from custom extent", () => {
-            const result = seriesRange.seriesLinearRange(settings, [], "test-value", [200, 300]);
+            const result = seriesRange.seriesLinearRange(
+                settings,
+                [],
+                "test-value",
+                [200, 300]
+            );
 
             sinon.assert.notCalled(domainStub);
             expect(result.domain()).toEqual([200, 300]);
@@ -79,7 +98,11 @@ describe("seriesRange", () => {
 
         test("return color range from data extent", () => {
             const data = [];
-            const result = seriesRange.seriesColorRange(settings, data, "test-value");
+            const result = seriesRange.seriesColorRange(
+                settings,
+                data,
+                "test-value"
+            );
 
             expect(result.domain()).toEqual([100, 1100]);
 
@@ -90,14 +113,24 @@ describe("seriesRange", () => {
         });
 
         test("create linear range from custom extent", () => {
-            const result = seriesRange.seriesColorRange(settings, [], "test-value", [200, 300]);
+            const result = seriesRange.seriesColorRange(
+                settings,
+                [],
+                "test-value",
+                [200, 300]
+            );
 
             sinon.assert.notCalled(domainStub);
             expect(result.domain()).toEqual([200, 300]);
         });
 
         test("return negative color range from custom extent", () => {
-            const result = seriesRange.seriesColorRange(settings, [], "test-value", [-200, -100]);
+            const result = seriesRange.seriesColorRange(
+                settings,
+                [],
+                "test-value",
+                [-200, -100]
+            );
 
             expect(result(-200)).toEqual("rgb(0, 0, 0)");
             expect(result(-160)).toEqual("rgb(0, 40, 0)");
@@ -106,7 +139,12 @@ describe("seriesRange", () => {
         });
 
         test("return full color range from custom extent", () => {
-            const result = seriesRange.seriesColorRange(settings, [], "test-value", [-100, 100]);
+            const result = seriesRange.seriesColorRange(
+                settings,
+                [],
+                "test-value",
+                [-100, 100]
+            );
 
             expect(result(-100)).toEqual("rgb(100, 0, 0)");
             expect(result(-40)).toEqual("rgb(40, 0, 0)");

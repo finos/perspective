@@ -51,5 +51,7 @@ export function ohlcCandleSeries(settings, seriesCanvas, upColor) {
             context.fillStyle = setOpacity(0.25)(avgColor(d[0].key));
         });
 
-    return fc.seriesCanvasMulti().series([bollingerAreaSeries, series, bollingerAverageSeries]);
+    return fc
+        .seriesCanvasMulti()
+        .series([bollingerAreaSeries, series, bollingerAverageSeries]);
 }

@@ -28,7 +28,11 @@ export const extentLinear = function() {
 
         let _iterator = accessors[Symbol.iterator]();
         try {
-            for (let _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            for (
+                let _step;
+                !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+                _iteratorNormalCompletion = true
+            ) {
                 let accessor = _step.value;
 
                 for (let i = 0; i < data.length; i++) {
@@ -57,11 +61,24 @@ export const extentLinear = function() {
 
         let extent$$1 = [d3Array.min(values), d3Array.max(values)];
 
-        extent$$1[0] = extent$$1[0] == null ? d3Array.min(include) : d3Array.min([extent$$1[0]].concat(toConsumableArray(include)));
-        extent$$1[1] = extent$$1[1] == null ? d3Array.max(include) : d3Array.max([extent$$1[1]].concat(toConsumableArray(include)));
+        extent$$1[0] =
+            extent$$1[0] == null
+                ? d3Array.min(include)
+                : d3Array.min(
+                      [extent$$1[0]].concat(toConsumableArray(include))
+                  );
+        extent$$1[1] =
+            extent$$1[1] == null
+                ? d3Array.max(include)
+                : d3Array.max(
+                      [extent$$1[1]].concat(toConsumableArray(include))
+                  );
 
         if (symmetricalAbout != null) {
-            let halfRange = Math.max(Math.abs(extent$$1[1] - symmetricalAbout), Math.abs(extent$$1[0] - symmetricalAbout));
+            let halfRange = Math.max(
+                Math.abs(extent$$1[1] - symmetricalAbout),
+                Math.abs(extent$$1[0] - symmetricalAbout)
+            );
             extent$$1[0] = symmetricalAbout - halfRange;
             extent$$1[1] = symmetricalAbout + halfRange;
         }
@@ -91,7 +108,9 @@ export const extentLinear = function() {
         if (!arguments.length) {
             return paddingStrategy.padUnit;
         }
-        paddingStrategy.padUnit(arguments.length <= 0 ? undefined : arguments[0]);
+        paddingStrategy.padUnit(
+            arguments.length <= 0 ? undefined : arguments[0]
+        );
         return instance;
     };
 

@@ -21,9 +21,37 @@ const WORKER = window.perspective.worker({
     }
 });
 
-const SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N", "AMD.N", "QQQ.N", "ZNGA.N", "NVDA.N"];
+const SECURITIES = [
+    "AAPL.N",
+    "AMZN.N",
+    "QQQ.N",
+    "NVDA.N",
+    "TSLA.N",
+    "FB.N",
+    "MSFT.N",
+    "TLT.N",
+    "XIV.N",
+    "YY.N",
+    "CSCO.N",
+    "GOOGL.N",
+    "PCLN.N",
+    "AMD.N",
+    "QQQ.N",
+    "ZNGA.N",
+    "NVDA.N"
+];
 
-const CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
+const CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty"
+];
 
 function newRows() {
     const rows = [];

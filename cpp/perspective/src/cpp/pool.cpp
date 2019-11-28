@@ -36,8 +36,8 @@ empty_callback() {
 t_pool::t_pool()
     : m_sleep(0)
     , m_update_delegate(empty_callback()) {
-        m_run.clear();
-    }
+    m_run.clear();
+}
 
 #elif defined PSP_ENABLE_PYTHON
 
@@ -49,15 +49,15 @@ empty_callback() {
 t_pool::t_pool()
     : m_sleep(0)
     , m_update_delegate(empty_callback()) {
-        m_run.clear();
-    }
+    m_run.clear();
+}
 
 #else
 
 t_pool::t_pool()
     : m_sleep(0) {
-        m_run.clear();
-    }
+    m_run.clear();
+}
 
 #endif
 
@@ -85,7 +85,8 @@ t_pool::register_gnode(t_gnode* node) {
     node->set_pool_cleanup([this, id]() { this->m_gnodes[id] = 0; });
 
     if (t_env::log_progress()) {
-        std::cout << "t_pool.register_gnode node => " << node << " rv => " << id << std::endl;
+        std::cout << "t_pool.register_gnode node => " << node << " rv => " << id
+                  << std::endl;
     }
 
     return id;
@@ -103,14 +104,15 @@ t_pool::unregister_gnode(t_uindex idx) {
 }
 
 void
-t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table, const std::vector<t_computed_column_def>& computed_lambdas) {
-   {
+t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table,
+    const std::vector<t_computed_column_def>& computed_lambdas) {
+    {
         std::lock_guard<std::mutex> lg(m_mtx);
         m_data_remaining.store(true);
         if (m_gnodes[gnode_id]) {
             m_gnodes[gnode_id]->_send(port_id, table, computed_lambdas);
         }
-    } 
+    }
 }
 
 void
@@ -123,8 +125,9 @@ t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table) {
         }
 
         if (t_env::log_progress()) {
-            std::cout << "t_pool.send gnode_id => " << gnode_id << " port_id => " << port_id
-                      << " tbl_size => " << table.size() << std::endl;
+            std::cout << "t_pool.send gnode_id => " << gnode_id
+                      << " port_id => " << port_id << " tbl_size => "
+                      << table.size() << std::endl;
         }
 
         if (t_env::log_data_pool_send()) {
@@ -188,8 +191,8 @@ t_pool::get_trees() {
 
 #ifdef PSP_ENABLE_WASM
 void
-t_pool::register_context(
-    t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr) {
+t_pool::register_context(t_uindex gnode_id, const std::string& name,
+    t_ctx_type type, std::int32_t ptr) {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
         return;
@@ -198,8 +201,8 @@ t_pool::register_context(
 
 #else
 void
-t_pool::register_context(
-    t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr) {
+t_pool::register_context(t_uindex gnode_id, const std::string& name,
+    t_ctx_type type, std::int64_t ptr) {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
         return;
@@ -216,13 +219,13 @@ t_pool::set_update_delegate(t_val ud) {
 
 void
 t_pool::notify_userspace() {
-    #if defined PSP_ENABLE_WASM
-        m_update_delegate.call<void>("_update_callback");
-    #elif PSP_ENABLE_PYTHON
-        if (!m_update_delegate.is_none()) {
-            m_update_delegate.attr("_update_callback")();
-        }
-    #endif
+#if defined PSP_ENABLE_WASM
+    m_update_delegate.call<void>("_update_callback");
+#elif PSP_ENABLE_PYTHON
+    if (!m_update_delegate.is_none()) {
+        m_update_delegate.attr("_update_callback")();
+    }
+#endif
 }
 
 void
@@ -231,7 +234,8 @@ t_pool::unregister_context(t_uindex gnode_id, const std::string& name) {
 
     if (t_env::log_progress()) {
         std::cout << repr() << " << t_pool.unregister_context: "
-                  << " gnode_id => " << gnode_id << " name => " << name << std::endl;
+                  << " gnode_id => " << gnode_id << " name => " << name
+                  << std::endl;
     }
 
     if (!validate_gnode_id(gnode_id))
@@ -246,7 +250,8 @@ t_pool::get_data_remaining() const {
 }
 
 std::vector<t_tscalar>
-t_pool::get_row_data_pkeys(t_uindex gnode_id, const std::vector<t_tscalar>& pkeys) {
+t_pool::get_row_data_pkeys(
+    t_uindex gnode_id, const std::vector<t_tscalar>& pkeys) {
     std::lock_guard<std::mutex> lg(m_mtx);
 
     if (!validate_gnode_id(gnode_id))
@@ -256,8 +261,8 @@ t_pool::get_row_data_pkeys(t_uindex gnode_id, const std::vector<t_tscalar>& pkey
 
     if (t_env::log_progress()) {
         std::cout << "t_pool.get_row_data_pkeys: "
-                  << " gnode_id => " << gnode_id << " pkeys => " << pkeys << " rv => " << rv
-                  << std::endl;
+                  << " gnode_id => " << gnode_id << " pkeys => " << pkeys
+                  << " rv => " << rv << std::endl;
     }
 
     return rv;
@@ -278,8 +283,8 @@ t_pool::get_contexts_last_updated() {
         for (const auto& ctx_name : updated_contexts) {
             if (t_env::log_progress()) {
                 std::cout << "t_pool.get_contexts_last_updated: "
-                          << " gnode_id => " << gnode_id << " ctx_name => " << ctx_name
-                          << std::endl;
+                          << " gnode_id => " << gnode_id << " ctx_name => "
+                          << ctx_name << std::endl;
             }
             rval.push_back(t_updctx(gnode_id, ctx_name));
         }
@@ -310,8 +315,8 @@ t_pool::pprint_registered() const {
         auto ctxnames = m_gnodes[idx]->get_registered_contexts();
 
         for (const auto& cname : ctxnames) {
-            std::cout << self << " gnode_id => " << gnode_id << " ctxname => " << cname
-                      << std::endl;
+            std::cout << self << " gnode_id => " << gnode_id << " ctxname => "
+                      << cname << std::endl;
         }
     }
 }
@@ -380,7 +385,8 @@ t_pool::get_gnodes_last_updated() {
 t_gnode*
 t_pool::get_gnode(t_uindex idx) {
     std::lock_guard<std::mutex> lg(m_mtx);
-    PSP_VERBOSE_ASSERT(idx < m_gnodes.size() && m_gnodes[idx], "Bad gnode encountered");
+    PSP_VERBOSE_ASSERT(
+        idx < m_gnodes.size() && m_gnodes[idx], "Bad gnode encountered");
     return m_gnodes[idx];
 }
 

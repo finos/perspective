@@ -35,7 +35,10 @@ class D3FCChartElement extends HTMLElement {
         this._settings = this._configureSettings(this._settings, settings);
         initialiseStyles(this._container, this._settings);
 
-        if ((this._settings.data && this._settings.data.length > 0) || chart.plugin.type !== this._chart.plugin.type) {
+        if (
+            (this._settings.data && this._settings.data.length > 0) ||
+            chart.plugin.type !== this._chart.plugin.type
+        ) {
             this.remove();
         }
         this.draw();
@@ -54,7 +57,10 @@ class D3FCChartElement extends HTMLElement {
             this._settings.size = this._container.getBoundingClientRect();
 
             if (this._settings.data.length > 0) {
-                this._chart(containerDiv.attr("class", chartClass), this._settings);
+                this._chart(
+                    containerDiv.attr("class", chartClass),
+                    this._settings
+                );
             } else {
                 containerDiv.attr("class", `${chartClass} disabled`);
             }
@@ -78,7 +84,15 @@ class D3FCChartElement extends HTMLElement {
     }
 
     getSettings() {
-        const excludeSettings = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
+        const excludeSettings = [
+            "crossValues",
+            "mainValues",
+            "splitValues",
+            "filter",
+            "data",
+            "size",
+            "colorStyles"
+        ];
         const settings = {...this._settings};
         excludeSettings.forEach(s => {
             delete settings[s];
@@ -98,9 +112,22 @@ class D3FCChartElement extends HTMLElement {
                 return {...oldSettings, ...newSettings};
             }
 
-            const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues];
-            const newValues = [newSettings.crossValues, newSettings.mainValues, newSettings.splitValues];
-            if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data, colorStyles: null};
+            const oldValues = [
+                oldSettings.crossValues,
+                oldSettings.mainValues,
+                oldSettings.splitValues
+            ];
+            const newValues = [
+                newSettings.crossValues,
+                newSettings.mainValues,
+                newSettings.splitValues
+            ];
+            if (areArraysEqualSimple(oldValues, newValues))
+                return {
+                    ...oldSettings,
+                    data: newSettings.data,
+                    colorStyles: null
+                };
         }
         this.remove();
         return newSettings;
@@ -108,7 +135,9 @@ class D3FCChartElement extends HTMLElement {
 }
 
 function getD3FCStyles() {
-    const headerStyles = document.querySelector("head").querySelectorAll("style");
+    const headerStyles = document
+        .querySelector("head")
+        .querySelectorAll("style");
     const d3fcStyles = [];
     headerStyles.forEach(s => {
         if (s.innerText.indexOf("d3fc-") !== -1) {

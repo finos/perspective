@@ -16,6 +16,7 @@ from ..table import Table
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
     '''PerspectiveViewer wraps the `perspective.Table` API and exposes an API around creating views, loading data, and updating data.'''
+
     def __init__(self,
                  plugin='hypergrid',
                  columns=None,
@@ -63,7 +64,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             >>> viewer = PerspectiveViewer(aggregates={"a": "avg"}, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
         '''
 
-        # Create an instance of `PerspectiveManager`, which receives messages from the `PerspectiveJupyterClient` on the front-end.
+        # Create an instance of `PerspectiveManager`, which receives messages
+        # from the `PerspectiveJupyterClient` on the front-end.
         self.manager = PerspectiveManager()
         self.table_name = None  # not a traitlet - only used in the python side of the viewer
         self.view_name = None
@@ -137,7 +139,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if self.table_name is not None:
             self.reset()
 
-        # If the user does not set columns to show, synchronize viewer state with dataset.
+        # If the user does not set columns to show, synchronize viewer state
+        # with dataset.
         if len(self.columns) == 0:
             self.columns = table.columns()
 

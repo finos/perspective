@@ -7,7 +7,17 @@
  *
  */
 
-import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
+import {
+    dragend,
+    column_dragend,
+    column_dragleave,
+    column_dragover,
+    column_drop,
+    drop,
+    dragenter,
+    dragover,
+    dragleave
+} from "./dragdrop.js";
 
 import {DomElement} from "./dom_element.js";
 
@@ -37,7 +47,11 @@ export class ActionElement extends DomElement {
             this._show_config = !this._show_config;
             this._plugin.resize.call(this, true);
             this._hide_context_menu();
-            this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
+            this.dispatchEvent(
+                new CustomEvent("perspective-toggle-settings", {
+                    detail: this._show_config
+                })
+            );
         }
     }
 
@@ -54,14 +68,18 @@ export class ActionElement extends DomElement {
 
     // edits state
     _set_computed_column_input(event) {
-        event.detail.target.appendChild(this._new_row(event.detail.column.name, event.detail.column.type));
+        event.detail.target.appendChild(
+            this._new_row(event.detail.column.name, event.detail.column.type)
+        );
         this._update_column_view();
     }
 
     // edits state
     _validate_computed_column(event) {
         const new_column = event.detail;
-        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
+        let computed_columns = JSON.parse(
+            this.getAttribute("computed-columns")
+        );
         if (computed_columns === null) {
             computed_columns = [];
         }
@@ -105,13 +123,16 @@ export class ActionElement extends DomElement {
 
     _column_visibility_clicked(ev) {
         let parent = ev.currentTarget;
-        let is_active = parent.parentElement.getAttribute("id") === "active_columns";
+        let is_active =
+            parent.parentElement.getAttribute("id") === "active_columns";
         if (is_active) {
             if (this._get_visible_column_count() === 1) {
                 return;
             }
             if (ev.detail.shiftKey) {
-                for (let child of Array.prototype.slice.call(this._active_columns.children)) {
+                for (let child of Array.prototype.slice.call(
+                    this._active_columns.children
+                )) {
                     if (child !== parent) {
                         this._active_columns.removeChild(child);
                     }
@@ -121,18 +142,33 @@ export class ActionElement extends DomElement {
             }
         } else {
             // check if we're manipulating computed column input
-            if (ev.path && ev.path[1].classList.contains("psp-cc-computation__input-column")) {
+            if (
+                ev.path &&
+                ev.path[1].classList.contains(
+                    "psp-cc-computation__input-column"
+                )
+            ) {
                 //  this._computed_column._register_inputs();
-                this._computed_column.deselect_column(ev.currentTarget.getAttribute("name"));
+                this._computed_column.deselect_column(
+                    ev.currentTarget.getAttribute("name")
+                );
                 this._update_column_view();
                 return;
             }
-            if ((ev.detail.shiftKey && this._plugin.selectMode === "toggle") || (!ev.detail.shiftKey && this._plugin.selectMode === "select")) {
-                for (let child of Array.prototype.slice.call(this._active_columns.children)) {
+            if (
+                (ev.detail.shiftKey && this._plugin.selectMode === "toggle") ||
+                (!ev.detail.shiftKey && this._plugin.selectMode === "select")
+            ) {
+                for (let child of Array.prototype.slice.call(
+                    this._active_columns.children
+                )) {
                     this._active_columns.removeChild(child);
                 }
             }
-            let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"));
+            let row = this._new_row(
+                parent.getAttribute("name"),
+                parent.getAttribute("type")
+            );
             this._active_columns.appendChild(row);
         }
         this._check_responsive_layout();
@@ -144,7 +180,9 @@ export class ActionElement extends DomElement {
         let aggregates = this.get_aggregate_attribute();
         let new_aggregates = this._get_view_aggregates();
         for (let aggregate of aggregates) {
-            let updated_agg = new_aggregates.find(x => x.column === aggregate.column);
+            let updated_agg = new_aggregates.find(
+                x => x.column === aggregate.column
+            );
             if (updated_agg) {
                 aggregate.op = updated_agg.op;
             }
@@ -171,13 +209,20 @@ export class ActionElement extends DomElement {
             sort_orders = sort_orders.map(x => `${x} abs`);
         }
         sort_orders.push("none");
-        return sort_orders[(sort_orders.indexOf(sort) + 1) % sort_orders.length];
+        return sort_orders[
+            (sort_orders.indexOf(sort) + 1) % sort_orders.length
+        ];
     }
 
     _sort_order_clicked(event) {
         const row = event.target;
-        const abs_sorting = event.detail.shiftKey && row.getAttribute("type") !== "string";
-        const new_sort_order = this._increment_sort(row.getAttribute("sort-order"), this._get_view_column_pivots().length > 0, abs_sorting);
+        const abs_sorting =
+            event.detail.shiftKey && row.getAttribute("type") !== "string";
+        const new_sort_order = this._increment_sort(
+            row.getAttribute("sort-order"),
+            this._get_view_column_pivots().length > 0,
+            abs_sorting
+        );
         row.setAttribute("sort-order", new_sort_order);
 
         const sort = this._get_view_sorts();
@@ -216,7 +261,10 @@ export class ActionElement extends DomElement {
         const start = event.clientX;
         const width = this._side_panel.offsetWidth;
         const resize = event => {
-            const new_width = Math.max(0, Math.min(width + (event.clientX - start), this.offsetWidth - 10));
+            const new_width = Math.max(
+                0,
+                Math.min(width + (event.clientX - start), this.offsetWidth - 10)
+            );
             this._side_panel.style.width = `${new_width}px`;
             if (this._plugin) {
                 this._resize_handler();
@@ -260,28 +308,74 @@ export class ActionElement extends DomElement {
         this._filters.addEventListener("dragover", dragover.bind(this));
         this._filters.addEventListener("dragleave", dragleave.bind(this));
         this._active_columns.addEventListener("drop", column_drop.bind(this));
-        this._active_columns.addEventListener("dragenter", dragenter.bind(this));
-        this._active_columns.addEventListener("dragend", column_dragend.bind(this));
-        this._active_columns.addEventListener("dragover", column_dragover.bind(this));
-        this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_column.addEventListener("click", this._open_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
+        this._active_columns.addEventListener(
+            "dragenter",
+            dragenter.bind(this)
+        );
+        this._active_columns.addEventListener(
+            "dragend",
+            column_dragend.bind(this)
+        );
+        this._active_columns.addEventListener(
+            "dragover",
+            column_dragover.bind(this)
+        );
+        this._active_columns.addEventListener(
+            "dragleave",
+            column_dragleave.bind(this)
+        );
+        this._add_computed_column.addEventListener(
+            "click",
+            this._open_computed_column.bind(this)
+        );
+        this._computed_column.addEventListener(
+            "perspective-computed-column-save",
+            this._validate_computed_column.bind(this)
+        );
+        this._computed_column.addEventListener(
+            "perspective-computed-column-update",
+            this._set_computed_column_input.bind(this)
+        );
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
-        this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
-        this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
+        this._config_button.addEventListener(
+            "mousedown",
+            this._toggle_config.bind(this)
+        );
+        this._config_button.addEventListener(
+            "contextmenu",
+            this._show_context_menu.bind(this)
+        );
         this._reset_button.addEventListener("click", this.reset.bind(this));
-        this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
-        this._download_button.addEventListener("click", event => this.download(event.shiftKey));
-        this._transpose_button.addEventListener("click", this._transpose.bind(this));
+        this._copy_button.addEventListener("click", event =>
+            this.copy(event.shiftKey)
+        );
+        this._download_button.addEventListener("click", event =>
+            this.download(event.shiftKey)
+        );
+        this._transpose_button.addEventListener(
+            "click",
+            this._transpose.bind(this)
+        );
         this._drop_target.addEventListener("dragover", dragover.bind(this));
-        this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
-        this._resize_bar.addEventListener("dblclick", this._reset_sidepanel.bind(this));
+        this._resize_bar.addEventListener(
+            "mousedown",
+            this._resize_sidepanel.bind(this)
+        );
+        this._resize_bar.addEventListener(
+            "dblclick",
+            this._reset_sidepanel.bind(this)
+        );
 
-        this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
+        this._vis_selector.addEventListener(
+            "change",
+            this._vis_selector_changed.bind(this)
+        );
 
         this._plugin_information_action.addEventListener("click", () => {
-            this._debounce_update({ignore_size_check: true, limit_points: false});
+            this._debounce_update({
+                ignore_size_check: true,
+                limit_points: false
+            });
             this._plugin_information.classList.add("hidden");
         });
 

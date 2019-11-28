@@ -15,8 +15,8 @@
 namespace perspective {
 
 template <typename DATA_T>
-class t_iter : public std::iterator<std::random_access_iterator_tag, DATA_T, std::ptrdiff_t,
-                   DATA_T*, DATA_T&> {
+class t_iter : public std::iterator<std::random_access_iterator_tag, DATA_T,
+                   std::ptrdiff_t, DATA_T*, DATA_T&> {
 public:
     t_iter(DATA_T* ptr = nullptr) { m_ptr = ptr; }
 

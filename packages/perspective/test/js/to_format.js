@@ -15,11 +15,46 @@ var int_float_string_data = [
 ];
 
 const pivoted_output = [
-    {__ROW_PATH__: [], int: 10, float: 15.75, string: 4, datetime: 4, __INDEX__: [3, 2, 1, 0]},
-    {__ROW_PATH__: [1], int: 1, float: 2.25, string: 1, datetime: 1, __INDEX__: [0]},
-    {__ROW_PATH__: [2], int: 2, float: 3.5, string: 1, datetime: 1, __INDEX__: [1]},
-    {__ROW_PATH__: [3], int: 3, float: 4.75, string: 1, datetime: 1, __INDEX__: [2]},
-    {__ROW_PATH__: [4], int: 4, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]}
+    {
+        __ROW_PATH__: [],
+        int: 10,
+        float: 15.75,
+        string: 4,
+        datetime: 4,
+        __INDEX__: [3, 2, 1, 0]
+    },
+    {
+        __ROW_PATH__: [1],
+        int: 1,
+        float: 2.25,
+        string: 1,
+        datetime: 1,
+        __INDEX__: [0]
+    },
+    {
+        __ROW_PATH__: [2],
+        int: 2,
+        float: 3.5,
+        string: 1,
+        datetime: 1,
+        __INDEX__: [1]
+    },
+    {
+        __ROW_PATH__: [3],
+        int: 3,
+        float: 4.75,
+        string: 1,
+        datetime: 1,
+        __INDEX__: [2]
+    },
+    {
+        __ROW_PATH__: [4],
+        int: 4,
+        float: 5.25,
+        string: 1,
+        datetime: 1,
+        __INDEX__: [3]
+    }
 ];
 
 module.exports = perspective => {
@@ -139,7 +174,9 @@ module.exports = perspective => {
             let json = await view.to_json({
                 start_row: 1
             });
-            expect(json).toEqual([{"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}]);
+            expect(json).toEqual([
+                {"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}
+            ]);
         });
 
         it("two-sided views should have row paths", async function() {
@@ -196,19 +233,31 @@ module.exports = perspective => {
         });
 
         it("should return dates in native form by default", async function() {
-            let table = perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
+            let table = perspective.table([
+                {datetime: new Date("2016-06-13")},
+                {datetime: new Date("2016-06-14")}
+            ]);
             let view = table.view();
             let json = await view.to_json();
-            expect(json).toEqual([{datetime: 1465776000000}, {datetime: 1465862400000}]);
+            expect(json).toEqual([
+                {datetime: 1465776000000},
+                {datetime: 1465862400000}
+            ]);
             view.delete();
             table.delete();
         });
 
         it("should return dates in readable format on passing string in options", async function() {
-            let table = perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
+            let table = perspective.table([
+                {datetime: new Date("2016-06-13")},
+                {datetime: new Date("2016-06-14")}
+            ]);
             let view = table.view();
             let json = await view.to_json({date_format: "en-US"});
-            expect(json).toEqual([{datetime: "6/13/2016"}, {datetime: "6/14/2016"}]);
+            expect(json).toEqual([
+                {datetime: "6/13/2016"},
+                {datetime: "6/14/2016"}
+            ]);
             view.delete();
             table.delete();
         });
@@ -222,9 +271,21 @@ module.exports = perspective => {
             });
             let json = await view.to_json({leaves_only: true});
             expect(json).toEqual([
-                {__ROW_PATH__: [1], datetime: 1, float: 2.25, int: 1, string: 1},
+                {
+                    __ROW_PATH__: [1],
+                    datetime: 1,
+                    float: 2.25,
+                    int: 1,
+                    string: 1
+                },
                 {__ROW_PATH__: [2], datetime: 1, float: 3.5, int: 2, string: 1},
-                {__ROW_PATH__: [3], datetime: 1, float: 4.75, int: 3, string: 1},
+                {
+                    __ROW_PATH__: [3],
+                    datetime: 1,
+                    float: 4.75,
+                    int: 3,
+                    string: 1
+                },
                 {__ROW_PATH__: [4], datetime: 1, float: 5.25, int: 4, string: 1}
             ]);
         });
@@ -240,7 +301,15 @@ module.exports = perspective => {
             let arrow = await view.to_arrow();
             let json = await view.to_json();
 
-            expect(json).toEqual([{bool: true}, {bool: false}, {bool: true}, {bool: false}, {bool: true}, {bool: false}, {bool: false}]);
+            expect(json).toEqual([
+                {bool: true},
+                {bool: false},
+                {bool: true},
+                {bool: false},
+                {bool: true},
+                {bool: false},
+                {bool: false}
+            ]);
 
             let table2 = perspective.table(arrow);
             let view2 = table2.view();
@@ -383,7 +452,10 @@ module.exports = perspective => {
 
         it("Transitive arrow output 2-sided", async function() {
             let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
+            let view = table.view({
+                row_pivots: ["string"],
+                column_pivots: ["int"]
+            });
             let json = await view.to_json();
             let arrow = await view.to_arrow();
             let table2 = perspective.table(arrow);
@@ -441,7 +513,9 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for float indexed table", async function() {
-                    let table = perspective.table(int_float_string_data, {index: "float"});
+                    let table = perspective.table(int_float_string_data, {
+                        index: "float"
+                    });
                     let view = table.view();
                     let json = await view.to_json({
                         start_row: 0,
@@ -454,7 +528,9 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for string indexed table", async function() {
-                    let table = perspective.table(int_float_string_data, {index: "string"});
+                    let table = perspective.table(int_float_string_data, {
+                        index: "string"
+                    });
                     let view = table.view();
                     let json = await view.to_json({
                         start_row: 0,
@@ -480,7 +556,13 @@ module.exports = perspective => {
                         end_row: 2,
                         index: true
                     });
-                    expect(json).toEqual([{int: 2, datetime: data[1].datetime.getTime(), __INDEX__: [data[1].datetime.getTime()]}]);
+                    expect(json).toEqual([
+                        {
+                            int: 2,
+                            datetime: data[1].datetime.getTime(),
+                            __INDEX__: [data[1].datetime.getTime()]
+                        }
+                    ]);
                 });
 
                 it("should return correct pkey for all rows + columns on an unindexed table", async function() {
@@ -496,7 +578,9 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for all rows + columns on an indexed table", async function() {
-                    let table = perspective.table(int_float_string_data, {index: "string"});
+                    let table = perspective.table(int_float_string_data, {
+                        index: "string"
+                    });
                     let view = table.view();
                     let json = await view.to_json({
                         index: true

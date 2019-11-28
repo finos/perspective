@@ -17,12 +17,17 @@ export class StateElement extends HTMLElement {
             view = Object.keys(current_renderers)[0];
         }
         this.setAttribute("plugin", view);
-        return current_renderers[view] || current_renderers[Object.keys(current_renderers)[0]];
+        return (
+            current_renderers[view] ||
+            current_renderers[Object.keys(current_renderers)[0]]
+        );
     }
 
     _get_view_dom_columns(selector, callback) {
         selector = selector || "#active_columns perspective-row";
-        let columns = Array.prototype.slice.call(this.shadowRoot.querySelectorAll(selector));
+        let columns = Array.prototype.slice.call(
+            this.shadowRoot.querySelectorAll(selector)
+        );
         if (!callback) {
             return columns;
         }
@@ -52,15 +57,21 @@ export class StateElement extends HTMLElement {
     }
 
     _get_view_row_pivots() {
-        return this._get_view_dom_columns("#row_pivots perspective-row", col => {
-            return col.getAttribute("name");
-        });
+        return this._get_view_dom_columns(
+            "#row_pivots perspective-row",
+            col => {
+                return col.getAttribute("name");
+            }
+        );
     }
 
     _get_view_column_pivots() {
-        return this._get_view_dom_columns("#column_pivots perspective-row", col => {
-            return col.getAttribute("name");
-        });
+        return this._get_view_dom_columns(
+            "#column_pivots perspective-row",
+            col => {
+                return col.getAttribute("name");
+            }
+        );
     }
 
     _get_view_filter_nodes() {

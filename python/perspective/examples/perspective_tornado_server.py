@@ -1,3 +1,4 @@
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 import os
 import os.path
 import sys
@@ -8,7 +9,6 @@ import tornado.ioloop
 import pandas as pd
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -36,12 +36,14 @@ def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
-        (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
+        (r"/websocket", PerspectiveTornadoHandler,
+         {"manager": MANAGER, "check_origin": True})
     ])
 
 
 if __name__ == "__main__":
-    # Because we use `PerspectiveTornadoHandler`, all that needs to be done in `init` is to start the Tornado server.
+    # Because we use `PerspectiveTornadoHandler`, all that needs to be done in
+    # `init` is to start the Tornado server.
     app = make_app()
     app.listen(8888)
     logging.critical("Listening on http://localhost:8888")

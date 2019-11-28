@@ -96,7 +96,16 @@ module.exports = perspective => {
         });
 
         it("aggregates nulls correctly", async function() {
-            const data = [{x: "AAAAAAAAAAAAAA"}, {x: "AAAAAAAAAAAAAA"}, {x: "AAAAAAAAAAAAAA"}, {x: null}, {x: null}, {x: "BBBBBBBBBBBBBB"}, {x: "BBBBBBBBBBBBBB"}, {x: "BBBBBBBBBBBBBB"}];
+            const data = [
+                {x: "AAAAAAAAAAAAAA"},
+                {x: "AAAAAAAAAAAAAA"},
+                {x: "AAAAAAAAAAAAAA"},
+                {x: null},
+                {x: null},
+                {x: "BBBBBBBBBBBBBB"},
+                {x: "BBBBBBBBBBBBBB"},
+                {x: "BBBBBBBBBBBBBB"}
+            ];
             const tbl = perspective.table(data);
             const view = tbl.view({row_pivots: ["x"]});
 

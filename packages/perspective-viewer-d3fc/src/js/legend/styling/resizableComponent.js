@@ -27,7 +27,10 @@ export function resizableComponent() {
     const maxDimensionsPx = {height: null, width: null};
 
     const callbacks = [];
-    const executeCallbacks = (event, direction) => callbacks.filter(callback => callback.event === event).forEach(callback => callback.execute(direction));
+    const executeCallbacks = (event, direction) =>
+        callbacks
+            .filter(callback => callback.event === event)
+            .forEach(callback => callback.execute(direction));
 
     const resizable = container => {
         if (handlesContainerExists(container)) {
@@ -35,14 +38,46 @@ export function resizableComponent() {
         }
 
         const dragHelper = {
-            left: () => executeCallbacks(resizeEvent, {horizontal: dragLeft(d3.event), vertical: false}),
-            top: () => executeCallbacks(resizeEvent, {horizontal: false, vertical: dragTop(d3.event)}),
-            right: () => executeCallbacks(resizeEvent, {horizontal: dragRight(d3.event), vertical: false}),
-            bottom: () => executeCallbacks(resizeEvent, {horizontal: false, vertical: dragBottom(d3.event)}),
-            topleft: () => executeCallbacks(resizeEvent, {horizontal: dragLeft(d3.event), vertical: dragTop(d3.event)}),
-            topright: () => executeCallbacks(resizeEvent, {horizontal: dragRight(d3.event), vertical: dragTop(d3.event)}),
-            bottomright: () => executeCallbacks(resizeEvent, {horizontal: dragRight(d3.event), vertical: dragBottom(d3.event)}),
-            bottomleft: () => executeCallbacks(resizeEvent, {horizontal: dragLeft(d3.event), vertical: dragBottom(d3.event)})
+            left: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: dragLeft(d3.event),
+                    vertical: false
+                }),
+            top: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: false,
+                    vertical: dragTop(d3.event)
+                }),
+            right: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: dragRight(d3.event),
+                    vertical: false
+                }),
+            bottom: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: false,
+                    vertical: dragBottom(d3.event)
+                }),
+            topleft: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: dragLeft(d3.event),
+                    vertical: dragTop(d3.event)
+                }),
+            topright: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: dragRight(d3.event),
+                    vertical: dragTop(d3.event)
+                }),
+            bottomright: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: dragRight(d3.event),
+                    vertical: dragBottom(d3.event)
+                }),
+            bottomleft: () =>
+                executeCallbacks(resizeEvent, {
+                    horizontal: dragLeft(d3.event),
+                    vertical: dragBottom(d3.event)
+                })
         };
 
         const containerNode = container.node();
@@ -60,18 +95,48 @@ export function resizableComponent() {
         const handlesGroup = handles.append("g");
 
         const isVertical = d => d === "left" || d === "right";
-        const xCoordHelper = {left: 0, top: handleWidthPx, right: containerRect.width - handleWidthPx, bottom: handleWidthPx};
-        const yCoordHelper = {left: handleWidthPx, top: 0, right: handleWidthPx, bottom: containerRect.height - handleWidthPx};
+        const xCoordHelper = {
+            left: 0,
+            top: handleWidthPx,
+            right: containerRect.width - handleWidthPx,
+            bottom: handleWidthPx
+        };
+        const yCoordHelper = {
+            left: handleWidthPx,
+            top: 0,
+            right: handleWidthPx,
+            bottom: containerRect.height - handleWidthPx
+        };
         const edgeHandles = ["left", "top", "right", "bottom"];
-        const [leftHandle, topHandle, rightHandle, bottomHandle] = edgeHandles.map(edge =>
+        const [
+            leftHandle,
+            topHandle,
+            rightHandle,
+            bottomHandle
+        ] = edgeHandles.map(edge =>
             handlesGroup
                 .append("rect")
                 .attr("id", `drag${edge}`)
-                .attr("class", isVertical(edge) ? verticalHandleClass : horizontalHandleClass)
+                .attr(
+                    "class",
+                    isVertical(edge)
+                        ? verticalHandleClass
+                        : horizontalHandleClass
+                )
                 .attr("y", yCoordHelper[edge])
                 .attr("x", xCoordHelper[edge])
-                .attr("height", isVertical(edge) ? containerRect.height - handleWidthPx * 2 : handleWidthPx)
-                .attr("width", isVertical(edge) ? handleWidthPx : containerRect.width - handleWidthPx * 2)
+                .attr(
+                    "height",
+                    isVertical(edge)
+                        ? containerRect.height - handleWidthPx * 2
+                        : handleWidthPx
+                )
+                .attr(
+                    "width",
+                    isVertical(edge)
+                        ? handleWidthPx
+                        : containerRect.width - handleWidthPx * 2
+                )
                 .attr("fill", isVertical(edge) ? "lightgreen" : "lightblue")
                 .attr("fill-opacity", fillOpacity)
                 .style("z-index", zIndex)
@@ -80,9 +145,24 @@ export function resizableComponent() {
         );
 
         const concatCornerEdges = corner => `${corner[0]}${corner[1]}`;
-        const cornerCursorHelper = {topleft: "nwse", topright: "nesw", bottomright: "nwse", bottomleft: "nesw"};
-        const cornerHandles = [["top", "left"], ["top", "right"], ["bottom", "right"], ["bottom", "left"]];
-        const [topLeftHandle, topRightHandle, bottomRightHandle, bottomLeftHandle] = cornerHandles.map(corner =>
+        const cornerCursorHelper = {
+            topleft: "nwse",
+            topright: "nesw",
+            bottomright: "nwse",
+            bottomleft: "nesw"
+        };
+        const cornerHandles = [
+            ["top", "left"],
+            ["top", "right"],
+            ["bottom", "right"],
+            ["bottom", "left"]
+        ];
+        const [
+            topLeftHandle,
+            topRightHandle,
+            bottomRightHandle,
+            bottomLeftHandle
+        ] = cornerHandles.map(corner =>
             handlesGroup
                 .append("rect")
                 .attr("id", `drag${concatCornerEdges(corner)}`)
@@ -92,8 +172,13 @@ export function resizableComponent() {
                 .attr("fill", "red")
                 .attr("fill-opacity", fillOpacity)
                 .style("z-index", zIndex)
-                .attr("cursor", `${cornerCursorHelper[concatCornerEdges(corner)]}-resize`)
-                .call(d3.drag().on("drag", dragHelper[concatCornerEdges(corner)]))
+                .attr(
+                    "cursor",
+                    `${cornerCursorHelper[concatCornerEdges(corner)]}-resize`
+                )
+                .call(
+                    d3.drag().on("drag", dragHelper[concatCornerEdges(corner)])
+                )
         );
 
         enforceMaxDimensions("height", "y", bottomHandle);
@@ -101,35 +186,85 @@ export function resizableComponent() {
         pinCorners(handles);
 
         function dragLeft(event) {
-            const offset = enforceDistToParallelBarConstraints(enforceContainerBoundaries(leftHandle.node(), event.x, 0).x, handles, "width", (x, y) => x - y);
+            const offset = enforceDistToParallelBarConstraints(
+                enforceContainerBoundaries(leftHandle.node(), event.x, 0).x,
+                handles,
+                "width",
+                (x, y) => x - y
+            );
             containerNode.style.left = `${containerNode.offsetLeft + offset}px`;
-            containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
+            containerNode.style.width = `${containerNode.offsetWidth -
+                offset}px`;
             updateSettings();
             return resizeAndRelocateHandles(rightHandle, offset, "width", "x");
         }
 
         function dragRight(event) {
-            const offset = -enforceDistToParallelBarConstraints(enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x, handles, "width", (x, y) => x + y);
-            if (pointerFallenBehindAbsoluteCoordinates(offset, "x", rightHandle, event)) return false;
-            containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
+            const offset = -enforceDistToParallelBarConstraints(
+                enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x,
+                handles,
+                "width",
+                (x, y) => x + y
+            );
+            if (
+                pointerFallenBehindAbsoluteCoordinates(
+                    offset,
+                    "x",
+                    rightHandle,
+                    event
+                )
+            )
+                return false;
+            containerNode.style.width = `${containerNode.offsetWidth -
+                offset}px`;
             updateSettings();
             return resizeAndRelocateHandles(rightHandle, offset, "width", "x");
         }
 
         function dragTop(event) {
-            const offset = enforceDistToParallelBarConstraints(enforceContainerBoundaries(topHandle.node(), 0, event.y).y, handles, "height", (x, y) => x - y);
+            const offset = enforceDistToParallelBarConstraints(
+                enforceContainerBoundaries(topHandle.node(), 0, event.y).y,
+                handles,
+                "height",
+                (x, y) => x - y
+            );
             containerNode.style.top = `${containerNode.offsetTop + offset}px`;
-            containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
+            containerNode.style.height = `${containerNode.offsetHeight -
+                offset}px`;
             updateSettings();
-            return resizeAndRelocateHandles(bottomHandle, offset, "height", "y");
+            return resizeAndRelocateHandles(
+                bottomHandle,
+                offset,
+                "height",
+                "y"
+            );
         }
 
         function dragBottom(event) {
-            const offset = -enforceDistToParallelBarConstraints(enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y, handles, "height", (x, y) => x + y);
-            if (pointerFallenBehindAbsoluteCoordinates(offset, "y", bottomHandle, event)) return false;
-            containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
+            const offset = -enforceDistToParallelBarConstraints(
+                enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y,
+                handles,
+                "height",
+                (x, y) => x + y
+            );
+            if (
+                pointerFallenBehindAbsoluteCoordinates(
+                    offset,
+                    "y",
+                    bottomHandle,
+                    event
+                )
+            )
+                return false;
+            containerNode.style.height = `${containerNode.offsetHeight -
+                offset}px`;
             updateSettings();
-            return resizeAndRelocateHandles(bottomHandle, offset, "height", "y");
+            return resizeAndRelocateHandles(
+                bottomHandle,
+                offset,
+                "height",
+                "y"
+            );
         }
 
         function updateSettings() {
@@ -145,22 +280,45 @@ export function resizableComponent() {
         function resizeAndRelocateHandles(handle, offset, dimension, axis) {
             extendHandlesBox(handles, dimension, offset);
             pinHandleToHandleBoxEdge(handle, axis, offset);
-            extendPerpendicularHandles(handles, offset, dimension, dimension === "height" ? verticalHandleClass : horizontalHandleClass);
+            extendPerpendicularHandles(
+                handles,
+                offset,
+                dimension,
+                dimension === "height"
+                    ? verticalHandleClass
+                    : horizontalHandleClass
+            );
             pinCorners(handles);
             return offset != 0;
         }
 
         function pinCorners(handles) {
             topLeftHandle.attr("y", 0, "x", 0);
-            topRightHandle.attr("y", 0).attr("x", handles.attr("width") - handleWidthPx);
-            bottomRightHandle.attr("y", handles.attr("height") - handleWidthPx).attr("x", handles.attr("width") - handleWidthPx);
-            bottomLeftHandle.attr("y", handles.attr("height") - handleWidthPx).attr("x", 0);
+            topRightHandle
+                .attr("y", 0)
+                .attr("x", handles.attr("width") - handleWidthPx);
+            bottomRightHandle
+                .attr("y", handles.attr("height") - handleWidthPx)
+                .attr("x", handles.attr("width") - handleWidthPx);
+            bottomLeftHandle
+                .attr("y", handles.attr("height") - handleWidthPx)
+                .attr("x", 0);
         }
 
         function enforceMaxDimensions(dimension, axis, relativeHandle) {
-            if (!!maxDimensionsPx[dimension] && maxDimensionsPx[dimension] < containerRect[dimension]) {
-                containerNode.style[dimension] = `${maxDimensionsPx[dimension]}px`;
-                resizeAndRelocateHandles(relativeHandle, containerRect[dimension] - maxDimensionsPx[dimension], dimension, axis);
+            if (
+                !!maxDimensionsPx[dimension] &&
+                maxDimensionsPx[dimension] < containerRect[dimension]
+            ) {
+                containerNode.style[
+                    dimension
+                ] = `${maxDimensionsPx[dimension]}px`;
+                resizeAndRelocateHandles(
+                    relativeHandle,
+                    containerRect[dimension] - maxDimensionsPx[dimension],
+                    dimension,
+                    axis
+                );
             }
         }
     };
@@ -185,13 +343,21 @@ export function resizableComponent() {
 
     resizable.minWidth = input => {
         minDimensionsPx.width = input;
-        if (!!maxDimensionsPx.width) maxDimensionsPx.width = Math.max(minDimensionsPx.width, maxDimensionsPx.width);
+        if (!!maxDimensionsPx.width)
+            maxDimensionsPx.width = Math.max(
+                minDimensionsPx.width,
+                maxDimensionsPx.width
+            );
         return resizable;
     };
 
     resizable.minHeight = input => {
         minDimensionsPx.height = input;
-        if (!!maxDimensionsPx.height) maxDimensionsPx.height = Math.max(minDimensionsPx.height, maxDimensionsPx.height);
+        if (!!maxDimensionsPx.height)
+            maxDimensionsPx.height = Math.max(
+                minDimensionsPx.height,
+                maxDimensionsPx.height
+            );
         return resizable;
     };
 
@@ -202,30 +368,59 @@ export function resizableComponent() {
 
     resizable.maxWidth = input => {
         maxDimensionsPx.width = input;
-        minDimensionsPx.width = Math.min(minDimensionsPx.width, maxDimensionsPx.width);
+        minDimensionsPx.width = Math.min(
+            minDimensionsPx.width,
+            maxDimensionsPx.width
+        );
         return resizable;
     };
 
     resizable.maxHeight = input => {
         maxDimensionsPx.height = input;
-        minDimensionsPx.height = Math.min(minDimensionsPx.height, maxDimensionsPx.height);
+        minDimensionsPx.height = Math.min(
+            minDimensionsPx.height,
+            maxDimensionsPx.height
+        );
         return resizable;
     };
 
-    function pointerFallenBehindAbsoluteCoordinates(offset, axis, handle, event) {
-        const becauseCrossedMinSize = (offset, axis, handle, event) => offset < 0 && event[axis] < Number(handle.attr(axis));
-        const becauseExitedCoordinateSpace = (offset, axis, handle, event) => offset > 0 && event[axis] > Number(handle.attr(axis));
-        return becauseCrossedMinSize(offset, axis, handle, event) || becauseExitedCoordinateSpace(offset, axis, handle, event);
+    function pointerFallenBehindAbsoluteCoordinates(
+        offset,
+        axis,
+        handle,
+        event
+    ) {
+        const becauseCrossedMinSize = (offset, axis, handle, event) =>
+            offset < 0 && event[axis] < Number(handle.attr(axis));
+        const becauseExitedCoordinateSpace = (offset, axis, handle, event) =>
+            offset > 0 && event[axis] > Number(handle.attr(axis));
+        return (
+            becauseCrossedMinSize(offset, axis, handle, event) ||
+            becauseExitedCoordinateSpace(offset, axis, handle, event)
+        );
     }
 
-    function enforceDistToParallelBarConstraints(offset, dragHandleContainer, dimension, operatorFunction) {
-        const anticipatedDimension = operatorFunction(Number(dragHandleContainer.attr(dimension)), offset);
+    function enforceDistToParallelBarConstraints(
+        offset,
+        dragHandleContainer,
+        dimension,
+        operatorFunction
+    ) {
+        const anticipatedDimension = operatorFunction(
+            Number(dragHandleContainer.attr(dimension)),
+            offset
+        );
         if (anticipatedDimension < minDimensionsPx[dimension]) {
-            const difference = minDimensionsPx[dimension] - anticipatedDimension;
+            const difference =
+                minDimensionsPx[dimension] - anticipatedDimension;
             return operatorFunction(offset, difference);
         }
-        if (!!maxDimensionsPx[dimension] && anticipatedDimension > maxDimensionsPx[dimension]) {
-            const difference = maxDimensionsPx[dimension] - anticipatedDimension;
+        if (
+            !!maxDimensionsPx[dimension] &&
+            anticipatedDimension > maxDimensionsPx[dimension]
+        ) {
+            const difference =
+                maxDimensionsPx[dimension] - anticipatedDimension;
             return operatorFunction(offset, difference);
         }
         return offset;
@@ -235,17 +430,31 @@ export function resizableComponent() {
 }
 
 // "dimension" referring to width or height
-const extendPerpendicularHandles = (handles, offset, dimension, orientationClass) => {
+const extendPerpendicularHandles = (
+    handles,
+    offset,
+    dimension,
+    orientationClass
+) => {
     const perpendicularHandles = handles.selectAll(`.${orientationClass}`);
     perpendicularHandles.each((_, i, nodes) => {
         const handleNode = nodes[i];
         const handleElement = d3.select(handleNode);
-        handleElement.attr(dimension, handleNode.getBoundingClientRect()[dimension] - offset);
+        handleElement.attr(
+            dimension,
+            handleNode.getBoundingClientRect()[dimension] - offset
+        );
     });
 };
 
-const handlesContainerExists = container => container.select(`#${handlesContainerId}`).size() > 0;
+const handlesContainerExists = container =>
+    container.select(`#${handlesContainerId}`).size() > 0;
 
-const pinHandleToHandleBoxEdge = (handle, axis, offset) => handle.attr(axis, Number(handle.attr(axis)) - offset);
+const pinHandleToHandleBoxEdge = (handle, axis, offset) =>
+    handle.attr(axis, Number(handle.attr(axis)) - offset);
 
-const extendHandlesBox = (handles, dimension, offset) => handles.attr(dimension, handles.node().getBoundingClientRect()[dimension] - offset);
+const extendHandlesBox = (handles, dimension, offset) =>
+    handles.attr(
+        dimension,
+        handles.node().getBoundingClientRect()[dimension] - offset
+    );

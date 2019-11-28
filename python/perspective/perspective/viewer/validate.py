@@ -18,7 +18,9 @@ def validate_plugin(plugin):
             raise PerspectiveError('Unrecognized `plugin`: %s', plugin)
         return plugin
     else:
-        raise PerspectiveError('Cannot parse `plugin` of type: %s', str(type(plugin)))
+        raise PerspectiveError(
+            'Cannot parse `plugin` of type: %s', str(
+                type(plugin)))
 
 
 def validate_columns(columns):
@@ -30,7 +32,9 @@ def validate_columns(columns):
     if isinstance(columns, list):
         return columns
     else:
-        raise PerspectiveError('Cannot parse `columns` of type: %s', str(type(columns)))
+        raise PerspectiveError(
+            'Cannot parse `columns` of type: %s', str(
+                type(columns)))
 
 
 def _validate_pivots(pivots):
@@ -42,7 +46,9 @@ def _validate_pivots(pivots):
     if isinstance(pivots, list):
         return pivots
     else:
-        raise PerspectiveError('Cannot parse pivots of type: %s', str(type(pivots)))
+        raise PerspectiveError(
+            'Cannot parse pivots of type: %s', str(
+                type(pivots)))
 
 
 def validate_row_pivots(row_pivots):
@@ -64,10 +70,14 @@ def validate_aggregates(aggregates):
                 if v not in Aggregate.options():
                     raise PerspectiveError('Unrecognized aggregate: %s', v)
             else:
-                raise PerspectiveError('Cannot parse aggregation of type %s', str(type(v)))
+                raise PerspectiveError(
+                    'Cannot parse aggregation of type %s', str(
+                        type(v)))
         return aggregates
     else:
-        raise PerspectiveError('Cannot parse aggregates type: %s', str(type(aggregates)))
+        raise PerspectiveError(
+            'Cannot parse aggregates type: %s', str(
+                type(aggregates)))
 
 
 def validate_sort(sort):
@@ -107,13 +117,16 @@ def validate_filters(filters):
             for i, item in enumerate(f):
                 if i == 1:
                     if item not in ALL_FILTERS:
-                        raise PerspectiveError('Unrecognized filter operator: {}'.format(item))
+                        raise PerspectiveError(
+                            'Unrecognized filter operator: {}'.format(item))
                     elif item not in ("is null", "is not null"):
                         if len(f) != 3:
-                            raise PerspectiveError('Cannot parse filter - {} operator must have a comparison value.'.format(item))
+                            raise PerspectiveError(
+                                'Cannot parse filter - {} operator must have a comparison value.'.format(item))
         return filters
     else:
-        raise PerspectiveError('Cannot parse filters type: {}'.format(str(type(filters))))
+        raise PerspectiveError(
+            'Cannot parse filters type: {}'.format(str(type(filters))))
 
 
 def validate_plugin_config(plugin_config):

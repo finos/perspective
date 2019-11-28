@@ -10,7 +10,15 @@
 export const FORMATTER = Symbol("formatter");
 
 export class Computation {
-    constructor(name, formatter, input_type, return_type, func, category, num_params = 1) {
+    constructor(
+        name,
+        formatter,
+        input_type,
+        return_type,
+        func,
+        category,
+        num_params = 1
+    ) {
         this.category = category;
         this.name = name;
         this[FORMATTER] = formatter;

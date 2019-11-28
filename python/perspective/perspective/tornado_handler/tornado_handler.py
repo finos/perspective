@@ -20,7 +20,8 @@ class DateTimeEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
-            # Convert to milliseconds - perspective.js expects millisecond timestamps, but python generates them in seconds.
+            # Convert to milliseconds - perspective.js expects millisecond
+            # timestamps, but python generates them in seconds.
             return _date_validator.to_timestamp(obj)
         else:
             return super(DateTimeEncoder, self).default(obj)
@@ -57,7 +58,8 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         self._check_origin = kwargs.pop("check_origin", False)
 
         if self._manager is None:
-            raise PerspectiveError("A `PerspectiveManager` instance must be provided to the tornado handler!")
+            raise PerspectiveError(
+                "A `PerspectiveManager` instance must be provided to the tornado handler!")
 
         super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
 

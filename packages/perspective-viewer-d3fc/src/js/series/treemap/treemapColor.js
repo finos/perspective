@@ -22,6 +22,10 @@ export function treeColor(settings, data) {
 
 // only get the colors from the bottom level (e.g. nodes with no children)
 function getColors(nodes, colors = []) {
-    nodes.children && nodes.children.length > 0 ? nodes.children.forEach(child => colors.concat(getColors(child, colors))) : colors.push(nodes.data.color);
+    nodes.children && nodes.children.length > 0
+        ? nodes.children.forEach(child =>
+              colors.concat(getColors(child, colors))
+          )
+        : colors.push(nodes.data.color);
     return colors;
 }

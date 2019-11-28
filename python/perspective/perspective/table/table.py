@@ -49,7 +49,15 @@ class Table(object):
 
         self._limit = limit or 4294967295
         self._index = index or ""
-        self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, self._is_arrow)
+        self._table = make_table(
+            None,
+            self._accessor,
+            None,
+            self._limit,
+            self._index,
+            t_op.OP_INSERT,
+            False,
+            self._is_arrow)
         self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
@@ -183,7 +191,8 @@ class Table(object):
         columns = self.columns()
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
-        self._accessor._names = columns + [name for name in self._accessor._names if name == "__INDEX__"]
+        self._accessor._names = columns + \
+            [name for name in self._accessor._names if name == "__INDEX__"]
         self._accessor._types = types[:len(columns)]
 
         if "__INDEX__" in self._accessor._names:
@@ -194,7 +203,15 @@ class Table(object):
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
+        self._table = make_table(
+            self._table,
+            self._accessor,
+            None,
+            self._limit,
+            self._index,
+            t_op.OP_INSERT,
+            True,
+            False)
 
     def remove(self, pkeys):
         '''Removes the rows with the primary keys specified in ``pkeys``.
@@ -219,9 +236,18 @@ class Table(object):
         self._accessor = _PerspectiveAccessor(pkeys)
         self._accessor._names = [self._index]
         self._accessor._types = types
-        make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_DELETE, True, False)
+        make_table(
+            self._table,
+            self._accessor,
+            None,
+            self._limit,
+            self._index,
+            t_op.OP_DELETE,
+            True,
+            False)
 
-    def view(self, columns=None, row_pivots=None, column_pivots=None, aggregates=None, sort=None, filter=None):
+    def view(self, columns=None, row_pivots=None, column_pivots=None,
+             aggregates=None, sort=None, filter=None):
         ''' Create a new :class:`~perspective.View` from this
         :class:`~perspective.Table` via the supplied keyword arguments.
 
@@ -308,7 +334,8 @@ class Table(object):
             >>> table.delete()
         '''
         if not callable(callback):
-            return ValueError("remove_delete callback should be a callable function!")
+            return ValueError(
+                "remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def delete(self):
@@ -317,7 +344,8 @@ class Table(object):
         registered to it (which must be deleted first).
         '''
         if len(self._views) > 0:
-            raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
+            raise PerspectiveError(
+                "Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 

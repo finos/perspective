@@ -15,7 +15,9 @@ describe("output test", () => {
     test("ensure valid jupyterlab output", () => {
         expect(packagejson.main).toEqual("dist/index.js");
         expect(webpackjson.output.filename).toEqual("index.js");
-        expect(webpackjson.output.path).toEqual(path.resolve(__dirname, "../../dist"));
+        expect(webpackjson.output.path).toEqual(
+            path.resolve(__dirname, "../../dist")
+        );
         console.log(webpackjson);
     });
 });

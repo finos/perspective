@@ -72,8 +72,9 @@ t_ctx0::step_end() {
             auto colname = m_config.col_at(colidx);
 
             if (stbl->get_dtype(colname) != DTYPE_STR) {
-                auto v = m_state->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
-                    const std::vector<t_tscalar>&)>>(pkeys, colname, get_vec_min_max);
+                auto v = m_state->reduce<std::function<std::pair<t_tscalar,
+                    t_tscalar>(const std::vector<t_tscalar>&)>>(
+                    pkeys, colname, get_vec_min_max);
 
                 rval[colidx].m_min = v.first;
                 rval[colidx].m_max = v.second;
@@ -99,8 +100,8 @@ t_ctx0::get_column_count() const {
 }
 
 /**
- * @brief Given a start/end row and column index, return the underlying data for the requested
- * subset.
+ * @brief Given a start/end row and column index, return the underlying data for
+ * the requested subset.
  *
  * @param start_row
  * @param end_row
@@ -109,7 +110,8 @@ t_ctx0::get_column_count() const {
  * @return std::vector<t_tscalar>
  */
 std::vector<t_tscalar>
-t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
+t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col,
+    t_index end_col) const {
     t_uindex ctx_nrows = get_row_count();
     t_uindex ctx_ncols = get_column_count();
     auto ext = sanitize_get_data_extents(
@@ -119,7 +121,8 @@ t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
     t_index stride = ext.m_ecol - ext.m_scol;
     std::vector<t_tscalar> values(nrows * stride);
 
-    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
+    std::vector<t_tscalar> pkeys
+        = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
     auto none = mknone();
 
     for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
@@ -141,11 +144,12 @@ t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
 }
 
 /**
- * @brief Given a vector of row indices, which may not be contiguous, return the underlying data
- * for these rows.
+ * @brief Given a vector of row indices, which may not be contiguous, return the
+ * underlying data for these rows.
  *
  * @param rows a vector of row indices
- * @return std::vector<t_tscalar> a vector of scalars containing the underlying data
+ * @return std::vector<t_tscalar> a vector of scalars containing the underlying
+ * data
  */
 std::vector<t_tscalar>
 t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
@@ -206,7 +210,8 @@ t_ctx0::init() {
 }
 
 std::vector<t_tscalar>
-t_ctx0::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ctx0::get_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     if (!m_traversal->validate_cells(cells)) {
         std::vector<t_tscalar> rval;
         return rval;
@@ -215,7 +220,8 @@ t_ctx0::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const
 }
 
 std::vector<t_tscalar>
-t_ctx0::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ctx0::get_all_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     if (!m_traversal->validate_cells(cells)) {
         std::vector<t_tscalar> rval;
         return rval;
@@ -224,7 +230,8 @@ t_ctx0::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
 }
 
 std::vector<t_tscalar>
-t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ctx0::get_cell_data(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     if (!m_traversal->validate_cells(cells)) {
         std::vector<t_tscalar> rval;
         return rval;
@@ -272,13 +279,15 @@ t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
 
     if (m_traversal->empty_sort_by()) {
         std::vector<t_tscalar> pkey_vec = m_traversal->get_pkeys(bidx, eidx);
-        for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
+        for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end;
+             ++idx) {
             const t_tscalar& pkey = pkey_vec[idx];
             t_index row = bidx + idx;
             std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
                 t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
                 iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
-            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
+            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+                 = iters.first;
                  iter != iters.second; ++iter) {
                 t_cellupd cellupd;
                 cellupd.row = row;
@@ -330,15 +339,16 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     bidx = std::min(bidx, m_traversal->size());
     eidx = std::min(eidx, m_traversal->size());
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
-    t_stepdelta rval(rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
+    t_stepdelta rval(
+        rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
     m_deltas->clear();
     clear_deltas();
     return rval;
 }
 
 /**
- * @brief Returns a `t_rowdelta` struct containing data from updated rows and the updated row
- * indices.
+ * @brief Returns a `t_rowdelta` struct containing data from updated rows and
+ * the updated row indices.
  *
  * @return t_rowdelta
  */
@@ -394,16 +404,19 @@ t_ctx0::sidedness() const {
  */
 void
 t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& curr, const t_data_table& transitions,
-    const t_data_table& existed) {
+    const t_data_table& prev, const t_data_table& curr,
+    const t_data_table& transitions, const t_data_table& existed) {
     psp_log_time(repr() + " notify.enter");
     t_uindex nrecs = flattened.size();
-    std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
-    std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
+    std::shared_ptr<const t_column> pkey_sptr
+        = flattened.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> op_sptr
+        = flattened.get_const_column("psp_op");
     const t_column* pkey_col = pkey_sptr.get();
     const t_column* op_col = op_sptr.get();
 
-    std::shared_ptr<const t_column> existed_sptr = existed.get_const_column("psp_existed");
+    std::shared_ptr<const t_column> existed_sptr
+        = existed.get_const_column("psp_existed");
     const t_column* existed_col = existed_sptr.get();
 
     bool delete_encountered = false;
@@ -412,7 +425,8 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         t_mask msk_curr = filter_table_for_config(curr, m_config);
 
         for (t_uindex idx = 0; idx < nrecs; ++idx) {
-            t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
+            t_tscalar pkey
+                = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
 
             std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
             t_op op = static_cast<t_op>(op_);
@@ -439,7 +453,9 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
                     m_traversal->delete_row(pkey);
                     delete_encountered = true;
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+                } break;
             }
 
             // add the pkey for updated rows
@@ -449,7 +465,8 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
         // calculate deltas
         calc_step_delta(flattened, prev, curr, transitions);
-        m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
+        m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0
+            || delete_encountered;
 
         psp_log_time(repr() + " notify.has_filter_path.exit");
 
@@ -457,7 +474,8 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     }
 
     for (t_uindex idx = 0; idx < nrecs; ++idx) {
-        t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
+        t_tscalar pkey
+            = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
         std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
         t_op op = static_cast<t_op>(op_);
         bool existed = *(existed_col->get_nth<bool>(idx));
@@ -474,7 +492,9 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
                 m_traversal->delete_row(pkey);
                 delete_encountered = true;
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+            } break;
         }
 
         // add the pkey for updated rows
@@ -485,7 +505,8 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
     // calculate deltas
     calc_step_delta(flattened, prev, curr, transitions);
-    m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
+    m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0
+        || delete_encountered;
 
     psp_log_time(repr() + " notify.no_filter_path.exit");
 }
@@ -498,8 +519,10 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 void
 t_ctx0::notify(const t_data_table& flattened) {
     t_uindex nrecs = flattened.size();
-    std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
-    std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
+    std::shared_ptr<const t_column> pkey_sptr
+        = flattened.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> op_sptr
+        = flattened.get_const_column("psp_op");
     const t_column* pkey_col = pkey_sptr.get();
     const t_column* op_col = op_sptr.get();
 
@@ -509,7 +532,8 @@ t_ctx0::notify(const t_data_table& flattened) {
         t_mask msk = filter_table_for_config(flattened, m_config);
 
         for (t_uindex idx = 0; idx < nrecs; ++idx) {
-            t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
+            t_tscalar pkey
+                = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
             std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
             t_op op = static_cast<t_op>(op_);
 
@@ -528,7 +552,8 @@ t_ctx0::notify(const t_data_table& flattened) {
     }
 
     for (t_uindex idx = 0; idx < nrecs; ++idx) {
-        t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
+        t_tscalar pkey
+            = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
         std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
         t_op op = static_cast<t_op>(op_);
 
@@ -536,7 +561,9 @@ t_ctx0::notify(const t_data_table& flattened) {
             case OP_INSERT: {
                 m_traversal->add_row(m_state, m_config, pkey);
             } break;
-            default: { } break; }
+            default: {
+            } break;
+        }
     }
 }
 
@@ -568,15 +595,19 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
                 case VALUE_TRANSITION_NVEQ_FT:
                 case VALUE_TRANSITION_NEQ_FT:
                 case VALUE_TRANSITION_NEQ_TDT: {
-                    m_deltas->insert(t_zcdelta(get_interned_tscalar(pkey_col->get_scalar(ridx)),
-                        cidx, mknone(), get_interned_tscalar(ccol->get_scalar(ridx))));
-                } break;
-                case VALUE_TRANSITION_NEQ_TT: {
-                    m_deltas->insert(t_zcdelta(get_interned_tscalar(pkey_col->get_scalar(ridx)),
-                        cidx, get_interned_tscalar(pcol->get_scalar(ridx)),
+                    m_deltas->insert(t_zcdelta(
+                        get_interned_tscalar(pkey_col->get_scalar(ridx)), cidx,
+                        mknone(),
                         get_interned_tscalar(ccol->get_scalar(ridx))));
                 } break;
-                default: {}
+                case VALUE_TRANSITION_NEQ_TT: {
+                    m_deltas->insert(t_zcdelta(
+                        get_interned_tscalar(pkey_col->get_scalar(ridx)), cidx,
+                        get_interned_tscalar(pcol->get_scalar(ridx)),
+                        get_interned_tscalar(ccol->get_scalar(ridx))));
+                } break;
+                default: {
+                }
             }
         }
     }

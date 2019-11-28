@@ -24,7 +24,9 @@ export function pointSeriesCanvas(settings, seriesKey, size, color, symbols) {
     }
 
     series.decorate((context, d) => {
-        const colorValue = color(d.colorValue !== undefined ? d.colorValue : seriesKey);
+        const colorValue = color(
+            d.colorValue !== undefined ? d.colorValue : seriesKey
+        );
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
 
         context.strokeStyle = withoutOpacity(colorValue);
@@ -35,7 +37,8 @@ export function pointSeriesCanvas(settings, seriesKey, size, color, symbols) {
 }
 
 export function symbolTypeFromGroups(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = [];
     Object.keys(col).forEach(key => {
         if (key !== "__ROW_PATH__") {

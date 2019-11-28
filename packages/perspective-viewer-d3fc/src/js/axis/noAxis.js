@@ -19,7 +19,9 @@ export const domain = () => {
 
     const _domain = data => {
         const flattenedData = flattenArray(data);
-        return transformDomain([...new Set(flattenedData.map(d => d[valueNames[0]]))]);
+        return transformDomain([
+            ...new Set(flattenedData.map(d => d[valueNames[0]]))
+        ]);
     };
 
     const transformDomain = d => (orient == "vertical" ? d.reverse() : d);

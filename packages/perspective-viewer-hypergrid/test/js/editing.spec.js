@@ -17,13 +17,23 @@ utils.with_server({}, () => {
         "superstore.html",
         () => {
             describe("editing UI opens", () => {
-                test.capture("should not edit an immutable viewer", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
+                test.capture(
+                    "should not edit an immutable viewer",
+                    async page => {
+                        await page.$("perspective-viewer");
+                        await page.shadow_click(
+                            "perspective-viewer",
+                            "#config_button"
+                        );
+                        await page.waitForSelector(
+                            "perspective-viewer[settings]"
+                        );
+                        await dblclick(page);
+                        await page.waitForSelector(
+                            "perspective-viewer:not([updating])"
+                        );
+                    }
+                );
             });
         },
         {reload_page: true, root: path.join(__dirname, "..", "..")}
@@ -33,75 +43,128 @@ utils.with_server({}, () => {
         "editable.html",
         () => {
             describe("editing UI saves", () => {
-                test.capture("should save edits to a string column", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page);
-                    await page.keyboard.sendCharacter("a");
-                    await page.keyboard.sendCharacter("b");
-                    await page.keyboard.sendCharacter("c");
-                    await page.keyboard.sendCharacter("d");
-                    await page.keyboard.press("Enter");
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
+                test.capture(
+                    "should save edits to a string column",
+                    async page => {
+                        await page.$("perspective-viewer");
+                        await page.shadow_click(
+                            "perspective-viewer",
+                            "#config_button"
+                        );
+                        await page.waitForSelector(
+                            "perspective-viewer[settings]"
+                        );
+                        await dblclick(page);
+                        await page.keyboard.sendCharacter("a");
+                        await page.keyboard.sendCharacter("b");
+                        await page.keyboard.sendCharacter("c");
+                        await page.keyboard.sendCharacter("d");
+                        await page.keyboard.press("Enter");
+                        await page.waitForSelector(
+                            "perspective-viewer:not([updating])"
+                        );
+                    }
+                );
 
-                test.capture("should save edits to an integer column", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page, 50);
-                    await page.keyboard.sendCharacter("1");
-                    await page.keyboard.sendCharacter("2");
-                    await page.keyboard.press("Enter");
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
+                test.capture(
+                    "should save edits to an integer column",
+                    async page => {
+                        await page.$("perspective-viewer");
+                        await page.shadow_click(
+                            "perspective-viewer",
+                            "#config_button"
+                        );
+                        await page.waitForSelector(
+                            "perspective-viewer[settings]"
+                        );
+                        await dblclick(page, 50);
+                        await page.keyboard.sendCharacter("1");
+                        await page.keyboard.sendCharacter("2");
+                        await page.keyboard.press("Enter");
+                        await page.waitForSelector(
+                            "perspective-viewer:not([updating])"
+                        );
+                    }
+                );
 
-                test.capture("should save edits of negative numbers to an integer column", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page, 50);
-                    await page.keyboard.sendCharacter("-");
-                    await page.keyboard.sendCharacter("1");
-                    await page.keyboard.sendCharacter("2");
-                    await page.keyboard.press("Enter");
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
+                test.capture(
+                    "should save edits of negative numbers to an integer column",
+                    async page => {
+                        await page.$("perspective-viewer");
+                        await page.shadow_click(
+                            "perspective-viewer",
+                            "#config_button"
+                        );
+                        await page.waitForSelector(
+                            "perspective-viewer[settings]"
+                        );
+                        await dblclick(page, 50);
+                        await page.keyboard.sendCharacter("-");
+                        await page.keyboard.sendCharacter("1");
+                        await page.keyboard.sendCharacter("2");
+                        await page.keyboard.press("Enter");
+                        await page.waitForSelector(
+                            "perspective-viewer:not([updating])"
+                        );
+                    }
+                );
 
-                test.capture("should fail to save edits of invalid integers", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page, 50);
-                    await page.keyboard.sendCharacter("1");
-                    await page.keyboard.sendCharacter("2");
-                    await page.keyboard.sendCharacter("A");
-                    await page.keyboard.press("Enter");
-                    await page.waitFor(100); // wait for the invalid animation
-                    await page.keyboard.press("Escape");
-                });
+                test.capture(
+                    "should fail to save edits of invalid integers",
+                    async page => {
+                        await page.$("perspective-viewer");
+                        await page.shadow_click(
+                            "perspective-viewer",
+                            "#config_button"
+                        );
+                        await page.waitForSelector(
+                            "perspective-viewer[settings]"
+                        );
+                        await dblclick(page, 50);
+                        await page.keyboard.sendCharacter("1");
+                        await page.keyboard.sendCharacter("2");
+                        await page.keyboard.sendCharacter("A");
+                        await page.keyboard.press("Enter");
+                        await page.waitFor(100); // wait for the invalid animation
+                        await page.keyboard.press("Escape");
+                    }
+                );
 
-                test.capture("should follow the indexed row when the data updates", async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await page.evaluate(async viewer => {
-                        viewer.setAttribute("sort", '[["Sales", "desc"]]');
-                        await viewer.flush();
-                    }, viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await dblclick(page);
-                    await page.keyboard.sendCharacter("a");
-                    await page.keyboard.sendCharacter("b");
-                    await page.keyboard.sendCharacter("c");
-                    await page.keyboard.sendCharacter("d");
-                    await page.evaluate(async viewer => {
-                        const res = new Promise(x => viewer.addEventListener("perspective-view-update", () => x()));
-                        viewer.update([{Sales: 100000}]);
-                        await res;
-                    }, viewer);
-                });
+                test.capture(
+                    "should follow the indexed row when the data updates",
+                    async page => {
+                        const viewer = await page.$("perspective-viewer");
+                        await page.shadow_click(
+                            "perspective-viewer",
+                            "#config_button"
+                        );
+                        await page.waitForSelector(
+                            "perspective-viewer[settings]"
+                        );
+                        await page.evaluate(async viewer => {
+                            viewer.setAttribute("sort", '[["Sales", "desc"]]');
+                            await viewer.flush();
+                        }, viewer);
+                        await page.waitForSelector(
+                            "perspective-viewer:not([updating])"
+                        );
+                        await dblclick(page);
+                        await page.keyboard.sendCharacter("a");
+                        await page.keyboard.sendCharacter("b");
+                        await page.keyboard.sendCharacter("c");
+                        await page.keyboard.sendCharacter("d");
+                        await page.evaluate(async viewer => {
+                            const res = new Promise(x =>
+                                viewer.addEventListener(
+                                    "perspective-view-update",
+                                    () => x()
+                                )
+                            );
+                            viewer.update([{Sales: 100000}]);
+                            await res;
+                        }, viewer);
+                    }
+                );
             });
         },
         {reload_page: true, root: path.join(__dirname, "..", "..")}

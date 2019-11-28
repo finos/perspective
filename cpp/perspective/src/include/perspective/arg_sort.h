@@ -17,10 +17,12 @@ namespace perspective {
 
 struct t_multisorter;
 
-PERSPECTIVE_EXPORT void argsort(std::vector<t_index>& output, const t_multisorter& sorter);
+PERSPECTIVE_EXPORT void argsort(
+    std::vector<t_index>& output, const t_multisorter& sorter);
 
 struct PERSPECTIVE_EXPORT t_argsort_comparator {
-    t_argsort_comparator(const std::vector<t_tscalar>& v, const t_sorttype& sort_type);
+    t_argsort_comparator(
+        const std::vector<t_tscalar>& v, const t_sorttype& sort_type);
 
     bool operator()(t_index a, t_index b) const;
 
@@ -28,7 +30,7 @@ struct PERSPECTIVE_EXPORT t_argsort_comparator {
     t_sorttype m_sort_type;
 };
 
-PERSPECTIVE_EXPORT void simple_argsort(
-    std::vector<t_tscalar>& v, std::vector<t_index>& output, const t_sorttype& sort_type);
+PERSPECTIVE_EXPORT void simple_argsort(std::vector<t_tscalar>& v,
+    std::vector<t_index>& output, const t_sorttype& sort_type);
 
 } // namespace perspective

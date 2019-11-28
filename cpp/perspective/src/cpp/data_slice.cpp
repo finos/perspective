@@ -13,9 +13,10 @@
 namespace perspective {
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-    t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
-    t_uindex col_offset, const std::vector<t_tscalar>& slice,
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col,
+    t_uindex row_offset, t_uindex col_offset,
+    const std::vector<t_tscalar>& slice,
     std::vector<std::vector<t_tscalar>> column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
@@ -30,10 +31,12 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
 }
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-    t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
-    t_uindex col_offset, const std::vector<t_tscalar>& slice,
-    std::vector<std::vector<t_tscalar>> column_names, std::vector<t_uindex> column_indices)
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col,
+    t_uindex row_offset, t_uindex col_offset,
+    const std::vector<t_tscalar>& slice,
+    std::vector<std::vector<t_tscalar>> column_names,
+    std::vector<t_uindex> column_indices)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -48,8 +51,8 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
 }
 
 /**
- * @brief Construct a new data slice, with a vector of row indices on which to access the
- * underlying data.
+ * @brief Construct a new data slice, with a vector of row indices on which to
+ * access the underlying data.
  *
  * @tparam CTX_T
  * @param ctx
@@ -57,8 +60,8 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
  * @param row_indices
  */
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(
-    std::shared_ptr<CTX_T> ctx, const std::vector<t_tscalar>& slice, t_uindex end_row)
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
+    const std::vector<t_tscalar>& slice, t_uindex end_row)
     : m_ctx(ctx)
     , m_end_row(end_row)
     , m_slice(slice) {

@@ -13,7 +13,13 @@ jest.mock("../../../src/less/computed_column.less", () => jest.fn());
 
 describe(PerspectiveElement, () => {
     describe(".get_maxes", () => {
-        let max_cells, max_columns, num_columns, num_columns_fn, perspective_element, schema, schema_fn;
+        let max_cells,
+            max_columns,
+            num_columns,
+            num_columns_fn,
+            perspective_element,
+            schema,
+            schema_fn;
 
         beforeEach(() => {
             perspective_element = new PerspectiveElement();
@@ -42,7 +48,10 @@ describe(PerspectiveElement, () => {
             });
 
             test("the max cols and max rows are undefined", async done => {
-                const {max_cols, max_rows} = await perspective_element.get_maxes();
+                const {
+                    max_cols,
+                    max_rows
+                } = await perspective_element.get_maxes();
                 expect(max_cols).toEqual(undefined);
                 expect(max_rows).toEqual(undefined);
                 done();
@@ -67,7 +76,10 @@ describe(PerspectiveElement, () => {
                 num_columns = 2;
                 max_columns = 1;
 
-                const {max_cols, max_rows} = await perspective_element.get_maxes();
+                const {
+                    max_cols,
+                    max_rows
+                } = await perspective_element.get_maxes();
                 expect(max_cols).toEqual(1);
                 expect(max_rows).toEqual(undefined);
                 done();
@@ -79,7 +91,10 @@ describe(PerspectiveElement, () => {
                     schema = {one: 1, two: 2};
                     max_columns = 3;
 
-                    const {max_cols, max_rows} = await perspective_element.get_maxes();
+                    const {
+                        max_cols,
+                        max_rows
+                    } = await perspective_element.get_maxes();
                     expect(max_cols).toEqual(4);
                     expect(max_rows).toEqual(undefined);
                     done();
@@ -95,7 +110,10 @@ describe(PerspectiveElement, () => {
             });
 
             test("the max rows is the max cell", async done => {
-                const {max_cols, max_rows} = await perspective_element.get_maxes();
+                const {
+                    max_cols,
+                    max_rows
+                } = await perspective_element.get_maxes();
                 expect(max_cols).toEqual(undefined);
                 expect(max_rows).toEqual(2);
                 done();
@@ -111,7 +129,10 @@ describe(PerspectiveElement, () => {
             });
 
             test("the max columns is set and max rows * max cols = max cells", async done => {
-                const {max_cols, max_rows} = await perspective_element.get_maxes();
+                const {
+                    max_cols,
+                    max_rows
+                } = await perspective_element.get_maxes();
                 expect(max_cols).toEqual(2);
                 expect(max_rows).toEqual(5);
                 expect(max_cols * max_rows).toEqual(max_cells);

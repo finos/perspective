@@ -107,7 +107,9 @@ function getEditorValueNumber(updated) {
         const index = old.__INDEX__;
         delete old["__INDEX__"];
         const colname = Object.keys(old)[0];
-        this._table.update([{__INDEX__: index, [colname]: Number(updated.replace(/,/g, ""))}]);
+        this._table.update([
+            {__INDEX__: index, [colname]: Number(updated.replace(/,/g, ""))}
+        ]);
     });
     return this.localizer.format(updated);
 }
@@ -124,9 +126,17 @@ function getEditorValueDate(updated) {
 }
 
 function saveEditorValue(x) {
-    var save = !(x && x === this.initialValue) && this.grid.fireBeforeCellEdit(this.event.gridCell, this.initialValue, x, this);
+    var save =
+        !(x && x === this.initialValue) &&
+        this.grid.fireBeforeCellEdit(
+            this.event.gridCell,
+            this.initialValue,
+            x,
+            this
+        );
     if (save) {
-        const row = this.event.gridCell.y + this.grid.renderer.dataWindow.top - 1;
+        const row =
+            this.event.gridCell.y + this.grid.renderer.dataWindow.top - 1;
         const col = this.event.gridCell.x;
         this._data[row][col] = x;
         this.grid.canvas.paintNow();
@@ -144,7 +154,10 @@ function keydown(e) {
         specialKeyup,
         stopped;
 
-    if ((specialKeyup = this.specialKeyups[e.keyCode]) && (stopped = this[specialKeyup](feedbackCount))) {
+    if (
+        (specialKeyup = this.specialKeyups[e.keyCode]) &&
+        (stopped = this[specialKeyup](feedbackCount))
+    ) {
         grid.repaint();
     }
 
@@ -171,7 +184,14 @@ function stopEditing(feedback) {
         error = err;
     }
 
-    if (!error && this.grid.fireSyntheticEditorDataChangeEvent(this, this.initialValue, value)) {
+    if (
+        !error &&
+        this.grid.fireSyntheticEditorDataChangeEvent(
+            this,
+            this.initialValue,
+            value
+        )
+    ) {
         try {
             this.saveEditorValue(value);
         } catch (err) {

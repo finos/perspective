@@ -49,7 +49,11 @@ export class Client {
      */
     post(msg, resolve, reject, keep_alive = false) {
         if (resolve || reject) {
-            this._worker.handlers[++this._worker.msg_id] = {resolve, reject, keep_alive};
+            this._worker.handlers[++this._worker.msg_id] = {
+                resolve,
+                reject,
+                keep_alive
+            };
         }
         msg.id = this._worker.msg_id;
         if (this._worker.initialized.value) {
@@ -63,7 +67,9 @@ export class Client {
         if (this._worker.initialized.value) {
             this.send({id: -1, cmd: "init_profile_thread"});
         } else {
-            this._worker.messages.push(() => this.send({id: -1, cmd: "init_profile_thread"}));
+            this._worker.messages.push(() =>
+                this.send({id: -1, cmd: "init_profile_thread"})
+            );
         }
     }
 

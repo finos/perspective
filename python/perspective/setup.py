@@ -51,6 +51,7 @@ version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
 Run `yarn add zerorpc` to fix."""
 
+
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir='dist'):
         Extension.__init__(self, name, sources=[])
@@ -104,24 +105,45 @@ class PSPBuild(build_ext):
             os.makedirs(self.build_temp)
         try:
             if not os.path.exists("node_modules"):
-                install = [self.npm_cmd] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install']
+                install = [
+                    self.npm_cmd] if 'yarn' in self.npm_cmd else [
+                    self.npm_cmd, 'install']
                 subprocess.check_call(install, cwd=self.build_temp, env=env)
-                # if not os.path.exists(os.path.join("node_modules", "zerorpc")):
-                install = [self.npm_cmd, "add", "zerorpc"] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install', 'zerorpc']
+                # if not os.path.exists(os.path.join("node_modules",
+                # "zerorpc")):
+                install = [
+                    self.npm_cmd,
+                    "add",
+                    "zerorpc"] if 'yarn' in self.npm_cmd else [
+                    self.npm_cmd,
+                    'install',
+                    'zerorpc']
                 subprocess.check_call(install, cwd=self.build_temp, env=env)
-            build = [self.npm_cmd, 'webpack'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'webpack']
-            subprocess.check_call(build, cwd=self.build_temp, env=env, stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
+            build = [
+                self.npm_cmd,
+                'webpack'] if 'yarn' in self.npm_cmd else [
+                self.npm_cmd,
+                'run',
+                'webpack']
+            subprocess.check_call(
+                build, cwd=self.build_temp, env=env, stdout=open(
+                    os.devnull, 'wb'), stderr=open(
+                    os.devnull, 'wb'))
             print("ZeroMQ node client built successfully")
         except (subprocess.CalledProcessError, OSError):
             print(ZMQ_ERROR)
         print()  # Add an empty line for cleaner output
 
     def build_extension_cmake(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        extdir = os.path.abspath(
+            os.path.dirname(
+                self.get_ext_fullpath(
+                    ext.name)))
         cfg = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join('perspective', 'table')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' +
+            os.path.abspath(os.path.join('perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
@@ -130,9 +152,12 @@ class PSPBuild(build_ext):
             '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
             '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
             '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX),
-            '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
+            '-DPSP_CMAKE_MODULE_PATH={folder}'.format(
+                folder=os.path.join(ext.sourcedir, 'cmake')),
             '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
-            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, "..", 'perspective'))
+            '-DPSP_PYTHON_SRC={folder}'.format(
+                folder=os.path.join(
+                    ext.sourcedir, "..", 'perspective'))
         ]
 
         build_args = ['--config', cfg]
@@ -146,29 +171,52 @@ class PSPBuild(build_ext):
             build_args += ['--', '/m']
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j4']
+            build_args += ['--',
+                           '-j2' if os.environ.get('DOCKER', '') else '-j4']
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
-        env["PYTHONPATH"] = os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))
+        env["PYTHONPATH"] = os.path.pathsep.join(
+            (os.path.join(
+                os.path.dirname(
+                    os.__file__),
+                'site-packages'),
+                os.path.dirname(
+                os.__file__)))
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
 
         try:
-            subprocess.check_output([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
-            subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
+            subprocess.check_output([self.cmake_cmd,
+                                     os.path.abspath(ext.sourcedir)] + cmake_args,
+                                    cwd=self.build_temp,
+                                    env=env,
+                                    stderr=subprocess.STDOUT)
+            subprocess.check_call([self.cmake_cmd,
+                                   '--build',
+                                   '.'] + build_args,
+                                  cwd=self.build_temp,
+                                  env=env,
+                                  stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out = e.output.decode()
             logging.critical(out)
 
-            # if stale cmake build, or issues with python inside python, rerun with shell=true
+            # if stale cmake build, or issues with python inside python, rerun
+            # with shell=true
             if "The current CMakeCache.txt directory" in out:
                 # purge temporary folder
                 rmtree(self.build_temp)
                 os.makedirs(self.build_temp)
-                subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
-                subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+                subprocess.check_call([self.cmake_cmd, os.path.abspath(
+                    ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
+                subprocess.check_call([self.cmake_cmd,
+                                       '--build',
+                                       '.'] + build_args,
+                                      cwd=self.build_temp,
+                                      env=env,
+                                      shell=True)
             else:
                 raise
         print()  # Add an empty line for cleaner output

@@ -50,7 +50,15 @@ function reducer(obj, key, val) {
 }
 
 module.exports = Object.assign({}, CONFIG, {
-    entry: THEMES.reduce((obj, theme) => reducer(obj, theme.replace(".less", ""), path.resolve(__dirname, "..", "themes", theme)), {"perspective-viewer": "./dist/cjs/perspective-viewer.js"}),
+    entry: THEMES.reduce(
+        (obj, theme) =>
+            reducer(
+                obj,
+                theme.replace(".less", ""),
+                path.resolve(__dirname, "..", "themes", theme)
+            ),
+        {"perspective-viewer": "./dist/cjs/perspective-viewer.js"}
+    ),
     output: {
         filename: "[name].js",
         libraryTarget: "umd",

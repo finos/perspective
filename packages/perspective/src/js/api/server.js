@@ -87,7 +87,10 @@ export class Server {
                     this._tables[msg.name] = [];
                 } else {
                     const msgs = this._tables[msg.name];
-                    this._tables[msg.name] = this.perspective.table(msg.args[0], msg.options);
+                    this._tables[msg.name] = this.perspective.table(
+                        msg.args[0],
+                        msg.options
+                    );
                     if (msgs) {
                         for (const msg of msgs) {
                             this.process(msg);
@@ -127,7 +130,9 @@ export class Server {
                 break;
             case "view":
                 // create a new view and track it with `client_id`
-                this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
+                this._views[msg.view_name] = this._tables[msg.table_name].view(
+                    msg.config
+                );
                 this._views[msg.view_name].client_id = client_id;
                 break;
         }
@@ -158,7 +163,10 @@ export class Server {
                     try {
                         // post transferable data for arrow
                         if (msg.args && msg.args[0]) {
-                            if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
+                            if (
+                                msg.method === "on_update" &&
+                                msg.args[0]["mode"] === "row"
+                            ) {
                                 this.post(result, [ev]);
                                 return;
                             }
@@ -166,7 +174,9 @@ export class Server {
 
                         this.post(result);
                     } catch (e) {
-                        console.error(`Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`);
+                        console.error(
+                            `Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`
+                        );
                         const remove_method = msg.method.substring(3);
                         obj[`remove_${remove_method}`](callback);
                     }
@@ -181,7 +191,11 @@ export class Server {
             if (callback) {
                 obj[msg.method](callback, ...msg.args);
             } else {
-                console.error(`Callback not found for remote call "${JSON.stringify(msg)}"`);
+                console.error(
+                    `Callback not found for remote call "${JSON.stringify(
+                        msg
+                    )}"`
+                );
             }
         } catch (error) {
             this.process_error(msg, error);
@@ -216,7 +230,9 @@ export class Server {
      */
     process_method_call(msg) {
         let obj, result;
-        msg.cmd === "table_method" ? (obj = this._tables[msg.name]) : (obj = this._views[msg.name]);
+        msg.cmd === "table_method"
+            ? (obj = this._tables[msg.name])
+            : (obj = this._views[msg.name]);
 
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a view
@@ -236,7 +252,11 @@ export class Server {
             } else {
                 result = obj[msg.method].apply(obj, msg.args);
                 if (result instanceof Promise) {
-                    result.then(result => this.process_method_call_response(msg, result)).catch(error => this.process_error(msg, error));
+                    result
+                        .then(result =>
+                            this.process_method_call_response(msg, result)
+                        )
+                        .catch(error => this.process_error(msg, error));
                 } else {
                     this.process_method_call_response(msg, result);
                 }

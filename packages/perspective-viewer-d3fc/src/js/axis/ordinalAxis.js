@@ -10,7 +10,12 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import {flattenArray} from "./flatten";
-import {multiAxisBottom, multiAxisLeft, multiAxisTop, multiAxisRight} from "../d3fc/axis/multi-axis";
+import {
+    multiAxisBottom,
+    multiAxisLeft,
+    multiAxisTop,
+    multiAxisRight
+} from "../d3fc/axis/multi-axis";
 import {getChartContainer} from "../plugin/root";
 
 export const scale = () => minBandwidth(d3.scaleBand()).padding(0.5);
@@ -21,7 +26,9 @@ export const domain = () => {
 
     const _domain = data => {
         const flattenedData = flattenArray(data);
-        return transformDomain([...new Set(flattenedData.map(d => d[valueNames[0]]))]);
+        return transformDomain([
+            ...new Set(flattenedData.map(d => d[valueNames[0]]))
+        ]);
     };
 
     const transformDomain = d => (orient == "vertical" ? d.reverse() : d);
@@ -66,7 +73,9 @@ export const component = settings => {
         const levelGroups = axisGroups(domain);
         const groupTickLayout = levelGroups.map(getGroupTickLayout);
 
-        const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
+        const tickSizeInner = multiLevel
+            ? groupTickLayout.map(l => l.size)
+            : groupTickLayout[0].size;
         const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
 
         const createAxis = base => scale => {
@@ -98,12 +107,14 @@ export const component = settings => {
         };
     };
 
-    const pickAxis = multiLevel => {
-        if (multiLevel) {
-            return orient === "horizontal" ? multiAxisBottom : multiAxisLeft;
-        }
-        return orient === "horizontal" ? fc.axisOrdinalBottom : fc.axisOrdinalLeft;
-    };
+    // const pickAxis = multiLevel => {
+    //     if (multiLevel) {
+    //         return orient === "horizontal" ? multiAxisBottom : multiAxisLeft;
+    //     }
+    //     return orient === "horizontal"
+    //         ? fc.axisOrdinalBottom
+    //         : fc.axisOrdinalLeft;
+    // };
 
     const getAxisSet = multiLevel => {
         if (multiLevel) {
@@ -182,13 +193,23 @@ export const component = settings => {
             return coords;
         };
 
-        const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
-        const rotatedLabelsOverlap = (r1, r2) => r1.x + r1.width + 14 > r2.x + r2.width;
+        const rectanglesOverlap = (r1, r2) =>
+            r1.x <= r2.x + r2.width &&
+            r2.x <= r1.x + r1.width &&
+            r1.y <= r2.y + r2.height &&
+            r2.y <= r1.y + r1.height;
+        const rotatedLabelsOverlap = (r1, r2) =>
+            r1.x + r1.width + 14 > r2.x + r2.width;
         const isOverlap = rotated ? rotatedLabelsOverlap : rectanglesOverlap;
 
-        const rectangleContained = (r1, r2) => r1.x >= r2.x && r1.x + r1.width <= r2.x + r2.width && r1.y >= r2.y && r1.y + r1.height <= r2.y + r2.height;
+        const rectangleContained = (r1, r2) =>
+            r1.x >= r2.x &&
+            r1.x + r1.width <= r2.x + r2.width &&
+            r1.y >= r2.y &&
+            r1.y + r1.height <= r2.y + r2.height;
         // The bounds rect is the available screen space a label can fit into
-        const boundsRect = orient == "horizontal" ? getXAxisBoundsRect(s) : null;
+        const boundsRect =
+            orient == "horizontal" ? getXAxisBoundsRect(s) : null;
 
         const previousRectangles = [];
         s.each((d, i, nodes) => {
@@ -199,12 +220,19 @@ export const component = settings => {
 
             // Work out the actual rectanble the label occupies
             const tickRect = tick.node().getBBox();
-            const rect = {x: tickRect.x + transformCoords[0], y: tickRect.y + transformCoords[1], width: tickRect.width, height: tickRect.height};
+            const rect = {
+                x: tickRect.x + transformCoords[0],
+                y: tickRect.y + transformCoords[1],
+                width: tickRect.width,
+                height: tickRect.height
+            };
 
             const overlap = previousRectangles.some(r => isOverlap(r, rect));
 
             // Test that it also fits into the screen space
-            const hidden = overlap || (boundsRect && !rectangleContained(rect, boundsRect));
+            const hidden =
+                overlap ||
+                (boundsRect && !rectangleContained(rect, boundsRect));
 
             tick.attr("visibility", hidden ? "hidden" : "");
             if (!hidden) {
@@ -214,7 +242,9 @@ export const component = settings => {
     };
 
     const getXAxisBoundsRect = s => {
-        const chart = getChartContainer(s.node()).querySelector(".cartesian-chart");
+        const chart = getChartContainer(s.node()).querySelector(
+            ".cartesian-chart"
+        );
         const axis = chart.querySelector(".x-axis");
 
         const chartRect = chart.getBoundingClientRect();

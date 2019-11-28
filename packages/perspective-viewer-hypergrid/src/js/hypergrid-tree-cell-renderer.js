@@ -28,7 +28,11 @@ export function treeLineRendererPaint(gc, config) {
     if (config.isSelected) {
         backgroundColor = config.backgroundSelectionColor;
     }
-    if (config.isRowHovered && config.hoverRowHighlight.enabled && !config.isCellHovered) {
+    if (
+        config.isRowHovered &&
+        config.hoverRowHighlight.enabled &&
+        !config.isCellHovered
+    ) {
         backgroundColor = config.hoverRowHighlight.backgroundColor;
     } else if (config.isCellHovered && config.hoverCellHighlight.enabled) {
         backgroundColor = config.hoverCellHighlight.backgroundColor;
@@ -69,7 +73,13 @@ export function treeLineRendererPaint(gc, config) {
     // Draw node circle
     if (!leaf) {
         gc.moveTo(xOffset + lineNodeSpace + nodeRadius, y + height / 2);
-        gc.arc(xOffset + lineNodeSpace, y + height / 2, nodeRadius, 0, 2 * Math.PI);
+        gc.arc(
+            xOffset + lineNodeSpace,
+            y + height / 2,
+            nodeRadius,
+            0,
+            2 * Math.PI
+        );
         if (config.isCellHovered) {
             gc.globalAlpha = 1.0;
             gc.fill();
@@ -93,15 +103,27 @@ export function treeLineRendererPaint(gc, config) {
     // render message text
 
     gc.globalAlpha = 1.0;
-    gc.fillStyle = config.isSelected ? config.foregroundSelectionColor : config.color;
+    gc.fillStyle = config.isSelected
+        ? config.foregroundSelectionColor
+        : config.color;
     gc.textAlign = "start";
     gc.textBaseline = "middle";
-    gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
+    gc.font = config.isSelected
+        ? config.foregroundSelectionFont
+        : config.treeHeaderFont;
     var cellTextOffset = xOffset + lineNodeSpace + 2 * nodeRadius + 3;
     let formatted_value = config.formatValue(value, config._type);
     config.minWidth = cellTextOffset + gc.getTextWidth(formatted_value) + 15;
-    var metrics = gc.getTextWidthTruncated(formatted_value, width - cellTextOffset + (x - 3), true);
+    var metrics = gc.getTextWidthTruncated(
+        formatted_value,
+        width - cellTextOffset + (x - 3),
+        true
+    );
     var yOffset = y + height / 2;
-    gc.fillText(metrics.string ? metrics.string : formatted_value, cellTextOffset, yOffset);
+    gc.fillText(
+        metrics.string ? metrics.string : formatted_value,
+        cellTextOffset,
+        yOffset
+    );
     gc.restore();
 }

@@ -78,8 +78,16 @@ view.prototype.col_to_js_typed_array = async_queue("col_to_js_typed_array");
 
 view.prototype.on_update = subscribe("on_update", "view_method", true);
 
-view.prototype.remove_update = unsubscribe("remove_update", "view_method", true);
+view.prototype.remove_update = unsubscribe(
+    "remove_update",
+    "view_method",
+    true
+);
 
 view.prototype.on_delete = subscribe("on_delete", "view_method", true);
 
-view.prototype.remove_delete = unsubscribe("remove_delete", "view_method", true);
+view.prototype.remove_delete = unsubscribe(
+    "remove_delete",
+    "view_method",
+    true
+);

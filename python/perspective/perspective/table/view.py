@@ -51,11 +51,26 @@ class View(object):
             date_validator = _PerspectiveDateValidator()
 
         if self._sides == 0:
-            self._view = make_view_zero(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_zero(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator)
         elif self._sides == 1:
-            self._view = make_view_one(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_one(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator)
         else:
-            self._view = make_view_two(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_two(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator)
 
         self._column_only = self._view.is_column_only()
         self._callbacks = self._table._callbacks
@@ -85,7 +100,8 @@ class View(object):
         Returns:
             :obj:`int`: 0 <= N <= 2
         '''
-        if len(self._config.get_row_pivots()) > 0 or len(self._config.get_column_pivots()) > 0:
+        if len(self._config.get_row_pivots()) > 0 or len(
+                self._config.get_column_pivots()) > 0:
             if len(self._config.get_column_pivots()) > 0:
                 return 2
             else:
@@ -160,7 +176,8 @@ class View(object):
         string_paths = []
 
         for path in paths:
-            string_paths.append(COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path]))
+            string_paths.append(COLUMN_SEPARATOR_STRING.join(
+                [p.to_string(False) for p in path]))
 
         return string_paths
 
@@ -182,7 +199,8 @@ class View(object):
         if as_string:
             return {item[0]: item[1] for item in self._view.schema().items()}
 
-        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
+        return {item[0]: _str_to_pythontype(item[1])
+                for item in self._view.schema().items()}
 
     def on_update(self, callback, mode=None):
         '''Add a callback to be fired when :func:`perspective.Table.update()` is
@@ -209,13 +227,17 @@ class View(object):
             raise ValueError('Invalid callback - must be a callable function')
 
         if mode not in ["none", "cell", "row"]:
-            raise ValueError('Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(mode))
+            raise ValueError(
+                'Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(mode))
 
         if mode == "cell" or mode == "row":
             if not self._view.get_deltas_enabled():
                 self._view.set_deltas_enabled(True)
 
-        wrapped_callback = partial(self._wrapped_on_update_callback, mode=mode, callback=callback)
+        wrapped_callback = partial(
+            self._wrapped_on_update_callback,
+            mode=mode,
+            callback=callback)
         self._callbacks.add_callback({
             "name": self._name,
             "orig_callback": callback,
@@ -242,8 +264,10 @@ class View(object):
             >>> table.update(new_data) # callback removed and will not fire
         '''
         if not callable(callback):
-            return ValueError("remove_update callback should be a callable function!")
-        self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] != callback)
+            return ValueError(
+                "remove_update callback should be a callable function!")
+        self._callbacks.remove_callbacks(
+            lambda cb: cb["orig_callback"] != callback)
 
     def on_delete(self, callback):
         '''Set a callback to be run when the :func:`perspective.View.delete()`
@@ -304,7 +328,8 @@ class View(object):
             >>> view2.delete() # callback removed and will not fire
         '''
         if not callable(callback):
-            return ValueError("remove_delete callback should be a callable function!")
+            return ValueError(
+                "remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def to_records(self, **kwargs):
@@ -433,7 +458,8 @@ class View(object):
         Returns:
             :obj:`str`: A CSV-formatted string containing the serialized data.
         '''
-        return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
+        return self.to_df(
+            **options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
 
     @wraps(to_records)
     def to_json(self, **options):

@@ -20,7 +20,11 @@ export function gridLayoutMultiChart() {
     let containerSize = null;
 
     const _gridLayoutMultiChart = container => {
-        const innerContainer = getOrCreateElement(container, "div.inner-container", () => container.append("div").attr("class", "inner-container"));
+        const innerContainer = getOrCreateElement(
+            container,
+            "div.inner-container",
+            () => container.append("div").attr("class", "inner-container")
+        );
 
         const innerRect = innerContainer.node().getBoundingClientRect();
         const containerHeight = innerRect.height;
@@ -28,20 +32,34 @@ export function gridLayoutMultiChart() {
 
         const minSize = 500;
         const data = container.datum();
-        const cols = Math.min(data.length, Math.floor(containerWidth / minSize));
+        const cols = Math.min(
+            data.length,
+            Math.floor(containerWidth / minSize)
+        );
         const rows = Math.ceil(data.length / cols);
         containerSize = {
             width: containerWidth / cols,
-            height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / cols))
+            height: Math.min(
+                containerHeight,
+                Math.max(containerHeight / rows, containerWidth / cols)
+            )
         };
         if (containerHeight / rows > containerSize.height * 0.75) {
             containerSize.height = containerHeight / rows;
         }
 
-        innerContainer.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
-        innerContainer.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
+        innerContainer.style(
+            "grid-template-columns",
+            `repeat(${cols}, ${containerSize.width}px)`
+        );
+        innerContainer.style(
+            "grid-template-rows",
+            `repeat(${rows}, ${containerSize.height}px)`
+        );
 
-        chartDiv = innerContainer.selectAll(`div.${elementsPrefix}-container`).data(data, d => d.split);
+        chartDiv = innerContainer
+            .selectAll(`div.${elementsPrefix}-container`)
+            .data(data, d => d.split);
         chartDiv.exit().remove();
 
         chartEnter = chartDiv

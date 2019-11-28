@@ -138,11 +138,11 @@ t_lstore::destroy_mapping() {
 void
 t_lstore::freeze_impl() {
     DWORD dwOld;
-    if (VirtualProtect(
-            (LPVOID)this, static_cast<size_t>(get_page_size()), PAGE_READONLY, &dwOld)
+    if (VirtualProtect((LPVOID)this, static_cast<size_t>(get_page_size()),
+            PAGE_READONLY, &dwOld)
         == 0) {
-        std::cout << "Virtual protect failed addr => " << this << " error code => "
-                  << GetLastError() << std::endl;
+        std::cout << "Virtual protect failed addr => " << this
+                  << " error code => " << GetLastError() << std::endl;
         PSP_VERBOSE_ASSERT(false, "virtual protect failed");
     }
 }
@@ -150,11 +150,11 @@ t_lstore::freeze_impl() {
 void
 t_lstore::unfreeze_impl() {
     DWORD dwOld;
-    if (VirtualProtect(
-            (LPVOID)this, static_cast<size_t>(get_page_size()), PAGE_READWRITE, &dwOld)
+    if (VirtualProtect((LPVOID)this, static_cast<size_t>(get_page_size()),
+            PAGE_READWRITE, &dwOld)
         == 0) {
-        std::cout << "Virtual protect failed addr => " << this << " error code => "
-                  << GetLastError() << std::endl;
+        std::cout << "Virtual protect failed addr => " << this
+                  << " error code => " << GetLastError() << std::endl;
         PSP_VERBOSE_ASSERT(false, "virtual protect failed");
     }
 }

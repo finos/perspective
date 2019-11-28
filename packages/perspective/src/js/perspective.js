@@ -19,7 +19,14 @@ import {Table} from "@apache-arrow/es5-esm/table";
 import {Data} from "@apache-arrow/es5-esm/data";
 import {Vector} from "@apache-arrow/es5-esm/vector";
 
-import {Utf8, Float64, Int32, Bool, TimestampMillisecond, Dictionary} from "@apache-arrow/es5-esm/type";
+import {
+    Utf8,
+    Float64,
+    Int32,
+    Bool,
+    TimestampMillisecond,
+    Dictionary
+} from "@apache-arrow/es5-esm/type";
 
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
@@ -83,8 +90,26 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, computed, index, limit, op, is_update, is_arrow) {
-        _Table = __MODULE__.make_table(_Table, accessor, computed, limit || 4294967295, index, op, is_update, is_arrow);
+    function make_table(
+        accessor,
+        _Table,
+        computed,
+        index,
+        limit,
+        op,
+        is_update,
+        is_arrow
+    ) {
+        _Table = __MODULE__.make_table(
+            _Table,
+            accessor,
+            computed,
+            limit || 4294967295,
+            index,
+            op,
+            is_update,
+            is_arrow
+        );
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -122,18 +147,44 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(table, sides, config, view_config, name, callbacks, overridden_types) {
+    function view(
+        table,
+        sides,
+        config,
+        view_config,
+        name,
+        callbacks,
+        overridden_types
+    ) {
         this._View = undefined;
         this.date_parser = new DateParser();
         this.config = config || {};
         this.view_config = view_config || new view_config();
 
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_zero(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                this.date_parser
+            );
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_one(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                this.date_parser
+            );
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_two(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                this.date_parser
+            );
         }
 
         this.table = table;
@@ -239,7 +290,11 @@ export default function(Module) {
             for (const key of Object.keys(schema)) {
                 let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
                 colname = colname[colname.length - 1];
-                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                if (
+                    this.overridden_types[colname] &&
+                    get_type_config(this.overridden_types[colname]).type ===
+                        schema[key]
+                ) {
                     schema[key] = this.overridden_types[colname];
                 }
             }
@@ -248,7 +303,9 @@ export default function(Module) {
     };
 
     view.prototype._column_names = function(skip = false, depth = 0) {
-        return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+        return extract_vector_scalar(
+            this._View.column_names(skip, depth)
+        ).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
 
     /**
@@ -257,13 +314,26 @@ export default function(Module) {
      * A column path shows the columns that a given cell belongs to after pivots are applied.
      */
     view.prototype.column_paths = function() {
-        return extract_vector_scalar(this._View.column_paths()).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+        return extract_vector_scalar(this._View.column_paths()).map(x =>
+            x.join(defaults.COLUMN_SEPARATOR_STRING)
+        );
     };
 
-    view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
+    view.prototype.get_data_slice = function(
+        start_row,
+        end_row,
+        start_col,
+        end_col
+    ) {
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];
-        return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+        return __MODULE__[`get_data_slice_${nidx}`](
+            this._View,
+            start_row,
+            end_row,
+            start_col,
+            end_col
+        );
     };
 
     /**
@@ -274,15 +344,33 @@ export default function(Module) {
     const to_format = function(options, formatter) {
         _clear_process(this.table.get_id());
         options = options || {};
-        const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
+        const max_cols =
+            this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
         const hidden = this._num_hidden();
 
         const viewport = this.config.viewport ? this.config.viewport : {};
-        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = Math.min(max_rows, options.end_row !== undefined ? options.end_row : viewport.height ? start_row + viewport.height : max_rows);
-        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
+        const start_row =
+            options.start_row || (viewport.top ? viewport.top : 0);
+        const end_row = Math.min(
+            max_rows,
+            options.end_row !== undefined
+                ? options.end_row
+                : viewport.height
+                ? start_row + viewport.height
+                : max_rows
+        );
+        const start_col =
+            options.start_col || (viewport.left ? viewport.left : 0);
+        const end_col = Math.min(
+            max_cols,
+            (options.end_col !== undefined
+                ? options.end_col
+                : viewport.width
+                ? start_col + viewport.width
+                : max_cols) *
+                (hidden + 1)
+        );
         let date_format;
         if (options.date_format) {
             date_format = new Intl.DateTimeFormat(options.date_format);
@@ -294,16 +382,27 @@ export default function(Module) {
         const has_row_path = num_sides !== 0 && !this.column_only;
         const nidx = ["zero", "one", "two"][num_sides];
 
-        const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
+        const slice = this.get_data_slice(
+            start_row,
+            end_row,
+            start_col,
+            end_col
+        );
         const ns = slice.get_column_names();
-        const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+        const col_names = extract_vector_scalar(ns).map(x =>
+            x.join(defaults.COLUMN_SEPARATOR_STRING)
+        );
         const schema = this.schema();
 
         let data = formatter.initDataValue();
 
         for (let ridx = start_row; ridx < end_row; ridx++) {
             let row_path = has_row_path ? slice.get_row_path(ridx) : undefined;
-            if (has_row_path && leaves_only && row_path.size() < this.config.row_pivots.length) {
+            if (
+                has_row_path &&
+                leaves_only &&
+                row_path.size() < this.config.row_pivots.length
+            ) {
                 row_path.delete();
                 continue;
             }
@@ -311,20 +410,39 @@ export default function(Module) {
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
                 const col_type = schema[col_name];
-                if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
+                if (
+                    (cidx - (num_sides > 0 ? 1 : 0)) %
+                        (this.config.columns.length + hidden) >=
+                    this.config.columns.length
+                ) {
                     // Hidden columns are always at the end, so don't emit these.
                     continue;
                 } else if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                            formatter.addColumnValue(data, row, "__ROW_PATH__", value);
+                            const value = __MODULE__.scalar_vec_to_val(
+                                row_path,
+                                i
+                            );
+                            formatter.addColumnValue(
+                                data,
+                                row,
+                                "__ROW_PATH__",
+                                value
+                            );
                         }
                     }
                 } else {
-                    let value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
-                    if ((col_type === "datetime" || col_type === "date") && value !== undefined) {
+                    let value = __MODULE__[`get_from_data_slice_${nidx}`](
+                        slice,
+                        ridx,
+                        cidx
+                    );
+                    if (
+                        (col_type === "datetime" || col_type === "date") &&
+                        value !== undefined
+                    ) {
                         if (date_format) {
                             value = new Date(value);
                             value = date_format.format(value);
@@ -545,28 +663,120 @@ export default function(Module) {
             const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
             const type = schema[col_path[col_path.length - 1]];
             if (type === "float") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(
+                    name,
+                    options
+                );
+                vectors.push(
+                    Vector.new(
+                        Data.Float(
+                            new Float64(),
+                            0,
+                            vals.length,
+                            nullCount,
+                            nullArray,
+                            vals
+                        )
+                    )
+                );
             } else if (type === "integer") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(
+                    name,
+                    options
+                );
+                vectors.push(
+                    Vector.new(
+                        Data.Int(
+                            new Int32(),
+                            0,
+                            vals.length,
+                            nullCount,
+                            nullArray,
+                            vals
+                        )
+                    )
+                );
             } else if (type === "boolean") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(
+                    name,
+                    options
+                );
+                vectors.push(
+                    Vector.new(
+                        Data.Bool(
+                            new Bool(),
+                            0,
+                            vals.length,
+                            nullCount,
+                            nullArray,
+                            vals
+                        )
+                    )
+                );
             } else if (type === "date" || type === "datetime") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(
+                    name,
+                    options
+                );
+                vectors.push(
+                    Vector.new(
+                        Data.Timestamp(
+                            new TimestampMillisecond(),
+                            0,
+                            vals.length / 2,
+                            nullCount,
+                            nullArray,
+                            vals
+                        )
+                    )
+                );
             } else if (type === "string") {
-                const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
-                const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
-                vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
+                const [
+                    vals,
+                    offsets,
+                    indices,
+                    nullCount,
+                    nullArray
+                ] = this.col_to_js_typed_array(name, options);
+                const utf8Vector = Vector.new(
+                    Data.Utf8(
+                        new Utf8(),
+                        0,
+                        offsets.length - 1,
+                        0,
+                        null,
+                        offsets,
+                        vals
+                    )
+                );
+                const type = new Dictionary(
+                    utf8Vector.type,
+                    new Int32(),
+                    null,
+                    null,
+                    utf8Vector
+                );
+                vectors.push(
+                    Vector.new(
+                        Data.Dictionary(
+                            type,
+                            0,
+                            indices.length,
+                            nullCount,
+                            nullArray,
+                            indices
+                        )
+                    )
+                );
             } else {
                 throw new Error(`Type ${type} not supported`);
             }
         }
 
-        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
+        return Table.fromVectors(
+            vectors,
+            names.slice(start_col, end_col)
+        ).serialize("binary", false).buffer;
     };
 
     /**
@@ -594,7 +804,9 @@ export default function(Module) {
     view.prototype.num_columns = function() {
         const ncols = this._View.num_columns();
         const nhidden = this._num_hidden();
-        return ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden;
+        return (
+            ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden
+        );
     };
 
     /**
@@ -693,7 +905,9 @@ export default function(Module) {
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
         _clear_process(this.table.get_id());
         if (["none", "cell", "row"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`);
+            throw new Error(
+                `Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`
+            );
         }
         if (mode === "cell" || mode === "row") {
             // Enable deltas only if needed by callback
@@ -748,7 +962,10 @@ export default function(Module) {
         _clear_process(this.table.get_id());
         const total = this.callbacks.length;
         filterInPlace(this.callbacks, x => x.orig_callback !== callback);
-        console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
+        console.assert(
+            total > this.callbacks.length,
+            `"callback" does not match a registered updater`
+        );
     };
 
     /**
@@ -769,7 +986,10 @@ export default function(Module) {
     view.prototype.remove_delete = function(callback) {
         const initial_length = this._delete_callbacks.length;
         filterInPlace(this._delete_callbacks, cb => cb !== callback);
-        console.assert(initial_length > this._delete_callbacks.length, `"callback" does not match a registered delete callbacks`);
+        console.assert(
+            initial_length > this._delete_callbacks.length,
+            `"callback" does not match a registered delete callbacks`
+        );
     };
 
     /**
@@ -948,7 +1168,10 @@ export default function(Module) {
     table.prototype.remove_delete = function(callback) {
         const initial_length = this._delete_callbacks.length;
         filterInPlace(this._delete_callbacks, cb => cb !== callback);
-        console.assert(initial_length > this._delete_callbacks.length, `"callback" does not match a registered delete callbacks`);
+        console.assert(
+            initial_length > this._delete_callbacks.length,
+            `"callback" does not match a registered delete callbacks`
+        );
     };
 
     /**
@@ -981,7 +1204,10 @@ export default function(Module) {
         const computed_schema = this.computed_schema();
         for (let key = 0; key < columns.size(); key++) {
             const name = columns.get(key);
-            if (name === "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
+            if (
+                name === "psp_okey" &&
+                (typeof computed_schema[name] === "undefined" || computed)
+            ) {
                 continue;
             }
             if (override && this.overridden_types[name]) {
@@ -1034,7 +1260,10 @@ export default function(Module) {
      */
     table.prototype.is_valid_filter = function(filter) {
         // isNull and isNotNull filter operators are always valid and apply to all schema types
-        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
+        if (
+            filter[1] === perspective.FILTER_OPERATORS.isNull ||
+            filter[1] === perspective.FILTER_OPERATORS.isNotNull
+        ) {
             return true;
         }
 
@@ -1092,13 +1321,19 @@ export default function(Module) {
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
                 if (!config[defaults.CONFIG_ALIASES[key]]) {
-                    console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                    console.warn(
+                        `Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`
+                    );
                     config[defaults.CONFIG_ALIASES[key]] = _config[key];
                 } else {
-                    throw new Error(`Duplicate configuration parameter "${key}"`);
+                    throw new Error(
+                        `Duplicate configuration parameter "${key}"`
+                    );
                 }
             } else if (key === "aggregate") {
-                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
+                console.warn(
+                    `Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`
+                );
                 // backwards compatibility: deconstruct `aggregate` into `aggregates` and `columns`
                 config["aggregates"] = {};
                 config["columns"] = [];
@@ -1138,7 +1373,15 @@ export default function(Module) {
         }
 
         let vc = new view_config(config);
-        let v = new view(this, sides, config, vc, name, this.callbacks, this.overridden_types);
+        let v = new view(
+            this,
+            sides,
+            config,
+            vc,
+            name,
+            this.callbacks,
+            this.overridden_types
+        );
         this.views.push(v);
         return v;
     };
@@ -1151,7 +1394,9 @@ export default function(Module) {
             let start = performance.now();
             setTimeout(function poll() {
                 let now = performance.now();
-                console.log(`${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`);
+                console.log(
+                    `${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`
+                );
                 _msgs = 0;
                 start = now;
                 setTimeout(poll, 5000);
@@ -1191,16 +1436,24 @@ export default function(Module) {
                 data = "_" + data;
             }
             accessor.init(papaparse.parse(data.trim(), {header: true}).data);
-            accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
-            accessor.types = accessor.extract_typevec(types).slice(0, accessor.names.length);
+            accessor.names = cols.concat(
+                accessor.names.filter(x => x === "__INDEX__")
+            );
+            accessor.types = accessor
+                .extract_typevec(types)
+                .slice(0, accessor.names.length);
 
             if (meter) {
                 meter(accessor.row_count);
             }
         } else {
             accessor.init(data);
-            accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
-            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            accessor.names = cols.concat(
+                accessor.names.filter(x => x === "__INDEX__")
+            );
+            accessor.types = accessor
+                .extract_typevec(types)
+                .slice(0, cols.length);
 
             if (meter) {
                 meter(accessor.row_count);
@@ -1219,7 +1472,9 @@ export default function(Module) {
                 const explicit_index = !!this.index;
                 if (explicit_index) {
                     // find the type of the index column
-                    accessor.types.push(accessor.types[accessor.names.indexOf(this.index)]);
+                    accessor.types.push(
+                        accessor.types[accessor.names.indexOf(this.index)]
+                    );
                 } else {
                     // default index is an integer
                     accessor.types.push(__MODULE__.t_dtype.DTYPE_INT32);
@@ -1230,7 +1485,16 @@ export default function(Module) {
         try {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned Table reference as it is identical
-            make_table(pdata, this._Table, this.computed, this.index || "", this.limit, op, true, is_arrow);
+            make_table(
+                pdata,
+                this._Table,
+                this.computed,
+                this.index || "",
+                this.limit,
+                op,
+                true,
+                is_arrow
+            );
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1263,14 +1527,25 @@ export default function(Module) {
         } else {
             accessor.init(data);
             accessor.names = [this.index];
-            accessor.types = [accessor.extract_typevec(types)[cols.indexOf(this.index)]];
+            accessor.types = [
+                accessor.extract_typevec(types)[cols.indexOf(this.index)]
+            ];
             pdata = accessor;
         }
 
         try {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table reference as it is identical
-            make_table(pdata, this._Table, undefined, this.index || "", this.limit, op, false, is_arrow);
+            make_table(
+                pdata,
+                this._Table,
+                undefined,
+                this.index || "",
+                this.limit,
+                op,
+                false,
+                is_arrow
+            );
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1293,7 +1568,13 @@ export default function(Module) {
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
-            return new table(_Table, this.index, computed, this.limit, this.overridden_types);
+            return new table(
+                _Table,
+                this.index,
+                computed,
+                this.limit,
+                this.overridden_types
+            );
         } catch (e) {
             if (_Table) {
                 _Table.delete();
@@ -1317,7 +1598,10 @@ export default function(Module) {
         let names = [];
         for (let cidx = 0; cidx < cols.size(); cidx++) {
             let name = cols.get(cidx);
-            if (name !== "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
+            if (
+                name !== "psp_okey" &&
+                (typeof computed_schema[name] === "undefined" || computed)
+            ) {
                 names.push(name);
             }
         }
@@ -1385,7 +1669,10 @@ export default function(Module) {
             let is_arrow = false;
             let overridden_types = {};
 
-            if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
+            if (
+                data instanceof ArrayBuffer ||
+                (Buffer && data instanceof Buffer)
+            ) {
                 data_accessor = new Uint8Array(data);
                 is_arrow = true;
             } else {
@@ -1393,7 +1680,10 @@ export default function(Module) {
                     if (data[0] === ",") {
                         data = "_" + data;
                     }
-                    data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
+                    data = papaparse.parse(data.trim(), {
+                        dynamicTyping: true,
+                        header: true
+                    }).data;
                 }
 
                 accessor.clean();
@@ -1409,8 +1699,23 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                _Table = make_table(data_accessor, undefined, undefined, options.index, options.limit, op, false, is_arrow);
-                return new table(_Table, options.index, undefined, options.limit, overridden_types);
+                _Table = make_table(
+                    data_accessor,
+                    undefined,
+                    undefined,
+                    options.index,
+                    options.limit,
+                    op,
+                    false,
+                    is_arrow
+                );
+                return new table(
+                    _Table,
+                    options.index,
+                    undefined,
+                    options.limit,
+                    overridden_types
+                );
             } catch (e) {
                 if (_Table) {
                     _Table.delete();

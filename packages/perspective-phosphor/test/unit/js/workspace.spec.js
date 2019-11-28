@@ -6,7 +6,9 @@ import {PerspectiveWidget} from "../../../dist/esm/widget";
 describe("workspace", () => {
     test("addViewer adds widget to underlying dockpanel", () => {
         const workspace = new PerspectiveWorkspace();
-        const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
+        const widget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
         workspace.addViewer(widget);
 
         const widgets = toArray(workspace.dockpanel.widgets());
@@ -17,7 +19,9 @@ describe("workspace", () => {
 
     test("makeMaster moves widget from dock to split panel", () => {
         const workspace = new PerspectiveWorkspace();
-        const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
+        const widget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
         workspace.addViewer(widget);
 
         let widgets = toArray(workspace.dockpanel.widgets());
@@ -38,7 +42,9 @@ describe("workspace", () => {
 
     test("makeDetail moves widget from split to dock panel", () => {
         const workspace = new PerspectiveWorkspace();
-        const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
+        const widget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
         workspace.addViewer(widget);
 
         let widgets = toArray(workspace.dockpanel.widgets());
@@ -65,7 +71,9 @@ describe("workspace", () => {
 
     test("`perspective-click` event handlers are registered on masterpanel widgets", () => {
         const workspace = new PerspectiveWorkspace();
-        const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
+        const widget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
         workspace.addViewer(widget);
 
         workspace.onPerspectiveClick = jest.fn();
@@ -80,7 +88,9 @@ describe("workspace", () => {
 
     test("`perspective-click` event handlers are unregistered when widget is moved to detailpanel", () => {
         const workspace = new PerspectiveWorkspace();
-        const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
+        const widget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
         workspace.addViewer(widget);
 
         workspace.onPerspectiveClick = jest.fn();
@@ -99,8 +109,12 @@ describe("workspace", () => {
 
     test("`perspective-click` events from master panel filter detail views when columns match", done => {
         const workspace = new PerspectiveWorkspace();
-        const detailWidget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
-        const masterWidget = new PerspectiveWidget("One", {plugin_config: {columns: ["A", "B"]}});
+        const detailWidget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
+        const masterWidget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A", "B"]}
+        });
 
         const mockTable = jest.fn();
         mockTable.schema = () => new Promise(resolve => resolve({A: "string"}));
@@ -112,7 +126,9 @@ describe("workspace", () => {
 
         workspace.makeMaster(masterWidget);
         const config = {filters: [["A", "===", "testValue"]]};
-        masterWidget.viewer.dispatchEvent(new CustomEvent("perspective-click", {detail: {config}}));
+        masterWidget.viewer.dispatchEvent(
+            new CustomEvent("perspective-click", {detail: {config}})
+        );
 
         setTimeout(() => {
             expect(detailWidget.save().filters).toEqual(config.filters);
@@ -122,8 +138,12 @@ describe("workspace", () => {
 
     test("`perspective-click` events from master panel do NOT filter detail views when columns do NOT match", done => {
         const workspace = new PerspectiveWorkspace();
-        const detailWidget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
-        const masterWidget = new PerspectiveWidget("One", {plugin_config: {columns: ["A", "B"]}});
+        const detailWidget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
+        const masterWidget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A", "B"]}
+        });
 
         const mockTable = jest.fn();
         mockTable.schema = () => new Promise(resolve => resolve({A: "string"}));
@@ -135,7 +155,9 @@ describe("workspace", () => {
 
         workspace.makeMaster(masterWidget);
         const config = {filters: [["B", "===", "testValue"]]};
-        masterWidget.viewer.dispatchEvent(new CustomEvent("perspective-click", {detail: {config}}));
+        masterWidget.viewer.dispatchEvent(
+            new CustomEvent("perspective-click", {detail: {config}})
+        );
 
         setTimeout(() => {
             expect(detailWidget.save().filters).toEqual([]);

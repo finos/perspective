@@ -19,6 +19,18 @@ import candlestick from "./candlestick";
 import sunburst from "./sunburst";
 import treemap from "./treemap";
 
-const chartClasses = [barChart, columnChart, lineChart, areaChart, yScatter, xyScatter, heatmap, ohlc, candlestick, sunburst, treemap];
+const chartClasses = [
+    barChart,
+    columnChart,
+    lineChart,
+    areaChart,
+    yScatter,
+    xyScatter,
+    heatmap,
+    ohlc,
+    candlestick,
+    sunburst,
+    treemap
+];
 
 export default chartClasses;

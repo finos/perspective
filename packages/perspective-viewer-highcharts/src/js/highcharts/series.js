@@ -14,7 +14,8 @@ function row_to_series(series, sname, gname) {
     let sidx = 0;
     // TODO: figure out what this does
     for (sidx; sidx < series.length; sidx++) {
-        let is_group = typeof gname === "undefined" || series[sidx].stack === gname;
+        let is_group =
+            typeof gname === "undefined" || series[sidx].stack === gname;
         if (series[sidx].name == sname && is_group) {
             s = series[sidx];
             break;
@@ -155,9 +156,21 @@ class RowIterator {
     *[Symbol.iterator]() {
         for (let row of this.rows) {
             if (this.columns === undefined) {
-                this.columns = Object.keys(row).filter(prop => prop !== "__ROW_PATH__");
+                this.columns = Object.keys(row).filter(
+                    prop => prop !== "__ROW_PATH__"
+                );
                 this.is_stacked =
-                    this.columns.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
+                    this.columns
+                        .map(value =>
+                            value.substr(
+                                value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1,
+                                value.length
+                            )
+                        )
+                        .filter(
+                            (value, index, self) =>
+                                self.indexOf(value) === index
+                        ).length > 1;
             }
             yield row;
         }
@@ -167,9 +180,19 @@ class RowIterator {
 class ColumnIterator {
     constructor(columns, pivot_length) {
         this.columns = columns;
-        this.column_names = Object.keys(this.columns).filter(prop => prop !== "__ROW_PATH__");
+        this.column_names = Object.keys(this.columns).filter(
+            prop => prop !== "__ROW_PATH__"
+        );
         this.is_stacked =
-            this.column_names.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
+            this.column_names
+                .map(value =>
+                    value.substr(
+                        value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1,
+                        value.length
+                    )
+                )
+                .filter((value, index, self) => self.indexOf(value) === index)
+                .length > 1;
         this.pivot_length = pivot_length;
     }
 
@@ -179,7 +202,10 @@ class ColumnIterator {
             if (this.columns.__ROW_PATH__) {
                 let filtered_data = [];
                 for (let i = 0; i < data.length; i++) {
-                    if (this.columns.__ROW_PATH__[i].length === this.pivot_length) {
+                    if (
+                        this.columns.__ROW_PATH__[i].length ===
+                        this.pivot_length
+                    ) {
                         filtered_data.push(data[i]);
                     }
                 }
@@ -202,7 +228,11 @@ export function make_y_data(cols, pivots) {
         } else {
             sname = sname.slice(0, sname.length - 1).join(", ") || " ";
         }
-        let s = column_to_series(col.data.map(val => (val === undefined || val === "" ? null : val)), sname, gname);
+        let s = column_to_series(
+            col.data.map(val => (val === undefined || val === "" ? null : val)),
+            sname,
+            gname
+        );
         series.push(s);
     }
 
@@ -326,7 +356,11 @@ class MakeTick {
         }
 
         for (let i = 0; i < data[0].length; i++) {
-            if (data[0][i] === null || data[0][i] === undefined || data[0][i] === "") {
+            if (
+                data[0][i] === null ||
+                data[0][i] === undefined ||
+                data[0][i] === ""
+            ) {
                 continue;
             }
 
@@ -388,7 +422,14 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
     let row_path = columns.columns.__ROW_PATH__;
 
     if (col_pivots.length === 0) {
-        let ticks = make_tick.make_col(columns.columns, columns.column_names, aggs.length, columns.pivot_length, row_path, color_range);
+        let ticks = make_tick.make_col(
+            columns.columns,
+            columns.column_names,
+            aggs.length,
+            columns.pivot_length,
+            row_path,
+            color_range
+        );
 
         let s = column_to_series(ticks, " ");
         series.push(s);
@@ -410,7 +451,9 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
 
         for (let col of columns) {
             let column_levels = col.name.split(COLUMN_SEPARATOR_STRING);
-            let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
+            let group_name =
+                column_levels.slice(0, column_levels.length - 1).join(", ") ||
+                " ";
 
             if (groups[group_name] === undefined) {
                 groups[group_name] = [];
@@ -420,7 +463,14 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
 
             if (groups[group_name].length === aggs.length) {
                 // generate series as soon as we have enough data
-                let ticks = make_tick.make_col(groups[group_name], aggs, aggs.length, columns.pivot_length, row_path, color_range);
+                let ticks = make_tick.make_col(
+                    groups[group_name],
+                    aggs,
+                    aggs.length,
+                    columns.pivot_length,
+                    row_path,
+                    color_range
+                );
 
                 let s = column_to_series(ticks, group_name);
                 series.push(s);
@@ -428,7 +478,12 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
         }
     }
 
-    return [series, {categories: make_tick.xaxis_clean.names}, color_range, {categories: make_tick.yaxis_clean.names}];
+    return [
+        series,
+        {categories: make_tick.xaxis_clean.names},
+        color_range,
+        {categories: make_tick.yaxis_clean.names}
+    ];
 }
 
 export function make_xy_data(js, schema, columns, pivots, col_pivots) {
@@ -453,7 +508,9 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots) {
         let cols = Object.keys(js[0]).filter(prop => prop !== "__ROW_PATH__");
         for (let prop of cols) {
             let column_levels = prop.split(COLUMN_SEPARATOR_STRING);
-            let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
+            let group_name =
+                column_levels.slice(0, column_levels.length - 1).join(", ") ||
+                " ";
             if (prev === undefined) {
                 prev = group_name;
             }
@@ -479,7 +536,12 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots) {
         }
     }
 
-    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];
+    return [
+        series,
+        {categories: make_tick.xaxis_clean.names},
+        colorRange,
+        {categories: make_tick.yaxis_clean.names}
+    ];
 }
 
 /******************************************************************************
@@ -552,12 +614,21 @@ function make_color(aggregates, all, leaf_only) {
             let colorvals = series["data"];
             for (let i = 1; i < colorvals.length; ++i) {
                 if ((leaf_only && colorvals[i].leaf) || !leaf_only) {
-                    colorRange[0] = Math.min(colorRange[0], colorvals[i].colorValue);
-                    colorRange[1] = Math.max(colorRange[1], colorvals[i].colorValue);
+                    colorRange[0] = Math.min(
+                        colorRange[0],
+                        colorvals[i].colorValue
+                    );
+                    colorRange[1] = Math.max(
+                        colorRange[1],
+                        colorvals[i].colorValue
+                    );
                 }
             }
             if (colorRange[0] * colorRange[1] < 0) {
-                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+                let cmax = Math.max(
+                    Math.abs(colorRange[0]),
+                    Math.abs(colorRange[1])
+                );
                 colorRange = [-cmax, cmax];
             }
         }
@@ -639,7 +710,10 @@ export function make_tree_data(js, row_pivots, aggregates, leaf_only) {
                     id: id,
                     name: name,
                     value: row[prop],
-                    colorValue: aggregates.length > 1 ? row[rows2.columns[idx + 1]] : undefined,
+                    colorValue:
+                        aggregates.length > 1
+                            ? row[rows2.columns[idx + 1]]
+                            : undefined,
                     parent: parent,
                     leaf: row.__ROW_PATH__.length === row_pivots.length
                 });

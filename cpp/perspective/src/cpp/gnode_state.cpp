@@ -98,8 +98,9 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
 
     t_uindex nrows = m_table->num_rows();
     if (nrows >= m_table->get_capacity() - 1) {
-        m_table->reserve(std::max(
-            nrows + 1, static_cast<t_uindex>(m_table->get_capacity() * PSP_TABLE_GROW_RATIO)));
+        m_table->reserve(std::max(nrows + 1,
+            static_cast<t_uindex>(
+                m_table->get_capacity() * PSP_TABLE_GROW_RATIO)));
     }
 
     m_table->set_size(nrows + 1);
@@ -148,7 +149,10 @@ t_gstate::update_history(const t_data_table* tbl) {
 #else
         for (t_uindex idx = 0; idx < ncols; ++idx)
 #endif
-            { stable->set_column(idx, fcolumns[col_translation[idx]]->clone()); }
+            {
+                stable->set_column(
+                    idx, fcolumns[col_translation[idx]]->clone());
+            }
 #ifdef PSP_PARALLEL_FOR
         );
 #endif
@@ -158,7 +162,8 @@ t_gstate::update_history(const t_data_table* tbl) {
         stable->set_capacity(tbl->get_capacity());
         stable->set_size(tbl->size());
 
-        for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx) {
+        for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end;
+             ++idx) {
             t_tscalar pkey = pkey_col->get_scalar(idx);
             const std::uint8_t* op_ptr = op_col->get_nth<std::uint8_t>(idx);
             t_op op = static_cast<t_op>(*op_ptr);
@@ -172,7 +177,9 @@ t_gstate::update_history(const t_data_table* tbl) {
                 case OP_DELETE: {
                     _mark_deleted(idx);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+                } break;
             }
         }
 
@@ -200,13 +207,16 @@ t_gstate::update_history(const t_data_table* tbl) {
             case OP_DELETE: {
                 erase(pkey);
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+            } break;
         }
     }
 
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(ncols), 1,
-        [tbl, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](int colidx)
+        [tbl, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](
+            int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
 #endif
@@ -216,7 +226,8 @@ t_gstate::update_history(const t_data_table* tbl) {
 
             t_column* scolumn = scolumns[colidx];
 
-            for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx) {
+            for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end;
+                 ++idx) {
                 bool is_valid = fcolumn->is_valid(idx);
                 t_uindex stableidx = stableidx_vec[idx];
 
@@ -270,10 +281,12 @@ t_gstate::update_history(const t_data_table* tbl) {
                             stableidx, *(fcolumn->get_nth<std::uint8_t>(idx)));
                     } break;
                     case DTYPE_FLOAT64: {
-                        scolumn->set_nth<double>(stableidx, *(fcolumn->get_nth<double>(idx)));
+                        scolumn->set_nth<double>(
+                            stableidx, *(fcolumn->get_nth<double>(idx)));
                     } break;
                     case DTYPE_FLOAT32: {
-                        scolumn->set_nth<float>(stableidx, *(fcolumn->get_nth<float>(idx)));
+                        scolumn->set_nth<float>(
+                            stableidx, *(fcolumn->get_nth<float>(idx)));
                     } break;
                     case DTYPE_BOOL: {
                         scolumn->set_nth<std::uint8_t>(
@@ -291,7 +304,9 @@ t_gstate::update_history(const t_data_table* tbl) {
                         const char* s = fcolumn->get_nth<const char>(idx);
                         scolumn->set_nth<const char*>(stableidx, s);
                     } break;
-                    default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+                    default: {
+                        PSP_COMPLAIN_AND_ABORT("Unexpected type");
+                    }
                 }
             }
         }
@@ -304,7 +319,8 @@ void
 t_gstate::pprint() const {
     std::vector<t_uindex> indices(m_mapping.size());
     t_uindex idx = 0;
-    for (t_mapping::const_iterator iter = m_mapping.begin(); iter != m_mapping.end(); ++iter) {
+    for (t_mapping::const_iterator iter = m_mapping.begin();
+         iter != m_mapping.end(); ++iter) {
         indices[idx] = iter->second;
         ++idx;
     }
@@ -315,7 +331,8 @@ t_mask
 t_gstate::get_cpp_mask() const {
     t_uindex sz = m_table->size();
     t_mask msk(sz);
-    for (t_mapping::const_iterator iter = m_mapping.begin(); iter != m_mapping.end(); ++iter) {
+    for (t_mapping::const_iterator iter = m_mapping.begin();
+         iter != m_mapping.end(); ++iter) {
         msk.set(iter->second, true);
     }
     return msk;
@@ -332,7 +349,8 @@ t_gstate::get_table() const {
 }
 
 void
-t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+t_gstate::read_column(const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
     std::vector<t_tscalar>& out_data) const {
     t_index num = pkeys.size();
     std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
@@ -350,14 +368,15 @@ t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& 
 }
 
 void
-t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
-    std::vector<double>& out_data) const {
+t_gstate::read_column(const std::string& colname,
+    const std::vector<t_tscalar>& pkeys, std::vector<double>& out_data) const {
     read_column(colname, pkeys, out_data, true);
 }
 
 void
-t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
-    std::vector<double>& out_data, bool include_nones) const {
+t_gstate::read_column(const std::string& colname,
+    const std::vector<t_tscalar>& pkeys, std::vector<double>& out_data,
+    bool include_nones) const {
     t_index num = pkeys.size();
     std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
@@ -379,7 +398,8 @@ t_tscalar
 t_gstate::get(t_tscalar pkey, const std::string& colname) const {
     t_mapping::const_iterator iter = m_mapping.find(pkey);
     if (iter != m_mapping.end()) {
-        std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+        std::shared_ptr<const t_column> col
+            = m_table->get_const_column(colname);
         return col->get_scalar(iter->second);
     }
 
@@ -405,8 +425,8 @@ t_gstate::get_row(t_tscalar pkey) const {
 }
 
 bool
-t_gstate::is_unique(
-    const std::vector<t_tscalar>& pkeys, const std::string& colname, t_tscalar& value) const {
+t_gstate::is_unique(const std::vector<t_tscalar>& pkeys,
+    const std::string& colname, t_tscalar& value) const {
     std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
     value = mknone();
@@ -426,7 +446,8 @@ t_gstate::is_unique(
 
 bool
 t_gstate::apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
-    t_tscalar& value, std::function<bool(const t_tscalar&, t_tscalar&)> fn) const {
+    t_tscalar& value,
+    std::function<bool(const t_tscalar&, t_tscalar&)> fn) const {
     std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
 
@@ -480,7 +501,8 @@ t_gstate::get_sorted_pkeyed_table() const {
     for (auto it = ordered.begin(); it != ordered.end(); ++it) {
         auto ridx = it->second;
         pkey_col->push_back(it->first);
-        for (t_uindex cidx = 0, loop_end = m_tblschema.size(); cidx < loop_end; ++cidx) {
+        for (t_uindex cidx = 0, loop_end = m_tblschema.size(); cidx < loop_end;
+             ++cidx) {
             auto scalar = icolumns[cidx]->get_scalar(ridx);
             ocolumns[cidx]->push_back(scalar);
         }
@@ -512,7 +534,8 @@ t_gstate::_get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const {
 }
 
 t_data_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema, const std::vector<t_tscalar>& pkeys) const {
+t_gstate::_get_pkeyed_table(
+    const t_schema& schema, const std::vector<t_tscalar>& pkeys) const {
     t_mask mask(size());
 
     for (const auto& pkey : pkeys) {
@@ -598,7 +621,8 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
     }
 
     std::sort(order.begin(), order.end(),
-        [](const std::pair<t_tscalar, t_uindex>& a, const std::pair<t_tscalar, t_uindex>& b) {
+        [](const std::pair<t_tscalar, t_uindex>& a,
+            const std::pair<t_tscalar, t_uindex>& b) {
             return a.second < b.second;
         });
 
@@ -612,13 +636,15 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
 
         if (enable_pkeyed_table_vocab_reserve) {
             total_string_size += offset;
-            for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx) {
-                total_string_size += strlen(order[idx].first.get_char_ptr()) + 1;
+            for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end;
+                 ++idx) {
+                total_string_size
+                    += strlen(order[idx].first.get_char_ptr()) + 1;
             }
         }
 
-        // if the m_mapping is empty, get_pkey_dtype() may lie about our pkeys being strings
-        // don't try to reserve in this case
+        // if the m_mapping is empty, get_pkey_dtype() may lie about our pkeys
+        // being strings don't try to reserve in this case
         if (!order.size())
             total_string_size = 0;
 

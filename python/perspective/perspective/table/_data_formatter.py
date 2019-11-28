@@ -20,7 +20,8 @@ except ImportError:
 def _mod(a, b):
     '''C-style modulo function'''
     if b == 0:
-        # Javascript returns NaN in cases of division by 0; return -1 because None would fail comparisons with other ints
+        # Javascript returns NaN in cases of division by 0; return -1 because
+        # None would fail comparisons with other ints
         return float('nan')
     d = trunc(float(a) / b)
     return a - d * b
@@ -40,17 +41,21 @@ def to_format(options, view, output_format):
     num_hidden = view._num_hidden_cols()
 
     for ridx in range(options["start_row"], options["end_row"]):
-        row_path = data_slice.get_row_path(ridx) if options["has_row_path"] else []
-        if options["leaves_only"] and len(row_path) < len(view._config.get_row_pivots()):
+        row_path = data_slice.get_row_path(
+            ridx) if options["has_row_path"] else []
+        if options["leaves_only"] and len(row_path) < len(
+                view._config.get_row_pivots()):
             continue
 
         if output_format == 'records':
             data.append({})
 
         for cidx in range(options["start_col"], options["end_col"]):
-            name = COLUMN_SEPARATOR_STRING.join([n.to_string(False) for n in column_names[cidx]])
+            name = COLUMN_SEPARATOR_STRING.join(
+                [n.to_string(False) for n in column_names[cidx]])
 
-            if _mod((cidx - (1 if view._sides > 0 else 0)), (num_columns + num_hidden)) >= len(view._config.get_columns()):
+            if _mod((cidx - (1 if view._sides > 0 else 0)),
+                    (num_columns + num_hidden)) >= len(view._config.get_columns()):
                 # don't emit columns used for hidden sort
                 continue
             elif cidx == options["start_col"] and view._sides > 0:
@@ -93,11 +98,13 @@ def to_format(options, view, output_format):
                     data[-1]['__INDEX__'].append(pkey)
             elif output_format in ('dict', 'numpy'):
                 if len(pkeys) == 0:
-                    data["__INDEX__"].append([])  # ensure that `__INDEX__` has the same number of rows as returned dataset
+                    data["__INDEX__"].append(
+                        [])  # ensure that `__INDEX__` has the same number of rows as returned dataset
                 for pkey in pkeys:
                     data['__INDEX__'].append([pkey])
 
-    if output_format in ('dict', 'numpy') and (not options["has_row_path"] and ("__ROW_PATH__" in data)):
+    if output_format in ('dict', 'numpy') and (
+            not options["has_row_path"] and ("__ROW_PATH__" in data)):
         del data["__ROW_PATH__"]
 
     if output_format == 'numpy':
@@ -114,11 +121,26 @@ def _to_format_helper(view, options=None):
     opts = _parse_format_options(view, options)
 
     if view._sides == 0:
-        data_slice = get_data_slice_zero(view._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
+        data_slice = get_data_slice_zero(
+            view._view,
+            opts["start_row"],
+            opts["end_row"],
+            opts["start_col"],
+            opts["end_col"])
     elif view._sides == 1:
-        data_slice = get_data_slice_one(view._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
+        data_slice = get_data_slice_one(
+            view._view,
+            opts["start_row"],
+            opts["end_row"],
+            opts["start_col"],
+            opts["end_col"])
     else:
-        data_slice = get_data_slice_two(view._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
+        data_slice = get_data_slice_two(
+            view._view,
+            opts["start_row"],
+            opts["end_row"],
+            opts["start_col"],
+            opts["end_col"])
 
     column_names = data_slice.get_column_names()
 

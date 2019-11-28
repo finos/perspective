@@ -25,7 +25,8 @@ if six.PY2:
 def _normalize_timestamp(obj):
     '''Convert a timestamp in seconds to milliseconds.'''
     try:
-        # if it overflows, it's milliseconds - otherwise convert from seconds to milliseconds.
+        # if it overflows, it's milliseconds - otherwise convert from seconds to
+        # milliseconds.
         datetime.fromtimestamp(obj)
         return int(obj * 1000)
     except (ValueError, OverflowError):
@@ -126,8 +127,10 @@ class _PerspectiveDateValidator(object):
         if isinstance(obj, (int, float)):
             return _normalize_timestamp(obj)
 
-        # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
-        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)
+        # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond
+        # timestamps
+        return int((time.mktime(obj.timetuple()) +
+                    obj.microsecond / 1000000.0) * 1000)
 
     def format(self, s):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on the format of the parsed date.
@@ -141,14 +144,16 @@ class _PerspectiveDateValidator(object):
         '''
         if isinstance(s, (bytes, bytearray)):
             s = s.decode("utf-8")
-        has_separators = bool(search(r"[/. -]", s))  # match commonly-used date separators
+        # match commonly-used date separators
+        has_separators = bool(search(r"[/. -]", s))
 
         dtype = t_dtype.DTYPE_STR
 
         if has_separators:
             try:
                 parsed = parse(s)
-                if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
+                if (parsed.hour, parsed.minute, parsed.second,
+                        parsed.microsecond) == (0, 0, 0, 0):
                     dtype = t_dtype.DTYPE_DATE
                 else:
                     dtype = t_dtype.DTYPE_TIME

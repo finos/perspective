@@ -31,7 +31,11 @@ export const domain = () => {
                 .map(d => new Date(d[valueName]).getTime())
                 .sort((a, b) => a - b)
                 .filter((d, i, a) => i === 0 || d !== a[i - 1])
-                .reduce((acc, d, i, src) => (i === 0 || acc <= d - src[i - 1] ? acc : Math.abs(d - src[i - 1])))
+                .reduce((acc, d, i, src) =>
+                    i === 0 || acc <= d - src[i - 1]
+                        ? acc
+                        : Math.abs(d - src[i - 1])
+                )
         );
 
         return Math.min(...gaps);

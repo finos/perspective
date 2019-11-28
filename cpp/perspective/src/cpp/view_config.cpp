@@ -13,9 +13,12 @@ namespace perspective {
 
 t_view_config::t_view_config(std::vector<std::string> row_pivots,
     std::vector<std::string> column_pivots,
-    tsl::ordered_map<std::string, std::string> aggregates, std::vector<std::string> columns,
-    std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
-    std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only)
+    tsl::ordered_map<std::string, std::string> aggregates,
+    std::vector<std::string> columns,
+    std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>
+        filter,
+    std::vector<std::vector<std::string>> sort, std::string filter_op,
+    bool column_only)
     : m_init(false)
     , m_row_pivots(std::move(row_pivots))
     , m_column_pivots(std::move(column_pivots))
@@ -126,7 +129,8 @@ t_view_config::get_column_pivot_depth() const {
 void
 t_view_config::fill_aggspecs(const t_schema& schema) {
     /**
-     * Provide aggregates for columns that are shown but NOT specified in `m_aggregates`.
+     * Provide aggregates for columns that are shown but NOT specified in
+     * `m_aggregates`.
      */
     for (const std::string& column : m_columns) {
         if (m_aggregates.count(column) != 0) {
@@ -135,8 +139,8 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
 
         t_dtype dtype = schema.get_dtype(column);
         std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
-        t_aggtype agg_type
-            = t_aggtype::AGGTYPE_ANY; // use aggtype here since we are not parsing aggs
+        t_aggtype agg_type = t_aggtype::AGGTYPE_ANY; // use aggtype here since
+                                                     // we are not parsing aggs
 
         if (!m_column_only) {
             agg_type = _get_default_aggregate(dtype);
@@ -151,7 +155,8 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
     for (auto const& iter : m_aggregates) {
         auto column = iter.first;
         auto aggregate = iter.second;
-        if (std::find(m_columns.begin(), m_columns.end(), column) == m_columns.end()) {
+        if (std::find(m_columns.begin(), m_columns.end(), column)
+            == m_columns.end()) {
             continue;
         }
 
@@ -166,8 +171,8 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
 
         if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST) {
             dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
-            m_aggspecs.push_back(
-                t_aggspec(column, column, agg_type, dependencies, SORTTYPE_ASCENDING));
+            m_aggspecs.push_back(t_aggspec(
+                column, column, agg_type, dependencies, SORTTYPE_ASCENDING));
         } else {
             m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
         }
@@ -180,13 +185,16 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
         std::string column = sort[0];
 
         bool is_hidden_column
-            = std::find(m_columns.begin(), m_columns.end(), column) == m_columns.end();
+            = std::find(m_columns.begin(), m_columns.end(), column)
+            == m_columns.end();
 
         if (is_hidden_column) {
-            bool is_pivot = (std::find(m_row_pivots.begin(), m_row_pivots.end(), column)
-                                != m_row_pivots.end())
-                || (std::find(m_column_pivots.begin(), m_column_pivots.end(), column)
-                       != m_column_pivots.end());
+            bool is_pivot
+                = (std::find(m_row_pivots.begin(), m_row_pivots.end(), column)
+                      != m_row_pivots.end())
+                || (std::find(
+                        m_column_pivots.begin(), m_column_pivots.end(), column)
+                    != m_column_pivots.end());
 
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
             t_aggtype agg_type;
@@ -214,13 +222,13 @@ t_view_config::fill_fterm() {
         switch (op) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
-                m_fterm.push_back(
-                    t_fterm(std::get<0>(filter), op, mktscalar(0), std::get<2>(filter)));
+                m_fterm.push_back(t_fterm(std::get<0>(filter), op, mktscalar(0),
+                    std::get<2>(filter)));
             } break;
             default: {
                 t_tscalar filter_term = std::get<2>(filter)[0];
-                m_fterm.push_back(
-                    t_fterm(std::get<0>(filter), op, filter_term, std::vector<t_tscalar>()));
+                m_fterm.push_back(t_fterm(std::get<0>(filter), op, filter_term,
+                    std::vector<t_tscalar>()));
             }
         }
     }
@@ -245,7 +253,8 @@ t_view_config::fill_sortspec() {
 
 t_index
 t_view_config::get_aggregate_index(const std::string& column) const {
-    auto it = std::find(m_aggregate_names.begin(), m_aggregate_names.end(), column);
+    auto it
+        = std::find(m_aggregate_names.begin(), m_aggregate_names.end(), column);
     if (it != m_aggregate_names.end()) {
         return t_index(std::distance(m_aggregate_names.begin(), it));
     }

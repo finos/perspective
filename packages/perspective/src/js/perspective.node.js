@@ -20,8 +20,10 @@ const path = require("path");
 
 const load_perspective = require("./psp.async.js").default;
 
-// eslint-disable-next-line no-undef
-const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__.resolve : module.require.resolve;
+const RESOLVER =
+    typeof __non_webpack_require__ !== "undefined"
+        ? __non_webpack_require__.resolve // eslint-disable-line no-undef
+        : module.require.resolve;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 
@@ -109,7 +111,10 @@ function create_http_server(assets, host_psp) {
                 if (typeof content !== "undefined") {
                     console.log(`200 ${url}`);
                     response.writeHead(200, {"Content-Type": contentType});
-                    response.end(content, extname === ".arrow" ? "user-defined" : "utf-8");
+                    response.end(
+                        content,
+                        extname === ".arrow" ? "user-defined" : "utf-8"
+                    );
                     return;
                 }
             }
@@ -117,13 +122,22 @@ function create_http_server(assets, host_psp) {
                 for (let rootDir of DEFAULT_ASSETS) {
                     try {
                         let paths = RESOLVER.paths(rootDir + url);
-                        paths = [...paths, ...assets.map(x => path.join(x, "node_modules")), LOCAL_PATH];
+                        paths = [
+                            ...paths,
+                            ...assets.map(x => path.join(x, "node_modules")),
+                            LOCAL_PATH
+                        ];
                         let filePath = RESOLVER(rootDir + url, {paths});
                         let content = await read_promise(filePath);
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
-                            response.writeHead(200, {"Content-Type": contentType});
-                            response.end(content, extname === ".arrow" ? "user-defined" : "utf-8");
+                            response.writeHead(200, {
+                                "Content-Type": contentType
+                            });
+                            response.end(
+                                content,
+                                extname === ".arrow" ? "user-defined" : "utf-8"
+                            );
                             return;
                         }
                     } catch (e) {}
@@ -164,7 +178,10 @@ class WebSocketServer extends Server {
         this.REQ_ID_MAP = new Map();
 
         // Serve Worker API through WebSockets
-        this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
+        this._wss = new WebSocket.Server({
+            noServer: true,
+            perMessageDeflate: true
+        });
 
         // When the server starts, define how to handle messages
         this._wss.on("connection", ws => {

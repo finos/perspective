@@ -40,8 +40,13 @@ utils.with_server({}, () => {
                         getData(2, 1),
                         schema
                     );
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
+                    await page.shadow_click(
+                        "perspective-viewer",
+                        "#config_button"
+                    );
 
                     await page.evaluate(
                         (viewer, data, schema) => {
@@ -52,7 +57,9 @@ utils.with_server({}, () => {
                         getData(3, 2),
                         schema
                     );
-                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
                 },
                 {wait_for_update: false}
             );

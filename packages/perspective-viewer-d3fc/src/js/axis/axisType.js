@@ -21,7 +21,9 @@ export const axisType = settings => {
 
     const getType = () => {
         const checkTypes = types => {
-            const list = settingValue ? settings[settingName].filter(s => settingValue == s.name) : settings[settingName];
+            const list = settingValue
+                ? settings[settingName].filter(s => settingValue == s.name)
+                : settings[settingName];
 
             if (settingName == "crossValues" && list.length > 1) {
                 // can't do multiple values on non-ordinal cross-axis
@@ -33,9 +35,15 @@ export const axisType = settings => {
 
         if (settings[settingName].length === 0) {
             return AXIS_TYPES.none;
-        } else if (excludeType != AXIS_TYPES.time && checkTypes(["datetime", "date"])) {
+        } else if (
+            excludeType != AXIS_TYPES.time &&
+            checkTypes(["datetime", "date"])
+        ) {
             return AXIS_TYPES.time;
-        } else if (excludeType != AXIS_TYPES.linear && checkTypes(["integer", "float"])) {
+        } else if (
+            excludeType != AXIS_TYPES.linear &&
+            checkTypes(["integer", "float"])
+        ) {
             return AXIS_TYPES.linear;
         }
 

@@ -12,12 +12,16 @@ const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
-    mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
+    mode:
+        process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG
+            ? "development"
+            : process.env.NODE_ENV || "production",
     entry: "./src/ts/index.ts",
     devtool: "cheap-eval-source-map",
     resolveLoader: {
         alias: {
-            "file-worker-loader": "@finos/perspective-webpack-plugin/src/js/psp-worker-loader.js"
+            "file-worker-loader":
+                "@finos/perspective-webpack-plugin/src/js/psp-worker-loader.js"
         }
     },
     resolve: {
@@ -29,8 +33,20 @@ module.exports = {
         maxAssetSize: 512000
     },
     externals: /\@jupyter|\@phosphor/,
-    stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
-    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
+    stats: {
+        modules: false,
+        hash: false,
+        version: false,
+        builtAt: false,
+        entrypoints: false
+    },
+    plugins: [
+        new webpack.ContextReplacementPlugin(
+            /moment[\/\\]locale$/,
+            /(en|es|fr)$/
+        ),
+        new PerspectivePlugin()
+    ],
     module: {
         rules: [
             {

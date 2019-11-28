@@ -122,7 +122,8 @@ t_time::gmtime(struct tm& out, std::int64_t secs, std::int32_t offset) const {
 
         /* Adjust DAYS and Y to match the guessed year.
          */
-        days -= ((yg - y) * 365 + LEAPS_THRU_END_OF(yg - 1) - LEAPS_THRU_END_OF(y - 1));
+        days -= ((yg - y) * 365 + LEAPS_THRU_END_OF(yg - 1)
+            - LEAPS_THRU_END_OF(y - 1));
         y = yg;
     }
     out.tm_year = y - 1900;
@@ -185,9 +186,9 @@ t_time::str(const struct tm& t) const {
 
     double s = seconds(t) + microseconds() / 1000000.0;
 
-    ss << year(t) << "-" << str_(month(t)) << "-" << str_(day(t)) << " " << str_(hours(t))
-       << ":" << str_(minutes(t)) << ":" << std::setfill('0') << std::setw(6) << std::fixed
-       << std::setprecision(3) << s;
+    ss << year(t) << "-" << str_(month(t)) << "-" << str_(day(t)) << " "
+       << str_(hours(t)) << ":" << str_(minutes(t)) << ":" << std::setfill('0')
+       << std::setw(6) << std::fixed << std::setprecision(3) << s;
 
     return ss.str();
 }
@@ -215,8 +216,8 @@ ymd_to_ord(std::int32_t year, std::int32_t month, std::int32_t day) {
 }
 
 std::int64_t
-to_gmtime(std::int32_t year, std::int32_t month, std::int32_t day, std::int32_t hour,
-    std::int32_t min, std::int32_t sec) {
+to_gmtime(std::int32_t year, std::int32_t month, std::int32_t day,
+    std::int32_t hour, std::int32_t min, std::int32_t sec) {
     static std::int32_t EPOCH_ORD = ymd_to_ord(1970, 1, 1);
     std::int64_t days = ymd_to_ord(year, month, day) - EPOCH_ORD;
     std::int64_t res = ((days * 24 + hour) * 60 + min) * 60 + sec;

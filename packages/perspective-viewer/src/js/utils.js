@@ -50,9 +50,13 @@ export function registerElement(templateString, styleString, proto) {
     const template = importTemplate(templateString);
     setTemplateContent(template);
     if (styleString) {
-        template.innerHTML = `<style>${styleString.toString()}</style>` + template.innerHTML;
+        template.innerHTML =
+            `<style>${styleString.toString()}</style>` + template.innerHTML;
     }
-    template.innerHTML = `<style id="psp_styles" scope="${template.getAttribute("id")}">test{}</style>` + template.innerHTML;
+    template.innerHTML =
+        `<style id="psp_styles" scope="${template.getAttribute(
+            "id"
+        )}">test{}</style>` + template.innerHTML;
 
     const _perspective_element = class extends proto {
         attributeChangedCallback(name, old, value) {
@@ -88,7 +92,8 @@ export function registerElement(templateString, styleString, proto) {
             // Call all attributes bound to setters on the proto
             for (let key of Object.getOwnPropertyNames(proto.prototype)) {
                 if (key !== "connectedCallback") {
-                    if (this.hasAttribute(key) && key[0] !== "_") this[key] = this.getAttribute(key);
+                    if (this.hasAttribute(key) && key[0] !== "_")
+                        this[key] = this.getAttribute(key);
                 }
             }
             this._initializing = false;

@@ -31,18 +31,32 @@ function ScriptPath() {
             callerIndex = Number(i);
             break;
         }
-        pathParts = stackLines[callerIndex].match(/((http[s]?:\/\/.+\/)([^\/]+\.(js|html))).*?:/);
+        pathParts = stackLines[callerIndex].match(
+            /((http[s]?:\/\/.+\/)([^\/]+\.(js|html))).*?:/
+        );
     }
 
     this.fullPath = function() {
-        return pathParts ? pathParts[1] : typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
+        return pathParts
+            ? pathParts[1]
+            : typeof window !== "undefined"
+            ? window.location.origin + window.location.pathname
+            : "";
     };
     this.path = function() {
-        return pathParts ? pathParts[2] : typeof window !== "undefined" ? window.location.pathname : "";
+        return pathParts
+            ? pathParts[2]
+            : typeof window !== "undefined"
+            ? window.location.pathname
+            : "";
     };
     this.host = function() {
         var x = this.path().match(/.+?\/\/.+?\//);
-        return x ? x[0] : typeof window !== "undefined" ? window.location.hostname : "";
+        return x
+            ? x[0]
+            : typeof window !== "undefined"
+            ? window.location.hostname
+            : "";
     };
     this.file = function() {
         return pathParts ? pathParts[3] : "";
@@ -68,7 +82,10 @@ module.exports.isCrossOrigin = function(webpackOrigin) {
             return true;
         }
     } else {
-        return window.location.origin !== module.exports.host.slice(0, window.location.origin.length);
+        return (
+            window.location.origin !==
+            module.exports.host.slice(0, window.location.origin.length)
+        );
     }
 };
 

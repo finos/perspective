@@ -43,9 +43,10 @@
 
 #endif // else
 
-#define SUPPRESS_WARNINGS_GCC(X_)                                                              \
+#define SUPPRESS_WARNINGS_GCC(X_)                                              \
     PRAGMA_GCC(GCC diagnostic push) PRAGMA_GCC(GCC diagnostic ignored #X_)
 #define RESTORE_WARNINGS_GCC() PRAGMA_GCC(GCC diagnostic pop)
 
-#define SUPPRESS_WARNINGS_VC(X_) PRAGMA_VC(warning(push)) PRAGMA_VC(warning(disable : X_))
+#define SUPPRESS_WARNINGS_VC(X_)                                               \
+    PRAGMA_VC(warning(push)) PRAGMA_VC(warning(disable : X_))
 #define RESTORE_WARNINGS_VC() PRAGMA_VC(warning(pop))

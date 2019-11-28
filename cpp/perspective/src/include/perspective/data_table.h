@@ -43,10 +43,11 @@ class t_data_table;
 class PERSPECTIVE_EXPORT t_tabular {};
 
 /**
- * @brief `t_data_table` is the underlying structure used to store and access tabluar data
- * within Perspective.
+ * @brief `t_data_table` is the underlying structure used to store and access
+ * tabluar data within Perspective.
  *
- * Do not directly construct or use `t_data_table` - use the `Table` class instead.
+ * Do not directly construct or use `t_data_table` - use the `Table` class
+ * instead.
  *
  */
 class PERSPECTIVE_EXPORT t_data_table {
@@ -57,10 +58,11 @@ public:
     PSP_NON_COPYABLE(t_data_table);
     t_data_table(const t_schema& s, t_uindex capacity = DEFAULT_EMPTY_CAPACITY);
     // Only use in tests, it inits the table unlike other constructors
-    t_data_table(const t_schema& s, const std::vector<std::vector<t_tscalar>>& v);
+    t_data_table(
+        const t_schema& s, const std::vector<std::vector<t_tscalar>>& v);
 
-    t_data_table(const std::string& name, const std::string& dirname, const t_schema& s,
-        t_uindex init_cap, t_backing_store backing_store);
+    t_data_table(const std::string& name, const std::string& dirname,
+        const t_schema& s, t_uindex init_cap, t_backing_store backing_store);
     ~t_data_table();
 
     const std::string& name() const;
@@ -73,7 +75,8 @@ public:
     t_dtype get_dtype(const std::string& colname) const;
 
     std::shared_ptr<t_column> get_column(const std::string& colname);
-    std::shared_ptr<const t_column> get_const_column(const std::string& colname) const;
+    std::shared_ptr<const t_column> get_const_column(
+        const std::string& colname) const;
 
     std::shared_ptr<const t_column> get_const_column(t_uindex idx) const;
 
@@ -102,22 +105,26 @@ public:
     void clear();
     void reset();
 
-    t_mask filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fops) const;
+    t_mask filter_cpp(
+        t_filter_op combiner, const std::vector<t_fterm>& fops) const;
     t_data_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone() const;
 
-    t_column* clone_column(const std::string& existing_col, const std::string& new_colname);
+    t_column* clone_column(
+        const std::string& existing_col, const std::string& new_colname);
 
     std::vector<const t_column*> get_const_columns() const;
     std::vector<t_column*> get_columns();
 
     void set_column(t_uindex idx, std::shared_ptr<t_column> col);
     void set_column(const std::string& name, std::shared_ptr<t_column> col);
-    std::shared_ptr<t_column> add_column_sptr(const std::string& cname, t_dtype dtype, bool status_enabled);
-    t_column* add_column(const std::string& cname, t_dtype dtype, bool status_enabled);
-    void promote_column(
-        const std::string& cname, t_dtype new_dtype, std::int32_t iter_limit, bool fill);
+    std::shared_ptr<t_column> add_column_sptr(
+        const std::string& cname, t_dtype dtype, bool status_enabled);
+    t_column* add_column(
+        const std::string& cname, t_dtype dtype, bool status_enabled);
+    void promote_column(const std::string& cname, t_dtype new_dtype,
+        std::int32_t iter_limit, bool fill);
 
     std::shared_ptr<t_column> make_column(
         const std::string& colname, t_dtype dtype, bool status_enabled);
@@ -136,8 +143,9 @@ protected:
     void flatten_helper_1(FLATTENED_T flattened) const;
 
     template <typename DATA_T, typename ROWPACK_VEC_T>
-    void flatten_helper_2(ROWPACK_VEC_T& sorted, std::vector<t_flatten_record>& fltrecs,
-        const t_column* scol, t_column* dcol) const;
+    void flatten_helper_2(ROWPACK_VEC_T& sorted,
+        std::vector<t_flatten_record>& fltrecs, const t_column* scol,
+        t_column* dcol) const;
     std::string repr() const;
 
 private:
@@ -151,7 +159,8 @@ private:
     std::vector<std::shared_ptr<t_column>> m_columns;
 };
 
-PERSPECTIVE_EXPORT bool operator==(const t_data_table& lhs, const t_data_table& rhs);
+PERSPECTIVE_EXPORT bool operator==(
+    const t_data_table& lhs, const t_data_table& rhs);
 
 template <typename FLATTENED_T>
 void
@@ -200,7 +209,9 @@ t_data_table::flatten_body(FLATTENED_T flattened) const {
         case DTYPE_FLOAT32: {
             flatten_helper_1<FLATTENED_T, float>(flattened);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unsupported key type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unsupported key type");
+        }
     }
 
     return;
@@ -208,13 +219,15 @@ t_data_table::flatten_body(FLATTENED_T flattened) const {
 
 template <typename DATA_T, typename ROWPACK_VEC_T>
 void
-t_data_table::flatten_helper_2(ROWPACK_VEC_T& sorted, std::vector<t_flatten_record>& fltrecs,
-    const t_column* scol, t_column* dcol) const {
+t_data_table::flatten_helper_2(ROWPACK_VEC_T& sorted,
+    std::vector<t_flatten_record>& fltrecs, const t_column* scol,
+    t_column* dcol) const {
     for (const auto& rec : fltrecs) {
         bool added = false;
         t_index fragidx = 0;
         t_status status = STATUS_INVALID;
-        for (t_index spanidx = rec.m_eidx - 1; spanidx >= t_index(rec.m_bidx); --spanidx) {
+        for (t_index spanidx = rec.m_eidx - 1; spanidx >= t_index(rec.m_bidx);
+             --spanidx) {
             const auto& sort_rec = sorted[spanidx];
             fragidx = sort_rec.m_idx;
             status = *(scol->get_nth_status(fragidx));
@@ -225,7 +238,8 @@ t_data_table::flatten_helper_2(ROWPACK_VEC_T& sorted, std::vector<t_flatten_reco
         }
 
         if (added) {
-            dcol->set_nth<DATA_T>(rec.m_store_idx, *(scol->get_nth<DATA_T>(fragidx)), status);
+            dcol->set_nth<DATA_T>(
+                rec.m_store_idx, *(scol->get_nth<DATA_T>(fragidx)), status);
         }
     }
 }
@@ -262,14 +276,17 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     std::vector<t_rowpack<PKEY_T>> sorted(frags_size);
     for (t_uindex fragidx = 0; fragidx < frags_size; ++fragidx) {
         sorted[fragidx].m_pkey = *(s_pkey_col->get_nth<PKEY_T>(fragidx));
-        sorted[fragidx].m_op = static_cast<t_op>(*(s_op_col->get_nth<std::uint8_t>(fragidx)));
+        sorted[fragidx].m_op
+            = static_cast<t_op>(*(s_op_col->get_nth<std::uint8_t>(fragidx)));
         sorted[fragidx].m_idx = fragidx;
     }
 
     struct t_packcomp {
         bool
-        operator()(const t_rowpack<PKEY_T>& a, const t_rowpack<PKEY_T>& b) const {
-            return a.m_pkey < b.m_pkey || (!(b.m_pkey < a.m_pkey) && a.m_idx < b.m_idx);
+        operator()(
+            const t_rowpack<PKEY_T>& a, const t_rowpack<PKEY_T>& b) const {
+            return a.m_pkey < b.m_pkey
+                || (!(b.m_pkey < a.m_pkey) && a.m_idx < b.m_idx);
         }
     };
 
@@ -344,48 +361,64 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
 
             switch (scol->get_dtype()) {
                 case DTYPE_INT64: {
-                    this->flatten_helper_2<std::int64_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::int64_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_INT32: {
-                    this->flatten_helper_2<std::int32_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::int32_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_INT16: {
-                    this->flatten_helper_2<std::int16_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::int16_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_INT8: {
-                    this->flatten_helper_2<std::int8_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::int8_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_UINT64: {
-                    this->flatten_helper_2<std::uint64_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::uint64_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_UINT32: {
-                    this->flatten_helper_2<std::uint32_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::uint32_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_UINT16: {
-                    this->flatten_helper_2<std::uint16_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::uint16_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_UINT8: {
-                    this->flatten_helper_2<std::uint8_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::uint8_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_FLOAT64: {
-                    this->flatten_helper_2<double, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<double, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_FLOAT32: {
-                    this->flatten_helper_2<float, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<float, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_BOOL: {
-                    this->flatten_helper_2<std::uint8_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::uint8_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_TIME: {
-                    this->flatten_helper_2<std::int64_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::int64_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_DATE: {
-                    this->flatten_helper_2<std::uint32_t, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<std::uint32_t, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
                 case DTYPE_STR: {
-                    this->flatten_helper_2<t_uindex, t_rpvec>(sorted, fltrecs, scol, dcol);
+                    this->flatten_helper_2<t_uindex, t_rpvec>(
+                        sorted, fltrecs, scol, dcol);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unsupported column dtype");
+                }
             }
         }
 #ifdef PSP_PARALLEL_FOR
@@ -396,8 +429,8 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     PSP_PFOR(0, int(m_schema.get_num_columns()),
         [&flattened, this](int colidx)
 #else
-    for (t_uindex colidx = 0, loop_end = m_schema.get_num_columns(); colidx < loop_end;
-         ++colidx)
+    for (t_uindex colidx = 0, loop_end = m_schema.get_num_columns();
+         colidx < loop_end; ++colidx)
 #endif
         {
             const auto& colname = this->m_schema.m_columns[colidx];

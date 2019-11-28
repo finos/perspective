@@ -24,8 +24,8 @@ t_minmax::t_minmax()
 namespace std {
 std::ostream&
 operator<<(std::ostream& os, const perspective::t_minmax& mm) {
-    os << "t_minmax<min=" << mm.m_min << ", mincount=" << mm.m_min_count << " max=" << mm.m_max
-       << ", maxcount=" << mm.m_max_count << ">";
+    os << "t_minmax<min=" << mm.m_min << ", mincount=" << mm.m_min_count
+       << " max=" << mm.m_max << ", maxcount=" << mm.m_max_count << ">";
     return os;
 }
 

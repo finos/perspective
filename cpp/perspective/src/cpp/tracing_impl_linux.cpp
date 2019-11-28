@@ -61,7 +61,8 @@ th_trace_fini() {
     void* iptr = mmap(0, ifsize, PROT_READ, MAP_SHARED, ifd, 0);
 
     PSP_VERBOSE_ASSERT(iptr != MAP_FAILED, "Error in mmap");
-    PSP_VERBOSE_ASSERT(ifsize % sizeof(t_instrec) == 0, "Partial record encountered");
+    PSP_VERBOSE_ASSERT(
+        ifsize % sizeof(t_instrec) == 0, "Partial record encountered");
 
     std::int64_t ndrecs = ifsize / sizeof(t_instrec);
 
@@ -74,8 +75,8 @@ th_trace_fini() {
         fptrs.emplace(irec->t_fntrace.m_fn);
     }
 
-    for (tsl::hopscotch_set<void*>::const_iterator iter = fptrs.begin(); iter != fptrs.end();
-         ++iter) {
+    for (tsl::hopscotch_set<void*>::const_iterator iter = fptrs.begin();
+         iter != fptrs.end(); ++iter) {
 
         of << *iter << " ";
         char** mangled;

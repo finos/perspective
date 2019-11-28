@@ -10,9 +10,14 @@
 const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow")).buffer;
-const partial_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial.arrow")).buffer;
-const partial_missing_rows_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow")).buffer;
+const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow"))
+    .buffer;
+const partial_arrow = fs.readFileSync(
+    path.join(__dirname, "..", "arrow", "partial.arrow")
+).buffer;
+const partial_missing_rows_arrow = fs.readFileSync(
+    path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow")
+).buffer;
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -48,18 +53,117 @@ var data_2 = [
 ];
 
 var arrow_result = [
-    {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
-    {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
-    {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: true, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
-    {f32: 4.5, f64: 4.5, i64: 4, i32: 4, i16: 4, i8: 4, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-28")},
-    {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
+    {
+        f32: 1.5,
+        f64: 1.5,
+        i64: 1,
+        i32: 1,
+        i16: 1,
+        i8: 1,
+        bool: true,
+        char: "a",
+        dict: "a",
+        datetime: +new Date("2018-01-25")
+    },
+    {
+        f32: 2.5,
+        f64: 2.5,
+        i64: 2,
+        i32: 2,
+        i16: 2,
+        i8: 2,
+        bool: false,
+        char: "b",
+        dict: "b",
+        datetime: +new Date("2018-01-26")
+    },
+    {
+        f32: 3.5,
+        f64: 3.5,
+        i64: 3,
+        i32: 3,
+        i16: 3,
+        i8: 3,
+        bool: true,
+        char: "c",
+        dict: "c",
+        datetime: +new Date("2018-01-27")
+    },
+    {
+        f32: 4.5,
+        f64: 4.5,
+        i64: 4,
+        i32: 4,
+        i16: 4,
+        i8: 4,
+        bool: false,
+        char: "d",
+        dict: "d",
+        datetime: +new Date("2018-01-28")
+    },
+    {
+        f32: 5.5,
+        f64: 5.5,
+        i64: 5,
+        i32: 5,
+        i16: 5,
+        i8: 5,
+        bool: true,
+        char: "d",
+        dict: "d",
+        datetime: +new Date("2018-01-29")
+    }
 ];
 
 var arrow_indexed_result = [
-    {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
-    {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
-    {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: true, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
-    {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
+    {
+        f32: 1.5,
+        f64: 1.5,
+        i64: 1,
+        i32: 1,
+        i16: 1,
+        i8: 1,
+        bool: true,
+        char: "a",
+        dict: "a",
+        datetime: +new Date("2018-01-25")
+    },
+    {
+        f32: 2.5,
+        f64: 2.5,
+        i64: 2,
+        i32: 2,
+        i16: 2,
+        i8: 2,
+        bool: false,
+        char: "b",
+        dict: "b",
+        datetime: +new Date("2018-01-26")
+    },
+    {
+        f32: 3.5,
+        f64: 3.5,
+        i64: 3,
+        i32: 3,
+        i16: 3,
+        i8: 3,
+        bool: true,
+        char: "c",
+        dict: "c",
+        datetime: +new Date("2018-01-27")
+    },
+    {
+        f32: 5.5,
+        f64: 5.5,
+        i64: 5,
+        i32: 5,
+        i16: 5,
+        i8: 5,
+        bool: true,
+        char: "d",
+        dict: "d",
+        datetime: +new Date("2018-01-29")
+    }
 ];
 
 module.exports = perspective => {
@@ -121,7 +225,11 @@ module.exports = perspective => {
         });
 
         it("coerces to string", async function() {
-            var table = perspective.table({x: "string", y: "string", z: "string"});
+            var table = perspective.table({
+                x: "string",
+                y: "string",
+                z: "string"
+            });
             table.update(data);
             var view = table.view();
             let result = await view.to_json();
@@ -254,9 +362,21 @@ module.exports = perspective => {
                 }
             ]);
             table2.update(data);
-            let view2 = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
+            let view2 = table2.view({
+                columns: ["yes/no"],
+                aggregates: {"yes/no": "count"}
+            });
             let result = await view2.to_json();
-            let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
+            let expected = [
+                {"yes/no": "yes"},
+                {"yes/no": "no"},
+                {"yes/no": "yes"},
+                {"yes/no": "no"},
+                {"yes/no": "yes"},
+                {"yes/no": "no"},
+                {"yes/no": "yes"},
+                {"yes/no": "no"}
+            ];
             expect(result).toEqual(expected);
             view2.delete();
             table.delete();
@@ -1439,11 +1559,81 @@ module.exports = perspective => {
             let result = await view.to_json();
             // update should be applied properly
             expect(result).toEqual([
-                {__ROW_PATH__: [], "a|x": 100, "a|y": 1, "a|z": 1, "b|x": 2, "b|y": 1, "b|z": 1, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": 4, "d|y": 1, "d|z": 1},
-                {__ROW_PATH__: [2], "a|x": null, "a|y": null, "a|z": null, "b|x": 2, "b|y": 1, "b|z": 1, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null},
-                {__ROW_PATH__: [3], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": null, "d|y": null, "d|z": null},
-                {__ROW_PATH__: [4], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": 4, "d|y": 1, "d|z": 1},
-                {__ROW_PATH__: [100], "a|x": 100, "a|y": 1, "a|z": 1, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null}
+                {
+                    __ROW_PATH__: [],
+                    "a|x": 100,
+                    "a|y": 1,
+                    "a|z": 1,
+                    "b|x": 2,
+                    "b|y": 1,
+                    "b|z": 1,
+                    "c|x": 3,
+                    "c|y": 1,
+                    "c|z": 1,
+                    "d|x": 4,
+                    "d|y": 1,
+                    "d|z": 1
+                },
+                {
+                    __ROW_PATH__: [2],
+                    "a|x": null,
+                    "a|y": null,
+                    "a|z": null,
+                    "b|x": 2,
+                    "b|y": 1,
+                    "b|z": 1,
+                    "c|x": null,
+                    "c|y": null,
+                    "c|z": null,
+                    "d|x": null,
+                    "d|y": null,
+                    "d|z": null
+                },
+                {
+                    __ROW_PATH__: [3],
+                    "a|x": null,
+                    "a|y": null,
+                    "a|z": null,
+                    "b|x": null,
+                    "b|y": null,
+                    "b|z": null,
+                    "c|x": 3,
+                    "c|y": 1,
+                    "c|z": 1,
+                    "d|x": null,
+                    "d|y": null,
+                    "d|z": null
+                },
+                {
+                    __ROW_PATH__: [4],
+                    "a|x": null,
+                    "a|y": null,
+                    "a|z": null,
+                    "b|x": null,
+                    "b|y": null,
+                    "b|z": null,
+                    "c|x": null,
+                    "c|y": null,
+                    "c|z": null,
+                    "d|x": 4,
+                    "d|y": 1,
+                    "d|z": 1
+                },
+                {
+                    __ROW_PATH__: [100],
+                    "a|x": 100,
+                    "a|y": 1,
+                    "a|z": 1,
+                    "b|x": null,
+                    "b|y": null,
+                    "b|z": null,
+                    "c|x": null,
+                    "c|y": null,
+                    "c|z": null,
+                    "d|x": null,
+                    "d|y": null,
+                    "d|z": null
+                }
             ]);
 
             // check that un-pivoted view reflects data correctly

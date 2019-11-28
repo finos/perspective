@@ -19,14 +19,21 @@ export function categoryPointSeries(settings, seriesKey, color, symbols) {
     }
 
     series.decorate(selection => {
-        selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey), opacity));
+        selection
+            .style("stroke", d =>
+                withoutOpacity(color(d.colorValue || seriesKey))
+            )
+            .style("fill", d =>
+                withOpacity(color(d.colorValue || seriesKey), opacity)
+            );
     });
 
     return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
 }
 
 export function symbolType(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
     return fromDomain(domain);
 }

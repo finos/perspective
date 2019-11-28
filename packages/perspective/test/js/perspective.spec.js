@@ -29,7 +29,9 @@ const delete_tests = require("./delete.js");
 
 describe("perspective.js", function() {
     Object.keys(RUNTIMES).forEach(function(mode) {
-        (typeof WebAssembly === "undefined" && mode === "WASM" ? xdescribe : describe)(mode, function() {
+        (typeof WebAssembly === "undefined" && mode === "WASM"
+            ? xdescribe
+            : describe)(mode, function() {
             clear_tests(RUNTIMES[mode]);
             constructor_tests(RUNTIMES[mode]);
             pivot_tests(RUNTIMES[mode]);

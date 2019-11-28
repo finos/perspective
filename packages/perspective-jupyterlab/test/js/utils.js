@@ -19,9 +19,13 @@ const cp = require("child_process");
 
 const {WebSocketServer} = require("@finos/perspective");
 
-const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
+const IS_LOCAL_PUPPETEER = fs.existsSync(
+    path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer")
+);
 const LOCAL_RESULTS_FILENAME = `results.${process.platform}.json`;
-const RESULTS_FILENAME = IS_LOCAL_PUPPETEER ? LOCAL_RESULTS_FILENAME : "results.json";
+const RESULTS_FILENAME = IS_LOCAL_PUPPETEER
+    ? LOCAL_RESULTS_FILENAME
+    : "results.json";
 
 let __PORT__;
 
@@ -59,7 +63,15 @@ let browser,
 
 beforeAll(async () => {
     browser = await puppeteer.launch({
-        args: ["--disable-accelerated-2d-canvas", "--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
+        args: [
+            "--disable-accelerated-2d-canvas",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            '--proxy-server="direct://"',
+            "--proxy-bypass-list=*"
+        ]
     });
     page = await browser.newPage();
 
@@ -107,7 +119,12 @@ beforeAll(async () => {
     });
 
     results = (() => {
-        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
+        const dir_name = path.join(
+            test_root,
+            "test",
+            "results",
+            RESULTS_FILENAME
+        );
         if (fs.existsSync(dir_name)) {
             return JSON.parse(fs.readFileSync(dir_name));
         } else if (fs.existsSync(dir_name)) {
@@ -118,7 +135,9 @@ beforeAll(async () => {
 
     if (results.__GIT_COMMIT__) {
         try {
-            const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
+            const diff = execSync(
+                `git rev-list ${results.__GIT_COMMIT__}..HEAD`
+            );
             console.log(
                 `${RESULTS_FILENAME} was last updated ${
                     diff
@@ -128,7 +147,9 @@ beforeAll(async () => {
                 } commits ago ${results.__GIT_COMMIT__}`
             );
         } catch (e) {
-            console.log(`${RESULTS_FILENAME} was last updated UNKNOWN commits ago (Can't find commit ${results.__GIT_COMMIT__} in history)`);
+            console.log(
+                `${RESULTS_FILENAME} was last updated UNKNOWN commits ago (Can't find commit ${results.__GIT_COMMIT__} in history)`
+            );
         }
     }
 });
@@ -136,7 +157,12 @@ beforeAll(async () => {
 afterAll(() => {
     browser.close();
     if (process.env.WRITE_TESTS) {
-        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
+        const dir_name = path.join(
+            test_root,
+            "test",
+            "results",
+            RESULTS_FILENAME
+        );
         const results2 = (() => {
             if (fs.existsSync(dir_name)) {
                 return JSON.parse(fs.readFileSync(dir_name));
@@ -170,7 +196,11 @@ function mkdirSyncRec(targetDir) {
 describe.page = (url, body, {reload_page = true, name, root} = {}) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
-    const dir_name = path.join(test_root, "screenshots", _url.replace(".html", ""));
+    const dir_name = path.join(
+        test_root,
+        "screenshots",
+        _url.replace(".html", "")
+    );
     if (!fs.existsSync(dir_name)) {
         mkdirSyncRec(dir_name);
     }
@@ -185,7 +215,13 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         return result;
     });
 
-    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", LOCAL_RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
+    if (
+        IS_LOCAL_PUPPETEER &&
+        !fs.existsSync(
+            path.join(test_root, "test", "results", LOCAL_RESULTS_FILENAME)
+        ) &&
+        !process.env.WRITE_TESTS
+    ) {
         throw new Error(`
         
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
@@ -216,7 +252,11 @@ test.run = function run(name, body, viewport = null) {
 
 const OLD_SETTINGS = {};
 
-test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true} = {}) {
+test.capture = function capture(
+    name,
+    body,
+    {timeout = 60000, viewport = null, wait_for_update = true} = {}
+) {
     const _url = page_url;
     const _reload_page = page_reload;
     test(
@@ -243,7 +283,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                         await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
                     } else {
                         await page.evaluate(x => {
-                            const viewer = document.querySelector("perspective-viewer");
+                            const viewer = document.querySelector(
+                                "perspective-viewer"
+                            );
                             viewer._show_config = true;
                             viewer.toggleConfig();
                             viewer.restore(x);
@@ -253,16 +295,26 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 }
 
                 if (wait_for_update) {
-                    await page.waitForSelector("perspective-viewer[updating]", {timeout: 1000}).catch(() => {});
-                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page
+                        .waitForSelector("perspective-viewer[updating]", {
+                            timeout: 1000
+                        })
+                        .catch(() => {});
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
                 } else {
                     await page.waitForSelector("perspective-viewer");
                 }
 
                 if (!_reload_page && !OLD_SETTINGS[test_root + _url]) {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
                     OLD_SETTINGS[test_root + _url] = await page.evaluate(() => {
-                        const viewer = document.querySelector("perspective-viewer");
+                        const viewer = document.querySelector(
+                            "perspective-viewer"
+                        );
                         return viewer.save();
                     });
                 }
@@ -270,7 +322,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 await body(page);
 
                 if (wait_for_update) {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
                 }
 
                 const screenshot = await page.screenshot();
@@ -280,15 +334,24 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     .update(screenshot)
                     .digest("hex");
 
-                const filename = path.join(test_root, "screenshots", `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
+                const filename = path.join(
+                    test_root,
+                    "screenshots",
+                    `${_url.replace(".html", "")}`,
+                    `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`
+                );
 
                 if (hash === results[_url + "/" + name]) {
                     fs.writeFileSync(filename + ".png", screenshot);
                 } else {
                     fs.writeFileSync(filename + ".failed.png", screenshot);
                     if (fs.existsSync(filename + ".png")) {
-                        cp.execSync(`composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`);
-                        cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
+                        cp.execSync(
+                            `composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`
+                        );
+                        cp.execSync(
+                            `convert ${filename}.diff.png -auto-level ${filename}.diff.png`
+                        );
                     }
                 }
 
@@ -311,10 +374,14 @@ exports.drag_drop = async function drag_drop(page, origin, target) {
     const element2 = await page.$(target);
     const box2 = await element2.boundingBox();
     process.stdout.write(element2, box2);
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {steps: 100});
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+        steps: 100
+    });
     await page.mouse.down();
     await page.waitFor(1000);
-    await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2, {steps: 100});
+    await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2, {
+        steps: 100
+    });
     await page.mouse.up();
 };
 
@@ -323,7 +390,9 @@ const highcharts_selector_center = async function(svg_selector, page) {
     const viewer = await page.$("perspective-viewer");
     const handle = await page.waitFor(
         (viewer, selector) => {
-            const elem = viewer.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(selector);
+            const elem = viewer.shadowRoot
+                .querySelector("perspective-highcharts")
+                .shadowRoot.querySelector(selector);
             if (elem) {
                 return elem;
             }
@@ -343,11 +412,17 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
     await page.mouse.move(coords.x, coords.y);
     await page.waitFor(
         element => {
-            let elem = element.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(".highcharts-label.highcharts-tooltip");
+            let elem = element.shadowRoot
+                .querySelector("perspective-highcharts")
+                .shadowRoot.querySelector(
+                    ".highcharts-label.highcharts-tooltip"
+                );
             if (elem) {
                 return (
                     window.getComputedStyle(elem).opacity !== "0" &&
-                    elem.querySelector("text tspan").textContent.indexOf("Loading") === -1 &&
+                    elem
+                        .querySelector("text tspan")
+                        .textContent.indexOf("Loading") === -1 &&
                     elem.querySelector("text tspan").textContent.trim() !== ""
                 );
             }
@@ -371,7 +446,9 @@ exports.render_warning = {
     wait_for_warning: async function(page, viewer) {
         await page.waitForFunction(
             element => {
-                return !element.shadowRoot.querySelector(".plugin_information.hidden");
+                return !element.shadowRoot.querySelector(
+                    ".plugin_information.hidden"
+                );
             },
             {},
             viewer

@@ -42,9 +42,16 @@ const getExtent = (data, valueName, customExtent) => {
 const multiInterpolator = gradientPairs => {
     // A new interpolator that calls through to a set of
     // interpolators between each value/color pair
-    const interpolators = gradientPairs.slice(1).map((p, i) => d3.interpolate(gradientPairs[i][1], p[1]));
+    const interpolators = gradientPairs
+        .slice(1)
+        .map((p, i) => d3.interpolate(gradientPairs[i][1], p[1]));
     return value => {
-        const index = gradientPairs.findIndex((p, i) => i < gradientPairs.length - 1 && value <= gradientPairs[i + 1][0] && value > p[0]);
+        const index = gradientPairs.findIndex(
+            (p, i) =>
+                i < gradientPairs.length - 1 &&
+                value <= gradientPairs[i + 1][0] &&
+                value > p[0]
+        );
         if (index === -1) {
             if (value <= gradientPairs[0][0]) {
                 return gradientPairs[0][1];

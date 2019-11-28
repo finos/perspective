@@ -23,7 +23,10 @@ function treemap(container, settings) {
     if (!settings.treemaps) settings.treemaps = {};
 
     const data = treeData(settings);
-    const color = treeColor(settings, data.map(d => d.data));
+    const color = treeColor(
+        settings,
+        data.map(d => d.data)
+    );
     const treemapGrid = gridLayoutMultiChart().elementsPrefix("treemap");
 
     container.datum(data).call(treemapGrid);
@@ -50,7 +53,9 @@ function treemap(container, settings) {
             treemapSeries()
                 .settings(settings.treemaps[split])
                 .data(data)
-                .container(d3.select(d3.select(this.parentNode).node().parentNode))
+                .container(
+                    d3.select(d3.select(this.parentNode).node().parentNode)
+                )
                 .color(color)(treemapSvg);
 
             tooltip()

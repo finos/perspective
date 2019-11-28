@@ -9,7 +9,11 @@ import six
 import numpy as np
 from datetime import datetime
 
-DATE_DTYPES = [np.dtype("datetime64[D]"), np.dtype("datetime64[W]"), np.dtype("datetime64[M]"), np.dtype("datetime64[Y]")]
+DATE_DTYPES = [
+    np.dtype("datetime64[D]"),
+    np.dtype("datetime64[W]"),
+    np.dtype("datetime64[M]"),
+    np.dtype("datetime64[Y]")]
 
 
 def deconstruct_numpy(array):
@@ -27,7 +31,8 @@ def deconstruct_numpy(array):
         np.issubdtype(array.dtype, np.object_)
 
     if six.PY2:
-        is_object_or_string_dtype = is_object_or_string_dtype or np.issubdtype(array.dtype, np.unicode_)
+        is_object_or_string_dtype = is_object_or_string_dtype or np.issubdtype(
+            array.dtype, np.unicode_)
 
     is_datetime_dtype = np.issubdtype(array.dtype, np.datetime64) or\
         np.issubdtype(array.dtype, np.timedelta64)
@@ -48,12 +53,14 @@ def deconstruct_numpy(array):
         # bool => byte
         array = array.astype("b", copy=False)
     elif np.issubdtype(array.dtype, np.datetime64):
-        # treat days/weeks/months/years as datetime objects - avoid idiosyncracy with days of month, etc.
+        # treat days/weeks/months/years as datetime objects - avoid idiosyncracy
+        # with days of month, etc.
         if array.dtype in DATE_DTYPES:
             array = array.astype(datetime)
 
         # cast datetimes to millisecond timestamps
-        # because datetime64("nat") is a double, cast to float64 here - C++ handles the rest
+        # because datetime64("nat") is a double, cast to float64 here - C++
+        # handles the rest
         if array.dtype == np.dtype("datetime64[us]"):
             array = array.astype(np.float64, copy=False) / 1000
         elif array.dtype == np.dtype("datetime64[ns]"):
@@ -70,6 +77,6 @@ def deconstruct_numpy(array):
         array = array.astype(np.float64, copy=False)
 
     return {
-            "array": array,
-            "mask": mask
-        }
+        "array": array,
+        "mask": mask
+    }

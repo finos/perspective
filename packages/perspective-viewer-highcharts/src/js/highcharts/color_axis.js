@@ -12,9 +12,14 @@ import * as gparser from "gradient-parser";
 function _get_gradient(type) {
     let gradient;
     if (window.ShadyCSS) {
-        gradient = window.ShadyCSS.getComputedStyleValue(this, `--highcharts-${type}--gradient`);
+        gradient = window.ShadyCSS.getComputedStyleValue(
+            this,
+            `--highcharts-${type}--gradient`
+        );
     } else {
-        gradient = getComputedStyle(this).getPropertyValue(`--highcharts-${type}--gradient`);
+        gradient = getComputedStyle(this).getPropertyValue(
+            `--highcharts-${type}--gradient`
+        );
     }
 
     const parsed = gparser.parse(gradient)[0].colorStops;
@@ -25,7 +30,12 @@ function _get_gradient(type) {
         } else {
             color = `#${x.value}`;
         }
-        return [Number.parseFloat(x.length ? x.length.value / 100 : `${i / (parsed.length - 1)}`), color];
+        return [
+            Number.parseFloat(
+                x.length ? x.length.value / 100 : `${i / (parsed.length - 1)}`
+            ),
+            color
+        ];
     });
 }
 

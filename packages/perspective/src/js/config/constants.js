@@ -20,7 +20,17 @@ export const CONFIG_ALIASES = {
     sorts: "sort"
 };
 
-export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "row_pivot_depth", "filter_op"];
+export const CONFIG_VALID_KEYS = [
+    "viewport",
+    "row_pivots",
+    "column_pivots",
+    "aggregates",
+    "columns",
+    "filter",
+    "sort",
+    "row_pivot_depth",
+    "filter_op"
+];
 
 const NUMBER_AGGREGATES = [
     "any",
@@ -44,11 +54,45 @@ const NUMBER_AGGREGATES = [
     "unique"
 ];
 
-const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique"];
+const STRING_AGGREGATES = [
+    "any",
+    "count",
+    "distinct count",
+    "distinct leaf",
+    "dominant",
+    "first by index",
+    "last by index",
+    "last",
+    "mean by count",
+    "unique"
+];
 
-const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique", "and", "or"];
+const BOOLEAN_AGGREGATES = [
+    "any",
+    "count",
+    "distinct count",
+    "distinct leaf",
+    "dominant",
+    "first by index",
+    "last by index",
+    "last",
+    "mean by count",
+    "unique",
+    "and",
+    "or"
+];
 
-export const SORT_ORDERS = ["none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs"];
+export const SORT_ORDERS = [
+    "none",
+    "asc",
+    "desc",
+    "col asc",
+    "col desc",
+    "asc abs",
+    "desc abs",
+    "col asc abs",
+    "col desc abs"
+];
 
 export const SORT_ORDER_IDS = [2, 0, 1, 0, 1, 3, 4, 3, 4];
 

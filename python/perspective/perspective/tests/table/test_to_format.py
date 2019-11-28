@@ -31,7 +31,8 @@ class TestToFormat(object):
         assert view.to_records() == data
 
     def test_to_records_string(self):
-        data = [{"a": "string1", "b": "string2"}, {"a": "string3", "b": "string4"}]
+        data = [{"a": "string1", "b": "string2"},
+                {"a": "string3", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.to_records() == data
@@ -42,36 +43,46 @@ class TestToFormat(object):
         data = [{"a": today, "b": "string2"}, {"a": today, "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_records() == [{"a": dt, "b": "string2"}, {"a": dt, "b": "string4"}]
+        assert view.to_records() == [{"a": dt, "b": "string2"}, {
+            "a": dt, "b": "string4"}]
 
     def test_to_records_date_no_dst(self):
-        # make sure that DST does not affect the way we read dates - if tm_dst in `t_date::get_tm()` isn't set to -1, it could reverse 1hr by assuming DST is not in effect.
+        # make sure that DST does not affect the way we read dates - if tm_dst
+        # in `t_date::get_tm()` isn't set to -1, it could reverse 1hr by
+        # assuming DST is not in effect.
         today = date.today()
         dt = datetime(today.year, today.month, today.day)
         data = [{"a": today, "b": "string2"}, {"a": today, "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_records() == [{"a": dt, "b": "string2"}, {"a": dt, "b": "string4"}] 
+        assert view.to_records() == [{"a": dt, "b": "string2"}, {
+            "a": dt, "b": "string4"}]
 
     def test_to_records_date_str(self):
-        data = [{"a": "03/11/2019", "b": "string2"}, {"a": "03/12/2019", "b": "string4"}]
+        data = [{"a": "03/11/2019", "b": "string2"},
+                {"a": "03/12/2019", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_records() == [{"a": datetime(2019, 3, 11), "b": "string2"}, {"a": datetime(2019, 3, 12), "b": "string4"}]
+        assert view.to_records() == [{"a": datetime(2019, 3, 11), "b": "string2"}, {
+            "a": datetime(2019, 3, 12), "b": "string4"}]
 
     def test_to_records_date_str_month_first(self):
-        data = [{"a": "1/2/2019", "b": "string2"}, {"a": "3/4/2019", "b": "string4"}]
+        data = [{"a": "1/2/2019", "b": "string2"},
+                {"a": "3/4/2019", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.schema() == {"a": date, "b": str}
-        assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {"a": datetime(2019, 3, 4), "b": "string4"}]
+        assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {
+            "a": datetime(2019, 3, 4), "b": "string4"}]
 
     def test_to_records_date_str_month_ymd(self):
-        data = [{"a": "2019/01/02", "b": "string2"}, {"a": "2019/03/04", "b": "string4"}]
+        data = [{"a": "2019/01/02", "b": "string2"},
+                {"a": "2019/03/04", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.schema() == {"a": date, "b": str}
-        assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {"a": datetime(2019, 3, 4), "b": "string4"}]
+        assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {
+            "a": datetime(2019, 3, 4), "b": "string4"}]
 
     def test_to_records_datetime(self):
         dt = datetime(2019, 9, 10, 19, 30, 59, 515000)
@@ -81,10 +92,12 @@ class TestToFormat(object):
         assert view.to_records() == data  # should have symmetric input/output
 
     def test_to_records_datetime_str(self):
-        data = [{"a": "03/11/2019 3:15PM", "b": "string2"}, {"a": "3/11/2019 3:20PM", "b": "string4"}]
+        data = [{"a": "03/11/2019 3:15PM", "b": "string2"},
+                {"a": "3/11/2019 3:20PM", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_records() == [{"a": datetime(2019, 3, 11, 15, 15), "b": "string2"}, {"a": datetime(2019, 3, 11, 15, 20), "b": "string4"}]
+        assert view.to_records() == [{"a": datetime(2019, 3, 11, 15, 15), "b": "string2"}, {
+            "a": datetime(2019, 3, 11, 15, 20), "b": "string4"}]
 
     def test_to_records_datetime_str_tz(self):
         dt = "2019/07/25T15:30:00+00:00"
@@ -94,13 +107,16 @@ class TestToFormat(object):
         records = view.to_records()
         for r in records:
             r["a"] = r["a"].replace(tzinfo=pytz.utc)
-        assert records == [{"a": datetime(2019, 7, 25, 15, 30, tzinfo=pytz.utc)}, {"a": datetime(2019, 7, 25, 15, 30, tzinfo=pytz.utc)}]
+        assert records == [{"a": datetime(2019, 7, 25, 15, 30, tzinfo=pytz.utc)}, {
+            "a": datetime(2019, 7, 25, 15, 30, tzinfo=pytz.utc)}]
 
     def test_to_records_datetime_ms_str(self):
-        data = [{"a": "03/11/2019 3:15:15.999PM"}, {"a": "3/11/2019 3:15:16.001PM"}]
+        data = [{"a": "03/11/2019 3:15:15.999PM"},
+                {"a": "3/11/2019 3:15:16.001PM"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_records() == [{"a": datetime(2019, 3, 11, 15, 15, 15, 999000)}, {"a": datetime(2019, 3, 11, 15, 15, 16, 1000)}]
+        assert view.to_records() == [{"a": datetime(2019, 3, 11, 15, 15, 15, 999000)}, {
+            "a": datetime(2019, 3, 11, 15, 15, 16, 1000)}]
 
     def test_to_records_none(self):
         data = [{"a": None, "b": 1}, {"a": None, "b": 2}]
@@ -115,7 +131,8 @@ class TestToFormat(object):
             row_pivots=["a"]
         )
         assert view.to_records() == [
-            {"__ROW_PATH__": [], "a": 2, "b": 2}, {"__ROW_PATH__": ["1"], "a": 2, "b": 2}
+            {"__ROW_PATH__": [], "a": 2, "b": 2}, {
+                "__ROW_PATH__": ["1"], "a": 2, "b": 2}
         ]
 
     def test_to_records_two(self):
@@ -126,8 +143,13 @@ class TestToFormat(object):
             column_pivots=["b"]
         )
         assert view.to_records() == [
-            {"__ROW_PATH__": [], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
-            {"__ROW_PATH__": ["1"], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
+            {"__ROW_PATH__": [],
+             "string1|a": 1,
+             "string1|b": 1,
+             "string2|a": 1,
+             "string2|b": 1},
+            {"__ROW_PATH__": ["1"], "string1|a": 1,
+                "string1|b": 1, "string2|a": 1, "string2|b": 1},
         ]
 
     def test_to_records_column_only(self):
@@ -137,8 +159,10 @@ class TestToFormat(object):
             column_pivots=["b"]
         )
         assert view.to_records() == [
-            {"string1|a": 1, "string1|b": "string1", "string2|a": None, "string2|b": None},
-            {"string1|a": None, "string1|b": None, "string2|a": 1, "string2|b": "string2"},
+            {"string1|a": 1, "string1|b": "string1",
+                "string2|a": None, "string2|b": None},
+            {"string1|a": None, "string1|b": None,
+                "string2|a": 1, "string2|b": "string2"},
         ]
 
     # to_dict
@@ -192,7 +216,8 @@ class TestToFormat(object):
         }
 
     def test_to_dict_string(self):
-        data = [{"a": "string1", "b": "string2"}, {"a": "string3", "b": "string4"}]
+        data = [{"a": "string1", "b": "string2"},
+                {"a": "string3", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.to_dict() == {
@@ -319,7 +344,8 @@ class TestToFormat(object):
         assert np.array_equal(v["a"], np.array([dt, dt]))
 
     def test_to_numpy_string(self):
-        data = [{"a": "string1", "b": "string2"}, {"a": "string3", "b": "string4"}]
+        data = [{"a": "string1", "b": "string2"},
+                {"a": "string3", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         v = view.to_numpy()
@@ -374,11 +400,13 @@ class TestToFormat(object):
         view = tbl.view()
         df2 = view.to_df()
         if six.PY2:
-            # order not guaranteed if columns are inferred using aggregate dict keys
+            # order not guaranteed if columns are inferred using aggregate dict
+            # keys
             for col in df2.columns:
                 assert col in ["index", "a", "b"]
         else:
-            assert np.array_equal(df2.columns, pd.Index(["index", "a", "b"], dtype=object))
+            assert np.array_equal(df2.columns, pd.Index(
+                ["index", "a", "b"], dtype=object))
 
         assert np.array_equal(df2["a"].values, df["a"].values)
         assert np.array_equal(df2["b"].values, df["b"].values)
@@ -391,11 +419,13 @@ class TestToFormat(object):
         view = tbl.view()
         df2 = view.to_df()
         if six.PY2:
-            # order not guaranteed if columns are inferred using aggregate dict keys
+            # order not guaranteed if columns are inferred using aggregate dict
+            # keys
             for col in df2.columns:
                 assert col in ["index", "a"]
         else:
-            assert np.array_equal(df2.columns, pd.Index(["index", "a"], dtype=object))
+            assert np.array_equal(df2.columns, pd.Index(
+                ["index", "a"], dtype=object))
         assert np.array_equal(df2["a"].values, df["a"].values)
 
     # start_row/end_row
@@ -435,8 +465,10 @@ class TestToFormat(object):
         )
         assert records == [
             {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {'2|a': 1, '2|b': 2, '4|a': None,
+                '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3,
+                '4|b': 4, '__ROW_PATH__': ['3']}
         ]
 
     def test_to_records_start_row(self):
@@ -505,8 +537,10 @@ class TestToFormat(object):
         )
         assert records == [
             {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {'2|a': 1, '2|b': 2, '4|a': None,
+                '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3,
+                '4|b': 4, '__ROW_PATH__': ['3']}
         ]
 
     def test_to_records_start_col(self):
@@ -540,8 +574,10 @@ class TestToFormat(object):
         )
         assert records == [
             {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {'2|a': 1, '2|b': 2, '4|a': None,
+                '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3,
+                '4|b': 4, '__ROW_PATH__': ['3']}
         ]
 
     def test_to_records_start_col_end_col(self):
@@ -552,12 +588,14 @@ class TestToFormat(object):
             start_col=1,
             end_col=2
         )
-        # start_col and end_col access columns at that index - dict key order not guaranteed in python2
+        # start_col and end_col access columns at that index - dict key order
+        # not guaranteed in python2
         if six.PY2:
             # in this test, column c comes before b
             assert records == [{"c": 3}, {"c": 5}]
             # assert that in the general dataset, just to see if it holds true
-            assert view.to_records() == [{"a": 1, "c": 3, "b": 2}, {"a": 3, "c": 5, "b": 4}]
+            assert view.to_records() == [{"a": 1, "c": 3, "b": 2}, {
+                "a": 3, "c": 5, "b": 4}]
         else:
             assert records == [{"b": 2}, {"b": 4}]
 
@@ -604,7 +642,9 @@ class TestToFormat(object):
         assert tbl.schema()["a"] == date
         view = tbl.view()
         # date_format only applies to `datetime`
-        assert view.to_csv(date_format="%Y") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+        assert view.to_csv(
+            date_format="%Y") == ",a,b\n0,{},2\n1,{},4\n".format(
+            dt_str, dt_str)
 
     def test_to_csv_datetime(self):
         dt = datetime(2019, 3, 15, 20, 30, 59, 6000)
@@ -620,7 +660,9 @@ class TestToFormat(object):
         data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv(date_format="%H:%M:%S") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+        assert view.to_csv(
+            date_format="%H:%M:%S") == ",a,b\n0,{},2\n1,{},4\n".format(
+            dt_str, dt_str)
 
     def test_to_csv_bool(self):
         data = [{"a": True, "b": False}, {"a": True, "b": False}]
@@ -629,7 +671,8 @@ class TestToFormat(object):
         assert view.to_csv() == ",a,b\n0,True,False\n1,True,False\n"
 
     def test_to_csv_string(self):
-        data = [{"a": "string1", "b": "string2"}, {"a": "string3", "b": "string4"}]
+        data = [{"a": "string1", "b": "string2"},
+                {"a": "string3", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
         assert view.to_csv() == ",a,b\n0,string1,string2\n1,string3,string4\n"
@@ -753,7 +796,8 @@ class TestToFormat(object):
             '2.5|b': [2.5, 2.5, None],
             '4.5|a': [3.5, None, 3.5],
             '4.5|b': [4.5, None, 4.5],
-            '__INDEX__': [[], [], []],  # index needs to be the same length as each column
+            # index needs to be the same length as each column
+            '__INDEX__': [[], [], []],
             '__ROW_PATH__': [[], ['1.5'], ['3.5']]
         }
 
@@ -800,10 +844,13 @@ class TestToFormat(object):
         ]
 
     def test_to_format_explicit_index_datetime_records(self):
-        data = [{"a": datetime(2019, 7, 11, 9, 0), "b": 2.5}, {"a": datetime(2019, 7, 11, 9, 1), "b": 4.5}]
+        data = [{"a": datetime(2019, 7, 11, 9, 0), "b": 2.5}, {
+            "a": datetime(2019, 7, 11, 9, 1), "b": 4.5}]
         tbl = Table(data, index="a")
         view = tbl.view()
         assert view.to_records(index=True) == [
-            {"__INDEX__": [datetime(2019, 7, 11, 9, 0)], "a": datetime(2019, 7, 11, 9, 0), "b": 2.5},
-            {"__INDEX__": [datetime(2019, 7, 11, 9, 1)], "a": datetime(2019, 7, 11, 9, 1), "b": 4.5}
+            {"__INDEX__": [datetime(2019, 7, 11, 9, 0)],
+             "a": datetime(2019, 7, 11, 9, 0), "b": 2.5},
+            {"__INDEX__": [datetime(2019, 7, 11, 9, 1)],
+             "a": datetime(2019, 7, 11, 9, 1), "b": 4.5}
         ]

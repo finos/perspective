@@ -36,8 +36,8 @@ public:
 
     t_dtree(t_dssptr ds, const std::vector<t_pivot>& pivots,
         const std::vector<std::pair<std::string, std::string>>& sortby_columns);
-    t_dtree(const std::string& dirname, t_dssptr ds, const std::vector<t_pivot>& pivots,
-        t_backing_store backing_store,
+    t_dtree(const std::string& dirname, t_dssptr ds,
+        const std::vector<t_pivot>& pivots, t_backing_store backing_store,
         const std::vector<std::pair<std::string, std::string>>& sortby_columns);
 
     void init();
@@ -50,7 +50,8 @@ public:
 
     t_uindex size() const;
 
-    t_tscalar _get_value(const t_filter& filter, t_index nidx, bool sort_value) const;
+    t_tscalar _get_value(
+        const t_filter& filter, t_index nidx, bool sort_value) const;
     t_tscalar get_value(const t_filter& filter, t_index nidx) const;
     t_tscalar get_sortby_value(const t_filter& filter, t_index nidx) const;
 

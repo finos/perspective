@@ -498,7 +498,11 @@ module.exports = perspective => {
             });
             it("x > undefined", async function() {
                 let table = perspective.table(data);
-                let isValid = await table.is_valid_filter(["x", ">", undefined]);
+                let isValid = await table.is_valid_filter([
+                    "x",
+                    ">",
+                    undefined
+                ]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
@@ -514,7 +518,11 @@ module.exports = perspective => {
                     y: "date"
                 };
                 let table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", "==", "01-01-1970"]);
+                let isValid = await table.is_valid_filter([
+                    "y",
+                    "==",
+                    "01-01-1970"
+                ]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
@@ -534,7 +542,11 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 let table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
+                let isValid = await table.is_valid_filter([
+                    "y",
+                    "==",
+                    "11:11:11.111"
+                ]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
@@ -544,7 +556,11 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 let table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
+                let isValid = await table.is_valid_filter([
+                    "y",
+                    ">",
+                    "11:11:11:111"
+                ]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });

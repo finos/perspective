@@ -13,7 +13,11 @@ import subprocess
 import zerorpc
 
 _PSP_ENV_VAR = 'PERSPECTIVE_NODE_HOST'
-_NODE_BUNDLE = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'bundle.js'))
+_NODE_BUNDLE = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        'assets',
+        'bundle.js'))
 
 
 def _get_open_port():
@@ -59,13 +63,16 @@ class Perspective(object):
         if node_server == '127.0.0.1':
             self.launch_node = True
             if port:
-                self.node_host = '{node_server}:{port}'.format(node_server=node_server, port=port)
+                self.node_host = '{node_server}:{port}'.format(
+                    node_server=node_server, port=port)
             else:
-                self.node_host = '{node_server}:{port}'.format(node_server=node_server, port=_get_open_port())
+                self.node_host = '{node_server}:{port}'.format(
+                    node_server=node_server, port=_get_open_port())
         else:
             self.launch_node = False
             if port:
-                self.node_host = '{node_server}:{port}'.format(node_server=node_server, port=port)
+                self.node_host = '{node_server}:{port}'.format(
+                    node_server=node_server, port=port)
             else:
                 self.node_host = '{node_server}'.format(node_server=node_server)
         self.connected = False
@@ -76,7 +83,8 @@ class Perspective(object):
         else:
             env = os.environ.copy()
             env[_PSP_ENV_VAR] = self.node_host
-            self.node_pid = subprocess.Popen([shutil.which('node'), _NODE_BUNDLE], env=env).pid
+            self.node_pid = subprocess.Popen(
+                [shutil.which('node'), _NODE_BUNDLE], env=env).pid
         self.client = zerorpc.Client()
         self.reconnect()
 

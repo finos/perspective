@@ -111,9 +111,15 @@ table.prototype.compute = async_queue("compute", "table_method");
 
 table.prototype.schema = async_queue("schema", "table_method");
 
-table.prototype.computed_schema = async_queue("computed_schema", "table_method");
+table.prototype.computed_schema = async_queue(
+    "computed_schema",
+    "table_method"
+);
 
-table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
+table.prototype.is_valid_filter = async_queue(
+    "is_valid_filter",
+    "table_method"
+);
 
 table.prototype.size = async_queue("size", "table_method");
 
@@ -129,7 +135,11 @@ table.prototype.on_delete = subscribe("on_delete", "table_method", true);
 
 table.prototype.remove = async_queue("remove", "table_method");
 
-table.prototype.remove_delete = unsubscribe("remove_delete", "table_method", true);
+table.prototype.remove_delete = unsubscribe(
+    "remove_delete",
+    "table_method",
+    true
+);
 
 table.prototype.update = function(data) {
     return new Promise((resolve, reject) => {

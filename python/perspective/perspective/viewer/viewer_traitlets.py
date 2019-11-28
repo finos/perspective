@@ -40,22 +40,34 @@ class PerspectiveTraitlets(HasTraits):
     def _validate_plugin(self, proposal): return validate_plugin(proposal.value)
 
     @validate('columns')
-    def _validate_columns(self, proposal): return validate_columns(proposal.value)
+    def _validate_columns(
+        self, proposal): return validate_columns(
+        proposal.value)
 
     @validate('row_pivots')
-    def _validate_row_pivots(self, proposal): return validate_row_pivots(proposal.value)
+    def _validate_row_pivots(
+        self, proposal): return validate_row_pivots(
+        proposal.value)
 
     @validate('column_pivots')
-    def _validate_column_pivots(self, proposal): return validate_column_pivots(proposal.value)
+    def _validate_column_pivots(
+        self, proposal): return validate_column_pivots(
+        proposal.value)
 
     @validate('aggregates')
-    def _validate_aggregates(self, proposal): return validate_aggregates(proposal.value)
+    def _validate_aggregates(
+        self, proposal): return validate_aggregates(
+        proposal.value)
 
     @validate('sort')
     def _validate_sort(self, proposal): return validate_sort(proposal.value)
 
     @validate('filters')
-    def _validate_filters(self, proposal): return validate_filters(proposal.value)
+    def _validate_filters(
+        self, proposal): return validate_filters(
+        proposal.value)
 
     @validate('plugin_config')
-    def _validate_plugin_config(self, proposal): return validate_plugin_config(proposal.value)
+    def _validate_plugin_config(
+        self, proposal): return validate_plugin_config(
+        proposal.value)

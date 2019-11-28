@@ -8,7 +8,11 @@
  */
 import {splitterLabels} from "./splitterLabels";
 
-export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) => {
+export const axisSplitter = (
+    settings,
+    sourceData,
+    splitFn = dataSplitFunction
+) => {
     let color;
     let data;
     let altData;
@@ -39,7 +43,9 @@ export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) 
 
         const labeller = () => splitterLabels(settings).color(color);
 
-        selection.select(".y-label-container>.y-label").call(labeller().labels(mainLabels));
+        selection
+            .select(".y-label-container>.y-label")
+            .call(labeller().labels(mainLabels));
         selection.select(".y2-label-container>.y-label").call(
             labeller()
                 .labels(altLabels)

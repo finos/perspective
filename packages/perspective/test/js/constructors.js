@@ -10,8 +10,12 @@ const fs = require("fs");
 const path = require("path");
 const papaparse = require("papaparse");
 const moment = require("moment");
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
-const chunked = fs.readFileSync(path.join(__dirname, "..", "arrow", "chunked.arrow")).buffer;
+const arrow = fs.readFileSync(
+    path.join(__dirname, "..", "arrow", "test-null.arrow")
+).buffer;
+const chunked = fs.readFileSync(
+    path.join(__dirname, "..", "arrow", "chunked.arrow")
+).buffer;
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -240,7 +244,11 @@ module.exports = perspective => {
             const table = perspective.table(int_float_string_data);
             const view = table.view();
             const schema = await view.schema();
-            expect(schema).toEqual({int: "integer", float: "float", string: "string"});
+            expect(schema).toEqual({
+                int: "integer",
+                float: "float",
+                string: "string"
+            });
             view.delete();
             table.delete();
         });
@@ -390,7 +398,9 @@ module.exports = perspective => {
                 let column = cols[col];
                 if (ta !== undefined && column !== undefined) {
                     expect(ta[0].length).toEqual(cols[col].length);
-                    expect(validate_typed_array(ta[0], cols[col])).toEqual(true);
+                    expect(validate_typed_array(ta[0], cols[col])).toEqual(
+                        true
+                    );
                 }
             }
             view.delete();
@@ -410,7 +420,9 @@ module.exports = perspective => {
                 let column = cols[col];
                 if (ta !== undefined && column !== undefined) {
                     expect(ta[0].length).toEqual(cols[col].length);
-                    expect(validate_typed_array(ta[0], cols[col])).toEqual(true);
+                    expect(validate_typed_array(ta[0], cols[col])).toEqual(
+                        true
+                    );
                 }
             }
             view.delete();
@@ -519,7 +531,9 @@ module.exports = perspective => {
             var table = perspective.table(csv);
             var view = table.view();
             let result = await view.to_json();
-            expect(result).toEqual(papaparse.parse(csv, {header: true, dynamicTyping: true}).data);
+            expect(result).toEqual(
+                papaparse.parse(csv, {header: true, dynamicTyping: true}).data
+            );
             view.delete();
             table.delete();
         });
@@ -629,7 +643,13 @@ module.exports = perspective => {
             expect(schema_1["a"]).toEqual("string");
             var view = table.view();
             var json = await view.to_json();
-            expect(json).toEqual([{a: "1"}, {a: "2"}, {a: "3"}, {a: "x"}, {a: "y"}]);
+            expect(json).toEqual([
+                {a: "1"},
+                {a: "2"},
+                {a: "3"},
+                {a: "x"},
+                {a: "y"}
+            ]);
             view.delete();
             table.delete();
         });
@@ -748,17 +768,27 @@ module.exports = perspective => {
             var table = perspective.table(data_5);
             let view = table.view();
             let result = await view.to_json();
-            expect(result).toEqual([{v: +moment(data_5[0]["v"], "MM-DD-YYYY")}]);
+            expect(result).toEqual([
+                {v: +moment(data_5[0]["v"], "MM-DD-YYYY")}
+            ]);
             view.delete();
             table.delete();
         });
 
         it("Handles datetime values with mixed formats", async function() {
             var table = perspective.table({datetime: "datetime"});
-            table.update([{datetime: new Date(1549257586108)}, {datetime: "2019-01-30"}, {datetime: 11}]);
+            table.update([
+                {datetime: new Date(1549257586108)},
+                {datetime: "2019-01-30"},
+                {datetime: 11}
+            ]);
             let view = table.view();
             let result = await view.to_json();
-            expect(result).toEqual([{datetime: 1549257586108}, {datetime: 1548806400000}, {datetime: 11}]);
+            expect(result).toEqual([
+                {datetime: 1549257586108},
+                {datetime: 1548806400000},
+                {datetime: 11}
+            ]);
             view.delete();
             table.delete();
         });
@@ -798,21 +828,27 @@ module.exports = perspective => {
 
         describe("Datetime constructors", function() {
             it("Correctly parses an ISO-8601 formatted string", async function() {
-                let table = perspective.table({d: ["2011-10-05T14:48:00.000Z"]});
+                let table = perspective.table({
+                    d: ["2011-10-05T14:48:00.000Z"]
+                });
                 let view = table.view({});
                 let result = await view.schema();
                 expect(result["d"]).toEqual("datetime");
             });
 
             it("Correctly parses an ISO-8601 formatted string with timezone", async function() {
-                let table = perspective.table({d: ["2008-09-15T15:53:00+05:00"]});
+                let table = perspective.table({
+                    d: ["2008-09-15T15:53:00+05:00"]
+                });
                 let view = table.view({});
                 let result = await view.schema();
                 expect(result["d"]).toEqual("datetime");
             });
 
             it("Correctly parses an RFC 2822 formatted string", async function() {
-                let table = perspective.table({d: ["Wed, 05 Oct 2011 22:26:12 -0400"]});
+                let table = perspective.table({
+                    d: ["Wed, 05 Oct 2011 22:26:12 -0400"]
+                });
                 let view = table.view({});
                 let result = await view.schema();
                 expect(result["d"]).toEqual("datetime");
@@ -820,7 +856,14 @@ module.exports = perspective => {
 
             // Not all formats covered by JS parser, test intended for C++ parser
             it.skip("Correctly parses all m-d-y formatted strings", async function() {
-                let datestrings = ["08-15-2009", "08/15/2009", "08-15-2009", "02 28 2009", "08/15/10", "31 08 2009"];
+                let datestrings = [
+                    "08-15-2009",
+                    "08/15/2009",
+                    "08-15-2009",
+                    "02 28 2009",
+                    "08/15/10",
+                    "31 08 2009"
+                ];
                 for (let str of datestrings) {
                     let table = perspective.table({d: [str]});
                     let view = table.view({});
@@ -864,9 +907,17 @@ module.exports = perspective => {
                         inputs: []
                     }
                 ]);
-                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
+                let view = table2.view({
+                    columns: ["const"],
+                    aggregates: {const: "count"}
+                });
                 let result = await view.to_json();
-                expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
+                expect(result).toEqual([
+                    {const: 1},
+                    {const: 1},
+                    {const: 1},
+                    {const: 1}
+                ]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -883,9 +934,17 @@ module.exports = perspective => {
                         inputs: ["w", "x"]
                     }
                 ]);
-                let view = table2.view({columns: ["ratio"], aggregates: {ratio: "count"}});
+                let view = table2.view({
+                    columns: ["ratio"],
+                    aggregates: {ratio: "count"}
+                });
                 let result = await view.to_json();
-                expect(result).toEqual([{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}]);
+                expect(result).toEqual([
+                    {ratio: 1.5},
+                    {ratio: 1.25},
+                    {ratio: 1.1666666666666667},
+                    {ratio: 1.125}
+                ]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -917,7 +976,10 @@ module.exports = perspective => {
                     {y: "d", z: true}
                 ];
                 table2.update(delta_upd);
-                let view = table2.view({columns: ["y", "ratio"], aggregates: {y: "count", ratio: "count"}});
+                let view = table2.view({
+                    columns: ["y", "ratio"],
+                    aggregates: {y: "count", ratio: "count"}
+                });
                 let result = await view.to_json();
                 let expected = [
                     {y: "a", ratio: 1.5},
@@ -942,9 +1004,17 @@ module.exports = perspective => {
                         inputs: ["z"]
                     }
                 ]);
-                let view = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
+                let view = table2.view({
+                    columns: ["yes/no"],
+                    aggregates: {"yes/no": "count"}
+                });
                 let result = await view.to_json();
-                let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
+                let expected = [
+                    {"yes/no": "yes"},
+                    {"yes/no": "no"},
+                    {"yes/no": "yes"},
+                    {"yes/no": "no"}
+                ];
                 expect(result).toEqual(expected);
                 view.delete();
                 table2.delete();
@@ -993,13 +1063,27 @@ module.exports = perspective => {
         it("allocates a large tables", async function() {
             function makeid() {
                 var text = "";
-                var possible = Array.from(Array(26).keys()).map(x => String.fromCharCode(x + 65));
-                for (var i = 0; i < 15; i++) text += possible[Math.floor(Math.random() * possible.length)];
+                var possible = Array.from(Array(26).keys()).map(x =>
+                    String.fromCharCode(x + 65)
+                );
+                for (var i = 0; i < 15; i++)
+                    text +=
+                        possible[Math.floor(Math.random() * possible.length)];
                 return text;
             }
             let data = [];
             for (let i = 0; i < 35000; i++) {
-                data.push([{a: makeid(), b: makeid(), c: makeid(), d: makeid(), w: i + 0.5, x: i, y: makeid()}]);
+                data.push([
+                    {
+                        a: makeid(),
+                        b: makeid(),
+                        c: makeid(),
+                        d: makeid(),
+                        w: i + 0.5,
+                        x: i,
+                        y: makeid()
+                    }
+                ]);
             }
             let table = perspective.table(data);
             let view = table.view();

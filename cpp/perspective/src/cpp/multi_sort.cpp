@@ -100,7 +100,8 @@ get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
     switch (stype) {
         case SORTTYPE_DESCENDING:
         case SORTTYPE_ASCENDING: {
-            for (t_index idx = 0, loop_end = vec.size(); idx < loop_end; ++idx) {
+            for (t_index idx = 0, loop_end = vec.size(); idx < loop_end;
+                 ++idx) {
                 const t_tscalar& val = vec[idx];
                 if (val <= min_max.first) {
                     min_max.first = val;
@@ -116,7 +117,8 @@ get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
         } break;
         case SORTTYPE_ASCENDING_ABS:
         case SORTTYPE_DESCENDING_ABS: {
-            for (t_index idx = 0, loop_end = vec.size(); idx < loop_end; ++idx) {
+            for (t_index idx = 0, loop_end = vec.size(); idx < loop_end;
+                 ++idx) {
                 double val = std::abs(vec[idx].to_double());
                 double mindbl = std::abs(double(min_max.first));
                 double maxdbl = std::abs(double(min_max.second));
@@ -138,7 +140,9 @@ get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
             rval.m_max = 0;
             return rval;
         } break;
-        default: { return rval; }
+        default: {
+            return rval;
+        }
     }
 
     return rval;
@@ -211,8 +215,8 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
 t_multisorter::t_multisorter(const std::vector<t_sorttype>& order)
     : m_sort_order(order) {}
 
-t_multisorter::t_multisorter(
-    std::shared_ptr<const std::vector<t_mselem>> elems, const std::vector<t_sorttype>& order)
+t_multisorter::t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
+    const std::vector<t_sorttype>& order)
     : m_sort_order(order)
     , m_elems(elems) {}
 

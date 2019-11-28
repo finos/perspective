@@ -67,5 +67,10 @@ const computedStyle = container => {
 
 const parseGradient = (gradient, opacity) => {
     const parsed = gparser.parse(gradient)[0].colorStops;
-    return parsed.map((g, i) => [g.length ? g.length.value / 100 : i / (parsed.length - 1), stepAsColor(g.value, opacity)]).sort((a, b) => a[0] - b[0]);
+    return parsed
+        .map((g, i) => [
+            g.length ? g.length.value / 100 : i / (parsed.length - 1),
+            stepAsColor(g.value, opacity)
+        ])
+        .sort((a, b) => a[0] - b[0]);
 };

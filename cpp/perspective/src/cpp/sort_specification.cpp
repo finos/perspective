@@ -13,7 +13,8 @@
 
 namespace perspective {
 
-t_sortspec::t_sortspec(const std::string& column_name, t_index agg_index, t_sorttype sort_type)
+t_sortspec::t_sortspec(
+    const std::string& column_name, t_index agg_index, t_sorttype sort_type)
     : m_colname(column_name)
     , m_agg_index(agg_index)
     , m_sort_type(sort_type)
@@ -65,7 +66,8 @@ namespace std {
 PERSPECTIVE_EXPORT std::ostream&
 operator<<(std::ostream& os, const perspective::t_sortspec& t) {
     using namespace perspective;
-    os << "t_sortspec<idx: " << t.m_agg_index << " stype: " << t.m_sort_type << ">";
+    os << "t_sortspec<idx: " << t.m_agg_index << " stype: " << t.m_sort_type
+       << ">";
     return os;
 }
 

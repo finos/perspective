@@ -14,8 +14,20 @@ import template from "../../html/highcharts.html";
 
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
-import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
-import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
+import {
+    make_tree_data,
+    make_y_data,
+    make_xy_data,
+    make_xyz_data,
+    make_xy_column_data
+} from "./series.js";
+import {
+    set_boost,
+    set_category_axis,
+    set_both_axis,
+    default_config,
+    set_tick_size
+} from "./config.js";
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils";
 import detectIE from "detectie";
 
@@ -25,7 +37,9 @@ function get_or_create_element(div) {
     let perspective_highcharts_element;
     this[PRIVATE] = this[PRIVATE] || {};
     if (!this[PRIVATE].chart) {
-        perspective_highcharts_element = this[PRIVATE].chart = document.createElement("perspective-highcharts");
+        perspective_highcharts_element = this[
+            PRIVATE
+        ].chart = document.createElement("perspective-highcharts");
     } else {
         perspective_highcharts_element = this[PRIVATE].chart;
     }
@@ -52,8 +66,11 @@ export const draw = (mode, set_config, restyle) =>
         const col_pivots = config.column_pivots;
         const columns = config.columns;
 
-        const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false, false)]);
-        let js, element;
+        const [schema, tschema] = await Promise.all([
+            view.schema(false),
+            this._table.schema(false, false)
+        ]);
+        let element;
 
         if (task.cancelled) {
             return;
@@ -64,9 +81,15 @@ export const draw = (mode, set_config, restyle) =>
             xaxis_type = schema[xaxis_name],
             yaxis_name = columns.length > 1 ? columns[1] : undefined,
             yaxis_type = schema[yaxis_name],
-            xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
+            xtree_name =
+                row_pivots.length > 0
+                    ? row_pivots[row_pivots.length - 1]
+                    : undefined,
             xtree_type = tschema[xtree_name],
-            ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
+            ytree_name =
+                col_pivots.length > 0
+                    ? col_pivots[col_pivots.length - 1]
+                    : undefined,
             ytree_type = tschema[ytree_name],
             num_aggregates = columns.length;
 
@@ -74,12 +97,26 @@ export const draw = (mode, set_config, restyle) =>
             if (mode === "scatter") {
                 let cols;
                 if (end_col || end_row) {
-                    cols = await view.to_columns({end_col, end_row, leaves_only: true});
+                    cols = await view.to_columns({
+                        end_col,
+                        end_row,
+                        leaves_only: true
+                    });
                 } else {
                     cols = await view.to_columns();
                 }
-                const config = (configs[0] = default_config.call(this, columns, mode));
-                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, columns, row_pivots, col_pivots);
+                const config = (configs[0] = default_config.call(
+                    this,
+                    columns,
+                    mode
+                ));
+                const [series, xtop, colorRange, ytop] = make_xy_column_data(
+                    cols,
+                    schema,
+                    columns,
+                    row_pivots,
+                    col_pivots
+                );
 
                 config.legend.floating = series.length <= 20;
                 config.legend.enabled = col_pivots.length > 0;
@@ -96,18 +133,44 @@ export const draw = (mode, set_config, restyle) =>
                 if (num_aggregates < 3) {
                     set_boost(config, xaxis_type, yaxis_type);
                 }
-                set_both_axis(config, "xAxis", xaxis_name, xaxis_type, xaxis_type, xtop);
-                set_both_axis(config, "yAxis", yaxis_name, yaxis_type, yaxis_type, ytop);
+                set_both_axis(
+                    config,
+                    "xAxis",
+                    xaxis_name,
+                    xaxis_type,
+                    xaxis_type,
+                    xtop
+                );
+                set_both_axis(
+                    config,
+                    "yAxis",
+                    yaxis_name,
+                    yaxis_type,
+                    yaxis_type,
+                    ytop
+                );
                 set_tick_size.call(this, config);
             } else if (mode === "heatmap") {
                 let js;
                 if (end_col || end_row) {
-                    js = await view.to_json({end_col, end_row, leaves_only: false});
+                    js = await view.to_json({
+                        end_col,
+                        end_row,
+                        leaves_only: false
+                    });
                 } else {
                     js = await view.to_json();
                 }
-                let config = (configs[0] = default_config.call(this, columns, mode));
-                let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, ytree_type);
+                let config = (configs[0] = default_config.call(
+                    this,
+                    columns,
+                    mode
+                ));
+                let [series, top, ytop, colorRange] = make_xyz_data(
+                    js,
+                    row_pivots,
+                    ytree_type
+                );
                 config.series = [
                     {
                         name: null,
@@ -125,11 +188,20 @@ export const draw = (mode, set_config, restyle) =>
             } else if (mode === "treemap" || mode === "sunburst") {
                 let js;
                 if (end_col || end_row) {
-                    js = await view.to_json({end_col, end_row, leaves_only: false});
+                    js = await view.to_json({
+                        end_col,
+                        end_row,
+                        leaves_only: false
+                    });
                 } else {
                     js = await view.to_json();
                 }
-                let [charts, , colorRange] = make_tree_data(js, row_pivots, columns, mode === "treemap");
+                let [charts, , colorRange] = make_tree_data(
+                    js,
+                    row_pivots,
+                    columns,
+                    mode === "treemap"
+                );
                 for (let series of charts) {
                     let config = default_config.call(this, columns, mode);
                     config.series = [series];
@@ -145,24 +217,48 @@ export const draw = (mode, set_config, restyle) =>
                 }
             } else if (mode === "line") {
                 let s;
-                let config = (configs[0] = default_config.call(this, columns, mode));
+                let config = (configs[0] = default_config.call(
+                    this,
+                    columns,
+                    mode
+                ));
 
                 if (col_pivots.length === 0) {
                     let cols;
                     if (end_col || end_row) {
-                        cols = await view.to_columns({end_col, end_row, leaves_only: true});
+                        cols = await view.to_columns({
+                            end_col,
+                            end_row,
+                            leaves_only: true
+                        });
                     } else {
                         cols = await view.to_columns();
                     }
-                    s = await make_xy_column_data(cols, schema, columns, row_pivots, col_pivots);
+                    s = await make_xy_column_data(
+                        cols,
+                        schema,
+                        columns,
+                        row_pivots,
+                        col_pivots
+                    );
                 } else {
                     let js;
                     if (end_col || end_row) {
-                        js = await view.to_json({end_col, end_row, leaves_only: false});
+                        js = await view.to_json({
+                            end_col,
+                            end_row,
+                            leaves_only: false
+                        });
                     } else {
                         js = await view.to_json();
                     }
-                    s = await make_xy_data(js, schema, columns, row_pivots, col_pivots);
+                    s = await make_xy_data(
+                        js,
+                        schema,
+                        columns,
+                        row_pivots,
+                        col_pivots
+                    );
                 }
 
                 const series = s[0];
@@ -178,13 +274,35 @@ export const draw = (mode, set_config, restyle) =>
                 if (set_boost(config, xaxis_type, yaxis_type)) {
                     delete config.chart["type"];
                 }
-                set_both_axis(config, "xAxis", xaxis_name, xaxis_type, xaxis_type, xtop);
-                set_both_axis(config, "yAxis", yaxis_name, yaxis_type, yaxis_type, ytop);
+                set_both_axis(
+                    config,
+                    "xAxis",
+                    xaxis_name,
+                    xaxis_type,
+                    xaxis_type,
+                    xtop
+                );
+                set_both_axis(
+                    config,
+                    "yAxis",
+                    yaxis_name,
+                    yaxis_type,
+                    yaxis_type,
+                    ytop
+                );
             } else {
-                let config = (configs[0] = default_config.call(this, columns, mode));
+                let config = (configs[0] = default_config.call(
+                    this,
+                    columns,
+                    mode
+                ));
                 let cols;
                 if (end_col || end_row) {
-                    cols = await view.to_columns({end_col, end_row, leaves_only: false});
+                    cols = await view.to_columns({
+                        end_col,
+                        end_row,
+                        leaves_only: false
+                    });
                 } else {
                     cols = await view.to_columns();
                 }
@@ -192,7 +310,8 @@ export const draw = (mode, set_config, restyle) =>
                 let [series, top] = make_y_data(cols, row_pivots);
                 config.series = series;
                 config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
-                config.legend.enabled = col_pivots.length > 0 || series.length > 1;
+                config.legend.enabled =
+                    col_pivots.length > 0 || series.length > 1;
                 config.legend.floating = series.length <= 20;
                 config.plotOptions.series.dataLabels = {
                     allowOverlap: false,
@@ -246,7 +365,9 @@ class HighchartsElement extends HTMLElement {
                     try {
                         chart.destroy();
                     } catch (e) {
-                        console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
+                        console.warn(
+                            "Scatter plot destroy() call failed - this is probably leaking memory"
+                        );
                     }
                     this._charts[cidx] = Highcharts.chart(target, config);
                 } else if (mode === "scatter") {
@@ -257,7 +378,11 @@ class HighchartsElement extends HTMLElement {
                     set_tick_size.call(callee, conf);
                     chart.update(conf);
                 } else {
-                    let opts = {series: config.series, xAxis: config.xAxis, yAxis: config.yAxis};
+                    let opts = {
+                        series: config.series,
+                        xAxis: config.xAxis,
+                        yAxis: config.yAxis
+                    };
                     chart.update(opts);
                 }
             }
@@ -310,7 +435,9 @@ class HighchartsElement extends HTMLElement {
             try {
                 chart.destroy();
             } catch (e) {
-                console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
+                console.warn(
+                    "Scatter plot destroy() call failed - this is probably leaking memory"
+                );
             }
         }
         this.remove();

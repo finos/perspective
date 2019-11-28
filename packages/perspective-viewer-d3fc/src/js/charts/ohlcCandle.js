@@ -27,7 +27,9 @@ function ohlcCandle(seriesCanvas) {
         const bollinger = fc.indicatorBollingerBands().value(d => d.openValue);
         const data = srcData.map(seriesData => {
             const bollingerData = bollinger(seriesData);
-            return seriesData.map((d, i) => Object.assign({bollinger: bollingerData[i]}, d));
+            return seriesData.map((d, i) =>
+                Object.assign({bollinger: bollingerData[i]}, d)
+            );
         });
 
         const keys = srcData
@@ -77,7 +79,13 @@ function ohlcCandle(seriesCanvas) {
             .settings(settings)
             .xScale(xAxis.scale)
             .onChange(zoom => {
-                const zoomedData = data.map(series => series.filter(d => d.crossValue >= zoom.xDomain[0] && d.crossValue <= zoom.xDomain[1]));
+                const zoomedData = data.map(series =>
+                    series.filter(
+                        d =>
+                            d.crossValue >= zoom.xDomain[0] &&
+                            d.crossValue <= zoom.xDomain[1]
+                    )
+                );
                 chart.yDomain(yAxis.domainFunction(zoomedData));
             })
             .canvas(true);

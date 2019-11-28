@@ -13,7 +13,10 @@ function calc_index(event) {
     } else {
         for (let cidx in this._active_columns.children) {
             let child = this._active_columns.children[cidx];
-            if (child.offsetTop + child.offsetHeight > event.offsetY + this._active_columns.scrollTop) {
+            if (
+                child.offsetTop + child.offsetHeight >
+                event.offsetY + this._active_columns.scrollTop
+            ) {
                 return parseInt(cidx);
             }
         }
@@ -35,7 +38,9 @@ export function dragend(event) {
     } else {
         parent = div.parentElement;
     }
-    let idx = Array.prototype.slice.call(parent.children).indexOf(div.tagName === "PERSPECTIVE-ROW" ? div : event.target);
+    let idx = Array.prototype.slice
+        .call(parent.children)
+        .indexOf(div.tagName === "PERSPECTIVE-ROW" ? div : event.target);
     let attr_name = parent.getAttribute("for");
     if (this.hasAttribute(attr_name)) {
         let attr_value = JSON.parse(this.getAttribute(attr_name));
@@ -59,7 +64,9 @@ export function drop(ev) {
     data = JSON.parse(data);
 
     // Update the columns attribute
-    let name = ev.currentTarget.querySelector("ul").getAttribute("for") || ev.currentTarget.getAttribute("id").replace("_", "-");
+    let name =
+        ev.currentTarget.querySelector("ul").getAttribute("for") ||
+        ev.currentTarget.getAttribute("id").replace("_", "-");
     let columns = JSON.parse(this.getAttribute(name) || "[]");
     let data_index = columns.indexOf(data[0]);
     if (data_index !== -1) {
@@ -76,8 +83,15 @@ export function drop(ev) {
     }
 
     // Deselect the dropped column
-    if (this._plugin.deselectMode === "pivots" && this._get_visible_column_count() > 1 && name !== "sort" && !filtering) {
-        for (let x of this.shadowRoot.querySelectorAll("#active_columns perspective-row")) {
+    if (
+        this._plugin.deselectMode === "pivots" &&
+        this._get_visible_column_count() > 1 &&
+        name !== "sort" &&
+        !filtering
+    ) {
+        for (let x of this.shadowRoot.querySelectorAll(
+            "#active_columns perspective-row"
+        )) {
             if (x.getAttribute("name") === data[0]) {
                 this._active_columns.removeChild(x);
                 break;
@@ -93,7 +107,10 @@ export function drop(ev) {
 export function column_dragend(event) {
     let data = event.target.parentElement.parentElement;
     _clear_classes.bind(this)();
-    if (this._get_visible_column_count() > 1 && event.dataTransfer.dropEffect !== "move") {
+    if (
+        this._get_visible_column_count() > 1 &&
+        event.dataTransfer.dropEffect !== "move"
+    ) {
         this._active_columns.removeChild(data);
         this._update_column_view();
     }
@@ -111,7 +128,10 @@ export function column_dragleave(event) {
             this._active_columns.removeChild(this._drop_target_hover);
         }
         if (this._original_index !== -1) {
-            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
+            this._active_columns.insertBefore(
+                this._drop_target_hover,
+                this._active_columns.children[this._original_index]
+            );
         }
         this._drop_target_hover.removeAttribute("drop-target");
     }
@@ -127,14 +147,27 @@ export function column_dragover(event) {
         this._drop_target_hover.toggleAttribute("drop-target", true);
     }
     let new_index = calc_index.call(this, event);
-    let current_index = Array.prototype.slice.call(this._active_columns.children).indexOf(this._drop_target_hover);
+    let current_index = Array.prototype.slice
+        .call(this._active_columns.children)
+        .indexOf(this._drop_target_hover);
     if (current_index < new_index) new_index += 1;
     if (new_index < this._active_columns.children.length) {
-        if (!this._active_columns.children[new_index].hasAttribute("drop-target")) {
-            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[new_index]);
+        if (
+            !this._active_columns.children[new_index].hasAttribute(
+                "drop-target"
+            )
+        ) {
+            this._active_columns.insertBefore(
+                this._drop_target_hover,
+                this._active_columns.children[new_index]
+            );
         }
     } else {
-        if (!this._active_columns.children[this._active_columns.children.length - 1].hasAttribute("drop-target")) {
+        if (
+            !this._active_columns.children[
+                this._active_columns.children.length - 1
+            ].hasAttribute("drop-target")
+        ) {
             this._active_columns.appendChild(this._drop_target_hover);
         }
     }

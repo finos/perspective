@@ -20,7 +20,8 @@
 
 namespace perspective {
 
-std::pair<t_tscalar, t_tscalar> get_vec_min_max(const std::vector<t_tscalar>& vec);
+std::pair<t_tscalar, t_tscalar> get_vec_min_max(
+    const std::vector<t_tscalar>& vec);
 
 class PERSPECTIVE_EXPORT t_gstate {
     typedef tsl::hopscotch_map<t_tscalar, t_uindex> t_mapping;
@@ -41,23 +42,29 @@ public:
     void update_history(const t_data_table* tbl);
     t_mask get_cpp_mask() const;
 
-    t_tscalar get_value(const t_tscalar& pkey, const std::string& colname) const;
+    t_tscalar get_value(
+        const t_tscalar& pkey, const std::string& colname) const;
 
-    void read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    void read_column(const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
         std::vector<t_tscalar>& out_data) const;
 
-    void read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    void read_column(const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
         std::vector<double>& out_data) const;
 
-    void read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
-        std::vector<double>& out_data, bool include_nones) const;
+    void read_column(const std::string& colname,
+        const std::vector<t_tscalar>& pkeys, std::vector<double>& out_data,
+        bool include_nones) const;
 
     std::shared_ptr<t_data_table> get_table();
     std::shared_ptr<const t_data_table> get_table() const;
 
-    std::shared_ptr<t_data_table> get_pkeyed_table(const t_schema& schema) const;
+    std::shared_ptr<t_data_table> get_pkeyed_table(
+        const t_schema& schema) const;
     t_data_table* _get_pkeyed_table(const t_schema& schema) const;
-    t_data_table* _get_pkeyed_table(const t_schema& schema, const t_mask& mask) const;
+    t_data_table* _get_pkeyed_table(
+        const t_schema& schema, const t_mask& mask) const;
 
     std::shared_ptr<t_data_table> get_pkeyed_table() const;
 
@@ -74,34 +81,37 @@ public:
     t_tscalar get(t_tscalar pkey, const std::string& colname) const;
     std::vector<t_tscalar> get_row(t_tscalar pkey) const;
 
-    bool is_unique(const std::vector<t_tscalar>& pkeys, const std::string& colname,
-        t_tscalar& value) const;
+    bool is_unique(const std::vector<t_tscalar>& pkeys,
+        const std::string& colname, t_tscalar& value) const;
 
     bool apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
         t_tscalar& value) const;
 
     bool apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
-        t_tscalar& value, std::function<bool(const t_tscalar&, t_tscalar&)> fn) const;
+        t_tscalar& value,
+        std::function<bool(const t_tscalar&, t_tscalar&)> fn) const;
 
     bool has_pkey(t_tscalar pkey) const;
 
     template <typename FN_T>
-    typename FN_T::result_type reduce(
-        const std::vector<t_tscalar>& pkeys, const std::string& colname, FN_T fn) const;
+    typename FN_T::result_type reduce(const std::vector<t_tscalar>& pkeys,
+        const std::string& colname, FN_T fn) const;
 
     const t_schema& get_schema() const;
 
     t_uindex size() const;
     t_uindex mapping_size() const;
 
-    std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;
+    std::vector<t_tscalar> get_row_data_pkeys(
+        const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> get_pkeys() const;
 
     void reset();
 
     const t_schema& get_port_schema() const;
-    std::vector<t_uindex> get_pkeys_idx(const std::vector<t_tscalar>& pkeys) const;
+    std::vector<t_uindex> get_pkeys_idx(
+        const std::vector<t_tscalar>& pkeys) const;
 
 protected:
     t_dtype get_pkey_dtype() const;
@@ -120,8 +130,8 @@ private:
 
 template <typename FN_T>
 typename FN_T::result_type
-t_gstate::reduce(
-    const std::vector<t_tscalar>& pkeys, const std::string& colname, FN_T fn) const {
+t_gstate::reduce(const std::vector<t_tscalar>& pkeys,
+    const std::string& colname, FN_T fn) const {
     std::vector<t_tscalar> data;
     read_column(colname, pkeys, data);
     return fn(data);

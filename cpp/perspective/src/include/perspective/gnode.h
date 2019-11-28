@@ -28,7 +28,9 @@
 
 namespace perspective {
 
-typedef std::function<void(std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>, const std::vector<t_rlookup>&)> t_computed_column_def;
+typedef std::function<void(std::shared_ptr<t_data_table>,
+    std::shared_ptr<t_data_table>, const std::vector<t_rlookup>&)>
+    t_computed_column_def;
 
 PERSPECTIVE_EXPORT t_tscalar calc_delta(
     t_value_transition trans, t_tscalar oval, t_tscalar nval);
@@ -71,7 +73,8 @@ public:
     t_gnode(const t_gnode_options& options);
     t_gnode(const t_schema& tblschema, const t_schema& port_schema);
     t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
-        const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
+        const std::vector<t_schema>& ischemas,
+        const std::vector<t_schema>& oschemas,
         const std::vector<t_custom_column>& custom_columns);
     ~t_gnode();
     void init();
@@ -79,11 +82,13 @@ public:
     // send data to input port with at index idx
     // schema should match port schema
     void _send(t_uindex idx, const t_data_table& fragments);
-    void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_def>& computed_lambdas);
+    void _send(t_uindex idx, const t_data_table& fragments,
+        const std::vector<t_computed_column_def>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
     void _process_self();
-    void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
+    void _register_context(
+        const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
 
     void begin_step();
@@ -122,7 +127,8 @@ public:
 
     bool has_pkey(t_tscalar pkey) const;
 
-    std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;
+    std::vector<t_tscalar> get_row_data_pkeys(
+        const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> get_pkeys() const;
 
@@ -138,7 +144,8 @@ public:
     t_uindex mapping_size() const;
 
     // helper function for tests
-    std::shared_ptr<t_data_table> tstep(std::shared_ptr<const t_data_table> input_table);
+    std::shared_ptr<t_data_table> tstep(
+        std::shared_ptr<const t_data_table> input_table);
 
     // helper function for JS interface
     void promote_column(const std::string& name, t_dtype new_type);
@@ -147,23 +154,29 @@ public:
     void register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
-    void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
+    void register_context(
+        const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
 
     std::vector<t_computed_column_def> get_computed_lambdas() const;
 
 protected:
-    void recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs);
-    void append_computed_lambdas(std::vector<t_computed_column_def> new_lambdas);
+    void recompute_columns(std::shared_ptr<t_data_table> table,
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& updated_ridxs);
+    void append_computed_lambdas(
+        std::vector<t_computed_column_def> new_lambdas);
 
     bool have_context(const std::string& name) const;
     void notify_contexts(const t_data_table& flattened);
 
     template <typename CTX_T>
-    void notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh);
+    void notify_context(
+        const t_data_table& flattened, const t_ctx_handle& ctxh);
 
     template <typename CTX_T>
-    void notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
-        const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+    void notify_context(CTX_T* ctx, const t_data_table& flattened,
+        const t_data_table& delta, const t_data_table& prev,
+        const t_data_table& current, const t_data_table& transitions,
         const t_data_table& existed);
 
     template <typename CTX_T>
@@ -173,24 +186,26 @@ protected:
     void set_ctx_state(void* ptr);
 
     template <typename DATA_T>
-    void _process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
+    void _process_helper(const t_column* fcolumn, const t_column* scolumn,
+        t_column* dcolumn, t_column* pcolumn, t_column* ccolumn,
+        t_column* tcolumn, const std::uint8_t* op_base,
         std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
         std::vector<t_uindex>& added_vec);
 
-    t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
-        bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
+    t_value_transition calc_transition(bool prev_existed, bool row_pre_existed,
+        bool exists, bool prev_valid, bool cur_valid, bool prev_cur_eq,
+        bool prev_pkey_eq);
 
     void _update_contexts_from_state(const t_data_table& tbl);
     void _update_contexts_from_state();
     void clear_deltas();
 
 private:
-    void populate_icols_in_flattened(
-        const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const;
+    void populate_icols_in_flattened(const std::vector<t_rlookup>& lkup,
+        std::shared_ptr<t_data_table>& flat) const;
 
     std::shared_ptr<t_data_table> _process_table();
-    
+
     std::vector<t_computed_column_def> m_computed_lambdas;
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
@@ -211,14 +226,16 @@ private:
 };
 
 template <>
-void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* scolumn,
-    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
-    const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
-    std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
+void t_gnode::_process_helper<std::string>(const t_column* fcolumn,
+    const t_column* scolumn, t_column* dcolumn, t_column* pcolumn,
+    t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
+    std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
+    std::vector<t_uindex>& added_vec);
 
 /**
- * @brief Given a t_data_table and a context handler, construct the t_tables relating to delta
- * calculation and notify the context with the constructed tables.
+ * @brief Given a t_data_table and a context handler, construct the t_tables
+ * relating to delta calculation and notify the context with the constructed
+ * tables.
  *
  * @tparam CTX_T
  * @param flattened
@@ -226,21 +243,27 @@ void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_colu
  */
 template <typename CTX_T>
 void
-t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh) {
+t_gnode::notify_context(
+    const t_data_table& flattened, const t_ctx_handle& ctxh) {
     CTX_T* ctx = ctxh.get<CTX_T>();
     const t_data_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
     const t_data_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
-    const t_data_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
-    const t_data_table& transitions = *(m_oports[PSP_PORT_TRANSITIONS]->get_table().get());
-    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
-    notify_context<CTX_T>(ctx, flattened, delta, prev, current, transitions, existed);
+    const t_data_table& current
+        = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
+    const t_data_table& transitions
+        = *(m_oports[PSP_PORT_TRANSITIONS]->get_table().get());
+    const t_data_table& existed
+        = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
+    notify_context<CTX_T>(
+        ctx, flattened, delta, prev, current, transitions, existed);
 }
 
 /**
- * @brief Given multiple `t_data_table`s containing the different states of the context,
- * update the context with new data.
+ * @brief Given multiple `t_data_table`s containing the different states of the
+ * context, update the context with new data.
  *
- * Called on updates and additions AFTER a view is constructed from the table/context.
+ * Called on updates and additions AFTER a view is constructed from the
+ * table/context.
  *
  * @tparam CTX_T
  * @param ctx
@@ -248,13 +271,15 @@ t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh)
  * @param delta a `t_data_table` containing the changes to the dataset
  * @param prev a `t_data_table` containing the previous state
  * @param current a `t_data_table` containing the current state
- * @param transitions a `t_data_table` containing operations to transform the context
+ * @param transitions a `t_data_table` containing operations to transform the
+ * context
  * @param existed
  */
 template <typename CTX_T>
 void
-t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened,
+    const t_data_table& delta, const t_data_table& prev,
+    const t_data_table& current, const t_data_table& transitions,
     const t_data_table& existed) {
     auto t1 = std::chrono::high_resolution_clock::now();
     ctx->step_begin();
@@ -263,7 +288,9 @@ t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_
     if (t_env::log_time_ctx_notify()) {
         auto t2 = std::chrono::high_resolution_clock::now();
         std::cout << ctx->repr() << " ctx_notify "
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+                  << std::chrono::duration_cast<std::chrono::milliseconds>(
+                         t2 - t1)
+                         .count()
                   << std::endl;
     }
 }
@@ -282,8 +309,8 @@ void
 t_gnode::update_context_from_state(CTX_T* ctx, const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(
-        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
+    PSP_VERBOSE_ASSERT(m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
+        "Only simple dataflows supported currently");
 
     if (flattened.size() == 0)
         return;
@@ -295,10 +322,10 @@ t_gnode::update_context_from_state(CTX_T* ctx, const t_data_table& flattened) {
 
 template <typename DATA_T>
 void
-t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-    t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
-    std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
-    std::vector<t_uindex>& added_vec) {
+t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn,
+    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
+    const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
+    std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec) {
     for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
         std::uint8_t op_ = op_base[idx];
         t_op op = static_cast<t_op>(op_);
@@ -327,25 +354,29 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                 bool prev_existed = row_pre_existed && prev_valid;
                 bool prev_cur_eq = prev_value == cur_value;
 
-                auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq_vec[idx]);
+                auto trans = calc_transition(prev_existed, row_pre_existed,
+                    exists, prev_valid, cur_valid, prev_cur_eq,
+                    prev_pkey_eq_vec[idx]);
 
-                dcolumn->set_nth<DATA_T>(
-                    added_count, cur_valid ? cur_value - prev_value : DATA_T(0));
+                dcolumn->set_nth<DATA_T>(added_count,
+                    cur_valid ? cur_value - prev_value : DATA_T(0));
                 dcolumn->set_valid(added_count, true);
 
                 pcolumn->set_nth<DATA_T>(added_count, prev_value);
                 pcolumn->set_valid(added_count, prev_valid);
 
-                ccolumn->set_nth<DATA_T>(added_count, cur_valid ? cur_value : prev_value);
+                ccolumn->set_nth<DATA_T>(
+                    added_count, cur_valid ? cur_value : prev_value);
 
-                ccolumn->set_valid(added_count, cur_valid ? cur_valid : prev_valid);
+                ccolumn->set_valid(
+                    added_count, cur_valid ? cur_valid : prev_valid);
 
                 tcolumn->set_nth<std::uint8_t>(idx, trans);
             } break;
             case OP_DELETE: {
                 if (row_pre_existed) {
-                    DATA_T prev_value = *(scolumn->get_nth<DATA_T>(rlookup.m_idx));
+                    DATA_T prev_value
+                        = *(scolumn->get_nth<DATA_T>(rlookup.m_idx));
                     bool prev_valid = scolumn->is_valid(rlookup.m_idx);
 
                     pcolumn->set_nth<DATA_T>(added_count, prev_value);
@@ -359,10 +390,13 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                     RESTORE_WARNINGS_VC()
                     dcolumn->set_valid(added_count, true);
 
-                    tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
+                    tcolumn->set_nth<std::uint8_t>(
+                        added_count, VALUE_TRANSITION_NEQ_TDF);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
     }
 }

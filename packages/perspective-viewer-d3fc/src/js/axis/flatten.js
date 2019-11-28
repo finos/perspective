@@ -13,7 +13,13 @@ export const flattenExtent = array => {
         if (b === undefined) return a;
         return fn(a, b);
     };
-    return array.reduce((r, v) => [withUndefined(Math.min)(r[0], v[0]), withUndefined(Math.max)(r[1], v[1])], [undefined, undefined]);
+    return array.reduce(
+        (r, v) => [
+            withUndefined(Math.min)(r[0], v[0]),
+            withUndefined(Math.max)(r[1], v[1])
+        ],
+        [undefined, undefined]
+    );
 };
 
 export const flattenArray = array => {

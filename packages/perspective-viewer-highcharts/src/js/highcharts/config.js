@@ -10,12 +10,18 @@
 import * as tooltip from "./tooltip";
 
 export function set_boost(config, series, ...types) {
-    const count = config.series[0].data ? config.series[0].data.length * config.series.length : config.series.length;
+    const count = config.series[0].data
+        ? config.series[0].data.length * config.series.length
+        : config.series.length;
     if (count > 5000) {
         Object.assign(config, {
             boost: {
-                useGPUTranslations: types.indexOf("datetime") === -1 && types.indexOf("date") === -1,
-                usePreAllocated: types.indexOf("datetime") === -1 && types.indexOf("date") === -1
+                useGPUTranslations:
+                    types.indexOf("datetime") === -1 &&
+                    types.indexOf("date") === -1,
+                usePreAllocated:
+                    types.indexOf("datetime") === -1 &&
+                    types.indexOf("date") === -1
             }
         });
         config.plotOptions.series.boostThreshold = 1;
@@ -25,7 +31,16 @@ export function set_boost(config, series, ...types) {
 }
 
 export function set_tick_size(config) {
-    let new_radius = Math.min(6, Math.max(3, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, config.series[0].data.length / 3))));
+    let new_radius = Math.min(
+        6,
+        Math.max(
+            3,
+            Math.floor(
+                (this.clientWidth + this.clientHeight) /
+                    Math.max(300, config.series[0].data.length / 3)
+            )
+        )
+    );
     config.plotOptions.coloredScatter = {marker: {radius: new_radius}};
     config.plotOptions.scatter = {marker: {radius: new_radius}};
 }
@@ -58,7 +73,15 @@ export function set_category_axis(config, axis, type, top) {
     if (type === "datetime") {
         Object.assign(config, {
             [axis]: {
-                categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"})),
+                categories: top.categories.map(x =>
+                    new Date(x).toLocaleString("en-us", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric"
+                    })
+                ),
                 labels: {
                     enabled: top.categories.length > 0,
                     autoRotation: [-5]
@@ -68,7 +91,13 @@ export function set_category_axis(config, axis, type, top) {
     } else if (type === "date") {
         Object.assign(config, {
             [axis]: {
-                categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"})),
+                categories: top.categories.map(x =>
+                    new Date(x).toLocaleString("en-us", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric"
+                    })
+                ),
                 labels: {
                     enabled: top.categories.length > 0,
                     autoRotation: [-5]
@@ -84,7 +113,10 @@ export function set_category_axis(config, axis, type, top) {
                 autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90]
             }
         };
-        if (axis === "yAxis" && (!config.hasOwnProperty("boost") || config.chart.type === "heatmap")) {
+        if (
+            axis === "yAxis" &&
+            (!config.hasOwnProperty("boost") || config.chart.type === "heatmap")
+        ) {
             Object.assign(opts, {
                 title: null,
                 tickWidth: 1,
@@ -139,7 +171,10 @@ export function default_config(aggregates, mode) {
     const config = this._config;
 
     const axis_titles = get_axis_titles(config.aggregates);
-    const pivot_titles = get_pivot_titles(config.row_pivots, config.column_pivots);
+    const pivot_titles = get_pivot_titles(
+        config.row_pivots,
+        config.column_pivots
+    );
 
     const is_empty = str => str.replace(/\s/g, "") == "";
 
@@ -223,19 +258,50 @@ export function default_config(aggregates, mode) {
                         click: async function() {
                             let row_pivots_values = [];
                             let column_pivot_values = [];
-                            if ((type === "bubble" && mode === "scatter") || (type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
-                                column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivots_values = this.name ? this.name.split(", ") : [];
-                            } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
-                                column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivots_values = tooltip.get_pivot_values(this.category);
+                            if (
+                                (type === "bubble" && mode === "scatter") ||
+                                (type === "scatter" && mode === "scatter") ||
+                                (type === "scatter" && mode === "line")
+                            ) {
+                                column_pivot_values = this.series.userOptions.name.split(
+                                    ", "
+                                );
+                                row_pivots_values = this.name
+                                    ? this.name.split(", ")
+                                    : [];
+                            } else if (
+                                type === "column" ||
+                                type === "line" ||
+                                type === "scatter" ||
+                                type === "area"
+                            ) {
+                                column_pivot_values = this.series.userOptions.name.split(
+                                    ", "
+                                );
+                                row_pivots_values = tooltip.get_pivot_values(
+                                    this.category
+                                );
                             } else {
-                                console.log(`Click dispatch for ${mode} ${type} not supported.`);
+                                console.log(
+                                    `Click dispatch for ${mode} ${type} not supported.`
+                                );
                                 return;
                             }
 
-                            const row_filters = config.row_pivots.map((c, index) => [c, "==", row_pivots_values[index]]);
-                            const column_filters = config.column_pivots.map((c, index) => [c, "==", column_pivot_values[index]]);
+                            const row_filters = config.row_pivots.map(
+                                (c, index) => [
+                                    c,
+                                    "==",
+                                    row_pivots_values[index]
+                                ]
+                            );
+                            const column_filters = config.column_pivots.map(
+                                (c, index) => [
+                                    c,
+                                    "==",
+                                    column_pivot_values[index]
+                                ]
+                            );
                             const filters = config.filter
                                 .concat(row_filters)
                                 .concat(column_filters)
@@ -244,16 +310,29 @@ export function default_config(aggregates, mode) {
                             const start_row = this.index + 1;
                             const end_row = start_row + 1;
                             let column_names = [];
-                            if ((type === "bubble" && mode === "scatter") || (type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                            if (
+                                (type === "bubble" && mode === "scatter") ||
+                                (type === "scatter" && mode === "scatter") ||
+                                (type === "scatter" && mode === "line")
+                            ) {
                                 column_names = axis_titles;
                             } else {
-                                const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
-                                const column_name = column_pivot_values[column_pivot_values.length - 1];
-                                if (is_empty(column_name)) column_names.push(stack_name);
+                                const stack_name = this.series.userOptions
+                                    ? this.series.userOptions.stack
+                                    : "";
+                                const column_name =
+                                    column_pivot_values[
+                                        column_pivot_values.length - 1
+                                    ];
+                                if (is_empty(column_name))
+                                    column_names.push(stack_name);
                                 else column_names.push(column_name);
                             }
 
-                            const r = await that._view.to_json({start_row, end_row});
+                            const r = await that._view.to_json({
+                                start_row,
+                                end_row
+                            });
                             that.dispatchEvent(
                                 new CustomEvent("perspective-click", {
                                     bubbles: true,
@@ -280,7 +359,13 @@ export function default_config(aggregates, mode) {
                 that._view
                     .schema(false)
                     .then(schema => {
-                        let tooltip_text = tooltip.format_tooltip(this, hover_type, schema, axis_titles, pivot_titles);
+                        let tooltip_text = tooltip.format_tooltip(
+                            this,
+                            hover_type,
+                            schema,
+                            axis_titles,
+                            pivot_titles
+                        );
                         highcharts_tooltip.label.attr({
                             text: tooltip_text
                         });

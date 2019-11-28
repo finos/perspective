@@ -25,7 +25,8 @@ t_dtree_ctx::t_dtree_ctx(std::shared_ptr<const t_data_table> strands,
     , m_init(false) {
     std::vector<t_dep> depvec = {t_dep("psp_strand_count", DEPTYPE_COLUMN)};
 
-    m_aggspecs.push_back(t_aggspec("psp_strand_count_sum", AGGTYPE_SUM, depvec));
+    m_aggspecs.push_back(
+        t_aggspec("psp_strand_count_sum", AGGTYPE_SUM, depvec));
 
     t_uindex aggidx = 0;
     for (const auto& spec : m_aggspecs) {
@@ -55,7 +56,8 @@ t_dtree_ctx::build_aggregates() {
     for (const auto& spec : m_aggspecs) {
         auto cinfo = spec.get_output_specs(delta_schema);
         for (const auto& ci : cinfo) {
-            PSP_VERBOSE_ASSERT(ci.m_type != DTYPE_NONE, "NULL type encountered");
+            PSP_VERBOSE_ASSERT(
+                ci.m_type != DTYPE_NONE, "NULL type encountered");
             columns.push_back(ci.m_name);
             dtypes.push_back(ci.m_type);
         }
@@ -68,7 +70,8 @@ t_dtree_ctx::build_aggregates() {
     m_aggregates->init();
     m_aggregates->set_size(m_tree.size());
 
-    for (t_uindex idx = 0, loop_end = m_aggspecs.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_aggspecs.size(); idx < loop_end;
+         ++idx) {
         const t_aggspec& aggspec = m_aggspecs[idx];
         const std::vector<t_dep>& deps = aggspec.get_dependencies();
 
@@ -106,8 +109,8 @@ const t_aggspec&
 t_dtree_ctx::get_aggspec(const std::string& aggname) const {
     auto iter = m_aggspecmap.find(aggname);
     PSP_VERBOSE_ASSERT(iter != m_aggspecmap.end(), "Failed to find aggspec");
-    PSP_VERBOSE_ASSERT(
-        static_cast<t_uindex>(iter->second) < m_aggspecs.size(), "Invalid aggspec index");
+    PSP_VERBOSE_ASSERT(static_cast<t_uindex>(iter->second) < m_aggspecs.size(),
+        "Invalid aggspec index");
     return m_aggspecs[iter->second];
 }
 
@@ -125,7 +128,8 @@ t_dtree_ctx::pprint(const t_filter& fltr) const {
 
     for (auto idx : m_tree.dfs()) {
         auto depth = m_tree.get_depth(idx);
-        for (t_uindex spidx = 0; spidx < static_cast<t_uindex>(depth); ++spidx) {
+        for (t_uindex spidx = 0; spidx < static_cast<t_uindex>(depth);
+             ++spidx) {
             std::cout << "\t";
         }
 
@@ -170,7 +174,8 @@ t_dtree_ctx::get_strand_deltas() const {
 void
 t_dtree_ctx::pprint_strands() const {
     std::vector<const t_column*> columns;
-    auto scount_col = m_strand_deltas->get_const_column("psp_strand_count").get();
+    auto scount_col
+        = m_strand_deltas->get_const_column("psp_strand_count").get();
     auto pkey_col = m_strands->get_const_column("psp_pkey").get();
     auto strand_schema = m_strands->get_schema();
 
@@ -203,7 +208,8 @@ t_dtree_ctx::pprint_strands() const {
 
     std::cout << "\n====================================\n";
 
-    for (t_uindex idx = 0, loop_end = m_strands->size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_strands->size(); idx < loop_end;
+         ++idx) {
 
         std::vector<t_tscalar> vec;
         vec.push_back(pkey_col->get_scalar(idx));
@@ -230,11 +236,11 @@ t_dtree_ctx::pprint_strands_tree() const {
 
     std::vector<t_colname_cptr_pair> columns;
 
-    columns.push_back(
-        t_colname_cptr_pair("psp_pkey", m_strands->get_const_column("psp_pkey").get()));
-
     columns.push_back(t_colname_cptr_pair(
-        "psp_strand_count", m_strand_deltas->get_const_column("psp_strand_count").get()));
+        "psp_pkey", m_strands->get_const_column("psp_pkey").get()));
+
+    columns.push_back(t_colname_cptr_pair("psp_strand_count",
+        m_strand_deltas->get_const_column("psp_strand_count").get()));
 
     for (const auto& piv : m_tree.get_pivots()) {
         columns.push_back(t_colname_cptr_pair(

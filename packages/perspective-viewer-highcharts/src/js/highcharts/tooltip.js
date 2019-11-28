@@ -9,7 +9,13 @@
 
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 
-export function format_tooltip(context, type, schema, axis_titles, pivot_titles) {
+export function format_tooltip(
+    context,
+    type,
+    schema,
+    axis_titles,
+    pivot_titles
+) {
     const row_pivots_titles = pivot_titles.row,
         column_pivot_titles = pivot_titles.column;
 
@@ -23,12 +29,20 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
 
         if (has_row_pivots) {
             let row_pivots_values = get_pivot_values(context.key);
-            row_pivots_text = collate_multiple_values(row_pivots_titles, row_pivots_values);
+            row_pivots_text = collate_multiple_values(
+                row_pivots_titles,
+                row_pivots_values
+            );
         }
 
         if (has_column_pivots) {
-            let column_pivot_values = context.series.userOptions.name.split(", ");
-            column_pivot_text = collate_multiple_values(column_pivot_titles, column_pivot_values);
+            let column_pivot_values = context.series.userOptions.name.split(
+                ", "
+            );
+            column_pivot_text = collate_multiple_values(
+                column_pivot_titles,
+                column_pivot_values
+            );
         }
 
         const axis_title = context.series.userOptions.stack;
@@ -36,7 +50,10 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
 
         return `${row_pivots_text}
                 ${column_pivot_text}
-                <span>${axis_title}: </span><b>${format_value(context.y, axis_type)}</b>`;
+                <span>${axis_title}: </span><b>${format_value(
+            context.y,
+            axis_type
+        )}</b>`;
     } else if (type === "xy") {
         const has_x_values = value_exists(axis_titles[0]),
             has_y_values = value_exists(axis_titles[1]),
@@ -53,12 +70,18 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
         // render tooltip based on axis + pivots
         if (has_row_pivots) {
             let row_pivots_values = context.key.split(",");
-            row_pivots_text = collate_multiple_values(row_pivots_titles, row_pivots_values);
+            row_pivots_text = collate_multiple_values(
+                row_pivots_titles,
+                row_pivots_values
+            );
         }
 
         if (has_column_pivots) {
             let column_pivot_values = context.point.series.name.split(",");
-            column_pivot_text = collate_multiple_values(column_pivot_titles, column_pivot_values);
+            column_pivot_text = collate_multiple_values(
+                column_pivot_titles,
+                column_pivot_values
+            );
         }
 
         if (has_x_values) {
@@ -76,22 +99,39 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
         if (has_z_values) {
             let z_axis_title = axis_titles[2],
                 raw_z_axis_value = context.point.colorValue;
-            z_text = collate_single_value(z_axis_title, raw_z_axis_value, schema);
+            z_text = collate_single_value(
+                z_axis_title,
+                raw_z_axis_value,
+                schema
+            );
         }
 
         if (has_w_values) {
             let w_axis_title = axis_titles[3],
                 raw_w_axis_value = context.point.colorValue;
 
-            w_text = collate_single_value(w_axis_title, raw_w_axis_value, schema);
+            w_text = collate_single_value(
+                w_axis_title,
+                raw_w_axis_value,
+                schema
+            );
         }
 
-        const tooltip_text = [row_pivots_text, column_pivot_text, x_text, y_text, z_text, w_text];
+        const tooltip_text = [
+            row_pivots_text,
+            column_pivot_text,
+            x_text,
+            y_text,
+            z_text,
+            w_text
+        ];
         return tooltip_text.join("");
     } else if (type === "xyz") {
         return `<span>${format_value(context.point.value)}</span>`;
     } else if (type === "hierarchy") {
-        return `<span>${context.point.id}: </span><b>${format_value(context.x)}</b>`;
+        return `<span>${context.point.id}: </span><b>${format_value(
+            context.x
+        )}</b>`;
     }
 
     let default_value;
@@ -106,7 +146,12 @@ function collate_single_value(title, raw_value, schema) {
 
     /* columns in aggregate AND in sort need to show up, but
      * columns not in aggregate but NOT in sort need to hide */
-    if (formatted_value === "NaN" || formatted_value === null || formatted_value === undefined) return "";
+    if (
+        formatted_value === "NaN" ||
+        formatted_value === null ||
+        formatted_value === undefined
+    )
+        return "";
 
     return `<span>${title}: <b>${formatted_value}</b></span><br/>`;
 }
@@ -147,9 +192,15 @@ function value_exists(value) {
 
 function format_value(value, type) {
     if (type === "datetime") {
-        return new Date(value).toLocaleString("en-us", get_type_config("datetime").format);
+        return new Date(value).toLocaleString(
+            "en-us",
+            get_type_config("datetime").format
+        );
     } else if (type === "date") {
-        return new Date(value).toLocaleString("en-us", get_type_config("date").format);
+        return new Date(value).toLocaleString(
+            "en-us",
+            get_type_config("date").format
+        );
     } else if (type === "float" || type === "integer") {
         return format_number(value, type);
     } else {
@@ -159,8 +210,12 @@ function format_value(value, type) {
 
 function format_number(num, format) {
     if (format === "float") {
-        return Number.parseFloat(num).toLocaleString(get_type_config("float").format);
+        return Number.parseFloat(num).toLocaleString(
+            get_type_config("float").format
+        );
     } else {
-        return Number.parseInt(num).toLocaleString(get_type_config("float").format);
+        return Number.parseInt(num).toLocaleString(
+            get_type_config("float").format
+        );
     }
 }

@@ -24,8 +24,32 @@ var TICK_RATE = 20;
 // Size limit of the server-side table
 var TABLE_SIZE = 10000;
 
-var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
-var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
+var SECURITIES = [
+    "AAPL.N",
+    "AMZN.N",
+    "QQQ.N",
+    "NVDA.N",
+    "TSLA.N",
+    "FB.N",
+    "MSFT.N",
+    "TLT.N",
+    "XIV.N",
+    "YY.N",
+    "CSCO.N",
+    "GOOGL.N",
+    "PCLN.N"
+];
+var CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty"
+];
 
 var __CACHE__ = [];
 

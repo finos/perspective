@@ -52,8 +52,8 @@ t_traversal::populate_root_children(const t_stnode_vec& rchildren) {
 
     t_index count = 1;
 
-    for (t_stnode_vec::const_iterator iter = rchildren.begin(); iter != rchildren.end();
-         ++iter) {
+    for (t_stnode_vec::const_iterator iter = rchildren.begin();
+         iter != rchildren.end(); ++iter) {
         t_tvnode& cnode = (*m_nodes)[count];
         cnode.m_expanded = false;
         cnode.m_depth = 1;
@@ -86,8 +86,8 @@ t_traversal::expand_node(t_index exp_idx) {
     std::vector<t_tvnode> children = std::vector<t_tvnode>(n_changed);
 
     t_index count = 0;
-    for (t_stnode_vec::const_iterator iter = tchildren.begin(); iter != tchildren.end();
-         ++iter) {
+    for (t_stnode_vec::const_iterator iter = tchildren.begin();
+         iter != tchildren.end(); ++iter) {
         t_tvnode& tv_node = children[count];
         tv_node.m_expanded = false;
         tv_node.m_depth = exp_tvnode.m_depth + 1;
@@ -105,7 +105,8 @@ t_traversal::expand_node(t_index exp_idx) {
     exp_tvnode.m_nchild = n_changed;
 
     // insert children of node into the traversal
-    m_nodes->insert(m_nodes->begin() + exp_idx + 1, children.begin(), children.end());
+    m_nodes->insert(
+        m_nodes->begin() + exp_idx + 1, children.begin(), children.end());
 
     // update ancestors about their new descendents
     update_ancestors(exp_idx, n_changed);
@@ -115,7 +116,8 @@ t_traversal::expand_node(t_index exp_idx) {
 }
 
 t_index
-t_traversal::expand_node(const std::vector<t_sortspec>& sortby, t_index exp_idx, t_ctx2* ctx2) {
+t_traversal::expand_node(
+    const std::vector<t_sortspec>& sortby, t_index exp_idx, t_ctx2* ctx2) {
     t_tvnode& exp_tvnode = (*m_nodes)[exp_idx];
 
     if (exp_tvnode.m_expanded) {
@@ -136,14 +138,14 @@ t_traversal::expand_node(const std::vector<t_sortspec>& sortby, t_index exp_idx,
     }
 
     if (!sortby.empty()) {
-        auto sortelems
-            = std::make_shared<std::vector<t_mselem>>(static_cast<size_t>(n_changed));
+        auto sortelems = std::make_shared<std::vector<t_mselem>>(
+            static_cast<size_t>(n_changed));
         t_index num_aggs = sortby.size();
         std::vector<t_tscalar> aggregates(num_aggs);
 
         t_uindex child_idx = 0;
-        for (t_stnode_vec::const_iterator iter = tchildren.begin(); iter != tchildren.end();
-             ++iter) {
+        for (t_stnode_vec::const_iterator iter = tchildren.begin();
+             iter != tchildren.end(); ++iter) {
             m_tree->get_aggregates_for_sorting(
                 iter->m_idx, sortby_agg_indices, aggregates, ctx2);
             (*sortelems)[count] = t_mselem(aggregates, child_idx);
@@ -178,7 +180,8 @@ t_traversal::expand_node(const std::vector<t_sortspec>& sortby, t_index exp_idx,
     exp_tvnode.m_nchild = n_changed;
 
     // insert children of node into the traversal
-    m_nodes->insert(m_nodes->begin() + exp_idx + 1, children.begin(), children.end());
+    m_nodes->insert(
+        m_nodes->begin() + exp_idx + 1, children.begin(), children.end());
 
     // update ancestors about their new descendents
     update_ancestors(exp_idx, n_changed);
@@ -219,12 +222,14 @@ t_traversal::collapse_node(t_index idx) {
 
 void
 t_traversal::add_node(const std::vector<t_sortspec>& sortby,
-    const std::vector<t_uindex>& indices, t_index insert_level_idx, t_ctx2* ctx2) {
+    const std::vector<t_uindex>& indices, t_index insert_level_idx,
+    t_ctx2* ctx2) {
     std::vector<t_sortspec> dummy = sortby;
     std::vector<t_index> tv_indices;
     t_index collapsed_ancestor = INVALID_INDEX;
 
-    get_expanded_span(indices, tv_indices, collapsed_ancestor, insert_level_idx);
+    get_expanded_span(
+        indices, tv_indices, collapsed_ancestor, insert_level_idx);
 
     if (static_cast<t_index>(tv_indices.size()) == insert_level_idx) {
         t_index p_tvidx = tv_indices.back();
@@ -351,7 +356,8 @@ t_traversal::get_expanded_span(const std::vector<t_uindex>& in_ptidxes,
 
     out_indexes.push_back(0);
 
-    for (t_index counter = 1, loop_end = in_ptidxes.size(); counter < loop_end; counter++) {
+    for (t_index counter = 1, loop_end = in_ptidxes.size(); counter < loop_end;
+         counter++) {
         bool level_node_found = false;
         t_index level_idx = INVALID_INDEX;
         t_index p_nchild = (*m_nodes)[pidx].m_nchild;
@@ -392,7 +398,8 @@ t_traversal::get_expanded_span(const std::vector<t_uindex>& in_ptidxes,
 }
 
 bool
-t_traversal::validate_cells(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_traversal::validate_cells(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     t_uindex trav_size = size();
 
     for (t_index idx = 0, loop_end = cells.size(); idx < loop_end; ++idx) {
@@ -437,7 +444,8 @@ t_traversal::pprint() const {
             std::cout << "\t";
         }
         std::cout << "tvidx: " << idx << " value: " << tnode.m_value
-                  << " depth: " << node.m_depth << " m_rel_pidx: " << node.m_rel_pidx
+                  << " depth: " << node.m_depth
+                  << " m_rel_pidx: " << node.m_rel_pidx
                   << " ndesc: " << node.m_ndesc << " tnid: " << node.m_tnid
                   << " nchild: " << node.m_nchild << std::endl;
     }
@@ -450,7 +458,8 @@ t_traversal::get_node(t_index idx) const {
 
 void
 t_traversal::get_leaves(std::vector<t_index>& out_data) const {
-    for (t_index curidx = 0, loop_end = m_nodes->size(); curidx < loop_end; ++curidx) {
+    for (t_index curidx = 0, loop_end = m_nodes->size(); curidx < loop_end;
+         ++curidx) {
         if (!(*m_nodes)[curidx].m_expanded) {
             out_data.push_back(curidx);
         }
@@ -467,7 +476,8 @@ t_traversal::get_child_indices(
     for (int i = 0; i < nchild; i++) {
         t_index curr_cidx = nidx + coffset;
         const t_tvnode& child_node = (*m_nodes)[curr_cidx];
-        out_data.push_back(std::pair<t_index, t_index>(curr_cidx, child_node.m_tnid));
+        out_data.push_back(
+            std::pair<t_index, t_index>(curr_cidx, child_node.m_tnid));
         coffset = coffset + child_node.m_ndesc + 1;
     }
 }
@@ -483,8 +493,8 @@ t_traversal::get_num_tree_leaves(t_index idx) const {
 
     t_index rval = 0;
 
-    for (t_index curidx = idx + 1, loop_end = idx + node.m_ndesc + 1; curidx < loop_end;
-         ++curidx) {
+    for (t_index curidx = idx + 1, loop_end = idx + node.m_ndesc + 1;
+         curidx < loop_end; ++curidx) {
         if (!(*m_nodes)[curidx].m_expanded) {
             ++rval;
         }
@@ -507,7 +517,8 @@ t_traversal::post_order(t_index nidx, std::vector<t_index>& out_vec) {
 
 // Traversal
 t_index
-t_traversal::set_depth(const std::vector<t_sortspec>& sortby, t_depth depth, t_ctx2* ctx2) {
+t_traversal::set_depth(
+    const std::vector<t_sortspec>& sortby, t_depth depth, t_ctx2* ctx2) {
     std::vector<t_index> pending;
     depth = depth + 1;
     pending.push_back(0);
@@ -519,7 +530,8 @@ t_traversal::set_depth(const std::vector<t_sortspec>& sortby, t_depth depth, t_c
         std::vector<std::pair<t_index, t_index>> children;
         get_child_indices(curidx, children);
         std::vector<t_index> collapse;
-        for (t_index idx = 0, loop_end = children.size(); idx < loop_end; ++idx) {
+        for (t_index idx = 0, loop_end = children.size(); idx < loop_end;
+             ++idx) {
             const std::pair<t_index, t_index>& child = children[idx];
             const t_tvnode& tv_node = (*m_nodes)[child.first];
 
@@ -570,7 +582,8 @@ t_traversal::get_flattened_tree(t_index idx, t_depth stop_depth) const {
                 }
                 rvec_idx++;
             }
-            for (t_index cidx = 0, loop_end = children.size(); cidx < loop_end; ++cidx) {
+            for (t_index cidx = 0, loop_end = children.size(); cidx < loop_end;
+                 ++cidx) {
                 queue.push(children[cidx]);
             }
         } else {
@@ -596,7 +609,8 @@ t_traversal::tree_index_lookup(t_index idx, t_index bidx) const {
 }
 
 void
-t_traversal::get_node_ancestors(t_index nidx, std::vector<t_index>& ancestors) const {
+t_traversal::get_node_ancestors(
+    t_index nidx, std::vector<t_index>& ancestors) const {
     if (nidx == 0)
         return;
 

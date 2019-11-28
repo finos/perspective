@@ -10,7 +10,9 @@
 const fs = require("fs");
 const path = require("path");
 
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
+const arrow = fs.readFileSync(
+    path.join(__dirname, "..", "arrow", "test-null.arrow")
+).buffer;
 
 var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 
@@ -21,7 +23,9 @@ module.exports = (perspective, mode) => {
             if (perspective.sync_module) {
                 perspective = perspective.sync_module();
             }
-            expect(perspective.__module__.wasmJSMethod).toEqual(mode === "ASMJS" ? "asmjs" : "native-wasm");
+            expect(perspective.__module__.wasmJSMethod).toEqual(
+                mode === "ASMJS" ? "asmjs" : "native-wasm"
+            );
         });
 
         it("Arrow schema types are mapped correctly", async function() {

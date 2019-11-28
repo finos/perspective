@@ -466,7 +466,20 @@ module.exports = perspective => {
                     async function(delta) {
                         const json = await view.to_json();
                         const expected = [
-                            {"1|x": 1, "1|y": "string1", "1|z": false, "2|x": 2, "2|y": "b", "2|z": false, "3|x": 3, "3|y": "c", "3|z": true, "4|x": 4, "4|y": "string2", "4|z": true},
+                            {
+                                "1|x": 1,
+                                "1|y": "string1",
+                                "1|z": false,
+                                "2|x": 2,
+                                "2|y": "b",
+                                "2|z": false,
+                                "3|x": 3,
+                                "3|y": "c",
+                                "3|z": true,
+                                "4|x": 4,
+                                "4|y": "string2",
+                                "4|z": true
+                            },
                             json[0],
                             json[3]
                         ];

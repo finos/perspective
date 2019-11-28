@@ -7,9 +7,33 @@
  *
  */
 
-var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
+var SECURITIES = [
+    "AAPL.N",
+    "AMZN.N",
+    "QQQ.N",
+    "NVDA.N",
+    "TSLA.N",
+    "FB.N",
+    "MSFT.N",
+    "TLT.N",
+    "XIV.N",
+    "YY.N",
+    "CSCO.N",
+    "GOOGL.N",
+    "PCLN.N"
+];
 
-var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
+var CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty"
+];
 
 function newRows() {
     var rows = [];

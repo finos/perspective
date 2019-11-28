@@ -30,7 +30,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_int_with_None(self):
-        data = {"a": np.array([1, 2, 3, None, None]), "b": np.array([4, 5, 6, None, None])}
+        data = {"a": np.array([1, 2, 3, None, None]),
+                "b": np.array([4, 5, 6, None, None])}
         tbl = Table(data)
         assert tbl.size() == 5
         assert tbl.view().to_dict() == {
@@ -39,7 +40,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_int8(self):
-        data = {"a": np.array([1, 2, 3]).astype(np.int8), "b": np.array([4, 5, 6]).astype(np.int8)}
+        data = {"a": np.array([1, 2, 3]).astype(np.int8),
+                "b": np.array([4, 5, 6]).astype(np.int8)}
         tbl = Table(data)
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -48,7 +50,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_int16(self):
-        data = {"a": np.array([1, 2, 3]).astype(np.int16), "b": np.array([4, 5, 6]).astype(np.int16)}
+        data = {"a": np.array([1, 2, 3]).astype(
+            np.int16), "b": np.array([4, 5, 6]).astype(np.int16)}
         tbl = Table(data)
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -57,7 +60,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_int32(self):
-        data = {"a": np.array([1, 2, 3]).astype(np.int32), "b": np.array([4, 5, 6]).astype(np.int32)}
+        data = {"a": np.array([1, 2, 3]).astype(
+            np.int32), "b": np.array([4, 5, 6]).astype(np.int32)}
         tbl = Table(data)
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -66,7 +70,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_int64(self):
-        data = {"a": np.array([1, 2, 3]).astype(np.int64), "b": np.array([4, 5, 6]).astype(np.int64)}
+        data = {"a": np.array([1, 2, 3]).astype(
+            np.int64), "b": np.array([4, 5, 6]).astype(np.int64)}
         tbl = Table(data)
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -96,7 +101,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_float32(self):
-        data = {"a": np.array([1.1, 2.2]).astype(np.float32), "b": np.array([3.3, 4.4]).astype(np.float32)}
+        data = {"a": np.array([1.1, 2.2]).astype(
+            np.float32), "b": np.array([3.3, 4.4]).astype(np.float32)}
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -106,7 +112,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_float64(self):
-        data = {"a": np.array([1.1, 2.2]).astype(np.float64), "b": np.array([3.3, 4.4]).astype(np.float64)}
+        data = {"a": np.array([1.1, 2.2]).astype(
+            np.float64), "b": np.array([3.3, 4.4]).astype(np.float64)}
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -126,7 +133,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_bool8(self):
-        data = {"a": np.array([True, False]).astype(np.bool8), "b": np.array([False, True]).astype(np.bool8)}
+        data = {"a": np.array([True, False]).astype(
+            np.bool8), "b": np.array([False, True]).astype(np.bool8)}
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -135,7 +143,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_bool_with_none(self):
-        data = {"a": np.array([True, False, None, False]), "b": np.array([False, True, None, False])}
+        data = {"a": np.array([True, False, None, False]),
+                "b": np.array([False, True, None, False])}
         tbl = Table(data)
         assert tbl.size() == 4
         assert tbl.view().to_dict() == {
@@ -144,7 +153,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_bool_with_dtype(self):
-        data = {"a": np.array([True, False, False], dtype="?"), "b": np.array([False, True, False], dtype="?")}
+        data = {"a": np.array([True, False, False], dtype="?"), "b": np.array(
+            [False, True, False], dtype="?")}
         tbl = Table(data)
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -153,7 +163,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_bool_str(self):
-        data = {"a": np.array(["True", "False"]), "b": np.array(["False", "True"])}
+        data = {"a": np.array(["True", "False"]),
+                "b": np.array(["False", "True"])}
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.schema() == {
@@ -163,12 +174,13 @@ class TestTableNumpy(object):
         assert tbl.view().to_dict() == {
             "a": [True, False],
             "b": [False, True]
-        }    
+        }
 
     # strings
 
     def test_table_str_object(self):
-        data = {"a": np.array(["abc", "def"], dtype=object), "b": np.array(["hij", "klm"], dtype=object)}
+        data = {"a": np.array(["abc", "def"], dtype=object),
+                "b": np.array(["hij", "klm"], dtype=object)}
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -180,7 +192,8 @@ class TestTableNumpy(object):
         dtype = "U3"
         if six.PY2:
             dtype = "|S3"
-        data = {"a": np.array(["abc", "def"], dtype=dtype), "b": np.array(["hij", "klm"], dtype=dtype)}
+        data = {"a": np.array(["abc", "def"], dtype=dtype),
+                "b": np.array(["hij", "klm"], dtype=dtype)}
         tbl = Table(data)
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -204,7 +217,8 @@ class TestTableNumpy(object):
     # date and datetime
 
     def test_table_date(self):
-        data = {"a": np.array([date(2019, 7, 11)]), "b": np.array([date(2019, 7, 12)])}
+        data = {"a": np.array([date(2019, 7, 11)]),
+                "b": np.array([date(2019, 7, 12)])}
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
@@ -217,7 +231,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_np_datetime(self):
-        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=np.datetime64)}
+        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array(
+            [datetime(2019, 7, 11, 12, 14)], dtype=np.datetime64)}
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
@@ -227,7 +242,8 @@ class TestTableNumpy(object):
         assert tbl.view().to_numpy() == data
 
     def test_table_np_datetime_mixed_dtype(self):
-        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)}
+        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array(
+            [datetime(2019, 7, 11, 12, 14)], dtype=object)}
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
@@ -676,7 +692,8 @@ class TestTableNumpy(object):
             "a": float
         })
         table.update(df)
-        assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
+        assert table.view().to_dict()["a"] == [
+            None, 1.0, None, 2.0, None, 3.0, 4.0]
 
     def test_table_numpy_from_schema_date(self):
         data = [date(2019, 8, 15), None, date(2019, 8, 16)]
@@ -685,10 +702,16 @@ class TestTableNumpy(object):
             "a": date
         })
         table.update(df)
-        assert table.view().to_dict()["a"] == [datetime(2019, 8, 15), None, datetime(2019, 8, 16)]
+        assert table.view().to_dict()["a"] == [
+            datetime(
+                2019, 8, 15), None, datetime(
+                2019, 8, 16)]
 
     def test_table_numpy_from_schema_datetime(self):
-        data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        data = [
+            datetime(
+                2019, 7, 11, 12, 30, 5), None, datetime(
+                2019, 7, 11, 13, 30, 5), None]
         df = {"a": np.array(data)}
         table = Table({
             "a": datetime
@@ -697,7 +720,12 @@ class TestTableNumpy(object):
         assert table.view().to_dict()["a"] == data
 
     def test_table_numpy_from_schema_datetime_timestamp_s(self, util):
-        data = [util.to_timestamp(datetime(2019, 7, 11, 12, 30, 5)), np.nan, util.to_timestamp(datetime(2019, 7, 11, 13, 30, 5)), np.nan]
+        data = [
+            util.to_timestamp(
+                datetime(
+                    2019, 7, 11, 12, 30, 5)), np.nan, util.to_timestamp(
+                datetime(
+                    2019, 7, 11, 13, 30, 5)), np.nan]
         df = {"a": np.array(data)}
         table = Table({
             "a": datetime
@@ -756,7 +784,8 @@ class TestTableNumpy(object):
     # recarray
 
     def test_table_recarray(self):
-        d = np.array([(1.0, 2), (3.0, 4)], dtype=[('x', '<f8'), ('y', '<i8')]).view(np.recarray)
+        d = np.array([(1.0, 2), (3.0, 4)], dtype=[
+                     ('x', '<f8'), ('y', '<i8')]).view(np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": float,
@@ -768,7 +797,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_ns(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 30, 29), 4)], dtype=[('x', "datetime64[ns]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[ns]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": datetime,
@@ -780,7 +815,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_us(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 30, 29), 4)], dtype=[('x', "datetime64[us]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[us]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": datetime,
@@ -792,7 +833,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_ms(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 30, 29), 4)], dtype=[('x', "datetime64[ms]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[ms]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": datetime,
@@ -804,7 +851,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_s(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 30, 29), 4)], dtype=[('x', "datetime64[s]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[s]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": datetime,
@@ -816,7 +869,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_m(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 31, 29), 4)], dtype=[('x', "datetime64[m]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 31, 29), 4)], dtype=[
+                ('x', "datetime64[m]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": datetime,
@@ -828,7 +887,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_h(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 9, 30, 29), 4)], dtype=[('x', "datetime64[h]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 9, 30, 29), 4)], dtype=[
+                ('x', "datetime64[h]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": datetime,
@@ -840,7 +905,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_D(self):
-        d = np.array([(datetime(2019, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 12, 8, 30, 29), 4)], dtype=[('x', "datetime64[D]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 12, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[D]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": date,
@@ -852,7 +923,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_W(self):
-        d = np.array([(datetime(2019, 6, 30, 0, 0, 0), 2), (datetime(2019, 7, 7, 0, 0, 0), 4)], dtype=[('x', "datetime64[W]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 6, 30, 0, 0, 0), 2), (datetime(
+                        2019, 7, 7, 0, 0, 0), 4)], dtype=[
+                ('x', "datetime64[W]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": date,
@@ -865,7 +942,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_M(self):
-        d = np.array([(datetime(2019, 6, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 30, 29), 4)], dtype=[('x', "datetime64[M]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2019, 6, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[M]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": date,
@@ -877,7 +960,13 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_datetime_Y(self):
-        d = np.array([(datetime(2018, 7, 11, 8, 30, 29), 2), (datetime(2019, 7, 11, 8, 30, 29), 4)], dtype=[('x', "datetime64[Y]"), ('y', '<i8')]).view(np.recarray)
+        d = np.array(
+            [
+                (datetime(
+                    2018, 7, 11, 8, 30, 29), 2), (datetime(
+                        2019, 7, 11, 8, 30, 29), 4)], dtype=[
+                ('x', "datetime64[Y]"), ('y', '<i8')]).view(
+            np.recarray)
         table = Table(d)
         assert table.schema() == {
             "x": date,
@@ -889,7 +978,8 @@ class TestTableNumpy(object):
         }
 
     def test_table_recarray_str(self):
-        table = Table(np.array([("string1", "string2"), ("string3", "string4")], dtype=[('x', 'O'), ('y', 'O')]).view(np.recarray))
+        table = Table(np.array([("string1", "string2"), ("string3", "string4")], dtype=[
+                      ('x', 'O'), ('y', 'O')]).view(np.recarray))
         assert table.schema() == {
             "x": str,
             "y": str
@@ -903,7 +993,8 @@ class TestTableNumpy(object):
         dtype = "U7"
         if six.PY2:
             dtype = "|S7"
-        table = Table(np.array([("string1", "string2"), ("string3", "string4")], dtype=[('x', dtype), ('y', dtype)]).view(np.recarray))
+        table = Table(np.array([("string1", "string2"), ("string3", "string4")], dtype=[
+                      ('x', dtype), ('y', dtype)]).view(np.recarray))
         assert table.schema() == {
             "x": str,
             "y": str

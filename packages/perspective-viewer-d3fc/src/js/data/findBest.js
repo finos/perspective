@@ -11,7 +11,11 @@ export const findBestFromData = (array, valueFn, compareFn = Math.min) => {
     const findBestFromArray = array => {
         return array.reduce((best, v) => {
             const thisValue = findBestFromItem(v, valueFn);
-            return thisValue && (!best || compareFn(best.value, thisValue.value) === thisValue.value) ? thisValue : best;
+            return thisValue &&
+                (!best ||
+                    compareFn(best.value, thisValue.value) === thisValue.value)
+                ? thisValue
+                : best;
         }, null);
     };
     const findBestFromItem = item => {

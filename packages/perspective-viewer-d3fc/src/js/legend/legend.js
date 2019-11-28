@@ -32,7 +32,8 @@ const scrollSymbolLegend = settings =>
     );
 
 export const colorLegend = () => legendComponent(scrollColorLegend);
-export const symbolLegend = () => legendComponent(scrollSymbolLegend, symbolScale);
+export const symbolLegend = () =>
+    legendComponent(scrollSymbolLegend, symbolScale);
 
 function symbolScale(fromScale) {
     if (!fromScale) return null;
@@ -60,7 +61,9 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 .on("cellclick", function(d) {
                     settings.hideKeys = settings.hideKeys || [];
                     if (settings.hideKeys.includes(d)) {
-                        settings.hideKeys = settings.hideKeys.filter(k => k !== d);
+                        settings.hideKeys = settings.hideKeys.filter(
+                            k => k !== d
+                        );
                     } else {
                         settings.hideKeys.push(d);
                     }
@@ -70,13 +73,20 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
 
             scrollLegend.labels(options => {
                 const parts = options.domain[options.i].split("|");
-                return settings.mainValues.length <= 1 && parts.length > 1 ? parts.slice(0, parts.length - 1).join("|") : options.domain[options.i];
+                return settings.mainValues.length <= 1 && parts.length > 1
+                    ? parts.slice(0, parts.length - 1).join("|")
+                    : options.domain[options.i];
             });
 
-            const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
+            const legendSelection = getOrCreateElement(
+                container,
+                "div.legend-container",
+                () => container.append("div")
+            );
 
             scrollLegend.decorate(selection => {
-                const isHidden = data => settings.hideKeys && settings.hideKeys.includes(data);
+                const isHidden = data =>
+                    settings.hideKeys && settings.hideKeys.includes(data);
 
                 const cells = selection
                     .select("g.legendCells")
@@ -90,7 +100,9 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                     cells
                         .select("path")
                         .style("fill", d => (isHidden(d) ? null : color(d)))
-                        .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
+                        .style("stroke", d =>
+                            isHidden(d) ? null : withoutOpacity(color(d))
+                        );
                 }
             });
 

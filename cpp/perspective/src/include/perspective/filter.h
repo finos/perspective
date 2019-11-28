@@ -101,7 +101,8 @@ struct t_operator_begins_with<const char*, DTYPE_STR> {
     operator()(const char* value, const char* threshold_value) {
         t_uindex t_vlen = strlen(value);
         t_uindex t_tlen = strlen(threshold_value);
-        return t_vlen < t_tlen ? false : strncmp(value, threshold_value, t_tlen) == 0;
+        return t_vlen < t_tlen ? false
+                               : strncmp(value, threshold_value, t_tlen) == 0;
     }
 };
 
@@ -112,8 +113,9 @@ struct t_operator_ends_with<t_uindex, DTYPE_STR> {
         t_uindex t_vlen = strlen(value);
         t_uindex t_tlen = strlen(threshold_value);
 
-        return t_vlen < t_tlen ? false
-                               : strncmp(value + t_vlen - t_tlen, threshold_value, t_tlen) == 0;
+        return t_vlen < t_tlen
+            ? false
+            : strncmp(value + t_vlen - t_tlen, threshold_value, t_tlen) == 0;
     }
 };
 
@@ -144,7 +146,9 @@ struct PERSPECTIVE_EXPORT t_fterm {
             case FILTER_OP_IN: {
                 rv = std::find(m_bag.begin(), m_bag.end(), s) != m_bag.end();
             } break;
-            default: { rv = s.cmp(m_op, m_threshold); } break;
+            default: {
+                rv = s.cmp(m_op, m_threshold);
+            } break;
         }
 
         return m_negated ? (!rv) : rv;
@@ -168,7 +172,8 @@ public:
     t_filter();
     t_filter(const std::vector<std::string>& columns);
 
-    t_filter(const std::vector<std::string>& columns, t_uindex bidx, t_uindex eidx);
+    t_filter(
+        const std::vector<std::string>& columns, t_uindex bidx, t_uindex eidx);
 
     t_filter(const std::vector<std::string>& columns, t_uindex mask_size);
     t_filter(const t_mask& mask);

@@ -67,7 +67,8 @@ class PerspectiveManager(object):
         elif isinstance(data, View):
             self._views[name] = data
         else:
-            raise PerspectiveError("Only `Table()` and `View()` instances can be hosted.")
+            raise PerspectiveError(
+                "Only `Table()` and `View()` instances can be hosted.")
 
     def host_table(self, name, table):
         '''Given a reference to a `Table`, manage it and allow operations on it to occur through the Manager.'''
@@ -95,31 +96,44 @@ class PerspectiveManager(object):
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):
-            raise PerspectiveError("Message passed into `_process` should either be a JSON-serialized string or a dict.")
+            raise PerspectiveError(
+                "Message passed into `_process` should either be a JSON-serialized string or a dict.")
 
         cmd = msg["cmd"]
 
         try:
             if cmd == "init":
                 # return empty response
-                post_callback(json.dumps(self._make_message(msg["id"], None), cls=DateTimeEncoder))
+                post_callback(
+                    json.dumps(
+                        self._make_message(
+                            msg["id"],
+                            None),
+                        cls=DateTimeEncoder))
             elif cmd == "table":
                 try:
                     # create a new Table and track it
                     data_or_schema = msg["args"][0]
-                    self._tables[msg["name"]] = Table(data_or_schema, **msg.get("options", {}))
+                    self._tables[msg["name"]] = Table(
+                        data_or_schema, **msg.get("options", {}))
                 except IndexError:
                     self._tables[msg["name"]] = []
             elif cmd == "view":
                 # create a new view and track it with the assigned client_id.
-                new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
+                new_view = self._tables[msg["table_name"]].view(
+                    **msg.get("config", {}))
                 new_view._client_id = client_id
                 self._views[msg["view_name"]] = new_view
             elif cmd == "table_method" or cmd == "view_method":
                 self._process_method_call(msg, post_callback)
         except(PerspectiveError, PerspectiveCppError) as e:
             # Catch errors and return them to client
-            post_callback(json.dumps(self._make_error_message(msg["id"], str(e))), cls=DateTimeEncoder)
+            post_callback(
+                json.dumps(
+                    self._make_error_message(
+                        msg["id"],
+                        str(e))),
+                cls=DateTimeEncoder)
 
     def _process_method_call(self, msg, post_callback):
         '''When the client calls a method, validate the instance it calls on and return the result.'''
@@ -128,14 +142,20 @@ class PerspectiveManager(object):
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
-                post_callback(json.dumps(self._make_error_message(msg["id"], "View is not initialized"), cls=DateTimeEncoder))
+                post_callback(
+                    json.dumps(
+                        self._make_error_message(
+                            msg["id"],
+                            "View is not initialized"),
+                        cls=DateTimeEncoder))
         try:
             if msg.get("subscribe", False) is True:
                 self._process_subscribe(msg, table_or_view, post_callback)
             else:
                 args = {}
                 if msg["method"] == "schema":
-                    args["as_string"] = True  # make sure schema returns string types
+                    # make sure schema returns string types
+                    args["as_string"] = True
                 elif msg["method"].startswith("to_"):
                     # TODO
                     for d in msg.get("args", []):
@@ -156,9 +176,19 @@ class PerspectiveManager(object):
                     # otherwise parse args as list
                     result = getattr(table_or_view, msg["method"])(*args)
                 # return the result to the client
-                post_callback(json.dumps(self._make_message(msg["id"], result), cls=DateTimeEncoder))
+                post_callback(
+                    json.dumps(
+                        self._make_message(
+                            msg["id"],
+                            result),
+                        cls=DateTimeEncoder))
         except Exception as error:
-            post_callback(json.dumps(self._make_error_message(msg["id"], str(error)), cls=DateTimeEncoder))
+            post_callback(
+                json.dumps(
+                    self._make_error_message(
+                        msg["id"],
+                        str(error)),
+                    cls=DateTimeEncoder))
 
     def _process_subscribe(self, msg, table_or_view, post_callback):
         '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
@@ -174,7 +204,8 @@ class PerspectiveManager(object):
             method = msg.get("method", None)
             if method and method[:2] == "on":
                 # wrap the callback
-                callback = partial(self.callback, msg=msg, post_callback=post_callback)
+                callback = partial(
+                    self.callback, msg=msg, post_callback=post_callback)
                 if callback_id:
                     self._callback_cache[callback_id] = callback
             elif callback_id is not None:
@@ -184,16 +215,27 @@ class PerspectiveManager(object):
                 # call the underlying method on the Table or View
                 getattr(table_or_view, method)(callback, *msg.get("args", []))
             else:
-                logging.info("callback not found for remote call {}".format(msg))
+                logging.info(
+                    "callback not found for remote call {}".format(msg))
         except Exception as error:
-            post_callback(json.dumps(self._make_error_message(msg["id"], error), cls=DateTimeEncoder))
+            post_callback(
+                json.dumps(
+                    self._make_error_message(
+                        msg["id"],
+                        error),
+                    cls=DateTimeEncoder))
 
     def callback(self, **kwargs):
         '''Return a message to the client using the `post_callback` method.'''
         id = kwargs.get("msg")["id"]
         data = kwargs.get("event", None)
         post_callback = kwargs.get("post_callback")
-        post_callback(json.dumps(self._make_message(id, data), cls=DateTimeEncoder))
+        post_callback(
+            json.dumps(
+                self._make_message(
+                    id,
+                    data),
+                cls=DateTimeEncoder))
 
     def clear_views(self, client_id):
         '''Garbage collect views that belong to closed connections.'''
@@ -201,7 +243,8 @@ class PerspectiveManager(object):
         names = []
 
         if not client_id:
-            raise PerspectiveError("Cannot garbage collect views that are not linked to a specific client ID!")
+            raise PerspectiveError(
+                "Cannot garbage collect views that are not linked to a specific client ID!")
 
         for name, view in self._views.items():
             if view._client_id == client_id:

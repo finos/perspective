@@ -24,10 +24,13 @@ public:
 
     t_range(); // select all
 
-    t_range(const std::vector<t_tscalar>& brpath, const std::vector<t_tscalar>& erpath);
+    t_range(const std::vector<t_tscalar>& brpath,
+        const std::vector<t_tscalar>& erpath);
 
-    t_range(const std::vector<t_tscalar>& brpath, const std::vector<t_tscalar>& erpath,
-        const std::vector<t_tscalar>& bcpath, const std::vector<t_tscalar>& ecpath);
+    t_range(const std::vector<t_tscalar>& brpath,
+        const std::vector<t_tscalar>& erpath,
+        const std::vector<t_tscalar>& bcpath,
+        const std::vector<t_tscalar>& ecpath);
 
     t_range(const std::string& expr_name);
 

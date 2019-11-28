@@ -60,7 +60,8 @@ t_data_table::t_data_table(const std::string& name, const std::string& dirname,
 }
 
 // THIS CONSTRUCTOR INITS. Do not use in production.
-t_data_table::t_data_table(const t_schema& s, const std::vector<std::vector<t_tscalar>>& v)
+t_data_table::t_data_table(
+    const t_schema& s, const std::vector<std::vector<t_tscalar>>& v)
     : m_name("")
     , m_dirname("")
     , m_schema(s)
@@ -70,9 +71,10 @@ t_data_table::t_data_table(const t_schema& s, const std::vector<std::vector<t_ts
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_data_table");
     auto ncols = s.size();
-    PSP_VERBOSE_ASSERT(
-        std::all_of(v.begin(), v.end(),
-            [ncols](const std::vector<t_tscalar>& vec) { return vec.size() == ncols; }),
+    PSP_VERBOSE_ASSERT(std::all_of(v.begin(), v.end(),
+                           [ncols](const std::vector<t_tscalar>& vec) {
+                               return vec.size() == ncols;
+                           }),
         "Mismatched row size found");
     set_capacity(v.size());
     init();
@@ -113,7 +115,8 @@ t_data_table::init() {
         {
             const std::string& colname = m_schema.m_columns[idx];
             t_dtype dtype = m_schema.m_types[idx];
-            m_columns[idx] = make_column(colname, dtype, m_schema.m_status_enabled[idx]);
+            m_columns[idx]
+                = make_column(colname, dtype, m_schema.m_status_enabled[idx]);
             m_columns[idx]->init();
         }
 #ifdef PSP_PARALLEL_FOR
@@ -124,7 +127,8 @@ t_data_table::init() {
 }
 
 std::shared_ptr<t_column>
-t_data_table::make_column(const std::string& colname, t_dtype dtype, bool status_enabled) {
+t_data_table::make_column(
+    const std::string& colname, t_dtype dtype, bool status_enabled) {
     t_lstore_recipe a(m_dirname, m_name + std::string("_") + colname,
         m_capacity * get_dtype_size(dtype), m_backing_store);
     return std::make_shared<t_column>(dtype, status_enabled, a, m_capacity);
@@ -363,10 +367,12 @@ t_data_table::append(const t_data_table& other) {
         t_dtype col_dtype = get_column(cname)->get_dtype();
         t_dtype other_col_dtype = other.get_const_column(cname)->get_dtype();
         if (col_dtype != other_col_dtype) {
-            std::stringstream ss; 
-            ss << "Mismatched column dtypes: attempted to append column of dtype `" 
-               << dtype_to_str(other_col_dtype) << "` to existing column of dtype `" 
-               << dtype_to_str(col_dtype) << std::endl;
+            std::stringstream ss;
+            ss << "Mismatched column dtypes: attempted to append column of "
+                  "dtype `"
+               << dtype_to_str(other_col_dtype)
+               << "` to existing column of dtype `" << dtype_to_str(col_dtype)
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str())
         }
         src_cols.push_back(other.get_const_column(cname).get());
@@ -385,7 +391,8 @@ t_data_table::append(const t_data_table& other) {
     PSP_PFOR(0, int(src_cols.size()), 1,
         [&src_cols, dst_cols](int colidx)
 #else
-    for (t_uindex colidx = 0, loop_end = src_cols.size(); colidx < loop_end; ++colidx)
+    for (t_uindex colidx = 0, loop_end = src_cols.size(); colidx < loop_end;
+         ++colidx)
 #endif
         { dst_cols[colidx]->append(*(src_cols[colidx])); }
 #ifdef PSP_PARALLEL_FOR
@@ -406,7 +413,8 @@ t_data_table::clear() {
 }
 
 t_mask
-t_data_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterms_) const {
+t_data_table::filter_cpp(
+    t_filter_op combiner, const std::vector<t_fterm>& fterms_) const {
     auto self = const_cast<t_data_table*>(this);
     auto fterms = fterms_;
 
@@ -431,7 +439,8 @@ t_data_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterm
         case FILTER_OP_AND: {
             t_tscalar cell_val;
 
-            for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end; ++ridx) {
+            for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end;
+                 ++ridx) {
                 bool pass = true;
 
                 for (t_uindex cidx = 0; cidx < fterm_size; ++cidx) {
@@ -449,7 +458,8 @@ t_data_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterm
                         tval = ft(cell_val);
                     }
 
-                    if ((ft.m_op != FILTER_OP_IS_NULL && !cell_val.is_valid()) || !tval) {
+                    if ((ft.m_op != FILTER_OP_IS_NULL && !cell_val.is_valid())
+                        || !tval) {
                         pass = false;
                         break;
                     }
@@ -459,7 +469,8 @@ t_data_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterm
             }
         } break;
         case FILTER_OP_OR: {
-            for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end; ++ridx) {
+            for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end;
+                 ++ridx) {
                 bool pass = false;
                 for (t_uindex cidx = 0; cidx < fterm_size; ++cidx) {
                     t_tscalar cell_val = columns[cidx]->get_scalar(ridx);
@@ -471,7 +482,9 @@ t_data_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterm
                 mask.set(ridx, pass);
             }
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown filter op"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown filter op");
+        } break;
     }
 
     return mask;
@@ -488,7 +501,8 @@ t_data_table::clone_(const t_mask& mask) const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_schema schema = m_schema;
 
-    t_data_table* rval = new t_data_table("", "", schema, 5, BACKING_STORE_MEMORY);
+    t_data_table* rval
+        = new t_data_table("", "", schema, 5, BACKING_STORE_MEMORY);
     rval->init();
 
     for (const auto& cname : schema.m_columns) {
@@ -512,7 +526,8 @@ t_data_table::clone() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_schema schema = m_schema;
-    auto rval = std::make_shared<t_data_table>("", "", schema, 5, BACKING_STORE_MEMORY);
+    auto rval = std::make_shared<t_data_table>(
+        "", "", schema, 5, BACKING_STORE_MEMORY);
     rval->init();
 
     for (const auto& cname : schema.m_columns) {
@@ -523,7 +538,8 @@ t_data_table::clone() const {
 }
 
 std::shared_ptr<t_column>
-t_data_table::add_column_sptr(const std::string& name, t_dtype dtype, bool status_enabled) {
+t_data_table::add_column_sptr(
+    const std::string& name, t_dtype dtype, bool status_enabled) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -533,24 +549,27 @@ t_data_table::add_column_sptr(const std::string& name, t_dtype dtype, bool statu
     m_schema.add_column(name, dtype);
     m_columns.push_back(make_column(name, dtype, status_enabled));
     m_columns.back()->init();
-    m_columns.back()->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
+    m_columns.back()->reserve(
+        std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     m_columns.back()->set_size(size());
     return m_columns.back();
 }
 
 t_column*
-t_data_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled) {
+t_data_table::add_column(
+    const std::string& name, t_dtype dtype, bool status_enabled) {
     return add_column_sptr(name, dtype, status_enabled).get();
 }
 
 void
-t_data_table::promote_column(
-    const std::string& name, t_dtype new_dtype, std::int32_t iter_limit, bool fill) {
+t_data_table::promote_column(const std::string& name, t_dtype new_dtype,
+    std::int32_t iter_limit, bool fill) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_schema.has_column(name)) {
-        std::cout << "Cannot promote a column that does not exist." << std::endl;
+        std::cout << "Cannot promote a column that does not exist."
+                  << std::endl;
         return;
     }
 
@@ -561,7 +580,8 @@ t_data_table::promote_column(
     std::shared_ptr<t_column> promoted_col
         = make_column(name, new_dtype, current_col->is_status_enabled());
     promoted_col->init();
-    promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
+    promoted_col->reserve(
+        std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     promoted_col->set_size(size());
 
     if (fill) {
@@ -582,7 +602,9 @@ t_data_table::promote_column(
                     std::string fval = std::to_string(*val);
                     promoted_col->set_nth(i, fval);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Bad promotion"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Bad promotion");
+                }
             }
         }
     }
@@ -598,18 +620,21 @@ t_data_table::set_column(t_uindex idx, std::shared_ptr<t_column> col) {
 }
 
 void
-t_data_table::set_column(const std::string& name, std::shared_ptr<t_column> col) {
+t_data_table::set_column(
+    const std::string& name, std::shared_ptr<t_column> col) {
     t_uindex idx = m_schema.get_colidx(name);
     set_column(idx, col);
 }
 
 t_column*
-t_data_table::clone_column(const std::string& existing_col, const std::string& new_colname) {
+t_data_table::clone_column(
+    const std::string& existing_col, const std::string& new_colname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_schema.has_column(existing_col)) {
-        std::cout << "Cannot clone non existing column: " << existing_col << std::endl;
+        std::cout << "Cannot clone non existing column: " << existing_col
+                  << std::endl;
         return 0;
     }
 
@@ -617,7 +642,8 @@ t_data_table::clone_column(const std::string& existing_col, const std::string& n
 
     m_schema.add_column(new_colname, m_columns[idx]->get_dtype());
     m_columns.push_back(m_columns[idx]->clone());
-    m_columns.back()->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
+    m_columns.back()->reserve(
+        std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     m_columns.back()->set_size(size());
     return m_columns.back().get();
 }
@@ -637,7 +663,8 @@ t_data_table::verify() const {
     }
 
     for (auto& c : m_columns) {
-        PSP_VERBOSE_ASSERT(c, || (size() == c->size()), "Ragged table encountered");
+        PSP_VERBOSE_ASSERT(
+            c, || (size() == c->size()), "Ragged table encountered");
     }
 }
 

@@ -13,8 +13,8 @@
 
 namespace perspective {
 template <typename CTX_T>
-View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
-    std::string separator, t_view_config view_config)
+View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx,
+    std::string name, std::string separator, t_view_config view_config)
     : m_table(table)
     , m_ctx(ctx)
     , m_name(std::move(name))
@@ -38,7 +38,6 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
         auto column_sort = m_view_config.get_col_sortspec();
         _find_hidden_sort(column_sort);
     }
-
 
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
@@ -127,7 +126,8 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
         aggregate_names.push_back(agg.name());
     }
 
-    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
+         ++key) {
         std::string name = aggregate_names[key % aggregate_names.size()];
 
         if (name == "psp_okey") {
@@ -143,7 +143,8 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
         for (auto path = col_path.rbegin(); path != col_path.rend(); ++path) {
             new_path.push_back(*path);
         }
-        new_path.push_back(m_ctx->get_aggregate_name(key % aggregate_names.size()));
+        new_path.push_back(
+            m_ctx->get_aggregate_name(key % aggregate_names.size()));
         names.push_back(new_path);
     }
 
@@ -155,7 +156,8 @@ std::vector<std::vector<t_tscalar>>
 View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
 
-    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
+         ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
         if (name.to_string() == "psp_okey") {
             continue;
@@ -188,13 +190,13 @@ View<CTX_T>::column_paths() const {
         for (const auto& column : names) {
             // Remove undisplayed column names used to sort
             std::string name = column.back().to_string();
-            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name) == m_hidden_sort.end()) {
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name)
+                == m_hidden_sort.end()) {
                 visible_column_paths.push_back(column);
             }
         }
 
         return visible_column_paths;
-        
     }
 
     return names;
@@ -222,7 +224,8 @@ View<CTX_T>::schema() const {
         new_schema[agg_name] = type_string;
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
+            new_schema[agg_name]
+                = _map_aggregate_types(agg_name, new_schema[agg_name]);
         }
     }
 
@@ -257,33 +260,37 @@ View<t_ctx0>::schema() const {
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx0>>
-View<t_ctx0>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
-    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
+View<t_ctx0>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
+    t_uindex end_col) {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
+            start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx1>>
-View<t_ctx1>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
-    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
+View<t_ctx1>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
+    t_uindex end_col) {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
     t_tscalar row_path;
     row_path.set("__ROW_PATH__");
     col_names.insert(col_names.begin(), std::vector<t_tscalar>{row_path});
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx1>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<t_ctx1>>(m_ctx, start_row, end_row,
+            start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx2>>
-View<t_ctx2>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
+View<t_ctx2>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
+    t_uindex end_col) {
     std::vector<t_tscalar> slice;
     std::vector<t_uindex> column_indices;
     std::vector<std::vector<t_tscalar>> cols;
@@ -309,16 +316,19 @@ View<t_ctx2>::get_data(
         }
 
         cols = column_names(true, depth);
-        column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
-            column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size()));
+        column_indices
+            = std::vector<t_uindex>(column_indices.begin() + start_col,
+                column_indices.begin()
+                    + std::min(end_col, (t_uindex)column_indices.size()));
 
-        std::vector<t_tscalar> slice_with_headers = m_ctx->get_data(
-            start_row, end_row, column_indices.front(), column_indices.back() + 1);
+        std::vector<t_tscalar> slice_with_headers = m_ctx->get_data(start_row,
+            end_row, column_indices.front(), column_indices.back() + 1);
 
         auto iter = slice_with_headers.begin();
         while (iter != slice_with_headers.end()) {
             t_uindex prev = column_indices.front();
-            for (auto idx = column_indices.begin(); idx != column_indices.end(); idx++) {
+            for (auto idx = column_indices.begin(); idx != column_indices.end();
+                 idx++) {
                 t_uindex col_num = *idx;
                 iter += col_num - prev;
                 prev = col_num;
@@ -334,8 +344,9 @@ View<t_ctx2>::get_data(
     t_tscalar row_path;
     row_path.set("__ROW_PATH__");
     cols.insert(cols.begin(), std::vector<t_tscalar>{row_path});
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, cols, column_indices);
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(m_ctx,
+        start_row, end_row, start_col, end_col, m_row_offset, m_col_offset,
+        slice, cols, column_indices);
     return data_slice_ptr;
 }
 
@@ -419,7 +430,8 @@ View<t_ctx1>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(depth);
     } else {
-        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length)
+                  << std::endl;
     }
 }
 
@@ -429,7 +441,8 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(t_header::HEADER_ROW, depth);
     } else {
-        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length)
+                  << std::endl;
     }
 }
 
@@ -494,7 +507,8 @@ View<CTX_T>::get_row_delta() const {
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
     t_uindex num_rows_changed = delta.num_rows_changed;
-    auto data_slice_ptr = std::make_shared<t_data_slice<CTX_T>>(m_ctx, data, num_rows_changed);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<CTX_T>>(m_ctx, data, num_rows_changed);
     return data_slice_ptr;
 }
 
@@ -534,7 +548,9 @@ View<CTX_T>::_map_aggregate_types(
                 case AGGTYPE_PCT_SUM_GRAND_TOTAL: {
                     return "float";
                 } break;
-                default: { return typestring; } break;
+                default: {
+                    return typestring;
+                } break;
             }
         }
     }
@@ -546,7 +562,8 @@ template <typename CTX_T>
 void
 View<CTX_T>::_find_hidden_sort(const std::vector<t_sortspec>& sort) {
     for (const t_sortspec& s : sort) {
-        bool hidden = std::find(m_columns.begin(), m_columns.end(), s.m_colname) == m_columns.end();
+        bool hidden = std::find(m_columns.begin(), m_columns.end(), s.m_colname)
+            == m_columns.end();
         if (hidden) {
             // Store the actual column, not the composite column path
             m_hidden_sort.push_back(s.m_colname);

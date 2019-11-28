@@ -22,7 +22,10 @@ function sunburst(container, settings) {
     }
 
     const data = treeData(settings);
-    const color = treeColor(settings, data.map(d => d.extents));
+    const color = treeColor(
+        settings,
+        data.map(d => d.extents)
+    );
     const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");
 
     container.datum(data).call(sunburstGrid);
@@ -50,7 +53,10 @@ function sunburst(container, settings) {
         .merge(sunburstDiv)
         .select("svg")
         .select("g.sunburst")
-        .attr("transform", `translate(${containerSize.width / 2}, ${containerSize.height / 2})`)
+        .attr(
+            "transform",
+            `translate(${containerSize.width / 2}, ${containerSize.height / 2})`
+        )
         .each(function({split, data}) {
             const sunburstElement = select(this);
             const svgNode = this.parentNode;
@@ -64,7 +70,9 @@ function sunburst(container, settings) {
                 .color(color)
                 .radius(radius)(sunburstElement);
 
-            tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
+            tooltip().settings(settings)(
+                sunburstElement.selectAll("g.segment")
+            );
         });
 }
 

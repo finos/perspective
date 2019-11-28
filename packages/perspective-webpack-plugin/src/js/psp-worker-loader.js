@@ -35,7 +35,10 @@ const schema = {
 exports.default = function loader(content) {
     const options = loaderUtils.getOptions(this) || {};
     validateOptions(schema, options, "File Worker Loader");
-    const context = options.context || this.rootContext || (this.options && this.options.context);
+    const context =
+        options.context ||
+        this.rootContext ||
+        (this.options && this.options.context);
     const emitPath = loaderUtils.interpolateName(this, options.name, {
         context,
         content,
@@ -46,8 +49,14 @@ exports.default = function loader(content) {
         var inputPath = this.resourcePath;
         if (!options.inline) {
             inputPath = inputPath
-                .replace(path.join("perspective", "dist", "esm"), path.join("perspective", "dist", "umd"))
-                .replace(path.join("perspective", "dist", "cjs"), path.join("perspective", "dist", "umd"))
+                .replace(
+                    path.join("perspective", "dist", "esm"),
+                    path.join("perspective", "dist", "umd")
+                )
+                .replace(
+                    path.join("perspective", "dist", "cjs"),
+                    path.join("perspective", "dist", "umd")
+                )
                 .replace(/\.js/, ".worker.js")
                 .replace(path.join("dist", "esm"), path.join("dist", "umd"));
         }

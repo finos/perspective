@@ -22,7 +22,12 @@ import sys
 import os.path
 import subprocess
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..')))
 
 
 # -- General configuration ------------------------------------------------
@@ -34,7 +39,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.coverage', 'sphinx.ext.viewcode', 'sphinx.ext.napoleon', "sphinx.ext.autosummary"]
+extensions = [
+    'sphinx.ext.coverage',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
+    "sphinx.ext.autosummary"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -188,11 +197,19 @@ texinfo_documents = [
 
 def run_apidoc(_):
     out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-    psp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'perspective'))
+    psp_dir = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '..',
+            'perspective'))
     cmd_path = 'sphinx-apidoc'
     if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
         # If we are, assemble the path manually
-        cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
+        cmd_path = os.path.abspath(
+            os.path.join(
+                sys.prefix,
+                'bin',
+                'sphinx-apidoc'))
     subprocess.check_call([cmd_path,
                            '-E',
                            '-M',

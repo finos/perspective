@@ -74,7 +74,12 @@ module.exports = perspective => {
                 {x: 3, y: 2, z: "b"}
             ];
             const table = perspective.table(input);
-            const view = table.view({row_pivots: ["z"], column_pivots: ["x"], sort: [["y", "asc"]], columns: ["y"]});
+            const view = table.view({
+                row_pivots: ["z"],
+                column_pivots: ["x"],
+                sort: [["y", "asc"]],
+                columns: ["y"]
+            });
             setTimeout(() => table.replace(input));
             let json = await view.to_json();
             await new Promise(setTimeout);

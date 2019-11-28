@@ -9,7 +9,10 @@
 import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {chartCanvasFactory} from "../axis/chartFactory";
-import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
+import {
+    pointSeriesCanvas,
+    symbolTypeFromGroups
+} from "../series/pointSeriesCanvas";
 import {pointData} from "../data/pointData";
 import {seriesColorsFromGroups} from "../series/seriesColors";
 import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
@@ -40,12 +43,19 @@ function xyScatter(container, settings) {
         legend = colorRangeLegend().scale(color);
     }
 
-    const size = settings.mainValues.length > 3 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
+    const size =
+        settings.mainValues.length > 3
+            ? seriesLinearRange(settings, data, "size").range([10, 10000])
+            : null;
 
     const series = fc
         .seriesCanvasMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols)));
+        .series(
+            data.map(series =>
+                pointSeriesCanvas(settings, series.key, size, color, symbols)
+            )
+        );
 
     const axisDefault = () =>
         axisFactory(settings)

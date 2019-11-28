@@ -8,7 +8,9 @@ describe("dockpanel", () => {
         Widget.attach(dockpanel, document.body);
 
         // eslint-disable-next-line @typescript-eslint/camelcase
-        const widget = new PerspectiveWidget("One", {plugin_config: {columns: ["A"]}});
+        const widget = new PerspectiveWidget("One", {
+            plugin_config: {columns: ["A"]}
+        });
         dockpanel.addWidget(widget);
 
         const expectedConfig = {
@@ -22,7 +24,9 @@ describe("dockpanel", () => {
     });
 
     test("deserialise restore correct dockpanel state", () => {
-        const dockpanel = new PerspectiveDockPanel("name", {node: document.body});
+        const dockpanel = new PerspectiveDockPanel("name", {
+            node: document.body
+        });
 
         const config = {
             main: {
@@ -40,6 +44,8 @@ describe("dockpanel", () => {
         }, dockpanel.saveLayout());
 
         expect(widgets.length).toBe(1);
-        expect(widgets[0].viewer.getAttribute("columns")).toBe(JSON.stringify(["A"]));
+        expect(widgets[0].viewer.getAttribute("columns")).toBe(
+            JSON.stringify(["A"])
+        );
     });
 });

@@ -2,7 +2,9 @@ const originalCreateElement = document.createElement;
 
 document.createElement = name => {
     const element = originalCreateElement.call(document, name);
-    return name === "perspective-viewer" ? patchUnknownElement(element) : element;
+    return name === "perspective-viewer"
+        ? patchUnknownElement(element)
+        : element;
 };
 
 const patchUnknownElement = element => {

@@ -23,7 +23,8 @@ except ImportError:
 
 def _flatten_structure(array):
     '''Flatten numpy.recarray or structured arrays into a dict.'''
-    # recarrays/structured arrays do not have guaranteed bit offsets - make a copy of the array to fix
+    # recarrays/structured arrays do not have guaranteed bit offsets - make a
+    # copy of the array to fix
     columns = [numpy.copy(array[col]) for col in array.dtype.names]
     return dict(zip(array.dtype.names, columns))
 
@@ -64,18 +65,22 @@ def _type_to_format(data_or_schema):
                 try:
                     iter(v)
                 except TypeError:
-                    raise NotImplementedError("Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
+                    raise NotImplementedError(
+                        "Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
                 else:
                     return isinstance(v, numpy.ndarray), 1, data_or_schema
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
-            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+            raise NotImplementedError(
+                "Data should be dict of numpy.ndarray or a structured array.")
         return True, 1, _flatten_structure(data_or_schema)
     else:
-        if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
+        if not (isinstance(data_or_schema, pandas.DataFrame)
+                or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
-            raise NotImplementedError("Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.")
+            raise NotImplementedError(
+                "Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.")
         else:
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
@@ -88,7 +93,8 @@ class _PerspectiveAccessor(object):
     INTEGER_TYPES = six.integer_types + (numpy.integer,)
 
     def __init__(self, data_or_schema):
-        self._is_numpy, self._format, self._data_or_schema = _type_to_format(data_or_schema)
+        self._is_numpy, self._format, self._data_or_schema = _type_to_format(
+            data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
         self._row_count = \
             len(self._data_or_schema) if self._format == 0 else \
@@ -96,13 +102,16 @@ class _PerspectiveAccessor(object):
             0
 
         if isinstance(self._data_or_schema, list):
-            self._names = list(self._data_or_schema[0].keys()) if len(self._data_or_schema) > 0 else []
+            self._names = list(
+                self._data_or_schema[0].keys()) if len(
+                self._data_or_schema) > 0 else []
         elif isinstance(self._data_or_schema, dict):
             self._names = list(self._data_or_schema.keys())
 
         self._types = []
 
-        # Verify that column names are strings, and that numpy arrays are of type `ndarray`
+        # Verify that column names are strings, and that numpy arrays are of
+        # type `ndarray`
         for name in self._names:
             if not isinstance(name, six.string_types):
                 raise PerspectiveError(
@@ -111,14 +120,17 @@ class _PerspectiveAccessor(object):
                 array = self._data_or_schema[name]
 
                 if not isinstance(array, numpy.ndarray):
-                    raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
+                    raise PerspectiveError(
+                        "Mixed datasets of numpy.ndarray and lists are not supported.")
 
                 dtype = array.dtype
-                if name == "index" and isinstance(data_or_schema.index, pandas.DatetimeIndex):
+                if name == "index" and isinstance(
+                        data_or_schema.index, pandas.DatetimeIndex):
                     # use the index of the original, unflattened dataframe
                     dtype = _parse_datetime_index(data_or_schema.index)
 
-                # keep a string representation of the dtype, as PyBind only has access to the char dtype code
+                # keep a string representation of the dtype, as PyBind only has
+                # access to the char dtype code
                 self._types.append(str(dtype))
 
     def data(self):
@@ -182,22 +194,28 @@ class _PerspectiveAccessor(object):
         if val is None:
             return val
 
-        # first, check for numpy nans without using numpy.isnan as it tries to cast values
+        # first, check for numpy nans without using numpy.isnan as it tries to
+        # cast values
         if isinstance(val, float) and isnan(val):
             val = None
         elif isinstance(val, list) and len(val) == 1:
             # strip out values encased lists
             val = val[0]
         elif dtype == t_dtype.DTYPE_BOOL:
-            # True values are y, yes, t, true, on and 1; false values are n, no, f, false, off and 0.
+            # True values are y, yes, t, true, on and 1; false values are n, no,
+            # f, false, off and 0.
             val = bool(strtobool(str(val)))
         elif dtype == t_dtype.DTYPE_INT32 or dtype == t_dtype.DTYPE_INT64:
-            if not isinstance(val, bool) and isinstance(val, (float, numpy.floating)):
-                # should be able to update int columns with either ints or floats
+            if not isinstance(val, bool) and isinstance(
+                    val, (float, numpy.floating)):
+                # should be able to update int columns with either ints or
+                # floats
                 val = int(val)
         elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
-                # should be able to update float columns with either ints or floats
+            if not isinstance(val, bool) and isinstance(
+                    val, _PerspectiveAccessor.INTEGER_TYPES):
+                # should be able to update float columns with either ints or
+                # floats
                 val = float(val)
         elif dtype == t_dtype.DTYPE_DATE:
             # return datetime.date
@@ -218,7 +236,8 @@ class _PerspectiveAccessor(object):
                 val = val.decode("utf-8")
             else:
                 if six.PY2:
-                    # six.u mangles quotes with escape sequences - use native unicode()
+                    # six.u mangles quotes with escape sequences - use native
+                    # unicode()
                     val = unicode(val)  # noqa: F821
                 else:
                     val = str(val)

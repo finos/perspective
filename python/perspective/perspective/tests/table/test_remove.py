@@ -17,7 +17,8 @@ class TestRemove(object):
         assert tbl.view().to_records() == []
 
     def test_remove_nonsequential(self):
-        tbl = Table([{"a": "abc", "b": 123}, {"a": "def", "b": 456}, {"a": "efg", "b": 789}], index="a")
+        tbl = Table([{"a": "abc", "b": 123}, {"a": "def", "b": 456}, {
+                    "a": "efg", "b": 789}], index="a")
         tbl.remove(["abc", "efg"])
         assert tbl.view().to_records() == [{"a": "def", "b": 456}]
 

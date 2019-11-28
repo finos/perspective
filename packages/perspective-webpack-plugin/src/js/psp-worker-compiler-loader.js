@@ -50,10 +50,15 @@ exports.pitch = function pitch(request) {
 
     this.cacheable(false);
 
-    const filename = loaderUtils.interpolateName(this, options.name || "[hash].worker.js", {
-        context: options.context || this.rootContext || this.options.context,
-        regExp: options.regExp
-    });
+    const filename = loaderUtils.interpolateName(
+        this,
+        options.name || "[hash].worker.js",
+        {
+            context:
+                options.context || this.rootContext || this.options.context,
+            regExp: options.regExp
+        }
+    );
 
     const cb = this.async();
 
@@ -65,7 +70,10 @@ exports.pitch = function pitch(request) {
         namedChunkFilename: null
     };
 
-    worker.compiler = this._compilation.createChildCompiler("worker", worker.options);
+    worker.compiler = this._compilation.createChildCompiler(
+        "worker",
+        worker.options
+    );
 
     new WebWorkerTemplatePlugin(worker.options).apply(worker.compiler);
 
@@ -73,7 +81,9 @@ exports.pitch = function pitch(request) {
         new NodeTargetPlugin().apply(worker.compiler);
     }
 
-    new SingleEntryPlugin(this.context, `!!${request}`, "main").apply(worker.compiler);
+    new SingleEntryPlugin(this.context, `!!${request}`, "main").apply(
+        worker.compiler
+    );
 
     const subCache = `subcache ${__dirname} ${request}`;
 

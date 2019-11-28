@@ -24,10 +24,13 @@ def superstore(count=10):
         dat['Row ID'] = id
         dat['Order ID'] = fake.ein()
         dat['Order Date'] = fake.date_this_year()
-        dat['Ship Date'] = fake.date_between_dates(dat['Order Date']).strftime('%Y-%m-%d')
+        dat['Ship Date'] = fake.date_between_dates(
+            dat['Order Date']).strftime('%Y-%m-%d')
         dat['Order Date'] = dat['Order Date'].strftime('%Y-%m-%d')
-        dat['Ship Mode'] = choice(['First Class', 'Standard Class', 'Second Class'])
-        dat['Ship Mode'] = choice(['First Class', 'Standard Class', 'Second Class'])
+        dat['Ship Mode'] = choice(
+            ['First Class', 'Standard Class', 'Second Class'])
+        dat['Ship Mode'] = choice(
+            ['First Class', 'Standard Class', 'Second Class'])
         dat['Customer ID'] = fake.license_plate()
         dat['Segment'] = choice(['A', 'B', 'C', 'D'])
         dat['Country'] = 'US'
@@ -272,7 +275,8 @@ class TestTablePandas(object):
         ]
 
     def test_table_pandas_period(self):
-        df = pd.DataFrame({"a": [pd.Period("1Q2019"), pd.Period("2Q2019"), pd.Period("3Q2019"), pd.Period("4Q2019")]})
+        df = pd.DataFrame({"a": [pd.Period("1Q2019"), pd.Period(
+            "2Q2019"), pd.Period("3Q2019"), pd.Period("4Q2019")]})
         tbl = Table(df)
         assert tbl.size() == 4
         assert tbl.schema() == {
@@ -376,7 +380,8 @@ class TestTablePandas(object):
             "a": float
         })
         table.update(df)
-        assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
+        assert table.view().to_dict()["a"] == [
+            None, 1.0, None, 2.0, None, 3.0, 4.0]
 
     def test_table_pandas_from_schema_date(self):
         data = [date(2019, 8, 15), None, date(2019, 8, 16)]
@@ -387,10 +392,16 @@ class TestTablePandas(object):
             "a": date
         })
         table.update(df)
-        assert table.view().to_dict()["a"] == [datetime(2019, 8, 15), None, datetime(2019, 8, 16)]
+        assert table.view().to_dict()["a"] == [
+            datetime(
+                2019, 8, 15), None, datetime(
+                2019, 8, 16)]
 
     def test_table_pandas_from_schema_datetime(self):
-        data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        data = [
+            datetime(
+                2019, 7, 11, 12, 30, 5), None, datetime(
+                2019, 7, 11, 13, 30, 5), None]
         df = pd.DataFrame({
             "a": data
         })
@@ -401,7 +412,12 @@ class TestTablePandas(object):
         assert table.view().to_dict()["a"] == data
 
     def test_table_pandas_from_schema_datetime_timestamp_s(self, util):
-        data = [util.to_timestamp(datetime(2019, 7, 11, 12, 30, 5)), np.nan, util.to_timestamp(datetime(2019, 7, 11, 13, 30, 5)), np.nan]
+        data = [
+            util.to_timestamp(
+                datetime(
+                    2019, 7, 11, 12, 30, 5)), np.nan, util.to_timestamp(
+                datetime(
+                    2019, 7, 11, 13, 30, 5)), np.nan]
         df = pd.DataFrame({
             "a": data
         })
@@ -541,7 +557,8 @@ class TestTablePandas(object):
             "index": int,
             "a": int
         }
-        assert table.view().to_dict()["a"] == [None, 1.0, None, 2.0, None, 3.0, 4.0]
+        assert table.view().to_dict()["a"] == [
+            None, 1.0, None, 2.0, None, 3.0, 4.0]
 
     def test_table_pandas_object_to_bool(self):
         df = pd.DataFrame({
@@ -552,7 +569,8 @@ class TestTablePandas(object):
             "index": int,
             "a": bool
         }
-        assert table.view().to_dict()["a"] == [True, False, True, False, True, False]
+        assert table.view().to_dict()["a"] == [
+            True, False, True, False, True, False]
 
     def test_table_pandas_object_to_date(self):
         df = pd.DataFrame({
@@ -563,7 +581,10 @@ class TestTablePandas(object):
             "index": int,
             "a": date
         }
-        assert table.view().to_dict()["a"] == [datetime(2019, 7, 11), datetime(2019, 7, 12), None]
+        assert table.view().to_dict()["a"] == [
+            datetime(
+                2019, 7, 11), datetime(
+                2019, 7, 12), None]
 
     def test_table_pandas_object_to_datetime(self):
         df = pd.DataFrame({
@@ -574,7 +595,10 @@ class TestTablePandas(object):
             "index": int,
             "a": datetime
         }
-        assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 1, 2, 3), datetime(2019, 7, 12, 1, 2, 3), None]
+        assert table.view().to_dict()["a"] == [
+            datetime(
+                2019, 7, 11, 1, 2, 3), datetime(
+                2019, 7, 12, 1, 2, 3), None]
 
     def test_table_pandas_object_to_str(self):
         df = pd.DataFrame({
@@ -676,23 +700,38 @@ class TestTablePandas(object):
     # Timestamps
 
     def test_table_pandas_timestamp_to_datetime(self):
-        data = [pd.Timestamp(2019, 7, 11, 12, 30, 5), None, pd.Timestamp(2019, 7, 11, 13, 30, 5), None]
+        data = [
+            pd.Timestamp(
+                2019, 7, 11, 12, 30, 5), None, pd.Timestamp(
+                2019, 7, 11, 13, 30, 5), None]
         df = pd.DataFrame({
             "a": data
         })
         table = Table(df)
-        assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        assert table.view().to_dict()["a"] == [
+            datetime(
+                2019, 7, 11, 12, 30, 5), None, datetime(
+                2019, 7, 11, 13, 30, 5), None]
 
     def test_table_pandas_timestamp_explicit_dtype(self):
-        data = [pd.Timestamp(2019, 7, 11, 12, 30, 5), None, pd.Timestamp(2019, 7, 11, 13, 30, 5), None]
+        data = [
+            pd.Timestamp(
+                2019, 7, 11, 12, 30, 5), None, pd.Timestamp(
+                2019, 7, 11, 13, 30, 5), None]
         df = pd.DataFrame({
             "a": np.array(data, dtype="datetime64[ns]")
         })
         table = Table(df)
-        assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        assert table.view().to_dict()["a"] == [
+            datetime(
+                2019, 7, 11, 12, 30, 5), None, datetime(
+                2019, 7, 11, 13, 30, 5), None]
 
     def test_table_pandas_update_datetime_with_timestamp(self):
-        data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        data = [
+            datetime(
+                2019, 7, 11, 12, 30, 5), None, datetime(
+                2019, 7, 11, 13, 30, 5), None]
         df = pd.DataFrame({
             "a": data
         })
@@ -731,7 +770,8 @@ class TestTablePandas(object):
         assert table.view().to_dict()["a"] == [None, 1.5, None, 2.5]
 
     def test_table_read_nan_int_col(self):
-        data = pd.DataFrame({"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]})
+        data = pd.DataFrame(
+            {"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -746,7 +786,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_float_col(self):
-        data = pd.DataFrame({"str": [float("nan"), "abc", float("nan")], "float": [np.nan, 1.5, 2.5]})
+        data = pd.DataFrame(
+            {"str": [float("nan"), "abc", float("nan")], "float": [np.nan, 1.5, 2.5]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -761,9 +802,12 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_bool_col(self):
-        data = pd.DataFrame({"bool": [np.nan, True, np.nan], "bool2": [False, np.nan, True]})
+        data = pd.DataFrame(
+            {"bool": [np.nan, True, np.nan], "bool2": [False, np.nan, True]})
         tbl = Table(data)
-        # if np.nan begins a column, it is inferred as float and then can be promoted. if np.nan is in the values (but not at start), the column type is whatever is inferred.
+        # if np.nan begins a column, it is inferred as float and then can be
+        # promoted. if np.nan is in the values (but not at start), the column
+        # type is whatever is inferred.
         assert tbl.schema() == {
             "index": int,
             "bool": str,
@@ -778,7 +822,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_date_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "date": [float("nan"), date(2019, 7, 11)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "date": [
+                            float("nan"), date(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -793,7 +838,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_datetime_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [
+                            float("nan"), datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -808,7 +854,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nat_datetime_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": ["NaT", datetime(2019, 7, 11, 11, 0)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [
+                            "NaT", datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -823,7 +870,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_datetime_as_date_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [
+                            float("nan"), datetime(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -838,7 +886,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_datetime_no_seconds(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [
+                            float("nan"), datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -853,7 +902,8 @@ class TestTablePandas(object):
         }
 
     def test_table_read_nan_datetime_milliseconds(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11, 10, 30, 55)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [
+                            np.nan, datetime(2019, 7, 11, 10, 30, 55)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -932,7 +982,9 @@ class TestTablePandas(object):
 
     def test_pivottable(self):
         df = superstore()
-        pt = pd.pivot_table(df, values='Discount', index=['Country', 'Region'], columns='Category')
+        pt = pd.pivot_table(
+            df, values='Discount', index=[
+                'Country', 'Region'], columns='Category')
         table = Table(pt)
         columns = table.columns()
         assert "Country" in columns
@@ -940,11 +992,30 @@ class TestTablePandas(object):
 
     def test_colpivots(self):
         arrays = [np.array(['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux']),
-                  np.array(['one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two']),
+                  np.array(['one',
+                            'one',
+                            'two',
+                            'two',
+                            'one',
+                            'one',
+                            'two',
+                            'two',
+                            'one',
+                            'one',
+                            'two',
+                            'two',
+                            'one',
+                            'one',
+                            'two',
+                            'two']),
                   np.array(['X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y'])]
         tuples = list(zip(*arrays))
-        index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second', 'third'])
+        index = pd.MultiIndex.from_tuples(
+            tuples, names=['first', 'second', 'third'])
 
-        df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
+        df_both = pd.DataFrame(
+            np.random.randn(
+                3, 16), index=[
+                'A', 'B', 'C'], columns=index)
         table = Table(df_both)
         assert table.size() == 48

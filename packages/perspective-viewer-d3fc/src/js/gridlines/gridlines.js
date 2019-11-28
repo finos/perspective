@@ -12,7 +12,10 @@ const mainGridSvg = settings => x =>
     x
         .style("opacity", "0.3")
         .style("stroke-width", "1.0")
-        .style("stroke", settings ? settings.colorStyles.grid.gridLineColor : "#bbb");
+        .style(
+            "stroke",
+            settings ? settings.colorStyles.grid.gridLineColor : "#bbb"
+        );
 
 const mainGridCanvas = c => {
     c.globalAlpha = 0.3;
@@ -49,7 +52,9 @@ export default (series, settings) => {
         const xStyle = orient === "vertical" ? crossGrid : mainGrid;
         const yStyle = orient === "horizontal" ? crossGrid : mainGrid;
 
-        const gridlines = annotationGridline.xDecorate(xStyle).yDecorate(yStyle);
+        const gridlines = annotationGridline
+            .xDecorate(xStyle)
+            .yDecorate(yStyle);
 
         return multi.series([gridlines, series])(...args);
     };

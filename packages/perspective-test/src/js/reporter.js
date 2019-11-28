@@ -29,7 +29,9 @@ module.exports = class ImageViewerReporter {
 
     write_img(title, ancestors, filename) {
         if (fs.existsSync(filename)) {
-            process.stdout.write(`\n    ${ancestors.join(" > ")} > ${title}\n\n    `);
+            process.stdout.write(
+                `\n    ${ancestors.join(" > ")} > ${title}\n\n    `
+            );
             termimg(filename, {
                 width: "320px",
                 height: "240px",
@@ -45,10 +47,16 @@ module.exports = class ImageViewerReporter {
     onTestResult(testRunConfig, testResults) {
         for (const test of testResults.testResults) {
             if (test.status === "failed") {
-                const ancestors = test.ancestorTitles.filter(x => x.indexOf(".html") > -1).map(x => x.replace(".html", "").replace(/ /g, "_"));
+                const ancestors = test.ancestorTitles
+                    .filter(x => x.indexOf(".html") > -1)
+                    .map(x => x.replace(".html", "").replace(/ /g, "_"));
                 const desc = ancestors.join("/");
-                const name = test.title.replace(/ /g, "_").replace(/[\.']/g, "");
-                const filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${desc}/${name}.diff.png`;
+                const name = test.title
+                    .replace(/ /g, "_")
+                    .replace(/[\.']/g, "");
+                const filename = `${
+                    testRunConfig.path.split("/test")[0]
+                }/screenshots/${desc}/${name}.diff.png`;
                 const alt_filename = `screenshots/${desc}/${name}.diff.png`;
                 if (filename) {
                     this.write_img(test.title, ancestors, filename);

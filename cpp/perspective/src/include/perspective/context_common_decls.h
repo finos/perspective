@@ -11,8 +11,8 @@ perspective::t_index get_row_count() const;
 
 perspective::t_index get_column_count() const;
 
-std::vector<t_tscalar> get_data(
-    t_index start_row, t_index end_row, t_index start_col, t_index end_col) const;
+std::vector<t_tscalar> get_data(t_index start_row, t_index end_row,
+    t_index start_col, t_index end_col) const;
 
 std::vector<t_tscalar> get_data(const std::vector<t_uindex>& rows) const;
 
@@ -23,8 +23,9 @@ void reset_sortby();
 // will only work on empty contexts
 void notify(const t_data_table& flattened);
 
-void notify(const t_data_table& flattened, const t_data_table& delta, const t_data_table& prev,
-    const t_data_table& current, const t_data_table& transitions, const t_data_table& existed);
+void notify(const t_data_table& flattened, const t_data_table& delta,
+    const t_data_table& prev, const t_data_table& current,
+    const t_data_table& transitions, const t_data_table& existed);
 
 void step_begin();
 
@@ -48,7 +49,8 @@ void set_minmax_enabled(bool enabled_state);
 
 void set_feature_state(t_ctx_feature feature, bool state);
 
-std::vector<t_tscalar> get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+std::vector<t_tscalar> get_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
 std::vector<t_tscalar> get_cell_data(
     const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;

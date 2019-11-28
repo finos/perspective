@@ -26,7 +26,9 @@ export function get_column_type(val) {
     } else if (val === 13) {
         return "date";
     } else {
-        console.warn(`Unknown type for value ${val} with JS type ${typeof val}`);
+        console.warn(
+            `Unknown type for value ${val} with JS type ${typeof val}`
+        );
     }
 }
 
@@ -86,7 +88,13 @@ export function detectChrome() {
 
     if (isIOSChrome) {
         return true;
-    } else if (isChromium !== null && typeof isChromium !== "undefined" && vendorName === "Google Inc." && isOpera === false && isIEedge === false) {
+    } else if (
+        isChromium !== null &&
+        typeof isChromium !== "undefined" &&
+        vendorName === "Google Inc." &&
+        isOpera === false &&
+        isIEedge === false
+    ) {
         return true;
     } else {
         return false;
@@ -146,7 +154,13 @@ if (!Array.prototype.includes) {
             var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
 
             function sameValueZero(x, y) {
-                return x === y || (typeof x === "number" && typeof y === "number" && isNaN(x) && isNaN(y));
+                return (
+                    x === y ||
+                    (typeof x === "number" &&
+                        typeof y === "number" &&
+                        isNaN(x) &&
+                        isNaN(y))
+                );
             }
 
             // 7. Repeat, while k < len

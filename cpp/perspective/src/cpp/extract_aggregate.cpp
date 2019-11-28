@@ -13,8 +13,8 @@
 namespace perspective {
 
 t_tscalar
-extract_aggregate(
-    const t_aggspec& aggspec, const t_column* aggcol, t_uindex ridx, t_index pridx) {
+extract_aggregate(const t_aggspec& aggspec, const t_column* aggcol,
+    t_uindex ridx, t_index pridx) {
     static std::string non_unique("-");
 
     switch (aggspec.agg()) {
@@ -96,7 +96,9 @@ extract_aggregate(
             }
             return rval;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected agg type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected agg type");
+        }
     }
 
     return mknone();

@@ -10,7 +10,12 @@
 import "@webcomponents/webcomponentsjs";
 import "./polyfill.js";
 
-import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
+import {
+    bindTemplate,
+    json_attribute,
+    array_attribute,
+    copy_to_clipboard
+} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import {COMPUTATIONS} from "./computed_column.js";
 import "./row.js";
@@ -35,7 +40,17 @@ import {ActionElement} from "./viewer/action_element.js";
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
+const PERSISTENT_ATTRIBUTES = [
+    "editable",
+    "plugin",
+    "row-pivots",
+    "column-pivots",
+    "aggregates",
+    "filters",
+    "sort",
+    "computed-columns",
+    "columns"
+];
 
 /**
  * HTMLElement class for `<perspective-viewer>` custom element.  This class is
@@ -119,7 +134,10 @@ class PerspectiveViewer extends ActionElement {
             },
             (sort, node) => {
                 if (Array.isArray(sort)) {
-                    return node.getAttribute("name") === sort[0] && node.getAttribute("sort-order") === sort[1];
+                    return (
+                        node.getAttribute("name") === sort[0] &&
+                        node.getAttribute("sort-order") === sort[1]
+                    );
                 }
                 return node.getAttribute("name") === sort;
             }
@@ -145,7 +163,10 @@ class PerspectiveViewer extends ActionElement {
         if (show === null || show === undefined || show.length === 0) {
             if (this.hasAttribute("columns")) {
                 if (this._initial_col_order) {
-                    this.setAttribute("columns", JSON.stringify(this._initial_col_order));
+                    this.setAttribute(
+                        "columns",
+                        JSON.stringify(this._initial_col_order)
+                    );
                 } else {
                     this.removeAttribute("columns");
                 }
@@ -171,7 +192,11 @@ class PerspectiveViewer extends ActionElement {
      */
     @array_attribute
     "computed-columns"(computed_columns) {
-        if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
+        if (
+            computed_columns === null ||
+            computed_columns === undefined ||
+            computed_columns.length === 0
+        ) {
             if (this.hasAttribute("computed-columns")) {
                 this.removeAttribute("computed-columns");
             }
@@ -216,7 +241,11 @@ class PerspectiveViewer extends ActionElement {
      */
     @json_attribute
     aggregates(show) {
-        if (show === null || show === undefined || Object.keys(show).length === 0) {
+        if (
+            show === null ||
+            show === undefined ||
+            Object.keys(show).length === 0
+        ) {
             if (this.hasAttribute("aggregates")) {
                 this.removeAttribute("aggregates");
             }
@@ -274,7 +303,12 @@ class PerspectiveViewer extends ActionElement {
                         operator: filter[1],
                         operand: filter[2]
                     });
-                    return this._new_row(filter[0], undefined, undefined, fterms);
+                    return this._new_row(
+                        filter[0],
+                        undefined,
+                        undefined,
+                        fterms
+                    );
                 },
                 (filter, node) =>
                     node.getAttribute("name") === filter[0] &&
@@ -305,13 +339,20 @@ class PerspectiveViewer extends ActionElement {
         if (this.hasAttribute("plugin")) {
             let plugin = this.getAttribute("plugin");
             if (plugin_names.indexOf(plugin) === -1) {
-                const guess_plugin = plugin_names.find(x => x.indexOf(plugin) > -1);
+                const guess_plugin = plugin_names.find(
+                    x => x.indexOf(plugin) > -1
+                );
                 if (guess_plugin) {
-                    console.warn(`Unknown plugin "${plugin}", using "${guess_plugin}"`);
+                    console.warn(
+                        `Unknown plugin "${plugin}", using "${guess_plugin}"`
+                    );
                     this.setAttribute("plugin", guess_plugin);
                 } else {
                     console.error(`Unknown plugin "${plugin}"`);
-                    this.setAttribute("plugin", this._vis_selector.options[0].value);
+                    this.setAttribute(
+                        "plugin",
+                        this._vis_selector.options[0].value
+                    );
                 }
             } else {
                 if (this._vis_selector.value !== plugin) {
@@ -504,7 +545,8 @@ class PerspectiveViewer extends ActionElement {
      */
     clone(widget) {
         if (this._inner_drop_target) {
-            this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML;
+            this._inner_drop_target.innerHTML =
+                widget._inner_drop_target.innerHTML;
         }
 
         this._load_table(widget.table);
@@ -551,7 +593,11 @@ class PerspectiveViewer extends ActionElement {
             if (cols.has(attr.name)) {
                 if (attr.value === "") {
                     obj[attr.name] = true;
-                } else if (attr.name !== "plugin" && attr.value !== undefined && attr.value !== null) {
+                } else if (
+                    attr.name !== "plugin" &&
+                    attr.value !== undefined &&
+                    attr.value !== null
+                ) {
                     obj[attr.name] = JSON.parse(attr.value);
                 } else {
                     obj[attr.name] = attr.value;
@@ -640,7 +686,10 @@ class PerspectiveViewer extends ActionElement {
         this.removeAttribute("filters");
         this.removeAttribute("sort");
         if (this._initial_col_order) {
-            this.setAttribute("columns", JSON.stringify(this._initial_col_order));
+            this.setAttribute(
+                "columns",
+                JSON.stringify(this._initial_col_order)
+            );
         } else {
             this.removeAttribute("columns");
         }

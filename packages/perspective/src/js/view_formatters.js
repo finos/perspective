@@ -21,8 +21,10 @@ const jsonFormatter = {
 };
 
 const csvFormatter = Object.assign({}, jsonFormatter, {
-    addColumnValue: (data, row, colName, value) => row[colName.split("|").join(",")].unshift(value),
-    setColumnValue: (data, row, colName, value) => (row[colName.split("|").join(",")] = value),
+    addColumnValue: (data, row, colName, value) =>
+        row[colName.split("|").join(",")].unshift(value),
+    setColumnValue: (data, row, colName, value) =>
+        (row[colName.split("|").join(",")] = value),
     formatData: (data, config) => papaparse.unparse(data, config)
 });
 

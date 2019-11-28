@@ -31,7 +31,9 @@ export default () => {
         if (xScale || yScale) {
             let tooltipData = null;
             const pointer = fc.pointer().on("point", event => {
-                const closest = event.length ? getClosestDataPoint(event[0]) : null;
+                const closest = event.length
+                    ? getClosestDataPoint(event[0])
+                    : null;
                 tooltipData = closest ? [closest.data] : [];
                 const useYScale = closest ? closest.scale : yScale;
 
@@ -43,7 +45,11 @@ export default () => {
                 .on("measure.nearbyTip", () => renderTip(selection, []))
                 .on("click", () => {
                     if (tooltipData.length) {
-                        raiseEvent(selection.node(), tooltipData[0], base.settings());
+                        raiseEvent(
+                            selection.node(),
+                            tooltipData[0],
+                            base.settings()
+                        );
                     }
                 })
                 .call(pointer);
@@ -62,7 +68,13 @@ export default () => {
             .attr("class", "nearbyTip")
             .merge(tips)
             .attr("r", d => (size ? Math.sqrt(size(d.size)) : 10))
-            .attr("transform", d => `translate(${xScale(d[xValueName])},${useYScale(d[yValueName])})`)
+            .attr(
+                "transform",
+                d =>
+                    `translate(${xScale(d[xValueName])},${useYScale(
+                        d[yValueName]
+                    )})`
+            )
             .style("stroke", "none")
             .style("fill", d => color && withOpacity(color(d.key)));
 
@@ -72,9 +84,18 @@ export default () => {
     const getClosestDataPoint = pos => {
         const distFn = scale => {
             return v => {
-                if (v[yValueName] === undefined || v[yValueName] === null || v[xValueName] === undefined || v[xValueName] === null) return null;
+                if (
+                    v[yValueName] === undefined ||
+                    v[yValueName] === null ||
+                    v[xValueName] === undefined ||
+                    v[xValueName] === null
+                )
+                    return null;
 
-                return Math.sqrt(Math.pow(xScale(v[xValueName]) - pos.x, 2) + Math.pow(scale(v[yValueName]) - pos.y, 2));
+                return Math.sqrt(
+                    Math.pow(xScale(v[xValueName]) - pos.x, 2) +
+                        Math.pow(scale(v[yValueName]) - pos.y, 2)
+                );
             };
         };
 
@@ -85,8 +106,14 @@ export default () => {
         if (altDataWithScale) {
             // Check the alt data with its scale, to see if any are closer
             const dist2 = distFn(altDataWithScale.yScale);
-            const best2 = findBestFromData(altDataWithScale.data, dist2, Math.min);
-            return dist1(best1) <= dist2(best2) ? {data: best1, scale: yScale} : {data: best2, scale: altDataWithScale.yScale};
+            const best2 = findBestFromData(
+                altDataWithScale.data,
+                dist2,
+                Math.min
+            );
+            return dist1(best1) <= dist2(best2)
+                ? {data: best1, scale: yScale}
+                : {data: best2, scale: altDataWithScale.yScale};
         }
         return {data: best1, scale: yScale};
     };

@@ -40,12 +40,15 @@ export const axisFactory = settings => {
         const domainFunction = axis.domain().valueNames(valueNames);
 
         optionalParams.forEach(p => {
-            if (optional[p] && domainFunction[p]) domainFunction[p](optional[p]);
+            if (optional[p] && domainFunction[p])
+                domainFunction[p](optional[p]);
         });
         if (domainFunction.orient) domainFunction.orient(orient);
 
         const domain = domainFunction(data);
-        const component = axis.component ? createComponent(axis, domain, data) : defaultComponent();
+        const component = axis.component
+            ? createComponent(axis, domain, data)
+            : defaultComponent();
 
         return {
             scale: axis.scale(),

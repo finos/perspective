@@ -31,7 +31,13 @@ bindTemplate(
 )(
     class HypergridElement extends HTMLElement {
         set_data(data, schema, tschema, row_pivots, columns, force = false) {
-            const hg_data = psp2hypergrid(data, schema, tschema, row_pivots, columns);
+            const hg_data = psp2hypergrid(
+                data,
+                schema,
+                tschema,
+                row_pivots,
+                columns
+            );
             if (this.grid) {
                 this.grid.behavior.setPSP(hg_data, force);
             } else {
@@ -44,7 +50,9 @@ bindTemplate(
                 const host = this.shadowRoot.querySelector("#mainGrid");
 
                 host.setAttribute("hidden", true);
-                this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
+                this.grid = new Hypergrid(host, {
+                    DataModel: PerspectiveDataModel
+                });
                 this.grid.canvas.stopResizeLoop();
                 this.grid.canvas.stopPaintLoop();
                 host.removeAttribute("hidden");
@@ -52,11 +60,18 @@ bindTemplate(
 
                 const grid_properties = default_grid_properties();
                 grid_properties.renderer = ["SimpleCell", "Borders"];
-                this.grid.installPlugins([perspectivePlugin, [groupedHeaderPlugin, grid_properties.groupedHeader]]);
+                this.grid.installPlugins([
+                    perspectivePlugin,
+                    [groupedHeaderPlugin, grid_properties.groupedHeader]
+                ]);
 
                 // Broken in fin-hypergrid-grouped-header 0.1.2
-                let _old_paint = this.grid.cellRenderers.items.GroupedHeader.paint;
-                this.grid.cellRenderers.items.GroupedHeader.paint = function(gc, config) {
+                let _old_paint = this.grid.cellRenderers.items.GroupedHeader
+                    .paint;
+                this.grid.cellRenderers.items.GroupedHeader.paint = function(
+                    gc,
+                    config
+                ) {
                     this.visibleColumns = config.grid.renderer.visibleColumns;
                     return _old_paint.call(this, gc, config);
                 };
@@ -69,7 +84,10 @@ bindTemplate(
                 set_editors(this.grid);
 
                 // Add tree cell renderer
-                this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
+                this.grid.cellRenderers.add(
+                    "TreeCell",
+                    Base.extend({paint: treeLineRendererPaint})
+                );
 
                 if (this._hg_data) {
                     this.grid.behavior.setPSP(this._hg_data);
@@ -124,10 +142,15 @@ function get_hypergrid() {
 async function getOrCreateHypergrid(div) {
     let perspectiveHypergridElement;
     if (!get_hypergrid.call(this)) {
-        perspectiveHypergridElement = this[HYPERGRID_INSTANCE] = document.createElement("perspective-hypergrid");
+        perspectiveHypergridElement = this[
+            HYPERGRID_INSTANCE
+        ] = document.createElement("perspective-hypergrid");
         perspectiveHypergridElement.setAttribute("tabindex", 1);
         perspectiveHypergridElement.addEventListener("blur", () => {
-            if (perspectiveHypergridElement.grid && !perspectiveHypergridElement.grid._is_editing) {
+            if (
+                perspectiveHypergridElement.grid &&
+                !perspectiveHypergridElement.grid._is_editing
+            ) {
                 perspectiveHypergridElement.grid.selectionModel.clear();
                 perspectiveHypergridElement.grid.paintNow();
             }
@@ -145,7 +168,12 @@ async function getOrCreateHypergrid(div) {
     return perspectiveHypergridElement;
 }
 
-function pad_data_window(rect, rowPivots = [], colPivots = [], settings = true) {
+function pad_data_window(
+    rect,
+    rowPivots = [],
+    colPivots = [],
+    settings = true
+) {
     const range = {
         start_row: rect.origin.y,
         end_row: rect.corner.y,
@@ -187,13 +215,22 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         index: rowPivots.length === 0 && colPivots.length === 0
     };
 
-    const [nrows, json, schema, tschema, all_columns] = await Promise.all([view.num_rows(), view.to_columns(data_window), view.schema(), this._table.schema(), view.column_paths()]);
+    const [nrows, json, schema, tschema, all_columns] = await Promise.all([
+        view.num_rows(),
+        view.to_columns(data_window),
+        view.schema(),
+        this._table.schema(),
+        view.column_paths()
+    ]);
 
     if (task.cancelled) {
         return;
     }
 
-    let perspectiveHypergridElement = await getOrCreateHypergrid.call(this, div);
+    let perspectiveHypergridElement = await getOrCreateHypergrid.call(
+        this,
+        div
+    );
     hypergrid = get_hypergrid.call(this);
 
     if (task.cancelled) {
@@ -212,7 +249,12 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel._viewer = this;
 
     dataModel.pspFetch = async rect => {
-        const range = pad_data_window(rect, rowPivots, colPivots, this.hasAttribute("settings"));
+        const range = pad_data_window(
+            rect,
+            rowPivots,
+            colPivots,
+            this.hasAttribute("settings")
+        );
         let next_page = await dataModel._view.to_columns(range);
         dataModel.data = [];
         const rows = page2hypergrid(next_page, rowPivots, columns);
@@ -221,7 +263,16 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
     hypergrid.renderer.needsComputeCellsBounds = true;
-    suppress_paint(hypergrid, () => perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns, force));
+    suppress_paint(hypergrid, () =>
+        perspectiveHypergridElement.set_data(
+            json,
+            schema,
+            tschema,
+            rowPivots,
+            columns,
+            force
+        )
+    );
     if (hypergrid.behavior.dataModel._outstanding) {
         await hypergrid.behavior.dataModel._outstanding.req;
     }

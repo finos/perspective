@@ -53,9 +53,15 @@ export function set_formatters(grid) {
         }[config.type || type];
         if (format_function) {
             if (typeof config.format === "string") {
-                formatters[type] = custom_formatter(new format_function("en-us"), eval(config.format));
+                formatters[type] = custom_formatter(
+                    new format_function("en-us"),
+                    eval(config.format)
+                );
             } else {
-                formatters[type] = null_formatter(new format_function("en-us", config.format), config.null_value);
+                formatters[type] = null_formatter(
+                    new format_function("en-us", config.format),
+                    config.null_value
+                );
             }
             grid.localization.add(`perspective-${type}`, formatters[type]);
         }

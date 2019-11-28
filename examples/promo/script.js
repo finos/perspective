@@ -9,7 +9,10 @@ async function script(page) {
         await page.evaluate(
             async (viewer, args) => {
                 for (let i = 0; i < args.length; i += 2) {
-                    const props = typeof args[i + 1] !== "string" ? JSON.stringify(args[i + 1]) : args[i + 1];
+                    const props =
+                        typeof args[i + 1] !== "string"
+                            ? JSON.stringify(args[i + 1])
+                            : args[i + 1];
                     viewer.setAttribute(args[i], props);
                     await viewer.flush();
                 }
@@ -22,7 +25,11 @@ async function script(page) {
     const poke = make_poke(viewer);
 
     const peek = async (name, json = true) => {
-        const result = await page.evaluate((viewer, name) => viewer.getAttribute(name), viewer, name);
+        const result = await page.evaluate(
+            (viewer, name) => viewer.getAttribute(name),
+            viewer,
+            name
+        );
         if (json) {
             return JSON.parse(result);
         } else {

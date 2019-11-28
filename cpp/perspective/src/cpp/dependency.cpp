@@ -30,8 +30,8 @@ t_dep::t_dep(t_tscalar imm)
     , m_imm(imm)
     , m_dtype(DTYPE_NONE) {}
 
-t_dep::t_dep(
-    const std::string& name, const std::string& disp_name, t_deptype type, t_dtype dtype)
+t_dep::t_dep(const std::string& name, const std::string& disp_name,
+    t_deptype type, t_dtype dtype)
     : m_name(name)
     , m_disp_name(disp_name)
     , m_type(type)

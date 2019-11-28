@@ -28,7 +28,9 @@ utils.with_server({paths: PATHS}, () => {
                 async page => {
                     const container = await page.$("#container");
                     await page.evaluate(async node => {
-                        const workspace = new window.PerspectivePhosphor.PerspectiveWorkspace({node});
+                        const workspace = new window.PerspectivePhosphor.PerspectiveWorkspace(
+                            {node}
+                        );
                         const widget = new window.PerspectivePhosphor.PerspectiveWidget();
                         widget.viewer.setAttribute("id", "viewer");
                         workspace.addViewer(widget);
@@ -51,7 +53,9 @@ utils.with_server({paths: PATHS}, () => {
                 async page => {
                     const container = await page.$("#container");
                     await page.evaluate(async node => {
-                        const workspace = new window.PerspectivePhosphor.PerspectiveWorkspace({node});
+                        const workspace = new window.PerspectivePhosphor.PerspectiveWorkspace(
+                            {node}
+                        );
                         const widget = new window.PerspectivePhosphor.PerspectiveWidget();
 
                         widget.viewer.setAttribute("id", "viewer");
@@ -80,7 +84,9 @@ utils.with_server({paths: PATHS}, () => {
                 async page => {
                     const container = await page.$("#container");
                     await page.evaluate(async node => {
-                        const workspace = new window.PerspectivePhosphor.PerspectiveWorkspace({node});
+                        const workspace = new window.PerspectivePhosphor.PerspectiveWorkspace(
+                            {node}
+                        );
                         window.workspace = workspace;
                         const widget = new window.PerspectivePhosphor.PerspectiveWidget();
 
@@ -100,7 +106,9 @@ utils.with_server({paths: PATHS}, () => {
                     });
 
                     await page.evaluate(() => {
-                        const widget = window.workspace.dockpanel.widgets().next();
+                        const widget = window.workspace.dockpanel
+                            .widgets()
+                            .next();
                         widget.restore({
                             "row-pivots": ["Segment"],
                             columns: ["Profit"]
@@ -108,7 +116,9 @@ utils.with_server({paths: PATHS}, () => {
                         window.workspace.makeMaster(widget);
                         window.workspace.setRelativeSizes([1, 2]);
                     });
-                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.waitForSelector(
+                        "perspective-viewer:not([updating])"
+                    );
                 },
                 {wait_for_update: false, timeout: 60000, fail_on_errors: false}
             );

@@ -31,22 +31,24 @@ public:
 
     ~t_aggspec();
 
-    t_aggspec(
-        const std::string& aggname, t_aggtype agg, const std::vector<t_dep>& dependencies);
+    t_aggspec(const std::string& aggname, t_aggtype agg,
+        const std::vector<t_dep>& dependencies);
 
-    t_aggspec(const std::string& aggname, t_aggtype agg, const std::string& dep);
+    t_aggspec(
+        const std::string& aggname, t_aggtype agg, const std::string& dep);
 
     t_aggspec(t_aggtype agg, const std::string& dep);
 
-    t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
-        const std::vector<t_dep>& dependencies);
+    t_aggspec(const std::string& aggname, const std::string& disp_aggname,
+        t_aggtype agg, const std::vector<t_dep>& dependencies);
 
-    t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
-        const std::vector<t_dep>& dependencies, t_sorttype sort_type);
+    t_aggspec(const std::string& aggname, const std::string& disp_aggname,
+        t_aggtype agg, const std::vector<t_dep>& dependencies,
+        t_sorttype sort_type);
 
-    t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
-        t_uindex agg_one_idx, t_uindex agg_two_idx, double agg_one_weight,
-        double agg_two_weight);
+    t_aggspec(const std::string& aggname, const std::string& disp_aggname,
+        t_aggtype agg, t_uindex agg_one_idx, t_uindex agg_two_idx,
+        double agg_one_weight, double agg_two_weight);
 
     std::string name() const;
     t_tscalar name_scalar() const;

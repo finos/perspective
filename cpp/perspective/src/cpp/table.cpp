@@ -13,9 +13,9 @@
 static perspective::t_uindex GLOBAL_TABLE_ID = 0;
 
 namespace perspective {
-Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
-    std::vector<t_dtype> data_types, std::uint32_t limit,
-    std::string index)
+Table::Table(std::shared_ptr<t_pool> pool,
+    std::vector<std::string> column_names, std::vector<t_dtype> data_types,
+    std::uint32_t limit, std::string index)
     : m_init(false)
     , m_id(GLOBAL_TABLE_ID++)
     , m_pool(pool)
@@ -25,15 +25,16 @@ Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names
     , m_limit(limit)
     , m_index(std::move(index))
     , m_gnode_set(false) {
-        validate_columns(m_column_names);
-    }
+    validate_columns(m_column_names);
+}
 
 void
 Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
     /**
-     * For the Table to be initialized correctly, make sure that the operation and index columns are
-     * processed before the new offset is calculated. Calculating the offset before the `process_op_column`
-     * and `process_index_column` causes primary keys to be misaligned.
+     * For the Table to be initialized correctly, make sure that the operation
+     * and index columns are processed before the new offset is calculated.
+     * Calculating the offset before the `process_op_column` and
+     * `process_index_column` causes primary keys to be misaligned.
      */
     process_op_column(data_table, op);
     calculate_offset(row_count);
@@ -64,13 +65,15 @@ Table::get_schema() const {
 }
 
 void
-Table::add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_def> computed_lambdas) {
+Table::add_computed_columns(std::shared_ptr<t_data_table> data_table,
+    std::vector<t_computed_column_def> computed_lambdas) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex prev_gnode_id = m_gnode->get_id();
-    
+
     // transfer computed lambdas across to the new gnode and recalculate
     auto lambdas = m_gnode->get_computed_lambdas();
-    lambdas.insert(lambdas.end(), computed_lambdas.begin(), computed_lambdas.end());
+    lambdas.insert(
+        lambdas.end(), computed_lambdas.begin(), computed_lambdas.end());
 
     auto new_gnode = make_gnode(data_table->get_schema());
     set_gnode(new_gnode);
@@ -86,7 +89,7 @@ Table::add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vecto
 
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
-    t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"}); 
+    t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"});
     auto gnode = std::make_shared<t_gnode>(out_schema, in_schema);
     gnode->init();
     return gnode;
@@ -162,13 +165,13 @@ Table::get_limit() const {
     return m_limit;
 }
 
-void 
+void
 Table::set_column_names(const std::vector<std::string>& column_names) {
     validate_columns(column_names);
     m_column_names = column_names;
 }
 
-void 
+void
 Table::set_data_types(const std::vector<t_dtype>& data_types) {
     m_data_types = data_types;
 }
@@ -178,10 +181,13 @@ Table::validate_columns(const std::vector<std::string>& column_names) {
     if (m_index != "") {
         // Check if index is valid after getting column names
         bool explicit_index
-            = std::find(column_names.begin(), column_names.end(), m_index) != column_names.end();
+            = std::find(column_names.begin(), column_names.end(), m_index)
+            != column_names.end();
         if (!explicit_index) {
-            std::cout << "Specified index " << m_index << " does not exist in data." << std::endl;
-            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' does not exist in data.");
+            std::cout << "Specified index " << m_index
+                      << " does not exist in data." << std::endl;
+            PSP_COMPLAIN_AND_ABORT(
+                "Specified index '" + m_index + "' does not exist in data.");
         }
     }
 }
@@ -193,7 +199,9 @@ Table::process_op_column(t_data_table& data_table, const t_op op) {
         case OP_DELETE: {
             op_col->raw_fill<std::uint8_t>(OP_DELETE);
         } break;
-        default: { op_col->raw_fill<std::uint8_t>(OP_INSERT); }
+        default: {
+            op_col->raw_fill<std::uint8_t>(OP_INSERT);
+        }
     }
 }
 

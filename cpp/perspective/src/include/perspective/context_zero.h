@@ -47,10 +47,12 @@ protected:
     std::vector<t_tscalar> get_all_pkeys(
         const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
-    void calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
-        const t_data_table& curr, const t_data_table& transitions);
+    void calc_step_delta(const t_data_table& flattened,
+        const t_data_table& prev, const t_data_table& curr,
+        const t_data_table& transitions);
 
-    void calc_row_delta(const t_data_table& flattened, const t_data_table& transitions);
+    void calc_row_delta(
+        const t_data_table& flattened, const t_data_table& transitions);
 
     void add_delta_pkey(t_tscalar pkey);
 

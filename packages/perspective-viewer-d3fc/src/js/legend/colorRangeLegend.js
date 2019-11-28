@@ -15,11 +15,14 @@ export function colorRangeLegend() {
     let scale = null;
 
     function legend(container) {
-        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
-            container
-                .append("div")
-                .attr("class", "legend-container legend-color")
-                .style("z-index", "2")
+        const legendSelection = getOrCreateElement(
+            container,
+            "div.legend-container",
+            () =>
+                container
+                    .append("div")
+                    .attr("class", "legend-container legend-color")
+                    .style("z-index", "2")
         );
         const {width, height} = legendSelection.node().getBoundingClientRect();
 
@@ -55,7 +58,10 @@ export function colorRangeLegend() {
                 selection.selectAll("path").style("fill", d => scale(d));
             });
 
-        const middle = domain[0] < 0 && domain[1] > 0 ? 0 : Math.round((domain[1] + domain[0]) / 2);
+        const middle =
+            domain[0] < 0 && domain[1] > 0
+                ? 0
+                : Math.round((domain[1] + domain[0]) / 2);
         const tickValues = [...domain, middle];
 
         const axisLabel = fc
@@ -64,15 +70,21 @@ export function colorRangeLegend() {
             .tickSizeOuter(0)
             .tickFormat(d => valueformatter(d));
 
-        const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
+        const legendSvg = getOrCreateElement(legendSelection, "svg", () =>
+            legendSelection.append("svg")
+        )
             .style("width", width)
             .style("height", height);
-        const legendBar = getOrCreateElement(legendSvg, "g", () => legendSvg.append("g"))
+        const legendBar = getOrCreateElement(legendSvg, "g", () =>
+            legendSvg.append("g")
+        )
             .datum(expandedDomain)
             .call(svgBar);
 
         const barWidth = Math.abs(legendBar.node().getBBox().x);
-        getOrCreateElement(legendSvg, "#legend-axis", () => legendSvg.append("g").attr("id", "legend-axis"))
+        getOrCreateElement(legendSvg, "#legend-axis", () =>
+            legendSvg.append("g").attr("id", "legend-axis")
+        )
             .attr("transform", `translate(${barWidth})`)
             .datum(expandedDomain)
             .call(axisLabel)

@@ -65,42 +65,42 @@ PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
 
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
-#define _ID(x)                                                                                 \
+#define _ID(x)                                                                 \
     x // https://stackoverflow.com/questions/25144589/c-macro-overloading-is-not-working
 #define GET_PSP_VERBOSE_ASSERT(_1, _2, _3, NAME, ...) NAME
 
 #ifdef PSP_DEBUG
-#define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
-    {                                                                                          \
-        if (!(COND)) {                                                                         \
-            std::stringstream ss;                                                              \
-            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
-               << perspective::get_error_str();                                                \
-            perror(ss.str().c_str());                                                          \
-            psp_abort("Verbose assert failed!");                                                \
-        }                                                                                      \
+#define PSP_VERBOSE_ASSERT1(COND, MSG)                                         \
+    {                                                                          \
+        if (!(COND)) {                                                         \
+            std::stringstream ss;                                              \
+            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "          \
+               << perspective::get_error_str();                                \
+            perror(ss.str().c_str());                                          \
+            psp_abort("Verbose assert failed!");                               \
+        }                                                                      \
     }
 
-#define PSP_VERBOSE_ASSERT2(COND, EXPR, MSG)                                                   \
-    {                                                                                          \
-        if (!(COND EXPR)) {                                                                    \
-            std::stringstream ss;                                                              \
-            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
-               << perspective::get_error_str();                                                \
-            perror(ss.str().c_str());                                                          \
-            psp_abort("Verbose assert failed!");                                               \
-        }                                                                                      \
+#define PSP_VERBOSE_ASSERT2(COND, EXPR, MSG)                                   \
+    {                                                                          \
+        if (!(COND EXPR)) {                                                    \
+            std::stringstream ss;                                              \
+            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "          \
+               << perspective::get_error_str();                                \
+            perror(ss.str().c_str());                                          \
+            psp_abort("Verbose assert failed!");                               \
+        }                                                                      \
     }
 
-#define PSP_COMPLAIN_AND_ABORT(X)                                                              \
-    {                                                                                          \
-        std::stringstream ss;                                                                  \
-        ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
-        perror(ss.str().c_str());                                                              \
-        psp_abort(X);                                                                          \
+#define PSP_COMPLAIN_AND_ABORT(X)                                              \
+    {                                                                          \
+        std::stringstream ss;                                                  \
+        ss << __FILE__ << ":" << __LINE__ << ": " << X;                        \
+        perror(ss.str().c_str());                                              \
+        psp_abort(X);                                                          \
     }
 
-#define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
+#define PSP_ASSERT_SIMPLE_TYPE(X)                                              \
 static_assert(                                               \
 std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 " Unsuitable type found. "
@@ -108,30 +108,32 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 //#define LOG_LIFETIMES 1
 
 #ifdef LOG_LIFETIMES
-#define LOG_CONSTRUCTOR(X)                                                                     \
-    std::cout << "constructing L: " << __LINE__ << " " << (X) << " <" << this << ">"           \
-              << std::endl;
+#define LOG_CONSTRUCTOR(X)                                                     \
+    std::cout << "constructing L: " << __LINE__ << " " << (X) << " <" << this  \
+              << ">" << std::endl;
 
-#define LOG_DESTRUCTOR(X)                                                                      \
-    std::cout << "destroying L: " << __LINE__ << " " << (X) << " <" << this << ">" << std::endl;
+#define LOG_DESTRUCTOR(X)                                                      \
+    std::cout << "destroying L: " << __LINE__ << " " << (X) << " <" << this    \
+              << ">" << std::endl;
 
-#define LOG_INIT(X)                                                                            \
-    std::cout << "initing L: " << __LINE__ << " " << (X) << " <" << this << ">" << std::endl;
+#define LOG_INIT(X)                                                            \
+    std::cout << "initing L: " << __LINE__ << " " << (X) << " <" << this       \
+              << ">" << std::endl;
 #else
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
 #else
-#define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
-    {                                                                                          \
-        if (!(COND))                                                                           \
-            psp_abort("Assertion failed!");                                                    \
+#define PSP_VERBOSE_ASSERT1(COND, MSG)                                         \
+    {                                                                          \
+        if (!(COND))                                                           \
+            psp_abort("Assertion failed!");                                    \
     }
-#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG)                                                   \
-    {                                                                                          \
-        if (!(EXPR COND))                                                                      \
-            psp_abort("Assertion failed!");                                                    \
+#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG)                                   \
+    {                                                                          \
+        if (!(EXPR COND))                                                      \
+            psp_abort("Assertion failed!");                                    \
     }
 #define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X);
 #define PSP_ASSERT_SIMPLE_TYPE(X)
@@ -140,12 +142,15 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_INIT(X)
 #endif
 
-#define PSP_VERBOSE_ASSERT(...)                                                                \
-    _ID(GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(         \
-        __VA_ARGS__))
+#define PSP_VERBOSE_ASSERT(...)                                                \
+    _ID(GET_PSP_VERBOSE_ASSERT(                                                \
+        __VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(__VA_ARGS__))
 
 // Currently only supporting single ports
-enum t_gnode_processing_mode { NODE_PROCESSING_SIMPLE_DATAFLOW, NODE_PROCESSING_KERNEL };
+enum t_gnode_processing_mode {
+    NODE_PROCESSING_SIMPLE_DATAFLOW,
+    NODE_PROCESSING_KERNEL
+};
 
 enum t_pivot_mode {
     PIVOT_MODE_NORMAL,
@@ -275,7 +280,7 @@ enum t_value_transition {
 };
 
 enum t_gnode_type {
-    GNODE_TYPE_PKEYED,         // Explicit user set pkey
+    GNODE_TYPE_PKEYED, // Explicit user set pkey
 };
 
 enum t_gnode_port {
@@ -353,8 +358,8 @@ enum t_fmode { FMODE_SIMPLE_CLAUSES, FMODE_JIT_EXPR };
 #ifdef WIN32
 #define PSP_NON_COPYABLE(X)
 #else
-#define PSP_NON_COPYABLE(X)                                                                    \
-    X(const X&) = delete;                                                                      \
+#define PSP_NON_COPYABLE(X)                                                    \
+    X(const X&) = delete;                                                      \
     X& operator=(const X&) = delete
 #endif
 
@@ -398,7 +403,8 @@ struct PERSPECTIVE_EXPORT t_cmp_charptr {
     }
 };
 
-struct t_cchar_umap_cmp : public std::binary_function<const char*, const char*, bool> {
+struct t_cchar_umap_cmp
+    : public std::binary_function<const char*, const char*, bool> {
     inline bool
     operator()(const char* x, const char* y) const {
         return strcmp(x, y) == 0;
@@ -477,7 +483,8 @@ PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::string>();
 namespace std {
 template <>
 struct hash<std::pair<perspective::t_uindex, perspective::t_uindex>> {
-    typedef std::pair<perspective::t_uindex, perspective::t_uindex> argument_type;
+    typedef std::pair<perspective::t_uindex, perspective::t_uindex>
+        argument_type;
     typedef std::size_t result_type;
 
     result_type

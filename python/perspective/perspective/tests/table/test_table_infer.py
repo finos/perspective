@@ -64,14 +64,16 @@ class TestTableInfer(object):
             data = {"a": [1.5, 2.5, 3.5, 4.5, "abc"]}
             tbl = Table(data)
             assert tbl.schema() == {"a": str}
-            assert tbl.view().to_dict() == {"a": ["1.5", "2.5", "3.5", "4.5", "abc"]}
+            assert tbl.view().to_dict() == {
+                "a": ["1.5", "2.5", "3.5", "4.5", "abc"]}
 
     def test_table_promote_float_py2(self):
         if six.PY2:
             data = {"a": [1, 2, 3, 4, 2147483648]}
             tbl = Table(data)
             assert tbl.schema() == {"a": float}
-            assert tbl.view().to_dict() == {"a": [1.0, 2.0, 3.0, 4.0, 2147483648.0]}
+            assert tbl.view().to_dict() == {
+                "a": [1.0, 2.0, 3.0, 4.0, 2147483648.0]}
 
     def test_table_infer_bool(self):
         data = {"a": [None, None, None, None, True, True, True]}
@@ -85,13 +87,38 @@ class TestTableInfer(object):
 
     def test_table_infer_time_as_string(self):
         # time objects are inferred as string
-        data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11, 12, 30, 5).time()]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                datetime(
+                    2019,
+                    7,
+                    11,
+                    12,
+                    30,
+                    5).time()]}
         tbl = Table(data)
         assert tbl.schema() == {"a": str}
 
     def test_table_infer_date_from_datetime(self):
         # inferrence on non-pandas datasets defaults to datetime
-        data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11)]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                datetime(
+                    2019,
+                    7,
+                    11)]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
 
@@ -122,37 +149,92 @@ class TestTableInfer(object):
         assert tbl.schema() == {"a": str}
 
     def test_table_infer_date_edge(self):
-        data = {"a": [None, None, None, None, None, None, "08/31/2019 00:00:00"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                "08/31/2019 00:00:00"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": date}
 
     def test_table_infer_datetime_edge(self):
-        data = {"a": [None, None, None, None, None, None, "08/31/2019 00:00:01"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                "08/31/2019 00:00:01"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
 
     def test_table_infer_valid_datetime(self):
-        data = {"a": [None, None, None, None, None, None, "08/31/2019 07:30:00"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                "08/31/2019 07:30:00"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
 
     def test_table_infer_iso_datetime(self):
-        data = {"a": [None, None, None, None, None, None, "2019/07/25T09:00:00"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                "2019/07/25T09:00:00"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
 
     def test_table_infer_datetime_separators(self):
-        data = {"a": [None, None, None, None, None, "2019-07-25T09:00:00", "2019/07/25T09:00:00"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                "2019-07-25T09:00:00",
+                "2019/07/25T09:00:00"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
 
     def test_table_infer_datetime_tz(self):
-        data = {"a": [None, None, None, None, None, "2019-07-25T09:00:00-05:00"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                "2019-07-25T09:00:00-05:00"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
 
     def test_table_infer_invalid_datetime(self):
-        data = {"a": [None, None, None, None, None, None, "08/31/2019 25:30:00"]}
+        data = {
+            "a": [
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                "08/31/2019 25:30:00"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": str}
 
