@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 import {PerspectiveWidget} from "@finos/perspective-phosphor";
@@ -13,13 +14,14 @@ import {PerspectiveJupyterWidget} from "./widget";
 import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
 
 /**
- * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with the DOM.
+ * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with
+ * the DOM.
  */
 export class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveWidget;
     perspective_client: PerspectiveJupyterClient;
 
-    _createElement(tagName: string) {
+    _createElement(): HTMLElement {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
@@ -42,7 +44,7 @@ export class PerspectiveView extends DOMWidgetView {
         return this.pWidget.node;
     }
 
-    _setElement(el: HTMLElement) {
+    _setElement(el: HTMLElement): void {
         if (this.el || el !== this.pWidget.node) {
             // Do not allow the view to be reassigned to a different element.
             throw new Error("Cannot reset the DOM element.");
@@ -55,17 +57,23 @@ export class PerspectiveView extends DOMWidgetView {
      *
      * @param mutations
      */
-    _synchronize_state(mutations: any) {
+    _synchronize_state(mutations: any): void {
         for (const mutation of mutations) {
             const name = mutation.attributeName.replace(/-/g, "_");
-            let new_value = this.pWidget.viewer.getAttribute(mutation.attributeName);
+            let new_value = this.pWidget.viewer.getAttribute(
+                mutation.attributeName
+            );
             const current_value = this.model.get(name);
 
             if (typeof new_value === "undefined") {
                 continue;
             }
 
-            if (new_value && typeof new_value === "string" && name !== "plugin") {
+            if (
+                new_value &&
+                typeof new_value === "string" &&
+                name !== "plugin"
+            ) {
                 new_value = JSON.parse(new_value);
             }
 
@@ -79,9 +87,10 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     /**
-     * Attach event handlers, and watch the DOM for state changes in order to reflect them back to Python.
+     * Attach event handlers, and watch the DOM for state changes in order to
+     * reflect them back to Python.
      */
-    render() {
+    render(): void {
         super.render();
 
         this.model.on("msg:custom", this._handle_message, this);
@@ -96,19 +105,30 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:dark", this.dark_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
 
-        // Watch the viewer DOM so that widget state is always synchronized with DOM attributes.
-        const observer = new MutationObserver(this._synchronize_state.bind(this));
+        // Watch the viewer DOM so that widget state is always synchronized
+        // with DOM attributes.
+        const observer = new MutationObserver(
+            this._synchronize_state.bind(this)
+        );
         observer.observe(this.pWidget.viewer, {
             attributes: true,
-            attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters"],
+            attributeFilter: [
+                "plugin",
+                "columns",
+                "row-pivots",
+                "column-pivots",
+                "aggregates",
+                "sort",
+                "filters"
+            ],
             subtree: false
         });
 
-        /**
-         * Request a table from the manager. If a table has been loaded, proxy it and kick off subsequent operations.
-         *
-         * If a table hasn't been loaded, the viewer won't get a response back and simply waits until it receives a table name.
-         */
+        // Request a table from the manager.  If a table has been loaded, proxy
+        // it and kick off subsequent operations.  If a table hasn't been
+        // loaded, the viewer won't get a response back and simply waits until
+        // it receives a table name.
+
         this.perspective_client.send({
             id: -2,
             cmd: "table"
@@ -116,25 +136,27 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     /**
-     * Handle messages from the Python Perspective instance.
-     *
-     * Messages should conform to the `PerspectiveJupyterMessage` interface.
+     * Handle messages from the Python Perspective instance.  Messages should
+     * conform to the `PerspectiveJupyterMessage` interface.
      *
      * @param msg {PerspectiveJupyterMessage}
      */
-    _handle_message(msg: PerspectiveJupyterMessage) {
-        // If in client-only mode (no Table on the python widget), message.data is an object containing "data" and "options".
+    _handle_message(msg: PerspectiveJupyterMessage): void {
+        // If in client-only mode (no Table on the python widget), message.data
+        // is an object containing "data" and "options".
         if (msg.type === "table") {
             this._handle_load_message(msg);
         } else {
             if (msg.data["cmd"] === "delete") {
-                // Regardless of client mode, if `delete()` is called we need to clean up the Viewer.
+                // Regardless of client mode, if `delete()` is called we need
+                // to clean up the Viewer.
                 this.pWidget.delete();
                 return;
             }
 
             if (this.pWidget.client === true) {
-                // In client mode, we need to directly call the methods on the viewer
+                // In client mode, we need to directly call the methods on the
+                // viewer
                 const command = msg.data["cmd"];
                 if (command === "update") {
                     this.pWidget._update(msg.data["data"]);
@@ -144,7 +166,9 @@ export class PerspectiveView extends DOMWidgetView {
                     this.pWidget.clear();
                 }
             } else {
-                // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
+                // Make a deep copy of each message - widget views share the
+                // same comm, so mutations on `msg` affect subsequent message
+                // handlers.
                 const message = JSON.parse(JSON.stringify(msg));
 
                 delete message.type;
@@ -158,16 +182,19 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     /**
-     * Given a message that commands the widget to load a dataset or table, process it.
-     * @param {PerspectiveJupyterMessage} msg 
+     * Given a message that commands the widget to load a dataset or table,
+     * process it.
+     * @param {PerspectiveJupyterMessage} msg
      */
-    _handle_load_message(msg: PerspectiveJupyterMessage) {
+    _handle_load_message(msg: PerspectiveJupyterMessage): void {
         if (this.pWidget.client === true) {
             const data = msg.data["data"];
             const options = msg.data["options"] || {};
             this.pWidget.load(data, options);
         } else {
-            const new_table = this.perspective_client.open_table(msg.data["table_name"]);
+            const new_table = this.perspective_client.open_table(
+                msg.data["table_name"]
+            );
             this.pWidget.load(new_table);
 
             // Only call `init` after the viewer has a table.
@@ -179,45 +206,46 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     /**
-     * When traitlets are updated in python, update the corresponding value on the front-end viewer.
+     * When traitlets are updated in python, update the corresponding
+     * value on the front-end viewer.
      */
-    plugin_changed() {
+    plugin_changed(): void {
         this.pWidget.plugin = this.model.get("plugin");
     }
 
-    columns_changed() {
+    columns_changed(): void {
         this.pWidget.columns = this.model.get("columns");
     }
 
-    row_pivots_changed() {
+    row_pivots_changed(): void {
         this.pWidget.row_pivots = this.model.get("row_pivots");
     }
 
-    column_pivots_changed() {
+    column_pivots_changed(): void {
         this.pWidget.column_pivots = this.model.get("column_pivots");
     }
 
-    aggregates_changed() {
+    aggregates_changed(): void {
         this.pWidget.aggregates = this.model.get("aggregates");
     }
 
-    sort_changed() {
+    sort_changed(): void {
         this.pWidget.sort = this.model.get("sort");
     }
 
-    filters_changed() {
+    filters_changed(): void {
         this.pWidget.filters = this.model.get("filters");
     }
 
-    plugin_config_changed() {
+    plugin_config_changed(): void {
         this.pWidget.plugin_config = this.model.get("plugin_config");
     }
 
-    dark_changed() {
+    dark_changed(): void {
         this.pWidget.dark = this.model.get("dark");
     }
 
-    editable_changed() {
+    editable_changed(): void {
         this.pWidget.editable = this.model.get("editable");
     }
 }

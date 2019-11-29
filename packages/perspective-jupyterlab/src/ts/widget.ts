@@ -6,11 +6,15 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 import {Message} from "@phosphor/messaging";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 
 import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
-import {PerspectiveWidget, PerspectiveWidgetOptions} from "@finos/perspective-phosphor";
+import {
+    PerspectiveWidget,
+    PerspectiveWidgetOptions
+} from "@finos/perspective-phosphor";
 
 import perspective from "@finos/perspective";
 
@@ -20,7 +24,9 @@ import * as worker from "!!file-worker-loader?inline=true!@finos/perspective/dis
 if (perspective) {
     perspective.override({wasm, worker});
 } else {
-    console.warn("Perspective was undefined in jlab - wasm load errors may occur");
+    console.warn(
+        "Perspective was undefined in jlab - wasm load errors may occur"
+    );
 }
 
 export type PerspectiveJupyterWidgetOptions = {
@@ -28,10 +34,16 @@ export type PerspectiveJupyterWidgetOptions = {
 };
 
 /**
- * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
+ * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective
+ * Jupyterlab plugin.
  */
 export class PerspectiveJupyterWidget extends PerspectiveWidget {
-    constructor(name = "Perspective", options: PerspectiveViewerOptions & PerspectiveJupyterWidgetOptions & PerspectiveWidgetOptions) {
+    constructor(
+        name = "Perspective",
+        options: PerspectiveViewerOptions &
+            PerspectiveJupyterWidgetOptions &
+            PerspectiveWidgetOptions
+    ) {
         const view = options.view;
         delete options.view;
         super(name, options);
@@ -44,7 +56,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
      * Any custom phosphor widget used inside a Jupyter widget should override
      * the processMessage function like this.
      */
-    processMessage(msg: Message) {
+    processMessage(msg: Message): void {
         super.processMessage(msg);
         this._view.processPhosphorMessage(msg);
     }
@@ -54,7 +66,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
      *
      * This causes the view to be destroyed as well with 'remove'
      */
-    dispose() {
+    dispose(): void {
         if (this.isDisposed) {
             return;
         }

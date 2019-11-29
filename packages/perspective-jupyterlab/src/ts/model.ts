@@ -10,11 +10,21 @@
 import {DOMWidgetModel, ISerializers} from "@jupyter-widgets/base";
 import {PERSPECTIVE_VERSION} from "./version";
 
+interface PerspectiveModelArgs extends DOMWidgetModel {
+    _model_module: string;
+    _model_name: string;
+    _model_module_version: string;
+    _view_module: string;
+    _view_name: string;
+    _view_module_version: string;
+    _view_count: number;
+}
+
 /**
  * TODO: document
  */
 export class PerspectiveModel extends DOMWidgetModel {
-    defaults() {
+    defaults(): PerspectiveModelArgs {
         return {
             ...super.defaults(),
             _model_name: PerspectiveModel.model_name,

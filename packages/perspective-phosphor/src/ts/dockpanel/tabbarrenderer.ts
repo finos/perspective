@@ -57,10 +57,16 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     }
 
     public renderConfigIcon(): VirtualElement {
-        return h.div({className: "p-TabBar-tabConfigIcon", id: TabBarActions.Config});
+        return h.div({
+            className: "p-TabBar-tabConfigIcon",
+            id: TabBarActions.Config
+        });
     }
 
     public renderLoadingIcon(): VirtualElement {
-        return h.div({className: "p-TabBar-tabLoadingIcon"}, h.div({className: "p-TabBar-tabLoadingAnimation"}));
+        return h.div(
+            {className: "p-TabBar-tabLoadingIcon"},
+            h.div({className: "p-TabBar-tabLoadingAnimation"})
+        );
     }
 }

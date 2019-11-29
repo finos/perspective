@@ -13,9 +13,17 @@ import "@finos/perspective-viewer";
 import {Table, TableData, TableOptions} from "@finos/perspective";
 import {Message} from "@phosphor/messaging";
 import {Widget} from "@phosphor/widgets";
-import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
+import {
+    MIME_TYPE,
+    PSP_CLASS,
+    PSP_CONTAINER_CLASS,
+    PSP_CONTAINER_CLASS_DARK
+} from "./utils";
 
-import {PerspectiveViewer, PerspectiveViewerOptions} from "@finos/perspective-viewer";
+import {
+    PerspectiveViewer,
+    PerspectiveViewerOptions
+} from "@finos/perspective-viewer";
 
 let _increment = 0;
 
@@ -26,7 +34,8 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     bindto?: HTMLElement;
     plugin_config?: PerspectiveViewerOptions;
 
-    // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g. ["row-pivots"]
+    // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
+    // ["row-pivots"]
     column_pivots?: string[];
     row_pivots?: string[];
     computed_columns?: {[column_name: string]: string}[];
@@ -41,7 +50,9 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
 export class PerspectiveWidget extends Widget {
     constructor(name = "Perspective", options: PerspectiveWidgetOptions = {}) {
         super({node: options.bindto || document.createElement("div")});
-        this._viewer = PerspectiveWidget.createNode(this.node as HTMLDivElement);
+        this._viewer = PerspectiveWidget.createNode(
+            this.node as HTMLDivElement
+        );
 
         this.title.label = name;
         this.title.caption = `${name}`;
@@ -59,13 +70,18 @@ export class PerspectiveWidget extends Widget {
     _set_attributes(options: PerspectiveWidgetOptions): void {
         const plugin: string = options.plugin || "hypergrid";
         const columns: Array<string> = options.columns || [];
-        const row_pivots: Array<string> = options.row_pivots || options["row-pivots"] || [];
-        const column_pivots: Array<string> = options.column_pivots || options["column-pivots"] || [];
-        const aggregates: {[column_name: string]: string} = options.aggregates || {};
+        const row_pivots: Array<string> =
+            options.row_pivots || options["row-pivots"] || [];
+        const column_pivots: Array<string> =
+            options.column_pivots || options["column-pivots"] || [];
+        const aggregates: {[column_name: string]: string} =
+            options.aggregates || {};
         const sort: Array<Array<string>> = options.sort || [];
         const filters: Array<Array<string>> = options.filters || [];
-        const computed_columns: {[colname: string]: string}[] = options.computed_columns || options["computed-columns"] || [];
-        const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
+        const computed_columns: {[colname: string]: string}[] =
+            options.computed_columns || options["computed-columns"] || [];
+        const plugin_config: PerspectiveViewerOptions =
+            options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
         const client: boolean = options.client || false;
@@ -140,14 +156,14 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table a `perspective.table` object.
      */
-    load(table: (TableData | Table), options?: TableOptions): void {
+    load(table: TableData | Table, options?: TableOptions): void {
         this.viewer.load(table, options);
     }
 
     /**
      * Update the viewer with new data.
-     * 
-     * @param data 
+     *
+     * @param data
      */
     _update(data: TableData): void {
         this.viewer.update(data);
@@ -161,9 +177,9 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
-     * Replaces the data of the viewer's table with new data. New data must conform
-     * to the schema of the Table.
-     * 
+     * Replaces the data of the viewer's table with new data. New data must
+     * conform to the schema of the Table.
+     *
      * @param data
      */
     replace(data: TableData): void {
@@ -174,13 +190,14 @@ export class PerspectiveWidget extends Widget {
      * Deletes this element's data and clears it's internal state (but not its
      * user state). This (or the underlying `perspective.table`'s equivalent
      * method) must be called in order for its memory to be reclaimed.
-     * 
-     * If not running in client mode, delete_table defaults to false and the server should
-     * handle memory cleanup.
      *
-     * @param {boolean} delete_table Whether `delete()` should be called on the underlying `Table`.
+     * If not running in client mode, delete_table defaults to false and the
+     * server should handle memory cleanup.
+     *
+     * @param {boolean} delete_table Whether `delete()` should be called on the
+     * underlying `Table`.
      */
-    delete(delete_table: boolean = true) {
+    delete(delete_table = true): void {
         this.viewer.delete(delete_table || this.client);
     }
 
@@ -188,7 +205,7 @@ export class PerspectiveWidget extends Widget {
         return this.viewer.table;
     }
 
-    /******************************************************************************
+    /***************************************************************************
      *
      * Getters
      *
@@ -251,7 +268,10 @@ export class PerspectiveWidget extends Widget {
         return JSON.parse(this.viewer.getAttribute("column-pivots"));
     }
     set column_pivots(column_pivots: string[]) {
-        this.viewer.setAttribute("column-pivots", JSON.stringify(column_pivots));
+        this.viewer.setAttribute(
+            "column-pivots",
+            JSON.stringify(column_pivots)
+        );
     }
 
     get aggregates(): {[column_name: string]: string} {
@@ -273,7 +293,10 @@ export class PerspectiveWidget extends Widget {
     }
     set computed_columns(computed_columns: {[column_name: string]: string}[]) {
         if (computed_columns.length > 0) {
-            this.viewer.setAttribute("computed-columns", JSON.stringify(computed_columns));
+            this.viewer.setAttribute(
+                "computed-columns",
+                JSON.stringify(computed_columns)
+            );
         } else {
             this.viewer.removeAttribute("computed-columns");
         }
@@ -301,7 +324,8 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
-     * True if the widget is in client-only mode, i.e. the browser has ownership of the widget's data.
+     * True if the widget is in client-only mode, i.e. the browser has ownership
+     * of the widget's data.
      */
     get client(): boolean {
         return this._client;
@@ -342,7 +366,7 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    toggleConfig() {
+    toggleConfig(): void {
         this._viewer.toggleConfig();
     }
 
@@ -353,7 +377,9 @@ export class PerspectiveWidget extends Widget {
     static createNode(node: HTMLDivElement): PerspectiveViewer {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
-        const viewer = document.createElement("perspective-viewer") as PerspectiveViewer;
+        const viewer = document.createElement(
+            "perspective-viewer"
+        ) as PerspectiveViewer;
         viewer.classList.add(PSP_CLASS);
         viewer.setAttribute("type", MIME_TYPE);
 
@@ -364,7 +390,11 @@ export class PerspectiveWidget extends Widget {
         node.appendChild(viewer);
 
         // allow perspective's event handlers to do their work
-        viewer.addEventListener("contextmenu", event => event.stopPropagation(), false);
+        viewer.addEventListener(
+            "contextmenu",
+            event => event.stopPropagation(),
+            false
+        );
 
         const div = document.createElement("div");
         div.style.setProperty("display", "flex");
@@ -374,8 +404,10 @@ export class PerspectiveWidget extends Widget {
         if (!viewer.notifyResize) {
             console.warn("Warning: not bound to real element");
         } else {
-            const resize_observer = new MutationObserver(viewer.notifyResize.bind(viewer));
-            resize_observer.observe(node, { attributes: true });
+            const resize_observer = new MutationObserver(
+                viewer.notifyResize.bind(viewer)
+            );
+            resize_observer.observe(node, {attributes: true});
         }
         return viewer;
     }

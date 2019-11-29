@@ -29,11 +29,17 @@ export class PerspectiveTabBar extends TabBar<Widget> {
         this.__content_node__;
     }
 
-    public get tabMaximizeRequested(): Signal<PerspectiveTabBar, TabMaximizeArgs> {
+    public get tabMaximizeRequested(): Signal<
+        PerspectiveTabBar,
+        TabMaximizeArgs
+    > {
         return this._tabMaximizeRequested;
     }
 
-    public get toggleConfigRequested(): Signal<PerspectiveTabBar, TabMaximizeArgs> {
+    public get toggleConfigRequested(): Signal<
+        PerspectiveTabBar,
+        TabMaximizeArgs
+    > {
         return this._toggleConfigRequested;
     }
 
@@ -51,14 +57,23 @@ export class PerspectiveTabBar extends TabBar<Widget> {
         switch (event.type) {
             case "mousedown":
                 const action: string = (event.target as HTMLElement).id;
-                if ([TabBarActions.Maximize as string, TabBarActions.Config].indexOf(action) === -1) {
+                if (
+                    [
+                        TabBarActions.Maximize as string,
+                        TabBarActions.Config
+                    ].indexOf(action) === -1
+                ) {
                     break;
                 }
                 const tabs = this.contentNode.children;
 
                 // Find the index of the released tab.
                 const index = ArrayExt.findFirstIndex(tabs, tab => {
-                    return ElementExt.hitTest(tab, event.clientX, event.clientY);
+                    return ElementExt.hitTest(
+                        tab,
+                        event.clientX,
+                        event.clientY
+                    );
                 });
 
                 if (index < 0) {
@@ -67,7 +82,8 @@ export class PerspectiveTabBar extends TabBar<Widget> {
 
                 const title = this.titles[index];
                 if (action === TabBarActions.Maximize) {
-                    this._tabMaximizeRequested && this._tabMaximizeRequested.emit({title});
+                    this._tabMaximizeRequested &&
+                        this._tabMaximizeRequested.emit({title});
                 } else {
                     this._toggleConfigRequested.emit({title});
                 }
@@ -82,7 +98,9 @@ export class PerspectiveTabBar extends TabBar<Widget> {
     }
 
     public checkCondensed(msg: Widget.ResizeMessage): void {
-        const approxWidth = (msg ? msg.width : this.node.offsetWidth) / this.contentNode.children.length;
+        const approxWidth =
+            (msg ? msg.width : this.node.offsetWidth) /
+            this.contentNode.children.length;
         if (approxWidth < 400) {
             this.node.classList.add("condensed");
         } else {

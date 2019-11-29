@@ -94,7 +94,7 @@
         "start": "lerna run start --stream --scope",
         "precommit": "npm run lint",
         "lint": "npm-run-all lint:* lint_python",
-        "lint:eslint": "eslint \"packages/*/src/**/*.js\" \"packages/*/test/**/*.js\" \"examples/*/*.js\"",
+        "lint:eslint": "eslint \"packages/*/src/**/*.+(js|ts)\" \"packages/*/test/**/*.+(js|ts)\" \"examples/*/*.+(js|ts)\"",
         "lint_python": "node scripts/lint_python.js",
         "fix:es": "npm run lint:eslint -- --fix",
         "fix:md": "prettier docs/md/*.md --prose-wrap=always --write",

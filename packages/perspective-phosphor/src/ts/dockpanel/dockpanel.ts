@@ -17,15 +17,19 @@ import {PerspectiveWidget, PerspectiveWidgetOptions} from "../widget";
 import {Signal} from "@phosphor/signaling";
 import {CommandRegistry} from "@phosphor/commands";
 
-export interface SerializableITabAreaConfig extends Omit<DockLayout.ITabAreaConfig, "widgets"> {
+export interface SerializableITabAreaConfig
+    extends Omit<DockLayout.ITabAreaConfig, "widgets"> {
     widgets: PerspectiveWidgetOptions[];
 }
 
-export interface SerializableISplitAreaConfig extends Omit<DockLayout.ISplitAreaConfig, "widgets"> {
+export interface SerializableISplitAreaConfig
+    extends Omit<DockLayout.ISplitAreaConfig, "widgets"> {
     widgets: PerspectiveWidgetOptions[];
 }
 
-export type SerilizableAreaConfig = SerializableITabAreaConfig | SerializableISplitAreaConfig;
+export type SerilizableAreaConfig =
+    | SerializableITabAreaConfig
+    | SerializableISplitAreaConfig;
 
 export interface SerilizableILayoutConfig {
     main: SerilizableAreaConfig | null;
@@ -35,10 +39,18 @@ class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
     public dock: PerspectiveDockPanel;
 
     public createTabBar(): TabBar<Widget> {
-        const tabbar = new PerspectiveTabBar({renderer: new PerspectiveTabBarRenderer(this.dock.maximized)});
+        const tabbar = new PerspectiveTabBar({
+            renderer: new PerspectiveTabBarRenderer(this.dock.maximized)
+        });
         tabbar.addClass("p-DockPanel-tabBar");
-        tabbar.tabMaximizeRequested.connect(this.dock.onTabMaximizeRequested, this);
-        tabbar.toggleConfigRequested.connect(this.dock.onToggleConfigRequested, this);
+        tabbar.tabMaximizeRequested.connect(
+            this.dock.onTabMaximizeRequested,
+            this
+        );
+        tabbar.toggleConfigRequested.connect(
+            this.dock.onToggleConfigRequested,
+            this
+        );
         return tabbar;
     }
 }
@@ -65,8 +77,15 @@ export class PerspectiveDockPanel extends DockPanel {
 
     private listeners: WeakMap<PerspectiveWidget, Function>;
 
-    constructor(name: string, options: PerspectiveDockPanelOptions = {enableContextMenu: true}) {
-        super({renderer: new PerspectiveDockPanelRenderer(), spacing: 14, ...options});
+    constructor(
+        name: string,
+        options: PerspectiveDockPanelOptions = {enableContextMenu: true}
+    ) {
+        super({
+            renderer: new PerspectiveDockPanelRenderer(),
+            spacing: 14,
+            ...options
+        });
 
         // Need a cleaner way to do this
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,29 +110,45 @@ export class PerspectiveDockPanel extends DockPanel {
         });
     }
 
-    public addWidget(widget: PerspectiveWidget, options: DockPanel.IAddOptions = {}): void {
+    public addWidget(
+        widget: PerspectiveWidget,
+        options: DockPanel.IAddOptions = {}
+    ): void {
         this.addWidgetEventListeners(widget);
         super.addWidget(widget, options);
     }
 
     public restore(layout: SerilizableILayoutConfig): void {
-        const newLayout = PerspectiveDockPanel.mapWidgets((config: PerspectiveWidgetOptions) => this.createWidget(config.title, config), layout);
+        const newLayout = PerspectiveDockPanel.mapWidgets(
+            (config: PerspectiveWidgetOptions) =>
+                this.createWidget(config.title, config),
+            layout
+        );
         this.restoreLayout(newLayout);
     }
 
     public save(): SerilizableILayoutConfig {
         const layout = this.saveLayout();
-        return PerspectiveDockPanel.mapWidgets((widget: PerspectiveWidget) => widget.save(), layout);
+        return PerspectiveDockPanel.mapWidgets(
+            (widget: PerspectiveWidget) => widget.save(),
+            layout
+        );
     }
 
-    public onToggleConfigRequested = (sender: PerspectiveTabBar, args: TabMaximizeArgs): void => {
+    public onToggleConfigRequested = (
+        sender: PerspectiveTabBar,
+        args: TabMaximizeArgs
+    ): void => {
         (args.title.owner as PerspectiveWidget).toggleConfig();
     };
     /**
      * Handle the `tabMaximizeRequested` signal from a tab bar.
      */
     // rethink maximize
-    public onTabMaximizeRequested = (sender: PerspectiveTabBar, args: TabMaximizeArgs): void => {
+    public onTabMaximizeRequested = (
+        sender: PerspectiveTabBar,
+        args: TabMaximizeArgs
+    ): void => {
         this.maximized = !this.maximized;
         if (this.maximized) {
             this.minimizedLayout = this.saveLayout();
@@ -132,7 +167,10 @@ export class PerspectiveDockPanel extends DockPanel {
     };
 
     protected findTabbar(widget: PerspectiveWidget): PerspectiveTabBar {
-        return find(this.tabBars(), bar => bar.titles[0].owner === widget) as PerspectiveTabBar;
+        return find(
+            this.tabBars(),
+            bar => bar.titles[0].owner === widget
+        ) as PerspectiveTabBar;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -147,7 +185,10 @@ export class PerspectiveDockPanel extends DockPanel {
         return contextMenu;
     }
 
-    private showMenu(sender: PerspectiveDockPanel, args: ContextMenuArgs): void {
+    private showMenu(
+        sender: PerspectiveDockPanel,
+        args: ContextMenuArgs
+    ): void {
         // create menu in add widget instead??
         const {event, widget} = args;
         const menu = this.createMenu(widget);
@@ -190,17 +231,24 @@ export class PerspectiveDockPanel extends DockPanel {
         const settings = (event: CustomEvent): void => {
             widget.title.className = event.detail && "settings_open";
         };
-        const contextMenu = (event: MouseEvent): void => this.onContextMenu.emit({widget, event});
+        const contextMenu = (event: MouseEvent): void =>
+            this.onContextMenu.emit({widget, event});
         widget.viewer.addEventListener("contextmenu", contextMenu);
         widget.viewer.addEventListener("perspective-toggle-settings", settings);
 
         this.listeners.set(widget, () => {
             widget.viewer.removeEventListener("contextmenu", contextMenu);
-            widget.viewer.removeEventListener("perspective-toggle-settings", settings);
+            widget.viewer.removeEventListener(
+                "perspective-toggle-settings",
+                settings
+            );
         });
     }
 
-    public createWidget = (title: string, config: PerspectiveWidgetOptions): PerspectiveWidget => {
+    public createWidget = (
+        title: string,
+        config: PerspectiveWidgetOptions
+    ): PerspectiveWidget => {
         const widget = new PerspectiveWidget(title, config);
         this.addWidgetEventListeners(widget);
         return widget;
@@ -208,11 +256,20 @@ export class PerspectiveDockPanel extends DockPanel {
 
     public static mapWidgets(widgetFunc: any, layout: any): any {
         if (layout.main) {
-            layout.main = PerspectiveDockPanel.mapWidgets(widgetFunc, layout.main);
+            layout.main = PerspectiveDockPanel.mapWidgets(
+                widgetFunc,
+                layout.main
+            );
         } else if (layout.children) {
-            layout.children = layout.children.map((x: DockLayout.ITabAreaConfig | DockLayout.ISplitAreaConfig) => PerspectiveDockPanel.mapWidgets(widgetFunc, x));
+            layout.children = layout.children.map(
+                (x: DockLayout.ITabAreaConfig | DockLayout.ISplitAreaConfig) =>
+                    PerspectiveDockPanel.mapWidgets(widgetFunc, x)
+            );
         } else if (layout.widgets) {
-            layout.widgets = layout.widgets.map((x: PerspectiveWidget | PerspectiveWidgetOptions) => widgetFunc(x));
+            layout.widgets = layout.widgets.map(
+                (x: PerspectiveWidget | PerspectiveWidgetOptions) =>
+                    widgetFunc(x)
+            );
         }
         return layout;
     }

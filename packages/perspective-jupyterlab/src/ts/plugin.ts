@@ -20,13 +20,16 @@ import {PerspectiveView} from "./view";
 import {PERSPECTIVE_VERSION} from "./version";
 
 /**
- * PerspectiveJupyterPlugin Defines the Jupyterlab plugin, and registers `PerspectiveModel` and `PerspectiveView`
- * to be called on initialization.
+ * PerspectiveJupyterPlugin Defines the Jupyterlab plugin, and registers
+ * `PerspectiveModel` and `PerspectiveView` to be called on initialization.
  */
 export const PerspectiveJupyterPlugin: IPlugin<Application<Widget>, void> = {
     id: "@finos/perspective-jupyterlab",
     requires: [IJupyterWidgetRegistry],
-    activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
+    activate: (
+        app: Application<Widget>,
+        registry: IJupyterWidgetRegistry
+    ): void => {
         registry.registerWidget({
             name: "@finos/perspective-jupyterlab",
             version: PERSPECTIVE_VERSION,
