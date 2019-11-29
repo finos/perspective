@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from pytest import raises
 from perspective import Table, PerspectiveError, PerspectiveCppError
 
@@ -33,7 +34,8 @@ class TestException(object):
             tbl.view()
             tbl.delete()
             assert str(
-                ex.value) == "Cannot delete a Table with active views still linked to it - call delete() on each view, and try again."
+                ex.value) == "Cannot delete a Table with active views still" + \
+                " linked to it - call delete() on each view, and try again."
 
         with raises(PerspectiveCppError) as ex:
             tbl.view(row_pivots=["b"])

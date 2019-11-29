@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 
 import six
 import time
@@ -231,8 +232,10 @@ class TestTableNumpy(object):
         }
 
     def test_table_np_datetime(self):
-        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array(
-            [datetime(2019, 7, 11, 12, 14)], dtype=np.datetime64)}
+        data = {
+            "a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64),
+            "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=np.datetime64)
+        }
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
@@ -242,8 +245,10 @@ class TestTableNumpy(object):
         assert tbl.view().to_numpy() == data
 
     def test_table_np_datetime_mixed_dtype(self):
-        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array(
-            [datetime(2019, 7, 11, 12, 14)], dtype=object)}
+        data = {
+            "a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64),
+            "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)
+        }
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
@@ -268,7 +273,10 @@ class TestTableNumpy(object):
         })
 
         assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 15, 30, 5), datetime(2019, 7, 11, 15, 30, 5)]
+            "a": [
+                datetime(2019, 7, 11, 15, 30, 5),
+                datetime(2019, 7, 11, 15, 30, 5)
+            ]
         }
 
     def test_table_np_datetime_string_on_schema(self):
@@ -280,12 +288,18 @@ class TestTableNumpy(object):
         tbl.update({"a": data})
 
         assert tbl.view().to_dict() == {
-            "a": [datetime(2019, 7, 11, 15, 30, 5), datetime(2019, 7, 11, 15, 30, 5)]
+            "a": [
+                datetime(2019, 7, 11, 15, 30, 5),
+                datetime(2019, 7, 11, 15, 30, 5)
+            ]
         }
 
     def test_table_np_datetime_ns(self):
         tbl = Table({
-            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")
+            "a": np.array(
+                [datetime(2019, 7, 12, 11, 0)],
+                dtype="datetime64[ns]"
+            )
         })
 
         assert tbl.view().to_dict() == {
@@ -294,7 +308,10 @@ class TestTableNumpy(object):
 
     def test_table_np_datetime_us(self):
         tbl = Table({
-            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[us]")
+            "a": np.array(
+                [datetime(2019, 7, 12, 11, 0)],
+                dtype="datetime64[us]"
+            )
         })
 
         assert tbl.view().to_dict() == {

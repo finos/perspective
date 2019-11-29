@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from datetime import date, datetime
 
 try:
@@ -41,7 +42,9 @@ def _dtype_to_pythontype(dtype):
 
 
 def _dtype_to_str(dtype):
-    '''Returns the normalized string representation of a Perspective type, compatible with Perspective.js'''
+    '''Returns the normalized string representation of a Perspective type,
+    compatible with Perspective.js.
+    '''
     mapping = {
         t_dtype.DTYPE_BOOL: "boolean",
         t_dtype.DTYPE_FLOAT32: "float",
@@ -59,7 +62,9 @@ def _dtype_to_str(dtype):
 
 
 def _str_to_pythontype(typestring):
-    '''Returns a Python type from the normalized string representation of a Perspective type, i.e. from Perspective.js'''
+    '''Returns a Python type from the normalized string representation of a
+    Perspective type, i.e. from Perspective.js
+    '''
     mapping = {
         "integer": int,
         "float": float,

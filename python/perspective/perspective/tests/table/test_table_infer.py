@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import six
 from perspective.table import Table
 from datetime import date, datetime
@@ -75,7 +76,7 @@ class TestTableInfer(object):
             assert tbl.view().to_dict() == {
                 "a": [1.0, 2.0, 3.0, 4.0, 2147483648.0]}
 
-    def test_table_infer_bool(self):
+    def test_table_infer_bool_2(self):
         data = {"a": [None, None, None, None, True, True, True]}
         tbl = Table(data)
         assert tbl.schema() == {"a": bool}

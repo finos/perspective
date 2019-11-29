@@ -1,18 +1,20 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import numpy as np
 from math import trunc
 from ._constants import COLUMN_SEPARATOR_STRING
 
 try:
-    from .libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
-        get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
-        get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
+    from .libbinding import get_data_slice_zero, get_data_slice_one, \
+        get_data_slice_two, get_from_data_slice_zero, get_from_data_slice_one, \
+        get_from_data_slice_two, get_pkeys_from_data_slice_zero, \
+        get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
 except ImportError:
     pass
 
@@ -54,9 +56,11 @@ def to_format(options, view, output_format):
             name = COLUMN_SEPARATOR_STRING.join(
                 [n.to_string(False) for n in column_names[cidx]])
 
+            ncols = len(view._config.get_columns())
+
+            # don't emit columns used for hidden sort
             if _mod((cidx - (1 if view._sides > 0 else 0)),
-                    (num_columns + num_hidden)) >= len(view._config.get_columns()):
-                # don't emit columns used for hidden sort
+                    (num_columns + num_hidden)) >= ncols:
                 continue
             elif cidx == options["start_col"] and view._sides > 0:
                 if options["has_row_path"]:
@@ -97,9 +101,10 @@ def to_format(options, view, output_format):
                 for pkey in pkeys:
                     data[-1]['__INDEX__'].append(pkey)
             elif output_format in ('dict', 'numpy'):
+                # ensure that `__INDEX__` has the same number of rows as
+                # returned dataset
                 if len(pkeys) == 0:
-                    data["__INDEX__"].append(
-                        [])  # ensure that `__INDEX__` has the same number of rows as returned dataset
+                    data["__INDEX__"].append([])
                 for pkey in pkeys:
                     data['__INDEX__'].append([pkey])
 
@@ -116,7 +121,9 @@ def to_format(options, view, output_format):
 
 
 def _to_format_helper(view, options=None):
-    '''Retrieves the data slice and column names in preparation for data serialization.'''
+    '''Retrieves the data slice and column names in preparation for data
+    serialization.
+    '''
     options = options or {}
     opts = _parse_format_options(view, options)
 
@@ -152,9 +159,15 @@ def _parse_format_options(view, options):
     max_cols = view.num_columns() + (1 if view._sides > 0 else 0)
     return {
         "start_row": options.get("start_row", 0),
-        "end_row": min(options.get("end_row", view.num_rows()), view.num_rows()),
+        "end_row": min(
+            options.get("end_row", view.num_rows()),
+            view.num_rows()
+        ),
         "start_col": options.get("start_col", 0),
-        "end_col": min(options.get("end_col", max_cols) * (view._num_hidden_cols() + 1), max_cols),
+        "end_col": min(
+            options.get("end_col", max_cols) * (view._num_hidden_cols() + 1),
+            max_cols
+        ),
         "index": options.get("index", False),
         "leaves_only": options.get("leaves_only", False),
         "has_row_path": view._sides > 0 and (not view._column_only)

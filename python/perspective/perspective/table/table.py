@@ -14,7 +14,8 @@ from ..core.exception import PerspectiveError
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 try:
-    from .libbinding import make_table, str_to_filter_op, t_filter_op, t_op, t_dtype
+    from .libbinding import make_table, str_to_filter_op, t_filter_op, t_op, \
+        t_dtype
 except ImportError:
     pass
 
@@ -139,7 +140,8 @@ class Table(object):
 
     def is_valid_filter(self, filter):
         '''Tests whether a given filter expression string is valid, e.g. that
-        the filter term is not None or an unparsable date/datetime.
+        the filter term is not None or an unparsable date/datetime.  `null`/
+        `not null` operators don't need a comparison value.
 
         Args:
             filter (:obj:`string`): The filter expression to validate.
@@ -152,8 +154,8 @@ class Table(object):
         else:
             filter_op = filter[1]
 
-        if filter_op == t_filter_op.FILTER_OP_IS_NULL or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
-            # null/not null operators don't need a comparison value
+        if filter_op == t_filter_op.FILTER_OP_IS_NULL or \
+                filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
             return True
 
         value = filter[2]
@@ -345,7 +347,8 @@ class Table(object):
         '''
         if len(self._views) > 0:
             raise PerspectiveError(
-                "Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
+                "Cannot delete a Table with active views still linked to it -"
+                " call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 

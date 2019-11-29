@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from six import iteritems, string_types
 from ..core.exception import PerspectiveError
 from ..core import Aggregate, Plugin, ALL_FILTERS, Sort
@@ -105,7 +106,9 @@ def validate_filters(filters):
     if filters is None:
         return []
 
-    elif isinstance(filters, list) and len(filters) > 0 and not isinstance(filters[0], list):
+    elif isinstance(filters, list) and \
+            len(filters) > 0 and \
+            not isinstance(filters[0], list):
         # wrap
         filters = [filters]
 
@@ -122,7 +125,8 @@ def validate_filters(filters):
                     elif item not in ("is null", "is not null"):
                         if len(f) != 3:
                             raise PerspectiveError(
-                                'Cannot parse filter - {} operator must have a comparison value.'.format(item))
+                                'Cannot parse filter - {}'.format(item) +
+                                ' operator must have a comparison value.')
         return filters
     else:
         raise PerspectiveError(

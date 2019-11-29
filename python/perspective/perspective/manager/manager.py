@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import logging
 import json
 import random
@@ -40,19 +41,24 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class PerspectiveManager(object):
-    '''PerspectiveManager is an orchestrator for running Perspective on the server side.
+    '''PerspectiveManager is an orchestrator for running Perspective on the
+    server side.
 
-    The core functionality resides in `process()`, which receives JSON-serialized messages from a client (usually `perspective-viewer` in the browser),
-    executes the commands in the message, and returns the results of those commands back to the `post_callback`.
+    The core functionality resides in `process()`, which receives
+    JSON-serialized messages from a client (usually `perspective-viewer` in the
+    browser), executes the commands in the message, and returns the results of
+    those commands back to the `post_callback`.  The manager cannot create
+    tables or views - use `host_table` or `host_view` to pass Table/View
+    instances to the manager.  Because Perspective is designed to be used in a
+    shared context, i.e. multiple clients all accessing the same `Table`,
+    PerspectiveManager comes with the context of `sessions` - an
+    encapsulation of the actions and resources used by a single connection
+    to Perspective.
 
-    The manager cannot create tables or views - use `host_table` or `host_view` to pass Table/View instances to the manager.
-
-    Because Perspective is designed to be used in a shared context, i.e. multiple clients all accessing the same `Table`,
-    PerspectiveManager comes with the context of `sessions` - an encapsulation of the actions and resources used by a single
-    connection to Perspective.
-
-    - When a client connects, for example through a websocket, a new session should be spawned using `new_session()`.
-    - When the websocket closes, call `close()` on the session instance to clean up associated resources.
+    - When a client connects, for example through a websocket, a new session
+        should be spawned using `new_session()`.
+    - When the websocket closes, call `close()` on the session instance to
+        clean up associated resources.
     '''
 
     def __init__(self):
@@ -71,24 +77,30 @@ class PerspectiveManager(object):
                 "Only `Table()` and `View()` instances can be hosted.")
 
     def host_table(self, name, table):
-        '''Given a reference to a `Table`, manage it and allow operations on it to occur through the Manager.'''
+        '''Given a reference to a `Table`, manage it and allow operations on it
+        to occur through the Manager.
+        '''
         name = name or gen_name()
         self._tables[name] = table
         return name
 
     def host_view(self, name, view):
-        '''Given a reference to a `View`, add it to the manager's views container.'''
+        '''Given a reference to a `View`, add it to the manager's views
+        container.
+        '''
         self._views[name] = view
 
     def new_session(self):
         return PerspectiveSession(self)
 
     def _process(self, msg, post_callback, client_id=None):
-        '''Given a message from the client, process it through the Perspective engine.
+        '''Given a message from the client, process it through the Perspective
+        engine.
 
         Args:
-            msg (dict): a message from the client with instructions that map to engine operations
-            post_callback (callable): a function that returns data to the client
+            msg (dict): a message from the client with instructions that map to
+                engine operations post_callback (callable): a function that
+                returns data to the client
         '''
         if isinstance(msg, str):
             if msg == "heartbeat":   # TODO fix this
@@ -97,7 +109,8 @@ class PerspectiveManager(object):
 
         if not isinstance(msg, dict):
             raise PerspectiveError(
-                "Message passed into `_process` should either be a JSON-serialized string or a dict.")
+                "Message passed into `_process` should either be a "
+                "JSON-serialized string or a dict.")
 
         cmd = msg["cmd"]
 
@@ -136,7 +149,9 @@ class PerspectiveManager(object):
                 cls=DateTimeEncoder)
 
     def _process_method_call(self, msg, post_callback):
-        '''When the client calls a method, validate the instance it calls on and return the result.'''
+        '''When the client calls a method, validate the instance it calls on
+        and return the result.
+        '''
         if msg["cmd"] == "table_method":
             table_or_view = self._tables.get(msg["name"], None)
         else:
@@ -191,12 +206,15 @@ class PerspectiveManager(object):
                     cls=DateTimeEncoder))
 
     def _process_subscribe(self, msg, table_or_view, post_callback):
-        '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
+        '''When the client attempts to add or remove a subscription callback,
+        validate and perform the requested operation.
 
         Args:
             msg (dict): the message from the client
-            table_or_view {Table|View} : the instance that the subscription will be called on
-            post_callback (callable): a method that notifies the client with new data
+            table_or_view {Table|View} : the instance that the subscription
+                will be called on
+            post_callback (callable): a method that notifies the client with
+                new data
         '''
         try:
             callback = None
@@ -244,7 +262,8 @@ class PerspectiveManager(object):
 
         if not client_id:
             raise PerspectiveError(
-                "Cannot garbage collect views that are not linked to a specific client ID!")
+                "Cannot garbage collect views that are not linked to a"
+                " specific client ID!")
 
         for name, view in self._views.items():
             if view._client_id == client_id:

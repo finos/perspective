@@ -1,15 +1,17 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import six
 import pandas
 import numpy
 from distutils.util import strtobool
 from math import isnan
+
 from ._date_validator import _PerspectiveDateValidator
 from ..core.data import deconstruct_numpy, deconstruct_pandas
 from ..core.data.pd import _parse_datetime_index
@@ -32,21 +34,20 @@ def _flatten_structure(array):
 def _type_to_format(data_or_schema):
     '''Deconstructs data passed in by the user into a standard format:
 
-    - A list of dicts, each of which represents a single row.
-    - A dict of lists, each of which represents a single column.
+    - A :obj:`list` of dicts, each of which represents a single row.
+    - A dict of :obj:`list`s, each of which represents a single column.
 
     Schemas passed in by the user are preserved as-is.
-
-    Pandas DataFrames are flattened and returned as a columnar dataset.
-
-    Finally, an integer is assigned to represent the type of the dataset to the internal engine.
+    :class:`pandas.DataFrame`s are flattened and returned as a columnar
+    dataset.  Finally, an integer is assigned to represent the type of the
+    dataset to the internal engine.
 
     Returns:
-        int: type
-                - 0: records (list[dict])
-                - 1: columns (dict[str:list])
+        :obj:`int`: type
+                - 0: records (:obj:`list` of :obj:`dict`)
+                - 1: columns (:obj:`dict` of :obj:`str` to :obj:`list`)
                 - 2: schema (dist[str]/dict[type])
-        {list, dict}: processed data
+        ():obj:`list`/:obj:`dict`): processed data
     '''
     if isinstance(data_or_schema, list):
         # records
@@ -66,21 +67,25 @@ def _type_to_format(data_or_schema):
                     iter(v)
                 except TypeError:
                     raise NotImplementedError(
-                        "Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
+                        "Cannot load dataset of non-iterable type: Data passed"
+                        " in through a dict must be of type :obj:`list` or"
+                        " `numpy.ndarray`.")
                 else:
                     return isinstance(v, numpy.ndarray), 1, data_or_schema
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
             raise NotImplementedError(
-                "Data should be dict of numpy.ndarray or a structured array.")
+                "Data should be dict of :class:`numpy.ndarray` or a"
+                " structured array.")
         return True, 1, _flatten_structure(data_or_schema)
     else:
         if not (isinstance(data_or_schema, pandas.DataFrame)
                 or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
             raise NotImplementedError(
-                "Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.")
+                "Data must be dataframe, dict, :obj:`list`, numpy.recarray, or"
+                " a numpy structured array.")
         else:
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
@@ -88,7 +93,9 @@ def _type_to_format(data_or_schema):
 
 
 class _PerspectiveAccessor(object):
-    '''A uniform accessor that wraps data/schemas of varying formats with a common `marshal` function.'''
+    '''A uniform accessor that wraps data/schemas of varying formats with a
+    common :func:`marshal` function.
+    '''
 
     INTEGER_TYPES = six.integer_types + (numpy.integer,)
 
@@ -96,10 +103,12 @@ class _PerspectiveAccessor(object):
         self._is_numpy, self._format, self._data_or_schema = _type_to_format(
             data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
-        self._row_count = \
-            len(self._data_or_schema) if self._format == 0 else \
-            len(max(self._data_or_schema.values(), key=len)) if self._format == 1 else \
-            0
+        if self._format == 0:
+            self._row_count = len(self._data_or_schema)
+        elif self._format == 1:
+            self._row_count = len(max(self._data_or_schema.values(), key=len))
+        else:
+            self._row_count = 0
 
         if isinstance(self._data_or_schema, list):
             self._names = list(
@@ -115,13 +124,15 @@ class _PerspectiveAccessor(object):
         for name in self._names:
             if not isinstance(name, six.string_types):
                 raise PerspectiveError(
-                    "Column names should be strings, not type `{0}`".format(type(name).__name__))
+                    "Column names should be strings, not"
+                    " type `{0}`".format(type(name).__name__))
             if self._is_numpy:
                 array = self._data_or_schema[name]
 
                 if not isinstance(array, numpy.ndarray):
                     raise PerspectiveError(
-                        "Mixed datasets of numpy.ndarray and lists are not supported.")
+                        "Mixed datasets of numpy.ndarray and :obj:`list`s are"
+                        " not supported.")
 
                 dtype = array.dtype
                 if name == "index" and isinstance(
@@ -176,14 +187,17 @@ class _PerspectiveAccessor(object):
             return None
 
     def marshal(self, cidx, ridx, dtype):
-        '''Returns the element at the specified column and row index, and marshals it into an object compatible with the core engine's `fill` method.
+        '''Returns the element at the specified column and row index, and
+        marshals it into an object compatible with the core engine's
+        :func:`fill` method.
 
-        If DTYPE_DATE or DTYPE_TIME is specified for a string value, attempt to parse the string value or return `None`.
+        If DTYPE_DATE or DTYPE_TIME is specified for a string value, attempt
+        to parse the string value or return :obj:`None`.
 
         Args:
-            cidx (int)
-            ridx (int)
-            dtype (.libbinding.t_dtype)
+            cidx (:obj:`int`)
+            ridx (:obj:`int`)
+            dtype (:obj:`.libbinding.t_dtype`)
 
         Returns:
             object or None
@@ -245,13 +259,15 @@ class _PerspectiveAccessor(object):
         return val
 
     def _get_numpy_column(self, name):
-        '''For columnar datasets, return the list/Numpy array that contains the data for a single column.
+        '''For columnar datasets, return the :obj:`list`/Numpy array that
+        contains the data for a single column.
 
         Args:
-            name (str): the column name to look up
+            name (:obj:`str)`: the column name to look up
 
         Returns:
-            list/numpy.array/None : returns the column's data, or None if it cannot be found.
+            (:obj:`list`/numpy.array/None): returns the column's data, or None
+                if it cannot be found.
         '''
         data = self._data_or_schema.get(name, None)
         if data is None:
@@ -261,14 +277,16 @@ class _PerspectiveAccessor(object):
     def _has_column(self, ridx, name):
         '''Given a column name, validate that it is in the row.
 
-        This allows differentiation between value is None (unset) and value not in row (no-op).
+        This allows differentiation between value is None (unset) and value not
+        in row (no-op).
 
         Args:
             ridx (int)
             name (str)
 
         Returns:
-            bool : True if column is in row, or if column belongs to pkey/op columns required by the engine. False otherwise.
+            bool: True if column is in row, or if column belongs to pkey/op
+                columns required by the engine. False otherwise.
         '''
         if name in ("psp_pkey", "psp_okey", "psp_op"):
             return True

@@ -228,7 +228,8 @@ class View(object):
 
         if mode not in ["none", "cell", "row"]:
             raise ValueError(
-                'Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(mode))
+                'Invalid update mode {} - valid on_update modes are "none",'
+                ' "cell", or "row"'.format(mode))
 
         if mode == "cell" or mode == "row":
             if not self._view.get_deltas_enabled():
@@ -458,8 +459,8 @@ class View(object):
         Returns:
             :obj:`str`: A CSV-formatted string containing the serialized data.
         '''
-        return self.to_df(
-            **options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
+        date_format = options.pop("date_format", "%Y/%m/%d %H:%M:%S")
+        return self.to_df(**options).to_csv(date_format=date_format)
 
     @wraps(to_records)
     def to_json(self, **options):
@@ -479,7 +480,9 @@ class View(object):
         return hidden
 
     def _wrapped_on_update_callback(self, **kwargs):
-        '''Provide the user-defined callback function with additional metadata from the view.'''
+        '''Provide the user-defined callback function with additional metadata
+        from the view.
+        '''
         mode = kwargs["mode"]
         cache = kwargs["cache"]
         callback = kwargs["callback"]

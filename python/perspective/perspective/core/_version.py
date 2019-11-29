@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 
 from collections import namedtuple
 
@@ -26,5 +27,6 @@ __version__ = '{}.{}.{}{}'.format(
     version_info.minor,
     version_info.micro,
     (''
-     if version_info.releaselevel == 'final'
-     else _specifier_[version_info.releaselevel] + "." + str(version_info.serial)))
+        if version_info.releaselevel == 'final'
+        else _specifier_[version_info.releaselevel] + "." +
+        str(version_info.serial)))
