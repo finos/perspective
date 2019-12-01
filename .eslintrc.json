@@ -26,7 +26,22 @@
         "parser": "@typescript-eslint/parser",
         "extends":  [
             "plugin:@typescript-eslint/recommended"
-        ]
+        ],
+        "rules": {
+            "@typescript-eslint/no-explicit-any": "off",
+            "camelcase": "off",
+            "@typescript-eslint/camelcase": "off"
+
+        }    
+    }, {
+        "files": ["**/test/**/*.js"],
+        "rules": {
+            "max-len": ["warn", {
+                "code": 200,
+                "comments": 200,
+                "ignoreTrailingComments": true
+            }]
+        }    
     }],
     "rules": {
         "prettier/prettier": ["error", {
@@ -34,6 +49,13 @@
             "tabWidth": 4,
             "bracketSpacing": false
         }],
+        "max-len": ["warn", {
+            "code": 200,
+            "comments": 80,
+            "ignoreTrailingComments": true
+        }],
+        "@typescript-eslint/camelcase": "off",
+        "camelcase": "off",
         "no-const-assign": "error",
         "no-this-before-super": "error",
         "no-undef": "error",

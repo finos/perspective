@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import logging
 import json
 import random
@@ -40,19 +41,24 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class PerspectiveManager(object):
-    '''PerspectiveManager is an orchestrator for running Perspective on the server side.
+    '''PerspectiveManager is an orchestrator for running Perspective on the
+    server side.
 
-    The core functionality resides in `process()`, which receives JSON-serialized messages from a client (usually `perspective-viewer` in the browser),
-    executes the commands in the message, and returns the results of those commands back to the `post_callback`.
+    The core functionality resides in `process()`, which receives
+    JSON-serialized messages from a client (usually `perspective-viewer` in the
+    browser), executes the commands in the message, and returns the results of
+    those commands back to the `post_callback`.  The manager cannot create
+    tables or views - use `host_table` or `host_view` to pass Table/View
+    instances to the manager.  Because Perspective is designed to be used in a
+    shared context, i.e. multiple clients all accessing the same `Table`,
+    PerspectiveManager comes with the context of `sessions` - an
+    encapsulation of the actions and resources used by a single connection
+    to Perspective.
 
-    The manager cannot create tables or views - use `host_table` or `host_view` to pass Table/View instances to the manager.
-
-    Because Perspective is designed to be used in a shared context, i.e. multiple clients all accessing the same `Table`,
-    PerspectiveManager comes with the context of `sessions` - an encapsulation of the actions and resources used by a single
-    connection to Perspective.
-
-    - When a client connects, for example through a websocket, a new session should be spawned using `new_session()`.
-    - When the websocket closes, call `close()` on the session instance to clean up associated resources.
+    - When a client connects, for example through a websocket, a new session
+        should be spawned using `new_session()`.
+    - When the websocket closes, call `close()` on the session instance to
+        clean up associated resources.
     '''
 
     def __init__(self):
@@ -67,27 +73,34 @@ class PerspectiveManager(object):
         elif isinstance(data, View):
             self._views[name] = data
         else:
-            raise PerspectiveError("Only `Table()` and `View()` instances can be hosted.")
+            raise PerspectiveError(
+                "Only `Table()` and `View()` instances can be hosted.")
 
     def host_table(self, name, table):
-        '''Given a reference to a `Table`, manage it and allow operations on it to occur through the Manager.'''
+        '''Given a reference to a `Table`, manage it and allow operations on it
+        to occur through the Manager.
+        '''
         name = name or gen_name()
         self._tables[name] = table
         return name
 
     def host_view(self, name, view):
-        '''Given a reference to a `View`, add it to the manager's views container.'''
+        '''Given a reference to a `View`, add it to the manager's views
+        container.
+        '''
         self._views[name] = view
 
     def new_session(self):
         return PerspectiveSession(self)
 
     def _process(self, msg, post_callback, client_id=None):
-        '''Given a message from the client, process it through the Perspective engine.
+        '''Given a message from the client, process it through the Perspective
+        engine.
 
         Args:
-            msg (dict): a message from the client with instructions that map to engine operations
-            post_callback (callable): a function that returns data to the client
+            msg (dict): a message from the client with instructions that map to
+                engine operations post_callback (callable): a function that
+                returns data to the client
         '''
         if isinstance(msg, str):
             if msg == "heartbeat":   # TODO fix this
@@ -95,47 +108,69 @@ class PerspectiveManager(object):
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):
-            raise PerspectiveError("Message passed into `_process` should either be a JSON-serialized string or a dict.")
+            raise PerspectiveError(
+                "Message passed into `_process` should either be a "
+                "JSON-serialized string or a dict.")
 
         cmd = msg["cmd"]
 
         try:
             if cmd == "init":
                 # return empty response
-                post_callback(json.dumps(self._make_message(msg["id"], None), cls=DateTimeEncoder))
+                post_callback(
+                    json.dumps(
+                        self._make_message(
+                            msg["id"],
+                            None),
+                        cls=DateTimeEncoder))
             elif cmd == "table":
                 try:
                     # create a new Table and track it
                     data_or_schema = msg["args"][0]
-                    self._tables[msg["name"]] = Table(data_or_schema, **msg.get("options", {}))
+                    self._tables[msg["name"]] = Table(
+                        data_or_schema, **msg.get("options", {}))
                 except IndexError:
                     self._tables[msg["name"]] = []
             elif cmd == "view":
                 # create a new view and track it with the assigned client_id.
-                new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
+                new_view = self._tables[msg["table_name"]].view(
+                    **msg.get("config", {}))
                 new_view._client_id = client_id
                 self._views[msg["view_name"]] = new_view
             elif cmd == "table_method" or cmd == "view_method":
                 self._process_method_call(msg, post_callback)
         except(PerspectiveError, PerspectiveCppError) as e:
             # Catch errors and return them to client
-            post_callback(json.dumps(self._make_error_message(msg["id"], str(e))), cls=DateTimeEncoder)
+            post_callback(
+                json.dumps(
+                    self._make_error_message(
+                        msg["id"],
+                        str(e))),
+                cls=DateTimeEncoder)
 
     def _process_method_call(self, msg, post_callback):
-        '''When the client calls a method, validate the instance it calls on and return the result.'''
+        '''When the client calls a method, validate the instance it calls on
+        and return the result.
+        '''
         if msg["cmd"] == "table_method":
             table_or_view = self._tables.get(msg["name"], None)
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
-                post_callback(json.dumps(self._make_error_message(msg["id"], "View is not initialized"), cls=DateTimeEncoder))
+                post_callback(
+                    json.dumps(
+                        self._make_error_message(
+                            msg["id"],
+                            "View is not initialized"),
+                        cls=DateTimeEncoder))
         try:
             if msg.get("subscribe", False) is True:
                 self._process_subscribe(msg, table_or_view, post_callback)
             else:
                 args = {}
                 if msg["method"] == "schema":
-                    args["as_string"] = True  # make sure schema returns string types
+                    # make sure schema returns string types
+                    args["as_string"] = True
                 elif msg["method"].startswith("to_"):
                     # TODO
                     for d in msg.get("args", []):

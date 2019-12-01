@@ -77,7 +77,8 @@ export const extentLinear = function() {
         return instance;
     };
 
-    //This function points directly at the paddingStrategy child object's properties for backwards-compatibility. DEPRECATED.
+    //This function points directly at the paddingStrategy child object's
+    //properties for backwards-compatibility. DEPRECATED.
     instance.pad = function() {
         if (!arguments.length) {
             return paddingStrategy.pad;
@@ -86,7 +87,8 @@ export const extentLinear = function() {
         return instance;
     };
 
-    //This function points directly at the paddingStrategy child object's properties for backwards-compatibility. DEPRECATED.
+    //This function points directly at the paddingStrategy child object's
+    //properties for backwards-compatibility. DEPRECATED.
     instance.padUnit = function() {
         if (!arguments.length) {
             return paddingStrategy.padUnit;

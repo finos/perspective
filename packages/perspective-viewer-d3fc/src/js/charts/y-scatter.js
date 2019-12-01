@@ -80,7 +80,8 @@ function yScatter(container, settings) {
         // Create the y-axis data for the alt-axis
         const yAxis2 = yAxisFactory(splitter.altData());
         chart.altAxis(yAxis2);
-        // Give the tooltip the information (i.e. 2 datasets with different scales)
+        // Give the tooltip the information (i.e. 2 datasets with different
+        // scales)
         toolTip.data(splitter.data()).altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
     }
 

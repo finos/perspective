@@ -41,7 +41,8 @@ def make_app():
 
 
 if __name__ == "__main__":
-    # Because we use `PerspectiveTornadoHandler`, all that needs to be done in `init` is to start the Tornado server.
+    # Because we use `PerspectiveTornadoHandler`, all that needs to be done in
+    # `init` is to start the Tornado server.
     app = make_app()
     app.listen(8888)
     logging.critical("Listening on http://localhost:8888")

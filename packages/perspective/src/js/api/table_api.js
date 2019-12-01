@@ -12,7 +12,8 @@ import {view} from "./view_api.js";
 import {bindall} from "../utils.js";
 
 /**
- * Construct a proxy for the table object by creating a "table" message and sending it through the worker.
+ * Construct a proxy for the table object by creating a "table" message and
+ * sending it through the worker.
  *
  * @param {*} worker
  * @param {*} data
@@ -55,7 +56,8 @@ export function table(worker, data, options) {
 table.prototype.type = "table";
 
 /**
- * Create a new computed table, serializing each computation to a string for processing by the engine.
+ * Create a new computed table, serializing each computation to a string for
+ * processing by the engine.
  *
  * @param {*} worker
  * @param {*} computed
@@ -83,7 +85,8 @@ function computed_table(worker, computed, name) {
 }
 
 /**
- * Create a reference to a Perspective table at `worker` for use by remote clients.
+ * Create a reference to a Perspective table at `worker` for use by remote
+ * clients.
  *
  * @param {worker} worker the Web Worker at which the table is located.
  * @param {String} name a unique name for the table.
@@ -105,7 +108,8 @@ table.prototype.view = function(config) {
     return new view(this._worker, this._name, config);
 };
 
-// Dispatch table methods that do not create new objects (getters, setters etc.) to the queue for processing.
+// Dispatch table methods that do not create new objects (getters, setters etc.)
+// to the queue for processing.
 
 table.prototype.compute = async_queue("compute", "table_method");
 

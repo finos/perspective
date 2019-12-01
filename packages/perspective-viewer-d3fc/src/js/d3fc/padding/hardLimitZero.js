@@ -33,7 +33,8 @@ export const hardLimitZeroPadding = () => {
         let paddedLowerExtent = extent[0] - pad[0] * delta;
         let paddedUpperExtent = extent[1] + pad[1] * delta;
 
-        // If datapoints are exclusively negative or exclusively positive hard limit extent to 0.
+        // If datapoints are exclusively negative or exclusively positive hard
+        // limit extent to 0.
         extent[0] = extent[0] >= 0 && paddedLowerExtent < 0 ? 0 : paddedLowerExtent;
         extent[1] = extent[1] <= 0 && paddedUpperExtent > 0 ? 0 : paddedUpperExtent;
         return extent;

@@ -1,22 +1,24 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from traitlets import HasTraits, Unicode, List, Bool, Dict, validate
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
 
 
 class PerspectiveTraitlets(HasTraits):
-    '''Define the traitlet interface with `PerspectiveJupyterWidget` on the front end.
-
-    Properties that are set here are synchronized between the front-end and back-end.
+    '''Define the traitlet interface with `PerspectiveJupyterWidget` on the
+    front end. Attributes which are set here are synchronized between the
+    front-end and back-end.
 
     Examples:
-        >>> widget = perspective.PerspectiveWidget(data, row_pivots=["a", "b", "c"])
+        >>> widget = perspective.PerspectiveWidget(
+        ...     data, row_pivots=["a", "b", "c"])
         PerspectiveWidget(row_pivots=["a", "b", "c"])
         >>> widget.column_pivots=["b"]
         >>> widget

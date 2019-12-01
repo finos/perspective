@@ -43,9 +43,10 @@ const PERSISTENT_ATTRIBUTES = ["editable", "plugin", "row-pivots", "column-pivot
  * instead, instances of the class are created through the Custom Elements DOM
  * API.
  *
- * Properties of an instance of this class, such as {@link module:perspective_viewer~PerspectiveViewer#columns},
- * are reflected on the DOM element as Attributes, and should be accessed as
- * such - e.g. `instance.setAttribute("columns", JSON.stringify(["a", "b"]))`.
+ * Properties of an instance of this class, such as
+ * {@link module:perspective_viewer~PerspectiveViewer#columns}, are reflected on
+ * the DOM element as Attributes, and should be accessed as such - e.g.
+ * `instance.setAttribute("columns", JSON.stringify(["a", "b"]))`.
  *
  * @class PerspectiveViewer
  * @extends {HTMLElement}
@@ -88,8 +89,8 @@ class PerspectiveViewer extends ActionElement {
      *
      * @kind member
      * @type {array<string>} Array of arrays tuples of column name and
-     * direction, where the possible values are "asc", "desc", "asc abs",
-     * "desc abs" and "none".
+     * direction, where the possible values are "asc", "desc", "asc abs", "desc
+     * abs" and "none".
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
@@ -157,6 +158,8 @@ class PerspectiveViewer extends ActionElement {
         this._debounce_update();
     }
 
+    /* eslint-disable max-len */
+
     /**
      * The set of visible columns.
      *
@@ -198,6 +201,8 @@ class PerspectiveViewer extends ActionElement {
         })();
     }
 
+    /* eslint-enable max-len */
+
     /**
      * The set of column aggregate configurations.
      *
@@ -212,7 +217,8 @@ class PerspectiveViewer extends ActionElement {
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
+     * <perspective-viewer aggregates='{"x": "distinct count"}'>
+     * </perspective-viewer>
      */
     @json_attribute
     aggregates(show) {
@@ -238,13 +244,11 @@ class PerspectiveViewer extends ActionElement {
      * The set of column filter configurations.
      *
      * @kind member
-     * @type {array} filters An arry of filter config objects.  A filter
-     * config object is an array of three elements:
-     *     * The column name.
-     *     * The filter operation as a string.  See
-     *       {@link perspective/src/js/config/constants.js}
-     *     * The filter argument, as a string, float or Array<string> as the
-     *       filter operation demands.
+     * @type {array} filters An arry of filter config objects.  A filter config
+     * object is an array of three elements: * The column name. * The filter
+     * operation as a string.  See
+     * {@link perspective/src/js/config/constants.js} * The filter argument, as
+     * a string, float or Array<string> as the filter operation demands.
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let filters = [
@@ -254,7 +258,8 @@ class PerspectiveViewer extends ActionElement {
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('filters', JSON.stringify(filters));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
+     * <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'>
+     * </perspective-viewer>
      */
     @array_attribute
     filters(filters) {
@@ -418,7 +423,8 @@ class PerspectiveViewer extends ActionElement {
 
     /**
      * This element's `perspective.table.view` instance.  The instance itself
-     * will change after every `PerspectiveViewer#perspective-config-update` event.
+     * will change after every `PerspectiveViewer#perspective-config-update`
+     * event.
      *
      * @readonly
      */
@@ -432,14 +438,10 @@ class PerspectiveViewer extends ActionElement {
      *
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
-     * @returns {Promise<void>} A promise which resolves once the data is
-     * loaded and a `perspective.view` has been created.
-     * @fires module:perspective_viewer~PerspectiveViewer#perspective-click PerspectiveViewer#perspective-view-update
-     * @example <caption>Load JSON</caption>
-     * const my_viewer = document.getElementById('#my_viewer');
-     * my_viewer.load([
-     *     {x: 1, y: 'a'},
-     *     {x: 2, y: 'b'}
+     * @returns {Promise<void>} A promise which resolves once the data is loaded
+     * and a `perspective.view` has been created.
+     * @fires module:perspective_viewer~PerspectiveViewer#perspective-click
+     * PerspectiveViewer#perspective-view-update
      * ]);
      * @example <caption>Load CSV</caption>
      * const my_viewer = document.getElementById('#my_viewer');

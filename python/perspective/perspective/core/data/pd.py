@@ -1,26 +1,29 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import numpy as np
 import pandas as pd
 
 
 def _parse_datetime_index(index):
-    '''Given an instance of `pandas.DatetimeIndex`, parse its `freq` and return a `numpy.dtype`
-    that corresponds to the unit it should be parsed in.
+    '''Given an instance of `pandas.DatetimeIndex`, parse its `freq` and
+    return a `numpy.dtype` that corresponds to the unit it should be parsed in.
 
-    Because Pandas DataFrames cannot store datetimes in anything other than `datetime64[ns]`, we need
-    to examine the `DatetimeIndex` itself to understand what unit it needs to be parsed as.
+    Because `pandas.DataFrame`s cannot store datetimes in anything other than
+    `datetime64[ns]`, we need to examine the `DatetimeIndex` itself to
+    understand what unit it needs to be parsed as.
 
     Args:
         index (pandas.DatetimeIndex)
 
     Returns:
-        numpy.dtype : a datetime64 dtype with the correct units depending on `index.freq`.
+        `numpy.dtype`: a datetime64 dtype with the correct units depending on
+            `index.freq`.
     '''
     if index.freq is None:
         return np.dtype("datetime64[ns]")
@@ -47,13 +50,15 @@ def _parse_datetime_index(index):
 
 
 def deconstruct_pandas(data):
-    '''Given a dataframe, flatten it by resetting the index and memoizing the pivots that were applied.
+    '''Given a dataframe, flatten it by resetting the index and memoizing the
+    pivots that were applied.
 
     Args:
         data (pandas.dataframe): a Pandas DataFrame to parse
 
     Returns:
-        (pandas.DataFrame, dict): a Pandas DataFrame and a dictionary containing optional members `columns`, `row_pivots`, and `column_pivots`.
+        (pandas.DataFrame, dict): a Pandas DataFrame and a dictionary containing
+            optional members `columns`, `row_pivots`, and `column_pivots`.
     '''
     kwargs = {}
 

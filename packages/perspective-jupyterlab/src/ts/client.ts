@@ -20,11 +20,13 @@ export interface PerspectiveJupyterMessage {
 }
 
 /**
- * `PerspectiveJupyterClient` acts as a message bus between the frontend and backend,
- * passing messages from `perspective-viewer` (method calls, `to_format()` calls, etc.) to
- * the `PerspectiveManager` on the python side of the plugin.
+ * `PerspectiveJupyterClient` acts as a message bus between the frontend and
+ * backend, passing messages from `perspective-viewer` (method calls,
+ * `to_format()` calls, etc.) to the `PerspectiveManager` on the python side of
+ * the plugin.
  *
- * This client implements the `Client` class as defined in `@finos/perspective/api`.
+ * This client implements the `Client` class as defined in
+ * `@finos/perspective/api`.
  */
 export class PerspectiveJupyterClient extends Client {
     view: DOMWidgetView;
@@ -32,7 +34,8 @@ export class PerspectiveJupyterClient extends Client {
     /**
      * Create a new instance of the client.
      *
-     * @param view {DOMWidgetView} the plugin view that can send messages to the Python backend.
+     * @param view {DOMWidgetView} the plugin view that can send messages to the
+     * Python backend.
      */
     constructor(view: DOMWidgetView) {
         super();
@@ -40,7 +43,8 @@ export class PerspectiveJupyterClient extends Client {
     }
 
     /**
-     * Given a message, pass it to the `PerspectiveManager` instance on the ipywidget.
+     * Given a message, pass it to the `PerspectiveManager` instance on the
+     * ipywidget.
      *
      * The sent message conforms to the `PerspectiveJupyterMessage` interface.
      *

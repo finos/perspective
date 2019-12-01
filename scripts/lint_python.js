@@ -12,9 +12,6 @@ const resolve = require("path").resolve;
 const execSync = require("child_process").execSync;
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
-const VALID_TARGETS = ["node", "table"];
-const HAS_TARGET = args.indexOf("--target") != -1;
-
 const IS_FIX = args.indexOf("--fix") != -1;
 
 function docker(target = "perspective", image = "emsdk") {
@@ -30,8 +27,7 @@ function docker(target = "perspective", image = "emsdk") {
 try {
     let cmd;
     let lint_cmd = `python3 -m flake8 perspective && echo "lint passed!"`;
-    let fix_cmd = `autopep8 -v --in-place --aggressive --recursive --exclude build . &&\
-        echo "autopep8 formatting complete!"`;
+    let fix_cmd = `autopep8 -v --in-place --aggressive --recursive --exclude build --exclude tests . && echo "autopep8 formatting complete!"`;
 
     if (process.env.PSP_DOCKER) {
         cmd = `cd python/perspective && ${IS_FIX ? fix_cmd : lint_cmd}`;

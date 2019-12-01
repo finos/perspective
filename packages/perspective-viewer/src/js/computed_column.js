@@ -348,7 +348,8 @@ class ComputedColumn extends HTMLElement {
             const current_column_type = current_column.getAttribute("type");
             event.swapTarget = this.state.swap_target;
 
-            // take the column at the drop target, and set it to the column being swapped
+            // take the column at the drop target, and set it to the column
+            // being swapped
             this._set_input_column(event, current_column_name, current_column_type);
 
             // reset swap_target and currentTarget
@@ -372,7 +373,8 @@ class ComputedColumn extends HTMLElement {
     // Called when the column passes over and then leaves the drop target
     _pass_column(event) {
         const src = event.currentTarget;
-        // are we inside the column? if we are, prevent further calls which cause flickering
+        // are we inside the column? if we are, prevent further calls which
+        // cause flickering
         const bounds = src.getBoundingClientRect();
         const inside_x = event.pageX >= bounds.left && event.pageX <= bounds.right - 2;
         const inside_y = event.pageY >= bounds.top && event.pageY <= bounds.bottom - 2;
@@ -528,7 +530,8 @@ class ComputedColumn extends HTMLElement {
         let reset_inputs = true;
 
         if (this.state["computation"]) {
-            // do we need to reset the input? if types/num_params differ then yes
+            // do we need to reset the input? if types/num_params differ then
+            // yes
             reset_inputs = input_type !== this.state["computation"].input_type || num_params !== this.state["computation"].num_params;
         }
 
@@ -615,7 +618,8 @@ class ComputedColumn extends HTMLElement {
         this._computation_selector = this.shadowRoot.querySelector("#psp-cc-computation__select");
         this._computation_type = this.shadowRoot.querySelector("#psp-cc-computation__type");
         this._input_columns = this.shadowRoot.querySelector("#psp-cc-computation-inputs");
-        //this._delete_button = this.shadowRoot.querySelector('#psp-cc-button-delete');
+        //this._delete_button =
+        //this.shadowRoot.querySelector('#psp-cc-button-delete');
         this._save_button = this.shadowRoot.querySelector("#psp-cc-button-save");
     }
 
@@ -627,7 +631,8 @@ class ComputedColumn extends HTMLElement {
             this.state["name_edited"] = this._column_name_input.innerText && this._column_name_input.innerText.length > 0;
             this._set_column_name(event);
         });
-        //this._delete_button.addEventListener('click', this._delete_computed_column.bind(this));
+        //this._delete_button.addEventListener('click',
+        //this._delete_computed_column.bind(this));
         this._save_button.addEventListener("click", this._save_computed_column.bind(this));
     }
 }

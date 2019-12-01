@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import six
 import time
 import numpy as np
@@ -22,7 +23,9 @@ def _make_period_index(size, time_unit):
 
 
 def _make_dataframe(index, size=10):
-    '''Create a new random dataframe of `size` and with a DateTimeIndex of frequency `time_unit`.'''
+    '''Create a new random dataframe of `size` and with a DateTimeIndex of
+    frequency `time_unit`.
+    '''
     return pd.DataFrame(index=index, data={
         "a": np.random.rand(size),
         "b": np.random.rand(size),
@@ -66,7 +69,9 @@ class Util:
 
 
 class Sentinel(object):
-    '''Generic sentinel class for testing side-effectful code in Python 2 and 3.'''
+    '''Generic sentinel class for testing side-effectful code in Python 2 and
+    3.
+    '''
 
     def __init__(self, value):
         self.value = value
@@ -80,7 +85,8 @@ class Sentinel(object):
 
 @fixture()
 def sentinel():
-    '''Pass `sentinel` into a test and call it with `value` to create a new instance of the Sentinel class.
+    '''Pass `sentinel` into a test and call it with `value` to create a new 
+    instance of the Sentinel class.
 
     Example:
         >>> def test_with_sentinel(self, sentinel):

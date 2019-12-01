@@ -15,11 +15,13 @@ import {textOpacity} from "./treemapLabel";
 const includesAllCrossValues = (d, crossValues) => crossValues.every(val => d.crossValue.split("|").includes(val));
 
 export function calculateSubTreeMap(d, crossValues, nodesMerge, treemapLevel, rootNode, treemapDiv) {
-    // We can approximate coordinates for most of the tree which will be shunted beyond the viewable area.
-    // This approach alone results in excessive margins as one goes deeper into the treemap.
+    // We can approximate coordinates for most of the tree which will be shunted
+    // beyond the viewable area. This approach alone results in excessive
+    // margins as one goes deeper into the treemap.
     approximateAttributesForAllNodes(d, crossValues, nodesMerge, treemapLevel, rootNode);
     d.mapLevel[treemapLevel].levelRoot = true;
-    // Use the pre-existing d3 mechanism to calculate the subtree for the viewable area.
+    // Use the pre-existing d3 mechanism to calculate the subtree for the
+    // viewable area.
     recalculateVisibleSubTreeCoordinates(d, treemapDiv.node().getBoundingClientRect().width, treemapDiv.node().getBoundingClientRect().height, treemapLevel);
 
     calculateTextOpacities(nodesMerge, treemapLevel);
