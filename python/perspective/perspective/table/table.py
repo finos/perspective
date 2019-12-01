@@ -131,7 +131,8 @@ class Table(object):
 
     def is_valid_filter(self, filter):
         '''Tests whether a given filter expression string is valid, e.g. that
-        the filter term is not None or an unparsable date/datetime.
+        the filter term is not None or an unparsable date/datetime.  `null`/
+        `not null` operators don't need a comparison value.
 
         Args:
             filter (:obj:`string`): The filter expression to validate.

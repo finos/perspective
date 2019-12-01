@@ -98,12 +98,14 @@ export const component = settings => {
         };
     };
 
-    const pickAxis = multiLevel => {
-        if (multiLevel) {
-            return orient === "horizontal" ? multiAxisBottom : multiAxisLeft;
-        }
-        return orient === "horizontal" ? fc.axisOrdinalBottom : fc.axisOrdinalLeft;
-    };
+    // const pickAxis = multiLevel => {
+    //     if (multiLevel) {
+    //         return orient === "horizontal" ?
+    //                multiAxisBottom : multiAxisLeft;
+    //     }
+    //     return orient === "horizontal" ?
+    //                 fc.axisOrdinalBottom : fc.axisOrdinalLeft;
+    // };
 
     const getAxisSet = multiLevel => {
         if (multiLevel) {

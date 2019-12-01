@@ -111,7 +111,8 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                         .call(yAxisComponent);
                 });
 
-            // Render all the series using either the primary or alternate y-scales
+            // Render all the series using either the primary or alternate
+            // y-scales
             if (canvas) {
                 const drawMultiCanvasSeries = selection => {
                     const canvasPlotArea = chart.plotArea();

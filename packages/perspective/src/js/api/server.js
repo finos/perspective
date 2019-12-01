@@ -22,10 +22,11 @@ function error_to_json(error) {
 }
 
 /**
- * The base class for Perspective's async API. It initializes and keeps track of tables, views, and processes
- * messages from the user into Perspective.
+ * The base class for Perspective's async API. It initializes and keeps track of
+ * tables, views, and processes messages from the user into Perspective.
  *
- * Child classes must implement the `post()` interface, which defines how the worker sends messages.
+ * Child classes must implement the `post()` interface, which defines how the
+ * worker sends messages.
  */
 export class Server {
     constructor(perspective) {
@@ -37,7 +38,8 @@ export class Server {
     }
 
     /**
-     * `Server` must be extended and the `post` method implemented before it can be initialized.
+     * `Server` must be extended and the `post` method implemented before it can
+     * be initialized.
      */
     init(msg) {
         if (msg.config) {
@@ -68,10 +70,12 @@ export class Server {
     }
 
     /**
-     * Given a message, execute its instructions. This method is the dispatcher for all Perspective actions,
-     * including table/view creation, deletion, and all method calls to/from the table and view.
+     * Given a message, execute its instructions. This method is the dispatcher
+     * for all Perspective actions, including table/view creation, deletion, and
+     * all method calls to/from the table and view.
      *
-     * @param {*} msg an Object containing `cmd` (a String instruction) and associated data for that instruction
+     * @param {*} msg an Object containing `cmd` (a String instruction) and
+     * associated data for that instruction
      * @param {*} client_id
      */
     process(msg, client_id) {
@@ -219,7 +223,8 @@ export class Server {
         msg.cmd === "table_method" ? (obj = this._tables[msg.name]) : (obj = this._views[msg.name]);
 
         if (!obj && msg.cmd === "view_method") {
-            // cannot have a host without a table, but can have a host without a view
+            // cannot have a host without a table, but can have a host without a
+            // view
             this.process_error(msg, {message: "View is not initialized"});
             return;
         }

@@ -453,7 +453,9 @@ class View(object):
         return hidden
 
     def _wrapped_on_update_callback(self, **kwargs):
-        '''Provide the user-defined callback function with additional metadata from the view.'''
+        '''Provide the user-defined callback function with additional metadata
+        from the view.
+        '''
         mode = kwargs["mode"]
         cache = kwargs["cache"]
         callback = kwargs["callback"]

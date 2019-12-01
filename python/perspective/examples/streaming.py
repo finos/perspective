@@ -57,7 +57,8 @@ def make_app():
         "lastUpdate": datetime,
     }, limit=2500)
 
-    # Track the table with the name "data_source_one", which will be used in the front-end to access the Table.
+    # Track the table with the name "data_source_one", which will be used in
+    # the front-end to access the Table.
     MANAGER.host_table("data_source_one", TABLE)
 
     # update with new data every 50ms

@@ -24,7 +24,8 @@ import {Utf8, Float64, Int32, Bool, TimestampMillisecond, Dictionary} from "@apa
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
-// IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
+// IE fix - chrono::steady_clock depends on performance.now() which does not
+// exist in IE workers
 if (global.performance === undefined) {
     global.performance = {now: Date.now};
 }
@@ -41,7 +42,7 @@ export default function(Module) {
     let __MODULE__ = Module;
     let accessor = new DataAccessor();
 
-    /******************************************************************************
+    /***************************************************************************
      *
      * Private
      *
@@ -71,13 +72,19 @@ export default function(Module) {
     /**
      * Common logic for creating and registering a Table.
      *
-     * @param {DataAccessor|Object[]} accessor - the data we provide to the Table
-     * @param {Object} _Table - `undefined` if a new table will be created, or an `std::shared_ptr<Table>` if updating
-     * @param {Object[]} computed - An array of computed columns to be applied to the table.
+     * @param {DataAccessor|Object[]} accessor - the data we provide to the
+     * Table
+     * @param {Object} _Table - `undefined` if a new table will be created, or
+     * an `std::shared_ptr<Table>` if updating
+     * @param {Object[]} computed - An array of computed columns to be applied
+     * to the table.
      * @param {String} index - A column name to be used as a primary key.
-     * @param {Number} limit - an upper bound on the number of rows in the table. If set, new rows that exceed the limit start overwriting old ones from row 0.
+     * @param {Number} limit - an upper bound on the number of rows in the
+     * table. If set, new rows that exceed the limit start overwriting old ones
+     * from row 0.
      * @param {t_op} op - either `OP_INSERT` or `OP_DELETE`
-     * @param {boolean} is_update - true if we are updating an already-created table
+     * @param {boolean} is_update - true if we are updating an already-created
+     * table
      * @param {boolean} is_arrow - true if the dataset is in the Arrow format
      *
      * @private
@@ -98,7 +105,7 @@ export default function(Module) {
         return _Table;
     }
 
-    /******************************************************************************
+    /***************************************************************************
      *
      * View
      *
@@ -106,11 +113,13 @@ export default function(Module) {
 
     /**
      * A View object represents a specific transform (configuration or pivot,
-     * filter, sort, etc) configuration on an underlying {@link module:perspective~table}. A View
-     * receives all updates from the {@link module:perspective~table} from which it is derived, and
-     * can be serialized to JSON or trigger a callback when it is updated.  View
+     * filter, sort, etc) configuration on an underlying
+     * {@link module:perspective~table}. A View receives all updates from the
+     * {@link module:perspective~table} from which it is derived, and can be
+     * serialized to JSON or trigger a callback when it is updated.  View
      * objects are immutable, and will remain in memory and actively process
-     * updates until its {@link module:perspective~view#delete} method is called.
+     * updates until its {@link module:perspective~view#delete} method is
+     * called.
      *
      * <strong>Note</strong> This constructor is not public - Views are created
      * by invoking the {@link module:perspective~table#view} method.
@@ -147,19 +156,21 @@ export default function(Module) {
     }
 
     /**
-     * A copy of the config object passed to the {@link table#view} method
-     * which created this {@link module:perspective~view}.
+     * A copy of the config object passed to the {@link table#view} method which
+     * created this {@link module:perspective~view}.
      *
-     * @returns {Promise<object>} Shared the same key/values properties as {@link module:perspective~view}
+     * @returns {Promise<object>} Shared the same key/values properties as
+     * {@link module:perspective~view}
      */
     view.prototype.get_config = function() {
         return JSON.parse(JSON.stringify(this.config));
     };
 
     /**
-     * Delete this {@link module:perspective~view} and clean up all resources associated with it.
-     * View objects do not stop consuming resources or processing updates when
-     * they are garbage collected - you must call this method to reclaim these.
+     * Delete this {@link module:perspective~view} and clean up all resources
+     * associated with it. View objects do not stop consuming resources or
+     * processing updates when they are garbage collected - you must call this
+     * method to reclaim these.
      *
      * @async
      */
@@ -212,7 +223,8 @@ export default function(Module) {
     }
 
     const extract_vector_scalar = function(vector) {
-        // handles deletion already - do not call delete() on the input vector again
+        // handles deletion already - do not call delete() on the input vector
+        // again
         let extracted = [];
         for (let i = 0; i < vector.size(); i++) {
             let item = vector.get(i);
@@ -223,15 +235,17 @@ export default function(Module) {
     };
 
     /**
-     * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
-     * are the columns of this {@link module:perspective~view}, and the values are their string type names.
-     * If this {@link module:perspective~view} is aggregated, theses will be the aggregated types;
-     * otherwise these types will be the same as the columns in the underlying
-     * {@link module:perspective~table}
+     * The schema of this {@link module:perspective~view}. A schema is an
+     * Object, the keys of which are the columns of this
+     * {@link module:perspective~view}, and the values are their string type
+     * names. If this {@link module:perspective~view} is aggregated, theses will
+     * be the aggregated types; otherwise these types will be the same as the
+     * columns in the underlying {@link module:perspective~table}
      *
      * @async
      *
-     * @returns {Promise<Object>} A Promise of this {@link module:perspective~view}'s schema.
+     * @returns {Promise<Object>} A Promise of this
+     * {@link module:perspective~view}'s schema.
      */
     view.prototype.schema = function(override = true) {
         const schema = extract_map(this._View.schema());
@@ -252,9 +266,11 @@ export default function(Module) {
     };
 
     /**
-     * Returns an array of strings containing the column paths of the View without any of the source columns.
+     * Returns an array of strings containing the column paths of the View
+     * without any of the source columns.
      *
-     * A column path shows the columns that a given cell belongs to after pivots are applied.
+     * A column path shows the columns that a given cell belongs to after pivots
+     * are applied.
      */
     view.prototype.column_paths = function() {
         return extract_vector_scalar(this._View.column_paths()).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
@@ -312,7 +328,8 @@ export default function(Module) {
                 const col_name = col_names[cidx];
                 const col_type = schema[col_name];
                 if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
-                    // Hidden columns are always at the end, so don't emit these.
+                    // Hidden columns are always at the end, so don't emit
+                    // these.
                     continue;
                 } else if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
@@ -338,7 +355,8 @@ export default function(Module) {
                 const keys = slice.get_pkeys(ridx, 0);
                 formatter.initColumnValue(data, row, "__INDEX__");
                 for (let i = 0; i < keys.size(); i++) {
-                    // TODO: if __INDEX__ and set index have the same value, don't we need to make sure that it only emits one?
+                    // TODO: if __INDEX__ and set index have the same value,
+                    // don't we need to make sure that it only emits one?
                     const value = __MODULE__.scalar_vec_to_val(keys, i);
                     formatter.addColumnValue(data, row, "__INDEX__", value);
                 }
@@ -370,7 +388,8 @@ export default function(Module) {
             return undefined;
         }
 
-        // mutate the column index if necessary: in pivoted views, columns start at 1
+        // mutate the column index if necessary: in pivoted views, columns start
+        // at 1
         const num_sides = this.sides();
         if (num_sides > 0) {
             idx++;
@@ -402,24 +421,26 @@ export default function(Module) {
      * @async
      *
      * @param {Object} [options] An optional configuration object.
-     * @param {number} options.start_row The starting row index from which
-     * to serialize.
-     * @param {number} options.end_row The ending row index from which
-     * to serialize.
-     * @param {number} options.start_col The starting column index from which
-     * to serialize.
-     * @param {number} options.end_col The ending column index from which
-     * to serialize.
-     * @param {boolean} [config.index=false] Should the index from the underlying
-     * {@link module:perspective~table} be in the output (as `"__INDEX__"`).
+     * @param {number} options.start_row The starting row index from which to
+     * serialize.
+     * @param {number} options.end_row The ending row index from which to
+     * serialize.
+     * @param {number} options.start_col The starting column index from which to
+     * serialize.
+     * @param {number} options.end_col The ending column index from which to
+     * serialize.
+     * @param {boolean} [config.index=false] Should the index from the
+     * underlying {@link module:perspective~table} be in the output (as
+     * `"__INDEX__"`).
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
-     * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
-     * "row_pivots" config parameter supplied when constructed, each row Object
-     * will have a "__ROW_PATH__" key, whose value specifies this row's
-     * aggregated path.  If this {@link module:perspective~view} had a "column_pivots" config
-     * parameter supplied, the keys of this object will be comma-prepended with
-     * their comma-separated column paths.
+     * representing the rows of this {@link module:perspective~view}.  If this
+     * {@link module:perspective~view} had a "row_pivots" config parameter
+     * supplied when constructed, each row Object will have a "__ROW_PATH__"
+     * key, whose value specifies this row's aggregated path.  If this
+     * {@link module:perspective~view} had a "column_pivots" config parameter
+     * supplied, the keys of this object will be comma-prepended with their
+     * comma-separated column paths.
      */
     view.prototype.to_columns = function(options) {
         return to_format.call(this, options, formatters.jsonTableFormatter);
@@ -431,22 +452,23 @@ export default function(Module) {
      * @async
      *
      * @param {Object} [options] An optional configuration object.
-     * @param {number} options.start_row The starting row index from which
-     * to serialize.
-     * @param {number} options.end_row The ending row index from which
-     * to serialize.
-     * @param {number} options.start_col The starting column index from which
-     * to serialize.
-     * @param {number} options.end_col The ending column index from which
-     * to serialize.
+     * @param {number} options.start_row The starting row index from which to
+     * serialize.
+     * @param {number} options.end_row The ending row index from which to
+     * serialize.
+     * @param {number} options.start_col The starting column index from which to
+     * serialize.
+     * @param {number} options.end_col The ending column index from which to
+     * serialize.
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
-     * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
-     * "row_pivots" config parameter supplied when constructed, each row Object
-     * will have a "__ROW_PATH__" key, whose value specifies this row's
-     * aggregated path.  If this {@link module:perspective~view} had a "column_pivots" config
-     * parameter supplied, the keys of this object will be comma-prepended with
-     * their comma-separated column paths.
+     * representing the rows of this {@link module:perspective~view}.  If this
+     * {@link module:perspective~view} had a "row_pivots" config parameter
+     * supplied when constructed, each row Object will have a "__ROW_PATH__"
+     * key, whose value specifies this row's aggregated path.  If this
+     * {@link module:perspective~view} had a "column_pivots" config parameter
+     * supplied, the keys of this object will be comma-prepended with their
+     * comma-separated column paths.
      */
     view.prototype.to_json = function(options) {
         return to_format.call(this, options, formatters.jsonFormatter);
@@ -458,24 +480,25 @@ export default function(Module) {
      * @async
      *
      * @param {Object} [options] An optional configuration object.
-     * @param {number} options.start_row The starting row index from which
-     * to serialize.
-     * @param {number} options.end_row The ending row index from which
-     * to serialize.
-     * @param {number} options.start_col The starting column index from which
-     * to serialize.
-     * @param {number} options.end_col The ending column index from which
-     * to serialize.
-     * @param {Object} options.config A config object for the Papaparse {@link https://www.papaparse.com/docs#json-to-csv}
-     * config object.
+     * @param {number} options.start_row The starting row index from which to
+     * serialize.
+     * @param {number} options.end_row The ending row index from which to
+     * serialize.
+     * @param {number} options.start_col The starting column index from which to
+     * serialize.
+     * @param {number} options.end_col The ending column index from which to
+     * serialize.
+     * @param {Object} options.config A config object for the Papaparse
+     * {@link https://www.papaparse.com/docs#json-to-csv} config object.
      *
      * @returns {Promise<string>} A Promise resolving to a string in CSV format
-     * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
-     * "row_pivots" config parameter supplied when constructed, each row
-     * will have prepended those values specified by this row's
-     * aggregated path.  If this {@link module:perspective~view} had a "column_pivots" config
-     * parameter supplied, the keys of this object will be comma-prepended with
-     * their comma-separated column paths.
+     * representing the rows of this {@link module:perspective~view}.  If this
+     * {@link module:perspective~view} had a "row_pivots" config parameter
+     * supplied when constructed, each row will have prepended those values
+     * specified by this row's aggregated path.  If this
+     * {@link module:perspective~view} had a "column_pivots" config parameter
+     * supplied, the keys of this object will be comma-prepended with their
+     * comma-separated column paths.
      */
     view.prototype.to_csv = function(options) {
         return to_format.call(this, options, formatters.csvFormatter);
@@ -490,19 +513,21 @@ export default function(Module) {
      *
      * @param {Object} options An optional configuration object.
      *
-     * @param {*} options.data_slice A data slice object from which to serialize.
+     * @param {*} options.data_slice A data slice object from which to
+     * serialize.
      *
-     * @param {number} options.start_row The starting row index from which
-     * to serialize.
-     * @param {number} options.end_row The ending row index from which
-     * to serialize.
+     * @param {number} options.start_row The starting row index from which to
+     * serialize.
+     * @param {number} options.end_row The ending row index from which to
+     * serialize.
      *
      * @returns {Promise<TypedArray>} A promise resolving to a TypedArray
-     * representing the data of the column as retrieved from the {@link module:perspective~view} - all
-     * pivots, aggregates, sorts, and filters have been applied onto the values
-     * inside the TypedArray. The TypedArray will be constructed based on data type -
-     * integers will resolve to Int8Array, Int16Array, or Int32Array. Floats resolve to
-     * Float32Array or Float64Array. If the column cannot be found, or is not of an
+     * representing the data of the column as retrieved from the
+     * {@link module:perspective~view} - all pivots, aggregates, sorts, and
+     * filters have been applied onto the values inside the TypedArray. The
+     * TypedArray will be constructed based on data type - integers will resolve
+     * to Int8Array, Int16Array, or Int32Array. Floats resolve to Float32Array
+     * or Float64Array. If the column cannot be found, or is not of an
      * integer/float type, the Promise returns undefined.
      */
     view.prototype.col_to_js_typed_array = function(col_name, options = {}) {
@@ -517,19 +542,20 @@ export default function(Module) {
      *
      * @param {Object} [options] An optional configuration object.
      *
-     * @param {*} options.data_slice A data slice object from which to serialize.
+     * @param {*} options.data_slice A data slice object from which to
+     * serialize.
      *
-     * @param {number} options.start_row The starting row index from which
-     * to serialize.
-     * @param {number} options.end_row The ending row index from which
-     * to serialize.
-     * @param {number} options.start_col The starting column index from which
-     * to serialize.
-     * @param {number} options.end_col The ending column index from which
-     * to serialize.
+     * @param {number} options.start_row The starting row index from which to
+     * serialize.
+     * @param {number} options.end_row The ending row index from which to
+     * serialize.
+     * @param {number} options.start_col The starting column index from which to
+     * serialize.
+     * @param {number} options.end_col The ending column index from which to
+     * serialize.
      *
-     * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format containing
-     * data from the view.
+     * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format
+     * containing data from the view.
      */
     view.prototype.to_arrow = function(options = {}) {
         const names = this._column_names();
@@ -570,9 +596,9 @@ export default function(Module) {
     };
 
     /**
-     * The number of aggregated rows in this {@link module:perspective~view}.  This is affected by
-     * the "row_pivots" configuration parameter supplied to this {@link module:perspective~view}'s
-     * contructor.
+     * The number of aggregated rows in this {@link module:perspective~view}.
+     * This is affected by the "row_pivots" configuration parameter supplied to
+     * this {@link module:perspective~view}'s contructor.
      *
      * @async
      *
@@ -583,9 +609,9 @@ export default function(Module) {
     };
 
     /**
-     * The number of aggregated columns in this {@link view}.  This is affected by
-     * the "column_pivots" configuration parameter supplied to this {@link view}'s
-     * contructor.
+     * The number of aggregated columns in this {@link view}.  This is affected
+     * by the "column_pivots" configuration parameter supplied to this
+     * {@link view}'s contructor.
      *
      * @async
      *
@@ -639,8 +665,8 @@ export default function(Module) {
     };
 
     /**
-     * Returns the data of all changed rows in JSON format, or for 1+ sided contexts
-     * the entire dataset of the view.
+     * Returns the data of all changed rows in JSON format, or for 1+ sided
+     * contexts the entire dataset of the view.
      * @private
      */
     view.prototype._get_step_delta = async function() {
@@ -668,7 +694,8 @@ export default function(Module) {
     };
 
     /**
-     * Returns an Arrow-serialized dataset that contains the data from updated rows.
+     * Returns an Arrow-serialized dataset that contains the data from updated
+     * rows.
      *
      * @private
      */
@@ -680,14 +707,15 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link module:perspective~view}.  Whenever the {@link module:perspective~view}'s
-     * underlying table emits an update, this callback will be invoked with the
-     * aggregated row deltas.
+     * Register a callback with this {@link module:perspective~view}.  Whenever
+     * the {@link module:perspective~view}'s underlying table emits an update,
+     * this callback will be invoked with the aggregated row deltas.
      *
      * @param {function} callback A callback function invoked on update.  The
      * parameter to this callback is dependent on the `mode` parameter:
      *     - "none" (default): The callback is invoked without an argument.
-     *     - "cell": The callback is invoked with the new data for each updated cell, serialized to JSON format.
+     *     - "cell": The callback is invoked with the new data for each updated
+     *           cell, serialized to JSON format.
      *     - "row": The callback is invoked with an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
@@ -752,8 +780,9 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link module:perspective~view}.  Whenever the {@link module:perspective~view}
-     * is deleted, this callback will be invoked.
+     * Register a callback with this {@link module:perspective~view}.  Whenever
+     * the {@link module:perspective~view} is deleted, this callback will be
+     * invoked.
      *
      * @param {function} callback A callback function invoked on delete.
      */
@@ -762,7 +791,8 @@ export default function(Module) {
     };
 
     /**
-     * Unregister a previously registered delete callback with this {@link module:perspective~view}.
+     * Unregister a previously registered delete callback with this
+     * {@link module:perspective~view}.
      *
      * @param {function} callback A delete callback function to be removed
      */
@@ -773,16 +803,21 @@ export default function(Module) {
     };
 
     /**
-     * A view config is a set of options that configures the underlying {@link module:perspective~view}, specifying
-     * its pivots, columns to show, aggregates, filters, and sorts.
+     * A view config is a set of options that configures the underlying
+     * {@link module:perspective~view}, specifying its pivots, columns to show,
+     * aggregates, filters, and sorts.
      *
-     * The view config receives an `Object` containing configuration options, and the `view_config` transforms it into a
-     * canonical format for interfacing with the core engine.
+     * The view config receives an `Object` containing configuration options,
+     * and the `view_config` transforms it into a canonical format for
+     * interfacing with the core engine.
      *
-     * <strong>Note</strong> This constructor is not public - view config objects should be created using standard
-     * Javascript `Object`s in the {@link module:perspective~table#view} method, which has an `options` parameter.
+     * <strong>Note</strong> This constructor is not public - view config
+     * objects should be created using standard Javascript `Object`s in the
+     * {@link module:perspective~table#view} method, which has an `options`
+     * parameter.
      *
-     * @param {Object} config the configuration `Object` passed by the user to the {@link module:perspective~table#view} method.
+     * @param {Object} config the configuration `Object` passed by the user to
+     * the {@link module:perspective~table#view} method.
      * @private
      * @class
      * @hideconstructor
@@ -800,9 +835,9 @@ export default function(Module) {
     }
 
     /**
-     * Transform configuration items into `std::vector` objects for interface with C++.
-     * `this.aggregates` is not transformed into a C++ map, as the use of `ordered_map` in the engine
-     * makes binding more difficult.
+     * Transform configuration items into `std::vector` objects for interface
+     * with C++. `this.aggregates` is not transformed into a C++ map, as the use
+     * of `ordered_map` in the engine makes binding more difficult.
      *
      * @private
      */
@@ -841,7 +876,7 @@ export default function(Module) {
         return vector;
     };
 
-    /******************************************************************************
+    /***************************************************************************
      *
      * Table
      *
@@ -853,8 +888,9 @@ export default function(Module) {
      * each.
      *
      * <strong>Note</strong> This constructor is not public - Tables are created
-     * by invoking the {@link module:perspective~table} factory method, either on the perspective
-     * module object, or an a {@link module:perspective~worker} instance.
+     * by invoking the {@link module:perspective~table} factory method, either
+     * on the perspective module object, or an a
+     * {@link module:perspective~worker} instance.
      *
      * @class
      * @hideconstructor
@@ -895,8 +931,8 @@ export default function(Module) {
     };
 
     /**
-     * Remove all rows in this {@link module:perspective~table} while preserving the schema and
-     * construction options.
+     * Remove all rows in this {@link module:perspective~table} while preserving
+     * the schema and construction options.
      */
     table.prototype.clear = function() {
         _reset_process(this.get_id());
@@ -914,9 +950,10 @@ export default function(Module) {
     };
 
     /**
-     * Delete this {@link module:perspective~table} and clean up all resources associated with it.
-     * Table objects do not stop consuming resources or processing updates when
-     * they are garbage collected - you must call this method to reclaim these.
+     * Delete this {@link module:perspective~table} and clean up all resources
+     * associated with it. Table objects do not stop consuming resources or
+     * processing updates when they are garbage collected - you must call this
+     * method to reclaim these.
      */
     table.prototype.delete = function() {
         if (this.views.length > 0) {
@@ -929,8 +966,9 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link module:perspective~table}.  Whenever the {@link module:perspective~table}
-     * is deleted, this callback will be invoked.
+     * Register a callback with this {@link module:perspective~table}.  Whenever
+     * the {@link module:perspective~table} is deleted, this callback will be
+     * invoked.
      *
      * @param {function} callback A callback function invoked on delete.  The
      *     parameter to this callback shares a structure with the return type of
@@ -941,7 +979,8 @@ export default function(Module) {
     };
 
     /**
-     * Unregister a previously registered delete callback with this {@link module:perspective~table}.
+     * Unregister a previously registered delete callback with this
+     * {@link module:perspective~table}.
      *
      * @param {function} callback A delete callback function to be removed
      */
@@ -952,9 +991,10 @@ export default function(Module) {
     };
 
     /**
-     * The number of accumulated rows in this {@link module:perspective~table}.  This is affected by
-     * the "index" configuration parameter supplied to this {@link module:perspective~view}'s
-     * contructor - as rows will be overwritten when they share an idnex column.
+     * The number of accumulated rows in this {@link module:perspective~table}.
+     * This is affected by the "index" configuration parameter supplied to this
+     * {@link module:perspective~view}'s contructor - as rows will be
+     * overwritten when they share an idnex column.
      *
      * @async
      *
@@ -965,13 +1005,16 @@ export default function(Module) {
     };
 
     /**
-     * The schema of this {@link module:perspective~table}.  A schema is an Object whose keys are the
-     * columns of this {@link module:perspective~table}, and whose values are their string type names.
+     * The schema of this {@link module:perspective~table}.  A schema is an
+     * Object whose keys are the columns of this
+     * {@link module:perspective~table}, and whose values are their string type
+     * names.
      *
      * @async
-     * @param {boolean} computed Should computed columns be included?
-     * (default false)
-     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
+     * @param {boolean} computed Should computed columns be included? (default
+     * false)
+     * @returns {Promise<Object>} A Promise of this
+     * {@link module:perspective~table}'s schema.
      */
     table.prototype.schema = function(computed = false, override = true) {
         let schema = this._Table.get_schema();
@@ -997,13 +1040,15 @@ export default function(Module) {
     };
 
     /**
-     * The computed schema of this {@link module:perspective~table}. Returns a schema of only computed
-     * columns added by the user, the keys of which are computed columns and the values an
-     * Object containing the associated column_name, column_type, and computation.
+     * The computed schema of this {@link module:perspective~table}. Returns a
+     * schema of only computed columns added by the user, the keys of which are
+     * computed columns and the values an Object containing the associated
+     * column_name, column_type, and computation.
      *
      * @async
      *
-     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s computed schema.
+     * @returns {Promise<Object>} A Promise of this
+     * {@link module:perspective~table}'s computed schema.
      */
     table.prototype.computed_schema = function() {
         if (this.computed.length < 0) return {};
@@ -1028,12 +1073,14 @@ export default function(Module) {
     };
 
     /**
-     * Validates a filter configuration, i.e. that the value to filter by is not null or undefined.
+     * Validates a filter configuration, i.e. that the value to filter by is not
+     * null or undefined.
      *
      * @param {Array<string>} [filter] a filter configuration to test.
      */
     table.prototype.is_valid_filter = function(filter) {
-        // isNull and isNotNull filter operators are always valid and apply to all schema types
+        // isNull and isNotNull filter operators are always valid and apply to
+        // all schema types
         if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
             return true;
         }
@@ -1051,28 +1098,33 @@ export default function(Module) {
         return typeof value !== "undefined" && value !== null;
     };
 
+    /* eslint-disable max-len */
+
     /**
-     * Create a new {@link module:perspective~view} from this table with a specified
-     * configuration.
+     * Create a new {@link module:perspective~view} from this table with a
+     * specified configuration.
      *
-     * @param {Object} [config] The configuration object for this {@link module:perspective~view}.
-     * @param {Array<string>} [config.row_pivots] An array of column names
-     * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
-     * @param {Array<string>} [config.column_pivots] An array of column names
-     * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
+     * @param {Object} [config] The configuration object for this
+     * {@link module:perspective~view}.
+     * @param {Array<string>} [config.row_pivots] An array of column names to
+     * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
+     * @param {Array<string>} [config.column_pivots] An array of column names to
+     * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
      * @param {Array<Object>} [config.columns] An array of column names for the
      * output columns.  If none are provided, all columns are output.
-     * @param {Object} [config.aggregates] An object, the keys of which are column
-     * names, and their respective values are the aggregates calculations to use
-     * when this view has `row_pivots`.  A column provided to `config.columns`
-     * without an aggregate in this object, will use the default aggregate
-     * calculation for its type.
-     * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
-     * apply.  A filter configuration is an array of 3 elements:  A column name,
-     * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
-     * @param {Array<string>} [config.sort] An Array of Sort configurations to apply.
-     * A sort configuration is an array of 2 elements: A column name, and a sort direction,
-     * which are: "none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
+     * @param {Object} [config.aggregates] An object, the keys of which are
+     * column names, and their respective values are the aggregates calculations
+     * to use when this view has `row_pivots`.  A column provided to
+     * `config.columns` without an aggregate in this object, will use the
+     * default aggregate calculation for its type.
+     * @param {Array<Array<string>>} [config.filter] An Array of Filter
+     * configurations to apply.  A filter configuration is an array of 3
+     * elements:  A column name, a supported filter comparison string (e.g.
+     * '===', '>'), and a value to compare.
+     * @param {Array<string>} [config.sort] An Array of Sort configurations to
+     * apply. A sort configuration is an array of 2 elements: A column name, and
+     * a sort direction, which are: "none", "asc", "desc", "col asc", "col
+     * desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
      *
      * @example
      * var view = table.view({
@@ -1083,8 +1135,8 @@ export default function(Module) {
      *      sort: [['value', 'asc']]
      * });
      *
-     * @returns {view} A new {@link module:perspective~view} object for the supplied configuration,
-     * bound to this table
+     * @returns {view} A new {@link module:perspective~view} object for the
+     * supplied configuration, bound to this table
      */
     table.prototype.view = function(_config = {}) {
         _clear_process(this.get_id());
@@ -1099,7 +1151,8 @@ export default function(Module) {
                 }
             } else if (key === "aggregate") {
                 console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
-                // backwards compatibility: deconstruct `aggregate` into `aggregates` and `columns`
+                // backwards compatibility: deconstruct `aggregate` into
+                // `aggregates` and `columns`
                 config["aggregates"] = {};
                 config["columns"] = [];
                 for (const agg of _config["aggregate"]) {
@@ -1143,6 +1196,8 @@ export default function(Module) {
         return v;
     };
 
+    /* eslint-enadle max-len */
+
     let meter;
 
     function initialize_profile_thread() {
@@ -1164,13 +1219,13 @@ export default function(Module) {
     }
 
     /**
-     * Updates the rows of a {@link module:perspective~table}. Updated rows are pushed down to any
-     * derived {@link module:perspective~view} objects.
+     * Updates the rows of a {@link module:perspective~table}. Updated rows are
+     * pushed down to any derived {@link module:perspective~view} objects.
      *
      * @param {Object<string, Array>|Array<Object>|string} data The input data
-     * for this table.  The supported input types mirror the constructor options, minus
-     * the ability to pass a schema (Object<string, string>) as this table has
-     * already been constructed, thus its types are set in stone.
+     * for this table.  The supported input types mirror the constructor
+     * options, minus the ability to pass a schema (Object<string, string>) as
+     * this table has already been constructed, thus its types are set in stone.
      *
      * @see {@link module:perspective~table}
      */
@@ -1229,7 +1284,8 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_INSERT;
-            // update the Table in C++, but don't keep the returned Table reference as it is identical
+            // update the Table in C++, but don't keep the returned Table
+            // reference as it is identical
             make_table(pdata, this._Table, this.computed, this.index || "", this.limit, op, true, is_arrow);
             this.initialized = true;
         } catch (e) {
@@ -1241,8 +1297,8 @@ export default function(Module) {
     };
 
     /**
-     * Removes the rows of a {@link module:perspective~table}. Removed rows are pushed down to any
-     * derived {@link module:perspective~view} objects.
+     * Removes the rows of a {@link module:perspective~table}. Removed rows are
+     * pushed down to any derived {@link module:perspective~view} objects.
      *
      * @param {Array<Object>} data An array of primary keys to remove.
      *
@@ -1269,7 +1325,8 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_DELETE;
-            // update the Table in C++, but don't keep the returned Table reference as it is identical
+            // update the Table in C++, but don't keep the returned Table
+            // reference as it is identical
             make_table(pdata, this._Table, undefined, this.index || "", this.limit, op, false, is_arrow);
             this.initialized = true;
         } catch (e) {
@@ -1281,7 +1338,8 @@ export default function(Module) {
     };
 
     /**
-     * Create a new table with the addition of new computed columns (defined as javascript functions)
+     * Create a new table with the addition of new computed columns (defined as
+     * javascript functions)
      *
      * @param {Computation} computed A computation specification object
      */
@@ -1306,9 +1364,10 @@ export default function(Module) {
      * The column names of this table.
      *
      * @async
-     * @param {boolean} computed Should computed columns be included?
-     * (default false)
-     * @returns {Promise<Array<string>>} An array of column names for this table.
+     * @param {boolean} computed Should computed columns be included? (default
+     * false)
+     * @returns {Promise<Array<string>>} An array of column names for this
+     * table.
      */
     table.prototype.columns = function(computed = false) {
         let schema = this._Table.get_schema();
@@ -1358,22 +1417,24 @@ export default function(Module) {
          * // Creating a table from a Web Worker (instantiated via the worker() method).
          * var table = worker.table([{x: 1}, {x: 2}]);
          *
-         * @param {Object<string, Array>|Object<string, string>|Array<Object>|string} data The input data
-         *     for this table.  When supplied an Object with string values, an empty
-         *     table is returned using this Object as a schema.  When an Object with
+         * @param {Object<string, Array>|Object<string,
+         *     string>|Array<Object>|string} data The input data for this table.
+         *     When supplied an Object with string values, an empty table is
+         *     returned using this Object as a schema.  When an Object with
          *     Array values is supplied, a table is returned using this object's
-         *     key/value pairs as name/columns respectively.  When an Array is supplied,
-         *     a table is constructed using this Array's objects as rows.  When
-         *     a string is supplied, the parameter as parsed as a CSV.
+         *     key/value pairs as name/columns respectively.  When an Array is
+         *     supplied, a table is constructed using this Array's objects as
+         *     rows.  When a string is supplied, the parameter as parsed as a
+         *     CSV.
          * @param {Object} [options] An optional options dictionary.
          * @param {string} options.index The name of the column in the resulting
-         *     table to treat as an index.  When updating this table, rows sharing an
-         *     index of a new row will be overwritten. `index` is mutually exclusive
-         *     to `limit`
+         *     table to treat as an index.  When updating this table, rows
+         *     sharing an index of a new row will be overwritten. `index` is
+         *     mutually exclusive to `limit`
          * @param {integer} options.limit The maximum number of rows that can be
-         *     added to this table.  When exceeded, old rows will be overwritten in
-         *     the order they were inserted.  `limit` is mutually exclusive to
-         *     `index`.
+         *     added to this table.  When exceeded, old rows will be overwritten
+         *     in the order they were inserted.  `limit` is mutually exclusive
+         *     to `index`.
          *
          * @returns {table} A new {@link module:perspective~table} object.
          */
@@ -1431,17 +1492,19 @@ export default function(Module) {
      * Create a WebWorker API that loads perspective in `init` and extends
      * `post` using the worker's `postMessage` method.
      *
-     * If Perspective is running inside a Web Worker, use the WebSorkerServer
-     * as default.
+     * If Perspective is running inside a Web Worker, use the WebSorkerServer as
+     * default.
      *
      * @extends Server
      * @private
      */
     class WebWorkerServer extends Server {
         /**
-         * On initialization, listen for messages posted from the client and send it to `Server.process()`.
+         * On initialization, listen for messages posted from the client and
+         * send it to `Server.process()`.
          *
-         * @param perspective a reference to the Perspective module, allowing the `Server` to access Perspective methods.
+         * @param perspective a reference to the Perspective module, allowing
+         * the `Server` to access Perspective methods.
          */
         constructor(perspective) {
             super(perspective);
@@ -1449,19 +1512,23 @@ export default function(Module) {
         }
 
         /**
-         * Implements the `Server`'s `post()` method using the Web Worker `postMessage()` API.
+         * Implements the `Server`'s `post()` method using the Web Worker
+         * `postMessage()` API.
          *
          * @param {Object} msg a message to pass to the client
-         * @param {*} transfer a transferable object to pass to the client, if needed
+         * @param {*} transfer a transferable object to pass to the client, if
+         * needed
          */
         post(msg, transfer) {
             self.postMessage(msg, transfer);
         }
 
         /**
-         * When initialized, replace Perspective's internal `__MODULE` variable with the WASM binary.
+         * When initialized, replace Perspective's internal `__MODULE` variable
+         * with the WASM binary.
          *
-         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective WASM code
+         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective
+         * WASM code
          */
         init(msg) {
             if (typeof WebAssembly === "undefined") {
@@ -1477,7 +1544,8 @@ export default function(Module) {
     }
 
     /**
-     * Use WebSorkerServer as default inside a Web Worker, where `window` is replaced with `self`.
+     * Use WebSorkerServer as default inside a Web Worker, where `window` is
+     * replaced with `self`.
      */
     if (typeof self !== "undefined" && self.addEventListener) {
         new WebWorkerServer(perspective);

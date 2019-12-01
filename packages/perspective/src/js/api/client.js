@@ -12,11 +12,11 @@ import {proxy_view} from "./view_api.js";
 import {bindall} from "../utils.js";
 
 /**
- * Perspective's worker API handles and processes asynchronous messages, interfacing with the Perspective host class.
- *
- * Child classes must implement the `send()` interface, which defines how messages are dispatched in different contexts.
- *
- * `handlers` is a dictionary of resolve/reject callbacks for each method the worker receives.
+ * Perspective's worker API handles and processes asynchronous messages,
+ * interfacing with the Perspective host class.  Child classes must implement
+ * the `send()` interface, which defines how messages are dispatched in
+ * different contexts.  `handlers` is a dictionary of resolve/reject callbacks
+ * for each method the worker receives.
  *
  * @export
  */
@@ -75,8 +75,10 @@ export class Client {
     }
 
     /**
-     * Given the name of a table that is hosted on the server (e.g. using `perspective-python` or `perspective` in NodeJS),
-     * return a `table` instance that sends all operations and instructions to the `table` on the server.
+     * Given the name of a table that is hosted on the server (e.g. using
+     * `perspective-python` or `perspective` in NodeJS), return a `table`
+     * instance that sends all operations and instructions to the `table` on the
+     * server.
      *
      * @param {string} name
      */
@@ -89,7 +91,8 @@ export class Client {
     }
 
     /**
-     * Handle a command from Perspective. If the Client is not initialized, initialize it and dispatch the `perspective-ready` event.
+     * Handle a command from Perspective. If the Client is not initialized,
+     * initialize it and dispatch the `perspective-ready` event.
      *
      * Otherwise, reject or resolve the incoming command.
      */

@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import six
 import numpy
 import pandas
@@ -20,9 +21,9 @@ from ..viewer import PerspectiveViewer
 
 
 def _type_to_string(t):
-    '''Convert a type object to a string representing a Perspective-supported type.
-
-    Redefine here as we can't have any dependencies on libbinding in client mode.
+    '''Convert a type object to a string representing a Perspective-supported
+    type.  Redefine here as we can't have any dependencies on libbinding in
+    client mode.
     '''
     if t in six.integer_types:
         return "integer"
@@ -76,12 +77,13 @@ def _serialize(data):
 
 
 class _PerspectiveWidgetMessage(object):
-    '''A custom message that will be passed from the Python widget to the front-end.
+    '''A custom message that will be passed from the Python widget to the
+    front-end.
 
-    When creating new messages, use this class as it defines a concrete schema for the message and
-    prevents loosely creating `dict` objects everywhere.
-
-    Use `to_dict()` to obtain the message in a form that can be sent through IPyWidgets.
+    When creating new messages, use this class as it defines a concrete schema
+    for the message and prevents loosely creating `dict` objects everywhere.
+    Use `to_dict()` to obtain the message in a form that can be sent through
+    IPyWidgets.
     '''
 
     def __init__(self, msg_id, msg_type, msg_data):
@@ -100,25 +102,37 @@ class _PerspectiveWidgetMessage(object):
 
 
 class PerspectiveWidget(Widget, PerspectiveViewer):
-    '''`PerspectiveWidget` allows for Perspective to be used in the form of a JupyterLab IPython widget.
+    ''':class`~perspective.PerspectiveWidget` allows for Perspective to be used
+    in the form of a JupyterLab IPython widget.
 
-    Using `perspective.Table`, you can create a widget that extends the full functionality of `perspective-viewer`.
-
-    Changes on the viewer can be programatically set on the `PerspectiveWidget` instance, and state is maintained across page refreshes.
+    Using `perspective.Table`, you can create a widget that extends the full
+    functionality of `perspective-viewer`.  Changes on the viewer can be
+    programatically set on the :class`~perspective.PerspectiveWidget` instance,
+    and state is maintained across page refreshes.
 
     Examples:
         >>> from perspective import Table, PerspectiveWidget
-        >>> data = {"a": [1, 2, 3], "b": ["2019/07/11 7:30PM", "2019/07/11 8:30PM", "2019/07/11 9:30PM"]}
+        >>> data = {
+        ...     "a": [1, 2, 3],
+        ...     "b": [
+        ...         "2019/07/11 7:30PM",
+        ...         "2019/07/11 8:30PM",
+        ...         "2019/07/11 9:30PM"
+        ...     ]
+        ... }
         >>> tbl = Table(data, index="a")
-        >>> widget = PerspectiveWidget(tbl, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
-        >>> widget
-        PerspectiveWidget(tbl, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
+        >>> widget = PerspectiveWidget(
+        ...     tbl,
+        ...     row_pivots=["a"],
+        ...     sort=[["b", "desc"]],
+        ...     filter=[["a", ">", 1]]
+        ... )
         >>> widget.sort
         [["b", "desc"]]
         >>> widget.sort.append(["a", "asc"])
         >>> widget.sort
         [["b", "desc"], ["a", "asc"]]
-        >>> widget.update({"a": [4, 5]}) # updates to the table reflect on the widget
+        >>> widget.update({"a": [4, 5]}) # Browser UI updates
     '''
 
     # Required by ipywidgets for proper registration of the backend
@@ -135,42 +149,45 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                  limit=None,
                  client=not is_libpsp(),
                  **kwargs):
-        '''Initialize an instance of `PerspectiveWidget` with the given table/data and viewer configuration.
+        '''Initialize an instance of :class`~perspective.PerspectiveWidget`
+        with the given table/data and viewer configuration.
 
-        If a pivoted DataFrame or MultiIndex table is passed in, the widget preserves pivots and applies them.
-
-        See `PerspectiveViewer.__init__` for arguments that transform the view shown in the widget.
+        If a pivoted DataFrame or MultiIndex table is passed in, the widget
+        preserves pivots and applies them.  See `PerspectiveViewer.__init__` for
+        arguments that transform the view shown in the widget.
 
         Args:
-            table_or_data (perspective.Table|dict|list|pandas.DataFrame): The ``Table`` or data that will be viewed in the widget.
+            table_or_data (perspective.Table|dict|list|pandas.DataFrame): The
+                `Table` or data that will be viewed in the widget.
 
         Keyword Arguments:
+            index (`str`): A column name to be used as the primary key.
+                Ignored if a `Table` is supplied.
+            limit (`int`): A upper limit on the number of rows in the Table.
+                Cannot be set at the same time as `index`, ignored if a `Table`
+                is passed in.
 
-        index ``(str)``
-        - A column name to be used as the primary key. Ignored if a `Table` is passed in.
+            client (`bool`):  If True, convert the dataset into an Apache Arrow
+                binary and create the Table in Javascript using a copy of the
+                data. Defaults to False.
 
-        limit ``(int)``
-        - A upper limit on the number of rows in the Table. Cannot be set at the same time as `index`, ignored if a `Table` is passed in.
-
-        client ``(bool)``
-        - If True, convert the dataset into an Apache Arrow binary and create the Table in Javascript using a copy of the data. Defaults to False.
-
-        kwargs
-        - configuration options for the `PerspectiveViewer`, and `Table` constructor if `table_or_data` is a dataset.
+            kwargs (`dict`): configuration options for the `PerspectiveViewer`,
+                and `Table` constructor if `table_or_data` is a dataset.
 
         Examples:
             >>> widget = PerspectiveWidget(
-                    {"a": [1, 2, 3]},
-                    aggregates={"a": "avg"},
-                    row_pivots=["a"],
-                    sort=[["b", "desc"]],
-                    filter=[["a", ">", 1]])
+            ...     {"a": [1, 2, 3]},
+            ...     aggregates={"a": "avg"},
+            ...     row_pivots=["a"],
+            ...     sort=[["b", "desc"]],
+            ...     filter=[["a", ">", 1]])
         '''
         self._displayed = False
         self.on_displayed(self._on_display)
 
-        # If `self.client` is True, the front-end `perspective-viewer` is given a copy of the data serialized to Arrow,
-        # and changes made in Python do not reflect to the front-end.
+        # If `self.client` is True, the front-end `perspective-viewer` is given
+        # a copy of the data serialized to Arrow, and changes made in Python
+        # do not reflect to the front-end.
         self.client = client
 
         if self.client:
@@ -200,9 +217,11 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         # Initialize the viewer
         super(PerspectiveWidget, self).__init__(**kwargs)
 
-        # Handle messages from the the front end `PerspectiveJupyterClient.send()`.
+        # Handle messages from the the front end
+        # `PerspectiveJupyterClient.send()`:
         # - The "data" value of the message should be a JSON-serialized string.
-        # - Both `on_msg` and `@observe("value")` must be specified on the handler for custom messages to be parsed by the Python widget.
+        # - Both `on_msg` and `@observe("value")` must be specified on the
+        # handler for custom messages to be parsed by the Python widget.
         self.on_msg(self.handle_message)
 
         if self.client:
@@ -215,7 +234,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if limit is not None:
                 self._client_options["limit"] = limit
 
-            # cache self._data so creating multiple views don't reserialize the same data
+            # cache self._data so creating multiple views don't reserialize the
+            # same data
             if not hasattr(self, "_data") or self._data is None:
                 self._data = _serialize(table_or_data)
         else:
@@ -234,8 +254,9 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 self.load(table_or_data, **load_kwargs)
 
     def load(self, data, **options):
-        '''Load the widget with data. If running in client mode, this method serializes the data
-        and calls the browser viewer's load method. Otherwise, it calls `Viewer.load()` using `super()`.
+        '''Load the widget with data. If running in client mode, this method
+        serializes the data and calls the browser viewer's load method.
+        Otherwise, it calls `Viewer.load()` using `super()`.
         '''
         if self.client is True:
             # serialize the data and send a custom message to the browser
@@ -251,8 +272,9 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         self.send(message.to_dict())
 
     def update(self, data):
-        '''Update the widget with new data. If running in client mode, this method serializes the data
-        and calls the browser viewer's update method. Otherwise, it calls `Viewer.update()` using `super()`.
+        '''Update the widget with new data. If running in client mode, this
+        method serializes the data and calls the browser viewer's update
+        method. Otherwise, it calls `Viewer.update()` using `super()`.
         '''
         if self.client is True:
             if self._displayed is False:
@@ -284,8 +306,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             super(PerspectiveWidget, self).clear()
 
     def replace(self, data):
-        '''Replaces the widget's `Table` with new data conforming to the same schema. Does not clear
-        user-set state. If in client mode, serializes the data and sends it to the browser.'''
+        '''Replaces the widget's `Table` with new data conforming to the same
+        schema. Does not clear user-set state. If in client mode, serializes
+        the data and sends it to the browser.
+        '''
         if self.client is True:
             if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
                 data, _ = deconstruct_pandas(data)
@@ -299,11 +323,13 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             super(PerspectiveWidget, self).replace(data)
 
     def delete(self, delete_table=True):
-        '''Delete the Widget's data and clears its internal state. If running in client mode, sends the
-        `delete()` command to the browser. Otherwise calls `delete` on the underlying viewer.
+        '''Delete the Widget's data and clears its internal state. If running in
+        client mode, sends the `delete()` command to the browser. Otherwise
+        calls `delete` on the underlying viewer.
 
         Args:
-            delete_table (bool) : whether the underlying `Table` will be deleted. Defaults to True.
+            delete_table (`bool`): whether the underlying `Table` will be
+                deleted. Defaults to True.
         '''
         if self.client is False:
             super(PerspectiveWidget, self).delete(delete_table)
@@ -315,24 +341,31 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         self.close()
 
     def post(self, msg, msg_id=None):
-        '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.
+        '''Post a serialized message to the `PerspectiveJupyterClient`
+        in the front end.
 
-        The posted message should conform to the `PerspectiveJupyterMessage` interface as defined in `@finos/perspective-jupyterlab`.
+        The posted message should conform to the `PerspectiveJupyterMessage`
+        interface as defined in `@finos/perspective-jupyterlab`.
 
         Args:
-            msg (dict): a message from `PerspectiveManager` for the front-end viewer to process.
-            msg_id (int): an integer id that allows the client to process the message.
+            msg (dict): a message from `PerspectiveManager` for the front-end
+                viewer to process.
+            msg_id (int): an integer id that allows the client to process
+                the message.
         '''
         message = _PerspectiveWidgetMessage(msg_id, "cmd", msg)
         self.send(message.to_dict())
 
     @observe("value")
     def handle_message(self, widget, content, buffers):
-        '''Given a message from `PerspectiveJupyterClient.send()`, process the message and return the result to `self.post`.
+        '''Given a message from `PerspectiveJupyterClient.send()`, process the
+        message and return the result to `self.post`.
 
         Args:
-            widget : a reference to the `Widget` instance that received the message.
-            content (dict): the message from the front-end. Automatically de-serialized by ipywidgets.
+            widget: a reference to the `Widget` instance that received the
+                message.
+            content (dict): the message from the front-end. Automatically
+                de-serialized by ipywidgets.
             buffers : optional arraybuffers from the front-end, if any.
         '''
         if content["type"] == "cmd":
@@ -345,8 +378,9 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 msg = self._make_load_message()
                 self.send(msg.to_dict())
 
-                # In client mode, users can call `update()` before the widget is visible.
-                # This applies the updates after the viewer has loaded the initial dataset.
+                # In client mode, users can call `update()` before the widget
+                # is visible. This applies the updates after the viewer has
+                # loaded the initial dataset.
                 if self.client is True and len(self._predisplay_update_cache) > 0:
                     for data in self._predisplay_update_cache:
                         self.update(data)
@@ -356,8 +390,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 self.manager._process(parsed, post_callback)
 
     def _make_load_message(self):
-        '''Send a message to the front-end either containing the name of a Table in python, or the serialized
-        dataset with options while in client mode.'''
+        '''Send a message to the front-end either containing the name of a
+        Table in python, or the serialized dataset with options while in client
+        mode.
+        '''
         msg_data = None
         if self.client and self._data is not None:
             # Send data to the client, transferring ownership to the browser
@@ -368,7 +404,9 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if len(self._client_options.keys()) > 0:
                 msg_data["options"] = self._client_options
         elif self.table_name is not None:
-            # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
+            # Only pass back the table if it's been loaded. If the table isn't
+            # loaded, the `load()` method will handle synchronizing the
+            # front-end.
             msg_data = {
                 "table_name": self.table_name
             }
@@ -379,5 +417,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             raise PerspectiveError("Widget could not find a dataset or a `Table` to load.")
 
     def _on_display(self, widget, **kwargs):
-        '''When the widget has been displayed, make sure `displayed` is set to True so updates stop being cached.'''
+        '''When the widget has been displayed, make sure `displayed` is set to
+        True so updates stop being cached.
+        '''
         self._displayed = True

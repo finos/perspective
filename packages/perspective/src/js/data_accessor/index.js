@@ -129,8 +129,8 @@ export class DataAccessor {
     }
 
     /**
-     * Resets the internal state of the accessor, preventing
-     * collisions with previously set data.
+     * Resets the internal state of the accessor, preventing collisions with
+     * previously set data.
      *
      * @private
      */
@@ -141,8 +141,8 @@ export class DataAccessor {
     }
 
     /**
-     * Links the accessor to a package of data for processing,
-     * calculating its format and size.
+     * Links the accessor to a package of data for processing, calculating its
+     * format and size.
      *
      * @private
      * @param {object} data

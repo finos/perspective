@@ -53,7 +53,7 @@ export const draw = (mode, set_config, restyle) =>
         const columns = config.columns;
 
         const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false, false)]);
-        let js, element;
+        let element;
 
         if (task.cancelled) {
             return;

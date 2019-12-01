@@ -59,8 +59,9 @@ export function draggableComponent() {
 
 function unpinNodeFromTopRight(node, pinned) {
     if (pinned !== false) {
-        // Default behaviour for the legend is to remain pinned to the top right hand corner with a specific margin.
-        // Once the legend has moved we cannot continue to use that css based approach.
+        // Default behaviour for the legend is to remain pinned to the top right
+        // hand corner with a specific margin. Once the legend has moved we
+        // cannot continue to use that css based approach.
         d3.select(window).on(resizeForDraggingEvent, function() {
             const offsets = enforceContainerBoundaries(node, 0, 0);
             node.style.left = `${node.offsetLeft + offsets.x}px`;

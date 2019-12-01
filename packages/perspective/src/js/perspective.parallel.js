@@ -51,9 +51,11 @@ const override = new (class {
 })();
 
 /**
- * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
+ * WebWorker extends Perspective's `worker` class and defines interactions using
+ * the WebWorker API.
  *
- * This class serves as the client API for transporting messages to/from Web Workers.
+ * This class serves as the client API for transporting messages to/from Web
+ * Workers.
  */
 class WebWorkerClient extends Client {
     constructor(config) {
@@ -119,9 +121,11 @@ class WebWorkerClient extends Client {
 /**
  * Given a WebSocket URL, connect to the socket located at `url`.
  *
- * The `onmessage` handler receives incoming messages and sends it to the WebWorker through `this._handle`.
+ * The `onmessage` handler receives incoming messages and sends it to the
+ * WebWorker through `this._handle`.
  *
- * If the message has a transferable asset, set the `pending_arrow` flag to tell the worker the next message is an ArrayBuffer.
+ * If the message has a transferable asset, set the `pending_arrow` flag to tell
+ * the worker the next message is an ArrayBuffer.
  */
 class WebSocketClient extends Client {
     constructor(url) {
@@ -147,9 +151,9 @@ class WebSocketClient extends Client {
                 msg = JSON.parse(msg.data);
 
                 // If the `is_transferable` flag is set, the worker expects the
-                // next message to be a transferable object.
-                // This sets the `_pending_arrow` flag, which triggers a special
-                // handler for the ArrayBuffer containing arrow data.
+                // next message to be a transferable object. This sets the
+                // `_pending_arrow` flag, which triggers a special handler for
+                // the ArrayBuffer containing arrow data.
                 if (msg.is_transferable) {
                     this._pending_arrow = msg.id;
                 } else {
@@ -192,8 +196,8 @@ const WORKER_SINGLETON = (function() {
 })();
 
 /**
- * If Perspective is loaded with the `preload` attribute, pre-initialize
- * the worker so it is available at page render.
+ * If Perspective is loaded with the `preload` attribute, pre-initialize the
+ * worker so it is available at page render.
  */
 if (document.currentScript && document.currentScript.hasAttribute("preload")) {
     WORKER_SINGLETON.getInstance();
@@ -203,8 +207,7 @@ const mod = {
     override: x => override.set(x),
 
     /**
-     * Create a new WebWorkerClient instance.
-     *s
+     * Create a new WebWorkerClient instance. s
      * @param {*} [config] An optional perspective config object override
      */
     worker(config) {
@@ -212,9 +215,8 @@ const mod = {
     },
 
     /**
-     * Create a new WebSocketClient instance. The `url` parameter is provided, load the worker
-     * at `url` using a WebSocket.
-     *s
+     * Create a new WebSocketClient instance. The `url` parameter is provided,
+     * load the worker at `url` using a WebSocket. s
      * @param {*} url Defaults to `window.location.origin`
      * @param {*} [config] An optional perspective config object override
      */

@@ -187,7 +187,8 @@ Highcharts.setOptions({
             grid = axis.labelsGrid = axis.chart.renderer
                 .path()
                 .attr({
-                    // #58: use tickWidth/tickColor instead of lineWidth/lineColor:
+                    // #58: use tickWidth/tickColor instead of
+                    // lineWidth/lineColor:
                     strokeWidth: tickWidth, // < 4.0.3
                     "stroke-width": tickWidth, // 4.0.3+ #30
                     stroke: options.tickColor || "" // for styled mode (tickColor === undefined)

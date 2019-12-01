@@ -31,9 +31,9 @@ module.exports.default = {
             aggregate: "sum",
 
             /**
-             * The format object for this type.  Can be either an `toLocaleString()`
-             * `options` object for this type (or supertype), or a function
-             * which returns the formatted string for this type.
+             * The format object for this type.  Can be either an
+             * `toLocaleString()` `options` object for this type (or supertype),
+             * or a function which returns the formatted string for this type.
              */
             format: {
                 style: "decimal",
