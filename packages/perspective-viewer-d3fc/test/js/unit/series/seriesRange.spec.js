@@ -13,9 +13,19 @@ import * as sinon from "sinon";
 const settings = {
     colorStyles: {
         gradient: {
-            positive: [[0, "rgb(0, 0, 0)"], [1, "rgb(100, 0, 0)"]],
-            negative: [[0, "rgb(0, 0, 0)"], [1, "rgb(0, 100, 0)"]],
-            full: [[0, "rgb(100, 0, 0)"], [0.5, "rgb(0, 0, 0)"], [1, "rgb(0, 0, 100)"]]
+            positive: [
+                [0, "rgb(0, 0, 0)"],
+                [1, "rgb(100, 0, 0)"]
+            ],
+            negative: [
+                [0, "rgb(0, 0, 0)"],
+                [1, "rgb(0, 100, 0)"]
+            ],
+            full: [
+                [0, "rgb(100, 0, 0)"],
+                [0.5, "rgb(0, 0, 0)"],
+                [1, "rgb(0, 0, 100)"]
+            ]
         }
     }
 };

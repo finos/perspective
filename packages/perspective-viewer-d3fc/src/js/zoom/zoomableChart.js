@@ -63,9 +63,18 @@ export default () => {
                         selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(k));
                     };
 
-                    oneYear.on("click", dateClick((start, end) => end.setYear(start.getFullYear() + 1)));
-                    sixMonths.on("click", dateClick((start, end) => end.setMonth(start.getMonth() + 6)));
-                    oneMonth.on("click", dateClick((start, end) => end.setMonth(start.getMonth() + 1)));
+                    oneYear.on(
+                        "click",
+                        dateClick((start, end) => end.setYear(start.getFullYear() + 1))
+                    );
+                    sixMonths.on(
+                        "click",
+                        dateClick((start, end) => end.setMonth(start.getMonth() + 6))
+                    );
+                    oneMonth.on(
+                        "click",
+                        dateClick((start, end) => end.setMonth(start.getMonth() + 1))
+                    );
                 }
             });
 

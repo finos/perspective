@@ -39,7 +39,12 @@ const multiAxis = (orient, baseAxis, scale) => {
 
             // add the domain line
             const range = scale.range();
-            const domainPathData = pathTranspose([[range[0], sign * tickSizeOuter], [range[0], 0], [range[1], 0], [range[1], sign * tickSizeOuter]]);
+            const domainPathData = pathTranspose([
+                [range[0], sign * tickSizeOuter],
+                [range[0], 0],
+                [range[1], 0],
+                [range[1], sign * tickSizeOuter]
+            ]);
 
             const domainLine = domainPathDataJoin(container, [data]);
             domainLine
