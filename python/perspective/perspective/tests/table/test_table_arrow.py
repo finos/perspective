@@ -13,6 +13,8 @@ from pytest import mark
 from perspective.table import Table
 
 SUPERSTORE_ARROW = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "examples", "simple", "superstore.arrow")
+DATE32_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date32.arrow")
+DATE64_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date64.arrow")
 
 names = ["a", "b", "c", "d"]
 
@@ -26,6 +28,30 @@ class TestTableArrow(object):
             v = tbl.view()
             df = v.to_df()
             assert df.shape == (9994, 21)
+
+    # files
+
+    def test_table_arrow_loads_date32_file(self):
+        with open(DATE32_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl = Table(file.read())
+            assert tbl.schema() == {
+                "a": date,
+                "b": date,
+                "c": date,
+                "d": date
+            }
+            assert tbl.size() == 29
+
+    def test_table_arrow_loads_date64_file(self):
+        with open(DATE64_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl = Table(file.read())
+            assert tbl.schema() == {
+                "a": date,
+                "b": date,
+                "c": date,
+                "d": date
+            }
+            assert tbl.size() == 29
 
     # streams
 

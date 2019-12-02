@@ -6,16 +6,63 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import os
 import pyarrow as pa
 from datetime import date, datetime
 from pytest import mark
 from perspective.table import Table
 
+SOURCE_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "2_x_10.arrow")
+PARTIAL_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "2_x_4.arrow")
 
 names = ["a", "b", "c", "d"]
 
 
 class TestUpdateArrow(object):
+
+    # files
+
+    def test_update_arrow_updates_file(self):
+        tbl = Table({
+            "a": int,
+            "b": float
+        })
+
+        with open(SOURCE_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl.update(file.read())
+            assert tbl.size() == 10
+            assert tbl.schema() == {
+                "a": int,
+                "b": float
+            }
+
+        with open(SOURCE_ARROW, mode='rb') as file:
+            tbl.update(file.read())
+            assert tbl.size() == 20
+            assert tbl.view().to_dict() == {
+                "a": [i for i in range(1, 11)] * 2,
+                "b": [i + 0.5 for i in range(1, 11)] * 2
+            }
+
+    def test_update_arrow_partial_updates_file(self):
+        tbl = Table({
+            "a": int,
+            "b": float
+        }, index="a")
+
+        with open(SOURCE_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 10
+
+        with open(PARTIAL_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 10
+            assert tbl.view().to_dict() == {
+                "a": [i for i in range(1, 11)],
+                "b": [100.5, 200.5, 300.5] + [i + 0.5 for i in range(4, 11)]
+            }
+
+    # streams
 
     def test_update_arrow_updates_int_stream(self, util):
         data = [list(range(10)) for i in range(4)]
