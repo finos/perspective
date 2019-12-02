@@ -25,7 +25,7 @@ import {PERSPECTIVE_VERSION} from "./version";
  */
 export const PerspectiveJupyterPlugin: IPlugin<Application<Widget>, void> = {
     id: "@finos/perspective-jupyterlab",
-    requires: [IJupyterWidgetRegistry],
+    requires: [IJupyterWidgetRegistry as any], //the "as any" is a workaround for @jupyter-widgets phosphor changes
     activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
         registry.registerWidget({
             name: "@finos/perspective-jupyterlab",

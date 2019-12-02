@@ -17,11 +17,11 @@ import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
  * the DOM.
  */
 export class PerspectiveView extends DOMWidgetView {
-    pWidget: PerspectiveWidget;
+    pspWidget: PerspectiveWidget;  // this should be pWidget, but temporarily calling it pspWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
     _createElement(tagName: string) {
-        this.pWidget = new PerspectiveJupyterWidget(undefined, {
+        this.pspWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
             row_pivots: this.model.get("row_pivots"),
@@ -40,15 +40,15 @@ export class PerspectiveView extends DOMWidgetView {
 
         this.perspective_client = new PerspectiveJupyterClient(this);
 
-        return this.pWidget.node;
+        return this.pspWidget.node;
     }
 
     _setElement(el: HTMLElement) {
-        if (this.el || el !== this.pWidget.node) {
+        if (this.el || el !== this.pspWidget.node) {
             // Do not allow the view to be reassigned to a different element.
             throw new Error("Cannot reset the DOM element.");
         }
-        this.el = this.pWidget.node;
+        this.el = this.pspWidget.node;
     }
 
     /**
@@ -59,7 +59,7 @@ export class PerspectiveView extends DOMWidgetView {
     _synchronize_state(mutations: any) {
         for (const mutation of mutations) {
             const name = mutation.attributeName.replace(/-/g, "_");
-            let new_value = this.pWidget.viewer.getAttribute(mutation.attributeName);
+            let new_value = this.pspWidget.viewer.getAttribute(mutation.attributeName);
             const current_value = this.model.get(name);
 
             if (typeof new_value === "undefined") {
@@ -101,7 +101,7 @@ export class PerspectiveView extends DOMWidgetView {
         // Watch the viewer DOM so that widget state is always synchronized with
         // DOM attributes.
         const observer = new MutationObserver(this._synchronize_state.bind(this));
-        observer.observe(this.pWidget.viewer, {
+        observer.observe(this.pspWidget.viewer, {
             attributes: true,
             attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters"],
             subtree: false
@@ -136,20 +136,20 @@ export class PerspectiveView extends DOMWidgetView {
             if (msg.data["cmd"] === "delete") {
                 // Regardless of client mode, if `delete()` is called we need to
                 // clean up the Viewer.
-                this.pWidget.delete();
+                this.pspWidget.delete();
                 return;
             }
 
-            if (this.pWidget.client === true) {
+            if (this.pspWidget.client === true) {
                 // In client mode, we need to directly call the methods on the
                 // viewer
                 const command = msg.data["cmd"];
                 if (command === "update") {
-                    this.pWidget._update(msg.data["data"]);
+                    this.pspWidget._update(msg.data["data"]);
                 } else if (command === "replace") {
-                    this.pWidget.replace(msg.data["data"]);
+                    this.pspWidget.replace(msg.data["data"]);
                 } else if (command === "clear") {
-                    this.pWidget.clear();
+                    this.pspWidget.clear();
                 }
             } else {
                 // Make a deep copy of each message - widget views share the
@@ -173,13 +173,13 @@ export class PerspectiveView extends DOMWidgetView {
      * @param {PerspectiveJupyterMessage} msg
      */
     _handle_load_message(msg: PerspectiveJupyterMessage) {
-        if (this.pWidget.client === true) {
+        if (this.pspWidget.client === true) {
             const data = msg.data["data"];
             const options = msg.data["options"] || {};
-            this.pWidget.load(data, options);
+            this.pspWidget.load(data, options);
         } else {
             const new_table = this.perspective_client.open_table(msg.data["table_name"]);
-            this.pWidget.load(new_table);
+            this.pspWidget.load(new_table);
 
             // Only call `init` after the viewer has a table.
             this.perspective_client.send({
@@ -194,42 +194,42 @@ export class PerspectiveView extends DOMWidgetView {
      * the front-end viewer.
      */
     plugin_changed() {
-        this.pWidget.plugin = this.model.get("plugin");
+        this.pspWidget.plugin = this.model.get("plugin");
     }
 
     columns_changed() {
-        this.pWidget.columns = this.model.get("columns");
+        this.pspWidget.columns = this.model.get("columns");
     }
 
     row_pivots_changed() {
-        this.pWidget.row_pivots = this.model.get("row_pivots");
+        this.pspWidget.row_pivots = this.model.get("row_pivots");
     }
 
     column_pivots_changed() {
-        this.pWidget.column_pivots = this.model.get("column_pivots");
+        this.pspWidget.column_pivots = this.model.get("column_pivots");
     }
 
     aggregates_changed() {
-        this.pWidget.aggregates = this.model.get("aggregates");
+        this.pspWidget.aggregates = this.model.get("aggregates");
     }
 
     sort_changed() {
-        this.pWidget.sort = this.model.get("sort");
+        this.pspWidget.sort = this.model.get("sort");
     }
 
     filters_changed() {
-        this.pWidget.filters = this.model.get("filters");
+        this.pspWidget.filters = this.model.get("filters");
     }
 
     plugin_config_changed() {
-        this.pWidget.plugin_config = this.model.get("plugin_config");
+        this.pspWidget.plugin_config = this.model.get("plugin_config");
     }
 
     dark_changed() {
-        this.pWidget.dark = this.model.get("dark");
+        this.pspWidget.dark = this.model.get("dark");
     }
 
     editable_changed() {
-        this.pWidget.editable = this.model.get("editable");
+        this.pspWidget.editable = this.model.get("editable");
     }
 }

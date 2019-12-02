@@ -28,7 +28,7 @@ module.exports = {
         maxEntrypointSize: 512000,
         maxAssetSize: 512000
     },
-    externals: /\@jupyter|\@phosphor/,
+    externals: /\@jupyter|\@phosphor|\@jupyter-widgets/,
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
     module: {
