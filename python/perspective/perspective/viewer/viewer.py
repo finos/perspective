@@ -28,7 +28,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                  sort=None,
                  filters=None,
                  plugin_config=None,
-                 dark=False,
+                 dark=None,
                  editable=False):
         '''Initialize an instance of `PerspectiveViewer` with the given viewer
         configuration.  Do not pass a `Table` or data into the constructor -
