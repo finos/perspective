@@ -54,6 +54,7 @@ namespace arrow {
 
     void
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
+        std::cout << "blen: " << length << std::endl;
         io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
         if (std::memcmp("ARROW1", (const void *)ptr, 6) == 0) {
             std::shared_ptr<ipc::RecordBatchFileReader> batch_reader;

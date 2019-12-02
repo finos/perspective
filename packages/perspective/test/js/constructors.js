@@ -8,7 +8,12 @@
  */
 const papaparse = require("papaparse");
 const moment = require("moment");
+<<<<<<< HEAD
 const arrows = require("./test_arrows.js");
+=======
+const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
+const chunked = fs.readFileSync(path.join(__dirname, "..", "arrow", "chunked.arrow")).buffer;
+>>>>>>> fix broken arrow JS tests, add more python file tests
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -580,6 +585,7 @@ module.exports = perspective => {
             table.delete();
         });
 
+<<<<<<< HEAD
         it("Arrow date32 constructor", async function() {
             const table = perspective.table(arrows.date32_arrow.slice());
             const view = table.view();
@@ -589,11 +595,27 @@ module.exports = perspective => {
                 b: arrow_date_col_2,
                 c: arrow_date_col_1,
                 d: arrow_date_col_2
+=======
+        it("Arrow date32 constructor", async function(done) {
+            fs.readFile(path.join(__dirname, "..", "arrow", "date32.arrow"), async (err, data) => {
+                if (err) throw err;
+                const table = perspective.table(data.buffer.slice());
+                const view = table.view();
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    a: arrow_date_col_1,
+                    b: arrow_date_col_2,
+                    c: arrow_date_col_1,
+                    d: arrow_date_col_2
+                });
+                view.delete();
+                table.delete();
+                done();
+>>>>>>> fix broken arrow JS tests, add more python file tests
             });
-            view.delete();
-            table.delete();
         });
 
+<<<<<<< HEAD
         it("Arrow date64 constructor", async function() {
             const table = perspective.table(arrows.date64_arrow.slice());
             const view = table.view();
@@ -603,9 +625,24 @@ module.exports = perspective => {
                 b: arrow_date_col_2,
                 c: arrow_date_col_1,
                 d: arrow_date_col_2
+=======
+        it("Arrow date64 constructor", async function(done) {
+            fs.readFile(path.join(__dirname, "..", "arrow", "date64.arrow"), async (err, data) => {
+                if (err) throw err;
+                const table = perspective.table(data.buffer.slice());
+                const view = table.view();
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    a: arrow_date_col_1,
+                    b: arrow_date_col_2,
+                    c: arrow_date_col_1,
+                    d: arrow_date_col_2
+                });
+                view.delete();
+                table.delete();
+                done();
+>>>>>>> fix broken arrow JS tests, add more python file tests
             });
-            view.delete();
-            table.delete();
         });
 
         it("CSV constructor", async function() {
