@@ -17,11 +17,14 @@ export const renderers = new (class {
      *
      * @param {string} name The logical unique name of the plugin.  This will be
      * used to set the component's `view` attribute.
-     * @param {object} plugin An object with this plugin's prototype.  Valid keys are:
-     *     name : The display name for this plugin.
-     *     create (required) : The creation function - may return a `Promise`.
-     *     delete : The deletion function.
-     *     mode : The selection mode - may be "toggle" or "select".
+     * @param {object} plugin An object with this plugin's prototype.
+     *     Valid keys are:
+     * @param {string} plugin.name The display name for this plugin.
+     * @param {string} plugin.create (required) The creation function - may
+     *     return a `Promise`.
+     * @param {string} plugin.delete The deletion function.
+     * @param {string} plugin.mode The selection mode - may be "toggle" or
+     *     "select".
      */
     registerPlugin(name, plugin) {
         if (RENDERERS[name]) {

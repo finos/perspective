@@ -26,7 +26,8 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     bindto?: HTMLElement;
     plugin_config?: PerspectiveViewerOptions;
 
-    // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g. ["row-pivots"]
+    // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
+    // ["row-pivots"]
     column_pivots?: string[];
     row_pivots?: string[];
     computed_columns?: {[column_name: string]: string}[];
@@ -35,8 +36,7 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
 /**
  * Class for perspective phosphor widget.
  *
- * @class PerspectiveWidget (name)
- * TODO: document
+ * @class PerspectiveWidget (name) TODO: document
  */
 export class PerspectiveWidget extends Widget {
     constructor(name = "Perspective", options: PerspectiveWidgetOptions = {}) {
@@ -157,13 +157,28 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
-     * Replaces the data of the viewer's table with new data. New data must conform
-     * to the schema of the Table.
+     * Replaces the data of the viewer's table with new data. New data must
+     * conform to the schema of the Table.
      *
      * @param data
      */
     replace(data: TableData): void {
         this.viewer.replace(data);
+    }
+
+    /**
+     * Deletes this element's data and clears it's internal state (but not its
+     * user state). This (or the underlying `perspective.table`'s equivalent
+     * method) must be called in order for its memory to be reclaimed.
+     *
+     * If not running in client mode, delete_table defaults to false and the
+     * server should handle memory cleanup.
+     *
+     * @param {boolean} delete_table Whether `delete()` should be called on the
+     * underlying `Table`.
+     */
+    delete(delete_table = true) {
+        this.viewer.delete(delete_table || this.client);
     }
 
     get table(): Table {
@@ -283,7 +298,8 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
-     * True if the widget is in client-only mode, i.e. the browser has ownership of the widget's data.
+     * True if the widget is in client-only mode, i.e. the browser has ownership
+     * of the widget's data.
      */
     get client(): boolean {
         return this._client;
@@ -352,7 +368,8 @@ export class PerspectiveWidget extends Widget {
         if (!viewer.notifyResize) {
             console.warn("Warning: not bound to real element");
         } else {
-            viewer.notifyResize = viewer.notifyResize.bind(viewer);
+            const resize_observer = new MutationObserver(viewer.notifyResize.bind(viewer));
+            resize_observer.observe(node, {attributes: true});
         }
         return viewer;
     }

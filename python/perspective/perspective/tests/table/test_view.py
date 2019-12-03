@@ -1,4 +1,4 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
@@ -164,6 +164,17 @@ class TestView(object):
         view = tbl.view(column_pivots=["a"], columns=["a", "b"], sort=[["c", "col desc"]])
         paths = view.column_paths()
         assert paths == ["1|a", "1|b", "2|a", "2|b", "3|a", "3|b"]
+
+    def test_view_column_path_pivot_by_bool(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [True, False, True],
+            "c": [3, 2, 1]
+        }
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["b"], columns=["a", "b", "c"])
+        paths = view.column_paths()
+        assert paths == ["false|a", "false|b", "false|c", "true|a", "true|b", "true|c"]
 
     # schema correctness
 

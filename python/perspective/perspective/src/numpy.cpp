@@ -239,13 +239,13 @@ namespace numpy {
 
             double fval = item.cast<double>();
             if (fval > 2147483647 || fval < -2147483648) {
-                binding::WARN("Promoting %s to float from int32", name);
+                binding::WARN("Promoting column `%s` to float from int32", name);
                 tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                 col = tbl.get_column(name);
                 type = DTYPE_FLOAT64;
                 col->set_nth(i, fval);
             } else if (isnan(fval)) {
-                binding::WARN("Promoting column %s to string from int32", name);
+                binding::WARN("Promoting column `%s` to string from int32", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 fill_object_iter<std::string>(
@@ -276,7 +276,7 @@ namespace numpy {
 
             double fval = item.cast<double>();
             if (isnan(fval)) {
-                binding::WARN("Promoting %s to string from int64", name);
+                binding::WARN("Promoting column `%s` to string from int64", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 fill_object_iter<std::string>(
@@ -308,7 +308,7 @@ namespace numpy {
             bool is_float = py::isinstance<py::float_>(item);
             bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
             if (!is_float || is_numpy_nan) {
-                binding::WARN("Promoting column %s to string from float64", name);
+                binding::WARN("Promoting column `%s` to string from float64", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 fill_object_iter<std::string>(

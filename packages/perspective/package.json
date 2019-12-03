@@ -26,7 +26,7 @@
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
         "docs": "npm-run-all docs:jsdoc docs:deploy",
         "docs:jsdoc": "jsdoc2md src/js/perspective.js -p list --separators --no-gfm > README.md",
-        "docs:deploy": "(echo \"---\nid: perspective\ntitle: \\`perspective\\` API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective.md",
+        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective.md",
         "test:build": "cpx \"test/html/*\" build",
         "test:run": "jest --color --ci",
         "test": "npm-run-all test:build test:run",

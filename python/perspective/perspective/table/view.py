@@ -1,13 +1,15 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import pandas
 from functools import partial, wraps
 from random import random
+
 from .view_config import ViewConfig
 from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
@@ -22,20 +24,24 @@ except ImportError:
 
 
 class View(object):
-    def __init__(self, Table, **config):
-        '''Private constructor for a View object - use the Table.view() method to create Views.
+    '''A :class:`~perspective.View` object represents a specific transform
+    (pivot, filter, sort, etc) configuration on an underlying
+    :class:`~perspective.Table`.  :class:`~perspective.View` objects
+    cannot be directly instantiated - they must be derived from an existing
+    :class:`~perspective.Table` via the :func:`~perspective.Table.view()`
+    method.
 
-        A View object represents a specific transform (configuration or pivot,
-        filter, sort, etc) configuration on an underlying Table. A View
-        receives all updates from the Table from which it is derived, and
-        can be serialized to JSON or trigger a callback when it is updated.
+    :class:`~perspective.View` instances receive all updates from the
+    :class:`~perspective.Table` from which they are derived, and can be
+    serialized (via ``to_*`` methods) or trigger a callback when it is updated.
+    :class:`~perspective.View` objects will remain in memory and actively
+    process updates until :obj:`~perspective.View.delete()` method is called.
+    '''
 
-        View objects are immutable, and will remain in memory and actively process
-        updates until its delete() method is called.
-        '''
+    def __init__(self, Table, **kwargs):
         self._name = "py_" + str(random())
         self._table = Table
-        self._config = ViewConfig(**config)
+        self._config = ViewConfig(**kwargs)
         self._sides = self.sides()
 
         date_validator = None
@@ -57,18 +63,27 @@ class View(object):
         self._client_id = None
 
     def get_config(self):
-        '''Returns the original dictionary config passed in by the user.'''
+        '''Returns a copy of the immutable configuration ``kwargs`` from which
+        this :class:`~perspective.View` was instantiated.
+
+        Returns:
+            :obj:`dict`: ``kwargs`` supplied to the
+                :func:`perspective.Table.view()` method.
+        '''
         return self._config.get_config()
 
     def sides(self):
-        '''Returns the number of pivoted sides of this View.
+        '''An integer representing the # of hierarchial axis on this
+        :class:`~perspective.View`.
 
-        0-sided views have no pivots applied.
-        1-sided views have one or more `row_pivots` applied.
-        2-sided views have one or more `row_pivots` and `column_pivots` applied, or one or more `column_pivots` without `row_pivots`.
+        0 - Neither ``row_pivots`` nor ``column_pivots`` properties are set.
+
+        1 - ``row_pivots`` is set.
+
+        2 - ``column_pivots`` is set (and also maybe ``row_pivots``).
 
         Returns:
-            int : 0, 1, or 2
+            :obj:`int`: 0 <= N <= 2
         '''
         if len(self._config.get_row_pivots()) > 0 or len(self._config.get_column_pivots()) > 0:
             if len(self._config.get_column_pivots()) > 0:
@@ -79,40 +94,67 @@ class View(object):
             return 0
 
     def num_rows(self):
-        '''The number of aggregated rows in the View. This is affected by the `row_pivots` that are applied to the View.
+        '''The number of aggregated rows in the :class:`~perspective.View`.
+
+        This count includes the total aggregate rows for all ``row_pivots``
+        depth levels, and can also be affected by any applied ``filter``.
 
         Returns:
-            int : number of rows
+            :obj:`int`: Number of rows.
         '''
         return self._view.num_rows()
 
     def num_columns(self):
-        '''The number of aggregated columns in the View. This is affected by the `column_pivots` that are applied to the View.
+        '''The number of aggregated columns in the :class:`~perspective.View`.
+        This is affected by the ``column_pivots`` that are applied to the
+        :class:`~perspective.View`.
 
         Returns:
-            int : number of columns
+            :obj:`int`: Number of columns.
         '''
         return self._view.num_columns()
 
     def get_row_expanded(self, idx):
-        '''Returns whether row at `idx` is expanded or collapsed.'''
+        '''Returns whether row at `idx` is expanded or collapsed.
+
+        Returns:
+            :obj:`bool`: Is this row expanded?
+        '''
         return self._view.get_row_expanded(idx)
 
     def expand(self, idx):
-        '''Expands the row at 'idx', i.e. displaying its leaf rows.'''
+        '''Expands the row at 'idx', i.e. displaying its leaf rows.
+
+        Args:
+            idx (:obj:`int`): Row index to expand.
+        '''
         return self._view.expand(idx, len(self._config.get_row_pivots()))
 
     def collapse(self, idx):
-        '''Collapses the row at 'idx', i.e. hiding its leaf rows'''
+        '''Collapses the row at 'idx', i.e. hiding its leaf rows.
+
+        Args:
+            idx (:obj:`int`): Row index to collapse.
+        '''
         return self._view.collapse(idx)
 
     def set_depth(self, depth):
-        '''Sets the expansion depth of the pivot tree.'''
+        '''Sets the expansion depth of the pivot tree.
+
+        Args:
+            depth (:obj:`int`): Depth to collapse all nodes to, which
+                may be no greater then the length of the ``row_pivots``
+                property.
+        '''
         return self._view.set_depth(depth, len(self._config.get_row_pivots()))
 
     def column_paths(self):
-        '''Returns the names of the columns as they show in the view, i.e. the composed columns
-        when a column pivot is applied.
+        '''Returns the names of the columns as they show in the
+        :class:`~perspective.View`, i.e. the hierarchial columns when
+        ``column_pivots`` is applied.
+
+        Returns:
+            :obj:`list` of :obj`str`: Aggregated column names.
         '''
         paths = self._view.column_paths()
         string_paths = []
@@ -123,15 +165,19 @@ class View(object):
         return string_paths
 
     def schema(self, as_string=False):
-        '''The schema of this view, which is a key-value map that contains the column names and their Python data types.
+        '''The schema of this :class:`~perspective.View`, which is a key-value
+        map that contains the column names and their Python data types.
 
-        If the columns are aggregated, their aggregated types will be shown.
+        If the columns are aggregated, their aggregated types will be shown
+        returned instead.
 
-        Args:
-            as_string (bool) : returns data types as string representations, if True
+        Keyword Args:
+            as_string (:obj:`bool`): returns data types as string
+                representations, if ``True``.
 
         Returns:
-            schema : a map of strings to strings
+            :obj:`dict`: A map of :obj:`str` column name to :obj:`str` or
+                :obj:`type`, depending on the value of ``as_string`` kwarg.
         '''
         if as_string:
             return {item[0]: item[1] for item in self._view.schema().items()}
@@ -139,15 +185,20 @@ class View(object):
         return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
 
     def on_update(self, callback, mode=None):
-        '''Add a callback to be fired when `Table.update()` is called on the underlying table.
+        '''Add a callback to be fired when :func:`perspective.Table.update()` is
+        called on the parent :class:`~perspective.Table`.
 
-        Multiple callbacks can be set through calling `on_update` multiple times, and will be called in the order they are set.
+        Multiple callbacks can be set through calling ``on_update`` multiple
+        times, and will be called in the order they are set.  Callback must be a
+        callable function that takes no parameters.
 
-        Callback must be a callable function that takes no parameters.
+        Args:
+            callback (:obj:`callable`): a callable function reference that will
+                be called when :func:`perspective.Table.update()` is called.
 
         Examples:
             >>> def updater():
-            >>>     print("Update fired!")
+            ...     print("Update fired!")
             >>> view.on_update(updater)
             >>> table.update({"a": [1]})'
             >>> Update fired!
@@ -175,17 +226,32 @@ class View(object):
         '''Given a callback function, remove it from the list of callbacks.
 
         Args:
-            callback (func) : a function reference that will be removed.
+            callback (:obj:`func`): a function reference that will be removed.
+
+        Examples:
+            >>> table = perspective.Table(data)
+            >>> view = table.view()
+            >>> view2 = table.view()
+            >>> def callback():
+            ...     print("called!")
+            >>> view.on_update(callback)
+            >>> view2.on_update(callback)
+            >>> table.update(new_data)
+            called!
+            >>> view2.remove_update(callback)
+            >>> table.update(new_data) # callback removed and will not fire
         '''
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
         self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] != callback)
 
     def on_delete(self, callback):
-        '''Set a callback to be run when the `delete()` method is called on the View.
+        '''Set a callback to be run when the :func:`perspective.View.delete()`
+        method is called on this :class:`~perspective.View`.
 
         Args:
-            callback (func) : a callback to run after `delete()` has been called.
+            callback (:obj:`callable`): A callback to run after
+                :func:`perspective.View.delete()` method has been called.
 
         Examples:
             >>> def deleter():
@@ -199,9 +265,17 @@ class View(object):
         self._delete_callbacks.add_callback(callback)
 
     def delete(self):
-        '''Delete the view and clean up all callbacks associated with the view.
+        '''Delete the :class:`~perspective.View` and clean up all associated
+        callbacks.
 
-        Called when `__del__` is called by GC.
+        This method must be called to clean up resources used by the
+        :class:`~perspective.View`, as it will last for the lifetime of the
+        underlying :class:`~perspective.Table` otherwise.
+
+        Examples:
+            >>> table = perspective.Table(data)
+            >>> view = table.view()
+            >>> view.delete()
         '''
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
@@ -209,70 +283,105 @@ class View(object):
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 
     def remove_delete(self, callback):
-        '''Remove the delete callback associated with this view.'''
+        '''Remove the delete callback associated with this
+        :class:`~perspective.View`.
+
+        Args:
+            callback (:obj:`callable`): A reference to a callable function that
+                will be removed from delete callbacks.
+
+        Examples:
+            >>> table = perspective.Table(data)
+            >>> view = table.view()
+            >>> view2 = table.view()
+            >>> def callback():
+            ...     print("called!")
+            >>> view.on_delete(callback)
+            >>> view2.on_delete(callback)
+            >>> view.delete()
+            called!
+            >>> view2.remove_delete(callback)
+            >>> view2.delete() # callback removed and will not fire
+        '''
         if not callable(callback):
             return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
-    def to_records(self, **options):
-        '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.
+    def to_records(self, **kwargs):
+        '''Serialize the :class:`~perspective.View`'s dataset into a :obj:`list`
+        of :obj:`dict` containing each row.
 
-        If the view is aggregated, the aggregated dataset will be returned.
+        By default, the entire dataset is returned, though this can be windowed
+        via ``kwargs``.  When ``row_pivots`` are applied, a ``__ROW_PATH__``
+        column name will be generated in addition to the applied ``columns``.
+        When ``column_pivots`` are applied, column names will be qualified
+        with their column group name.
 
-        Args:
-            options (dict) :
-                user-provided options that specifies what data to return:
-                - start_row: defaults to 0
-                - end_row: defaults to the number of total rows in the view
-                - start_col: defaults to 0
-                - end_col: defaults to the total columns in the view
-                - index: whether to return an implicit pkey for each row. Defaults to False
-                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+        Keyword Args:
+            start_row (:obj:`int`): (Defaults to 0).
+            end_row (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_rows()`).
+            start_col (:obj:`int`): (Defaults to 0).
+            end_col (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_columns()`).
+            index (:obj:`bool`): Whether to return an implicit pkey for each
+                row (Defaults to ``False``).
+            leaves_only (:obj:`bool`): Whether to return only the data at the
+                end of the tree (Defaults to ``False``).
 
         Returns:
-            list : A list of dictionaries, where each dict represents a new row of the dataset
+            :obj:`list` of :obj:`dict`: A list of :obj:`dict`, where each dict
+                represents a row of the current state of the
+                :class:`~perspective.View`.
         '''
-        return to_format(options, self, 'records')
+        return to_format(kwargs, self, 'records')
 
     def to_dict(self, **options):
-        '''Serialize the view's dataset into a `dict` of `str` keys and `list` values.
-        Each key is a column name, and the associated value is the column's data packed into a list.
+        '''Serialize the :class:`~perspective.View`'s dataset into a :obj:`dict`
+        of :obj:`str` keys and :obj:`list` values.  Each key is a column name,
+        and the associated value is the column's data packed into a :obj:`list`.
+        If the :class:`~perspective.View` is aggregated, the aggregated dataset
+        will be returned.
 
-        If the view is aggregated, the aggregated dataset will be returned.
-
-        Args:
-            options (dict) :
-                user-provided options that specifies what data to return:
-                - start_row: defaults to 0
-                - end_row: defaults to the number of total rows in the view
-                - start_col: defaults to 0
-                - end_col: defaults to the total columns in the view
-                - index: whether to return an implicit pkey for each row. Defaults to False
-                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+        Keyword Args:
+            start_row (:obj:`int`): (Defaults to 0).
+            end_row (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_rows()`).
+            start_col (:obj:`int`): (Defaults to 0).
+            end_col (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_columns()`).
+            index (:obj:`bool`): Whether to return an implicit pkey for each
+                row (Defaults to ``False``).
+            leaves_only (:obj:`bool`): Whether to return only the data at the
+                end of the tree (Defaults to ``False``).
 
         Returns:
-            dict : a dictionary with string keys and list values, where key = column name and value = column values
+            :obj:`dict`: A dictionary with string keys and list values, where
+                key = column name and value = column values.
         '''
         return to_format(options, self, 'dict')
 
     def to_numpy(self, **options):
-        '''Serialize the view's dataset into a `dict` of `str` keys and `numpy.array` values.
-        Each key is a column name, and the associated value is the column's data packed into a numpy array.
+        '''Serialize the view's dataset into a :obj:`dict` of :obj:`str` keys
+        and :class:`numpy.array` values.  Each key is a column name, and the
+        associated value is the column's data packed into a numpy array.
 
-        If the view is aggregated, the aggregated dataset will be returned.
-
-        Args:
-            options (dict) :
-                user-provided options that specifies what data to return:
-                - start_row: defaults to 0
-                - end_row: defaults to the number of total rows in the view
-                - start_col: defaults to 0
-                - end_col: defaults to the total columns in the view
-                - index: whether to return an implicit pkey for each row. Defaults to False
-                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+        Keyword Args:
+            start_row (:obj:`int`): (Defaults to 0).
+            end_row (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_rows()`).
+            start_col (:obj:`int`): (Defaults to 0).
+            end_col (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_columns()`).
+            index (:obj:`bool`): Whether to return an implicit pkey for each
+                row (Defaults to ``False``).
+            leaves_only (:obj:`bool`): Whether to return only the data at the
+                end of the tree (Defaults to ``False``).
 
         Returns:
-            dict : a dictionary with string keys and numpy array values, where key = column name and value = column values
+            :obj:`dict` of :class:`numpy.array`: A dictionary with string keys
+                and numpy array values, where key = column name and
+                value = column values.
         '''
         return to_format(options, self, 'numpy')
 
@@ -284,39 +393,45 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Args:
-            options (dict) :
-                user-provided options that specifies what data to return:
-                - start_row: defaults to 0
-                - end_row: defaults to the number of total rows in the view
-                - start_col: defaults to 0
-                - end_col: defaults to the total columns in the view
-                - index: whether to return an implicit pkey for each row. Defaults to False
-                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+        Keyword Args:
+            start_row (:obj:`int`): (Defaults to 0).
+            end_row (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_rows()`).
+            start_col (:obj:`int`): (Defaults to 0).
+            end_col (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_columns()`).
+            index (:obj:`bool`): Whether to return an implicit pkey for each
+                row (Defaults to ``False``).
+            leaves_only (:obj:`bool`): Whether to return only the data at the
+                end of the tree (Defaults to ``False``).
+
 
         Returns:
-            pandas.DataFrame : a pandas dataframe containing the serialized data.
+            :class:`pandas.DataFrame`: A DataFrame serialization of the current
+                state of this :class:`~perspective.View`.
         '''
         cols = self.to_numpy(**options)
         return pandas.DataFrame(cols)
 
     def to_csv(self, **options):
-        '''Serialize the view's dataset into a CSV string.
+        '''Serialize the :class:`~perspective.View`'s dataset into a CSV string.
 
-        Args:
-            options (dict) :
-                user-provided options that specifies what data to return:
-                - start_row: defaults to 0
-                - end_row: defaults to the number of total rows in the view
-                - start_col: defaults to 0
-                - end_col: defaults to the total columns in the view
-                - index: whether to return an implicit pkey for each row. Defaults to False
-                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
-                - date_format: how `datetime` objects should be formatted in the CSV. Formatting does not
-                    apply to `date` objects. Must be a valid date formatting string.
+        Keyword Args:
+            start_row (:obj:`int`): (Defaults to 0).
+            end_row (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_rows()`).
+            start_col (:obj:`int`): (Defaults to 0).
+            end_col (:obj:`int`): (Defaults to
+                :func:`perspective.View.num_columns()`).
+            index (:obj:`bool`): Whether to return an implicit pkey for each
+                row (Defaults to False).
+            leaves_only (:obj:`bool`): Whether to return only the data at the
+                end of the tree (Defaults to False).
+            date_format (:obj:`str`): How ``datetime`` objects should be
+                formatted in the CSV.
 
         Returns:
-            str : a CSV-formatted string containing the serialized data.
+            :obj:`str`: A CSV-formatted string containing the serialized data.
         '''
         return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
 
@@ -338,7 +453,9 @@ class View(object):
         return hidden
 
     def _wrapped_on_update_callback(self, **kwargs):
-        '''Provide the user-defined callback function with additional metadata from the view.'''
+        '''Provide the user-defined callback function with additional metadata
+        from the view.
+        '''
         mode = kwargs["mode"]
         cache = kwargs["cache"]
         callback = kwargs["callback"]

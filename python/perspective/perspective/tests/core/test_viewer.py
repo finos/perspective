@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import numpy as np
 import pandas as pd
 from perspective import PerspectiveViewer, Table
@@ -221,4 +222,25 @@ class TestViewer:
         assert viewer.filters == [["a", "==", 2]]
         viewer.reset()
         assert viewer.plugin == "hypergrid"
+        assert viewer.filters == []
+
+    # delete
+
+    def test_viewer_delete(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table)
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.delete()
+        assert viewer.table_name is None
+        assert viewer.table is None
+
+    def test_viewer_delete_without_table(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table)
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.delete(delete_table=False)
+        assert viewer.table_name is not None
+        assert viewer.table is not None
         assert viewer.filters == []

@@ -128,6 +128,8 @@ export function default_config(aggregates, mode) {
         type = "heatmap";
     }
 
+    /* eslint-disable max-len */
+
     // let new_radius = 0;
     // if (mode === 'scatter') {
     //     new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, series[0].data.length / 3))));
@@ -135,6 +137,9 @@ export function default_config(aggregates, mode) {
     //
 
     // read this + define chart schema using _view()
+
+    /* eslint-enable max-len */
+
     const that = this;
     const config = this._config;
 

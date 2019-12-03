@@ -202,7 +202,11 @@ export function make_y_data(cols, pivots) {
         } else {
             sname = sname.slice(0, sname.length - 1).join(", ") || " ";
         }
-        let s = column_to_series(col.data.map(val => (val === undefined || val === "" ? null : val)), sname, gname);
+        let s = column_to_series(
+            col.data.map(val => (val === undefined || val === "" ? null : val)),
+            sname,
+            gname
+        );
         series.push(s);
     }
 

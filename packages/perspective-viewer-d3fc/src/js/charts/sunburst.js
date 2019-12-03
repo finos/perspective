@@ -22,7 +22,10 @@ function sunburst(container, settings) {
     }
 
     const data = treeData(settings);
-    const color = treeColor(settings, data.map(d => d.extents));
+    const color = treeColor(
+        settings,
+        data.map(d => d.extents)
+    );
     const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");
 
     container.datum(data).call(sunburstGrid);

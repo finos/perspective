@@ -26,7 +26,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 - Integration with [Jupyterlab](https://github.com/finos/perspective/tree/master/packages/perspective-jupyterlab).
 
-- Runtimes for the Browser and Node.js.
+- Runtimes for the Browser, Python, and Node.js.
 
 ## Examples
 |||
@@ -36,6 +36,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 |[Dataset Explorer](https://bl.ocks.org/texodus/ecb5d086e0c9d52e414d2de6c93b5db3)| A configurable dataset performance tester. |
 |[Fractal](https://bl.ocks.org/texodus/1ce655d6bc0cc0d9db852d562af3e487)| `<perspective-viewer>` fractal playground.|
 |[Olympics](https://bl.ocks.org/texodus/6d4fa16fff331d71ac58ad256f0c5f94)| An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.|
+|[Olympics Workspace](https://bl.ocks.org/zemeolotu/68f3f1c2535bdde1a296b90e9b434717)| An example of Perspective Workspace with multiple perspective widgets sharing the same table with one directional cross-filtering|
 |[Streaming](https://bl.ocks.org/texodus/9bec2f8041471bafc2c56db2272a9381)| A streaming random data demo.|
 |[Streaming Stock Trades](https://bl.ocks.org/timkpaine/064a50a309f25b80c9cfb0b2b84fbdf3)|A streaming financial data demo.|
 |[CSV](https://bl.ocks.org/texodus/02d8fd10aef21b19d6165cf92e43e668)|Upload a CSV of your own.|
@@ -47,7 +48,9 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 * [Project Site](https://perspective.finos.org/)
 * [Installation](https://perspective.finos.org/docs/md/installation.html)
-* [User's Guide](https://perspective.finos.org/docs/md/usage.html)
+* [Javascript User's Guide](https://perspective.finos.org/docs/md/js.html)
+* [Python User's Guide](https://perspective.finos.org/docs/md/python.html)
 * [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
+* [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)

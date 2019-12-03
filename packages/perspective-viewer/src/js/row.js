@@ -153,8 +153,10 @@ class Row extends HTMLElement {
 
     set computed_column(c) {
         // const data = this._get_computed_data();
-        // const computed_input_column = this.shadowRoot.querySelector('#computed_input_column');
-        // const computation_name = this.shadowRoot.querySelector('#computation_name');
+        // const computed_input_column =
+        //    this.shadowRoot.querySelector('#computed_input_column');
+        // const computation_name =
+        //    this.shadowRoot.querySelector('#computation_name');
         // computation_name.textContent = data.computation.name;
         // computed_input_column.textContent = data.input_column;
     }

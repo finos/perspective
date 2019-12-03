@@ -29,7 +29,8 @@ module.exports = function({build_worker, no_minify} = {}) {
                         options: {}
                     }
                 },
-                // FIXME Workaround for performance regression in @apache-arrow 4.0
+                // FIXME Workaround for performance regression in @apache-arrow
+                // 4.0
                 {
                     test: /\.js$/,
                     include: /\@apache-arrow[/\\]es5-esm/,

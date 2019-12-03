@@ -70,8 +70,18 @@ describe("colorStyles should", () => {
         initialiseStyles(container.node(), settings);
         const result = settings.colorStyles;
 
-        expect(result.gradient.full).toEqual([[0, "rgba(77, 52, 47, 0.5)"], [0.5, "rgba(240, 240, 240, 0.5)"], [1, "rgba(26, 35, 126, 0.5)"]]);
-        expect(result.gradient.positive).toEqual([[0, "rgba(220, 237, 200, 0.5)"], [1, "rgba(26, 35, 126, 0.5)"]]);
-        expect(result.gradient.negative).toEqual([[0, "rgba(77, 52, 47, 0.5)"], [1, "rgba(254, 235, 101, 0.5)"]]);
+        expect(result.gradient.full).toEqual([
+            [0, "rgba(77, 52, 47, 0.5)"],
+            [0.5, "rgba(240, 240, 240, 0.5)"],
+            [1, "rgba(26, 35, 126, 0.5)"]
+        ]);
+        expect(result.gradient.positive).toEqual([
+            [0, "rgba(220, 237, 200, 0.5)"],
+            [1, "rgba(26, 35, 126, 0.5)"]
+        ]);
+        expect(result.gradient.negative).toEqual([
+            [0, "rgba(77, 52, 47, 0.5)"],
+            [1, "rgba(254, 235, 101, 0.5)"]
+        ]);
     });
 });

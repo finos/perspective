@@ -23,7 +23,10 @@ function treemap(container, settings) {
     if (!settings.treemaps) settings.treemaps = {};
 
     const data = treeData(settings);
-    const color = treeColor(settings, data.map(d => d.data));
+    const color = treeColor(
+        settings,
+        data.map(d => d.data)
+    );
     const treemapGrid = gridLayoutMultiChart().elementsPrefix("treemap");
 
     container.datum(data).call(treemapGrid);

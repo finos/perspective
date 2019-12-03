@@ -184,7 +184,8 @@ class WebSocketServer extends Server {
                 msg.id = compound_id;
                 this.REQS[msg.id] = {ws, msg};
                 try {
-                    // Send all messages to the handler defined in Perspective.Server
+                    // Send all messages to the handler defined in
+                    // Perspective.Server
                     this.process(msg, ws.id);
                 } catch (e) {
                     console.error(e);
@@ -232,11 +233,13 @@ class WebSocketServer extends Server {
     /**
      * Send an asynchronous message to the Perspective web worker.
      *
-     * If the `transferable` param is set, pass two messages: the string representation of the message and then
-     * the ArrayBuffer data that needs to be transferred. The `is_transferable` flag tells the client to expect the next message
-     * to be a transferable object.
+     * If the `transferable` param is set, pass two messages: the string
+     * representation of the message and then the ArrayBuffer data that needs to
+     * be transferred. The `is_transferable` flag tells the client to expect the
+     * next message to be a transferable object.
      *
-     * @param {Object} msg a valid JSON-serializable message to pass to the client
+     * @param {Object} msg a valid JSON-serializable message to pass to the
+     * client
      * @param {*} transferable a transferable object to be sent to the client
      */
     post(msg, transferable) {
@@ -261,7 +264,8 @@ class WebSocketServer extends Server {
     }
 
     /**
-     * Expose a Perspective table through the WebSocket, allowing it to be accessed by a unique name.
+     * Expose a Perspective table through the WebSocket, allowing it to be
+     * accessed by a unique name.
      *
      * @param {String} name
      * @param {Perspective.table} table
@@ -272,7 +276,8 @@ class WebSocketServer extends Server {
     }
 
     /**
-     * Expose a Perspective view through the WebSocket, allowing it to be accessed by a unique name.
+     * Expose a Perspective view through the WebSocket, allowing it to be
+     * accessed by a unique name.
      *
      * @param {String} name
      * @param {Perspective.view} view

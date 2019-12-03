@@ -29,7 +29,12 @@ export function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
     };
 
     const adjustedOffsets = {x: offsetX, y: offsetY};
-    const boundaries = [{edge: "right", dimension: "x"}, {edge: "left", dimension: "x"}, {edge: "top", dimension: "y"}, {edge: "bottom", dimension: "y"}];
+    const boundaries = [
+        {edge: "right", dimension: "x"},
+        {edge: "left", dimension: "x"},
+        {edge: "top", dimension: "y"},
+        {edge: "bottom", dimension: "y"}
+    ];
 
     boundaries.forEach(bound => {
         if (isElementOverflowing(chartNodeRect, draggedInnerNodeRect, bound.edge)) {

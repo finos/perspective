@@ -26,6 +26,13 @@ class TestTable(object):
         tbl = Table([])
         assert tbl.size() == 0
 
+    def test_table_not_iterable(self):
+        data = {
+            "a": 1
+        }
+        with raises(NotImplementedError):
+            Table(data)
+
     def test_table_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
@@ -46,12 +53,68 @@ class TestTable(object):
     def test_table_int_overflow(self):
         if six.PY2:
             maxint = sys.maxint + 1
+            # overflows into float
             data = {"a": [i for i in range(100)] + [maxint, maxint, maxint]}
             tbl = Table(data)
             # two promotions later
             assert tbl.schema() == {
-                "a": str
+                "a": float
             }
+
+    def test_table_long(self):
+        if six.PY2:
+            # don't overflow in this test
+            data = [long(100), long(200), long(300)]  # noqa: F821
+            tbl = Table({
+                "a": data
+            })
+            assert tbl.schema() == {
+                "a": int
+            }
+            assert tbl.view().to_dict()["a"] == [int(d) for d in data]
+
+    def test_table_long_overflow(self):
+        if six.PY2:
+            maxint = sys.maxint
+            # don't overflow in this test
+            data = [maxint, maxint + 1, maxint + 2]
+            tbl = Table({
+                "a": data
+            })
+            assert tbl.schema() == {
+                "a": float
+            }
+            assert tbl.view().to_dict()["a"] == [float(d) for d in data]
+
+    def test_table_int_to_long(self):
+        if six.PY2:
+            # don't overflow in this test
+            data = [int(100), int(200), int(300)]
+            tbl = Table({
+                "a": long  # noqa: F821
+            })
+            assert tbl.schema() == {
+                "a": int
+            }
+            tbl.update({
+                "a": data
+            })
+            assert tbl.view().to_dict()["a"] == data
+
+    def test_table_float_to_long(self):
+        if six.PY2:
+            # don't overflow in this test
+            data = [1.5, 2.5, 3.5]  # noqa: F821
+            tbl = Table({
+                "a": long  # noqa: F821
+            })
+            assert tbl.schema() == {
+                "a": int
+            }
+            tbl.update({
+                "a": data
+            })
+            assert tbl.view().to_dict()["a"] == [1, 2, 3]
 
     def test_table_nones(self):
         none_data = [{"a": 1, "b": None}, {"a": None, "b": 2}]
@@ -69,6 +132,19 @@ class TestTable(object):
         assert tbl.schema() == {
             "a": bool,
             "b": bool
+        }
+
+    def test_table_bool_str(self):
+        bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
+        tbl = Table(bool_data)
+        assert tbl.size() == 2
+        assert tbl.schema() == {
+            "a": bool,
+            "b": bool
+        }
+        assert tbl.view().to_dict() == {
+            "a": [True, True],
+            "b": [False, True]
         }
 
     def test_table_float(self):
@@ -298,6 +374,30 @@ class TestTable(object):
         tbl2 = Table(schema)
 
         assert tbl2.schema(True) == schema
+
+    def test_table_long_schema(self):
+        if six.PY2:
+            schema = {
+                "a": long,  # noqa: F821
+                "b": int
+            }
+            tbl = Table(schema)
+            assert tbl.schema() == {
+                "a": int,
+                "b": int
+            }
+
+    def test_table_unicode_schema(self):
+        if six.PY2:
+            schema = {
+                "a": unicode,  # noqa: F821
+                "b": int
+            }
+            tbl = Table(schema)
+            assert tbl.schema() == {
+                "a": str,
+                "b": int
+            }
 
     # is_valid_filter
 

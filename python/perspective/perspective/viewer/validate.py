@@ -1,16 +1,14 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from six import iteritems, string_types
-from .exception import PerspectiveError
-from .plugin import Plugin
-from .aggregate import Aggregate
-from .sort import Sort
-from .filters import ALL_FILTERS
+from ..core.exception import PerspectiveError
+from ..core import Aggregate, Plugin, ALL_FILTERS, Sort
 
 
 def validate_plugin(plugin):

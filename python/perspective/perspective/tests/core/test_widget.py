@@ -1,16 +1,24 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import six
 import numpy as np
 import pandas as pd
 from datetime import date, datetime
+from functools import partial
+from types import MethodType
 from pytest import raises
 from perspective import PerspectiveError, PerspectiveWidget, Table
+
+
+def mock_post(self, msg, msg_id=None, assert_msg=None):
+    '''Mock the widget's `post()` method so we can introspect the contents.'''
+    assert msg == assert_msg
 
 
 class TestWidget:
@@ -153,9 +161,87 @@ class TestWidget:
 
     def test_widget_client_update(self):
         data = {"a": np.arange(0, 50)}
-        widget = PerspectiveWidget(data, client=True)
-        widget.update(data)
-        assert widget.table is None
-        assert widget._data == {
+        comparison_data = {
             "a": [i for i in range(50)]
         }
+        widget = PerspectiveWidget(data, client=True)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "update",
+            "data": comparison_data
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.update(data)
+        assert widget.table is None
+
+    def test_widget_client_update_cached(self):
+        data = {"a": [1, 2]}
+        widget = PerspectiveWidget(data, client=True)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "update",
+            "data": data
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.update(data)
+        assert widget._predisplay_update_cache == [data]
+        widget._displayed = True
+        widget.update(data)
+        assert widget._predisplay_update_cache == [data]
+
+    # clear
+
+    def test_widget_clear(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data)
+        widget.clear()
+        assert widget.table.size() == 0
+
+    def test_widget_client_clear(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, client=True)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "clear"
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.clear()
+        assert widget._data is None
+
+    # replace
+
+    def test_widget_replace(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data)
+        widget.replace({"a": [1]})
+        assert widget.table.size() == 1
+
+    def test_widget_client_replace(self):
+        data = {"a": np.arange(0, 50)}
+        new_data = {"a": [1]}
+        widget = PerspectiveWidget(data, client=True)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "replace",
+            "data": new_data
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.replace(new_data)
+        assert widget._data is new_data
+
+    # delete
+
+    def test_widget_delete(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "delete"
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.delete()
+        assert widget.table is None
+
+    def test_widget_delete_client(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, client=True)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "delete"
+        })
+        widget.delete()
+        widget.post = MethodType(mocked_post, widget)

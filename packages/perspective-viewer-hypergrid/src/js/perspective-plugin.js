@@ -98,9 +98,10 @@ function setPSP(payload, force = false) {
 
     this.grid.properties.showTreeColumn = payload.isTree;
 
-    // Following call to setData signals the grid to call createColumns and dispatch the
-    // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
-    // into `this` (behavior instance) to complete the setup before the event is dispatched.
+    // Following call to setData signals the grid to call createColumns and
+    // dispatch the fin-hypergrid-schema-loaded event (in that order). Here we
+    // inject a createColumns override into `this` (behavior instance) to
+    // complete the setup before the event is dispatched.
     this.createColumns = createColumns;
     this.refreshColumns = refreshColumns;
 
@@ -233,8 +234,8 @@ function sortColumn(event) {
     const item_index = config.sort.findIndex(item => item[0] === column_name.trim());
     const already_sorted = item_index > -1;
 
-    // shift key to enable abs sorting
-    // alt key to not remove already sorted columns
+    // shift key to enable abs sorting alt key to not remove already sorted
+    // columns
     const abs_sorting = event.detail.keys && (event.detail.keys.indexOf("ALTSHIFT") > -1 || event.detail.keys.indexOf("ALT") > -1) && column.type !== "string";
     const shift_pressed = event.detail.keys && (event.detail.keys.indexOf("ALTSHIFT") > -1 || event.detail.keys.indexOf("SHIFT") > -1);
     let new_sort_direction;
@@ -249,14 +250,16 @@ function sortColumn(event) {
         new_sort_direction = viewer._increment_sort("none", column_sorting, abs_sorting);
     }
 
-    //if alt pressed and column is already sorted, we change the sort for the column and leave the rest as is
+    //if alt pressed and column is already sorted, we change the sort for the
+    //column and leave the rest as is
     if (shift_pressed && already_sorted) {
         if (new_sort_direction === "none") {
             config.sort.splice(item_index, 1);
         }
         viewer.sort = JSON.stringify(config.sort);
     } else if (shift_pressed) {
-        // if alt key is pressed and column is NOT already selected, append the new sort column
+        // if alt key is pressed and column is NOT already selected, append the
+        // new sort column
         config.sort.push([column_name, new_sort_direction]);
         viewer.sort = JSON.stringify(config.sort);
     } else {
@@ -379,7 +382,8 @@ export const install = function(grid) {
             return;
         }
 
-        //we have repeated a click in the same spot deslect the value from last time
+        //we have repeated a click in the same spot deslect the value from last
+        //time
         if (hasCTRL && x === mousePoint.x && y === mousePoint.y) {
             grid.clearMostRecentSelection();
             grid.popMouseDown();
@@ -473,8 +477,8 @@ export const install = function(grid) {
         const height = (this.height = Math.floor(this.div.clientHeight));
 
         //fix ala sir spinka, see
-        //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
-        //just add 'hdpi' as an attribute to the fin-canvas tag
+        //http://www.html5rocks.com/en/tutorials/canvas/hidpi/ just add 'hdpi'
+        //as an attribute to the fin-canvas tag
         let ratio = 1;
         const isHIDPI = window.devicePixelRatio && this.component.properties.useHiDPI;
         if (isHIDPI) {
@@ -492,7 +496,8 @@ export const install = function(grid) {
         if (height * ratio !== this.canvas.height || width * ratio !== this.canvas.width || force) {
             while (render) {
                 if (!this.component.grid.behavior.dataModel._view) {
-                    // If we are awaiting this grid's initialization, yield until it is ready.
+                    // If we are awaiting this grid's initialization, yield
+                    // until it is ready.
                     await new Promise(setTimeout);
                 }
                 render = await new Promise(resolve => this.component.grid.behavior.dataModel.fetchData(undefined, resolve));

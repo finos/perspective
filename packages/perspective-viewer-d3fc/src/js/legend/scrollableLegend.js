@@ -102,7 +102,8 @@ export default (fromLegend, settings) => {
         const legendContainerRect = selection.node().getBoundingClientRect();
         let proposedPageSize = Math.floor(legendContainerRect.height / averageCellHeightPx) - 1;
 
-        //if page size is less than all legend items, leave space for the legend controls
+        // if page size is less than all legend items, leave space for the
+        // legend controls
         pageSize = proposedPageSize < domain.length ? proposedPageSize - 1 : proposedPageSize;
         pageCount = calculatePageCount(proposedPageSize);
         pageIndex = Math.min(pageIndex, pageCount - 1);

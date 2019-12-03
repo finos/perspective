@@ -17,8 +17,9 @@ export function splitIntoMultiSeries(settings, data, {stack = false, excludeEmpt
 }
 
 function splitByValuesIntoMultiSeries(settings, data, {stack = false, excludeEmpty = false}) {
-    // Create a series for each "split" value, each one containing all the "aggregate" values,
-    // and "base" values to offset it from the previous series
+    // Create a series for each "split" value, each one containing all the
+    // "aggregate" values, and "base" values to offset it from the previous
+    // series
     const multiSeries = {};
 
     data.forEach(col => {
@@ -39,7 +40,8 @@ function splitByValuesIntoMultiSeries(settings, data, {stack = false, excludeEmp
                 // splitName="split1|split2"
                 const splitName = labels.slice(0, labels.length - 1).join("|");
 
-                // Combine aggregate values for the same split in a single object
+                // Combine aggregate values for the same split in a single
+                // object
                 const splitValues = (split[splitName] = split[splitName] || {__ROW_PATH__: col.__ROW_PATH__});
                 const baseValue = baseValues[baseKey] || 0;
 

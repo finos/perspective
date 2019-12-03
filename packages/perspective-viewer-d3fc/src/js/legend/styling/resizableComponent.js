@@ -81,7 +81,12 @@ export function resizableComponent() {
 
         const concatCornerEdges = corner => `${corner[0]}${corner[1]}`;
         const cornerCursorHelper = {topleft: "nwse", topright: "nesw", bottomright: "nwse", bottomleft: "nesw"};
-        const cornerHandles = [["top", "left"], ["top", "right"], ["bottom", "right"], ["bottom", "left"]];
+        const cornerHandles = [
+            ["top", "left"],
+            ["top", "right"],
+            ["bottom", "right"],
+            ["bottom", "left"]
+        ];
         const [topLeftHandle, topRightHandle, bottomRightHandle, bottomLeftHandle] = cornerHandles.map(corner =>
             handlesGroup
                 .append("rect")

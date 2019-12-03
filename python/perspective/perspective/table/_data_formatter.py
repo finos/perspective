@@ -1,10 +1,11 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import numpy as np
 from math import trunc
 from ._constants import COLUMN_SEPARATOR_STRING
@@ -20,7 +21,8 @@ except ImportError:
 def _mod(a, b):
     '''C-style modulo function'''
     if b == 0:
-        # Javascript returns NaN in cases of division by 0; return -1 because None would fail comparisons with other ints
+        # Javascript returns NaN in cases of division by 0; return -1 because
+        # None would fail comparisons with other ints
         return float('nan')
     d = trunc(float(a) / b)
     return a - d * b
@@ -92,6 +94,8 @@ def to_format(options, view, output_format):
                 for pkey in pkeys:
                     data[-1]['__INDEX__'].append(pkey)
             elif output_format in ('dict', 'numpy'):
+                # ensure that `__INDEX__` has the same number of rows as
+                # returned dataset
                 if len(pkeys) == 0:
                     data["__INDEX__"].append([])  # ensure that `__INDEX__` has the same number of rows as returned dataset
                 for pkey in pkeys:
@@ -109,7 +113,9 @@ def to_format(options, view, output_format):
 
 
 def _to_format_helper(view, options=None):
-    '''Retrieves the data slice and column names in preparation for data serialization.'''
+    '''Retrieves the data slice and column names in preparation for data
+    serialization.
+    '''
     options = options or {}
     opts = _parse_format_options(view, options)
 
