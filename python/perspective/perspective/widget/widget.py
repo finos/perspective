@@ -202,17 +202,17 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
         if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
-            data, pivots = deconstruct_pandas(table_or_data)
+            data, config = deconstruct_pandas(table_or_data)
             table_or_data = data
 
-            if pivots.get("row_pivots", None):
-                kwargs.update({"row_pivots": pivots["row_pivots"]})
+            if config.get("row_pivots", None) and "row_pivots" not in kwargs:
+                kwargs.update({"row_pivots": config["row_pivots"]})
 
-            if pivots.get("column_pivots", None):
-                kwargs.update({"column_pivots": pivots["column_pivots"]})
+            if config.get("column_pivots", None) and "column_pivots" not in kwargs:
+                kwargs.update({"column_pivots": config["column_pivots"]})
 
-            if pivots.get("columns", None):
-                kwargs.update({"columns": pivots["columns"]})
+            if config.get("columns", None) and "columns" not in kwargs:
+                kwargs.update({"columns": config["columns"]})
 
         # Initialize the viewer
         super(PerspectiveWidget, self).__init__(**kwargs)
