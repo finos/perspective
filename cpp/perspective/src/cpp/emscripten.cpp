@@ -1123,6 +1123,21 @@ namespace binding {
     std::shared_ptr<Table>
     make_table(t_val table, t_data_accessor accessor, t_val computed,
         std::uint32_t limit, const std::string& index, t_op op, bool is_update, bool is_arrow) {
+        bool table_initialized = has_value(table);
+        std::shared_ptr<t_pool> pool;
+        std::shared_ptr<Table> tbl;
+        std::shared_ptr<t_gnode> gnode;
+        std::uint32_t offset;
+
+        // If the Table has already been created, use it
+        if (table_initialized) {
+            tbl = table.as<std::shared_ptr<Table>>();
+            pool = tbl->get_pool();
+            gnode = tbl->get_gnode();
+            offset = tbl->get_offset();
+            is_update = (is_update || gnode->mapping_size() > 0);
+        }
+
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
         arrow::ArrowLoader loader;
@@ -1148,8 +1163,50 @@ namespace binding {
 
             // Parse the arrow and get its metadata
             loader.initialize(ptr, length);
-            column_names = loader.names();
-            data_types = loader.types();
+            
+            // Always use the `Table` column names and data types on up
+            if (table_initialized && is_update) {
+                auto schema = gnode->get_tblschema();
+                column_names = schema.columns();
+                data_types = schema.types();
+
+                auto data_table = gnode->get_table();
+                if (data_table->size() == 0) {
+                    /**
+                     * If updating a table created from schema, a 32-bit int/float
+                     * needs to be promoted to a 64-bit int/float if specified in
+                     * the Arrow schema.
+                     */
+                    std::vector<t_dtype> arrow_dtypes = loader.types();
+                    for (auto idx = 0; idx < column_names.size(); ++idx) {
+                        const std::string& name = column_names[idx];
+                        bool can_retype = name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
+                        if (can_retype) {
+                            t_dtype arrow_dtype = arrow_dtypes[idx];
+                            switch (arrow_dtype) {
+                                case DTYPE_INT64:
+                                case DTYPE_FLOAT64: {
+                                    std::cout << "Promoting column `" 
+                                                << column_names[idx] 
+                                                << "` to maintain consistency with Arrow type."
+                                                << std::endl;
+                                    gnode->promote_column(name, arrow_dtype);
+                                } break;
+                                default: {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    // Updated data types need to reflect in new data table
+                    auto new_schema = gnode->get_tblschema();
+                    data_types = new_schema.types();
+                }
+            } else {
+                column_names = loader.names();
+                data_types = loader.types();
+            }
         } else if (is_update || is_delete) {
             t_val names = accessor["names"];
             t_val types = accessor["types"];
@@ -1163,50 +1220,7 @@ namespace binding {
             data_types = get_data_types(data, format, column_names, accessor["date_validator"]);
         }
 
-        bool table_initialized = has_value(table);
-        std::shared_ptr<Table> tbl;
-        std::uint32_t offset;
-
-        // If the Table has already been created, use it
-        if (table_initialized) {
-            // Get a reference to the Table, and update its metadata
-            tbl = table.as<std::shared_ptr<Table>>();
-            tbl->set_column_names(column_names);
-            tbl->set_data_types(data_types);
-            offset = tbl->get_offset();
-
-            auto current_gnode = tbl->get_gnode();
-
-            // use gnode metadata to help decide if we need to update
-            is_update = (is_update || current_gnode->mapping_size() > 0);
-            
-            auto current_data_table = current_gnode->get_table();
-
-            if (is_arrow && is_update && current_data_table->size() == 0) {
-                auto current_schema = current_data_table->get_schema();
-                auto schema_names = current_schema.columns();
-                auto schema_types = current_schema.types();
-                for (auto idx = 0; idx < schema_names.size(); ++idx) {
-                    const std::string& name = schema_names[idx];
-                    if (name != "psp_okey" && name != "psp_pkey" && name != "psp_op") {
-                        t_dtype arrow_dtype = data_types[idx];
-                        switch (arrow_dtype) {
-                            case DTYPE_INT64:
-                            case DTYPE_FLOAT64: {
-                                std::cout << "Promoting column `" 
-                                            << column_names[idx] 
-                                            << "` to maintain consistency with Arrow type."
-                                            << std::endl;
-                                current_gnode->promote_column(name, arrow_dtype);
-                            } break;
-                            default: {
-                                continue;
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
+        if (!table_initialized) {
             std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
             tbl = std::make_shared<Table>(
                 pool, column_names, data_types, limit, index);

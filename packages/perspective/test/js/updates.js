@@ -319,7 +319,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("schema constructor then arrow `update()`", async function() {
+        it("schema constructor, then arrow `update()`", async function() {
             const table = perspective.table({
                 a: "integer",
                 b: "float",
@@ -339,7 +339,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("schema constructor then indexed arrow `update()`", async function() {
+        it.skip("schema constructor, then indexed arrow `update()`", async function() {
             const table = perspective.table(
                 {
                     a: "integer",

@@ -224,6 +224,30 @@ class TestUpdateArrow(object):
             "b": ["x", "y", None, "z"]
         }
 
+    def test_update_arrow_arbitary_order(self, util):
+        data = [[1, 2, 3, 4],
+                ["a", "b", "c", "d"],
+                [1, 2, 3, 4],
+                ["a", "b", "c", "d"]]
+        update_data = [[5, 6], ["e", "f"], [5, 6], ["e", "f"]]
+        arrow = util.make_arrow(["a", "b", "c", "d"], data)
+        update_arrow = util.make_arrow(["c", "b", "a", "d"], update_data)
+        tbl = Table(arrow)
+        assert tbl.schema() == {
+            "a": int,
+            "b": str,
+            "c": int,
+            "d": str
+        }
+        tbl.update(update_arrow)
+        assert tbl.size() == 6
+        assert tbl.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": ["a", "b", "c", "d", "e", "f"],
+            "c": [1, 2, 3, 4, 5, 6],
+            "d": ["a", "b", "c", "d", "e", "f"]
+        }
+
     # append
 
     def test_update_arrow_updates_append_int_stream(self, util):
@@ -373,4 +397,23 @@ class TestUpdateArrow(object):
         assert tbl.view().to_dict() == {
             "a": [1, 2, 3, 4],
             "b": ["a", "x", "c", "y"]
+        }
+
+    # update specific columns
+
+    def test_update_arrow_specific_column(self, util):
+        data = [[1, 2, 3, 4], ["a", "b", "c", "d"]]
+        update_data = [[2, 3, 4]]
+        arrow = util.make_arrow(["a", "b"], data)
+        update_arrow = util.make_arrow(["a"], update_data)
+        tbl = Table(arrow)
+        assert tbl.schema() == {
+            "a": int,
+            "b": str
+        }
+        tbl.update(update_arrow)
+        assert tbl.size() == 7
+        assert tbl.view().to_dict() == {
+            "a": [1, 2, 3, 4, 2, 3, 4],
+            "b": ["a", "b", "c", "d", None, None, None]
         }
