@@ -8,11 +8,7 @@
  */
 
 const _ = require("lodash");
-const fs = require("fs");
-const path = require("path");
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow")).buffer;
-const partial_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial.arrow")).buffer;
-const partial_missing_rows_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow")).buffer;
+const arrows = require("./test_arrows.js");
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -266,6 +262,7 @@ module.exports = perspective => {
 
     describe("Arrow Updates", function() {
         it("arrow contructor then arrow `update()`", async function() {
+            const arrow = arrows.test_arrow;
             var table = perspective.table(arrow.slice());
             table.update(arrow.slice());
             var view = table.view();
@@ -286,30 +283,85 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("arrow partial `update()` a single column", async function() {
-            let table = perspective.table(arrow.slice(), {index: "i64"});
-            table.update(partial_arrow.slice());
-            let view = table.view();
-            let result = await view.to_json();
-            let expected = arrow_indexed_result.map((d, idx) => {
-                idx % 2 == 0 ? (d["bool"] = false) : (d["bool"] = true);
-                return d;
-            });
-            expect(result).toEqual(expected);
+        it("arrow partial `update()` a single column", async function() {
+            let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
+            table.update(arrows.partial_arrow.slice());
+            const view = table.view();
+            const result = await view.to_json();
+            expect(result).toEqual(arrow_partial_result);
             view.delete();
             table.delete();
         });
 
-        it.skip("arrow partial `update()` a single column with missing rows", async function() {
-            let table = perspective.table(arrow.slice(), {index: "i64"});
-            table.update(partial_missing_rows_arrow.slice());
-            let view = table.view();
-            let result = await view.to_json();
-            let expected = arrow_indexed_result.map(d => {
-                d["bool"] = false;
-                return d;
+        it("arrow partial `update()` a single column with missing rows", async function() {
+            let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
+            table.update(arrows.partial_missing_rows_arrow.slice());
+            const view = table.view();
+            const result = await view.to_json();
+            expect(result).toEqual(arrow_partial_missing_result);
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor then arrow `update()`", async function() {
+            const table = perspective.table({
+                a: "integer",
+                b: "float",
+                c: "string"
             });
-            expect(result).toEqual(expected);
+            table.update(arrows.int_float_str_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            expect(size).toEqual(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("schema constructor then indexed arrow `update()`", async function() {
+            const table = perspective.table(
+                {
+                    a: "integer",
+                    b: "float",
+                    c: "string"
+                },
+                {index: "a"}
+            );
+
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_update_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [100.5, 2.5, 3.5, 400.5],
+                c: ["x", "b", "c", "y"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow stream and arrow file `update()`", async function() {
+            const table = perspective.table({
+                a: "integer",
+                b: "float",
+                c: "string"
+            });
+
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_file_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4, 1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5, 1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d", "a", "b", "c", "d"]
+            });
             view.delete();
             table.delete();
         });
@@ -456,7 +508,8 @@ module.exports = perspective => {
         });
 
         it("{limit: 1} with arrow update", async function() {
-            var table = perspective.table(arrow.slice(), {limit: 1});
+            const arrow = arrows.test_arrow.slice();
+            var table = perspective.table(arrow, {limit: 1});
             table.update(arrow.slice());
             var view = table.view();
             let result = await view.to_json();
@@ -488,7 +541,7 @@ module.exports = perspective => {
         });
 
         it("Arrow with {index: 'i64'} (int)", async function() {
-            var table = perspective.table(arrow.slice(), {index: "i64"});
+            var table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_result);
@@ -497,7 +550,7 @@ module.exports = perspective => {
         });
 
         it("Arrow with {index: 'char'} (char)", async function() {
-            var table = perspective.table(arrow.slice(), {index: "char"});
+            var table = perspective.table(arrows.test_arrow.slice(), {index: "char"});
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_indexed_result);
@@ -506,7 +559,7 @@ module.exports = perspective => {
         });
 
         it("Arrow with {index: 'dict'} (dict)", async function() {
-            var table = perspective.table(arrow.slice(), {index: "dict"});
+            var table = perspective.table(arrows.test_arrow.slice(), {index: "dict"});
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_indexed_result);

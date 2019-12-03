@@ -6,14 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const fs = require("fs");
-const path = require("path");
 const papaparse = require("papaparse");
 const moment = require("moment");
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
-const chunked = fs.readFileSync(path.join(__dirname, "..", "arrow", "chunked.arrow")).buffer;
-const date32_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "date32.arrow")).buffer;
-const date64_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "date64.arrow")).buffer;
+const arrows = require("./test_arrows.js");
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -564,7 +559,7 @@ module.exports = perspective => {
         });
 
         it("Arrow constructor", async function() {
-            var table = perspective.table(arrow.slice());
+            var table = perspective.table(arrows.test_null_arrow.slice());
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_result);
@@ -573,7 +568,7 @@ module.exports = perspective => {
         });
 
         it("Arrow (chunked format) constructor", async function() {
-            var table = perspective.table(chunked.slice());
+            var table = perspective.table(arrows.chunked_arrow.slice());
             var view = table.view();
             let result = await view.to_json();
             expect(result.length).toEqual(10);
@@ -581,10 +576,10 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("Arrow date32 constructor", async function() {
-            var table = perspective.table(date32_arrow.slice());
-            var view = table.view();
-            let result = await view.to_columns();
+        it("Arrow date32 constructor", async function() {
+            const table = perspective.table(arrows.date32_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
             expect(result).toEqual({
                 a: arrow_date_col_1,
                 b: arrow_date_col_2,
@@ -595,10 +590,10 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("Arrow date64 constructor", async function() {
-            var table = perspective.table(date64_arrow.slice());
-            var view = table.view();
-            let result = await view.to_columns();
+        it("Arrow date64 constructor", async function() {
+            const table = perspective.table(arrows.date64_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
             expect(result).toEqual({
                 a: arrow_date_col_1,
                 b: arrow_date_col_2,
