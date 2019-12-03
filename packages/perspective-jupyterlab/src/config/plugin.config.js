@@ -13,7 +13,9 @@ const webpack = require("webpack");
 
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
-    entry: "./src/ts/index.ts",
+    entry: {
+        "index": "./src/ts/index.ts",
+    },
     devtool: "cheap-eval-source-map",
     resolveLoader: {
         alias: {
@@ -54,7 +56,7 @@ module.exports = {
         ]
     },
     output: {
-        filename: "index.js",
+        filename: "[name].js",
         libraryTarget: "umd",
         path: path.resolve(__dirname, "../../dist")
     }

@@ -28,4 +28,3 @@ import {perspectiveRenderers} from "./renderer";
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [perspectiveRenderers];
 export default plugins;
-
