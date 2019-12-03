@@ -43,7 +43,7 @@ var data_2 = [
     {x: 6, y: "h", z: true}
 ];
 
-var arrow_result = [
+const arrow_result = [
     {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
     {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
     {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: true, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
@@ -51,7 +51,23 @@ var arrow_result = [
     {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
 ];
 
-var arrow_indexed_result = [
+const arrow_partial_result = [
+    {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: false, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
+    {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: true, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
+    {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: false, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
+    {f32: 4.5, f64: 4.5, i64: 4, i32: 4, i16: 4, i8: 4, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-28")},
+    {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
+];
+
+const arrow_partial_missing_result = [
+    {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: false, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
+    {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
+    {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: false, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
+    {f32: 4.5, f64: 4.5, i64: 4, i32: 4, i16: 4, i8: 4, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-28")},
+    {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
+];
+
+const arrow_indexed_result = [
     {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
     {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
     {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: true, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
@@ -283,7 +299,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("arrow partial `update()` a single column", async function() {
+        it.skip("arrow partial `update()` a single column", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_arrow.slice());
             const view = table.view();
@@ -293,75 +309,12 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("arrow partial `update()` a single column with missing rows", async function() {
+        it.skip("arrow partial `update()` a single column with missing rows", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_missing_rows_arrow.slice());
             const view = table.view();
             const result = await view.to_json();
             expect(result).toEqual(arrow_partial_missing_result);
-            view.delete();
-            table.delete();
-        });
-
-        it("schema constructor then arrow `update()`", async function() {
-            const table = perspective.table({
-                a: "integer",
-                b: "float",
-                c: "string"
-            });
-            table.update(arrows.int_float_str_arrow.slice());
-            const view = table.view();
-            const size = await table.size();
-            expect(size).toEqual(4);
-            const result = await view.to_columns();
-            expect(result).toEqual({
-                a: [1, 2, 3, 4],
-                b: [1.5, 2.5, 3.5, 4.5],
-                c: ["a", "b", "c", "d"]
-            });
-            view.delete();
-            table.delete();
-        });
-
-        it.skip("schema constructor then indexed arrow `update()`", async function() {
-            const table = perspective.table(
-                {
-                    a: "integer",
-                    b: "float",
-                    c: "string"
-                },
-                {index: "a"}
-            );
-
-            table.update(arrows.int_float_str_arrow.slice());
-            table.update(arrows.int_float_str_update_arrow.slice());
-            const view = table.view();
-            const result = await view.to_columns();
-            expect(result).toEqual({
-                a: [1, 2, 3, 4],
-                b: [100.5, 2.5, 3.5, 400.5],
-                c: ["x", "b", "c", "y"]
-            });
-            view.delete();
-            table.delete();
-        });
-
-        it("schema constructor, then arrow stream and arrow file `update()`", async function() {
-            const table = perspective.table({
-                a: "integer",
-                b: "float",
-                c: "string"
-            });
-
-            table.update(arrows.int_float_str_arrow.slice());
-            table.update(arrows.int_float_str_file_arrow.slice());
-            const view = table.view();
-            const result = await view.to_columns();
-            expect(result).toEqual({
-                a: [1, 2, 3, 4, 1, 2, 3, 4],
-                b: [1.5, 2.5, 3.5, 4.5, 1.5, 2.5, 3.5, 4.5],
-                c: ["a", "b", "c", "d", "a", "b", "c", "d"]
-            });
             view.delete();
             table.delete();
         });
