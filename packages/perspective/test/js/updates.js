@@ -299,60 +299,47 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("arrow partial `update()` a single column", async function(done) {
-            let table = perspective.table(arrow.slice(), {index: "i64"});
-
-            fs.readFile(path.join(__dirname, "..", "arrow", "partial.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
-                const view = table.view();
-                const result = await view.to_json();
-                expect(result).toEqual(arrow_partial_result);
-                view.delete();
-                table.delete();
-                done();
-            });
+        it("arrow partial `update()` a single column", async function() {
+            let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
+            table.update(arrows.partial_arrow.slice());
+            const view = table.view();
+            const result = await view.to_json();
+            expect(result).toEqual(arrow_partial_result);
+            view.delete();
+            table.delete();
         });
 
-        it("arrow partial `update()` a single column with missing rows", async function(done) {
-            let table = perspective.table(arrow.slice(), {index: "i64"});
-            fs.readFile(path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
-                const view = table.view();
-                const result = await view.to_json();
-                expect(result).toEqual(arrow_partial_missing_result);
-                view.delete();
-                table.delete();
-                done();
-            });
+        it("arrow partial `update()` a single column with missing rows", async function() {
+            let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
+            table.update(arrows.partial_missing_rows_arrow.slice());
+            const view = table.view();
+            const result = await view.to_json();
+            expect(result).toEqual(arrow_partial_missing_result);
+            view.delete();
+            table.delete();
         });
 
-        it("schema constructor then arrow `update()`", async function(done) {
+        it("schema constructor then arrow `update()`", async function() {
             const table = perspective.table({
                 a: "integer",
                 b: "float",
                 c: "string"
             });
-            fs.readFile(path.join(__dirname, "..", "arrow", "int_float_str.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
-                const view = table.view();
-                const size = await table.size();
-                expect(size).toEqual(4);
-                const result = await view.to_columns();
-                expect(result).toEqual({
-                    a: [1, 2, 3, 4],
-                    b: [1.5, 2.5, 3.5, 4.5],
-                    c: ["a", "b", "c", "d"]
-                });
-                view.delete();
-                table.delete();
-                done();
+            table.update(arrows.int_float_str_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            expect(size).toEqual(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d"]
             });
+            view.delete();
+            table.delete();
         });
 
-        it.skip("schema constructor then indexed arrow `update()`", async function(done) {
+        it.skip("schema constructor then indexed arrow `update()`", async function() {
             const table = perspective.table(
                 {
                     a: "integer",
@@ -362,57 +349,37 @@ module.exports = perspective => {
                 {index: "a"}
             );
 
-            // update from stream
-            fs.readFile(path.join(__dirname, "..", "arrow", "int_float_str.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_update_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [100.5, 2.5, 3.5, 400.5],
+                c: ["x", "b", "c", "y"]
             });
-
-            // update from file
-            fs.readFile(path.join(__dirname, "..", "arrow", "int_float_str_update.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
-                const view = table.view();
-                const result = await view.to_columns();
-                expect(result).toEqual({
-                    a: [1, 2, 3, 4],
-                    b: [100.5, 2.5, 3.5, 400.5],
-                    c: ["x", "b", "c", "y"]
-                });
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.delete();
+            table.delete();
         });
 
-        it.skip("schema constructor, then arrow stream and arrow file `update()`", async function(done) {
+        it("schema constructor, then arrow stream and arrow file `update()`", async function() {
             const table = perspective.table({
                 a: "integer",
                 b: "float",
                 c: "string"
             });
 
-            // update from stream
-            fs.readFile(path.join(__dirname, "..", "arrow", "int_float_str.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_file_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4, 1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5, 1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d", "a", "b", "c", "d"]
             });
-
-            // update from file
-            fs.readFile(path.join(__dirname, "..", "arrow", "int_float_str_file.arrow"), async (err, data) => {
-                if (err) throw err;
-                table.update(data.buffer.slice());
-                const view = table.view();
-                const result = await view.to_columns();
-                expect(result).toEqual({
-                    a: [1, 2, 3, 4, 1, 2, 3, 4],
-                    b: [1.5, 2.5, 3.5, 4.5, 1.5, 2.5, 3.5, 4.5],
-                    c: ["a", "b", "c", "d", "a", "b", "c", "d"]
-                });
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.delete();
+            table.delete();
         });
     });
 
