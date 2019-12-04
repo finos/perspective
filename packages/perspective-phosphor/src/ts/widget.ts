@@ -86,8 +86,6 @@ export class PerspectiveWidget extends Widget {
         // do computed last
         this.computed_columns = computed_columns;
         this.filters = filters;
-
-        this._displayed = false;
     }
 
     /**********************/
@@ -120,9 +118,7 @@ export class PerspectiveWidget extends Widget {
     }
 
     notifyResize(): void {
-        if (this.isAttached && !this.displayed) {
-            this._displayed = true;
-        } else if (this.isAttached) {
+        if (this.isVisible) {
             this.viewer.notifyResize();
         }
     }
@@ -327,7 +323,7 @@ export class PerspectiveWidget extends Widget {
             this.node.classList.add(PSP_CONTAINER_CLASS);
             this.node.classList.remove(PSP_CONTAINER_CLASS_DARK);
         }
-        if (this._displayed) {
+        if (this.isAttached) {
             this.viewer.restyleElement();
         }
     }
@@ -344,12 +340,8 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    toggleConfig() {
+    toggleConfig(): void {
         this._viewer.toggleConfig();
-    }
-
-    get displayed(): boolean {
-        return this._displayed;
     }
 
     static createNode(node: HTMLDivElement): PerspectiveViewer {
@@ -387,5 +379,4 @@ export class PerspectiveWidget extends Widget {
     private _client: boolean;
     private _dark: boolean;
     private _editable: boolean;
-    private _displayed: boolean;
 }
