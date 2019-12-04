@@ -10,7 +10,13 @@ import json
 import tornado.websocket
 from tornado.ioloop import IOLoop
 from ..core.exception import PerspectiveError
-from ..table._state import _PerspectiveStateManager
+
+
+# Redefine `queue_process` to take advantage of `tornado.ioloop`
+def _queue_process_tornado(table_id, state_manager):
+    loop = IOLoop.current()
+    print("async")
+    loop.add_callback(state_manager.clear_process, table_id=table_id)
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
@@ -52,14 +58,8 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
         super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
 
-        # Redefine `queue_process` to take advantage of `tornado.ioloop`
-        @classmethod
-        def _queue_process_tornado(cls, table_id):
-            loop = IOLoop.current()
-            loop.add_callback(cls.clear_process, table_id=table_id)
-
-        # if `queue_process` is not set as an attribute, Perspective will call `process()` after every operation.
-        setattr(_PerspectiveStateManager, "queue_process", _queue_process_tornado)
+        # make sure each `Table` calls the asynchronous version of `queue_process`
+        self._manager._set_queue_process(_queue_process_tornado)
 
     def check_origin(self, origin):
         '''Returns whether the handler allows requests from origins outside

@@ -64,11 +64,8 @@ class Table(object):
         pool.set_update_delegate(self)
         pool._process()
 
-        # if `queue_process` is not implemented, it means that an event loop
-        # isn't present/not set in this case, simply call `process()`
-        # immediately and allow to execute.
-        if not hasattr(_PerspectiveStateManager, "queue_process"):
-            setattr(_PerspectiveStateManager, "queue_process", _PerspectiveStateManager._queue_process_immediate)
+        # Each table always contains its own instance of state manager.
+        self._state_manager = _PerspectiveStateManager()
 
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''
@@ -79,7 +76,7 @@ class Table(object):
         preserves everything else including the schema and any callbacks or
         registered :class:`~perspective.View`.
         '''
-        _PerspectiveStateManager.reset_process(self._table.get_id())
+        self._state_manager.reset_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
 
     def replace(self, data):
@@ -90,13 +87,14 @@ class Table(object):
             data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): New data
                 that will be filled into the :class:`~perspective.Table`.
         '''
-        _PerspectiveStateManager.reset_process(self._table.get_id())
+        self._state_manager.reset_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
-        _PerspectiveStateManager.clear_process(self._table.get_id())
+        self._state_manager.clear_process(self._table.get_id())
 
     def size(self):
         '''Returns the row count of the :class:`~perspective.Table`.'''
+        self._state_manager.clear_process(self._table.get_id())
         return self._table.size()
 
     def schema(self, as_string=False):
@@ -222,7 +220,7 @@ class Table(object):
 
         self._table = make_table(self._table, self._accessor, None, self._limit,
                                  self._index, t_op.OP_INSERT, True, False)
-        _PerspectiveStateManager.set_process(
+        self._state_manager.set_process(
             self._table.get_pool(), self._table.get_id())
 
     def remove(self, pkeys):
@@ -250,7 +248,7 @@ class Table(object):
         self._accessor._types = types
         t = make_table(self._table, self._accessor, None, self._limit,
                        self._index, t_op.OP_DELETE, True, False)
-        _PerspectiveStateManager.set_process(t.get_pool(), t.get_id())
+        self._state_manager.set_process(t.get_pool(), t.get_id())
 
     def view(self, columns=None, row_pivots=None, column_pivots=None,
              aggregates=None, sort=None, filter=None):
@@ -289,7 +287,7 @@ class Table(object):
             >>> view.to_dict()
             >>> {"a": [1]}
         '''
-        _PerspectiveStateManager.clear_process(self._table.get_id())
+        self._state_manager.clear_process(self._table.get_id())
         config = {}
         if columns is None:
             config["columns"] = self.columns()  # TODO: push into C++
@@ -340,7 +338,7 @@ class Table(object):
             >>> table.remove_delete(deleter)
             >>> table.delete()
         '''
-        _PerspectiveStateManager.reset_process(self._table.get_id())
+        self._state_manager.reset_process(self._table.get_id())
         if not callable(callback):
             return ValueError(
                 "remove_delete callback should be a callable function!")
@@ -355,7 +353,7 @@ class Table(object):
             raise PerspectiveError(
                 "Cannot delete a Table with active views still linked to it " +
                 "- call delete() on each view, and try again.")
-        _PerspectiveStateManager.reset_process(self._table.get_id())
+        self._state_manager.reset_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 

@@ -11,6 +11,7 @@ import sys
 from pytest import raises
 from perspective.table import Table
 from perspective.core.exception import PerspectiveError
+from perspective.table._state import _PerspectiveStateManager
 from datetime import date, datetime
 
 try:
@@ -32,6 +33,12 @@ class TestTable(object):
         }
         with raises(NotImplementedError):
             Table(data)
+
+    def test_table_synchronous_process(self):
+        tbl = Table({"a": [1, 2, 3]})
+        assert _PerspectiveStateManager.TO_PROCESS == {}
+        tbl.update({"a": [4, 5, 6]})
+        assert _PerspectiveStateManager.TO_PROCESS == {}
 
     def test_table_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]

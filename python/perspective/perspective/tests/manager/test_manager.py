@@ -31,6 +31,27 @@ class TestPerspectiveManager(object):
             "b": str
         }
 
+    def test_manager_host_view(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_view("view1", view)
+        assert manager.get_view("view1").to_dict() == data
+
+    def test_manager_host_table_or_view(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host(table, name="table1")
+        manager.host(view, name="view1")
+        assert manager.get_table("table1").size() == 3
+        assert manager.get_view("view1").to_dict() == data
+
+    def test_manager_host_invalid(self):
+        manager = PerspectiveManager()
+        with raises(PerspectiveError):
+            manager.host({})
+
     def test_manager_host_table_transitive(self):
         manager = PerspectiveManager()
         table = Table(data)
@@ -293,3 +314,72 @@ class TestPerspectiveManager(object):
         delete_view = {"id": 3, "name": "view1", "cmd": "view_method", "method": "delete"}
         manager._process(delete_view, self.post)
         assert len(manager._views) == 0
+
+    def test_manager_set_queue_process(self, sentinel):
+        s = sentinel(0)
+        manager = PerspectiveManager()
+        table = Table({"a": [1, 2, 3]})
+        manager.host_table("tbl", table)
+        table.update({"a": [4, 5, 6]})
+        assert table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6]
+        }
+
+        def fake_queue_process(table_id, state_manager):
+            s.set(s.get() + 1)
+            state_manager.clear_process(table_id)
+
+        manager._set_queue_process(fake_queue_process)
+        table.update({"a": [7, 8, 9]})
+        assert s.get() == 1
+
+    def test_manager_set_queue_process_before_host_table(self, sentinel):
+        s = sentinel(0)
+        manager = PerspectiveManager()
+        table = Table({"a": [1, 2, 3]})
+
+        def fake_queue_process(table_id, state_manager):
+            s.set(s.get() + 1)
+            state_manager.clear_process(table_id)
+
+        manager._set_queue_process(fake_queue_process)
+        manager.host_table("tbl", table)
+        table.update({"a": [4, 5, 6]})
+        table.update({"a": [4, 5, 6]})
+
+        assert s.get() == 2
+
+    def test_manager_set_queue_process_multiple(self, sentinel):
+        # manager2's queue process should not affect manager1,
+        # provided they manage different tables
+        s = sentinel(0)
+        s2 = sentinel(0)
+        manager = PerspectiveManager()
+        manager2 = PerspectiveManager()
+        table = Table({"a": [1, 2, 3]})
+        table2 = Table({"a": [1, 2, 3]})
+        manager.host_table("tbl", table)
+        manager2.host_table("tbl2", table2)
+
+        def fake_queue_process(table_id, state_manager):
+            s2.set(s2.get() + 1)
+            state_manager.clear_process(table_id)
+
+        manager2._set_queue_process(fake_queue_process)
+
+        table.update({"a": [4, 5, 6]})
+        assert table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6]
+        }
+
+        table2.update({"a": [7, 8, 9]})
+        table.update({"a": [7, 8, 9]})
+
+        assert table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        }
+        assert table2.view().to_dict() == {
+            "a": [1, 2, 3, 7, 8, 9]
+        }
+        assert s.get() == 0
+        assert s2.get() == 1

@@ -9,6 +9,7 @@ psutil>=5.4.8
 pyarrow==0.15.0
 pytest>=4.3.0
 pytest-cov>=2.6.1
+pytest-asyncio>=0.10.0
 pytz>=2018.9
 scipy>=1.0.0
 six>=1.11.0

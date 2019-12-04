@@ -13,67 +13,78 @@ class _PerspectiveStateManager(object):
 
     `_process()` notifies the engine to clear its queue of pending updates to be applied
     and reconciled. When Perspective runs within an event loop, we should use the loop
-    whenever possible to batch calls to `_process()`. For this class to work, callers must
-    implement `queue_process` and add it as an attribute to the class (not on an instance).
+    whenever possible to batch calls to `_process()`. Callers that have access to an event
+    loop implementation should set `queue_process` to their own function with `table_id`
+    and `state_manager` as positional arguments.
+
+    Override functions must be bound to this instance using `functools.partial`,
+    i.e.: `functools.partial(queue_process_custom, state_manager=table._state_manager)
 
     The guarantee of `queue_process` is that `clear_process` will be called, either on the
     next iteration of the event loop or before output is generated (through a serialization
     method, for example).
-    """
 
+    Though each :obj:`~perspective.Table` contains a separate instance of the state manager,
+    `TO_PROCESS`, which contains the `t_pool` objects for pending `_process` calls, is shared
+    amongst all instances of the state manager.
+    """
     TO_PROCESS = {}
 
-    @classmethod
-    def set_process(cls, pool, table_id):
+    def __init__(self):
+        """Create a new instance of the state manager, and enable the default behavior
+        of calling `_process()` synchronously.
+
+        New instances of :obj:`_PerspectiveStateManager` have no awareness of whether
+        an event loop is present - the instance's `queue_process` method must be
+        overridden.
+        """
+        self.queue_process = self._queue_process_immediate
+
+    def set_process(self, pool, table_id):
         """Queue a `_process` call on the specified pool and table ID.
 
         Checks whether a `_process()` call has been queued already for the specified
         table, and calls `queue_process`, which MUST be implemented by the caller.
 
         Args:
-            cls (:obj`_PerspectiveStateManager`): an instance of _PerspectiveStateManager
             pool (:obj`libbinding.t_pool`): a `t_pool` object
             table_id (:obj`int`): a unique ID for the Table
         """
-        if table_id not in cls.TO_PROCESS:
-            cls.TO_PROCESS[table_id] = pool
-            cls.queue_process(table_id)
+        if table_id not in _PerspectiveStateManager.TO_PROCESS:
+            _PerspectiveStateManager.TO_PROCESS[table_id] = pool
+            self.queue_process(table_id)
 
-    @classmethod
-    def clear_process(cls, table_id):
+    def clear_process(self, table_id):
         """Given a table_id, find the corresponding pool and call `process()`
         on it, which takes all the updates that have been queued, applies each
         update to the global Table state, and then clears the queue.
 
         Args:
-            cls (:obj`_PerspectiveStateManager`): an instance of _PerspectiveStateManager
             table_id (:obj`int`): The unique ID of the Table
         """
-        pool = cls.TO_PROCESS.get(table_id, None)
+        pool = _PerspectiveStateManager.TO_PROCESS.get(table_id, None)
         if pool is not None:
             pool._process()
-            cls.reset_process(table_id)
+            self.reset_process(table_id)
 
-    @classmethod
-    def reset_process(cls, table_id):
+    def reset_process(self, table_id):
         """Remove a pool from the execution cache, indicating that it should no
         longer be operated on.
 
         Args:
             table_id (:obj`int`): The unique ID of the Table
         """
-        cls.TO_PROCESS.pop(table_id, None)
+        _PerspectiveStateManager.TO_PROCESS.pop(table_id, None)
 
-    @classmethod
-    def _queue_process_immediate(cls, table_id):
+    def _queue_process_immediate(self, table_id):
         """Immediately execute `clear_process` on the pool as soon
-        as it is registered with the manager.
+        as `queue_process` is called.
 
-        This is the default implementation of `set_process` for environments
-        without an event loop.
+        This is the default implementation of `queue_process` for environments
+        without an event loop, meaning that calls to :obj:`~perspective.Table`'s
+        `update()` method are immediately followed by a call to `_process`.
 
         Args:
-            pool (:obj`libbinding.t_pool`): A `t_pool` object
             table_id (:obj`int`): The unique ID of the Table
         """
-        cls.clear_process(table_id)
+        self.clear_process(table_id)

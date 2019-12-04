@@ -16,7 +16,6 @@ from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
-from ._state import _PerspectiveStateManager
 
 try:
     from .libbinding import make_view_zero, make_view_one, make_view_two
@@ -204,7 +203,7 @@ class View(object):
             >>> table.update({"a": [1]})'
             >>> Update fired!
         '''
-        _PerspectiveStateManager.clear_process(self._table._table.get_id())
+        self._table._state_manager.clear_process(self._table._table.get_id())
         mode = mode or "none"
 
         if not callable(callback):
@@ -243,7 +242,7 @@ class View(object):
             >>> view2.remove_update(callback)
             >>> table.update(new_data) # callback removed and will not fire
         '''
-        _PerspectiveStateManager.clear_process(self._table._table.get_id())
+        self._table._state_manager.clear_process(self._table._table.get_id())
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
         self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] != callback)
@@ -280,7 +279,7 @@ class View(object):
             >>> view = table.view()
             >>> view.delete()
         '''
-        _PerspectiveStateManager.reset_process(self._table._table.get_id())
+        self._table._state_manager.reset_process(self._table._table.get_id())
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
         self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)
