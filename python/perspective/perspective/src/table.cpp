@@ -77,7 +77,8 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
                 for (auto idx = 0; idx < column_names.size(); ++idx) {
                     const std::string& name = column_names[idx];
                     bool can_retype = name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
-                    if (can_retype) {
+                    bool is_32_bit = data_types[idx] == DTYPE_INT32 || data_types[idx] == DTYPE_FLOAT32;
+                    if (can_retype && is_32_bit) {
                         t_dtype arrow_dtype = arrow_dtypes[idx];
                         switch (arrow_dtype) {
                             case DTYPE_INT64:
