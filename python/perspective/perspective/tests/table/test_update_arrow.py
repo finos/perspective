@@ -417,3 +417,30 @@ class TestUpdateArrow(object):
             "a": [1, 2, 3, 4, 2, 3, 4],
             "b": ["a", "b", "c", "d", None, None, None]
         }
+
+    # try to fuzz column order
+
+    def test_update_arrow_column_order_str(self, util):
+        # use str so it doesn't get promoted
+        data = [["a", "b", "c"] for i in range(10)]
+        names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+        names_scrambled = names[::-1]
+        arrow = util.make_arrow(names_scrambled, data)
+        tbl = Table({name: str for name in names})
+        tbl.update(arrow)
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            name: data[0] for name in names
+        }
+
+    def test_update_arrow_column_order_int(self, util):
+        data = [[1, 2, 3] for i in range(10)]
+        names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+        names_scrambled = names[::-1]
+        arrow = util.make_arrow(names_scrambled, data)
+        tbl = Table({name: int for name in names})
+        tbl.update(arrow)
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            name: data[0] for name in names
+        }
