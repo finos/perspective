@@ -6,12 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const fs = require("fs");
-const path = require("path");
 const papaparse = require("papaparse");
 const moment = require("moment");
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
-const chunked = fs.readFileSync(path.join(__dirname, "..", "arrow", "chunked.arrow")).buffer;
+const arrows = require("./test_arrows.js");
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -129,6 +126,74 @@ var arrow_result = [
         "datetime(ns)": null
     }
 ];
+
+let arrow_date_col_1 = [
+    "2019-02-01",
+    "2019-02-02",
+    "2019-02-03",
+    "2019-02-04",
+    "2019-02-05",
+    "2019-02-06",
+    "2019-02-07",
+    "2019-02-08",
+    "2019-02-09",
+    "2019-02-10",
+    "2019-02-11",
+    "2019-02-12",
+    "2019-02-13",
+    "2019-02-14",
+    "2019-02-15",
+    "2019-02-16",
+    "2019-02-17",
+    "2019-02-18",
+    "2019-02-19",
+    "2019-02-20",
+    "2019-02-21",
+    "2019-02-22",
+    "2019-02-23",
+    "2019-02-24",
+    "2019-02-25",
+    "2019-02-26",
+    "2019-02-27",
+    "2019-02-28",
+    "2019-03-01"
+];
+
+let arrow_date_col_2 = [
+    "2005-12-01",
+    "2005-12-02",
+    "2005-12-03",
+    "2005-12-04",
+    "2005-12-05",
+    "2005-12-06",
+    "2005-12-07",
+    "2005-12-08",
+    "2005-12-09",
+    "2005-12-10",
+    "2005-12-11",
+    "2005-12-12",
+    "2005-12-13",
+    "2005-12-14",
+    "2005-12-15",
+    "2005-12-16",
+    "2005-12-17",
+    "2005-12-18",
+    "2005-12-19",
+    "2005-12-20",
+    "2005-12-21",
+    "2005-12-22",
+    "2005-12-23",
+    "2005-12-24",
+    "2005-12-25",
+    "2005-12-26",
+    "2005-12-27",
+    "2005-12-28",
+    "2005-12-29"
+];
+
+// transform arrow strings into timestamps
+arrow_date_col_1 = arrow_date_col_1.map(d => new Date(d).getTime());
+arrow_date_col_2 = arrow_date_col_2.map(d => new Date(d).getTime());
 
 var dt = () => {
     let dt = new Date();
@@ -498,7 +563,7 @@ module.exports = perspective => {
         });
 
         it("Arrow constructor", async function() {
-            var table = perspective.table(arrow.slice());
+            var table = perspective.table(arrows.test_null_arrow.slice());
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_result);
@@ -507,10 +572,38 @@ module.exports = perspective => {
         });
 
         it("Arrow (chunked format) constructor", async function() {
-            var table = perspective.table(chunked.slice());
+            var table = perspective.table(arrows.chunked_arrow.slice());
             var view = table.view();
             let result = await view.to_json();
             expect(result.length).toEqual(10);
+            view.delete();
+            table.delete();
+        });
+
+        it("Arrow date32 constructor", async function() {
+            const table = perspective.table(arrows.date32_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: arrow_date_col_1,
+                b: arrow_date_col_2,
+                c: arrow_date_col_1,
+                d: arrow_date_col_2
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("Arrow date64 constructor", async function() {
+            const table = perspective.table(arrows.date64_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: arrow_date_col_1,
+                b: arrow_date_col_2,
+                c: arrow_date_col_1,
+                d: arrow_date_col_2
+            });
             view.delete();
             table.delete();
         });

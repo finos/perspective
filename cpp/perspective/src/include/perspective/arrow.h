@@ -10,6 +10,7 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/base.h>
+#include <perspective/date.h>
 #include <perspective/exports.h>
 #include <perspective/scalar.h>
 #include <perspective/data_table.h>
@@ -17,6 +18,9 @@
 #include <arrow/api.h>
 #include <arrow/io/memory.h>
 #include <arrow/ipc/reader.h>
+
+#include <chrono>
+#include <date/date.h>
 
 namespace perspective {
 namespace arrow {

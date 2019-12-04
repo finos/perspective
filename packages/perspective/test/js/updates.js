@@ -8,11 +8,7 @@
  */
 
 const _ = require("lodash");
-const fs = require("fs");
-const path = require("path");
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow")).buffer;
-const partial_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial.arrow")).buffer;
-const partial_missing_rows_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow")).buffer;
+const arrows = require("./test_arrows.js");
 
 var data = [
     {x: 1, y: "a", z: true},
@@ -47,7 +43,7 @@ var data_2 = [
     {x: 6, y: "h", z: true}
 ];
 
-var arrow_result = [
+const arrow_result = [
     {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
     {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
     {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: true, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
@@ -55,7 +51,23 @@ var arrow_result = [
     {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
 ];
 
-var arrow_indexed_result = [
+const arrow_partial_result = [
+    {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: false, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
+    {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: true, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
+    {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: false, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
+    {f32: 4.5, f64: 4.5, i64: 4, i32: 4, i16: 4, i8: 4, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-28")},
+    {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
+];
+
+const arrow_partial_missing_result = [
+    {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: false, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
+    {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
+    {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: false, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
+    {f32: 4.5, f64: 4.5, i64: 4, i32: 4, i16: 4, i8: 4, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-28")},
+    {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: false, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
+];
+
+const arrow_indexed_result = [
     {f32: 1.5, f64: 1.5, i64: 1, i32: 1, i16: 1, i8: 1, bool: true, char: "a", dict: "a", datetime: +new Date("2018-01-25")},
     {f32: 2.5, f64: 2.5, i64: 2, i32: 2, i16: 2, i8: 2, bool: false, char: "b", dict: "b", datetime: +new Date("2018-01-26")},
     {f32: 3.5, f64: 3.5, i64: 3, i32: 3, i16: 3, i8: 3, bool: true, char: "c", dict: "c", datetime: +new Date("2018-01-27")},
@@ -266,6 +278,7 @@ module.exports = perspective => {
 
     describe("Arrow Updates", function() {
         it("arrow contructor then arrow `update()`", async function() {
+            const arrow = arrows.test_arrow;
             var table = perspective.table(arrow.slice());
             table.update(arrow.slice());
             var view = table.view();
@@ -287,29 +300,21 @@ module.exports = perspective => {
         });
 
         it.skip("arrow partial `update()` a single column", async function() {
-            let table = perspective.table(arrow.slice(), {index: "i64"});
-            table.update(partial_arrow.slice());
-            let view = table.view();
-            let result = await view.to_json();
-            let expected = arrow_indexed_result.map((d, idx) => {
-                idx % 2 == 0 ? (d["bool"] = false) : (d["bool"] = true);
-                return d;
-            });
-            expect(result).toEqual(expected);
+            let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
+            table.update(arrows.partial_arrow.slice());
+            const view = table.view();
+            const result = await view.to_json();
+            expect(result).toEqual(arrow_partial_result);
             view.delete();
             table.delete();
         });
 
         it.skip("arrow partial `update()` a single column with missing rows", async function() {
-            let table = perspective.table(arrow.slice(), {index: "i64"});
-            table.update(partial_missing_rows_arrow.slice());
-            let view = table.view();
-            let result = await view.to_json();
-            let expected = arrow_indexed_result.map(d => {
-                d["bool"] = false;
-                return d;
-            });
-            expect(result).toEqual(expected);
+            let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
+            table.update(arrows.partial_missing_rows_arrow.slice());
+            const view = table.view();
+            const result = await view.to_json();
+            expect(result).toEqual(arrow_partial_missing_result);
             view.delete();
             table.delete();
         });
@@ -456,7 +461,8 @@ module.exports = perspective => {
         });
 
         it("{limit: 1} with arrow update", async function() {
-            var table = perspective.table(arrow.slice(), {limit: 1});
+            const arrow = arrows.test_arrow.slice();
+            var table = perspective.table(arrow, {limit: 1});
             table.update(arrow.slice());
             var view = table.view();
             let result = await view.to_json();
@@ -488,7 +494,7 @@ module.exports = perspective => {
         });
 
         it("Arrow with {index: 'i64'} (int)", async function() {
-            var table = perspective.table(arrow.slice(), {index: "i64"});
+            var table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_result);
@@ -497,7 +503,7 @@ module.exports = perspective => {
         });
 
         it("Arrow with {index: 'char'} (char)", async function() {
-            var table = perspective.table(arrow.slice(), {index: "char"});
+            var table = perspective.table(arrows.test_arrow.slice(), {index: "char"});
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_indexed_result);
@@ -506,7 +512,7 @@ module.exports = perspective => {
         });
 
         it("Arrow with {index: 'dict'} (dict)", async function() {
-            var table = perspective.table(arrow.slice(), {index: "dict"});
+            var table = perspective.table(arrows.test_arrow.slice(), {index: "dict"});
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(arrow_indexed_result);

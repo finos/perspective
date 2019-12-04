@@ -7,12 +7,8 @@
  *
  */
 
-const fs = require("fs");
-const path = require("path");
-
-const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
-
-var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
+const test_null_arrow = require("./test_arrows.js").test_null_arrow;
+const arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 
 module.exports = (perspective, mode) => {
     describe("Internal API", function() {
@@ -29,7 +25,7 @@ module.exports = (perspective, mode) => {
             if (perspective.sync_module) {
                 perspective = perspective.sync_module();
             }
-            var table = perspective.table(arrow.slice());
+            var table = perspective.table(test_null_arrow.slice());
             let schema, stypes;
             let types = [];
             try {

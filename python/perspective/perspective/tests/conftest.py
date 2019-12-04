@@ -10,6 +10,7 @@ import six
 import time
 import numpy as np
 import pandas as pd
+import pyarrow as pa
 from datetime import datetime
 from pytest import fixture
 
@@ -35,6 +36,70 @@ def _make_dataframe(index, size=10):
 
 
 class Util:
+    @staticmethod
+    def make_arrow(names, data, types=None, legacy=False):
+        """Create an arrow binary that can be loaded and manipulated from memory.
+
+        Args:
+            names (list): a list of str column names
+            data (list): a list of lists containing data for each column
+            types (list): an optional list of `pyarrow.type` function references.
+                Types will be inferred if not provided.
+            legacy (bool): if True, use legacy IPC format (pre-pyarrow 0.15). Defaults to False.
+
+        Returns:
+            bytes : a bytes object containing the arrow-serialized output.
+        """
+        stream = pa.BufferOutputStream()
+        arrays = []
+
+        for idx, column in enumerate(data):
+            # only apply types if array is present
+            kwargs = {}
+            if types:
+                kwargs["type"] = types[idx]
+            arrays.append(pa.array(column, **kwargs))
+
+        batch = pa.RecordBatch.from_arrays(arrays, names)
+        table = pa.Table.from_batches([batch])
+        writer = pa.RecordBatchStreamWriter(
+            stream, table.schema, use_legacy_format=legacy)
+
+        writer.write_table(table)
+        return stream.getvalue().to_pybytes()
+
+    @staticmethod
+    def make_dictionary_arrow(names, data, legacy=False):
+        """Create an arrow binary that can be loaded and manipulated from memory, with
+        each column being a dictionary array of `str` values and `int` indices.
+
+        Args:
+            names (list): a list of str column names
+            data (list:tuple): a list of tuples, the first value being a list of indices,
+                and the second value being a list of values.
+            legacy (bool): if True, use legacy IPC format (pre-pyarrow 0.15). Defaults to False.
+
+        Returns:
+            bytes : a bytes object containing the arrow-serialized output.
+        """
+        stream = pa.BufferOutputStream()
+
+        arrays = []
+        for idx, column in enumerate(data):
+            # only apply types if array is present
+            indices = pa.array(column[0], type=pa.int64())
+            values = pa.array(column[1], type=pa.string())
+            parray = pa.DictionaryArray.from_arrays(indices, values)
+            arrays.append(parray)
+
+        batch = pa.RecordBatch.from_arrays(arrays, names)
+        table = pa.Table.from_batches([batch])
+        writer = pa.RecordBatchStreamWriter(
+            stream, table.schema, use_legacy_format=legacy)
+
+        writer.write_table(table)
+        return stream.getvalue().to_pybytes()
+
     @staticmethod
     def to_timestamp(obj):
         '''Return an integer timestamp based on a date/datetime object.'''

@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import six
-from pytest import mark
 from io import StringIO
 from datetime import date, datetime
 import numpy as np
@@ -17,7 +16,7 @@ from faker import Faker
 fake = Faker()
 
 
-def superstore(count=10):
+def superstore(count=100):
     data = []
     for id in range(count):
         dat = {}
@@ -28,7 +27,7 @@ def superstore(count=10):
         dat['Order Date'] = dat['Order Date'].strftime('%Y-%m-%d')
         dat['Ship Mode'] = choice(['First Class', 'Standard Class', 'Second Class'])
         dat['Ship Mode'] = choice(['First Class', 'Standard Class', 'Second Class'])
-        dat['Customer ID'] = fake.license_plate()
+        dat['Customer ID'] = fake.zipcode()
         dat['Segment'] = choice(['A', 'B', 'C', 'D'])
         dat['Country'] = 'US'
         dat['City'] = fake.city()
@@ -926,7 +925,7 @@ class TestTablePandas(object):
         df_pivoted = df.set_index(['Country', 'Region'])
         table = Table(df_pivoted)
         columns = table.columns()
-        assert table.size() == 10
+        assert table.size() == 100
         assert "Country" in columns
         assert "Region" in columns
 
