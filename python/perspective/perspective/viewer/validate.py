@@ -16,10 +16,10 @@ def validate_plugin(plugin):
         return plugin.value
     elif isinstance(plugin, string_types):
         if plugin not in Plugin.options():
-            raise PerspectiveError('Unrecognized `plugin`: %s', plugin)
+            raise PerspectiveError("Unrecognized `plugin`: {0}".format(plugin))
         return plugin
     else:
-        raise PerspectiveError('Cannot parse `plugin` of type: %s', str(type(plugin)))
+        raise PerspectiveError("Cannot parse `plugin` of type: {0}".format(str(type(plugin))))
 
 
 def validate_columns(columns):
