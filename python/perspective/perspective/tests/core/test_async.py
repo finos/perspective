@@ -48,7 +48,7 @@ def queue_process_async_delay(table_id, state_manager, delay=0.25, loop=None):
 data = [{"a": i, "b": i * 0.5, "c": str(i)} for i in range(10)]
 
 
-@mark.skipif(six.PY2, reason="Requires Python 3")
+# @mark.skipif(six.PY2, reason="Requires Python 3")
 class TestAsync(object):
 
     @classmethod
@@ -56,9 +56,10 @@ class TestAsync(object):
         cls.loop = tornado.ioloop.IOLoop()
         cls.loop.make_current()
         cls.wrapped_queue_process = partial(queue_process_async, loop=cls.loop)
-        cls.thread = Thread(target=cls.loop.start, daemon=True)
+        cls.thread = Thread(target=cls.loop.start)
+        cls.thread.daemon = True
         cls.thread.start()
-        assert cls.loop.asyncio_loop.is_running() is True
+        assert cls.loop_is_running() is True
 
     @classmethod
     def teardown_class(cls):
@@ -66,6 +67,13 @@ class TestAsync(object):
         cls.loop.add_callback(cls.loop.stop)
         cls.loop.clear_current()
         # cls.loop.close(all_fds=True)
+
+    @classmethod
+    def loop_is_running(cls):
+        if six.PY2:
+            return cls.loop._running
+        else:
+            return cls.loop.asyncio_loop.is_running()
 
     def setup_method(self):
         global SENTINEL
@@ -76,7 +84,7 @@ class TestAsync(object):
         SENTINEL = AsyncSentinel(0)
 
     def test_async_queue_process(self):
-        assert TestAsync.loop.asyncio_loop.is_running() is True
+        assert TestAsync.loop_is_running() is True
         tbl = Table({
             "a": int,
             "b": float,
@@ -106,7 +114,7 @@ class TestAsync(object):
         assert _PerspectiveStateManager.TO_PROCESS == {}
 
     def test_async_multiple_managers_queue_process(self):
-        assert TestAsync.loop.asyncio_loop.is_running() is True
+        assert TestAsync.loop_is_running() is True
         tbl = Table({
             "a": int,
             "b": float,
@@ -146,7 +154,8 @@ class TestAsync(object):
             SENTINEL_2.set(SENTINEL_2.get() - 1)
             state_manager.clear_process(table_id)
 
-        assert TestAsync.loop.asyncio_loop.is_running() is True
+        assert TestAsync.loop_is_running() is True
+
         tbl = Table({
             "a": int,
             "b": float,
@@ -190,7 +199,8 @@ class TestAsync(object):
         long_delay_queue_process = partial(queue_process_async_delay,
                                            delay=1, loop=TestAsync.loop)
 
-        assert TestAsync.loop.asyncio_loop.is_running() is True
+        assert TestAsync.loop_is_running() is True
+
         tbl = Table({
             "a": int,
             "b": float,
