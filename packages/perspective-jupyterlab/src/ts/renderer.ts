@@ -57,34 +57,11 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
           this._psp._update(data);
 
         } else {
+          // Column-oriented or single records JSON
+          // don't handle for now, just need to implement
+          // a simple transform but we can't handle all
+          // cases
           throw "Not handled";
-          // TODO
-          // if (Object.keys(data).length > 0){
-          //   // valid
-          //   const keys = Object.keys(data);
-  
-          //   if(Array.isArray(data[keys[0]])) {
-          //     // convert from columns to records
-          //     const records = [];
-          //     let i = 0;
-          //     while(i < data[keys[0]].length){
-          //       let obj = {} as {[key: string]: any};
-          //       for(let k of keys){
-          //         obj[k] = data[k][i];
-          //       }
-          //       records.push(obj);
-          //       i++;
-          //     }
-          //     this._psp._update(records);
-
-          //   } else {
-          //     // single record, wrap as array
-          //     this._psp._update([data]);
-          //   }
-          // } else {
-          //   // invalid
-          //   throw "Not handled";
-          // }
         }
       } else {
         // don't handle other mimetypes for now
