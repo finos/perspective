@@ -15,6 +15,8 @@ from perspective.table import Table
 SOURCE_STREAM_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
 SOURCE_FILE_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
 PARTIAL_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str_update.arrow")
+DICT_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict.arrow")
+DICT_UPDATE_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict_update.arrow")
 
 names = ["a", "b", "c", "d"]
 
@@ -66,6 +68,25 @@ class TestUpdateArrow(object):
                 "a": [1, 2, 3, 4],
                 "b": [100.5, 2.5, 3.5, 400.5],
                 "c": ["x", "b", "c", "y"]
+            }
+
+    @mark.skip
+    def test_update_arrow_updates_dict_file(self):
+        tbl = Table({
+            "a": str,
+            "b": str
+        })
+
+        with open(DICT_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 5
+
+        with open(DICT_UPDATE_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 8
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "def", None, "abc", None, "update1", "update2"],
+                "b": ["klm", "hij", None, "hij", "klm", "update3", None, "update4"]
             }
 
     # streams

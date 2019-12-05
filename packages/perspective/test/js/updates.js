@@ -299,6 +299,35 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("arrow dict contructor then arrow dict `update()`", async function() {
+            var table = perspective.table(arrows.dict_arrow.slice());
+            table.update(arrows.dict_update_arrow.slice());
+            var view = table.view();
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["abc", "def", "def", null, "abc", null, "update1", "update2"],
+                b: ["klm", "hij", null, "hij", "klm", "update3", null, "update4"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("non-arrow constructor then arrow dict `update()`", async function() {
+            let table = perspective.table({
+                a: ["a", "b", "c"],
+                b: ["d", "e", "f"]
+            });
+            let view = table.view();
+            table.update(arrows.dict_update_arrow.slice());
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["a", "b", "c", null, "update1", "update2"],
+                b: ["d", "e", "f", "update3", null, "update4"]
+            });
+            view.delete();
+            table.delete();
+        });
+
         it("arrow partial `update()` a single column", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_arrow.slice());
@@ -334,6 +363,24 @@ module.exports = perspective => {
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],
                 c: ["a", "b", "c", "d"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow dictionary `update()`", async function() {
+            const table = perspective.table({
+                a: "string",
+                b: "string"
+            });
+            table.update(arrows.dict_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            expect(size).toEqual(5);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["abc", "def", "def", null, "abc"],
+                b: ["klm", "hij", null, "hij", "klm"]
             });
             view.delete();
             table.delete();

@@ -614,6 +614,18 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Arrow dictionary constructor", async function() {
+            const table = perspective.table(arrows.dict_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["abc", "def", "def", null, "abc"],
+                b: ["klm", "hij", null, "hij", "klm"]
+            });
+            view.delete();
+            table.delete();
+        });
+
         it("CSV constructor", async function() {
             var table = perspective.table(csv);
             var view = table.view();

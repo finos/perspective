@@ -37,6 +37,8 @@ const int_float_str_update_arrow = load_arrow(path.join(__dirname, "..", "arrow"
 const int_float_str_file_arrow = load_arrow(path.join(__dirname, "..", "arrow", "int_float_str_file.arrow"));
 const date32_arrow = load_arrow(path.join(__dirname, "..", "arrow", "date32.arrow"));
 const date64_arrow = load_arrow(path.join(__dirname, "..", "arrow", "date64.arrow"));
+const dict_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict.arrow"));
+const dict_update_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict_update.arrow"));
 
 module.exports = {
     chunked_arrow,
@@ -48,5 +50,7 @@ module.exports = {
     int_float_str_update_arrow,
     int_float_str_file_arrow,
     date32_arrow,
-    date64_arrow
+    date64_arrow,
+    dict_arrow,
+    dict_update_arrow
 };

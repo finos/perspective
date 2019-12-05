@@ -15,6 +15,7 @@ from perspective.table import Table
 SUPERSTORE_ARROW = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "examples", "simple", "superstore.arrow")
 DATE32_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date32.arrow")
 DATE64_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date64.arrow")
+DICT_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict.arrow")
 
 names = ["a", "b", "c", "d"]
 
@@ -52,6 +53,20 @@ class TestTableArrow(object):
                 "d": date
             }
             assert tbl.size() == 29
+
+    @mark.skip
+    def test_table_arrow_loads_dict_file(self):
+        with open(DICT_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl = Table(file.read())
+            assert tbl.schema() == {
+                "a": str,
+                "b": str
+            }
+            assert tbl.size() == 5
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "def", None, "abc"],
+                "b": ["klm", "hij", None, "hij", "klm"]
+            }
 
     # streams
 
@@ -193,8 +208,8 @@ class TestTableArrow(object):
     @mark.skip
     def test_table_arrow_loads_dictionary_stream(self, util):
         data = [
-            ([0, 1, 1, None], ["a", "b"]),
-            ([0, 1, None, 2], ["x", "y", "z"])
+            ([0, 1, 1, None], ["abc", "def"]),
+            ([0, 1, None, 2], ["xx", "yy", "zz"])
         ]
         arrow_data = util.make_dictionary_arrow(["a", "b"], data)
         tbl = Table(arrow_data)
@@ -205,8 +220,8 @@ class TestTableArrow(object):
             "b": str
         }
         assert tbl.view().to_dict() == {
-            "a": ["a", "b", "b", None],
-            "b": ["x", "y", None, "z"]
+            "a": ["abc", "def", "def", None],
+            "b": ["xx", "yy", None, "zz"]
         }
 
     # legacy
