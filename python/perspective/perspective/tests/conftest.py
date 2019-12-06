@@ -69,7 +69,7 @@ class Util:
         return stream.getvalue().to_pybytes()
 
     @staticmethod
-    def make_dictionary_arrow(names, data, legacy=False):
+    def make_dictionary_arrow(names, data, types=None, legacy=False):
         """Create an arrow binary that can be loaded and manipulated from memory, with
         each column being a dictionary array of `str` values and `int` indices.
 
@@ -77,6 +77,8 @@ class Util:
             names (list): a list of str column names
             data (list:tuple): a list of tuples, the first value being a list of indices,
                 and the second value being a list of values.
+            types (list:list:pyarrow.func): a list of lists, containing the indices type and
+                dictionary value type for each array.
             legacy (bool): if True, use legacy IPC format (pre-pyarrow 0.15). Defaults to False.
 
         Returns:
@@ -86,9 +88,15 @@ class Util:
 
         arrays = []
         for idx, column in enumerate(data):
-            # only apply types if array is present
-            indices = pa.array(column[0], type=pa.int64())
-            values = pa.array(column[1], type=pa.string())
+            indice_type = pa.int64()
+            value_type = pa.string()
+
+            if types is not None:
+                indice_type = types[idx][0]
+                value_type = types[idx][1]
+
+            indices = pa.array(column[0], type=indice_type)
+            values = pa.array(column[1], type=value_type)
             parray = pa.DictionaryArray.from_arrays(indices, values)
             arrays.append(parray)
 

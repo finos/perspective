@@ -159,10 +159,10 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     t_data_table data_table(output_schema);
     data_table.init();
     std::uint32_t row_count;
-
     if (is_arrow) {
         row_count = arrow_loader.row_count();
         data_table.extend(arrow_loader.row_count());
+
         arrow_loader.fill_table(data_table, index, offset, limit, is_update);
     } else if (is_numpy) {
         row_count = numpy_loader.row_count();

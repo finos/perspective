@@ -7,6 +7,7 @@
 #
 import numpy as np
 from datetime import date, datetime
+from pytest import mark
 from perspective.table import Table
 
 
@@ -251,6 +252,7 @@ class TestUpdateNumpy(object):
             "b": ["a", "b", "c", "d"]
         }
 
+    @mark.skip
     def test_update_np_with_none_partial(self):
         tbl = Table({
             "a": [1, np.nan, 3],

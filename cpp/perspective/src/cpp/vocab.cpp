@@ -93,13 +93,7 @@ t_vocab::get_interned(const char* s) {
     } else {
         idx = iter->second;
     }
-#ifndef PSP_ENABLE_WASM
-#ifdef PSP_COLUMN_VERIFY
-    if (std::string(s) == "") {
-        PSP_VERBOSE_ASSERT(idx == 0, "Expected empty string to map to 0");
-    }
-#endif
-#endif
+
     return idx;
 }
 
@@ -115,9 +109,6 @@ t_vocab::init(bool from_recipe) {
     if (from_recipe) {
         rebuild_map();
     }
-#ifndef PSP_ENABLE_WASM
-    get_interned("");
-#endif // PSP_ENABLE_WASM
 }
 
 t_uindex
@@ -133,16 +124,7 @@ t_vocab::verify() const {
         rlookup[kv.second] = kv.first;
     }
 
-#ifndef PSP_ENABLE_WASM
-    auto zero = rlookup.find(t_uindex(0));
-    PSP_VERBOSE_ASSERT(zero, != rlookup.end(), "0 Not found");
-    PSP_VERBOSE_ASSERT(std::string(zero->second), == "", "0 mapped to unknown");
-#endif
-
     tsl::hopscotch_set<std::string> seen;
-#ifndef PSP_ENABLE_WASM
-    seen.insert(std::string(""));
-#endif
 
     for (t_uindex idx = 1; idx < m_vlenidx; ++idx) {
         std::stringstream ss;
@@ -193,7 +175,7 @@ void
 t_vocab::pprint_vocabulary() const {
     std::cout << "vocabulary =========\n";
     for (t_uindex idx = 0; idx < m_vlenidx; ++idx) {
-        std::cout << "\t" << idx << " => " << unintern_c(idx) << std::endl;
+        std::cout << "\t" << idx << " => '" << unintern_c(idx) << "'" << std::endl;
     }
 
     std::cout << "end vocabulary =========\n";
