@@ -9,7 +9,6 @@
 import os
 import pyarrow as pa
 from datetime import date, datetime
-from pytest import mark
 from perspective.table import Table
 
 SOURCE_STREAM_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
@@ -70,7 +69,6 @@ class TestUpdateArrow(object):
                 "c": ["x", "b", "c", "y"]
             }
 
-    @mark.skip
     def test_update_arrow_updates_dict_file(self):
         tbl = Table({
             "a": str,
@@ -226,7 +224,6 @@ class TestUpdateArrow(object):
             "a": data[0]
         }
 
-    @mark.skip
     def test_update_arrow_updates_dictionary_stream(self, util):
         data = [
             ([0, 1, 1, None], ["a", "b"]),
@@ -385,13 +382,27 @@ class TestUpdateArrow(object):
             "a": data[0] + data[0]
         }
 
-    @mark.skip
     def test_update_arrow_updates_append_dictionary_stream(self, util):
         data = [
             ([0, 1, 1, None], ["a", "b"]),
             ([0, 1, None, 2], ["x", "y", "z"])
         ]
         arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+        tbl = Table(arrow_data)
+        tbl.update(arrow_data)
+
+        assert tbl.size() == 8
+        assert tbl.view().to_dict() == {
+            "a": ["a", "b", "b", None, "a", "b", "b", None],
+            "b": ["x", "y", None, "z", "x", "y", None, "z"]
+        }
+
+    def test_update_arrow_updates_append_dictionary_stream_legacy(self, util):
+        data = [
+            ([0, 1, 1, None], ["a", "b"]),
+            ([0, 1, None, 2], ["x", "y", "z"])
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data, legacy=True)
         tbl = Table(arrow_data)
         tbl.update(arrow_data)
 

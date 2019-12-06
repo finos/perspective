@@ -580,21 +580,15 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Arrow date32 constructor", async function(done) {
-            fs.readFile(path.join(__dirname, "..", "arrow", "date32.arrow"), async (err, data) => {
-                if (err) throw err;
-                const table = perspective.table(data.buffer.slice());
-                const view = table.view();
-                const result = await view.to_columns();
-                expect(result).toEqual({
-                    a: arrow_date_col_1,
-                    b: arrow_date_col_2,
-                    c: arrow_date_col_1,
-                    d: arrow_date_col_2
-                });
-                view.delete();
-                table.delete();
-                done();
+        it("Arrow date32 constructor", async function() {
+            const table = perspective.table(arrows.date32_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: arrow_date_col_1,
+                b: arrow_date_col_2,
+                c: arrow_date_col_1,
+                d: arrow_date_col_2
             });
             view.delete();
             table.delete();

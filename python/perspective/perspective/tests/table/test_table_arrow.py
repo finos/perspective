@@ -9,7 +9,6 @@
 import os.path
 import pyarrow as pa
 from datetime import date, datetime
-from pytest import mark
 from perspective.table import Table
 
 SUPERSTORE_ARROW = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "examples", "simple", "superstore.arrow")
@@ -300,14 +299,13 @@ class TestTableArrow(object):
             "a": [None, "", "abc", "def"]
         }
 
-    @mark.skip
     def test_table_arrow_loads_dictionary_stream_nones_indexed(self, util):
         data = [
-            ([1, None, 0, 2], ["", "abc", "def"]),
-            ([2, 1, 0, None], ["", "hij", "klm"])
+            ([1, None, 0, 2], ["", "abc", "def"]),  # ["abc", None, "", "def"]
+            ([2, 1, 0, None], ["", "hij", "klm"])   # ["klm", "hij", "", None]
         ]
         arrow_data = util.make_dictionary_arrow(["a", "b"], data)
-        tbl = Table(arrow_data, index="a")
+        tbl = Table(arrow_data, index="a")  # column "a" is sorted
 
         assert tbl.schema() == {
             "a": str,
@@ -315,7 +313,25 @@ class TestTableArrow(object):
         }
         assert tbl.view().to_dict() == {
             "a": [None, "", "abc", "def"],
-            "b": ["klm", "hij", "", None]
+            "b": ["hij", "", "klm", None]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_nones_indexed_2(self, util):
+        """Test the other column, just in case."""
+        data = [
+            ([1, None, 0, 2], ["", "abc", "def"]),  # ["abc", None, "", "def"]
+            ([2, 1, 0, None], ["", "hij", "klm"])   # ["klm", "hij", "", None]
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+        tbl = Table(arrow_data, index="b")  # column "b" is sorted
+
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": ["def", "", None, "abc"],
+            "b": [None, "", "hij", "klm"]
         }
 
     # legacy
@@ -453,7 +469,6 @@ class TestTableArrow(object):
             "a": data[0]
         }
 
-    @mark.skip
     def test_table_arrow_loads_dictionary_legacy(self, util):
         data = [
             ([0, 1, 1, None], ["a", "b"]),

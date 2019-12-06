@@ -214,7 +214,6 @@ class TestUpdatePandas(object):
             "b": ["a", "b", "c", "d"]
         }
 
-    @mark.skip
     def test_update_df_with_none_partial(self):
         tbl = Table({
             "a": [1, np.nan, 3],
