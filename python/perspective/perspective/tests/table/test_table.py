@@ -491,7 +491,7 @@ class TestTable(object):
 
     def test_table_index_float_with_none(self):
         tbl = Table({
-            "a": [0, 1.5, 2.5, None, None],
+            "a": [0.0, 1.5, 2.5, None, None],
             "b": [4, 3, 2, 1, 0]
         }, index="a")
         assert tbl.view().to_dict() == {
