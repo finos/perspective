@@ -134,10 +134,11 @@ async function javascript_options() {
             type: "confirm",
             name: "PSP_DOCKER_PUPPETEER",
             message: "Use docker for puppeteer tests?",
-            default: CONFIG["PSP_DOCKER_PUPPETEER"] || true
+            default: !CONFIG["PSP_DOCKER_PUPPETEER"]
         }
     ]);
-    const local_puppeteer = !fs.existsSync("node_modules/puppeteer");
+    new_config.PSP_DOCKER_PUPPETEER = !new_config.PSP_DOCKER_PUPPETEER;
+    const local_puppeteer = fs.existsSync("node_modules/puppeteer");
     CONFIG.add(new_config);
     CONFIG.write();
     if (local_puppeteer !== new_config.PSP_DOCKER_PUPPETEER) {

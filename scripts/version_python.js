@@ -6,8 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const resolve = require("path").resolve;
-const execute = require("./script_utils").execute;
+
+const {execute, resolve} = require("./script_utils");
 const VERSION = require("../packages/perspective/package.json").version;
 const ENDINGS = ["alpha", "beta", "rc"];
 
@@ -51,6 +51,7 @@ const parse_version = function(version) {
 };
 
 console.log(`Bumping \`perspective-python\` version to ${VERSION}`);
-const python_path = resolve(__dirname, "..", "python", "perspective");
-const version_path = resolve(__dirname, "..", "python", "perspective", "perspective", "core", "_version.py");
-execute(`cd ${python_path} && bumpversion --allow-dirty --new-version "${parse_version(VERSION)}" ${version_path}`);
+
+const python_path = resolve`${__dirname}/../python/perspective`;
+const version_path = resolve`${__dirname}/../python/perspective/perspective/core/_version.py`;
+execute`cd ${python_path} && bumpversion --allow-dirty --new-version "${parse_version(VERSION)}" ${version_path}`;

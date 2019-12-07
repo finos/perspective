@@ -7,12 +7,8 @@
  *
  */
 
-const execSync = require("child_process").execSync;
 const fs = require("fs");
-const path = require("path");
-const minimatch = require("minimatch");
-
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
+const {execute} = require("./script_utils.js");
 
 try {
     if (fs.existsSync("node_modules/puppeteer")) {
