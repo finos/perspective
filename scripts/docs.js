@@ -7,18 +7,17 @@
  *
  */
 
-const {bash, execute} = require("./script_utils.js");
-const fs = require("fs");
+const {execute} = require("./script_utils.js");
 
 try {
-    execute("mkdirp docs/build docs/obj");
+    execute`mkdirp docs/build docs/obj`;
     const project = process.env.PSP_PROJECT;
     if (!project || project === "js") {
-        execute(bash`lerna run docs --silent --stream --scope=${process.env.PACKAGE}`);
+        execute`lerna run docs --silent --stream --scope=${process.env.PACKAGE}`;
     }
 
     if (!project || project === "python") {
-        execute(`lerna run docs --silent --stream --scope=perspective-python.node`);
+        execute`lerna run docs --silent --stream --scope=perspective-python.node`;
     }
 } catch (e) {
     console.log(e.message);

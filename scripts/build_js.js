@@ -106,7 +106,7 @@ function compileCPP(packageName) {
 function lerna() {
     let cmd = `lerna run build --loglevel silent `;
     if (process.env.PACKAGE) {
-        cmd += `--scope=@finos/${process.env.PACKAGE} `;
+        cmd += `--scope="@finos/${process.env.PACKAGE}" `;
     }
     execute(cmd);
 }

@@ -7,20 +7,17 @@
  *
  */
 
-const execSync = require("child_process").execSync;
-const path = require("path");
+const {execute, bash, path} = require("./script_utils.js");
 const minimatch = require("minimatch");
 
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
-
 function lint(dir) {
-    execute(`clang-format -i -style=file ${dir}`);
+    execute(bash`clang-format -i -style=file ${dir}`);
 }
 
 try {
     if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-        lint(path.join(".", "cpp", "perspective", "src", "cpp", "*.cpp"));
-        lint(path.join(".", "cpp", "perspective", "src", "include", "perspective", "*.h"));
+        lint(path`./cpp/perspective/src/cpp/*.cpp`);
+        lint(path`./cpp/perspective/src/include/perspective/*.h`);
     }
 } catch (e) {
     console.error(e.message);

@@ -7,7 +7,7 @@
  *
  */
 
-const {execute, clean, bash} = require("./script_utils.js");
+const {execute, clean} = require("./script_utils.js");
 
 const minimatch = require("minimatch");
 const args = process.argv.slice(2);
@@ -15,25 +15,25 @@ const args = process.argv.slice(2);
 const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
 function clean_screenshots() {
-    execute(bash`lerna exec -- mkdirp screenshots`);
-    execute(bash`lerna run clean:screenshots --ignore-missing --scope=@finos/${process.env.PACKAGE}`);
+    execute`lerna exec -- mkdirp screenshots`;
+    execute`lerna run clean:screenshots --ignore-missing --scope="@finos/${process.env.PACKAGE}"`;
 }
 
 try {
     if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
-        clean("cpp/perspective/obj");
+        clean`cpp/perspective/obj`;
     }
     if (process.env.PSP_PROJECT === "python") {
         clean("cpp/perspective/obj", "cpp/perspective/cppbuild", "python/perspective/dist", "python/perspective/build", "python/perspective/perspective_python.egg-info");
         return;
     }
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
-        clean("cpp/perspective/cppbuild");
-        let files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
+        clean`cpp/perspective/cppbuild`;
+        const files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
         clean(...files.map(x => `cpp/perspective/obj/${x}`));
     }
     if (!IS_SCREENSHOTS) {
-        execute(bash`lerna run clean --scope=@finos/${process.env.PACKAGE}`);
+        execute`lerna run clean --scope="@finos/${process.env.PACKAGE}"`;
         clean("docs/build", "docs/python", "docs/obj");
     }
     clean_screenshots();

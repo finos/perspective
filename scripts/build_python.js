@@ -7,41 +7,43 @@
  *
  */
 
-const args = process.argv.slice(2);
-const resolve = require("path").resolve;
-const execSync = require("child_process").execSync;
+const {execute, docker, clean, resolve, getarg, bash} = require("./script_utils.js");
 const fs = require("fs-extra");
-const rimraf = require("rimraf");
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 const IS_DOCKER = process.env.PSP_DOCKER;
-const PY2 = args.indexOf("--python2") != -1;
-
-function docker(target = "perspective", image = "python") {
-    console.log(`-- Creating ${image} docker image`);
-    let cmd = "docker run --rm -it";
-    if (process.env.PSP_CPU_COUNT) {
-        cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
-    }
-    cmd += ` -v $(pwd):/usr/src/app/python/${target} -w /usr/src/app/python/${target} perspective/${image}`;
-    return cmd;
-}
+const IS_PY2 = getarg("--python2");
+const IS_CI = getarg("--ci");
 
 try {
-    fs.mkdirp(resolve(__dirname, "..", "python", "perspective", "dist"));
-    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective", "dist"), {preserveTimestamps: true});
-    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "dist", "cmake"), {preserveTimestamps: true});
-    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "dist", "obj"));
+    const dist = resolve`${__dirname}/../python/perspective/dist`;
+    const cpp = resolve`${__dirname}/../cpp/perspective`;
+    const cmake = resolve`${__dirname}/../cmake`;
+    const dcmake = resolve`${dist}/cmake`;
+    const obj = resolve`${dist}/obj`;
 
+    fs.mkdirpSync(dist);
+    fs.copySync(cpp, dist, {preserveTimestamps: true});
+    fs.copySync(cmake, dcmake, {preserveTimestamps: true});
+    clean(obj);
+
+    const python = IS_PY2 ? "python2" : "python3";
+    const image = IS_PY2 ? "python2" : "python";
     let cmd;
-    let python = PY2 ? "python2" : "python3";
-    if (IS_DOCKER) {
-        cmd = `cd python/perspective && ${python} setup.py build -v`;
-        execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
+    if (IS_CI) {
+        cmd = bash`${python} -m pip install -r requirements-dev.txt && \
+            ${python} setup.py build && \
+            ${python} -m flake8 perspective && echo OK && \
+            ${python} -m pytest -v perspective --cov=perspective`;
     } else {
-        const python_path = resolve(__dirname, "..", "python", "perspective");
-        cmd = `cd ${python_path} && ${python} setup.py build -v`;
-        execute(cmd);
+        cmd = bash`${python} setup.py build -v`;
+    }
+
+    if (IS_DOCKER) {
+        execute`${docker(image)} bash -c "cd python/perspective && \
+            ${cmd} "`;
+    } else {
+        const python_path = resolve`${__dirname}/../python/perspective`;
+        execute`cd ${python_path} && ${cmd}`;
     }
 } catch (e) {
     console.log(e.message);

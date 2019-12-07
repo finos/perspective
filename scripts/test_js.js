@@ -7,87 +7,68 @@
  *
  */
 
-require("dotenv").config({path: "./.perspectiverc"});
-
+const {bash, execute, getarg, docker} = require("./script_utils.js");
 const minimatch = require("minimatch");
 const execSync = require("child_process").execSync;
 const fs = require("fs");
 
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
-
-const args = process.argv.slice(2);
-
-const IS_PUPPETEER = args.indexOf("--private-puppeteer") !== -1;
-const IS_EMSDK = args.indexOf("--private-emsdk") !== -1;
-const IS_WRITE = args.indexOf("--write") !== -1 || process.env.WRITE_TESTS;
-const IS_DOCKER = args.indexOf("--docker") !== -1 || process.env.PSP_DOCKER;
+const IS_PUPPETEER = getarg("--private-puppeteer");
+const IS_EMSDK = getarg("--private-emsdk");
+const IS_WRITE = getarg("--write") || process.env.WRITE_TESTS;
+const IS_DOCKER = getarg("--docker") || process.env.PSP_DOCKER;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
+const PACKAGE = process.env.PACKAGE;
+
+if (IS_WRITE) {
+    console.log("-- Running the test suite in Write mode");
+}
+
+if (getarg("--saturate")) {
+    console.log("-- Running the test suite in saturate mode");
+}
+
+if (getarg("--debug")) {
+    console.log("-- Running tests in debug mode - all console.log statements are preserved.");
+}
+
+function silent(x) {
+    return bash`output=$(${x}); ret=$?; echo "\${output}"; exit $ret`;
+}
+
 function jest() {
-    let cmd = "TZ=UTC node_modules/.bin/jest --rootDir=. --config=packages/perspective-test/jest.all.config.js --color --verbose";
-
-    if (args.indexOf("--saturate") > -1) {
-        console.log("-- Running the test suite in saturate mode");
-        cmd = "PSP_SATURATE=1 " + cmd;
-    }
-
-    if (args.indexOf("--bail") > -1) {
-        cmd += " --bail";
-    }
-
-    if (args.indexOf("--debug") > -1) {
-        console.log("-- Running tests in debug mode - all console.log statements are preserved.");
-    } else {
-        cmd += " --silent 2>&1";
-    }
-
-    if (args.indexOf("-t") > -1) {
-        const regex = args
-            .slice(args.indexOf("-t") + 1)
-            .join(".")
-            .replace(/ /g, ".");
-        console.log(`-- Qualifying search '${regex}'`);
-        cmd += ` -t "${regex}"`;
-    }
-
-    return (IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd;
+    return bash`PSP_SATURATE=${getarg("--saturate")} \
+        WRITE_TESTS=${IS_WRITE} TZ=UTC node_modules/.bin/jest --rootDir=. \
+        --config=packages/perspective-test/jest.all.config.js --color \
+        --verbose ${getarg("--bail") && "--bail"} \
+        ${getarg("--debug") || "--silent 2>&1"} \
+        --verbose
+        --testNamePattern="${get_regex()}"`;
 }
 
 function slow_jest() {
-    if (!process.env.PACKAGE || minimatch("perspective-phosphor", process.env.PACKAGE)) {
-        return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-jupyterlab" --concurrency 1 --no-bail -- yarn --silent test:run';
+    const has_phosphor = !process.env.PACKAGE || minimatch("perspective-phosphor", process.env.PACKAGE);
+    if (!process.env.PACKAGE || has_phosphor) {
+        return bash`WRITE_TESTS=${IS_WRITE} TZ=UTC node_modules/.bin/lerna \
+            exec --scope="@finos/perspective-jupyterlab" --concurrency 1 \
+            --no-bail -- yarn --silent test:run`;
     } else {
         return 'echo ""';
     }
 }
 
-function docker() {
-    console.log("-- Creating puppeteer docker image");
-    let cmd = `docker run -it --rm --shm-size=2g -u root ${process.env.PACKAGE ? `-e PACKAGE=${process.env.PACKAGE}` : ""} -v ${process.cwd()}:/src -w /src`;
-    if (IS_WRITE) {
-        console.log("-- Running the test suite in Write mode");
-        cmd += " -e WRITE_TESTS=1";
-    }
-    if (process.env.PSP_CPU_COUNT) {
-        cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
-    }
-    cmd += " perspective/puppeteer node scripts/test_js.js --private-puppeteer";
-    return cmd;
-}
-
 function emsdk() {
     console.log("-- Creating emsdk docker image");
-    return "npm run --silent _emsdk -- node scripts/test_js.js --private-emsdk " + args.join(" ");
+    return bash`${docker("emsdk")} node scripts/test_js.js \
+        --private-emsdk ${getarg()}`;
 }
 
-function emsdk() {
-    console.log("-- Creating emsdk docker image");
-    let cmd = "docker run --rm -it";
-    if (process.env.PSP_CPU_COUNT) {
-        cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
+function get_regex() {
+    const regex = getarg`-t`;
+    if (regex) {
+        console.log(`-- Qualifying search '${regex}'`);
+        return regex.replace(/ /g, ".");
     }
-    cmd += ` -v ${process.cwd()}:/src ${process.env.PACKAGE ? `-e PACKAGE=${process.env.PACKAGE}` : ""} perspective/emsdk node scripts/test_js.js --private-emsdk ` + args.join(" ");
-    return cmd;
 }
 
 try {
@@ -95,55 +76,32 @@ try {
         if (IS_DOCKER && !IS_EMSDK) {
             execute(emsdk());
         } else {
-            execute("node_modules/.bin/lerna exec -- mkdir -p dist/umd");
-            let cmd = "node_modules/.bin/lerna run test:build --stream";
-            if (process.env.PACKAGE) {
-                cmd += " --scope=@finos/${PACKAGE}";
-            }
-            execute(cmd);
+            execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+            execute`node_modules/.bin/lerna run test:build --stream \
+                --scope="@finos/${PACKAGE}"`;
         }
         if (!IS_EMSDK) {
-            execute(`yarn --silent clean --screenshots`);
-            execute(
-                docker() +
-                    " " +
-                    args
-                        .map(function(arg) {
-                            return "'" + arg.replace(/'/g, "'\\''") + "'";
-                        })
-                        .join(" ")
-            );
+            execute`yarn --silent clean --screenshots`;
+            execute`${docker("puppeteer")} node scripts/test_js.js \
+                --private-puppeteer ${getarg()}`;
         }
     } else {
         if (IS_LOCAL_PUPPETEER) {
-            execute(`yarn --silent clean --screenshots`);
-            execute("node_modules/.bin/lerna exec -- mkdir -p dist/umd");
-            let cmd = "node_modules/.bin/lerna run test:build --stream";
-            if (process.env.PACKAGE) {
-                cmd += " --scope=@finos/${PACKAGE}";
-            }
-            execute(cmd);
+            execute`yarn --silent clean --screenshots`;
+            execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+            execute`node_modules/.bin/lerna run test:build --stream \
+                --scope="@finos/${PACKAGE}"`;
         }
-        if (args.indexOf("--quiet") > -1) {
+        if (getarg("--quiet")) {
             console.log("-- Running test suite in quiet mode");
-            execSync(`output=$(${jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});
-            execSync(`output=$(${slow_jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});
+            execute(silent(jest()));
+            execSync(silent(slow_jest()));
         } else if (process.env.PACKAGE) {
             console.log("-- Running test suite in individual mode");
-            let cmd = "TZ=UTC node_modules/.bin/lerna exec --concurrency 1 --no-bail";
-            if (process.env.PACKAGE) {
-                cmd += " --scope=@finos/${PACKAGE}";
-            }
-            cmd += " -- yarn --silent test:run";
-            if (args.indexOf("-t") > -1) {
-                let regex = args.slice(args.indexOf("-t") + 1);
-                const len = regex.findIndex(x => x.indexOf('"' > -1));
-                regex = regex.slice(0, len + 1);
-                console.log(`-- Qualifying search '${regex.join(" ")}'`);
-                regex = regex.join(".").replace(/ /g, ".");
-                cmd += ` -t "${regex}"`;
-            }
-            execute((IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd);
+            execute`WRITE_TESTS=${IS_WRITE} TZ=UTC \
+                node_modules/.bin/lerna exec --concurrency 1 --no-bail \
+                --scope="@finos/${PACKAGE}" -- yarn --silent test:run \
+                --testNamePattern="${get_regex()}"`;
             execute(slow_jest());
         } else {
             console.log("-- Running test suite in fast mode");
