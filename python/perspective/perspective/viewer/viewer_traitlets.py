@@ -34,7 +34,7 @@ class PerspectiveTraitlets(HasTraits):
     sort = List(default_value=[]).tag(sync=True)
     filters = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
-    dark = Bool(False).tag(sync=True)
+    dark = Bool(None, allow_none=True).tag(sync=True)
     editable = Bool(False).tag(sync=True)
     client = Bool(False).tag(sync=True)
 

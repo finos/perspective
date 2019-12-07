@@ -17,7 +17,7 @@ import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
  * the DOM.
  */
 export class PerspectiveView extends DOMWidgetView {
-    pWidget: PerspectiveWidget;
+    pWidget: PerspectiveWidget;  // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
     _createElement(tagName: string) {
@@ -32,14 +32,13 @@ export class PerspectiveView extends DOMWidgetView {
             plugin_config: this.model.get("plugin_config"),
             computed_columns: [],
             client: this.model.get("client"),
-            dark: this.model.get("dark"),
+            dark: this.model.get("dark") === null ? // only set if its a bool, otherwise inherit
+                document.body.getAttribute("data-jp-theme-light") === "false": this.model.get("dark"),
             editable: this.model.get("editable"),
             bindto: this.el,
             view: this
         });
-
         this.perspective_client = new PerspectiveJupyterClient(this);
-
         return this.pWidget.node;
     }
 

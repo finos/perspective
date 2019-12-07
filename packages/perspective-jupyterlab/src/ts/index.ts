@@ -9,7 +9,6 @@
 
 export * from "./client";
 export * from "./model";
-export * from "./plugin";
 export * from "./version";
 export * from "./view";
 export * from "./widget";
@@ -20,3 +19,12 @@ import "!!style-loader!css-loader!less-loader!../less/index.less";
 import "@finos/perspective-viewer-hypergrid";
 import "@finos/perspective-viewer-highcharts";
 
+import {JupyterFrontEndPlugin} from '@jupyterlab/application';
+import {perspectiveRenderers} from "./renderer";
+import {PerspectiveJupyterPlugin} from "./plugin";
+
+/**
+ * Export the renderer as default.
+ */
+const plugins: JupyterFrontEndPlugin<any>[] = [PerspectiveJupyterPlugin, perspectiveRenderers];
+export default plugins;

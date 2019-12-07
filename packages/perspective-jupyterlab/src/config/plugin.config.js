@@ -13,7 +13,9 @@ const webpack = require("webpack");
 
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
-    entry: "./src/ts/index.ts",
+    entry: {
+        index: "./src/ts/index.ts"
+    },
     devtool: "cheap-eval-source-map",
     resolveLoader: {
         alias: {
@@ -28,7 +30,7 @@ module.exports = {
         maxEntrypointSize: 512000,
         maxAssetSize: 512000
     },
-    externals: /\@jupyter|\@phosphor/,
+    externals: /\@jupyterlab|\@phosphor|\@jupyter-widgets/,
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
     module: {
@@ -54,7 +56,7 @@ module.exports = {
         ]
     },
     output: {
-        filename: "index.js",
+        filename: "[name].js",
         libraryTarget: "umd",
         path: path.resolve(__dirname, "../../dist")
     }
