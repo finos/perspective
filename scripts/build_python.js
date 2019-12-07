@@ -13,6 +13,7 @@ const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_PY2 = getarg("--python2");
 const IS_CI = getarg("--ci");
+const IS_INSTALL = getarg("--install");
 
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
@@ -34,6 +35,8 @@ try {
             ${python} setup.py build && \
             ${python} -m flake8 perspective && echo OK && \
             ${python} -m pytest -v perspective --cov=perspective`;
+    } else if (IS_INSTALL) {
+        cmd = `${python} -m pip install . --no-clean`;
     } else {
         cmd = bash`${python} setup.py build -v`;
     }
