@@ -19,6 +19,14 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     around creating views, loading data, and updating data.
     '''
 
+    # Keep track of attributes that can be set via Enum, and their
+    # validation methods.
+    ENUM_VALIDATORS = {
+        "plugin": validate_plugin,
+        "aggregates": validate_aggregates,
+        "sort": validate_sort
+    }
+
     def __init__(self,
                  plugin='hypergrid',
                  columns=None,
@@ -231,3 +239,12 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         self.manager.host_view(name, view)
         self.view_name = name
+
+    def __setattr__(self, name, value):
+        """Override __setattr__ in order to allow Enums to be validated
+        through Traitlets."""
+        if name in PerspectiveViewer.ENUM_VALIDATORS:
+            # call the validator and set
+            validated = PerspectiveViewer.ENUM_VALIDATORS[name](value)
+            value = validated
+        super(PerspectiveViewer, self).__setattr__(name, value)
