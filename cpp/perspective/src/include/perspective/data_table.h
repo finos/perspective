@@ -28,6 +28,7 @@ namespace perspective {
 template <typename DATA_T>
 struct t_rowpack {
     DATA_T m_pkey;
+    bool m_pkey_is_valid;
     t_index m_idx;
     t_op m_op;
 };
@@ -160,7 +161,8 @@ t_data_table::flatten_body(FLATTENED_T flattened) const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
-    switch (get_const_column("psp_pkey")->get_dtype()) {
+    t_dtype pkey_dtype = get_const_column("psp_pkey")->get_dtype();
+    switch (pkey_dtype) {
         case DTYPE_INT64: {
             flatten_helper_1<FLATTENED_T, std::int64_t>(flattened);
         } break;
@@ -200,7 +202,12 @@ t_data_table::flatten_body(FLATTENED_T flattened) const {
         case DTYPE_FLOAT32: {
             flatten_helper_1<FLATTENED_T, float>(flattened);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unsupported key type"); }
+        default: {
+            std::stringstream ss;
+            ss << "Unsupported type `" << get_dtype_descr(pkey_dtype) 
+               << "` for `index`." << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str()); 
+        }
     }
 
     return;
@@ -262,6 +269,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     std::vector<t_rowpack<PKEY_T>> sorted(frags_size);
     for (t_uindex fragidx = 0; fragidx < frags_size; ++fragidx) {
         sorted[fragidx].m_pkey = *(s_pkey_col->get_nth<PKEY_T>(fragidx));
+        sorted[fragidx].m_pkey_is_valid = s_pkey_col->is_valid(fragidx);
         sorted[fragidx].m_op = static_cast<t_op>(*(s_op_col->get_nth<std::uint8_t>(fragidx)));
         sorted[fragidx].m_idx = fragidx;
     }
@@ -280,7 +288,8 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     edges.push_back(0);
 
     for (t_index idx = 1, loop_end = sorted.size(); idx < loop_end; ++idx) {
-        if (sorted[idx].m_pkey != sorted[idx - 1].m_pkey) {
+        if ((sorted[idx].m_pkey_is_valid != sorted[idx - 1].m_pkey_is_valid)
+            || (sorted[idx].m_pkey != sorted[idx - 1].m_pkey)) {
             edges.push_back(idx);
         }
     }
@@ -306,9 +315,11 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
         }
 
         const auto& sort_rec = sorted[bidx];
-
         if (delete_encountered) {
-            d_pkey_col->push_back(sort_rec.m_pkey);
+            d_pkey_col->push_back(
+                sort_rec.m_pkey,
+                sort_rec.m_pkey_is_valid ? t_status::STATUS_VALID
+                : t_status::STATUS_INVALID);
             std::uint8_t op8 = OP_DELETE;
             d_op_col->push_back(op8);
             ++store_idx;
@@ -321,7 +332,10 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
             rec.m_eidx = eidx;
             fltrecs.push_back(rec);
 
-            d_pkey_col->push_back(sort_rec.m_pkey);
+            d_pkey_col->push_back(
+                sort_rec.m_pkey,
+                sort_rec.m_pkey_is_valid ? t_status::STATUS_VALID
+                    : t_status::STATUS_INVALID);
 
             std::uint8_t op8 = OP_INSERT;
             d_op_col->push_back(op8);
@@ -410,7 +424,6 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     );
 #endif
 
-    d_pkey_col->valid_raw_fill();
     d_op_col->valid_raw_fill();
 }
 

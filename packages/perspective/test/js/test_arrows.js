@@ -32,8 +32,13 @@ const test_null_arrow = load_arrow(path.join(__dirname, "..", "arrow", "test_nul
 const test_arrow = load_arrow(path.join(__dirname, "..", "arrow", "test.arrow"));
 const partial_arrow = load_arrow(path.join(__dirname, "..", "arrow", "partial.arrow"));
 const partial_missing_rows_arrow = load_arrow(path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow"));
+const int_float_str_arrow = load_arrow(path.join(__dirname, "..", "arrow", "int_float_str.arrow"));
+const int_float_str_update_arrow = load_arrow(path.join(__dirname, "..", "arrow", "int_float_str_update.arrow"));
+const int_float_str_file_arrow = load_arrow(path.join(__dirname, "..", "arrow", "int_float_str_file.arrow"));
 const date32_arrow = load_arrow(path.join(__dirname, "..", "arrow", "date32.arrow"));
 const date64_arrow = load_arrow(path.join(__dirname, "..", "arrow", "date64.arrow"));
+const dict_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict.arrow"));
+const dict_update_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict_update.arrow"));
 
 module.exports = {
     chunked_arrow,
@@ -41,6 +46,11 @@ module.exports = {
     test_arrow,
     partial_arrow,
     partial_missing_rows_arrow,
+    int_float_str_arrow,
+    int_float_str_update_arrow,
+    int_float_str_file_arrow,
     date32_arrow,
-    date64_arrow
+    date64_arrow,
+    dict_arrow,
+    dict_update_arrow
 };

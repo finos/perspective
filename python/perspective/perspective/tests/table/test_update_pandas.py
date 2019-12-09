@@ -8,6 +8,7 @@
 import numpy as np
 import pandas as pd
 from datetime import date, datetime
+from pytest import mark
 from perspective.table import Table
 
 

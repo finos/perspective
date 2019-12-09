@@ -9,10 +9,12 @@
 import os.path
 import pyarrow as pa
 from datetime import date, datetime
-from pytest import mark
 from perspective.table import Table
 
 SUPERSTORE_ARROW = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "examples", "simple", "superstore.arrow")
+DATE32_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date32.arrow")
+DATE64_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date64.arrow")
+DICT_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict.arrow")
 
 names = ["a", "b", "c", "d"]
 
@@ -26,6 +28,43 @@ class TestTableArrow(object):
             v = tbl.view()
             df = v.to_df()
             assert df.shape == (9994, 21)
+
+    # files
+
+    def test_table_arrow_loads_date32_file(self):
+        with open(DATE32_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl = Table(file.read())
+            assert tbl.schema() == {
+                "a": date,
+                "b": date,
+                "c": date,
+                "d": date
+            }
+            assert tbl.size() == 29
+
+    def test_table_arrow_loads_date64_file(self):
+        with open(DATE64_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl = Table(file.read())
+            assert tbl.schema() == {
+                "a": date,
+                "b": date,
+                "c": date,
+                "d": date
+            }
+            assert tbl.size() == 29
+
+    def test_table_arrow_loads_dict_file(self):
+        with open(DICT_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl = Table(file.read())
+            assert tbl.schema() == {
+                "a": str,
+                "b": str
+            }
+            assert tbl.size() == 5
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "def", None, "abc"],
+                "b": ["klm", "hij", None, "hij", "klm"]
+            }
 
     # streams
 
@@ -164,11 +203,73 @@ class TestTableArrow(object):
             "a": data[0]
         }
 
-    @mark.skip
-    def test_table_arrow_loads_dictionary_stream(self, util):
+    def test_table_arrow_loads_dictionary_stream_int8(self, util):
         data = [
-            ([0, 1, 1, None], ["a", "b"]),
-            ([0, 1, None, 2], ["x", "y", "z"])
+            ([0, 1, 1, None], ["abc", "def"]),
+            ([0, 1, None, 2], ["xx", "yy", "zz"])
+        ]
+        types = [[pa.int8(), pa.string()]] * 2
+        arrow_data = util.make_dictionary_arrow(["a", "b"],
+                                                data,
+                                                types=types)
+        tbl = Table(arrow_data)
+
+        assert tbl.size() == 4
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": ["abc", "def", "def", None],
+            "b": ["xx", "yy", None, "zz"]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_int16(self, util):
+        data = [
+            ([0, 1, 1, None], ["abc", "def"]),
+            ([0, 1, None, 2], ["xx", "yy", "zz"])
+        ]
+        types = [[pa.int16(), pa.string()]] * 2
+        arrow_data = util.make_dictionary_arrow(["a", "b"],
+                                                data,
+                                                types=types)
+        tbl = Table(arrow_data)
+
+        assert tbl.size() == 4
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": ["abc", "def", "def", None],
+            "b": ["xx", "yy", None, "zz"]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_int32(self, util):
+        data = [
+            ([0, 1, 1, None], ["abc", "def"]),
+            ([0, 1, None, 2], ["xx", "yy", "zz"])
+        ]
+        types = [[pa.int32(), pa.string()]] * 2
+        arrow_data = util.make_dictionary_arrow(["a", "b"],
+                                                data,
+                                                types=types)
+        tbl = Table(arrow_data)
+
+        assert tbl.size() == 4
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": ["abc", "def", "def", None],
+            "b": ["xx", "yy", None, "zz"]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_int64(self, util):
+        data = [
+            ([0, 1, 1, None], ["abc", "def"]),
+            ([0, 1, None, 2], ["xx", "yy", "zz"])
         ]
         arrow_data = util.make_dictionary_arrow(["a", "b"], data)
         tbl = Table(arrow_data)
@@ -179,8 +280,58 @@ class TestTableArrow(object):
             "b": str
         }
         assert tbl.view().to_dict() == {
-            "a": ["a", "b", "b", None],
-            "b": ["x", "y", None, "z"]
+            "a": ["abc", "def", "def", None],
+            "b": ["xx", "yy", None, "zz"]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_nones(self, util):
+        data = [
+            ([None, 0, 1, 2], ["", "abc", "def"])
+        ]
+        arrow_data = util.make_dictionary_arrow(["a"], data)
+        tbl = Table(arrow_data)
+
+        assert tbl.size() == 4
+        assert tbl.schema() == {
+            "a": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": [None, "", "abc", "def"]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_nones_indexed(self, util):
+        data = [
+            ([1, None, 0, 2], ["", "abc", "def"]),  # ["abc", None, "", "def"]
+            ([2, 1, 0, None], ["", "hij", "klm"])   # ["klm", "hij", "", None]
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+        tbl = Table(arrow_data, index="a")  # column "a" is sorted
+
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": [None, "", "abc", "def"],
+            "b": ["hij", "", "klm", None]
+        }
+
+    def test_table_arrow_loads_dictionary_stream_nones_indexed_2(self, util):
+        """Test the other column, just in case."""
+        data = [
+            ([1, None, 0, 2], ["", "abc", "def"]),  # ["abc", None, "", "def"]
+            ([2, 1, 0, None], ["", "hij", "klm"])   # ["klm", "hij", "", None]
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+        tbl = Table(arrow_data, index="b")  # column "b" is sorted
+
+        assert tbl.schema() == {
+            "a": str,
+            "b": str
+        }
+        assert tbl.view().to_dict() == {
+            "a": ["def", "", None, "abc"],
+            "b": [None, "", "hij", "klm"]
         }
 
     # legacy
@@ -318,7 +469,6 @@ class TestTableArrow(object):
             "a": data[0]
         }
 
-    @mark.skip
     def test_table_arrow_loads_dictionary_legacy(self, util):
         data = [
             ([0, 1, 1, None], ["a", "b"]),

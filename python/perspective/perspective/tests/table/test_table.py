@@ -14,7 +14,7 @@ from perspective.core.exception import PerspectiveError
 from datetime import date, datetime
 
 try:
-    from perspective.table.libbinding import t_filter_op
+    from perspective.table.libbinding import t_filter_op, PerspectiveCppError
 except ImportError:
     pass
 
@@ -476,6 +476,66 @@ class TestTable(object):
         assert tbl.view().to_records() == [
             {"a": 1, "b": 4}
         ]
+
+    # index with None in column
+
+    def test_table_index_int_with_none(self):
+        tbl = Table({
+            "a": [0, 1, 2, None, None],
+            "b": [4, 3, 2, 1, 0]
+        }, index="a")
+        assert tbl.view().to_dict() == {
+            "a": [None, 0, 1, 2],  # second `None` replaces first
+            "b": [0, 4, 3, 2]
+        }
+
+    def test_table_index_float_with_none(self):
+        tbl = Table({
+            "a": [0.0, 1.5, 2.5, None, None],
+            "b": [4, 3, 2, 1, 0]
+        }, index="a")
+        assert tbl.view().to_dict() == {
+            "a": [None, 0, 1.5, 2.5],  # second `None` replaces first
+            "b": [0, 4, 3, 2]
+        }
+
+    def test_table_index_bool_with_none(self):
+        # bools cannot be used as primary key columns
+        with raises(PerspectiveCppError):
+            Table({
+                "a": [True, False, None, True],
+                "b": [4, 3, 2, 1]
+            }, index="a")
+
+    def test_table_index_date_with_none(self):
+        tbl = Table({
+            "a": [date(2019, 7, 11), None, date(2019, 3, 12), date(2011, 3, 10)],
+            "b": [4, 3, 2, 1]
+        }, index="a")
+        assert tbl.view().to_dict() == {
+            "a": [None, datetime(2011, 3, 10), datetime(2019, 3, 12), datetime(2019, 7, 11)],
+            "b": [3, 1, 2, 4]
+        }
+
+    def test_table_index_datetime_with_none(self):
+        tbl = Table({
+            "a": [datetime(2019, 7, 11, 15, 30), None, datetime(2019, 7, 11, 12, 10), datetime(2019, 7, 11, 5, 0)],
+            "b": [4, 3, 2, 1]
+        }, index="a")
+        assert tbl.view().to_dict() == {
+            "a": [None, datetime(2019, 7, 11, 5, 0), datetime(2019, 7, 11, 12, 10), datetime(2019, 7, 11, 15, 30)],
+            "b": [3, 1, 2, 4]
+        }
+
+    def test_table_index_str_with_none(self):
+        tbl = Table({
+            "a": ["", "a", None, "b"],
+            "b": [4, 3, 2, 1]
+        }, index="a")
+        assert tbl.view().to_dict() == {
+            "a": [None, "", "a", "b"],
+            "b": [2, 4, 3, 1]
+        }
 
     # limit
 

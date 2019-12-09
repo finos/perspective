@@ -27,14 +27,6 @@ export class DataAccessor {
         this.date_validator = val => is_valid_date(val);
     }
 
-    extract_typevec(typevec) {
-        let types = [];
-        for (let i = 0; i < typevec.size() - 1; i++) {
-            types.push(typevec.get(i));
-        }
-        return types;
-    }
-
     is_format(data) {
         if (Array.isArray(data)) {
             return this.data_formats.row;

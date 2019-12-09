@@ -77,7 +77,7 @@ PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
             ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
                << perspective::get_error_str();                                                \
             perror(ss.str().c_str());                                                          \
-            psp_abort("Verbose assert failed!");                                                \
+            psp_abort("Verbose assert failed!");                                               \
         }                                                                                      \
     }
 

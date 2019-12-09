@@ -7,6 +7,7 @@
 #
 import numpy as np
 from datetime import date, datetime
+from pytest import mark
 from perspective.table import Table
 
 

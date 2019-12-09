@@ -299,7 +299,36 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("arrow partial `update()` a single column", async function() {
+        it("arrow dict contructor then arrow dict `update()`", async function() {
+            var table = perspective.table(arrows.dict_arrow.slice());
+            table.update(arrows.dict_update_arrow.slice());
+            var view = table.view();
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["abc", "def", "def", null, "abc", null, "update1", "update2"],
+                b: ["klm", "hij", null, "hij", "klm", "update3", null, "update4"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("non-arrow constructor then arrow dict `update()`", async function() {
+            let table = perspective.table({
+                a: ["a", "b", "c"],
+                b: ["d", "e", "f"]
+            });
+            let view = table.view();
+            table.update(arrows.dict_update_arrow.slice());
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["a", "b", "c", null, "update1", "update2"],
+                b: ["d", "e", "f", "update3", null, "update4"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("arrow partial `update()` a single column", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_arrow.slice());
             const view = table.view();
@@ -309,12 +338,93 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("arrow partial `update()` a single column with missing rows", async function() {
+        it("arrow partial `update()` a single column with missing rows", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_missing_rows_arrow.slice());
             const view = table.view();
             const result = await view.to_json();
             expect(result).toEqual(arrow_partial_missing_result);
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow `update()`", async function() {
+            const table = perspective.table({
+                a: "integer",
+                b: "float",
+                c: "string"
+            });
+            table.update(arrows.int_float_str_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            expect(size).toEqual(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow dictionary `update()`", async function() {
+            const table = perspective.table({
+                a: "string",
+                b: "string"
+            });
+            table.update(arrows.dict_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            expect(size).toEqual(5);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["abc", "def", "def", null, "abc"],
+                b: ["klm", "hij", null, "hij", "klm"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("schema constructor, then indexed arrow `update()`", async function() {
+            const table = perspective.table(
+                {
+                    a: "integer",
+                    b: "float",
+                    c: "string"
+                },
+                {index: "a"}
+            );
+
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_update_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [100.5, 2.5, 3.5, 400.5],
+                c: ["x", "b", "c", "y"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow stream and arrow file `update()`", async function() {
+            const table = perspective.table({
+                a: "integer",
+                b: "float",
+                c: "string"
+            });
+
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_file_arrow.slice());
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4, 1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5, 1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d", "a", "b", "c", "d"]
+            });
             view.delete();
             table.delete();
         });
@@ -489,6 +599,124 @@ module.exports = perspective => {
             table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
+            view.delete();
+            table.delete();
+        });
+
+        it("{index: 'x'} (int) with null and 0", async function() {
+            const data = {
+                x: [0, 1, null, 2, 3],
+                y: ["a", "b", "c", "d", "e"]
+            };
+            const table = perspective.table(data, {index: "x"});
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [null, 0, 1, 2, 3], // null before 0
+                y: ["c", "a", "b", "d", "e"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("{index: 'y'} (str) with null and empty string", async function() {
+            const data = {
+                x: [0, 1, 2, 3, 4],
+                y: ["", "a", "b", "c", null]
+            };
+            const table = perspective.table(data, {index: "y"});
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [4, 0, 1, 2, 3],
+                y: [null, "", "a", "b", "c"] // null before empties
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("{index: 'x'} (int) with null and 0, update", async function() {
+            const data = {
+                x: [0, 1, null, 2, 3],
+                y: ["a", "b", "c", "d", "e"]
+            };
+            const table = perspective.table(data, {index: "x"});
+            table.update({
+                x: [null, 0],
+                y: ["x", "y"]
+            });
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [null, 0, 1, 2, 3], // null before 0
+                y: ["x", "y", "b", "d", "e"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("{index: 'y'} (str) with null and empty string, update", async function() {
+            const data = {
+                x: [0, 1, 2, 3, 4],
+                y: ["", "a", "b", "c", null]
+            };
+            const table = perspective.table(data, {index: "y"});
+            table.update({
+                x: [5, 6],
+                y: ["", null]
+            });
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [6, 5, 1, 2, 3],
+                y: [null, "", "a", "b", "c"] // null before empties
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("{index: 'x'} (date) with null", async function() {
+            const data = {
+                x: ["10/30/2016", "11/1/2016", null, "1/1/2000"],
+                y: [1, 2, 3, 4]
+            };
+            const table = perspective.table(
+                {
+                    x: "date",
+                    y: "integer"
+                },
+                {index: "x"}
+            );
+            table.update(data);
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [null, new Date("2000-1-1").getTime(), new Date("2016-10-30").getTime(), new Date("2016-11-1").getTime()],
+                y: [3, 4, 1, 2]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("{index: 'y'} (datetime) with datetime and null", async function() {
+            const data = {
+                x: ["2016-11-01 11:00:00", "2016-11-01 11:10:00", null, "2016-11-01 11:20:00"],
+                y: [1, 2, 3, 4]
+            };
+            const table = perspective.table(
+                {
+                    x: "datetime",
+                    y: "integer"
+                },
+                {index: "x"}
+            );
+            table.update(data);
+            const view = table.view();
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [null, new Date("2016-11-1 11:00:00").getTime(), new Date("2016-11-1 11:10:00").getTime(), new Date("2016-11-1 11:20:00").getTime()],
+                y: [3, 1, 2, 4]
+            });
             view.delete();
             table.delete();
         });

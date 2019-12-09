@@ -28,6 +28,21 @@ namespace binding {
 
 std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_val computed,
         std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow) {
+    bool table_initialized = !table.is_none();
+    std::shared_ptr<t_pool> pool;
+    std::shared_ptr<Table> tbl;
+    std::shared_ptr<t_gnode> gnode;
+    std::uint32_t offset;
+
+    // If the Table has already been created, use it
+    if (table_initialized) {
+        tbl = table.cast<std::shared_ptr<Table>>();
+        pool = tbl->get_pool();
+        gnode = tbl->get_gnode();
+        offset = tbl->get_offset();
+        is_update = (is_update || gnode->mapping_size() > 0);
+    }
+
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
     arrow::ArrowLoader arrow_loader;
@@ -38,14 +53,56 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
 
     // Determine metadata
     bool is_delete = op == OP_DELETE;
-    if (is_arrow) {
+    if (is_arrow && !is_delete) {
         py::bytes bytes = accessor.cast<py::bytes>();
         std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
         void * ptr = malloc(size);
         std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
         arrow_loader.initialize((uintptr_t)ptr, size);
-        column_names = arrow_loader.names();
-        data_types = arrow_loader.types();
+
+        // Always use the `Table` column names and data types on update.
+        if (table_initialized && is_update) {
+            auto schema = gnode->get_tblschema();
+            column_names = schema.columns();
+            data_types = schema.types();
+
+            auto data_table = gnode->get_table();
+            if (data_table->size() == 0) {
+                /**
+                 * If updating a table created from schema, a 32-bit int/float
+                 * needs to be promoted to a 64-bit int/float if specified in
+                 * the Arrow schema.
+                 */
+                std::vector<t_dtype> arrow_dtypes = arrow_loader.types();
+                for (auto idx = 0; idx < column_names.size(); ++idx) {
+                    const std::string& name = column_names[idx];
+                    bool can_retype = name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
+                    bool is_32_bit = data_types[idx] == DTYPE_INT32 || data_types[idx] == DTYPE_FLOAT32;
+                    if (can_retype && is_32_bit) {
+                        t_dtype arrow_dtype = arrow_dtypes[idx];
+                        switch (arrow_dtype) {
+                            case DTYPE_INT64:
+                            case DTYPE_FLOAT64: {
+                                std::cout << "Promoting column `" 
+                                            << column_names[idx] 
+                                            << "` to maintain consistency with Arrow type."
+                                            << std::endl;
+                                gnode->promote_column(name, arrow_dtype);
+                            } break;
+                            default: {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+            // Make sure promoted types are used to construct data table
+            auto new_schema = gnode->get_tblschema();
+            data_types = new_schema.types();
+        } else {
+            column_names = arrow_loader.names();
+            data_types = arrow_loader.types();
+        }
     } else if (is_update || is_delete) {
         /**
          * Use the names and types of the python accessor when updating/deleting.
@@ -78,40 +135,8 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         column_names = get_column_names(data, format);
         data_types = get_data_types(data, format, column_names, accessor.attr("date_validator")().cast<t_val>());
     }
-
-    // Check if index is valid after getting column names
-    bool table_initialized = !table.is_none();
-    std::shared_ptr<t_pool> pool;
-    std::shared_ptr<Table> tbl;
-    std::uint32_t offset;
-
-    // If the Table has already been created, use it
-    if (table_initialized) {
-        // Get a reference to the Table, and update its metadata
-        tbl = table.cast<std::shared_ptr<Table>>();
-        pool = tbl->get_pool();
-        tbl->set_column_names(column_names);
-        tbl->set_data_types(data_types);
-        offset = tbl->get_offset();
-
-        auto current_gnode = tbl->get_gnode();
-
-        // use gnode metadata to help decide if we need to update
-        is_update = (is_update || current_gnode->mapping_size() > 0);
-
-        // if performing an arrow schema update, promote columns
-        auto current_data_table = current_gnode->get_table();
-
-        if (is_arrow && is_update && current_data_table->size() == 0) {
-            auto current_schema = current_data_table->get_schema();
-            for (auto idx = 0; idx < current_schema.m_types.size(); ++idx) {
-                if (data_types[idx] == DTYPE_INT64) {
-                    WARN("Promoting %s to int64", column_names[idx]);
-                    current_gnode->promote_column(column_names[idx], DTYPE_INT64);
-                }
-            }
-        }
-    } else {
+    
+    if (!table_initialized) {
         pool = std::make_shared<t_pool>();
         tbl = std::make_shared<Table>(pool, column_names, data_types, limit, index);
         offset = 0;
@@ -134,10 +159,10 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     t_data_table data_table(output_schema);
     data_table.init();
     std::uint32_t row_count;
-
     if (is_arrow) {
         row_count = arrow_loader.row_count();
         data_table.extend(arrow_loader.row_count());
+
         arrow_loader.fill_table(data_table, index, offset, limit, is_update);
     } else if (is_numpy) {
         row_count = numpy_loader.row_count();
