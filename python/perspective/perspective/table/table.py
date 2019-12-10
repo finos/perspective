@@ -76,7 +76,7 @@ class Table(object):
         preserves everything else including the schema and any callbacks or
         registered :class:`~perspective.View`.
         '''
-        self._state_manager.reset_process(self._table.get_id())
+        self._state_manager.clear_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
 
     def replace(self, data):
@@ -87,14 +87,14 @@ class Table(object):
             data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): New data
                 that will be filled into the :class:`~perspective.Table`.
         '''
-        self._state_manager.reset_process(self._table.get_id())
+        self._state_manager.clear_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
-        self._state_manager.clear_process(self._table.get_id())
+        self._state_manager.call_process(self._table.get_id())
 
     def size(self):
         '''Returns the row count of the :class:`~perspective.Table`.'''
-        self._state_manager.clear_process(self._table.get_id())
+        self._state_manager.call_process(self._table.get_id())
         return self._table.size()
 
     def schema(self, as_string=False):
@@ -287,7 +287,7 @@ class Table(object):
             >>> view.to_dict()
             >>> {"a": [1]}
         '''
-        self._state_manager.clear_process(self._table.get_id())
+        self._state_manager.call_process(self._table.get_id())
         config = {}
         if columns is None:
             config["columns"] = self.columns()  # TODO: push into C++
@@ -338,7 +338,7 @@ class Table(object):
             >>> table.remove_delete(deleter)
             >>> table.delete()
         '''
-        self._state_manager.reset_process(self._table.get_id())
+        self._state_manager.clear_process(self._table.get_id())
         if not callable(callback):
             return ValueError(
                 "remove_delete callback should be a callable function!")
@@ -353,7 +353,7 @@ class Table(object):
             raise PerspectiveError(
                 "Cannot delete a Table with active views still linked to it " +
                 "- call delete() on each view, and try again.")
-        self._state_manager.reset_process(self._table.get_id())
+        self._state_manager.clear_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 

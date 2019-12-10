@@ -327,7 +327,7 @@ class TestPerspectiveManager(object):
 
         def fake_queue_process(table_id, state_manager):
             s.set(s.get() + 1)
-            state_manager.clear_process(table_id)
+            state_manager.call_process(table_id)
 
         manager._set_queue_process(fake_queue_process)
         table.update({"a": [7, 8, 9]})
@@ -340,7 +340,7 @@ class TestPerspectiveManager(object):
 
         def fake_queue_process(table_id, state_manager):
             s.set(s.get() + 1)
-            state_manager.clear_process(table_id)
+            state_manager.call_process(table_id)
 
         manager._set_queue_process(fake_queue_process)
         manager.host_table("tbl", table)
@@ -363,7 +363,7 @@ class TestPerspectiveManager(object):
 
         def fake_queue_process(table_id, state_manager):
             s2.set(s2.get() + 1)
-            state_manager.clear_process(table_id)
+            state_manager.call_process(table_id)
 
         manager2._set_queue_process(fake_queue_process)
 

@@ -8,25 +8,27 @@
 
 
 class _PerspectiveStateManager(object):
-    """Internal state management class that controls when `_process` is called within
-    the C++ Table internals.
+    """Internal state management class that controls when `_process` is called
+    within the C++ Table internals.
 
-    `_process()` notifies the engine to clear its queue of pending updates to be applied
-    and reconciled. When Perspective runs within an event loop, we should use the loop
-    whenever possible to batch calls to `_process()`. Callers that have access to an event
-    loop implementation should set `queue_process` to their own function with `table_id`
-    and `state_manager` as positional arguments.
+    `_process()` notifies the engine to clear its queue of pending updates to be
+    applied and reconciled. When Perspective runs within an event loop, we
+    should use the loop whenever possible to batch calls to `_process()`.
+    Callers that have access to an event loop implementation should set
+    `queue_process` to their own function with `table_id` and `state_manager` as
+    positional arguments.
 
     Override functions must be bound to this instance using `functools.partial`,
-    i.e.: `functools.partial(queue_process_custom, state_manager=table._state_manager)
+    i.e.: `functools.partial(queue_process_custom,
+    state_manager=table._state_manager)
 
-    The guarantee of `queue_process` is that `clear_process` will be called, either on the
-    next iteration of the event loop or before output is generated (through a serialization
-    method, for example).
+    The guarantee of `queue_process` is that `call_process` will be called,
+    either on the next iteration of the event loop or before output is generated
+    (through a serialization method, for example).
 
-    Though each :obj:`~perspective.Table` contains a separate instance of the state manager,
-    `TO_PROCESS`, which contains the `t_pool` objects for pending `_process` calls, is shared
-    amongst all instances of the state manager.
+    Though each :obj:`~perspective.Table` contains a separate instance of the
+    state manager, `TO_PROCESS`, which contains the `t_pool` objects for pending
+    `_process` calls, is shared amongst all instances of the state manager.
     """
     TO_PROCESS = {}
 
@@ -54,7 +56,7 @@ class _PerspectiveStateManager(object):
             _PerspectiveStateManager.TO_PROCESS[table_id] = pool
             self.queue_process(table_id)
 
-    def clear_process(self, table_id):
+    def call_process(self, table_id):
         """Given a table_id, find the corresponding pool and call `process()`
         on it, which takes all the updates that have been queued, applies each
         update to the global Table state, and then clears the queue.
@@ -65,9 +67,9 @@ class _PerspectiveStateManager(object):
         pool = _PerspectiveStateManager.TO_PROCESS.get(table_id, None)
         if pool is not None:
             pool._process()
-            self.reset_process(table_id)
+            self.clear_process(table_id)
 
-    def reset_process(self, table_id):
+    def clear_process(self, table_id):
         """Remove a pool from the execution cache, indicating that it should no
         longer be operated on.
 
@@ -77,7 +79,7 @@ class _PerspectiveStateManager(object):
         _PerspectiveStateManager.TO_PROCESS.pop(table_id, None)
 
     def _queue_process_immediate(self, table_id):
-        """Immediately execute `clear_process` on the pool as soon
+        """Immediately execute `call_process` on the pool as soon
         as `queue_process` is called.
 
         This is the default implementation of `queue_process` for environments
@@ -87,4 +89,4 @@ class _PerspectiveStateManager(object):
         Args:
             table_id (:obj`int`): The unique ID of the Table
         """
-        self.clear_process(table_id)
+        self.call_process(table_id)

@@ -15,16 +15,17 @@ from ..core.exception import PerspectiveError
 # Redefine `queue_process` to take advantage of `tornado.ioloop`
 def _queue_process_tornado(table_id, state_manager):
     loop = IOLoop.current()
-    print("async")
-    loop.add_callback(state_manager.clear_process, table_id=table_id)
+    loop.add_callback(state_manager.call_process, table_id=table_id)
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     '''PerspectiveTornadoHandler is a drop-in implementation of Perspective.
 
-    Use it inside Tornado routing to create a server-side Perspective that is ready to receive websocket messages from
-    the front-end `perspective-viewer`. Because Tornado implements an event loop, this handler links Perspective
-    with `IOLoop.current()` in order to defer expensive operations until the next free iteration of the event loop.
+    Use it inside Tornado routing to create a server-side Perspective that is
+    ready to receive websocket messages from the front-end `perspective-viewer`.
+    Because Tornado implements an event loop, this handler links Perspective
+    with `IOLoop.current()` in order to defer expensive operations until the
+    next free iteration of the event loop.
 
     Examples:
         >>> MANAGER = PerspectiveViewer()
@@ -46,8 +47,8 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         Keyword Args:
             manager (:obj`PerspectiveManager`): A `PerspectiveManager` instance.
                 Must be provided on initialization.
-            check_origin (:obj`bool`): If True, all requests will be accepted regardless of origin.
-                Defaults to False.
+            check_origin (:obj`bool`): If True, all requests will be accepted
+                regardless of origin. Defaults to False.
         '''
         self._manager = kwargs.pop("manager", None)
         self._session = self._manager.new_session()

@@ -35,14 +35,14 @@ def queue_process_async(table_id, state_manager, loop=None):
     """Create our own `queue_process` method that uses a Tornado IOLoop."""
     if loop:
         SENTINEL.set(SENTINEL.get() + 1)
-        loop.add_callback(state_manager.clear_process, table_id=table_id)
+        loop.add_callback(state_manager.call_process, table_id=table_id)
 
 
 def queue_process_async_delay(table_id, state_manager, delay=0.25, loop=None):
     """Create our own `queue_process` method that uses a Tornado IOLoop."""
     if loop:
         SENTINEL.set(SENTINEL.get() + 1)
-        loop.call_later(delay, state_manager.clear_process, table_id=table_id)
+        loop.call_later(delay, state_manager.call_process, table_id=table_id)
 
 
 data = [{"a": i, "b": i * 0.5, "c": str(i)} for i in range(10)]
@@ -63,10 +63,10 @@ class TestAsync(object):
 
     @classmethod
     def teardown_class(cls):
-        tornado.ioloop.IOLoop.current().stop()
-        cls.loop.add_callback(cls.loop.stop)
+        cls.loop.add_callback(lambda: tornado.ioloop.IOLoop.current().stop())
         cls.loop.clear_current()
-        # cls.loop.close(all_fds=True)
+        cls.thread.join()
+        cls.loop.close(all_fds=True)
 
     @classmethod
     def loop_is_running(cls):
@@ -152,7 +152,7 @@ class TestAsync(object):
 
         def sync_queue_process(table_id, state_manager):
             SENTINEL_2.set(SENTINEL_2.get() - 1)
-            state_manager.clear_process(table_id)
+            state_manager.call_process(table_id)
 
         assert TestAsync.loop_is_running() is True
 
@@ -238,6 +238,6 @@ class TestAsync(object):
         assert tbl2_id in _PerspectiveStateManager.TO_PROCESS
 
         # Wait for the callbacks to run - we don't call any methods
-        # that would call `clear_process`, but instead wait for the
+        # that would call `call_process`, but instead wait for the
         # callbacks to execute asynchronously.
         sleep(1)

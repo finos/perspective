@@ -67,7 +67,7 @@ class PerspectiveManager(object):
         self._callback_cache = {}
         self._queue_process_callback = None
 
-    def host(self, table_or_view, name=None):
+    def host(self, item, name=None):
         """Given a :obj:`~perspective.Table` or :obj:`~perspective.View`,
         place it under management and allow operations on it to be passed
         through the Manager instance.
@@ -82,10 +82,10 @@ class PerspectiveManager(object):
                 provided.
         """
         name = name or gen_name()
-        if isinstance(table_or_view, Table):
-            self.host_table(name, table_or_view)
-        elif isinstance(table_or_view, View):
-            self.host_view(name, table_or_view)
+        if isinstance(item, Table):
+            self.host_table(name, item)
+        elif isinstance(item, View):
+            self.host_view(name, item)
         else:
             raise PerspectiveError(
                 "Only `Table()` and `View()` instances can be hosted.")
