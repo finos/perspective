@@ -57,7 +57,7 @@ const execute = cmd => {
         }
         execSync(cmd, {stdio: "inherit"});
     } catch (e) {
-        console.error(e);
+        console.error("\n" + e.message);
         process.exit(1);
     }
 };
@@ -151,7 +151,7 @@ const bash = (exports.bash = function bash(strings, ...args) {
     }
     return terms
         .join("")
-        .replace(/ +/g, " ")
+        .replace(/[ \t\n]+/g, " ")
         .trim();
 });
 

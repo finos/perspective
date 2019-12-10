@@ -13,6 +13,8 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const execSync = require("child_process").execSync;
 
+const readline = require("readline");
+
 const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
@@ -54,8 +56,7 @@ let browser,
     page_url,
     page_reload,
     test_root = "",
-    errors = [],
-    __name = "";
+    errors = [];
 
 async function get_new_page() {
     page = await browser.newPage();
@@ -86,16 +87,20 @@ async function get_new_page() {
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
-    page.on("console", msg => {
-        let text;
-        if ({}.toString.call(msg.text) === "[object Function]") {
-            text = msg.text();
-        } else {
-            text = msg.text;
-        }
-        if (msg.type() === "error") {
-            errors.push(text);
-            private_console.log(`${__name}: ${text}\n`);
+    page.on("console", async msg => {
+        if (msg.type() === "error" || msg.type() === "warn") {
+            const args = await msg.args();
+            args.forEach(async arg => {
+                const val = await arg.jsonValue();
+                // value is serializable
+                if (JSON.stringify(val) !== JSON.stringify({})) console.log(val);
+                // value is unserializable (or an empty oject)
+                else {
+                    const {type, subtype, description} = arg._remoteObject;
+                    private_console.log(`${subtype}: ${description}`);
+                    if (msg.type() === "error") errors.push(`${type}/${subtype}: ${description}`);
+                }
+            });
         }
     });
     page.on("pageerror", msg => {
@@ -104,56 +109,59 @@ async function get_new_page() {
     return page;
 }
 
-beforeAll(async () => {
-    browser = await puppeteer.launch({
-        args: ["--disable-accelerated-2d-canvas", "--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
-    });
-    page = await get_new_page();
-    results = (() => {
-        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
-        if (fs.existsSync(dir_name)) {
-            return JSON.parse(fs.readFileSync(dir_name));
-        } else if (fs.existsSync(dir_name)) {
-        } else {
-            return {};
-        }
-    })();
+beforeAll(async done => {
+    try {
+        browser = await puppeteer.connect({browserWSEndpoint: process.env.PSP_BROWSER_ENDPOINT});
 
-    if (results.__GIT_COMMIT__) {
-        try {
-            const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
-            console.log(
-                `${RESULTS_FILENAME} was last updated ${
-                    diff
-                        .toString()
-                        .trim()
-                        .split("\n").length
-                } commits ago ${results.__GIT_COMMIT__}`
-            );
-        } catch (e) {
-            console.log(`${RESULTS_FILENAME} was last updated UNKNOWN commits ago (Can't find commit ${results.__GIT_COMMIT__} in history)`);
-        }
-    }
-});
+        page = await get_new_page();
 
-afterAll(() => {
-    browser.close();
-    if (process.env.WRITE_TESTS) {
-        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
-        const results2 = (() => {
+        results = (() => {
+            const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
             if (fs.existsSync(dir_name)) {
                 return JSON.parse(fs.readFileSync(dir_name));
+            } else if (fs.existsSync(dir_name)) {
             } else {
                 return {};
             }
         })();
-        for (let key of Object.keys(new_results)) {
-            results2[key] = new_results[key];
+
+        if (results.__GIT_COMMIT__) {
+            const hash = execSync(`git cat-file -e ${results.__GIT_COMMIT__}`);
+            if (!hash || hash.length == 0) {
+                private_console.error(`-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`);
+            }
         }
-        results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
-            .toString()
-            .trim();
-        fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
+    } catch (e) {
+        console.error(e);
+    } finally {
+        done();
+    }
+}, 30000);
+
+afterAll(() => {
+    try {
+        if (process.env.WRITE_TESTS) {
+            const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
+            const results2 = (() => {
+                if (fs.existsSync(dir_name)) {
+                    return JSON.parse(fs.readFileSync(dir_name));
+                } else {
+                    return {};
+                }
+            })();
+            for (let key of Object.keys(new_results)) {
+                results2[key] = new_results[key];
+            }
+            results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
+                .toString()
+                .trim();
+            fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
+        }
+        if (page) {
+            page.close();
+        }
+    } catch (e) {
+        private_console.error(e);
     }
 });
 
@@ -223,7 +231,7 @@ expect.extend({
     toNotError(received) {
         if (received.length > 0) {
             return {
-                message: () => `Errors emitted during evaluation: ${JSON.stringify(received)}`,
+                message: () => `Errors emitted during evaluation: \n${received.map(x => `    ${x}`).join("\n")}`,
                 pass: false
             };
         }
@@ -241,7 +249,6 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
         name,
         async () => {
             errors = [];
-            __name = name;
 
             if (viewport !== null)
                 await page.setViewport({
@@ -262,12 +269,12 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                         page = await get_new_page();
                         await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                     } else {
-                        await page.evaluate(x => {
+                        await page.evaluate(async x => {
                             const viewer = document.querySelector("perspective-viewer");
                             viewer._show_config = true;
-                            viewer.toggleConfig();
                             viewer.restore(x);
                             viewer.notifyResize();
+                            await viewer.toggleConfig();
                         }, OLD_SETTINGS[test_root + _url]);
                     }
                 }
@@ -328,9 +335,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 }
 
                 if (process.env.PSP_PAUSE_ON_FAILURE) {
-                    if (hash !== results[_url + "/" + name] || errors.length > 0) {
+                    if (!process.env.WRITE_TESTS && (hash !== results[_url + "/" + name] || errors.length > 0)) {
                         private_console.error(`Failed ${name}, pausing`);
-                        await new Promise(f => setTimeout(f, 1000000));
+                        await prompt(`Failed ${name}, pausing.  Press enter to continue ..`);
                     }
                 }
                 if (fail_on_errors) {
@@ -342,6 +349,20 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
         timeout
     );
 };
+
+function prompt(query) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    return new Promise(resolve =>
+        rl.question(query, ans => {
+            rl.close();
+            resolve(ans);
+        })
+    );
+}
 
 exports.drag_drop = async function drag_drop(page, origin, target) {
     const element = await page.$(origin);

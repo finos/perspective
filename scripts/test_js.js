@@ -12,10 +12,10 @@ const minimatch = require("minimatch");
 const execSync = require("child_process").execSync;
 const fs = require("fs");
 
-const IS_PUPPETEER = getarg("--private-puppeteer");
-const IS_EMSDK = getarg("--private-emsdk");
-const IS_WRITE = getarg("--write") || process.env.WRITE_TESTS;
-const IS_DOCKER = getarg("--docker") || process.env.PSP_DOCKER;
+const IS_PUPPETEER = !!getarg("--private-puppeteer");
+const IS_EMSDK = !!getarg("--private-emsdk");
+const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
+const IS_DOCKER = !!getarg("--docker") || process.env.PSP_DOCKER;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 const PACKAGE = process.env.PACKAGE;
@@ -37,29 +37,25 @@ function silent(x) {
 }
 
 function jest() {
-    return bash`PSP_SATURATE=${getarg("--saturate")} \
-        WRITE_TESTS=${IS_WRITE} TZ=UTC node_modules/.bin/jest --rootDir=. \
-        --config=packages/perspective-test/jest.all.config.js --color \
-        --verbose ${getarg("--bail") && "--bail"} \
-        ${getarg("--debug") || "--silent 2>&1"} \
-        --verbose
+    return bash`
+        PSP_SATURATE=${!!getarg("--saturate")} 
+        PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
+        WRITE_TESTS=${IS_WRITE} 
+        TZ=UTC 
+        node_modules/.bin/jest 
+        --rootDir=.
+        --config=packages/perspective-test/jest.all.config.js 
+        --color
+        --verbose 
+        --maxWorkers=50%
+        ${getarg("--bail") && "--bail"}
+        ${getarg("--debug") || "--silent 2>&1"} 
         --testNamePattern="${get_regex()}"`;
-}
-
-function slow_jest() {
-    const has_phosphor = !process.env.PACKAGE || minimatch("perspective-phosphor", process.env.PACKAGE);
-    if (!process.env.PACKAGE || has_phosphor) {
-        return bash`WRITE_TESTS=${IS_WRITE} TZ=UTC node_modules/.bin/lerna \
-            exec --scope="@finos/perspective-jupyterlab" --concurrency 1 \
-            --no-bail -- yarn --silent test:run`;
-    } else {
-        return 'echo ""';
-    }
 }
 
 function emsdk() {
     console.log("-- Creating emsdk docker image");
-    return bash`${docker("emsdk")} node scripts/test_js.js \
+    return bash`${docker("emsdk")} node scripts/test_js.js
         --private-emsdk ${getarg()}`;
 }
 
@@ -77,36 +73,43 @@ try {
             execute(emsdk());
         } else {
             execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-            execute`node_modules/.bin/lerna run test:build --stream \
+            execute`node_modules/.bin/lerna run test:build --stream
                 --scope="@finos/${PACKAGE}"`;
         }
         if (!IS_EMSDK) {
             execute`yarn --silent clean --screenshots`;
-            execute`${docker("puppeteer")} node scripts/test_js.js \
+            execute`${docker("puppeteer")} node scripts/test_js.js
                 --private-puppeteer ${getarg()}`;
         }
     } else {
         if (IS_LOCAL_PUPPETEER) {
             execute`yarn --silent clean --screenshots`;
             execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-            execute`node_modules/.bin/lerna run test:build --stream \
+            execute`node_modules/.bin/lerna run test:build --stream
                 --scope="@finos/${PACKAGE}"`;
         }
         if (getarg("--quiet")) {
             console.log("-- Running test suite in quiet mode");
             execute(silent(jest()));
-            execSync(silent(slow_jest()));
         } else if (process.env.PACKAGE) {
             console.log("-- Running test suite in individual mode");
-            execute`WRITE_TESTS=${IS_WRITE} TZ=UTC \
-                node_modules/.bin/lerna exec --concurrency 1 --no-bail \
-                --scope="@finos/${PACKAGE}" -- yarn --silent test:run \
+            execute`
+                PSP_SATURATE=${!!getarg("--saturate")}
+                PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
+                WRITE_TESTS=${IS_WRITE}
+                TZ=UTC 
+                node_modules/.bin/lerna exec 
+                --concurrency 1 
+                --no-bail
+                --scope="@finos/${PACKAGE}" 
+                -- 
+                yarn test:run
+                --silent
+                ${getarg("--interactive") && "--runInBand"}
                 --testNamePattern="${get_regex()}"`;
-            execute(slow_jest());
         } else {
             console.log("-- Running test suite in fast mode");
             execute(jest());
-            execute(slow_jest());
         }
     }
 } catch (e) {
