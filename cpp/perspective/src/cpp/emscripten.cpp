@@ -125,32 +125,10 @@ namespace binding {
         }
     }
 
-    t_val
-    scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
-        return scalar_to_val(scalars[idx]);
-    }
-
-    t_val
-    scalar_vec_to_string(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
-        return scalar_to_val(scalars[idx], false, true);
-    }
-
     template <typename T, typename U>
     std::vector<U>
     vecFromArray(T& arr) {
         return vecFromJSArray<U>(arr);
-    }
-
-    template <>
-    t_val
-    scalar_to(const t_tscalar& scalar) {
-        return scalar_to_val(scalar);
-    }
-
-    template <>
-    t_val
-    scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
-        return scalar_vec_to_val(scalars, idx);
     }
 
     /**
@@ -1943,8 +1921,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_table", &make_table<t_val>);
     function("to_arraybuffer", &to_arraybuffer);
     function("make_computed_table", &make_computed_table<t_val>);
-    function("scalar_vec_to_val", &scalar_vec_to_val);
-    function("scalar_vec_to_string", &scalar_vec_to_string);
     function("col_to_js_typed_array", &col_to_js_typed_array);
     function("make_view_zero", &make_view<t_ctx0>);
     function("make_view_one", &make_view<t_ctx1>);
@@ -1955,4 +1931,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_from_data_slice_one", &get_from_data_slice<t_ctx1>, allow_raw_pointers());
     function("get_data_slice_two", &get_data_slice<t_ctx2>, allow_raw_pointers());
     function("get_from_data_slice_two", &get_from_data_slice<t_ctx2>, allow_raw_pointers());
+    function("scalar_to_val", &scalar_to_val);
 }

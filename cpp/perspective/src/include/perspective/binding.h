@@ -74,15 +74,6 @@ namespace binding {
     T scalar_to(const t_tscalar& scalar);
 
     /**
-     * @brief Converts a `t_scalar` in a vector to a value in the binding language.
-     *
-     * @tparam T
-     * @param scalar
-     */
-    template <typename T>
-    T scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
-
-    /**
      * @brief namespace `arraybuffer` contains utilities for writing data in the Apache arrow format.
      *
      * Implementations of these methods access underlying heap memory and create contiguous

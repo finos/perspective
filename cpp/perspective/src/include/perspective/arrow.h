@@ -46,16 +46,25 @@ namespace arrow {
 
         void initialize(uintptr_t ptr, std::uint32_t);
 
-        void fill_table(t_data_table& tbl, const std::string& index, std::uint32_t offset,
-            std::uint32_t limit, bool is_update);
+        void fill_table(
+            t_data_table& tbl,
+            const std::string& index,
+            std::uint32_t offset,
+            std::uint32_t limit, 
+            bool is_update);
 
         std::vector<std::string> names() const;
         std::vector<t_dtype> types() const;
         std::uint32_t row_count() const;
 
     private:
-        void fill_column(t_data_table& tbl, std::shared_ptr<t_column> col,
-            const std::string& name, std::int32_t cidx, t_dtype type, std::string& raw_type,
+        void fill_column(
+            t_data_table& tbl, 
+            std::shared_ptr<t_column> col,
+            const std::string& name, 
+            std::int32_t cidx, 
+            t_dtype type, 
+            std::string& raw_type,
             bool is_update);
 
         std::shared_ptr<::arrow::Table> m_table;
@@ -71,36 +80,48 @@ namespace arrow {
      * @param stride 
      */
     std::shared_ptr<::arrow::Array>
-    boolean_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride);
+    boolean_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::uint32_t offset,
+        std::uint32_t stride);
 
     /**
-     * @brief Build an `arrow::Array` from a column typed as `DTYPE_DATE.` Separated out from the main
-     * templated `col_to_array` as `t_date` is an `uint32_t` that needs to be written into the `arrow::Array`
-     * as an `int32_t`.
-     * 
+     * @brief Build an `arrow::Array` from a column typed as `DTYPE_DATE.`
+     * Separated out from the main templated `col_to_array` as `t_date` is an
+     * `uint32_t` that needs to be written into the `arrow::Array` as an
+     * `int32_t`.
+     *
      * @param data 
      * @param offset 
      * @param stride 
      */
     std::shared_ptr<::arrow::Array>
-    date_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride);
+    date_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::uint32_t offset,
+        std::uint32_t stride);
 
     /**
-     * @brief Build an `arrow::Array` from a column typed as `DTYPE_TIME`. Separated out from the main
-     * templated `col_to_array` as `arrow::timestamp()` has parameters that need to be filled.
-     * 
+     * @brief Build an `arrow::Array` from a column typed as `DTYPE_TIME`.
+     * Separated out from the main templated `col_to_array` as
+     * `arrow::timestamp()` has parameters that need to be filled.
+     *
      * @param data 
      * @param offset 
      * @param stride 
      */
     std::shared_ptr<::arrow::Array>
-    timestamp_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride);
+    timestamp_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::uint32_t offset,
+        std::uint32_t stride);
 
     /**
-     * @brief Build an `arrow::Array` from a column contained in `data`. Column building 
-     * methods read from the vector of scalars that make up the data slice, as `t_data_slice` 
-     * is templated on the context type and we'd like to avoid template hell.
-     * 
+     * @brief Build an `arrow::Array` from a column contained in `data`. Column
+     * building methods read from the vector of scalars that make up the data
+     * slice, as `t_data_slice` is templated on the context type and we'd like
+     * to avoid template hell.
+     *
      * @tparam ArrowDataType
      * @param data 
      * @param offset 
@@ -109,7 +130,10 @@ namespace arrow {
      */
     template <typename ArrowDataType, typename ArrowValueType>
     std::shared_ptr<::arrow::Array>
-    col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+    numeric_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::uint32_t offset,
+        std::uint32_t stride) {
         // NumericBuilder encompasses the most types (int/float/date/datetime)
         ::arrow::NumericBuilder<ArrowDataType> array_builder;
 
@@ -126,7 +150,8 @@ namespace arrow {
             if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
         }
         
-        // Point to base `arrow::Array` instead of derived, so we don't have to template the caller.
+        // Point to base `arrow::Array` instead of derived, so we don't have to
+        // template the caller.
         std::shared_ptr<::arrow::Array> array;
         ::arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {

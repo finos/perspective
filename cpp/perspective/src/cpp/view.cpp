@@ -348,19 +348,23 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     std::shared_ptr<t_data_slice<CTX_T>> data_slice = get_data(
         start_row, end_row, start_col, end_col
     );
-    std::vector<std::vector<t_tscalar>> names = data_slice->get_column_names();
+    std::vector<std::vector<t_tscalar>> names = column_names();
     std::map<std::string, std::string> view_schema = schema();
 
     std::vector<std::shared_ptr<::arrow::Array>> vectors;
     std::vector<std::shared_ptr<::arrow::Field>> fields;
 
+    std::cout << names << std::endl;
+
     for (auto i = start_col; i < end_col; ++i) {
+        std::cout << "col: " << i << std::endl;
         // TODO: fix for 1/2 sided ctx
         std::vector<t_tscalar> col_path = names.at(i);
         std::string column_name = col_path.at(col_path.size() - 1).to_string();
         std::string type = view_schema.at(column_name);
         std::string name;
 
+        std::cout << col_path << std::endl;
         // Calculate the "concat'd" column header 
         if (col_path.size() > 1) {
             // TODO create the column name via concatenation
@@ -376,43 +380,43 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
         switch (dtype) {
             case DTYPE_INT8: {
                 fields.push_back(::arrow::field(name, ::arrow::int8()));
-                arr = arrow::col_to_array<::arrow::Int8Type, std::int8_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::Int8Type, std::int8_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_UINT8: {
                 fields.push_back(::arrow::field(name, ::arrow::uint8()));
-                arr = arrow::col_to_array<::arrow::UInt8Type, std::uint8_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::UInt8Type, std::uint8_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_INT16: {
                 fields.push_back(::arrow::field(name, ::arrow::int16()));
-                arr = arrow::col_to_array<::arrow::Int16Type, std::int16_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::Int16Type, std::int16_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_UINT16: {
                 fields.push_back(::arrow::field(name, ::arrow::uint16()));
-                arr = arrow::col_to_array<::arrow::UInt16Type, std::uint16_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::UInt16Type, std::uint16_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_INT32: {
                 fields.push_back(::arrow::field(name, ::arrow::int32()));
-                arr = arrow::col_to_array<::arrow::Int32Type, std::int32_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::Int32Type, std::int32_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_UINT32: {
                 fields.push_back(::arrow::field(name, ::arrow::uint32()));
-                arr = arrow::col_to_array<::arrow::UInt32Type, std::uint32_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::UInt32Type, std::uint32_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_INT64: {
                 fields.push_back(::arrow::field(name, ::arrow::int64()));
-                arr = arrow::col_to_array<::arrow::Int64Type, std::int64_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::Int64Type, std::int64_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_UINT64: {
                 fields.push_back(::arrow::field(name, ::arrow::uint64()));
-                arr = arrow::col_to_array<::arrow::UInt64Type, std::uint64_t>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::UInt64Type, std::uint64_t>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_FLOAT32: {
                 fields.push_back(::arrow::field(name, ::arrow::float32()));
-                arr = arrow::col_to_array<::arrow::FloatType, float>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::FloatType, float>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_FLOAT64: {
                 fields.push_back(::arrow::field(name, ::arrow::float64()));
-                arr = arrow::col_to_array<::arrow::DoubleType, double>(data_slice->get_slice(), i, data_slice->get_stride());
+                arr = arrow::numeric_col_to_array<::arrow::DoubleType, double>(data_slice->get_slice(), i, data_slice->get_stride());
             } break;
             case DTYPE_DATE: {
                 fields.push_back(::arrow::field(name, ::arrow::date32()));

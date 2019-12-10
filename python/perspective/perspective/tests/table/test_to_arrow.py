@@ -82,3 +82,49 @@ class TestToArrow(object):
         assert tbl2.view().to_dict() == {
             "a": [datetime(2019, 7, 11, 12, 30), datetime(2016, 2, 29, 11, 0), datetime(2019, 12, 10, 12, 0)]
         }
+
+    def test_to_arrow_one_symmetric(self):
+        data = {
+            "a": [1, 2, 3, 4],
+            "b": ["a", "b", "c", "d"],
+            "c": [datetime(2019, 7, 11, 12, 0),
+                  datetime(2019, 7, 11, 12, 10),
+                  datetime(2019, 7, 11, 12, 20),
+                  datetime(2019, 7, 11, 12, 30)]
+        }
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"])
+        arrow = view.to_dict()
+        print(arrow)
+        tbl2 = Table(arrow)
+        assert tbl2.schema() == {
+            
+        }
+
+    def test_to_arrow_two_symmetric(self):
+        data = {
+            "a": [1, 2, 3, 4],
+            "b": ["a", "b", "c", "d"],
+            "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
+        }
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        arrow = view.to_arrow()
+        tbl2 = Table(arrow)
+        assert tbl2.schema() == {
+            
+        }
+
+    def test_to_arrow_column_only_symmetric(self):
+        data = {
+            "a": [1, 2, 3, 4],
+            "b": ["a", "b", "c", "d"],
+            "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
+        }
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        arrow = view.to_arrow()
+        tbl2 = Table(arrow)
+        assert tbl2.schema() == {
+
+        }

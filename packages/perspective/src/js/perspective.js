@@ -216,7 +216,7 @@ export default function(Module) {
     function col_path_vector_to_string(vector) {
         let extracted = [];
         for (let i = 0; i < vector.size(); i++) {
-            extracted.push(__MODULE__.scalar_vec_to_string(vector, i));
+            extracted.push(__MODULE__.scalar_to_val(vector.get(i), false, true));
         }
         vector.delete();
         return extracted;
@@ -341,7 +341,7 @@ export default function(Module) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
+                            const value = __MODULE__.scalar_to_val(row_path.get(i), false, false);
                             formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                             if (get_ids) {
                                 formatter.addColumnValue(data, row, "__ID__", value);
@@ -366,7 +366,7 @@ export default function(Module) {
                 for (let i = 0; i < keys.size(); i++) {
                     // TODO: if __INDEX__ and set index have the same value,
                     // don't we need to make sure that it only emits one?
-                    const value = __MODULE__.scalar_vec_to_val(keys, i);
+                    const value = __MODULE__.scalar_to_val(keys.get(i), false, false);
                     formatter.addColumnValue(data, row, "__INDEX__", value);
                 }
             }
@@ -554,7 +554,9 @@ export default function(Module) {
         return column_to_format.call(this, col_name, options, format_function);
     };
 
-    view.prototype.to_arrow = function(options = {}) {
+    view.prototype._to_arrow = function(options = {}) {
+        // TODO: fix
+        _call_process(this.table.get_id());
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -566,23 +568,7 @@ export default function(Module) {
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
-        // use a specified data slice, if provided
-        let slice, data_slice;
-
-        if (!options.data_slice) {
-            data_slice = this.get_data_slice(start_row, end_row, start_col, end_col);
-            slice = data_slice.get_slice();
-        } else {
-            slice = options.data_slice.get_slice();
-        }
-
-        const rst = __MODULE__.to_arraybuffer(this._View.to_arrow(slice));
-
-        slice.delete();
-        if (data_slice) {
-            data_slice.delete();
-        }
-        return rst;
+        return __MODULE__.to_arraybuffer(this._View.to_arrow(start_row, end_row, start_col, end_col));
     };
 
     /**
@@ -607,7 +593,7 @@ export default function(Module) {
      * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format
      * containing data from the view.
      */
-    view.prototype._to_arrow = function(options = {}) {
+    view.prototype.to_arrow = function(options = {}) {
         const names = this._column_names();
         const schema = this.schema();
 

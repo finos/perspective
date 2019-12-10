@@ -27,8 +27,8 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
-    View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
-        std::string separator, t_view_config view_config);
+    View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx,
+         std::string name, std::string separator, t_view_config view_config);
     ~View();
 
     /**
@@ -66,9 +66,9 @@ public:
     std::int32_t num_columns() const;
 
     /**
-     * @brief The schema of this View.  A schema is an std::map, the keys of which
-     * are the columns of this View, and the values are their string type names.
-     * If this View is aggregated, theses will be the aggregated types;
+     * @brief The schema of this View.  A schema is an std::map, the keys of
+     * which are the columns of this View, and the values are their string type
+     * names. If this View is aggregated, theses will be the aggregated types;
      * otherwise these types will be the same as the columns in the underlying
      * Table.
      *
@@ -88,11 +88,12 @@ public:
     
     /**
      * @brief The aggregated column names of this View, showing the columns that
-     * have been composed through the addition of a pivot as they appear in the view.
-     * 
-     * If the view is pivoted, "__ROW_PATH__" will be prepended to the front of the vector
-     * because it is part of the column path.
-     * 
+     * have been composed through the addition of a pivot as they appear in the
+     * view.
+     *
+     * If the view is pivoted, "__ROW_PATH__" will be prepended to the front of
+     * the vector because it is part of the column path.
+     *
      * @return std::vector<std::vector<t_tscalar>>>
      */
     std::vector<std::vector<t_tscalar>> column_paths() const;
@@ -109,8 +110,28 @@ public:
      * @param end_col
      * @return std::shared_ptr<t_data_slice<t_ctx0>>
      */
-    std::shared_ptr<t_data_slice<CTX_T>> get_data(
-        t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const;
+    std::shared_ptr<t_data_slice<CTX_T>>
+    get_data(
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col) const;
+
+    /**
+     * @brief Serializes the `View`'s data into the Apache Arrow format 
+     * as a bytestring.
+     * 
+     * @param start_row
+     * @param end_row
+     * @param start_col 
+     * @param end_col 
+     * @return std::string 
+     */
+    std::string to_arrow(
+        std::int32_t start_row,
+        std::int32_t end_row,
+        std::int32_t start_col,
+        std::int32_t end_col) const;
 
     // Delta calculation
     bool _get_deltas_enabled() const;
@@ -151,17 +172,6 @@ public:
      */
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
-    /**
-     * @brief Serializes the `View`'s data into the Apache Arrow format as a bytestring.
-     * 
-     * @param start_row
-     * @param end_row
-     * @param start_col 
-     * @param end_col 
-     * @return std::string 
-     */
-    std::string to_arrow(std::int32_t start_row, std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) const;
-
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::vector<std::string> get_row_pivots() const;
@@ -177,25 +187,23 @@ public:
 
 private:
     /**
-     * @brief Gets the number of hidden columns - columns used in sort but not shown.
+     * @brief Gets the number of hidden columns - columns used in sort but not
+     * shown.
      *
      * @return std::int32_t
      */
     std::int32_t _num_hidden_cols();
 
     /**
-     * @brief Gets the correct type for the specified aggregate, thus remapping columns
-     * when they are pivoted. This ensures that we display aggregates with the correct type.
+     * @brief Gets the correct type for the specified aggregate, thus remapping
+     * columns when they are pivoted. This ensures that we display aggregates
+     * with the correct type.
      *
      * @return std::string
      */
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
 
-    /**
-     * @brief Find columns used in sort-by that are not specified in the `m_columns` array,
-     * and add each column name to `m_hidden_sort`. 
-     */
     void _find_hidden_sort(const std::vector<t_sortspec>& sort);
 
     std::shared_ptr<Table> m_table;
