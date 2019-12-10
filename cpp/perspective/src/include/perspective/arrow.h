@@ -14,6 +14,7 @@
 #include <perspective/exports.h>
 #include <perspective/scalar.h>
 #include <perspective/data_table.h>
+#include <perspective/get_data_extents.h>
 
 #include <arrow/api.h>
 #include <arrow/util/decimal.h>
@@ -73,6 +74,23 @@ namespace arrow {
     };
 
     /**
+     * @brief Retrieve the correct index into the data slice for the given
+     * column and row. This is a redefinition of the method in `t_data_slice`,
+     * except it does not rely on any instance variables.
+     * 
+     * @param cidx 
+     * @param ridx 
+     * @param stride 
+     * @param extents 
+     * @return std::int32_t 
+     */
+    std::int32_t
+    get_idx(std::int32_t cidx,
+            std::int32_t ridx, 
+            std::int32_t stride,
+            t_get_data_extents extents);
+
+    /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_BOOL.`
      * 
      * @param data 
@@ -82,8 +100,9 @@ namespace arrow {
     std::shared_ptr<::arrow::Array>
     boolean_col_to_array(
         const std::vector<t_tscalar>& data,
-        std::uint32_t offset,
-        std::uint32_t stride);
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_DATE.`
@@ -98,8 +117,9 @@ namespace arrow {
     std::shared_ptr<::arrow::Array>
     date_col_to_array(
         const std::vector<t_tscalar>& data,
-        std::uint32_t offset,
-        std::uint32_t stride);
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_TIME`.
@@ -113,8 +133,25 @@ namespace arrow {
     std::shared_ptr<::arrow::Array>
     timestamp_col_to_array(
         const std::vector<t_tscalar>& data,
-        std::uint32_t offset,
-        std::uint32_t stride);
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents);
+
+    /**
+     * @brief Build an `arrow::Array` from a column typed as `DTYPE_STR`, using
+     * arrow's `DictionaryArray` constructors.
+     * 
+     * @param data 
+     * @param offset 
+     * @param stride 
+     * @return std::shared_ptr<::arrow::Array> 
+     */
+    std::shared_ptr<::arrow::Array>
+    string_col_to_dictionary_array(
+        const std::vector<t_tscalar>& data,
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column contained in `data`. Column
@@ -132,15 +169,17 @@ namespace arrow {
     std::shared_ptr<::arrow::Array>
     numeric_col_to_array(
         const std::vector<t_tscalar>& data,
-        std::uint32_t offset,
-        std::uint32_t stride) {
-        // NumericBuilder encompasses the most types (int/float/date/datetime)
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents) {
+        // NumericBuilder encompasses the most types (int/float/datetime)
         ::arrow::NumericBuilder<ArrowDataType> array_builder;
 
         // TODO: write to Arrow array in bulk
-        for (int idx = offset; idx < data.size(); idx += stride) {
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             ::arrow::Status s;
-            t_tscalar scalar = data[idx];
+            auto idx = get_idx(cidx, ridx, stride, extents);
+            t_tscalar scalar = data.operator[](idx);
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 ArrowValueType val = get_scalar<ArrowValueType>(scalar);
                 s = array_builder.Append(val);

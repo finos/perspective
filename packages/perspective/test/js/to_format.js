@@ -303,7 +303,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Transitive arrow output 0-sided", async function() {
+        it("Tsransitive arrow output 0-sided", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
             let arrow = await view.to_arrow();
@@ -343,6 +343,7 @@ module.exports = perspective => {
         it("Transitive arrow output 0-sided, with col range", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
+            console.log(await view.schema());
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let json2 = await view.to_json({start_col: 1, end_col: 3});
             // expect(arrow.byteLength).toEqual(908);
@@ -364,6 +365,50 @@ module.exports = perspective => {
             let view = table.view({row_pivots: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 1-sided with row range", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({row_pivots: ["string"]});
+            let json = await view.to_json({start_row: 1, end_row: 3});
+            let arrow = await view.to_arrow({start_row: 1, end_row: 3});
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 1-sided with col range", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({row_pivots: ["string"]});
+            let json = await view.to_json({start_col: 1, end_col: 3});
+            let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let table2 = perspective.table(arrow);
             let view2 = table2.view();
             let json2 = await view2.to_json();
@@ -403,11 +448,99 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Transitive arrow output 2-sided with row range", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
+            let json = await view.to_json({start_row: 1, end_row: 3});
+            let arrow = await view.to_arrow({start_row: 1, end_row: 3});
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 2-sided with col range", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
+            let json = await view.to_json({start_col: 1, end_col: 3});
+            let arrow = await view.to_arrow({start_col: 1, end_col: 3});
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
         it("Transitive arrow output 2-sided column only", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view({column_pivots: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 2-sided column only row range", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({column_pivots: ["string"]});
+            let json = await view.to_json({start_row: 1, end_row: 3});
+            let arrow = await view.to_arrow({start_row: 1, end_row: 3});
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 2-sided column only col range", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({column_pivots: ["string"]});
+            let json = await view.to_json({start_col: 1, end_col: 3});
+            let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let table2 = perspective.table(arrow);
             let view2 = table2.view();
             let json2 = await view2.to_json();

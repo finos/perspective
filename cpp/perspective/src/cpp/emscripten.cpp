@@ -152,7 +152,32 @@ namespace binding {
             "slice", offset, offset + (sizeof(uint8_t) * xs->size()));
     }
 
+    t_val
+    str_to_arraybuffer(std::shared_ptr<std::string> str) {
+        char* start = &(*str)[0];
+        uintptr_t offset = reinterpret_cast<uintptr_t>(start);
+        return t_val::module_property("HEAPU8").call<t_val>(
+            "slice", offset, offset + (sizeof(char) * str->size()));
+    }
 
+    template <typename CTX_T>
+    t_val
+    to_arrow(
+        std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        std::shared_ptr<std::string> s = view->to_arrow(
+            start_row, end_row, start_col, end_col);
+        return str_to_arraybuffer(s)["buffer"];
+    }
+
+    template <typename CTX_T>
+    t_val
+    get_row_delta(
+        std::shared_ptr<View<CTX_T>> view) {
+        auto row_delta = view->get_row_delta();
+        return str_to_arraybuffer(row_delta)["buffer"];
+    }
+    
     /******************************************************************************
      *
      * Write data in the Apache Arrow format
@@ -1649,9 +1674,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_filter", &View<t_ctx0>::get_filter)
         .function("get_sort", &View<t_ctx0>::get_sort)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
-        .function("get_row_delta", &View<t_ctx0>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
-        .function("to_arrow", &View<t_ctx0>::to_arrow)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
@@ -1677,9 +1700,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_filter", &View<t_ctx1>::get_filter)
         .function("get_sort", &View<t_ctx1>::get_sort)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
-        .function("get_row_delta", &View<t_ctx1>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
-        .function("to_arrow", &View<t_ctx1>::to_arrow)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
@@ -1706,9 +1727,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx2>::get_sort)
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
-        .function("get_row_delta", &View<t_ctx2>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
-        .function("to_arrow", &View<t_ctx2>::to_arrow)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -1919,7 +1938,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * Perspective functions
      */
     function("make_table", &make_table<t_val>);
-    function("to_arraybuffer", &to_arraybuffer);
     function("make_computed_table", &make_computed_table<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
     function("make_view_zero", &make_view<t_ctx0>);
@@ -1931,5 +1949,11 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_from_data_slice_one", &get_from_data_slice<t_ctx1>, allow_raw_pointers());
     function("get_data_slice_two", &get_data_slice<t_ctx2>, allow_raw_pointers());
     function("get_from_data_slice_two", &get_from_data_slice<t_ctx2>, allow_raw_pointers());
+    function("to_arrow_zero", &to_arrow<t_ctx0>);
+    function("to_arrow_one", &to_arrow<t_ctx1>);
+    function("to_arrow_two", &to_arrow<t_ctx2>);
+    function("get_row_delta_zero", &get_row_delta<t_ctx0>);
+    function("get_row_delta_one", &get_row_delta<t_ctx1>);
+    function("get_row_delta_two", &get_row_delta<t_ctx2>);
     function("scalar_to_val", &scalar_to_val);
 }

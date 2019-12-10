@@ -283,12 +283,14 @@ export default function(Module) {
     };
 
     /**
-     * Generic base function from which `to_json`, `to_columns` etc. derives.
+     * Given an `options` Object, calculate the correct start/end rows and
+     * columns, as well as other metadata required by the data formatter.
      *
      * @private
+     * @param {Object} options User-provided options for `to_format`.
+     * @returns {Object} an Object containing the parsed options.
      */
-    const to_format = function(options, formatter) {
-        _call_process(this.table.get_id());
+    const _parse_format_options = function(options) {
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -299,6 +301,30 @@ export default function(Module) {
         const end_row = Math.min(max_rows, options.end_row !== undefined ? options.end_row : viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
+
+        // Return the calculated values
+        options.start_row = start_row;
+        options.end_row = end_row;
+        options.start_col = start_col;
+        options.end_col = end_col;
+
+        return options;
+    };
+
+    /**
+     * Generic base function from which `to_json`, `to_columns` etc. derives.
+     *
+     * @private
+     */
+    const to_format = function(options, formatter) {
+        _call_process(this.table.get_id());
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const hidden = this._num_hidden();
+
         let date_format;
         if (options.date_format) {
             date_format = new Intl.DateTimeFormat(options.date_format);
@@ -554,21 +580,46 @@ export default function(Module) {
         return column_to_format.call(this, col_name, options, format_function);
     };
 
-    view.prototype._to_arrow = function(options = {}) {
-        // TODO: fix
+    /**
+     * Serializes a view to the Apache Arrow data format.
+     *
+     * @async
+     *
+     * @param {Object} [options] An optional configuration object.
+     *
+     * @param {*} options.data_slice A data slice object from which to
+     * serialize.
+     *
+     * @param {number} options.start_row The starting row index from which to
+     * serialize.
+     * @param {number} options.end_row The ending row index from which to
+     * serialize.
+     * @param {number} options.start_col The starting column index from which to
+     * serialize.
+     * @param {number} options.end_col The ending column index from which to
+     * serialize.
+     *
+     * @returns {Promise<ArrayBuffer>} An `ArrayBuffer` in the Apache Arrow
+     * format containing data from the view.
+     */
+    view.prototype.to_arrow = function(options = {}) {
         _call_process(this.table.get_id());
-        options = options || {};
-        const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
-        const max_rows = this._View.num_rows();
-        const hidden = this._num_hidden();
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const sides = this.sides();
 
-        const viewport = this.config.viewport ? this.config.viewport : {};
-        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = Math.min(max_rows, options.end_row || (viewport.height ? start_row + viewport.height : max_rows));
-        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
+        console.log(start_row, end_row, start_col, end_col);
 
-        return __MODULE__.to_arraybuffer(this._View.to_arrow(start_row, end_row, start_col, end_col));
+        if (sides === 0) {
+            return __MODULE__.to_arrow_zero(this._View, start_row, end_row, start_col, end_col);
+        } else if (sides === 1) {
+            return __MODULE__.to_arrow_one(this._View, start_row, end_row, start_col, end_col);
+        } else if (sides === 2) {
+            return __MODULE__.to_arrow_two(this._View, start_row, end_row, start_col, end_col);
+        }
     };
 
     /**
@@ -593,7 +644,7 @@ export default function(Module) {
      * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format
      * containing data from the view.
      */
-    view.prototype.to_arrow = function(options = {}) {
+    view.prototype._to_arrow = function(options = {}) {
         const names = this._column_names();
         const schema = this.schema();
 
@@ -736,10 +787,14 @@ export default function(Module) {
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        let delta_slice = this._View.get_row_delta();
-        let arrow = this.to_arrow({data_slice: delta_slice});
-        delta_slice.delete();
-        return arrow;
+        const sides = this.sides();
+        if (sides === 0) {
+            return __MODULE__.get_row_delta_zero(this._View);
+        } else if (sides === 1) {
+            return __MODULE__.get_row_delta_one(this._View);
+        } else if (sides === 2) {
+            return __MODULE__.get_row_delta_two(this._View);
+        }
     };
 
     /**

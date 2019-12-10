@@ -89,10 +89,18 @@ namespace arrow {
             return DTYPE_BOOL;
         } else if (src == "int8") {
             return DTYPE_INT8;
+        } else if (src == "uint8") {
+            return DTYPE_UINT8;
         } else if (src == "int16") {
             return DTYPE_INT16;
+        } else if (src == "uint16") {
+            return DTYPE_UINT16;
         } else if (src == "int32") {
             return DTYPE_INT32;
+        } else if (src == "uint32") {
+            return DTYPE_UINT32;
+        } else if (src == "uint64") {
+            return DTYPE_UINT64;
         } else if (src == "decimal" || src == "decimal128" || src == "int64") {
             return DTYPE_INT64;
         } else if (src == "float") {
@@ -283,17 +291,33 @@ namespace arrow {
                 auto scol = std::static_pointer_cast<::arrow::Int8Array>(src);
                 std::memcpy(dest->get_nth<std::int8_t>(offset), (void*)scol->raw_values(), len);
             } break;
+            case ::arrow::UInt8Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt8Array>(src);
+                std::memcpy(dest->get_nth<std::uint8_t>(offset), (void*)scol->raw_values(), len);
+            } break;
             case ::arrow::Int16Type::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::Int16Array>(src);
                 std::memcpy(dest->get_nth<std::int16_t>(offset), (void*)scol->raw_values(), len * 2);
+            } break;
+            case ::arrow::UInt16Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt16Array>(src);
+                std::memcpy(dest->get_nth<std::uint16_t>(offset), (void*)scol->raw_values(), len * 2);
             } break;
             case ::arrow::Int32Type::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::Int32Array>(src);
                 std::memcpy(dest->get_nth<std::int32_t>(offset), (void*)scol->raw_values(), len * 4);
             } break;
+            case ::arrow::UInt32Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt32Array>(src);
+                std::memcpy(dest->get_nth<std::uint32_t>(offset), (void*)scol->raw_values(), len * 4);
+            } break;
             case ::arrow::Int64Type::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::Int64Array>(src);
                 std::memcpy(dest->get_nth<std::int64_t>(offset), (void*)scol->raw_values(), len * 8);
+            } break;
+            case ::arrow::UInt64Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt64Array>(src);
+                std::memcpy(dest->get_nth<std::uint64_t>(offset), (void*)scol->raw_values(), len * 8);
             } break;
             case ::arrow::TimestampType::type_id: {
                 std::shared_ptr<::arrow::TimestampType> tunit
@@ -421,13 +445,27 @@ namespace arrow {
         }
     }
 
+    std::int32_t
+    get_idx(std::int32_t cidx,
+            std::int32_t ridx, 
+            std::int32_t stride,
+            t_get_data_extents extents) {
+        return (ridx - extents.m_srow) * stride + (cidx - extents.m_scol);
+    }
+
     // TODO: split up arrow-loader and arrow-writer
     std::shared_ptr<::arrow::Array>
-    boolean_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+    boolean_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents) {
         ::arrow::BooleanBuilder array_builder;
+        // array_builder.Reserve(data.size() / stride);
 
-        for (int idx = offset; idx < data.size(); idx += stride) {
-            t_tscalar scalar = data[idx];
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            auto idx = get_idx(cidx, ridx, stride, extents);
+            t_tscalar scalar = data.operator[](idx);
             ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 // TODO: convert to unsafe writes, just extend underlying array
@@ -448,11 +486,17 @@ namespace arrow {
     }
 
     std::shared_ptr<::arrow::Array>
-    date_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+    date_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents) {
         ::arrow::Date32Builder array_builder;
+        // array_builder.Reserve(data.size() / stride);
     
-        for (int idx = offset; idx < data.size(); idx += stride) {
-            t_tscalar scalar = data[idx];
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            auto idx = get_idx(cidx, ridx, stride, extents);
+            t_tscalar scalar = data.operator[](idx);
             ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 t_date val = scalar.get<t_date>();
@@ -480,13 +524,20 @@ namespace arrow {
     }
 
     std::shared_ptr<::arrow::Array>
-    timestamp_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+    timestamp_col_to_array(
+        const std::vector<t_tscalar>& data,
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents) {
         // TimestampType requires parameters, so initialize them here
         std::shared_ptr<::arrow::DataType> type = ::arrow::timestamp(::arrow::TimeUnit::MILLI);
         ::arrow::TimestampBuilder array_builder(type, ::arrow::default_memory_pool());
+        // TODO: array_builder.Reserve(data.size() / stride);
 
-        for (int idx = offset; idx < data.size(); idx += stride) {
-            t_tscalar scalar = data[idx];
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            auto idx = get_idx(cidx, ridx, stride, extents);
+            // TODO: add row offset
+            t_tscalar scalar = data.operator[](idx);
             ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 s = array_builder.Append(get_scalar<std::int64_t>(scalar));
@@ -506,62 +557,64 @@ namespace arrow {
     }
 
     std::shared_ptr<::arrow::Array>
-    col_to_dictionary_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
-        return nullptr;
-        /*int data_size = data.size() / stride;
-
+    string_col_to_dictionary_array(
+        const std::vector<t_tscalar>& data,
+        std::int32_t cidx,
+        std::int32_t stride,
+        t_get_data_extents extents) {
+        int data_size = data.size() / stride;
         t_vocab vocab;
         vocab.init(false);
+        ::arrow::Int32Builder indices_builder;
+        ::arrow::StringBuilder values_builder;
+        indices_builder.Reserve(data_size);
 
-        int nullSize = ceil(data_size / 64.0) * 2;
-        int nullCount = 0;
-        std::vector<std::int32_t> validityMap; // = new std::uint32_t[nullSize];
-        validityMap.resize(nullSize);
-        std::vector<std::int32_t> indexArray;
-        indexArray.reserve(data_size);
-
-        for (int idx = offset; idx < data_size; idx += stride) {
-            t_tscalar scalar = data[idx];
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            auto idx = get_idx(cidx, ridx, stride, extents);
+            t_tscalar scalar = data.operator[](idx);
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 auto adx = vocab.get_interned(scalar.to_string());
-                indexArray[idx] = adx;
-                validityMap[idx / 32] |= 1 << (idx % 32);
+                indices_builder.UnsafeAppend(adx);
             } else {
-                nullCount++;
+                indices_builder.UnsafeAppendNull();
             }
         }
-        std::vector<std::int8_t> dictArray;
-        dictArray.reserve(vocab.get_vlendata()->size() - vocab.get_vlenidx());
-        std::vector<std::int32_t> offsets;
-        offsets.reserve(vocab.get_vlenidx() + 1);
-        std::int32_t index = 0;
+    
+        // get str out of vocab
         for (auto i = 0; i < vocab.get_vlenidx(); i++) {
             const char* str = vocab.unintern_c(i);
-            offsets.push_back(index);
-            while (*str) {
-                dictArray[index] = (*str++);
-                index++;
-            }
+            values_builder.Append(str, strlen(str));
         }
-        offsets.push_back(index);
 
-        return nullptr;
+        // Write dictionary indices
+        std::shared_ptr<::arrow::Array> indices_array;
+        ::arrow::Status indices_status = indices_builder.Finish(&indices_array);
+        if (!indices_status.ok()) {
+            std::stringstream ss;
+            ss << "Could not write indices for dictionary array: "
+               << indices_status.message()
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
 
-        // auto dict = ArrayFromJSON(utf8(), "[\"foo\", \"bar\", \"baz\"]");
-        // auto dict_type = dictionary(int16(), utf8());
-        // auto indices = ArrayFromJSON(int16(), "[1, 2, null, 0, 2, 0]");
-        // auto arr = std::make_shared<DictionaryArray>(dict_type, indices, dict);
+        // Write dictionary values
+        std::shared_ptr<::arrow::Array> values_array;
+        ::arrow::Status values_status = values_builder.Finish(&values_array);
+        if (!values_status.ok()) {
+            std::stringstream ss;
+            ss << "Could not write values for dictionary array: "
+               << values_status.message()
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+        auto dictionary_type = 
+            ::arrow::dictionary(::arrow::int32(), ::arrow::utf8());
 
-  // The indices array should not have dictionary data
-
-        // t_val arr = t_val::global("Array").new_();
-        // arr.call<void>("push", dictArray);
-        // arr.call<void>(
-        //     "push", js_typed_array::Int32Array.new_(vector_to_typed_array(offsets)["buffer"]));
-        // arr.call<void>("push", indexArray);
-        // arr.call<void>("push", nullCount);
-        // arr.call<void>("push", vector_to_typed_array(validityMap));
-        // return arr;*/
+        std::shared_ptr<::arrow::Array> dictionary_array;
+        ::arrow::DictionaryArray::FromArrays(
+            dictionary_type, indices_array, values_array, &dictionary_array);
+        
+        return dictionary_array;
     }
 
     // Getters

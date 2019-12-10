@@ -39,17 +39,37 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT t_data_slice {
 public:
-    t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col, t_uindex row_offset, t_uindex col_offset,
-        const std::vector<t_tscalar>& slice, std::vector<std::vector<t_tscalar>> column_names);
-
-    t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col, t_uindex row_offset, t_uindex col_offset,
-        const std::vector<t_tscalar>& slice, std::vector<std::vector<t_tscalar>> column_names,
-        std::vector<t_uindex> column_indices);
-
     t_data_slice(
-        std::shared_ptr<CTX_T> ctx, const std::vector<t_tscalar>& slice, t_uindex end_row);
+        std::shared_ptr<CTX_T> ctx,
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col,
+        t_uindex row_offset,
+        t_uindex col_offset,
+        const std::vector<t_tscalar>& slice,
+        const std::vector<std::vector<t_tscalar>>& column_names);
+
+    /**
+     * @brief Construct a new data slice, with a vector of row indices on which to access the
+     * underlying data.
+     *
+     * @tparam CTX_T
+     * @param ctx
+     * @param slice
+     * @param row_indices
+     */
+    t_data_slice(
+        std::shared_ptr<CTX_T> ctx,
+        t_uindex start_row,
+        t_uindex end_row,
+        t_uindex start_col,
+        t_uindex end_col,
+        t_uindex row_offset,
+        t_uindex col_offset,
+        const std::vector<t_tscalar>& slice, 
+        const std::vector<std::vector<t_tscalar>>& column_names,
+        const std::vector<t_uindex>& column_indices);
 
     ~t_data_slice();
 
@@ -85,8 +105,10 @@ public:
     const std::vector<t_uindex>& get_column_indices() const;
     t_get_data_extents get_data_extents() const;
     t_uindex get_stride() const;
-    bool is_column_only() const;
     t_uindex num_rows() const;
+    t_uindex get_row_offset() const;
+    t_uindex get_col_offset() const;
+    bool is_column_only() const;
 
 private:
     /**

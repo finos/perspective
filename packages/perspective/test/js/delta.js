@@ -226,6 +226,7 @@ module.exports = perspective => {
                     row_pivots: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
+                console.log(await view.schema());
                 view.on_update(
                     async function(delta) {
                         const expected = [

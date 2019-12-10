@@ -220,8 +220,8 @@ to_arrow_zero(
     std::int32_t start_col,
     std::int32_t end_col
 ) {
-    std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
-    return py::bytes(s);
+    std::shared_ptr<std::string> s = view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*s);
 }
 
 py::bytes
@@ -232,8 +232,8 @@ to_arrow_one(
     std::int32_t start_col, 
     std::int32_t end_col
 ) {
-    std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
-    return py::bytes(s);
+    std::shared_ptr<std::string> s = view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*s);
 }
 
 py::bytes
@@ -244,8 +244,8 @@ to_arrow_two(
     std::int32_t start_col, 
     std::int32_t end_col
 ) {
-    std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
-    return py::bytes(s);
+    std::shared_ptr<std::string> s = view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*s);
 }
 
 

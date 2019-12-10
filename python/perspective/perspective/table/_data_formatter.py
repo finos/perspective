@@ -136,9 +136,9 @@ def _parse_format_options(view, options):
     '''Given a user-provided options dictionary, extract the useful values.'''
     max_cols = view.num_columns() + (1 if view._sides > 0 else 0)
     return {
-        "start_row": options.get("start_row", 0),
+        "start_row": max(options.get("start_row", 0), 0),
         "end_row": min(options.get("end_row", view.num_rows()), view.num_rows()),
-        "start_col": options.get("start_col", 0),
+        "start_col": max(options.get("start_col", 0), 0),
         "end_col": min(options.get("end_col", max_cols) * (view._num_hidden_cols() + 1), max_cols),
         "index": options.get("index", False),
         "leaves_only": options.get("leaves_only", False),

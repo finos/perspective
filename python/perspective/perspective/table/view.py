@@ -312,6 +312,7 @@ class View(object):
 
     def to_arrow(self, **kwargs):
         options = _parse_format_options(self, kwargs)
+        print(options)
         if self._sides == 0:
             return to_arrow_zero(self._view, options["start_row"], options["end_row"], options["start_col"], options["end_col"])
         elif self._sides == 1:

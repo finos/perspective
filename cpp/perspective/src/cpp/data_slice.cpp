@@ -16,7 +16,7 @@ template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
     t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
     t_uindex col_offset, const std::vector<t_tscalar>& slice,
-    std::vector<std::vector<t_tscalar>> column_names)
+    const std::vector<std::vector<t_tscalar>>& column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -33,7 +33,8 @@ template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
     t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
     t_uindex col_offset, const std::vector<t_tscalar>& slice,
-    std::vector<std::vector<t_tscalar>> column_names, std::vector<t_uindex> column_indices)
+    const std::vector<std::vector<t_tscalar>>& column_names,
+    const std::vector<t_uindex>& column_indices)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -45,29 +46,6 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
     , m_column_names(column_names)
     , m_column_indices(column_indices) {
     m_stride = m_end_col - m_start_col;
-}
-
-/**
- * @brief Construct a new data slice, with a vector of row indices on which to access the
- * underlying data.
- *
- * @tparam CTX_T
- * @param ctx
- * @param slice
- * @param row_indices
- */
-template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(
-    std::shared_ptr<CTX_T> ctx, const std::vector<t_tscalar>& slice, t_uindex end_row)
-    : m_ctx(ctx)
-    , m_end_row(end_row)
-    , m_slice(slice) {
-    m_start_row = 0;
-    m_start_col = 0;
-    m_end_col = m_ctx->get_column_count();
-    m_stride = m_end_col;
-    m_row_offset = 0;
-    m_col_offset = 0;
 }
 
 template <typename CTX_T>
@@ -165,6 +143,18 @@ template <typename CTX_T>
 t_uindex
 t_data_slice<CTX_T>::get_stride() const {
     return m_stride;
+}
+
+template <typename CTX_T>
+t_uindex
+t_data_slice<CTX_T>::get_row_offset() const {
+    return m_row_offset;
+}
+
+template <typename CTX_T>
+t_uindex
+t_data_slice<CTX_T>::get_col_offset() const {
+    return m_col_offset;
 }
 
 template <typename CTX_T>

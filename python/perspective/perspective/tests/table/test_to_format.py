@@ -467,6 +467,16 @@ class TestToFormat(object):
         )
         assert records == [{"a": 3, "b": 4}]
 
+    def test_to_records_start_row_end_row_equiv(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_row=1,
+            end_row=1
+        )
+        assert records == []
+
     # start_col/end_col
 
     def test_to_records_zero_over_max_col(self):
@@ -560,6 +570,16 @@ class TestToFormat(object):
             assert view.to_records() == [{"a": 1, "c": 3, "b": 2}, {"a": 3, "c": 5, "b": 4}]
         else:
             assert records == [{"b": 2}, {"b": 4}]
+
+    def test_to_records_start_col_end_col_equiv(self):
+        data = [{"a": 1, "b": 2, "c": 3}, {"a": 3, "b": 4, "c": 5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=1,
+            end_col=1
+        )
+        assert records == [{}, {}]
 
     # to csv
 

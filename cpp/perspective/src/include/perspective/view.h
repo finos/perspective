@@ -119,19 +119,35 @@ public:
 
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format 
-     * as a bytestring.
+     * as a bytestring. Using start/end row and column, retrieve a data
+     * slice from the view and serialize it using `to_arrow_helper`.
      * 
      * @param start_row
      * @param end_row
      * @param start_col 
      * @param end_col 
-     * @return std::string 
+     * @return std::shared_ptr<std::string>
      */
-    std::string to_arrow(
+    std::shared_ptr<std::string> to_arrow(
         std::int32_t start_row,
         std::int32_t end_row,
         std::int32_t start_col,
         std::int32_t end_col) const;
+
+    /**
+     * @brief Serializes a given data slice into the Apache Arrow format. Can
+     * be directly called with a pointer to a data slice in order to serialize
+     * it to Arrow.
+     * 
+     * @param start_row
+     * @param end_row
+     * @param start_col 
+     * @param end_col 
+     * @return std::shared_ptr<std::string>
+     */
+    std::shared_ptr<std::string>
+    data_slice_to_arrow(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
     // Delta calculation
     bool _get_deltas_enabled() const;
@@ -172,6 +188,14 @@ public:
      */
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
+    /**
+     * @brief Returns an Arrow-encoded string of the dataset from the rows
+     * that have been changed by a call to `update()`.
+     * 
+     * @return std::shared_ptr<std::string> 
+     */
+    std::shared_ptr<std::string> get_row_delta() const;
+
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::vector<std::string> get_row_pivots() const;
@@ -181,7 +205,6 @@ public:
     std::vector<t_sortspec> get_sort() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
-    std::shared_ptr<t_data_slice<CTX_T>> get_row_delta() const;
     t_dtype get_column_dtype(t_uindex idx) const;
     bool is_column_only() const;
 
