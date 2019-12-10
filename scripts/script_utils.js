@@ -216,13 +216,53 @@ exports.docker = function docker(image = "puppeteer") {
     console.log(`-- Creating perspective/${image} docker image`);
     const IS_WRITE = getarg("--write") || process.env.WRITE_TESTS;
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
-    const PACKAGE = process.env.PACKAGE;
+    const PACKAGE = process.env.PACKAGE || "";
     const CWD = process.cwd();
-    return bash`docker run -it --rm -eWRITE_TESTS=${IS_WRITE} \
-        -ePACKAGE="${PACKAGE}" -v${CWD}:/usr/src/app/perspective \
+    const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true: false;
+    let env_vars =  ` -eWRITE_TESTS=${IS_WRITE} \
+        -ePACKAGE="${PACKAGE}" `;
+    if (IS_MANYLINUX) {
+        console.log(`-- Using manylinux build`);
+        env_vars += ` -ePSP_MANYLINUX=1 `;
+    }
+
+    let ret = bash`docker run -it --rm \
+        ${env_vars} \
+        -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" perspective/${image}`;
+        --cpus="${CPUS}.0" timkpaine/${image}`;
+    return ret;
 };
+
+/**
+ * Get the docker image to use for the given image/python combination
+ *
+ * @param {string} image The Docker image name.
+ * @param {string} python The python version requested
+ * @returns {string} The docker image to use
+ */
+exports.python_image = function python_image(image = "", python = "") {
+    console.log(`-- Getting image for image: '${image}' and python: '${python}'`);
+    let IMAGE;
+    if (python == "python2") {
+        if (image =="manylinux2010") {
+            return "manylinux2010py2";
+        } else if (image == "manylinux2014") {
+            throw "Python2 not supported for manylinux2014";
+        } else {
+            return "python2";
+        }
+    } else if (python == "python3.8") {
+        throw "Python 3.8 not implemented yet";
+    } else {
+        if (image == "manylinux2010" || image == "manylinux2014") {
+            return image;
+        } else {
+            return "python";
+        }
+    }
+};
+
 
 /*******************************************************************************
  *

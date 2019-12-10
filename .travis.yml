@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 language: node_js
 node_js: "10"
 sudo: required
@@ -6,59 +6,125 @@ sudo: required
 matrix:
   fast_finish: true
   include:
+    # WASM Build
     - node_js: "10"
       language: node_js
-      env: TEST=WASM
+      env: TEST=WASM PSP_DOCKER=1
       services: docker
 
+    # Vanilla C++ Linux build
     - language: c++
-      env: TEST=CPP
+      env: TEST=CPP PSP_DOCKER=1
       services: docker
 
-    - python: "3.6"
+    # Vanilla C++ Mac build
+    - language: c++
+      env: TEST=CPP_OSX
+      os: osx
+      osx_image: xcode11.2
+
+    # Python 3.7 Linux build
+    - python: "3.7"
       language: python
-      env: TEST=PYTHON
+      env: TEST=PYTHON PSP_DOCKER=1
       cache: pip
       services: docker
 
+    # Python 3.7 Linux manylinux2010 build
+    - python: "3.7"
+      language: python
+      env: TEST=PYTHON_MANYLINUX2010 PSP_DOCKER=1
+      cache: pip
+      services: docker
+
+    # Python 3.7 Linux manylinux2014 build
+    - python: "3.7"
+      language: python
+      env: TEST=PYTHON_MANYLINUX2014 PSP_DOCKER=1
+      cache: pip
+      services: docker
+
+    # Python 3.7 Mac build
+    - env: TEST=PYTHON
+      cache: pip
+      os: osx
+      osx_image: xcode11.2
+
+    # Python 2.7 Linux build
     - python: "2.7"
       language: python
-      env: TEST=PYTHON2
+      env: TEST=PYTHON2 PSP_DOCKER=1
       cache: pip
       services: docker
 
-    - language: c++
-      env: TEST=CPP_OSX
-      os: osx
-
-  allow_failures:
-    - language: c++
-      env: TEST=CPP
+    # Python 2.7 Linux manylinux2010 build
+    - python: "2.7"
+      language: python
+      env: TEST=PYTHON2_MANYLINUX2010 PSP_DOCKER=1
+      cache: pip
       services: docker
 
-    - language: c++
-      env: TEST=CPP_OSX
+    # Python 2.7 Mac build
+    - env: TEST=PYTHON2
+      cache: pip
       os: osx
+      osx_image: xcode11.2
 
 env:
   global:
     - EM_USE_GLOBAL_CACHE=1
 
+addons:
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libboost-all-dev
+      - libtbb-dev
+      - gcc-4.9
+      - g++-4.9
+  homebrew:
+    update: true
+    packages:
+      - python
+      - python2
+      - cmake
+      - boost
+      - tbb
+      - flatbuffers
+      - rapidjson
+
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export CUR_DIR=`pwd` && wget "https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz" -O /tmp/flatbuffers.tar.gz && cd /tmp && tar xfa /tmp/flatbuffers.tar.gz && cd flatbuffers-1.11.0 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DFLATBUFFERS_BUILD_SHAREDLIB=ON && sudo make install && sudo cp flatc /usr/bin && cd $CUR_DIR && sudo rm -rf /tmp/flatbuffers.tar.gz /tmp/flatbuffers-1.11.0; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget "https://cmake.org/files/v3.15/cmake-3.15.5-Linux-x86_64.tar.gz" -O /tmp/cmake.tar.gz  && cd /tmp && tar xfz cmake.tar.gz && sudo cp -r cmake-3.15.5-Linux-x86_64/* /usr && sudo rm -rf /usr/local/cmake-3.12.4 /tmp/cmake.tar.gz /tmp/cmake-3.15.5-Linux-x86_64 && cd $CUR_DIR; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+
 install:
-  - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
   - if [ "$TEST" = "PYTHON" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "PYTHON" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
   - if [ "$TEST" = "PYTHON2" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "PYTHON2" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
+  - if [ "$TEST" = "PYTHON_MANYLINUX2010" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "PYTHON_MANYLINUX2010" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
+  - if [ "$TEST" = "PYTHON_MANYLINUX2014" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "PYTHON_MANYLINUX2014" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
+  - if [ "$TEST" = "PYTHON2_MANYLINUX2010" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "PYTHON2_MANYLINUX2010" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
   - node --version
   - yarn
 
 script:
   - touch .perspectiverc
-  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn lint; fi
-  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn build_js; fi
-  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn test_js --quiet; fi
-  - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi
-  - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn test_cpp; fi
-  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn build_python --ci; fi
-  - if [ "$TEST" = "PYTHON2" ]; then PSP_DOCKER=1 yarn build_python --ci --python2; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi
+  - if [ "$TEST" = "WASM" ]; then yarn lint; fi
+  - if [ "$TEST" = "WASM" ]; then yarn build_js; fi
+  - if [ "$TEST" = "WASM" ]; then yarn test_js --quiet; fi
+  - if [ "$TEST" = "CPP" ]; then yarn build_cpp --ci; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp --ci; fi
+  - if [ "$TEST" = "PYTHON" ]; then yarn build_python --ci; fi
+  - if [ "$TEST" = "PYTHON2" ]; then yarn build_python --ci --python2; fi
+  - if [ "$TEST" = "PYTHON_MANYLINUX2010" ]; then yarn build_python --ci --manylinux2010; fi
+  - if [ "$TEST" = "PYTHON_MANYLINUX2014" ]; then yarn build_python --ci --manylinux2014; fi
+  - if [ "$TEST" = "PYTHON2_MANYLINUX2010" ]; then yarn build_python --ci --manylinux2010 --python2; fi

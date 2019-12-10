@@ -24,7 +24,7 @@ function docker(image = "emsdk") {
     return cmd;
 }
 
-let flags = " -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1 -DPSP_CPP_BUILD_STRICT=1";
+let flags = " -DPSP_WASM_BUILD=OFF -DPSP_CPP_BUILD=ON -DPSP_CPP_BUILD_TESTS=ON -DPSP_CPP_BUILD_STRICT=OFF";
 
 try {
     execute("mkdir -p cpp/perspective/cppbuild");
