@@ -273,7 +273,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                             const viewer = document.querySelector("perspective-viewer");
                             viewer._show_config = true;
                             viewer.restore(x);
-                            viewer.notifyResize();
+                            await viewer.notifyResize();
                             await viewer.toggleConfig();
                         }, OLD_SETTINGS[test_root + _url]);
                     }

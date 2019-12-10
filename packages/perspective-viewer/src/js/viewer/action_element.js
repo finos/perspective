@@ -23,21 +23,34 @@ export class ActionElement extends DomElement {
         this.shadowRoot.querySelector("#app").classList.remove("show_menu");
     }
 
-    _toggle_config(event) {
+    async _toggle_config(event) {
         if (!event || event.button !== 2) {
             if (this._show_config) {
-                this._side_panel.style.display = "none";
-                this._top_panel.style.display = "none";
-                this.removeAttribute("settings");
+                const panel = this.shadowRoot.querySelector("#pivot_chart_container");
+                this._datavis.style.width = `${panel.clientWidth + this._side_panel.clientWidth}px`;
+                this._datavis.style.height = `${panel.clientHeight + this._top_panel.clientHeight}px`;
+                try {
+                    await this._plugin.resize.call(this);
+                } finally {
+                    this._side_panel.style.display = "none";
+                    this._top_panel.style.display = "none";
+                    this._datavis.style.width = "100%";
+                    this._datavis.style.height = "100%";
+                    this.removeAttribute("settings");
+                    this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: !this._show_config}));
+                }
             } else {
                 this._side_panel.style.display = "flex";
                 this._top_panel.style.display = "flex";
-                this.toggleAttribute("settings", true);
+                this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: !this._show_config}));
+                try {
+                    await this._plugin.resize.call(this);
+                } finally {
+                    this.toggleAttribute("settings", true);
+                }
             }
             this._show_config = !this._show_config;
-            this._plugin.resize.call(this, true);
             this._hide_context_menu();
-            this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
         }
     }
 
@@ -219,7 +232,7 @@ export class ActionElement extends DomElement {
             const new_width = Math.max(0, Math.min(width + (event.clientX - start), this.offsetWidth - 10));
             this._side_panel.style.width = `${new_width}px`;
             if (this._plugin) {
-                this._resize_handler();
+                this.notifyResize();
             }
         };
         const stop = () => {

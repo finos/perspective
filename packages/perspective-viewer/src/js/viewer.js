@@ -10,7 +10,7 @@
 import "@webcomponents/webcomponentsjs";
 import "./polyfill.js";
 
-import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import {COMPUTATIONS} from "./computed_column.js";
 import "./row.js";
@@ -490,10 +490,11 @@ class PerspectiveViewer extends ActionElement {
      * Determine whether to reflow the viewer and redraw.
      *
      */
-    notifyResize() {
+    @throttlePromise
+    async notifyResize(immediate) {
         this._check_responsive_layout();
         if (!document.hidden && this.offsetParent) {
-            this._plugin.resize.call(this);
+            await this._plugin.resize.call(this, immediate);
         }
     }
 
@@ -712,9 +713,11 @@ class PerspectiveViewer extends ActionElement {
 
     /**
      * Opens/closes the element's config menu.
+     *
+     * @async
      */
-    toggleConfig() {
-        this._toggle_config();
+    async toggleConfig() {
+        await this._toggle_config();
     }
 }
 
