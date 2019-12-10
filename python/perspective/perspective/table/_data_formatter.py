@@ -52,7 +52,6 @@ def to_format(options, view, output_format):
 
         for cidx in range(options["start_col"], options["end_col"]):
             name = COLUMN_SEPARATOR_STRING.join([n.to_string(False) for n in column_names[cidx]])
-            print(name)
 
             if _mod((cidx - (1 if view._sides > 0 else 0)), (num_columns + num_hidden)) >= len(view._config.get_columns()):
                 # don't emit columns used for hidden sort

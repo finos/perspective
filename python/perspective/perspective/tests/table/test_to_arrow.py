@@ -94,17 +94,21 @@ class TestToArrow(object):
         }
         tbl = Table(data)
         view = tbl.view(row_pivots=["a"])
-        arrow = view.to_dict()
-        print(arrow)
+        arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
-            
+            "a": int,
+            "b": int,
+            "c": int
         }
+        d = view.to_dict()
+        d.pop("__ROW_PATH__")
+        assert tbl2.view().to_dict() == d
 
     def test_to_arrow_two_symmetric(self):
         data = {
             "a": [1, 2, 3, 4],
-            "b": ["a", "b", "c", "d"],
+            "b": ["hello", "world", "hello2", "world2"],
             "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
         }
         tbl = Table(data)
@@ -112,8 +116,22 @@ class TestToArrow(object):
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
-            
+            "hello|a": int,
+            "hello|b": int,
+            "hello|c": int,
+            "world|a": int,
+            "world|b": int,
+            "world|c": int,
+            "hello2|a": int,
+            "hello2|b": int,
+            "hello2|c": int,
+            "world2|a": int,
+            "world2|b": int,
+            "world2|c": int,
         }
+        d = view.to_dict()
+        d.pop("__ROW_PATH__")
+        assert tbl2.view().to_dict() == d
 
     def test_to_arrow_column_only_symmetric(self):
         data = {

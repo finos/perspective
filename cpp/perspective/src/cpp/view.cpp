@@ -14,6 +14,26 @@
 
 
 namespace perspective {
+
+std::string
+join_column_names(
+    const std::vector<t_tscalar>& names, const std::string& separator) {
+    if (names.size() == 0) {
+        return "";
+    } else if (names.size() == 1) {
+        return names.at(0).to_string();
+    } else {
+        std::ostringstream ss;
+        for (auto i = 0; i < names.size() - 1; ++i) {
+            std::string str = names.at(i).to_string();
+            ss << str;
+            ss << separator;
+        }
+        ss << names.at(names.size() - 1).to_string();
+        return ss.str();
+    }
+}
+
 template <typename CTX_T>
 View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
     std::string separator, t_view_config view_config)
@@ -348,35 +368,29 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     std::shared_ptr<t_data_slice<CTX_T>> data_slice = get_data(
         start_row, end_row, start_col, end_col
     );
-    std::vector<std::vector<t_tscalar>> names = column_names();
-    std::map<std::string, std::string> view_schema = schema();
-
+    std::vector<std::vector<t_tscalar>> names = data_slice->get_column_names();
     std::vector<std::shared_ptr<::arrow::Array>> vectors;
     std::vector<std::shared_ptr<::arrow::Field>> fields;
 
-    std::cout << names << std::endl;
+    if (sides() > 0) {
+        // increment start col to skip `__ROW_PATH__`
+        start_col++;
+    }
 
     for (auto i = start_col; i < end_col; ++i) {
-        std::cout << "col: " << i << std::endl;
-        // TODO: fix for 1/2 sided ctx
         std::vector<t_tscalar> col_path = names.at(i);
         std::string column_name = col_path.at(col_path.size() - 1).to_string();
-        std::string type = view_schema.at(column_name);
+        t_dtype dtype = get_column_dtype(i);
         std::string name;
 
-        std::cout << col_path << std::endl;
-        // Calculate the "concat'd" column header 
-        if (col_path.size() > 1) {
-            // TODO create the column name via concatenation
-            // joining in C++ is weird and hard lol
-            PSP_COMPLAIN_AND_ABORT("No column pivot support yet")
+        if (sides() > 1) {
+            name = join_column_names(col_path, m_separator);
         } else {
-            name.assign(col_path.at(col_path.size() - 1).to_string());
+            name = col_path.at(col_path.size() - 1).to_string();
         }
 
-        std::cout << name << ": " << type << std::endl;
+        std::cout << name << ": " << get_dtype_descr(dtype) << std::endl;
         std::shared_ptr<::arrow::Array> arr;
-        t_dtype dtype = get_column_dtype(i);
         switch (dtype) {
             case DTYPE_INT8: {
                 fields.push_back(::arrow::field(name, ::arrow::int8()));
@@ -433,7 +447,8 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
             case DTYPE_STR:
             default: {
                 std::stringstream ss;
-                ss << "Cannot serialize column of type `"
+                ss << "Cannot serialize column `" 
+                   << name << "` of type `"
                    << get_dtype_descr(dtype)
                    << "` to Arrow format." << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -480,34 +495,6 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     writer->Close();
     std::cout << "buffer size: " << buffer->size() << ", capacity: " << buffer->capacity() << std::endl;
     return buffer->ToString();
-    
-    //std::cout << buffer->ToString() << std::endl;
-
-        //     if (type === "float") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
-        //     } else if (type === "integer") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
-        //     } else if (type === "boolean") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
-        //     } else if (type === "date" || type === "datetime") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
-        //     } else if (type === "string") {
-        //         const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
-        //         const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
-        //         vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
-        //     } else {
-        //         throw new Error(`Type ${type} not supported`);
-        //     }
-        // }
-
-    //return nullptr;
-
-        // return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
 };
 
 // Delta calculation

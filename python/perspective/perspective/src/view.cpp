@@ -245,7 +245,6 @@ to_arrow_two(
     std::int32_t end_col
 ) {
     std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
-    std::cout << s << std::endl;
     return py::bytes(s);
 }
 

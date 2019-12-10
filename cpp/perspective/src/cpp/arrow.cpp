@@ -455,9 +455,7 @@ namespace arrow {
             t_tscalar scalar = data[idx];
             ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                // TODO: investigate `t_date` and see if we can't write faster using date64
                 t_date val = scalar.get<t_date>();
-
                 // years are signed, while month/days are unsigned
                 date::year year {val.year()};
                 date::month month {static_cast<std::uint32_t>(val.month())};
