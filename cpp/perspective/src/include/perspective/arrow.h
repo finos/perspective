@@ -28,48 +28,16 @@ namespace perspective {
 namespace arrow {
 
     /**
-     * @brief Retrieve and cast a `t_scalar` value.
-     *
-     * @tparam F
-     * @tparam F
-     * @param t
-     * @return T
+     * @brief Return a value from a `t_scalar` cast to `T`.
+     * 
+     * @tparam DataType
+     * @tparam ArrowDataType
+     * @tparam ArrowValueType
+     * @param t 
+     * @return ArrowValueType 
      */
-
-    template <typename F, typename T = F>
+    template <typename T>
     T get_scalar(t_tscalar& t);
-
-    template <typename T, typename A, typename F = T>
-    std::shared_ptr<::arrow::Array>
-    col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
-        int data_size = data.size() / stride;
-        // std::vector<T> vals;
-        // vals.reserve(data.size());
-        ::arrow::TypedBufferBuilder<T> value_builder;
-
-        // Validity map must have a length that is a multiple of 64
-        int nullSize = ceil(data_size / 64.0) * 8;
-        int nullCount = 0;
-        std::vector<std::uint8_t> validityMap;
-        validityMap.resize(nullSize);
-
-        for (int idx = offset; idx < data_size; idx += stride) {
-            t_tscalar scalar = data[idx];
-            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                value_builder.Append(get_scalar<F, T>(scalar));
-                // Mark the slot as non-null (valid)
-                validityMap[idx / 8] |= 1 << (idx % 8);
-            } else {
-                value_builder.Append({});
-                nullCount++;
-            }
-        }
-        std::shared_ptr<::arrow::Buffer> null_buf = std::make_shared<::arrow::Buffer>(&validityMap[0], validityMap.size());
-        std::shared_ptr<::arrow::Buffer> values;
-        value_builder.Finish(&values);
-        std::shared_ptr<A> arr = std::make_shared<A>(data_size, values, null_buf, nullCount);
-        return arr;
-    }
 
     class PERSPECTIVE_EXPORT ArrowLoader {
     public:
@@ -94,6 +62,78 @@ namespace arrow {
         std::vector<std::string> m_names;
         std::vector<t_dtype> m_types;
     };
+
+    /**
+     * @brief Build an `arrow::Array` from a column typed as `DTYPE_BOOL.`
+     * 
+     * @param data 
+     * @param offset 
+     * @param stride 
+     */
+    std::shared_ptr<::arrow::Array>
+    boolean_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride);
+
+    /**
+     * @brief Build an `arrow::Array` from a column typed as `DTYPE_DATE.` Separated out from the main
+     * templated `col_to_array` as `t_date` is an `uint32_t` that needs to be written into the `arrow::Array`
+     * as an `int32_t`.
+     * 
+     * @param data 
+     * @param offset 
+     * @param stride 
+     */
+    std::shared_ptr<::arrow::Array>
+    date_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride);
+
+    /**
+     * @brief Build an `arrow::Array` from a column typed as `DTYPE_TIME`. Separated out from the main
+     * templated `col_to_array` as `arrow::timestamp()` has parameters that need to be filled.
+     * 
+     * @param data 
+     * @param offset 
+     * @param stride 
+     */
+    std::shared_ptr<::arrow::Array>
+    timestamp_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride);
+
+    /**
+     * @brief Build an `arrow::Array` from a column contained in `data`. Column building 
+     * methods read from the vector of scalars that make up the data slice, as `t_data_slice` 
+     * is templated on the context type and we'd like to avoid template hell.
+     * 
+     * @tparam ArrowDataType
+     * @param data 
+     * @param offset 
+     * @param stride 
+     * @return std::shared_ptr<::arrow::Array> 
+     */
+    template <typename ArrowDataType, typename ArrowValueType>
+    std::shared_ptr<::arrow::Array>
+    col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        // NumericBuilder encompasses the most types (int/float/date/datetime)
+        ::arrow::NumericBuilder<ArrowDataType> array_builder;
+
+        // TODO: write to Arrow array in bulk
+        for (int idx = offset; idx < data.size(); idx += stride) {
+            ::arrow::Status s;
+            t_tscalar scalar = data[idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                ArrowValueType val = get_scalar<ArrowValueType>(scalar);
+                s = array_builder.Append(val);
+            } else {
+                s = array_builder.AppendNull();
+            }
+            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
+        }
+        
+        // Point to base `arrow::Array` instead of derived, so we don't have to template the caller.
+        std::shared_ptr<::arrow::Array> array;
+        ::arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(status.message());
+        }
+        return array;
+    }
 
 } // namespace arrow
 } // namespace perspective

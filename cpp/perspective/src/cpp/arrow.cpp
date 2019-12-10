@@ -16,6 +16,7 @@ using namespace ::arrow;
 namespace perspective {
 namespace arrow {
 
+    // TODO: unsure about efficacy of these functions when get<T> exists
     template <>
     double
     get_scalar<double>(t_tscalar& t) {
@@ -24,7 +25,7 @@ namespace arrow {
     template <>
     float
     get_scalar<float>(t_tscalar& t) {
-        return t.to_double();
+        return static_cast<float>(t.to_double());
     }
     template <>
     std::uint8_t
@@ -40,6 +41,11 @@ namespace arrow {
     std::int16_t
     get_scalar<std::int16_t>(t_tscalar& t) {
         return static_cast<std::int16_t>(t.to_int64());
+    }
+    template <>
+    std::uint16_t
+    get_scalar<std::uint16_t>(t_tscalar& t) {
+        return static_cast<std::uint16_t>(t.to_int64());
     }
     template <>
     std::int32_t
@@ -62,11 +68,18 @@ namespace arrow {
         return static_cast<std::uint64_t>(t.to_int64());
     }
     template <>
-    double
-    get_scalar<t_date, double>(t_tscalar& t) {
-        auto x = t.to_uint64();
-        return *reinterpret_cast<double*>(&x);
+    bool
+    get_scalar<bool>(t_tscalar& t) {
+        return t.get<bool>();
     }
+    template <>
+    std::string
+    get_scalar<std::string>(t_tscalar& t) {
+        return t.to_string();
+    }
+
+    ArrowLoader::ArrowLoader() {}
+    ArrowLoader::~ArrowLoader() {}
     
     t_dtype
     convert_type(const std::string& src) {
@@ -97,73 +110,6 @@ namespace arrow {
         return DTYPE_STR;
     }
 
-
-    
-    template <>
-    std::shared_ptr<::arrow::Array>
-    col_to_array<std::string, ::arrow::DictionaryArray, std::string>(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
-        int data_size = data.size() / stride;
-
-        t_vocab vocab;
-        vocab.init(false);
-
-        int nullSize = ceil(data_size / 64.0) * 2;
-        int nullCount = 0;
-        std::vector<std::int32_t> validityMap; // = new std::uint32_t[nullSize];
-        validityMap.resize(nullSize);
-        std::vector<std::int32_t> indexArray;
-        indexArray.reserve(data_size);
-
-        for (int idx = offset; idx < data_size; idx += stride) {
-            t_tscalar scalar = data[idx];
-            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                auto adx = vocab.get_interned(scalar.to_string());
-                indexArray[idx] = adx;
-                validityMap[idx / 32] |= 1 << (idx % 32);
-            } else {
-                nullCount++;
-            }
-        }
-        std::vector<std::int8_t> dictArray;
-        dictArray.reserve(vocab.get_vlendata()->size() - vocab.get_vlenidx());
-        std::vector<std::int32_t> offsets;
-        offsets.reserve(vocab.get_vlenidx() + 1);
-        std::int32_t index = 0;
-        for (auto i = 0; i < vocab.get_vlenidx(); i++) {
-            const char* str = vocab.unintern_c(i);
-            offsets.push_back(index);
-            while (*str) {
-                dictArray[index] = (*str++);
-                index++;
-            }
-        }
-        offsets.push_back(index);
-
-        return nullptr;
-
-        // auto dict = ArrayFromJSON(utf8(), "[\"foo\", \"bar\", \"baz\"]");
-        // auto dict_type = dictionary(int16(), utf8());
-        // auto indices = ArrayFromJSON(int16(), "[1, 2, null, 0, 2, 0]");
-        // auto arr = std::make_shared<DictionaryArray>(dict_type, indices, dict);
-
-  // The indices array should not have dictionary data
-
-        // t_val arr = t_val::global("Array").new_();
-        // arr.call<void>("push", dictArray);
-        // arr.call<void>(
-        //     "push", js_typed_array::Int32Array.new_(vector_to_typed_array(offsets)["buffer"]));
-        // arr.call<void>("push", indexArray);
-        // arr.call<void>("push", nullCount);
-        // arr.call<void>("push", vector_to_typed_array(validityMap));
-        // return arr;
-    }
-
-
-
-
-    ArrowLoader::ArrowLoader() {}
-    ArrowLoader::~ArrowLoader() {}
-
     void
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
         io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
@@ -171,8 +117,9 @@ namespace arrow {
             std::shared_ptr<ipc::RecordBatchFileReader> batch_reader;
             ::arrow::Status status = ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
             if (!status.ok()) {
-                std::cerr << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(status.message());
+                std::stringstream ss;
+                ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             } else {
                 std::vector<std::shared_ptr<RecordBatch>> batches;
                 auto num_batches = batch_reader->num_record_batches();
@@ -187,21 +134,25 @@ namespace arrow {
                 }
                 status = ::arrow::Table::FromRecordBatches(batches, &m_table);
                 if (!status.ok()) {
-                    std::cerr << status.message() << std::endl;
-                    PSP_COMPLAIN_AND_ABORT(status.message());
+                    std::stringstream ss;
+                    ss << "Failed to create Table from RecordBatches: "
+                       << status.message() << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
                 };
             };
         } else {
             std::shared_ptr<ipc::RecordBatchReader> batch_reader;
             ::arrow::Status status = ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
             if (!status.ok()) {
-                std::cerr << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(status.message());
+                std::stringstream ss;
+                ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             } else { 
                 status = batch_reader->ReadAll(&m_table);
                 if (!status.ok()) {
-                    std::cerr << status.message() << std::endl;
-                    PSP_COMPLAIN_AND_ABORT(status.message());
+                    std::stringstream ss;
+                    ss << "Failed to read batch: " << status.message() << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
                 };
             }
         }
@@ -398,6 +349,7 @@ namespace arrow {
                     auto ymd = date::year_month_day{
                         date::sys_days{days}
                     };
+                    // years are signed, month/day are unsigned
                     std::int32_t year = static_cast<std::int32_t>(ymd.year());
                     std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
                     std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
@@ -468,6 +420,153 @@ namespace arrow {
             offset += len;
         }
     }
+
+    // TODO: split up arrow-loader and arrow-writer
+    std::shared_ptr<::arrow::Array>
+    boolean_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        ::arrow::BooleanBuilder array_builder;
+
+        for (int idx = offset; idx < data.size(); idx += stride) {
+            t_tscalar scalar = data[idx];
+            ::arrow::Status s;
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                // TODO: convert to unsafe writes, just extend underlying array
+                s = array_builder.Append(get_scalar<bool>(scalar));
+            } else {
+                s = array_builder.AppendNull();
+            }
+
+            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
+        }
+        
+        std::shared_ptr<::arrow::Array> array;
+        ::arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(status.message());
+        }
+        return array;
+    }
+
+    std::shared_ptr<::arrow::Array>
+    date_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        ::arrow::Date32Builder array_builder;
+    
+        for (int idx = offset; idx < data.size(); idx += stride) {
+            t_tscalar scalar = data[idx];
+            ::arrow::Status s;
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                // TODO: investigate `t_date` and see if we can't write faster using date64
+                t_date val = scalar.get<t_date>();
+
+                // years are signed, while month/days are unsigned
+                date::year year {val.year()};
+                date::month month {static_cast<std::uint32_t>(val.month())};
+                date::day day {static_cast<std::uint32_t>(val.day())}; 
+                date::year_month_day ymd(year, month, day);
+                date::sys_days days_since_epoch = ymd;
+                s = array_builder.Append(
+                    static_cast<std::int32_t>(days_since_epoch.time_since_epoch().count()));
+            } else {
+                s = array_builder.AppendNull();
+            }
+
+            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
+        }
+        
+        std::shared_ptr<::arrow::Array> array;
+        ::arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(status.message());
+        }
+        return array;
+    }
+
+    std::shared_ptr<::arrow::Array>
+    timestamp_col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        // TimestampType requires parameters, so initialize them here
+        std::shared_ptr<::arrow::DataType> type = ::arrow::timestamp(::arrow::TimeUnit::MILLI);
+        ::arrow::TimestampBuilder array_builder(type, ::arrow::default_memory_pool());
+
+        for (int idx = offset; idx < data.size(); idx += stride) {
+            t_tscalar scalar = data[idx];
+            ::arrow::Status s;
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                s = array_builder.Append(get_scalar<std::int64_t>(scalar));
+            } else {
+                s = array_builder.AppendNull();
+            }
+
+            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
+        }
+        
+        std::shared_ptr<::arrow::Array> array;
+        ::arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(status.message());
+        }
+        return array;
+    }
+
+    std::shared_ptr<::arrow::Array>
+    col_to_dictionary_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        return nullptr;
+        /*int data_size = data.size() / stride;
+
+        t_vocab vocab;
+        vocab.init(false);
+
+        int nullSize = ceil(data_size / 64.0) * 2;
+        int nullCount = 0;
+        std::vector<std::int32_t> validityMap; // = new std::uint32_t[nullSize];
+        validityMap.resize(nullSize);
+        std::vector<std::int32_t> indexArray;
+        indexArray.reserve(data_size);
+
+        for (int idx = offset; idx < data_size; idx += stride) {
+            t_tscalar scalar = data[idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                auto adx = vocab.get_interned(scalar.to_string());
+                indexArray[idx] = adx;
+                validityMap[idx / 32] |= 1 << (idx % 32);
+            } else {
+                nullCount++;
+            }
+        }
+        std::vector<std::int8_t> dictArray;
+        dictArray.reserve(vocab.get_vlendata()->size() - vocab.get_vlenidx());
+        std::vector<std::int32_t> offsets;
+        offsets.reserve(vocab.get_vlenidx() + 1);
+        std::int32_t index = 0;
+        for (auto i = 0; i < vocab.get_vlenidx(); i++) {
+            const char* str = vocab.unintern_c(i);
+            offsets.push_back(index);
+            while (*str) {
+                dictArray[index] = (*str++);
+                index++;
+            }
+        }
+        offsets.push_back(index);
+
+        return nullptr;
+
+        // auto dict = ArrayFromJSON(utf8(), "[\"foo\", \"bar\", \"baz\"]");
+        // auto dict_type = dictionary(int16(), utf8());
+        // auto indices = ArrayFromJSON(int16(), "[1, 2, null, 0, 2, 0]");
+        // auto arr = std::make_shared<DictionaryArray>(dict_type, indices, dict);
+
+  // The indices array should not have dictionary data
+
+        // t_val arr = t_val::global("Array").new_();
+        // arr.call<void>("push", dictArray);
+        // arr.call<void>(
+        //     "push", js_typed_array::Int32Array.new_(vector_to_typed_array(offsets)["buffer"]));
+        // arr.call<void>("push", indexArray);
+        // arr.call<void>("push", nullCount);
+        // arr.call<void>("push", vector_to_typed_array(validityMap));
+        // return arr;*/
+    }
+
+    // Getters
 
     std::uint32_t
     ArrowLoader::row_count() const {

@@ -110,7 +110,7 @@ public:
      * @return std::shared_ptr<t_data_slice<t_ctx0>>
      */
     std::shared_ptr<t_data_slice<CTX_T>> get_data(
-        t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col);
+        t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const;
 
     // Delta calculation
     bool _get_deltas_enabled() const;
@@ -125,8 +125,6 @@ public:
      * @return std::int32_t
      */
     std::int32_t get_row_expanded(std::int32_t ridx) const;
-
-    std::string to_arrow(std::shared_ptr<t_data_slice<CTX_T>> data_slice, std::int32_t start_col, std::int32_t end_col) const;
 
     /**
      * @brief Expands the row at "ridx".
@@ -152,6 +150,17 @@ public:
      * @param row_pivot_length
      */
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
+
+    /**
+     * @brief Serializes the `View`'s data into the Apache Arrow format as a bytestring.
+     * 
+     * @param start_row
+     * @param end_row
+     * @param start_col 
+     * @param end_col 
+     * @return std::string 
+     */
+    std::string to_arrow(std::int32_t start_row, std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) const;
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;

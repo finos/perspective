@@ -1,11 +1,11 @@
 from perspective import Table
 import os.path
 import pyarrow as pa
-FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "examples", "simple", "superstore.arrow")
+FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "examples", "simple", "date32.arrow")
 
-with open(FILE_PATH, mode='rb') as file: # b is important -> binary
+with open(FILE_PATH, mode='rb') as file:  # b is important -> binary
     tbl = Table(file.read())
-    v = tbl.view(columns=["Row ID", "Quantity"])
+    v = tbl.view()
     array = v.to_arrow()
     # print(type(array))
     # print(str(array, "utf-8", "replace"))
@@ -18,11 +18,5 @@ with open(FILE_PATH, mode='rb') as file: # b is important -> binary
     print("Successful transit!")
     print(tbl2.schema())
 
-    data = tbl2.view().to_df();
+    data = tbl2.view().to_df()
     print(data)
-
-    # reader = pa.ipc.open_stream(array)
-    # print(reader.schema)
-    # batches = [b for b in reader]
-    # print(len(batches))
-   

@@ -257,168 +257,10 @@ View<t_ctx0>::schema() const {
     return new_schema;
 }
 
-template <typename CTX_T>
-std::string
-View<CTX_T>::to_arrow(
-    std::shared_ptr<t_data_slice<CTX_T>> data_slice, 
-    std::int32_t start_col, 
-    std::int32_t end_col) const {
-
-    // const names = this._column_names();
-    // const schema = this.schema();
-
-    // const vectors = [];
-
-    // const start_col = options.start_col || 0;
-    // const end_col = options.end_col || names.length;
-
-    std::vector<std::vector<t_tscalar>> names = column_names(false, 0);
-    std::map<std::string, std::string> sch = schema();
-
-    std::vector<std::shared_ptr<::arrow::Array>> vectors;
-    std::vector<std::shared_ptr<::arrow::Field>> fields;
-
-    // for (let i = start_col; i < end_col; i++) {
-    //     const name = names[i];
-    //     const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
-    //     const type = schema[col_path[col_path.length - 1]];
-
-    if (sides() > 0) {
-        start_col++;
-        end_col++;
-    }
-
-    for (auto i = start_col; i < end_col; ++i) {
-        std::vector<t_tscalar> col_path = names.at(i);
-        std::string column_name = col_path.at(col_path.size() - 1).to_string();
-        std::string type = sch.at(column_name);
-        std::string name;
-
-        // Calculate the "concat'd" column header 
-        if (col_path.size() > 1) {
-            // TODO create the column name via concatenation
-            PSP_COMPLAIN_AND_ABORT("No column pivot support yet")
-        } else {
-            name.assign(col_path.at(col_path.size() - 1).to_string());
-        }
-
-        std::cout << name << ": " << type << std::endl;
-        
-        // const column_to_format = function(col_name, options, format_function) {
-        // const num_rows = this.num_rows();
-        // const start_row = options.start_row || 0;
-        // const end_row = options.end_row || num_rows;
-        // const names = this._column_names();
-        // let idx = names.indexOf(col_name);
-
-        // if (idx === -1) {
-        //     return undefined;
-        // }
-
-        // // mutate the column index if necessary: in pivoted views, columns start at 1
-        // const num_sides = this.sides();
-        // if (num_sides > 0) {
-        //     idx++;
-        // }
-
-        // // use a specified data slice, if provided
-        // let slice, data_slice;
-
-        // if (!options.data_slice) {
-        //     data_slice = this.get_data_slice(start_row, end_row, idx, idx + 1);
-        //     slice = data_slice.get_slice();
-        // } else {
-        //     slice = options.data_slice.get_column_slice(idx);
-        // }
-
-        // const dtype = this._View.get_column_dtype(idx);
-        
-        std::shared_ptr<::arrow::Array> arr;
-        t_dtype dtype = get_column_dtype(i);
-        switch (dtype) {
-            case DTYPE_INT32: {
-                fields.push_back(::arrow::field(name, ::arrow::int32()));
-                arr = arrow::col_to_array<std::int32_t, ::arrow::Int32Array>(data_slice->get_slice(), i, data_slice->get_stride());
-            } break;
-            case DTYPE_UINT32: {
-                fields.push_back(::arrow::field(name, ::arrow::int32()));
-                arr = arrow::col_to_array<std::uint32_t, ::arrow::Int32Array>(data_slice->get_slice(), i, data_slice->get_stride());
-            } break;
-            case DTYPE_INT64: {
-                fields.push_back(::arrow::field(name, ::arrow::int64()));
-                arr = arrow::col_to_array<std::int64_t, ::arrow::Int64Array>(data_slice->get_slice(), i, data_slice->get_stride());
-            } break;
-            case DTYPE_UINT64: {
-                fields.push_back(::arrow::field(name, ::arrow::int64()));
-                arr = arrow::col_to_array<std::uint64_t, ::arrow::Int64Array>(data_slice->get_slice(), i, data_slice->get_stride());
-            } break;
-            default: {
-                PSP_COMPLAIN_AND_ABORT("Unknown type");
-                return nullptr;
-            }
-        }
-        vectors.push_back(arr);
-
-    }
-
-    auto s = ::arrow::schema(fields);
-    std::shared_ptr<::arrow::RecordBatch> batches = ::arrow::RecordBatch::Make(s, num_rows(), vectors);
-
-    
-    std::shared_ptr<::arrow::ResizableBuffer> buffer;
-    ::arrow::AllocateResizableBuffer(0, &buffer);
-    
-    ::arrow::io::BufferOutputStream sink(buffer);    
-    
-    auto options = ::arrow::ipc::IpcOptions::Defaults();
-    // options.allow_64bit = true;
-    // options.write_legacy_ipc_format = true;
-    // options.alignment = 64;
-
-    auto res = ::arrow::ipc::RecordBatchStreamWriter::Open(&sink, s, options);
-    if (!res.ok()) {
-        PSP_COMPLAIN_AND_ABORT("Failed to write Arrow");
-        return nullptr;
-    }
-    std::shared_ptr<::arrow::ipc::RecordBatchWriter> writer = *res;
-
-    writer->WriteRecordBatch(*batches);
-    writer->Close();
-    return buffer->ToString();
-    
-    //std::cout << buffer->ToString() << std::endl;
-
-        //     if (type === "float") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
-        //     } else if (type === "integer") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
-        //     } else if (type === "boolean") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
-        //     } else if (type === "date" || type === "datetime") {
-        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
-        //     } else if (type === "string") {
-        //         const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-        //         const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
-        //         const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
-        //         vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
-        //     } else {
-        //         throw new Error(`Type ${type} not supported`);
-        //     }
-        // }
-
-    //return nullptr;
-
-        // return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
-};
-
 template <>
 std::shared_ptr<t_data_slice<t_ctx0>>
 View<t_ctx0>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
     std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
     auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
@@ -429,7 +271,7 @@ View<t_ctx0>::get_data(
 template <>
 std::shared_ptr<t_data_slice<t_ctx1>>
 View<t_ctx1>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
     std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
     t_tscalar row_path;
@@ -443,7 +285,7 @@ View<t_ctx1>::get_data(
 template <>
 std::shared_ptr<t_data_slice<t_ctx2>>
 View<t_ctx2>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
     std::vector<t_tscalar> slice;
     std::vector<t_uindex> column_indices;
     std::vector<std::vector<t_tscalar>> cols;
@@ -498,6 +340,171 @@ View<t_ctx2>::get_data(
         start_col, end_col, m_row_offset, m_col_offset, slice, cols, column_indices);
     return data_slice_ptr;
 }
+
+template <typename CTX_T>
+std::string
+View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
+    std::int32_t start_col, std::int32_t end_col) const {
+    std::shared_ptr<t_data_slice<CTX_T>> data_slice = get_data(
+        start_row, end_row, start_col, end_col
+    );
+    std::vector<std::vector<t_tscalar>> names = data_slice->get_column_names();
+    std::map<std::string, std::string> view_schema = schema();
+
+    std::vector<std::shared_ptr<::arrow::Array>> vectors;
+    std::vector<std::shared_ptr<::arrow::Field>> fields;
+
+    for (auto i = start_col; i < end_col; ++i) {
+        // TODO: fix for 1/2 sided ctx
+        std::vector<t_tscalar> col_path = names.at(i);
+        std::string column_name = col_path.at(col_path.size() - 1).to_string();
+        std::string type = view_schema.at(column_name);
+        std::string name;
+
+        // Calculate the "concat'd" column header 
+        if (col_path.size() > 1) {
+            // TODO create the column name via concatenation
+            // joining in C++ is weird and hard lol
+            PSP_COMPLAIN_AND_ABORT("No column pivot support yet")
+        } else {
+            name.assign(col_path.at(col_path.size() - 1).to_string());
+        }
+
+        std::cout << name << ": " << type << std::endl;
+        std::shared_ptr<::arrow::Array> arr;
+        t_dtype dtype = get_column_dtype(i);
+        switch (dtype) {
+            case DTYPE_INT8: {
+                fields.push_back(::arrow::field(name, ::arrow::int8()));
+                arr = arrow::col_to_array<::arrow::Int8Type, std::int8_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_UINT8: {
+                fields.push_back(::arrow::field(name, ::arrow::uint8()));
+                arr = arrow::col_to_array<::arrow::UInt8Type, std::uint8_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_INT16: {
+                fields.push_back(::arrow::field(name, ::arrow::int16()));
+                arr = arrow::col_to_array<::arrow::Int16Type, std::int16_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_UINT16: {
+                fields.push_back(::arrow::field(name, ::arrow::uint16()));
+                arr = arrow::col_to_array<::arrow::UInt16Type, std::uint16_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_INT32: {
+                fields.push_back(::arrow::field(name, ::arrow::int32()));
+                arr = arrow::col_to_array<::arrow::Int32Type, std::int32_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_UINT32: {
+                fields.push_back(::arrow::field(name, ::arrow::uint32()));
+                arr = arrow::col_to_array<::arrow::UInt32Type, std::uint32_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_INT64: {
+                fields.push_back(::arrow::field(name, ::arrow::int64()));
+                arr = arrow::col_to_array<::arrow::Int64Type, std::int64_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_UINT64: {
+                fields.push_back(::arrow::field(name, ::arrow::uint64()));
+                arr = arrow::col_to_array<::arrow::UInt64Type, std::uint64_t>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_FLOAT32: {
+                fields.push_back(::arrow::field(name, ::arrow::float32()));
+                arr = arrow::col_to_array<::arrow::FloatType, float>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_FLOAT64: {
+                fields.push_back(::arrow::field(name, ::arrow::float64()));
+                arr = arrow::col_to_array<::arrow::DoubleType, double>(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_DATE: {
+                fields.push_back(::arrow::field(name, ::arrow::date32()));
+                arr = arrow::date_col_to_array(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_TIME: {
+                fields.push_back(::arrow::field(name, ::arrow::timestamp(::arrow::TimeUnit::MILLI)));
+                arr = arrow::timestamp_col_to_array(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_BOOL: {
+                fields.push_back(::arrow::field(name, ::arrow::boolean()));
+                arr = arrow::boolean_col_to_array(data_slice->get_slice(), i, data_slice->get_stride());
+            } break;
+            case DTYPE_STR:
+            default: {
+                std::stringstream ss;
+                ss << "Cannot serialize column of type `"
+                   << get_dtype_descr(dtype)
+                   << "` to Arrow format." << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+                return nullptr;
+            }
+        }
+        std::cout << arr->ToString() << std::endl;
+        vectors.push_back(arr);
+    }
+    
+    std::cout << "serialized num: " << vectors.size() << std::endl;
+    auto arrow_schema = ::arrow::schema(fields);
+    std::cout << arrow_schema->ToString() << std::endl;
+    std::shared_ptr<::arrow::RecordBatch> batches = ::arrow::RecordBatch::Make(arrow_schema, end_row - start_row, vectors);
+    auto valid = batches->Validate();
+    if (!valid.ok()) {
+        std::stringstream ss;
+        ss << "Invalid RecordBatch: " << valid.message() << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+        return nullptr;
+    }
+    std::cout << batches->num_columns() << " x " << batches->num_rows() << std::endl;
+
+    std::shared_ptr<::arrow::ResizableBuffer> buffer;
+    auto allocated = ::arrow::AllocateResizableBuffer(0, &buffer);
+    if (!allocated.ok()) {
+        std::stringstream ss;
+        ss << "Failed to allocate buffer: " << allocated.message() << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+        return nullptr;
+    }
+    
+    ::arrow::io::BufferOutputStream sink(buffer);    
+    
+    auto options = ::arrow::ipc::IpcOptions::Defaults();
+    // options.allow_64bit = true;
+    // options.write_legacy_ipc_format = true;
+    // options.alignment = 64;
+
+    auto res = ::arrow::ipc::RecordBatchStreamWriter::Open(&sink, arrow_schema, options);
+    std::shared_ptr<::arrow::ipc::RecordBatchWriter> writer = *res;
+
+    writer->WriteRecordBatch(*batches);
+    writer->Close();
+    std::cout << "buffer size: " << buffer->size() << ", capacity: " << buffer->capacity() << std::endl;
+    return buffer->ToString();
+    
+    //std::cout << buffer->ToString() << std::endl;
+
+        //     if (type === "float") {
+        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
+        //         vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
+        //     } else if (type === "integer") {
+        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
+        //         vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
+        //     } else if (type === "boolean") {
+        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
+        //         vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
+        //     } else if (type === "date" || type === "datetime") {
+        //         const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
+        //         vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
+        //     } else if (type === "string") {
+        //         const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
+        //         const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
+        //         const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
+        //         vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
+        //     } else {
+        //         throw new Error(`Type ${type} not supported`);
+        //     }
+        // }
+
+    //return nullptr;
+
+        // return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
+};
 
 // Delta calculation
 template <typename CTX_T>

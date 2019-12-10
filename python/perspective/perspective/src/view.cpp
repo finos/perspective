@@ -215,33 +215,37 @@ make_view_ctx2(std::shared_ptr<Table> table, std::string name, std::string separ
 py::bytes
 to_arrow_zero(
     std::shared_ptr<View<t_ctx0>> view,
-    std::shared_ptr<t_data_slice<t_ctx0>> data_slice, 
-    std::int32_t start_col, 
+    std::int32_t start_row,
+    std::int32_t end_row,
+    std::int32_t start_col,
     std::int32_t end_col
 ) {
-    std::string s = view->to_arrow(data_slice, start_col, end_col);
+    std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
     return py::bytes(s);
 }
 
 py::bytes
 to_arrow_one(
     std::shared_ptr<View<t_ctx1>> view,
-    std::shared_ptr<t_data_slice<t_ctx1>> data_slice, 
+    std::int32_t start_row,
+    std::int32_t end_row,
     std::int32_t start_col, 
     std::int32_t end_col
 ) {
-    std::string s = view->to_arrow(data_slice, start_col, end_col);
+    std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
     return py::bytes(s);
 }
 
 py::bytes
 to_arrow_two(
     std::shared_ptr<View<t_ctx2>> view,
-    std::shared_ptr<t_data_slice<t_ctx2>> data_slice, 
+    std::int32_t start_row,
+    std::int32_t end_row,
     std::int32_t start_col, 
     std::int32_t end_col
 ) {
-    std::string s = view->to_arrow(data_slice, start_col, end_col);
+    std::string s = view->to_arrow(start_row, end_row, start_col, end_col);
+    std::cout << s << std::endl;
     return py::bytes(s);
 }
 
