@@ -69,6 +69,7 @@ export class PerspectiveWidget extends Widget {
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
         const client: boolean = options.client || false;
+        const selectable: boolean = options.selectable || false;
 
         this.client = client;
         this.dark = dark;
@@ -79,6 +80,7 @@ export class PerspectiveWidget extends Widget {
         this.column_pivots = column_pivots;
         this.sort = sort;
         this.columns = columns;
+        this.selectable = selectable;
 
         // do aggregates after columns
         this.aggregates = aggregates;
@@ -337,6 +339,18 @@ export class PerspectiveWidget extends Widget {
             this.viewer.setAttribute("editable", "");
         } else {
             this.viewer.removeAttribute("editable");
+        }
+    }
+
+    get selectable(): boolean {
+        return this.viewer.hasAttribute("selectable");
+    }
+
+    set selectable(row_selection: boolean) {
+        if (row_selection) {
+            this.viewer.setAttribute("selectable", "");
+        } else {
+            this.viewer.removeAttribute("selectable");
         }
     }
 

@@ -7,12 +7,11 @@
  *
  */
 
-const perspective = require("@finos/perspective").default;
-require("./index.less");
-
-require("@finos/perspective-viewer");
-require("@finos/perspective-viewer-hypergrid");
-require("@finos/perspective-viewer-d3fc");
+import perspective from "@finos/perspective";
+import "./index.less";
+import "@finos/perspective-viewer";
+import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-d3fc";
 
 window.addEventListener("WebComponentsReady", () => {
     const worker = perspective.worker();

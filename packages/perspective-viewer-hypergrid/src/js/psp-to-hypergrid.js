@@ -48,6 +48,10 @@ function page2hypergrid(data, row_pivots, columns) {
             };
         }
 
+        if (data.__ID__) {
+            dataRow["__ID__"] = data["__ID__"][ridx].join("|");
+        }
+
         if (data.__INDEX__) {
             dataRow["__INDEX__"] = data["__INDEX__"][ridx][0];
         }

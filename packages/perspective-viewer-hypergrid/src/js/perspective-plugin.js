@@ -98,6 +98,16 @@ function setPSP(payload, force = false) {
 
     this.grid.properties.showTreeColumn = payload.isTree;
 
+    const row_selection_enabled = this.grid.behavior.dataModel._viewer.hasAttribute("selectable");
+    if (row_selection_enabled) {
+        this.grid.addProperties({
+            singleRowSelectionMode: true,
+            autoSelectRows: true,
+            rowSelection: true,
+            selectionRegionOutlineColor: "transparent"
+        });
+    }
+
     // Following call to setData signals the grid to call createColumns and
     // dispatch the fin-hypergrid-schema-loaded event (in that order). Here we
     // inject a createColumns override into `this` (behavior instance) to
@@ -117,11 +127,11 @@ function setPSP(payload, force = false) {
     } else {
         this.grid.sbVScroller.index = 0;
         this.grid.sbHScroller.index = 0;
+        this.grid.selectionModel.clear();
         this.grid.setData({
             data: payload.rows,
             schema: new_schema
         });
-        this.grid.selectionModel.clear();
     }
     this._memoized_schema = new_schema;
     this._memoized_pivots = payload.rowPivots;
@@ -319,6 +329,7 @@ export const install = function(grid) {
         }
 
         const filters = config.filter.concat(row_filters).concat(column_filters);
+        const action = this.grid.properties.rowSelection && this.grid.getSelectedRows().indexOf(y) === -1 ? "deselected" : "selected";
 
         this.grid.canvas.dispatchEvent(
             new CustomEvent("perspective-click", {
@@ -327,7 +338,8 @@ export const install = function(grid) {
                 detail: {
                     config: {filters},
                     column_names,
-                    row: r[0]
+                    row: r[0],
+                    action
                 }
             })
         );

@@ -13,6 +13,7 @@ const path = require("path");
 module.exports = {
     context: __dirname,
     entry: "./index.js",
+    mode: "development",
     output: {
         filename: "public/bundle.js",
         publicPath: "http://localhost:8080/",
@@ -34,6 +35,11 @@ module.exports = {
                 test: /\.less$/,
                 exclude: [/packages/, /node_modules/],
                 use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
+            },
+            {
+                test: /\.css$/,
+                exclude: [/packages/, /node_modules/],
+                use: [{loader: "style-loader"}, {loader: "css-loader"}]
             }
         ]
     },
