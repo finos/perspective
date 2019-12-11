@@ -59,7 +59,6 @@ class TestAsync(object):
         cls.thread = Thread(target=cls.loop.start)
         cls.thread.daemon = True
         cls.thread.start()
-        assert cls.loop_is_running() is True
 
     @classmethod
     def teardown_class(cls):
