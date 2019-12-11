@@ -65,13 +65,27 @@ class PerspectiveManager(object):
         self._tables = {}
         self._views = {}
         self._callback_cache = {}
+        self._queue_process_callback = None
 
-    def host(self, data, name=None):
+    def host(self, item, name=None):
+        """Given a :obj:`~perspective.Table` or :obj:`~perspective.View`,
+        place it under management and allow operations on it to be passed
+        through the Manager instance.
+
+        Args:
+            table_or_view (:obj:`~perspective.Table`/:obj:`~perspective.View`) :
+                a Table or View to be managed.
+
+        Keyword Args:
+            name (:obj:`str`) : an optional name to allow retrieval through
+                `get_table` or `get_view`. A name will be generated if not
+                provided.
+        """
         name = name or gen_name()
-        if isinstance(data, Table):
-            self._tables[name] = data
-        elif isinstance(data, View):
-            self._views[name] = data
+        if isinstance(item, Table):
+            self.host_table(name, item)
+        elif isinstance(item, View):
+            self.host_view(name, item)
         else:
             raise PerspectiveError(
                 "Only `Table()` and `View()` instances can be hosted.")
@@ -79,28 +93,55 @@ class PerspectiveManager(object):
     def host_table(self, name, table):
         '''Given a reference to a `Table`, manage it and allow operations on it
         to occur through the Manager.
+
+        If a function for `queue_process` is defined (i.e., by
+        :obj:`~perspective.PerspectiveTornadoHandler`), bind the function to
+        `Table` and have it call the manager's version of `queue_process`.
         '''
-        name = name or gen_name()
+        if self._queue_process_callback is not None:
+            # always bind the callback to the table's state manager
+            table._state_manager.queue_process = partial(
+                self._queue_process_callback, state_manager=table._state_manager)
         self._tables[name] = table
         return name
 
     def host_view(self, name, view):
-        '''Given a reference to a `View`, add it to the manager's views
+        '''Given a :obj:`~perspective.View`, add it to the manager's views
         container.
         '''
         self._views[name] = view
 
+    def get_table(self, name):
+        '''Return a table under management by name.'''
+        return self._tables.get(name, None)
+
+    def get_view(self, name):
+        '''Return a view under management by name.'''
+        return self._views.get(name, None)
+
     def new_session(self):
         return PerspectiveSession(self)
+
+    def _set_queue_process(self, func):
+        """For each table under management, bind `func` to the table's state
+        manager and to run whenever `queue_process` is called.
+
+        After this method is called, future Tables hosted on this manager
+        instance will call the same `queue_process` callback.
+        """
+        self._queue_process_callback = func
+        for table in self._tables.values():
+            table._state_manager.queue_process = partial(
+                self._queue_process_callback, state_manager=table._state_manager)
 
     def _process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective
         engine.
 
         Args:
-            msg (dict): a message from the client with instructions that map to
-                engine operations post_callback (callable): a function that
-                returns data to the client
+            msg (:obj`dict`): a message from the client with instructions
+                that map to engine operations
+            post_callback (:obj`callable`): a function that returns data to the client
         '''
         if isinstance(msg, str):
             if msg == "heartbeat":   # TODO fix this
@@ -172,7 +213,7 @@ class PerspectiveManager(object):
                     # make sure schema returns string types
                     args["as_string"] = True
                 elif msg["method"].startswith("to_"):
-                    # TODO
+                    # parse options in `to_format` calls
                     for d in msg.get("args", []):
                         args.update(d)
                 else:
@@ -262,11 +303,3 @@ class PerspectiveManager(object):
             "id": id,
             "error": error
         }
-
-    def get_table(self, name):
-        '''Return a table under management by name.'''
-        return self._tables.get(name, None)
-
-    def get_view(self, name):
-        '''Return a view under management by name.'''
-        return self._views.get(name, None)

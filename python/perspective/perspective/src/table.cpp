@@ -183,8 +183,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     // calculate offset, limit, and set the gnode
     tbl->init(data_table, row_count, op);
 
-    // FIXME: replicate JS _clear_process etc.
-    pool->_process();
+    //pool->_process();
     return tbl;
 }
 

@@ -29,6 +29,7 @@ def _mod(a, b):
 
 
 def to_format(options, view, output_format):
+    view._table._state_manager.call_process(view._table._table.get_id())
     options, column_names, data_slice = _to_format_helper(view, options)
 
     if output_format == 'records':
