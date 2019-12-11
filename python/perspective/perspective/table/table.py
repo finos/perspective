@@ -201,6 +201,8 @@ class Table(object):
         if (_is_arrow):
             self._accessor = data
             self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, True)
+            self._state_manager.set_process(
+                self._table.get_pool(), self._table.get_id())
             return
 
         columns = self.columns()
