@@ -61,11 +61,11 @@ export default function(Module) {
         const pool = _POOL_DEBOUNCES[table_id];
         if (pool) {
             pool._process();
-            _clear_process(table_id);
+            _remove_process(table_id);
         }
     }
 
-    function _clear_process(table_id) {
+    function _remove_process(table_id) {
         delete _POOL_DEBOUNCES[table_id];
     }
 
@@ -175,7 +175,7 @@ export default function(Module) {
      * @async
      */
     view.prototype.delete = function() {
-        _clear_process(this.table.get_id());
+        _remove_process(this.table.get_id());
         this._View.delete();
         this.ctx.delete();
 
@@ -935,7 +935,7 @@ export default function(Module) {
      * the schema and construction options.
      */
     table.prototype.clear = function() {
-        _clear_process(this.get_id());
+        _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
     };
 
@@ -943,7 +943,7 @@ export default function(Module) {
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
-        _clear_process(this.get_id());
+        _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
         this.update(data);
         _call_process(this._Table.get_id());
@@ -959,7 +959,7 @@ export default function(Module) {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
-        _clear_process(this.get_id());
+        _remove_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
         this._Table.delete();
         this._delete_callbacks.forEach(callback => callback());
