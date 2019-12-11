@@ -9,11 +9,12 @@
 
 import Hypergrid from "faux-hypergrid";
 import Base from "faux-hypergrid/src/Base";
+import Canvas from "faux-hypergrid/src/lib/Canvas";
 import groupedHeaderPlugin from "fin-hypergrid-grouped-header-plugin";
 
 import * as perspectivePlugin from "./perspective-plugin";
 import PerspectiveDataModel from "./PerspectiveDataModel";
-import {psp2hypergrid, page2hypergrid} from "./psp-to-hypergrid";
+import {psp2hypergrid} from "./psp-to-hypergrid";
 
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 
@@ -24,6 +25,9 @@ import {get_styles, clear_styles, default_grid_properties} from "./styles.js";
 import {set_formatters} from "./formatters.js";
 import {set_editors} from "./editors.js";
 import {treeLineRendererPaint} from "./hypergrid-tree-cell-renderer";
+
+Canvas.prototype.stopResizeLoop();
+Canvas.prototype.stopPaintLoop();
 
 bindTemplate(
     TEMPLATE,
@@ -44,9 +48,9 @@ bindTemplate(
                 const host = this.shadowRoot.querySelector("#mainGrid");
 
                 host.setAttribute("hidden", true);
+                Canvas.prototype.restartPaintLoop();
                 this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
-                this.grid.canvas.stopResizeLoop();
-                this.grid.canvas.stopPaintLoop();
+                Canvas.prototype.stopPaintLoop();
                 host.removeAttribute("hidden");
                 this.grid.get_styles = () => get_styles(this);
 
@@ -145,19 +149,6 @@ async function getOrCreateHypergrid(div) {
     return perspectiveHypergridElement;
 }
 
-function pad_data_window(rect, rowPivots = [], colPivots = [], settings = true) {
-    const range = {
-        start_row: rect.origin.y,
-        end_row: rect.corner.y,
-        start_col: rect.origin.x,
-        end_col: rect.corner.x + 1
-    };
-    range.end_row += settings ? 8 : 2;
-    range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
-    range.index = rowPivots.length === 0 && colPivots.length === 0;
-    return range;
-}
-
 function suppress_paint(hypergrid, f) {
     const canvas = hypergrid.divCanvas;
     hypergrid.divCanvas = undefined;
@@ -210,16 +201,9 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel._table = this._table;
     dataModel._config = config;
     dataModel._viewer = this;
+    dataModel._columns = columns;
+    dataModel._pad_window = this.hasAttribute("settings");
 
-    dataModel.pspFetch = async rect => {
-        const range = pad_data_window(rect, rowPivots, colPivots, this.hasAttribute("settings"));
-        let next_page = await dataModel._view.to_columns(range);
-        dataModel.data = [];
-        const rows = page2hypergrid(next_page, rowPivots, columns);
-        const base = range.start_row;
-        const data = dataModel.data;
-        rows.forEach((row, offset) => (data[base + offset] = row));
-    };
     hypergrid.renderer.needsComputeCellsBounds = true;
     suppress_paint(hypergrid, () => perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns, force));
     if (hypergrid.behavior.dataModel._outstanding) {
@@ -244,6 +228,7 @@ global.registerPlugin("hypergrid", {
             hypergrid.canvas.paintNow();
             let nrows = await this._view.num_rows();
             hypergrid.behavior.dataModel.setDirty(nrows);
+            await hypergrid.canvas.resize(true);
             hypergrid.canvas.paintNow();
         }
     },

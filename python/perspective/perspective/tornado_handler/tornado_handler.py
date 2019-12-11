@@ -8,26 +8,14 @@
 
 import json
 import tornado.websocket
-from datetime import datetime
+from tornado.ioloop import IOLoop
 from ..core.exception import PerspectiveError
-from ..table._date_validator import _PerspectiveDateValidator
 
 
-_date_validator = _PerspectiveDateValidator()
-
-
-class DateTimeEncoder(json.JSONEncoder):
-    '''Create a custom JSON encoder that allows serialization of datetime and
-    date objects.
-    '''
-
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
-            # Convert to milliseconds - perspective.js expects millisecond
-            # timestamps, but python generates them in seconds.
-            return _date_validator.to_timestamp(obj)
-        else:
-            return super(DateTimeEncoder, self).default(obj)
+# Redefine `queue_process` to take advantage of `tornado.ioloop`
+def _queue_process_tornado(table_id, state_manager):
+    loop = IOLoop.current()
+    loop.add_callback(state_manager.call_process, table_id=table_id)
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
@@ -35,6 +23,9 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
     Use it inside Tornado routing to create a server-side Perspective that is
     ready to receive websocket messages from the front-end `perspective-viewer`.
+    Because Tornado implements an event loop, this handler links Perspective
+    with `IOLoop.current()` in order to defer expensive operations until the
+    next free iteration of the event loop.
 
     Examples:
         >>> MANAGER = PerspectiveViewer()
@@ -53,12 +44,11 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         '''Create a new instance of the PerspectiveTornadoHandler with the
         given Manager instance.
 
-        Keyword Arguments:
-        manager (`PerspectiveManager`):  A `PerspectiveManager` instance.
-            Must be provided on initialization.
-
-        check_origin (`bool`): If True, all requests will be accepted
-            regardless of origin. Defaults to False.
+        Keyword Args:
+            manager (:obj`PerspectiveManager`): A `PerspectiveManager` instance.
+                Must be provided on initialization.
+            check_origin (:obj`bool`): If True, all requests will be accepted
+                regardless of origin. Defaults to False.
         '''
         self._manager = kwargs.pop("manager", None)
         self._session = self._manager.new_session()
@@ -68,6 +58,9 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
             raise PerspectiveError("A `PerspectiveManager` instance must be provided to the tornado handler!")
 
         super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
+
+        # make sure each `Table` calls the asynchronous version of `queue_process`
+        self._manager._set_queue_process(_queue_process_tornado)
 
     def check_origin(self, origin):
         '''Returns whether the handler allows requests from origins outside

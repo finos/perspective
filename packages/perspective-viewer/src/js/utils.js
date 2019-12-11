@@ -183,5 +183,55 @@ export function copy_to_clipboard(csv) {
     document.body.removeChild(element);
 }
 
+/**
+ * Just like `setTimeout` except it returns a promise which resolves after the
+ * callback has (also resolved).
+ *
+ * @param {func} cb
+ * @param {*} timeout
+ */
+export async function setPromise(cb = async () => {}, timeout = 0) {
+    await new Promise(x => setTimeout(x, timeout));
+    return await cb();
+}
+
+const invertPromise = () => {
+    let resolve;
+    let promise = new Promise(_resolve => {
+        resolve = _resolve;
+    });
+    promise.resolve = resolve;
+    return promise;
+};
+
+export function throttlePromise(target, property, descriptor) {
+    const lock = Symbol("private lock");
+    const f = descriptor.value;
+    descriptor.value = async function(...args) {
+        if (this[lock]) {
+            await this[lock];
+            if (this[lock]) {
+                await this[lock];
+                return;
+            }
+        }
+        this[lock] = invertPromise();
+        let result;
+        try {
+            const timeout = this._calculate_throttle_timeout();
+            await new Promise(x => setTimeout(x, timeout));
+            result = await f.call(this, ...args);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            const l = this[lock];
+            this[lock] = undefined;
+            l.resolve();
+            return result;
+        }
+    };
+    return descriptor;
+}
+
 export const json_attribute = _attribute(() => ({}));
 export const array_attribute = _attribute(() => []);

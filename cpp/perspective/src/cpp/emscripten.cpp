@@ -1603,14 +1603,16 @@ main(int argc, char** argv) {
 EM_ASM({
 
     if (typeof self !== "undefined") {
-        if (self.dispatchEvent && !self._perspective_initialized && self.document) {
-            self._perspective_initialized = true;
-            var event = self.document.createEvent("Event");
-            event.initEvent("perspective-ready", false, true);
-            self.dispatchEvent(event);
-        } else if (!self.document && self.postMessage) {
-            self.postMessage({});
-        }
+        try {
+            if (self.dispatchEvent && !self._perspective_initialized && self.document !== null) {
+                self._perspective_initialized = true;
+                var event = self.document.createEvent("Event");
+                event.initEvent("perspective-ready", false, true);
+                self.dispatchEvent(event);
+            } else if (!self.document && self.postMessage) {                
+                self.postMessage({});
+            }
+        } catch (e) {}
     }
 
 });
