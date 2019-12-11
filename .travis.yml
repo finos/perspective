@@ -102,6 +102,8 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
 
 install:
+  - if [ "$TEST" = "CPP" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
+  - if [ "$TEST" = "CPP" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
   - if [ "$TEST" = "CPP_OSX" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
   - if [ "$TEST" = "CPP_OSX" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
   - if [ "$TEST" = "PYTHON" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
