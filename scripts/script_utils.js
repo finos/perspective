@@ -140,7 +140,7 @@ const bash = (exports.bash = function bash(strings, ...args) {
     }
     for (let i = 0; i < strings.length - 1; i++) {
         const arg = args[i];
-        const start = terms.pop() || strings[i];
+        const start = terms.length === 0 ? strings[i] : terms.pop();
         if (arg === undefined || arg !== arg || arg === false) {
             terms = [...terms, cut_last(start), " ", cut_first(strings[i + 1])];
         } else if (Array.isArray(arg)) {
@@ -216,21 +216,23 @@ exports.docker = function docker(image = "puppeteer") {
     console.log(`-- Creating perspective/${image} docker image`);
     const IS_WRITE = getarg("--write") || process.env.WRITE_TESTS;
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
-    const PACKAGE = process.env.PACKAGE || "";
+    const PACKAGE = process.env.PACKAGE;
     const CWD = process.cwd();
-    const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true: false;
-    let env_vars =  ` -eWRITE_TESTS=${IS_WRITE} \
-        -ePACKAGE="${PACKAGE}" `;
+    const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
+    const DOCKERHUB = image.indexOf("puppeteer") > -1 ? "perspective" : "timkpaine";
+    const IMAGE = `${DOCKERHUB}/${image}`;
+    let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
+        -ePACKAGE="${PACKAGE}"`;
     if (IS_MANYLINUX) {
         console.log(`-- Using manylinux build`);
-        env_vars += ` -ePSP_MANYLINUX=1 `;
+        env_vars += bash`-ePSP_MANYLINUX=1`;
     }
 
     let ret = bash`docker run -it --rm \
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" timkpaine/${image}`;
+        --cpus="${CPUS}.0" ${IMAGE}`;
     return ret;
 };
 
@@ -243,9 +245,8 @@ exports.docker = function docker(image = "puppeteer") {
  */
 exports.python_image = function python_image(image = "", python = "") {
     console.log(`-- Getting image for image: '${image}' and python: '${python}'`);
-    let IMAGE;
     if (python == "python2") {
-        if (image =="manylinux2010") {
+        if (image == "manylinux2010") {
             return "manylinux2010py2";
         } else if (image == "manylinux2014") {
             throw "Python2 not supported for manylinux2014";
@@ -262,7 +263,6 @@ exports.python_image = function python_image(image = "", python = "") {
         }
     }
 };
-
 
 /*******************************************************************************
  *
@@ -308,5 +308,6 @@ run_suite([
     [bash`TEST=${1}`, `TEST=1`],
     [bash`TEST=${undefined}`, ``],
     [bash`this is a test`, `this is a test`],
-    [bash`this is a test `, `this is a test `]
+    [bash`this is a test `, `this is a test `],
+    [bash`--test="${undefined}.0" ${1}`, `1`]
 ]);
