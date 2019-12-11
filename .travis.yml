@@ -89,6 +89,7 @@ addons:
     packages:
       - python
       - python2
+      - pybind11
       - cmake
       - boost
       - tbb
