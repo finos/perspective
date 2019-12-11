@@ -98,14 +98,18 @@ function setPSP(payload, force = false) {
 
     this.grid.properties.showTreeColumn = payload.isTree;
 
-    const row_selection_enabled = this.grid.behavior.dataModel._viewer.hasAttribute("selectable");
+    const config = this.grid.behavior.dataModel._config;
+    const column_only = config.row_pivots.length === 0 && config.column_pivots.length > 0;
+    const row_selection_enabled = !column_only && this.grid.behavior.dataModel._viewer.hasAttribute("selectable");
+
+    this.grid.addProperties({
+        singleRowSelectionMode: row_selection_enabled,
+        autoSelectRows: row_selection_enabled,
+        rowSelection: row_selection_enabled
+    });
+
     if (row_selection_enabled) {
-        this.grid.addProperties({
-            singleRowSelectionMode: true,
-            autoSelectRows: true,
-            rowSelection: true,
-            selectionRegionOutlineColor: "transparent"
-        });
+        this.grid.addProperties({selectionRegionOutlineColor: "transparent"});
     }
 
     // Following call to setData signals the grid to call createColumns and
@@ -170,7 +174,7 @@ function setColumnPropsByType(column) {
     }
     const config = this.grid.behavior.dataModel._config;
     const isEditable = this.grid.behavior.dataModel._viewer.hasAttribute("editable");
-    if (isEditable && config.row_pivots.length === 0 && config.row_pivots.length === 0) {
+    if (isEditable && config.row_pivots.length === 0 && config.column_pivots.length === 0) {
         props.editor = {
             integer: "perspective-number",
             string: "perspective-text",

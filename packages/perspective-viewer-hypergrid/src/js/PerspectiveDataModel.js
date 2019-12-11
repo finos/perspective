@@ -266,9 +266,7 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         this._selected_row_index = undefined;
         this._selected_cell_index = undefined;
         this._grid.selectionModel.clear();
-    },
-
-    pspFetch: async function() {}
+    }
 });
 
 function is_cache_miss(req, cache) {
