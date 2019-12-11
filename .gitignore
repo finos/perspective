@@ -158,3 +158,4 @@ python/perspective/perspective/node/assets/*
 /__pycache__
 docs/static/js/logo.js
 docs/static/js/logo.js.map
+results.darwin.json

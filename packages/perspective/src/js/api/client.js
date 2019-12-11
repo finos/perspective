@@ -98,10 +98,12 @@ export class Client {
      */
     _handle(e) {
         if (!this._worker.initialized.value) {
-            if (!this._initialized && typeof document !== "undefined") {
-                var event = document.createEvent("Event");
-                event.initEvent("perspective-ready", false, true);
-                window.dispatchEvent(event);
+            if (!this._initialized && typeof document !== "undefined" && document && typeof window !== undefined && window) {
+                try {
+                    const event = document.createEvent("Event");
+                    event.initEvent("perspective-ready", false, true);
+                    window.dispatchEvent(event);
+                } catch (e) {}
                 this._initialized = true;
             }
 

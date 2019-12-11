@@ -26,10 +26,10 @@ utils.with_server({}, () => {
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(element => element.setAttribute("column-pivots", '["Sub-Category"]'), viewer);
 
-                    await page.evaluate(element => {
+                    await page.evaluate(async element => {
                         // 2 is greater than no. of row pivots
                         element.view.expand(2);
-                        element.notifyResize();
+                        await element.notifyResize();
                     }, viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 });
@@ -39,9 +39,9 @@ utils.with_server({}, () => {
                     await page.evaluate(element => element.setAttribute("row-pivots", '["Category","State"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
 
-                    await page.evaluate(element => {
+                    await page.evaluate(async element => {
                         element.view.set_depth(0);
-                        element.notifyResize();
+                        await element.notifyResize();
                     }, viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 });
@@ -49,13 +49,12 @@ utils.with_server({}, () => {
                 test.capture("handles flush", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => {
+                    await page.evaluate(async element => {
                         element.setAttribute("column-pivots", '["Category"]');
                         element.setAttribute("row-pivots", '["City"]');
-                        element.flush().then(() => {
-                            element.view.set_depth(0);
-                            element.notifyResize();
-                        });
+                        await element.flush();
+                        element.view.set_depth(0);
+                        await element.notifyResize();
                     }, viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 });

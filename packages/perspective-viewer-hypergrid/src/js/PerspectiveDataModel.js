@@ -9,6 +9,7 @@
 
 import Behavior from "faux-hypergrid/src/behaviors/Behavior";
 import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
+import {page2hypergrid} from "./psp-to-hypergrid";
 
 const {
     prototype: {treeColumnIndex: TREE_COLUMN_INDEX}
@@ -33,14 +34,29 @@ function find_row(rows, index) {
 
 const _wrapper = function(f) {
     return async function(_, resolve) {
+        let is_error;
         try {
-            const is_error = await f.call(this);
-            resolve(is_error);
+            is_error = await f.call(this);
         } catch (e) {
             resolve(e);
+            return;
         }
+        resolve(is_error);
     };
 };
+
+function pad_data_window(rect, rowPivots = [], colPivots = [], settings = true) {
+    const range = {
+        start_row: rect.origin.y,
+        end_row: rect.corner.y,
+        start_col: rect.origin.x,
+        end_col: rect.corner.x + 1
+    };
+    range.end_row += settings ? 8 : 2;
+    range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
+    range.index = rowPivots.length === 0 && colPivots.length === 0;
+    return range;
+}
 
 export default require("datasaur-local").extend("PerspectiveDataModel", {
     isTreeCol: function(x) {
@@ -146,6 +162,16 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         }
     },
 
+    pspFetch: async function(rect) {
+        const range = pad_data_window(rect, this._config.row_pivots, this._config.column_pivots, this._pad_window);
+        let next_page = await this._view.to_columns(range);
+        this.data = [];
+        const rows = page2hypergrid(next_page, this._config.row_pivots, this._columns);
+        const base = range.start_row;
+        const data = this.data;
+        rows.forEach((row, offset) => (data[base + offset] = row));
+    },
+
     fetchData: _wrapper(async function() {
         if (this._view === undefined) {
             return true;
@@ -217,9 +243,7 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
             config._type = this.schema[-1].type[config.value.rowPath.length - 2];
         }
         return config.grid.cellRenderers.get(rendererName);
-    },
-
-    pspFetch: async function() {}
+    }
 });
 
 function is_cache_miss(req, cache) {

@@ -472,10 +472,14 @@ export const install = function(grid) {
         grid.moveSingleSelect(offsetX, offsetY);
     };
 
-    grid.canvas.resize = async function(force) {
-        const width = (this.width = Math.floor(this.div.clientWidth));
-        const height = (this.height = Math.floor(this.div.clientHeight));
+    function update_bounds() {
+        this.width = Math.floor(this.div.clientWidth);
+        this.height = Math.floor(this.div.clientHeight);
+        this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
+        this.component.setBounds(this.bounds);
+    }
 
+    grid.canvas.resize = async function(force) {
         //fix ala sir spinka, see
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/ just add 'hdpi'
         //as an attribute to the fin-canvas tag
@@ -489,30 +493,38 @@ export const install = function(grid) {
             ratio = devicePixelRatio / backingStoreRatio;
         }
 
-        this.bounds = new rectangular.Rectangle(0, 0, width, height);
-        this.component.setBounds(this.bounds);
+        update_bounds.call(this);
 
         let render = true;
-        if (height * ratio !== this.canvas.height || width * ratio !== this.canvas.width || force) {
-            while (render) {
-                if (!this.component.grid.behavior.dataModel._view) {
+        const start_time = performance.now();
+        const dataModel = this.component.grid.behavior.dataModel;
+        if (this.height * ratio !== this.canvas.height || this.width * ratio !== this.canvas.width || force) {
+            while (dataModel._view && render) {
+                if (performance.now() - start_time > 3000) {
+                    throw new Error("Timeout");
+                }
+                if (typeof render === "object") {
                     // If we are awaiting this grid's initialization, yield
                     // until it is ready.
                     await new Promise(setTimeout);
                 }
-                render = await new Promise(resolve => this.component.grid.behavior.dataModel.fetchData(undefined, resolve));
+
+                update_bounds.call(this);
+                render = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
             }
         }
 
-        this.bounds = new rectangular.Rectangle(0, 0, width, height);
+        this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
         this.component.setBounds(this.bounds);
-        this.resizeNotification();
+        if (dataModel._view) {
+            this.resizeNotification();
+        }
 
-        this.buffer.width = this.canvas.width = width * ratio;
-        this.buffer.height = this.canvas.height = height * ratio;
+        this.buffer.width = this.canvas.width = this.width * ratio;
+        this.buffer.height = this.canvas.height = this.height * ratio;
 
-        this.canvas.style.width = this.buffer.style.width = width + "px";
-        this.canvas.style.height = this.buffer.style.height = height + "px";
+        this.canvas.style.width = this.buffer.style.width = this.width + "px";
+        this.canvas.style.height = this.buffer.style.height = this.height + "px";
 
         this.bc.scale(ratio, ratio);
         if (isHIDPI && !this.component.properties.useBitBlit) {
