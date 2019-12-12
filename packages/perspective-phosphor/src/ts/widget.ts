@@ -365,12 +365,6 @@ export class PerspectiveWidget extends Widget {
         div.style.setProperty("flex-direction", "row");
         node.appendChild(div);
 
-        if (!viewer.notifyResize) {
-            console.warn("Warning: not bound to real element");
-        } else {
-            const resize_observer = new MutationObserver(() => viewer.notifyResize.call(viewer));
-            resize_observer.observe(node, {attributes: true});
-        }
         return viewer;
     }
 
