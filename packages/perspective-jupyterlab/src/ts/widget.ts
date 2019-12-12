@@ -36,6 +36,15 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
         delete options.view;
         super(name, options);
         this._view = view;
+        
+        const perspective_viewer = this._viewer;
+        if (!perspective_viewer.notifyResize) {
+            console.warn("Warning: not bound to real element");
+        } else {
+            const resize_observer = new MutationObserver(
+                () => perspective_viewer.notifyResize.call(perspective_viewer));
+            resize_observer.observe(this.node, {attributes: true});
+        }
     }
 
     /**

@@ -368,7 +368,7 @@ export class PerspectiveWidget extends Widget {
         return viewer;
     }
 
-    private _viewer: PerspectiveViewer;
+    _viewer: PerspectiveViewer;
     private _plugin_config: PerspectiveViewerOptions;
     private _client: boolean;
     private _dark: boolean;
