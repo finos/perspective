@@ -45,14 +45,13 @@ const _wrapper = function(f) {
     };
 };
 
-function pad_data_window(rect, rowPivots = [], colPivots = [], settings = true) {
+function pad_data_window(rect, rowPivots = [], colPivots = []) {
     const range = {
         start_row: rect.origin.y,
-        end_row: rect.corner.y,
+        end_row: rect.corner.y + 1,
         start_col: rect.origin.x,
         end_col: rect.corner.x + 1
     };
-    range.end_row += settings ? 8 : 2;
     range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
     range.index = rowPivots.length === 0 && colPivots.length === 0;
     return range;
@@ -196,15 +195,18 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         this._outstanding = {rect, req};
         this._update_select_index();
 
-        await req;
+        try {
+            await req;
+        } finally {
+            this._outstanding = undefined;
+            this._grid.renderer.needsComputeCellsBounds = true;
+        }
 
         this._data_window = rect;
-        this._outstanding = undefined;
         this._update_selection(this._update_editor(rect));
 
         rect = get_rect.call(this._grid.renderer);
         const ret = is_cache_miss(rect, this._data_window);
-        this._grid.renderer.needsComputeCellsBounds = ret;
         return ret;
     }),
 
