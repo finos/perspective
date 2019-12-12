@@ -70,6 +70,37 @@ matrix:
       os: osx
       osx_image: xcode11.2
 
+
+  allow_failures:
+    # Mac builds get extensively tested by the core developers.
+    # They are also extremely slow to load on travis.
+    # So pull requests should check these, but they are allowed
+    # to fail
+
+    # Vanilla C++ Linux build
+    - language: c++
+      env: TEST=CPP PSP_DOCKER=1
+      services: docker
+
+    # Vanilla C++ Mac build
+    - language: c++
+      env: TEST=CPP_OSX
+      os: osx
+      osx_image: xcode11.2
+
+    # Python 3.7 Mac build
+    - env: TEST=PYTHON
+      cache: pip
+      os: osx
+      osx_image: xcode11.2
+
+    # Python 2.7 Mac build
+    - env: TEST=PYTHON2
+      cache: pip
+      os: osx
+      osx_image: xcode11.2
+
+
 env:
   global:
     - EM_USE_GLOBAL_CACHE=1
