@@ -40,28 +40,19 @@ perspective-viewer {
 
 |                                                                                       |                                                      |
 | :------------------------------------------------------------------------------------ | :--------------------------------------------------- |
-| `color`<br/>`--hypergrid--color`<br/>`--`_TYPE_`--hypergrid--color`                   | The primary text and interface color.                |
+| `color`<br/>`--hypergrid--color`<br/>`--`_TYPE_`--hypergrid--color`                   | The primary text and interface color. |
 | `background`<br/>`--hypergrid--background`                                            | For the element, e.g. the control panel `background` |
-| `font-family`<br/>`--hypergrid--font-family`<br/>`--`_TYPE_`--hypergrid--font-family` | The default `font-family`.                           |
-| `font-size`<br/>`--hypergrid--font-size`<br/>`--`_TYPE_`--hypergrid--font-size`       | The default `font-size`.                             |
-
-|`--column-type--content`<br/>`--`TYPE`--column-type--content`|`content`
-property of the Column type badge ("abc", "123", etc in default)|
-
-|`--hypergrid--width`<br/>`--`_TYPE_`--hypergrid--width`|Initial column width|
-|`--hypergrid--max-width`<br/>`--`_TYPE_`--hypergrid--max-width`|Max column
-width| |`--hypergrid--min-width`<br/>`--`_TYPE_`--hypergrid--min-width`|Min
-column width| |`--hypergrid-row-hover--background`|Row background on hover
-(additive)| |`--hypergrid-cell-hover--background`|Column background on hover
-(additive)|
-|`--hypergrid-positive--color`<br/>`--`_TYPE_`--hypergrid-positive--color`|Foreground
-color for (+)|
-|`--hypergrid-negative--color`<br/>`--`_TYPE_`--hypergrid-negative--color`|Foreground
-color for (-)|
-
-|`--d3fc-full--gradient`<br/>`--highcharts-full--gradient`|The color gradient
-for [-, +] ranges on numeric columns.|
-|`--d3fc-positive--gradient`<br/>`--highcharts-positive--gradient`|The color
-gradient for [+, +] ranges on numeric columns.|
-|`--d3fc-negative--gradient`<br/>`--highcharts-negative--gradient`|The color
-gradient for [-, -] ranges on numeric columns.|
+| `font-family`<br/>`--hypergrid--font-family`<br/>`--`_TYPE_`--hypergrid--font-family` | The default `font-family`. |
+| `font-size`<br/>`--hypergrid--font-size`<br/>`--`_TYPE_`--hypergrid--font-size`       | The default `font-size`. |
+| `--column-type--content`<br/>`--`TYPE`--column-type--content`                         | `content` property of the Column type badge ("abc", "123", etc in default) |
+| `--hypergrid-row--height`                                                             | Row height |
+| `--hypergrid--width`<br/>`--`_TYPE_`--hypergrid--width`                               | Initial column width |
+| `--hypergrid--max-width`<br/>`--`_TYPE_`--hypergrid--max-width`                       | Max column width |
+| `--hypergrid--min-width`<br/>`--`_TYPE_`--hypergrid--min-width`                       | Min column width |
+| `--hypergrid-row-hover--background`                                                   | Row background on hover (additive)|  
+| `--hypergrid-cell-hover--background                                                   | Column background on hover (additive) |
+| `--hypergrid-positive--color`<br/>`--`_TYPE_`--hypergrid-positive--color`             | Foreground color for (+) |
+| `--hypergrid-negative--color`<br/>`--`_TYPE_`--hypergrid-negative--color`             | Foreground color for (-) |
+| `--d3fc-full--gradient`<br/>`--highcharts-full--gradient`                             | The color gradient for [-, +] ranges on numeric columns. |
+| `--d3fc-positive--gradient`<br/>`--highcharts-positive--gradient`                     | The color gradient for [+, +] ranges on numeric columns. |
+| `--d3fc-negative--gradient`<br/>`--highcharts-negative--gradient`                     | The color gradient for [-, -] ranges on numeric columns. |

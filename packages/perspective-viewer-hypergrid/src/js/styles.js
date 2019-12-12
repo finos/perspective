@@ -61,6 +61,10 @@ properties.add_styles({
 });
 
 properties.add_measures({
+    defaultRowHeight: `${title}-row--height`,
+    groupedHeader: {
+        flatHeight: `${title}-row--height`
+    },
     width: `${title}--width`,
     minimumColumnWidth: `${title}--min-width`,
     maximumColumnWidth: `${title}--max-width`
@@ -111,6 +115,7 @@ const base_grid_properties = {
     gridLinesV: true, // except: due to groupedHeaderPlugin's `clipRuleLines: true` option, only header row displays these lines
     gridLinesUserDataArea: false, // restricts vertical rule line rendering to header row only
     groupedHeader: {
+        flatHeight: "30",
         paintBackground: null, // no group header label decoration
         columnHeaderLines: false, // only draw vertical rule lines between group labels
         groupConfig: [
