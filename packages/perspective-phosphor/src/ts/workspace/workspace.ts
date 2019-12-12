@@ -103,9 +103,8 @@ export class PerspectiveWorkspace extends SplitPanel {
 
         this.masterpanel.addWidget(widget);
         widget.isHidden && widget.show();
-        // bug with perspective view been looked up after it's been deleted.
-        widget.selectable = true;
 
+        widget.selectable = true;
         widget.viewer.restyleElement();
         widget.viewer.addEventListener("perspective-click", this.onPerspectiveClick);
     }
@@ -122,9 +121,6 @@ export class PerspectiveWorkspace extends SplitPanel {
             this.addWidget(this.dockpanel);
         }
         widget.selectable = false;
-
-        // setTimeout(() => {
-        // });
         widget.viewer.restyleElement();
         widget.viewer.removeEventListener("perspective-click", this.onPerspectiveClick);
     }

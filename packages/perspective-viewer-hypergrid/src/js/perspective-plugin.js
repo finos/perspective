@@ -100,17 +100,8 @@ function setPSP(payload, force = false) {
 
     const config = this.grid.behavior.dataModel._config;
     const column_only = config.row_pivots.length === 0 && config.column_pivots.length > 0;
-    const row_selection_enabled = !column_only && this.grid.behavior.dataModel._viewer.hasAttribute("selectable");
-
-    this.grid.addProperties({
-        singleRowSelectionMode: row_selection_enabled,
-        autoSelectRows: row_selection_enabled,
-        rowSelection: row_selection_enabled
-    });
-
-    if (row_selection_enabled) {
-        this.grid.addProperties({selectionRegionOutlineColor: "transparent"});
-    }
+    const selectable = !column_only && this.grid.behavior.dataModel._viewer.hasAttribute("selectable");
+    this.grid.addProperties(this.grid.get_dynamic_styles(selectable));
 
     // Following call to setData signals the grid to call createColumns and
     // dispatch the fin-hypergrid-schema-loaded event (in that order). Here we

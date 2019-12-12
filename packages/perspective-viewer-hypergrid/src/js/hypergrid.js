@@ -21,7 +21,7 @@ import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 import TEMPLATE from "../html/hypergrid.html";
 
 import style from "../less/hypergrid.less";
-import {get_styles, clear_styles, default_grid_properties} from "./styles.js";
+import {get_styles, clear_styles, get_dynamic_styles, default_grid_properties} from "./styles.js";
 import {set_formatters} from "./formatters.js";
 import {set_editors} from "./editors.js";
 import {treeLineRendererPaint} from "./hypergrid-tree-cell-renderer";
@@ -53,6 +53,7 @@ bindTemplate(
                 Canvas.prototype.stopPaintLoop();
                 host.removeAttribute("hidden");
                 this.grid.get_styles = () => get_styles(this);
+                this.grid.get_dynamic_styles = (...args) => get_dynamic_styles(this, ...args);
 
                 const grid_properties = default_grid_properties();
                 const styles = get_styles(this);
