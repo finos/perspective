@@ -1,4 +1,4 @@
-import {SplitPanel, DockLayout, Widget} from "@phosphor/widgets";
+import {SplitPanel, DockLayout, Widget, DockPanel} from "@phosphor/widgets";
 import {PerspectiveDockPanel, ContextMenuArgs} from "../dockpanel/dockpanel";
 import {uniqBy} from "lodash";
 import {Menu} from "@phosphor/widgets";
@@ -19,8 +19,11 @@ export class PerspectiveWorkspace extends SplitPanel {
     private commands: CommandRegistry;
     private side: string;
 
+    private single_document_prev_layout: DockPanel.ILayoutConfig;
+
     constructor(options: PerspectiveWorkspaceOptions = {}) {
         super({orientation: "horizontal"});
+        this.addClass("p-PerspectiveWorkspace");
         this.dockpanel = new PerspectiveDockPanel("main", {enableContextMenu: false});
         this.masterpanel = new SplitPanel({orientation: "vertical"});
         this.masterpanel.addClass("p-Master");
@@ -40,10 +43,11 @@ export class PerspectiveWorkspace extends SplitPanel {
     private createContextMenu(widget: any): Menu {
         const contextMenu = new Menu({commands: this.commands});
 
-        if (widget.parent === this.dockpanel) {
-            contextMenu.addItem({command: "perspective:duplicate", args: {widget}});
-        }
+        contextMenu.addItem({command: "workspace:toggle-single-document", args: {widget}});
+        contextMenu.addItem({command: "perspective:duplicate", args: {widget}});
         contextMenu.addItem({command: "workspace:master", args: {widget}});
+
+        contextMenu.addItem({type: "separator"});
 
         contextMenu.addItem({command: "perspective:export", args: {widget}});
         contextMenu.addItem({command: "perspective:copy", args: {widget}});
@@ -122,20 +126,69 @@ export class PerspectiveWorkspace extends SplitPanel {
 
     private toggleMasterDetail(widget: PerspectiveWidget): void {
         if (widget.parent === this.dockpanel) {
+            if (this.dockpanel.mode === "single-document") {
+                this.toggleSingleDocument(widget);
+            }
             this.makeMaster(widget);
         } else {
             this.makeDetail(widget);
         }
     }
 
+    private toggleSingleDocument(widget: PerspectiveWidget): void {
+        if (this.dockpanel.mode !== "single-document") {
+            this.single_document_prev_layout = this.dockpanel.saveLayout();
+            this.dockpanel.mode = "single-document";
+            this.dockpanel.activateWidget(widget);
+            widget.notifyResize();
+        } else {
+            this.dockpanel.mode = "multiple-document";
+            this.dockpanel.restoreLayout(this.single_document_prev_layout);
+        }
+    }
+
+    public async duplicate(widget: PerspectiveWidget): Promise<void> {
+        if (this.dockpanel.mode === "single-document") {
+            this.toggleSingleDocument(widget);
+        }
+        const newWidget = new PerspectiveWidget(widget.name);
+        newWidget.title.closable = true;
+        await newWidget.restore(widget.save());
+        this.dockpanel.addWidget(newWidget, {mode: "split-right", ref: widget});
+        newWidget.load(widget.table);
+    }
+
     private createCommands(): CommandRegistry {
         const commands = createCommands(this.dockpanel) as CommandRegistry;
+        commands.addCommand("perspective:duplicate", {
+            execute: ({widget}) => this.duplicate(widget as any),
+            // isVisible: args => (args as any).widget.parent === this.dockpanel,
+            iconClass: "p-MenuItem-duplicate",
+            label: "Duplicate",
+            mnemonic: 0
+        });
+
         commands.addCommand("workspace:master", {
             execute: args => this.toggleMasterDetail((args as any).widget),
             iconClass: args => ((args as any).widget.parent === this.dockpanel ? "p-MenuItem-master" : "p-MenuItem-detail"),
             label: args => ((args as any).widget.parent === this.dockpanel ? "Master" : "Detail"),
             mnemonic: 0
         });
+
+        commands.addCommand("workspace:toggle-single-document", {
+            execute: args => this.toggleSingleDocument((args as any).widget),
+            isVisible: args => (args as any).widget.parent === this.dockpanel,
+            iconClass: () => {
+                if (this.dockpanel.mode !== "single-document") {
+                    return "p-MenuItem-maximize";
+                } else {
+                    return "p-MenuItem-minimize";
+                }
+            },
+            label: () => (this.dockpanel.mode === "single-document" ? "Minimize" : "Maximize"),
+            mnemonic: 0
+        });
+
         return commands;
     }
 }
