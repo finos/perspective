@@ -461,20 +461,24 @@ namespace arrow {
         std::int32_t stride,
         t_get_data_extents extents) {
         ::arrow::BooleanBuilder array_builder;
-        // array_builder.Reserve(data.size() / stride);
+        auto reserve_status = array_builder.Reserve(
+            extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
 
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             auto idx = get_idx(cidx, ridx, stride, extents);
             t_tscalar scalar = data.operator[](idx);
             ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                // TODO: convert to unsafe writes, just extend underlying array
-                s = array_builder.Append(get_scalar<bool>(scalar));
+                array_builder.UnsafeAppend(get_scalar<bool>(scalar));
             } else {
-                s = array_builder.AppendNull();
+                array_builder.UnsafeAppendNull();
             }
-
-            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
         }
         
         std::shared_ptr<::arrow::Array> array;
@@ -492,12 +496,18 @@ namespace arrow {
         std::int32_t stride,
         t_get_data_extents extents) {
         ::arrow::Date32Builder array_builder;
-        // array_builder.Reserve(data.size() / stride);
+        auto reserve_status = array_builder.Reserve(
+            extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
     
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             auto idx = get_idx(cidx, ridx, stride, extents);
             t_tscalar scalar = data.operator[](idx);
-            ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 t_date val = scalar.get<t_date>();
                 // years are signed, while month/days are unsigned
@@ -506,13 +516,11 @@ namespace arrow {
                 date::day day {static_cast<std::uint32_t>(val.day())}; 
                 date::year_month_day ymd(year, month, day);
                 date::sys_days days_since_epoch = ymd;
-                s = array_builder.Append(
+                array_builder.UnsafeAppend(
                     static_cast<std::int32_t>(days_since_epoch.time_since_epoch().count()));
             } else {
-                s = array_builder.AppendNull();
+                array_builder.UnsafeAppendNull();
             }
-
-            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
         }
         
         std::shared_ptr<::arrow::Array> array;
@@ -532,20 +540,22 @@ namespace arrow {
         // TimestampType requires parameters, so initialize them here
         std::shared_ptr<::arrow::DataType> type = ::arrow::timestamp(::arrow::TimeUnit::MILLI);
         ::arrow::TimestampBuilder array_builder(type, ::arrow::default_memory_pool());
-        // TODO: array_builder.Reserve(data.size() / stride);
+        auto reserve_status = array_builder.Reserve(extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
 
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             auto idx = get_idx(cidx, ridx, stride, extents);
-            // TODO: add row offset
             t_tscalar scalar = data.operator[](idx);
-            ::arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                s = array_builder.Append(get_scalar<std::int64_t>(scalar));
+                array_builder.UnsafeAppend(get_scalar<std::int64_t>(scalar));
             } else {
-                s = array_builder.AppendNull();
+                array_builder.UnsafeAppendNull();
             }
-
-            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
         }
         
         std::shared_ptr<::arrow::Array> array;
@@ -562,12 +572,17 @@ namespace arrow {
         std::int32_t cidx,
         std::int32_t stride,
         t_get_data_extents extents) {
-        int data_size = data.size() / stride;
         t_vocab vocab;
         vocab.init(false);
         ::arrow::Int32Builder indices_builder;
         ::arrow::StringBuilder values_builder;
-        indices_builder.Reserve(data_size);
+        auto reserve_status = indices_builder.Reserve(extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
 
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             auto idx = get_idx(cidx, ridx, stride, extents);

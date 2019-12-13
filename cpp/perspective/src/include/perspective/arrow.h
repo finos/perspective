@@ -174,19 +174,24 @@ namespace arrow {
         t_get_data_extents extents) {
         // NumericBuilder encompasses the most types (int/float/datetime)
         ::arrow::NumericBuilder<ArrowDataType> array_builder;
+        auto reserve_status = array_builder.Reserve(
+            extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
 
-        // TODO: write to Arrow array in bulk
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
-            ::arrow::Status s;
             auto idx = get_idx(cidx, ridx, stride, extents);
             t_tscalar scalar = data.operator[](idx);
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 ArrowValueType val = get_scalar<ArrowValueType>(scalar);
-                s = array_builder.Append(val);
+                array_builder.UnsafeAppend(val);
             } else {
-                s = array_builder.AppendNull();
+                array_builder.UnsafeAppendNull();
             }
-            if (!s.ok()) PSP_COMPLAIN_AND_ABORT(s.message());
         }
         
         // Point to base `arrow::Array` instead of derived, so we don't have to

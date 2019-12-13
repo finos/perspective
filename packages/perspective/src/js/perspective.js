@@ -611,8 +611,6 @@ export default function(Module) {
         const end_col = options.end_col;
         const sides = this.sides();
 
-        console.log(start_row, end_row, start_col, end_col);
-
         if (sides === 0) {
             return __MODULE__.to_arrow_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (sides === 1) {

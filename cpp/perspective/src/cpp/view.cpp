@@ -64,8 +64,6 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
     // TODO: make sure is 0 for column only - right now get_data returns row path for everything
     sides() > 0 ? m_col_offset = 1 : m_col_offset = 0;
-
-    std::cout << "co: " << m_col_offset << std::endl;
 }
 
 template <typename CTX_T>
@@ -369,7 +367,6 @@ template <typename CTX_T>
 std::shared_ptr<std::string>
 View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     std::int32_t start_col, std::int32_t end_col) const {
-    std::cout << "first: " << start_row << ", " << end_row << ", " <<start_col << ", " << end_col <<std::endl;
     std::shared_ptr<t_data_slice<CTX_T>> data_slice = get_data(
         start_row, end_row, start_col, end_col
     );
@@ -389,15 +386,13 @@ View<CTX_T>::data_slice_to_arrow(
     std::int32_t col_offset = data_slice->get_col_offset();
     start_col += col_offset;
 
-    // Get the vector containing the view's entire dataset
     auto slice = data_slice->get_slice();
     auto stride = data_slice->get_stride();
+    auto names = data_slice->get_column_names();
+
     std::vector<std::shared_ptr<::arrow::Array>> vectors;
     std::vector<std::shared_ptr<::arrow::Field>> fields;
 
-    auto names = data_slice->get_column_names();
-    std::cout << names << std::endl;
-    std::cout << slice << std::endl;
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
@@ -408,8 +403,6 @@ View<CTX_T>::data_slice_to_arrow(
         } else {
             name = col_path.at(col_path.size() - 1).to_string();
         }
-
-        std::cout << name << ": " << get_dtype_descr(dtype) << std::endl;
 
         std::shared_ptr<::arrow::Array> arr;
         switch (dtype) {
@@ -478,7 +471,6 @@ View<CTX_T>::data_slice_to_arrow(
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             }
         }
-        std::cout << arr->ToString() << std::endl;
         vectors.push_back(arr);
     }
 
@@ -489,7 +481,6 @@ View<CTX_T>::data_slice_to_arrow(
     auto valid = batches->Validate();
     if (!valid.ok()) {
         std::stringstream ss;
-        std::cout << arrow_schema->ToString() << std::endl;
         ss << "Invalid RecordBatch: " << valid.message() << std::endl;
         std::cout << ss.str();
         PSP_COMPLAIN_AND_ABORT(ss.str());

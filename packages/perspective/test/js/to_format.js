@@ -303,7 +303,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Tsransitive arrow output 0-sided", async function() {
+        it("Transitive arrow output 0-sided", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
             let arrow = await view.to_arrow();
@@ -343,7 +343,6 @@ module.exports = perspective => {
         it("Transitive arrow output 0-sided, with col range", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
-            console.log(await view.schema());
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let json2 = await view.to_json({start_col: 1, end_col: 3});
             // expect(arrow.byteLength).toEqual(908);
