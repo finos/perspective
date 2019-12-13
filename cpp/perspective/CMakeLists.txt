@@ -424,7 +424,8 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/aggregate.cpp
 	${PSP_CPP_SRC}/src/cpp/aggspec.cpp
 	${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
-	${PSP_CPP_SRC}/src/cpp/arrow.cpp
+	${PSP_CPP_SRC}/src/cpp/arrow_loader.cpp
+	${PSP_CPP_SRC}/src/cpp/arrow_writer.cpp
 	${PSP_CPP_SRC}/src/cpp/base.cpp
 	${PSP_CPP_SRC}/src/cpp/base_impl_linux.cpp
 	${PSP_CPP_SRC}/src/cpp/base_impl_osx.cpp

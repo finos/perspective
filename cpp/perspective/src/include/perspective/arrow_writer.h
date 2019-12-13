@@ -40,39 +40,6 @@ namespace arrow {
     template <typename T>
     T get_scalar(t_tscalar& t);
 
-    class PERSPECTIVE_EXPORT ArrowLoader {
-    public:
-        ArrowLoader();
-        ~ArrowLoader();
-
-        void initialize(uintptr_t ptr, std::uint32_t);
-
-        void fill_table(
-            t_data_table& tbl,
-            const std::string& index,
-            std::uint32_t offset,
-            std::uint32_t limit, 
-            bool is_update);
-
-        std::vector<std::string> names() const;
-        std::vector<t_dtype> types() const;
-        std::uint32_t row_count() const;
-
-    private:
-        void fill_column(
-            t_data_table& tbl, 
-            std::shared_ptr<t_column> col,
-            const std::string& name, 
-            std::int32_t cidx, 
-            t_dtype type, 
-            std::string& raw_type,
-            bool is_update);
-
-        std::shared_ptr<::arrow::Table> m_table;
-        std::vector<std::string> m_names;
-        std::vector<t_dtype> m_types;
-    };
-
     /**
      * @brief Retrieve the correct index into the data slice for the given
      * column and row. This is a redefinition of the method in `t_data_slice`,

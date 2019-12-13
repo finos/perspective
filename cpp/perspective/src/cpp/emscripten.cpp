@@ -8,7 +8,8 @@
  */
 
 #include <perspective/emscripten.h>
-#include <perspective/arrow.h>
+#include <perspective/arrow_loader.h>
+#include <perspective/arrow_writer.h>
 
 using namespace emscripten;
 using namespace perspective;

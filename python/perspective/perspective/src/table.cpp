@@ -8,7 +8,7 @@
  */
 #ifdef PSP_ENABLE_PYTHON
 
-#include <perspective/arrow.h>
+#include <perspective/arrow_loader.h>
 #include <perspective/base.h>
 #include <perspective/binding.h>
 #include <perspective/python/accessor.h>
