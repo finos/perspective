@@ -218,8 +218,6 @@ export function throttlePromise(target, property, descriptor) {
         this[lock] = invertPromise();
         let result;
         try {
-            const timeout = this._calculate_throttle_timeout();
-            await new Promise(x => setTimeout(x, timeout));
             result = await f.call(this, ...args);
         } catch (e) {
             console.error(e);

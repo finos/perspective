@@ -261,14 +261,33 @@ export class PerspectiveElement extends StateElement {
         return false;
     }
 
+    /**
+     * Calculates the optimal timeout in milliseconds for render events,
+     * calculated by 5 frame moving average of this component's render
+     * framerate, or explicit override attribute `"throttle"`.
+     *
+     * @private
+     * @returns
+     * @memberof PerspectiveElement
+     */
     _calculate_throttle_timeout() {
-        if (!this.__render_times || this.__render_times.length < 5) {
-            return 0;
+        let timeout;
+        const throttle = this.getAttribute("throttle");
+        if (throttle === undefined || throttle === "null" || !this.hasAttribute("throttle")) {
+            if (!this.__render_times || this.__render_times.length < 5) {
+                return 0;
+            }
+            timeout = this.__render_times.reduce((x, y) => x + y, 0) / this.__render_times.length;
+            timeout = Math.min(5000, timeout);
+        } else {
+            timeout = parseInt(throttle);
+            if (isNaN(timeout) || timeout < 0) {
+                console.warn(`Bad throttle attribute value "${throttle}".  Can be (non-negative integer) milliseconds.`);
+                this.removeAttribute("throttle");
+                return 0;
+            }
         }
-        const view_count = document.getElementsByTagName("perspective-viewer").length;
-        const avg = this.__render_times.reduce((x, y) => x + y, 0) / this.__render_times.length;
-        const timeout = avg * view_count * 2;
-        return Math.min(10000, Math.max(0, timeout));
+        return Math.max(0, timeout);
     }
 
     _view_on_update(limit_points) {

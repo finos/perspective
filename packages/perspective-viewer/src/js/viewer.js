@@ -397,6 +397,30 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
+     * Determines the render throttling behavior.  Can be an integer, for
+     * millisecond window to throttle render event;  or, if `undefined`,
+     * will try to determine the optimal throttle time from this component's
+     * render framerate.
+     *
+     * @kind member
+     * @type {integer|string} The throttle rate - milliseconds (integer), or the
+     * enum "adaptive" for a dynamic throttle based on render time.
+     * @example
+     * <!-- Only draws at most 1 frame/sec. -->
+     * <perspective-viewer throttle="1000"></perspective-viewer>
+     */
+    set throttle(x) {
+        if (x === "null") {
+            if (this.hasAttribute("throttle")) {
+                this.removeAttribute("throttle");
+            }
+        }
+        // Returns the throttle time, but also perform validaiton - we only want
+        // the latter here.
+        this._calculate_throttle_timeout();
+    }
+
+    /**
      * This element's `perspective` worker instance.  This property is not
      * reflected as an HTML attribute, and is readonly;  it can be effectively
      * set however by calling the `load() method with a `perspective.table`
