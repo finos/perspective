@@ -69,7 +69,10 @@
         "webpack-cli": "^3.3.2"
     }, 
     "resolutions": {
-        "**/write-file-atomic": "2.4.1"
+        "**/write-file-atomic": "2.4.1",
+        "**/webpack": "^4.31.0",
+        "**/webpack-cli": "^3.3.2",
+        "**/webpack-dev-server": "3.9.0"
     },
     "pre-commit": [
         "precommit"

@@ -48,6 +48,7 @@ function jest() {
         --color
         --verbose 
         --maxWorkers=50%
+        --noStackTrace
         ${getarg("--bail") && "--bail"}
         ${getarg("--debug") || "--silent 2>&1"} 
         --testNamePattern="${get_regex()}"`;

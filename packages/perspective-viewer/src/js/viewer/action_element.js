@@ -25,7 +25,10 @@ export class ActionElement extends DomElement {
 
     async _toggle_config(event) {
         if (!event || event.button !== 2) {
-            if (this._show_config) {
+            this._show_config = !this._show_config;
+            this._hide_context_menu();
+
+            if (!this._show_config) {
                 const panel = this.shadowRoot.querySelector("#pivot_chart_container");
                 this._datavis.style.width = `${panel.clientWidth + this._side_panel.clientWidth}px`;
                 this._datavis.style.height = `${panel.clientHeight + this._top_panel.clientHeight}px`;
@@ -37,20 +40,18 @@ export class ActionElement extends DomElement {
                     this._datavis.style.width = "100%";
                     this._datavis.style.height = "100%";
                     this.removeAttribute("settings");
-                    this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: !this._show_config}));
+                    this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
                 }
             } else {
                 this._side_panel.style.display = "flex";
                 this._top_panel.style.display = "flex";
-                this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: !this._show_config}));
+                this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
                 try {
                     await this._plugin.resize.call(this);
                 } finally {
                     this.toggleAttribute("settings", true);
                 }
             }
-            this._show_config = !this._show_config;
-            this._hide_context_menu();
         }
     }
 

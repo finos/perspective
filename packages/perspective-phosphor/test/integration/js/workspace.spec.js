@@ -61,7 +61,7 @@ utils.with_server({paths: PATHS}, () => {
                         const data = await response.text();
                         widget.load(data);
 
-                        workspace.dockpanel.duplicate(widget);
+                        workspace.duplicate(widget);
                     }, container);
 
                     await page.waitFor(() => {
@@ -91,7 +91,7 @@ utils.with_server({paths: PATHS}, () => {
                         const data = await response.text();
                         widget.load(data);
 
-                        workspace.dockpanel.duplicate(widget);
+                        workspace.duplicate(widget);
                     }, container);
 
                     await page.waitFor(() => {

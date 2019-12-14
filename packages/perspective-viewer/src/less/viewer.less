@@ -241,12 +241,6 @@
             min-height: 64px;
         }
     }
-    #divider {
-        min-height: 2px;
-        height: 2px;
-        margin: 15px 13px 15px 13px;
-        margin-bottom: 5px;
-    }
     .column {
         display: flex;
         list-style: none;
@@ -362,6 +356,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: opacity 0.2s ease-out;
         &:hover {
             color: var(--active--color, inherit);
         }
