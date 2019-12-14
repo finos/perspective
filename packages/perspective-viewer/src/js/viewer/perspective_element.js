@@ -444,6 +444,14 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
+    _check_loaded_table() {
+        if (this._table) {
+            const table = this._table;
+            delete this._table;
+            this._load_table(table);
+        }
+    }
+
     _render_time() {
         const t = performance.now();
         return () => {
