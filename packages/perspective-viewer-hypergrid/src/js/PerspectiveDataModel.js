@@ -50,7 +50,7 @@ function pad_data_window(rect, rowPivots = [], colPivots = []) {
         start_row: rect.origin.y,
         end_row: rect.corner.y + 1,
         start_col: rect.origin.x,
-        end_col: rect.corner.x + 1
+        end_col: rect.corner.x + 3
     };
     range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
     range.index = rowPivots.length === 0 && colPivots.length === 0;
