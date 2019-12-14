@@ -45,7 +45,7 @@ const _wrapper = function(f) {
     };
 };
 
-function pad_data_window(rect, rowPivots = [], settings = true, selection = false) {
+function pad_data_window(rect, rowPivots = [], selection = false) {
     const range = {
         start_row: rect.origin.y,
         end_row: rect.corner.y + 1,

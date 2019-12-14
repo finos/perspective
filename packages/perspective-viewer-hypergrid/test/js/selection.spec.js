@@ -17,11 +17,12 @@ utils.with_server({}, () => {
             describe("no pivots", () => {
                 describe("selecting a row", () => {
                     test.capture("highlights the row with no pivots", async page => {
+                        await page.waitForSelector("perspective-viewer:not([updating])");
                         await page.$("perspective-viewer");
                         await page.focus("perspective-viewer");
                         await page.mouse.click(80, 60);
                         await page.mouse.move(80, 40);
-                        await page.waitForSelector("perspective-viewer:not([updating])");
+                        await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
                     });
 
                     test.capture("keeps selection when row moves with no pivots", async page => {
@@ -34,6 +35,7 @@ utils.with_server({}, () => {
 
                         await page.focus("perspective-viewer");
                         await page.mouse.click(80, 60);
+                        await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
 
                         await page.evaluate(element => {
                             element.update([{name: "Homer", number: 300}]);
@@ -54,7 +56,7 @@ utils.with_server({}, () => {
                         await page.focus("perspective-viewer");
                         await page.mouse.click(80, 60);
                         await page.mouse.move(80, 40);
-                        await page.waitForSelector("perspective-viewer:not([updating])");
+                        await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
                     });
 
                     test.capture("keeps selection when row moves with row pivots", async page => {
@@ -63,10 +65,10 @@ utils.with_server({}, () => {
                             element.setAttribute("sort", '[["number", "asc"]]');
                             element.setAttribute("row-pivots", '["name"]');
                         }, viewer);
-
+                        await page.waitForSelector("perspective-viewer:not([updating])");
                         await page.focus("perspective-viewer");
                         await page.mouse.click(80, 60);
-
+                        await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
                         await page.evaluate(element => {
                             element.update([{name: "Homer", number: 300}]);
                         }, viewer);
