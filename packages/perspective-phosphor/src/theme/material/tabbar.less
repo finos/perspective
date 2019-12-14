@@ -77,11 +77,11 @@
 
 
 .divider {
-    left: 24px;
+    left: 12px;
     bottom: 0;
     position: absolute;
     // background: #ccc;
-    right: 24px;
+    right: 12px;
     display: none;
     transition: background-color 0.2s ease-out, width 0.2s ease-out;
 
@@ -105,11 +105,10 @@
 
 .p-TabBar-tabLabel input {
     height: 18px;
-    padding-right: 20px;
 }
 
 .p-TabBar {
-    min-height: 36px !important;
+    min-height: 24px !important;
 }
 
 
@@ -126,16 +125,17 @@
 }
 
 .p-TabBar-content {
-    padding: 0px 5px;
+    padding: 0px;
     overflow: hidden;
     margin: 0px 0px -1px 0px;
     border-bottom: 0px solid #fff !important;
+    border-left: 1px solid #eaeaea;
+    border-right: 1px solid #eaeaea;
 }
 
 .p-TabBar-tab.p-mod-current {
     .shadow {
         margin: -1px;
-        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
         position: absolute;
         width: calc(~"100% + 2px");
         height: 200%;
@@ -182,10 +182,6 @@
  .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
     border-width: 1px !important;
     border-color: transparent;
-    .p-TabBar-tabLabel {
-        margin-left: 100px;
-        margin-right: 24px;
-    }
     .p-TabBar-tabToolbar {
         display: flex;
     }
@@ -259,8 +255,8 @@
     border-style: solid;
     border-width: 1px;
     border-color: transparent;
-    height: 36px !important;
-    max-height: 36px !important;
+    height: 24px !important;
+    max-height: 24px !important;
     transform: none !important;
     transition: color 0.2s ease-out;
 }
@@ -294,7 +290,7 @@
     font-family: "Open Sans";
     font-weight: 400;
     font-size: 12px;
-    line-height: 34px;
+    line-height: 22px;
     text-align: center;
     white-space: normal !important;
     word-break: break-all;
@@ -304,13 +300,12 @@
 .p-TabBar-tabCloseIcon,
 .p-TabBar-tabConfigIcon {
     cursor: pointer !important;
-    line-height: 34px !important;
-    padding-right: 17px !important;
-    padding-left: 4px;
+    line-height: 22px !important;
+    padding-right: 8px !important;
 }
 
 .p-TabBar-tabConfigIcon {
-    padding-left: 16px;
+    padding-left: 8px;
 }
 
 .p-TabBar-tabLoadingIcon {
@@ -321,7 +316,7 @@
 .p-TabBar-tabLinkIcon,
 .p-TabBar-tabMaximizeIcon {
     cursor: pointer !important;
-    line-height: 34px !important;
+    line-height: 22px !important;
     padding-right: 5px;
 }
 
@@ -336,8 +331,8 @@
     border-right: @border-color;
     border-left: @border-color;
     border-top: @border-color;
-    height: 38px !important;
-    max-height: 38px !important;
+    height: 26px !important;
+    max-height: 26px !important;
 }
 
 .bottom .p-TabBar-tab.p-mod-current {
