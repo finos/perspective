@@ -98,7 +98,7 @@ def to_format(options, view, output_format):
                 # ensure that `__INDEX__` has the same number of rows as
                 # returned dataset
                 if len(pkeys) == 0:
-                    data["__INDEX__"].append([])  # ensure that `__INDEX__` has the same number of rows as returned dataset
+                    data["__INDEX__"].append([])
                 for pkey in pkeys:
                     data['__INDEX__'].append([pkey])
 

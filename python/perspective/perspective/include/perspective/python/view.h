@@ -59,6 +59,10 @@ py::bytes to_arrow_two(
     std::int32_t start_col, 
     std::int32_t end_col);
 
+py::bytes get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view);
+py::bytes get_row_delta_one(std::shared_ptr<View<t_ctx1>> view);
+py::bytes get_row_delta_two(std::shared_ptr<View<t_ctx2>> view);
+
 
 } //namespace binding
 } //namespace perspective

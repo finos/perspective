@@ -189,12 +189,12 @@ public:
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
     /**
-     * @brief Returns an Arrow-encoded string of the dataset from the rows
+     * @brief Returns a data slice that contains the dataset from the rows
      * that have been changed by a call to `update()`.
      * 
-     * @return std::shared_ptr<std::string> 
+     * @return std::shared_ptr<t_data_slice<CTX_T>>
      */
-    std::shared_ptr<std::string> get_row_delta() const;
+    std::shared_ptr<t_data_slice<CTX_T>> get_row_delta() const;
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;

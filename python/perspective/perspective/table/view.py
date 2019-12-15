@@ -18,7 +18,9 @@ from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
 
 try:
-    from .libbinding import make_view_zero, make_view_one, make_view_two, to_arrow_zero, to_arrow_one, to_arrow_two
+    from .libbinding import make_view_zero, make_view_one, make_view_two,\
+        to_arrow_zero, to_arrow_one, to_arrow_two, get_row_delta_zero,\
+        get_row_delta_one, get_row_delta_two
 except ImportError:
     pass
 
@@ -190,11 +192,16 @@ class View(object):
 
         Multiple callbacks can be set through calling ``on_update`` multiple
         times, and will be called in the order they are set.  Callback must be a
-        callable function that takes no parameters.
+        callable function that takes exactly 0 or 1 parameter, depending on
+        whether `on_update` is called with `mode="rows"`. A `RuntimeError` will
+        be thrown if the callback has mis-configured parameters.
 
         Args:
             callback (:obj:`callable`): a callable function reference that will
                 be called when :func:`perspective.Table.update()` is called.
+            mode (:obj:`str`): if set to "rows", the callback will be passed
+                an Arrow-serialized dataset of the rows that were updated.
+                Defaults to "none".
 
         Examples:
             >>> def updater():
@@ -213,10 +220,11 @@ class View(object):
             raise ValueError('Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(mode))
 
         if mode == "cell" or mode == "row":
-            if not self._view.get_deltas_enabled():
-                self._view.set_deltas_enabled(True)
+            if not self._view._get_deltas_enabled():
+                self._view._set_deltas_enabled(True)
 
-        wrapped_callback = partial(self._wrapped_on_update_callback, mode=mode, callback=callback)
+        wrapped_callback = partial(
+            self._wrapped_on_update_callback, mode=mode, callback=callback)
         self._callbacks.add_callback({
             "name": self._name,
             "orig_callback": callback,
@@ -453,6 +461,17 @@ class View(object):
     def to_columns(self, **options):
         return self.to_dict(**options)
 
+    def _get_step_delta(self):
+        pass
+
+    def _get_row_delta(self):
+        if self._sides == 0:
+            return get_row_delta_zero(self._view)
+        elif self._sides == 1:
+            return get_row_delta_one(self._view)
+        else:
+            return get_row_delta_two(self._view)
+
     def _num_hidden_cols(self):
         '''Returns the number of columns that are sorted but not shown.'''
         hidden = 0
@@ -476,7 +495,7 @@ class View(object):
             callback(cache["step_delta"])
         elif mode == "row":
             if cache.get("row_delta") is None:
-                raise NotImplementedError("not implemented get_row_delta")
+                cache["row_delta"] = self._get_row_delta()
             callback(cache["row_delta"])
         else:
             callback()

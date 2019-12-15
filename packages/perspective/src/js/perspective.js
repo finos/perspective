@@ -41,6 +41,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 export default function(Module) {
     let __MODULE__ = Module;
     let accessor = new DataAccessor();
+    const SIDES = ["zero", "one", "two"];
 
     /***************************************************************************
      *
@@ -278,7 +279,7 @@ export default function(Module) {
 
     view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
         const num_sides = this.sides();
-        const nidx = ["zero", "one", "two"][num_sides];
+        const nidx = SIDES[num_sides];
         return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
     };
 
@@ -335,7 +336,7 @@ export default function(Module) {
         const leaves_only = !!options.leaves_only;
         const num_sides = this.sides();
         const has_row_path = num_sides !== 0 && !this.column_only;
-        const nidx = ["zero", "one", "two"][num_sides];
+        const nidx = SIDES[num_sides];
 
         const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
         const ns = slice.get_column_names();
@@ -780,19 +781,16 @@ export default function(Module) {
 
     /**
      * Returns an Arrow-serialized dataset that contains the data from updated
-     * rows.
+     * rows. Do not call this function directly, instead use the
+     * {@link module:perspective~view}'s `on_update` method with `{mode: "row"}`
+     * in order to access the row deltas.
      *
      * @private
      */
     view.prototype._get_row_delta = async function() {
         const sides = this.sides();
-        if (sides === 0) {
-            return __MODULE__.get_row_delta_zero(this._View);
-        } else if (sides === 1) {
-            return __MODULE__.get_row_delta_one(this._View);
-        } else if (sides === 2) {
-            return __MODULE__.get_row_delta_two(this._View);
-        }
+        const nidx = SIDES[sides];
+        return __MODULE__[`get_row_delta_${nidx}`](this._View);
     };
 
     /**

@@ -445,15 +445,14 @@ class TestToArrow(object):
         }
         arr = tbl.view().to_arrow(end_col=1, start_row=2, end_row=3)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {
-            "a": data["a"][2:3]
-        }
+        assert tbl2.view().to_dict() == tbl.view().to_dict(
+            end_col=1, start_row=2, end_row=3)
 
     def test_to_arrow_start_end_col_start_row(self):
         data = {
             "a": [None, 1, None, 2, 3],
             "b": [1.5, 2.5, None, 3.5, None],
-            "c": [1.5, 2.5, None, 3.5, None]
+            "c": [1.5, 2.5, None, 4.5, None]
         }
         tbl = Table(data)
         assert tbl.schema() == {
@@ -463,15 +462,14 @@ class TestToArrow(object):
         }
         arr = tbl.view().to_arrow(start_col=1, end_col=2, start_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {
-            "b": data["b"][2:]
-        }
+        assert tbl2.view().to_dict() == tbl.view().to_dict(
+            start_col=1, end_col=2, start_row=2)
 
     def test_to_arrow_start_end_col_end_row(self):
         data = {
             "a": [None, 1, None, 2, 3],
             "b": [1.5, 2.5, None, 3.5, None],
-            "c": [1.5, 2.5, None, 3.5, None]
+            "c": [1.5, 2.5, None, 4.5, None]
         }
         tbl = Table(data)
         assert tbl.schema() == {
@@ -481,6 +479,5 @@ class TestToArrow(object):
         }
         arr = tbl.view().to_arrow(start_col=1, end_col=2, end_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {
-            "b": data["b"][:2]
-        }
+        assert tbl2.view().to_dict() == tbl.view().to_dict(
+            start_col=1, end_col=2, end_row=2)

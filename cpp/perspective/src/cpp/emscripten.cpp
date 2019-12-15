@@ -175,7 +175,8 @@ namespace binding {
     t_val
     get_row_delta(
         std::shared_ptr<View<CTX_T>> view) {
-        auto row_delta = view->get_row_delta();
+        auto slice = view->get_row_delta();
+        auto row_delta = view->data_slice_to_arrow(slice);
         return str_to_arraybuffer(row_delta)["buffer"];
     }
     

@@ -581,6 +581,19 @@ class TestToFormat(object):
         )
         assert records == [{}, {}]
 
+    def test_to_dict_start_col_end_col(self):
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        tbl = Table(data)
+        view = tbl.view()
+        d = view.to_dict(
+            start_col=1,
+            end_col=3
+        )
+        assert d == {
+            "b": [2, 4],
+            "c": [3, 5]
+        }
+
     # to csv
 
     def test_to_csv_symmetric(self):

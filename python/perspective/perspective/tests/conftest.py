@@ -13,6 +13,7 @@ import pandas as pd
 import pyarrow as pa
 from datetime import datetime
 from pytest import fixture
+from perspective import Table
 
 
 def _make_date_time_index(size, time_unit):
@@ -139,6 +140,12 @@ class Util:
     def make_series(size=10, freq="D"):
         index = _make_date_time_index(size, freq)
         return pd.Series(data=np.random.rand(size), index=index)
+
+    @staticmethod
+    def compare_delta(received, expected):
+        """Compare an arrow-serialized row delta by constructing a Table."""
+        tbl = Table(received)
+        assert tbl.view().to_dict() == expected
 
 
 class Sentinel(object):

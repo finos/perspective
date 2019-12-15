@@ -7,6 +7,7 @@
 #
 
 import numpy as np
+from pytest import raises
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -736,6 +737,119 @@ class TestView(object):
         assert len(view._callbacks.get_callbacks()) == 1
         tbl.update(data)
         assert s.get() == 2
+
+    # row delta
+
+    def test_view_row_delta_zero(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1(delta):
+            util.compare_delta(delta, update_data)
+
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_one(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1(delta):
+            util.compare_delta(delta, {
+                "a": [9, 5],
+                "b": [12, 6]
+            })
+
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"])
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["1"], ["3"]],
+            "a": [4, 1, 3],
+            "b": [6, 2, 4]
+        }
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_two(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1(delta):
+            util.compare_delta(delta, {
+                "2|a": [1, None],
+                "2|b": [2, None],
+                "4|a": [3, None],
+                "4|b": [4, None],
+                "6|a": [5, 5],
+                "6|b": [6, 6]
+            })
+
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["1"], ["3"]],
+            "2|a": [1, 1, None],
+            "2|b": [2, 2, None],
+            "4|a": [3, None, 3],
+            "4|b": [4, None, 4],
+        }
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_two_column_only(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1(delta):
+            util.compare_delta(delta, {
+                "2|a": [1, None],
+                "2|b": [2, None],
+                "4|a": [3, None],
+                "4|b": [4, None],
+                "6|a": [5, 5],
+                "6|b": [6, 6]
+            })
+
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["b"])
+        assert view.to_dict() == {
+            "2|a": [1, None],
+            "2|b": [2, None],
+            "4|a": [None, 3],
+            "4|b": [None, 4],
+        }
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_should_throw_invalid_callback(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1():
+            pass
+
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_update(cb1, mode="row")
+        with raises(RuntimeError):
+            tbl.update(update_data)
 
     # hidden rows
 

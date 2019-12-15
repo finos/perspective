@@ -659,7 +659,7 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 }
 
 template <typename CTX_T>
-std::shared_ptr<std::string>
+std::shared_ptr<t_data_slice<CTX_T>>
 View<CTX_T>::get_row_delta() const {
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
@@ -677,10 +677,9 @@ View<CTX_T>::get_row_delta() const {
     // Column count for row delta needs to include `__ROW_PATH__`
     t_uindex num_columns = m_ctx->get_column_count();
 
-    auto data_slice = std::make_shared<t_data_slice<CTX_T>>(
+    return std::make_shared<t_data_slice<CTX_T>>(
         m_ctx, 0, num_rows_changed, 0, num_columns,
         m_row_offset, m_col_offset, data, paths);
-    return data_slice_to_arrow(data_slice);
 }
 
 template <typename CTX_T>

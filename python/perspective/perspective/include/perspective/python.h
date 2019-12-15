@@ -365,7 +365,9 @@ PYBIND11_MODULE(libbinding, m)
     m.def("to_arrow_zero", &to_arrow_zero);
     m.def("to_arrow_one", &to_arrow_one);
     m.def("to_arrow_two", &to_arrow_two);
-
+    m.def("get_row_delta_zero", &get_row_delta_zero);
+    m.def("get_row_delta_one", &get_row_delta_one);
+    m.def("get_row_delta_two", &get_row_delta_two);
 }
 
 #endif
