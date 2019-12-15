@@ -13,7 +13,7 @@ namespace perspective {
 
 t_view_config::t_view_config(std::vector<std::string> row_pivots,
     std::vector<std::string> column_pivots,
-    tsl::ordered_map<std::string, std::string> aggregates, std::vector<std::string> columns,
+    tsl::ordered_map<std::string, std::vector<std::string>> aggregates, std::vector<std::string> columns,
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
     std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only)
     : m_init(false)
@@ -161,7 +161,12 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
         if (m_column_only) {
             agg_type = t_aggtype::AGGTYPE_ANY;
         } else {
-            agg_type = str_to_aggtype(aggregate);
+            if (aggregate.at(0) == "weighted mean") {
+                dependencies.push_back(t_dep(aggregate.at(1), DEPTYPE_COLUMN));
+                agg_type = AGGTYPE_WEIGHTED_MEAN;
+            } else {
+                agg_type = str_to_aggtype(aggregate.at(0));
+            }
         }
 
         if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST) {
@@ -193,9 +198,15 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
 
             // use the `any` agg for columns used as pivots/column_only views
             if (is_pivot || m_row_pivots.size() == 0 || m_column_only) {
-                agg_type = t_aggtype::AGGTYPE_ANY;
+                agg_type = t_aggtype::AGGTYPE_ANY;      
             } else if (m_aggregates.count(column) > 0) {
-                agg_type = str_to_aggtype(m_aggregates.at(column));
+                auto col = m_aggregates.at(column);
+                if (col.at(0) == "weighted mean") {
+                    dependencies.push_back(t_dep(col.at(1), DEPTYPE_COLUMN));
+                    agg_type = AGGTYPE_WEIGHTED_MEAN;
+                } else {
+                    agg_type = str_to_aggtype(col.at(0));
+                }
             } else {
                 t_dtype dtype = schema.get_dtype(column);
                 agg_type = _get_default_aggregate(dtype);

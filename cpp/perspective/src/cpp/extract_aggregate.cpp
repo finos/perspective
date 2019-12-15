@@ -88,7 +88,7 @@ extract_aggregate(
                 = aggcol->get_nth<std::pair<double, double>>(ridx);
             t_tscalar rval;
             double second = pair->second;
-            if (second > 0) {
+            if (second != 0) {
                 double mean = pair->first / second;
                 rval.set(mean);
             } else {

@@ -77,11 +77,12 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("['z'], weighted_mean", async function() {
+        it("['z'], weighted mean", async function() {
             var table = perspective.table(data2);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "weighted mean", column: ["x", "y"]}]
+                aggregates: {x: ["weighted mean", "y"]},
+                columns: ["x"]
             });
             var answer = [
                 {__ROW_PATH__: [], x: 2.8333333333333335},
@@ -368,7 +369,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("weighted mean", async function() {
+        it("weighted mean", async function() {
             var table = perspective.table([
                 {a: "a", x: 1, y: 200},
                 {a: "a", x: 2, y: 100},
@@ -376,7 +377,8 @@ module.exports = perspective => {
             ]);
             var view = table.view({
                 row_pivots: ["a"],
-                aggregate: [{op: "weighted mean", column: ["y", "x"], name: "y"}]
+                aggregates: {y: ["weighted mean", "x"]},
+                columns: ["y"]
             });
             var answer = [
                 {__ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2)},
