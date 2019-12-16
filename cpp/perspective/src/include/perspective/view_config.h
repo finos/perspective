@@ -37,7 +37,7 @@ public:
      * @param sort
      */
     t_view_config(std::vector<std::string> row_pivots, std::vector<std::string> column_pivots,
-        tsl::ordered_map<std::string, std::string> aggregates, std::vector<std::string> columns,
+        tsl::ordered_map<std::string, std::vector<std::string>> aggregates, std::vector<std::string> columns,
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
         std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only);
 
@@ -139,7 +139,7 @@ private:
     // containers for primitive data that does not need transformation into abstractions
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
-    tsl::ordered_map<std::string, std::string> m_aggregates;
+    tsl::ordered_map<std::string, std::vector<std::string>> m_aggregates;
     std::vector<std::string> m_columns;
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> m_filter;
     std::vector<std::vector<std::string>> m_sort;

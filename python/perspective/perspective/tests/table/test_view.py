@@ -383,6 +383,40 @@ class TestView(object):
             {"__ROW_PATH__": ["2019-01-01 05:05:05.000"], "a": 1}
         ]
 
+    def test_view_aggregate_multiple_columns(self):
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": 2, "y": 100},
+            {"a": "a", "x": 3, "y": None}
+        ]
+        tbl = Table(data)
+        view = tbl.view(
+            aggregates={"y": ["weighted mean", "x"]},
+            row_pivots=["a"],
+            columns=['y']
+        )
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)},
+            {"__ROW_PATH__": ["a"], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)}
+        ]
+
+    def test_view_aggregate_multiple_columns_with_negative_weights(self):
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": -2, "y": 100},
+            {"a": "a", "x": 3, "y": None}
+        ]
+        tbl = Table(data)
+        view = tbl.view(
+            aggregates={"y": ["weighted mean", "x"]},
+            row_pivots=["a"],
+            columns=['y']
+        )
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": (1 * 200 + (-2) * 100) / (1 - 2)},
+            {"__ROW_PATH__": ["a"], "y": (1 * 200 + (-2) * 100) / (1 - 2)}
+        ]
+
     # sort
 
     def test_view_sort_int(self):

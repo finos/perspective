@@ -1367,9 +1367,17 @@ namespace binding {
             = t_val::global("Object").call<t_val>("keys", config["aggregates"]);
         auto aggregate_names = vecFromArray<t_val, std::string>(j_aggregate_keys);
 
-        tsl::ordered_map<std::string, std::string> aggregates;
+        tsl::ordered_map<std::string, std::vector<std::string>> aggregates;
         for (const auto& name : aggregate_names) {
-            aggregates[name] = config["aggregates"][name].as<std::string>();
+            t_val val = config["aggregates"][name];
+            bool is_array = t_val::global("Array").call<bool>("isArray", val);
+            if (is_array) {
+                auto agg = vecFromArray<t_val, std::string>(val);
+                aggregates[name] = agg;
+            } else {
+                std::vector<std::string> agg {val.as<std::string>()};
+                aggregates[name] = agg;
+            }
         };
 
         bool column_only = false;
@@ -1731,7 +1739,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_view_config>("t_view_config")
         .constructor<std::vector<std::string>, std::vector<std::string>,
-            tsl::ordered_map<std::string, std::string>, std::vector<std::string>,
+            tsl::ordered_map<std::string, std::vector<std::string>>, std::vector<std::string>,
             std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>,
             std::vector<std::vector<std::string>>, std::string, bool>()
         .function("add_filter_term", &t_view_config::add_filter_term);

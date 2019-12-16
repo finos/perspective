@@ -44,8 +44,16 @@ export class StateElement extends HTMLElement {
     _get_view_aggregates(selector) {
         selector = selector || "#active_columns perspective-row";
         return this._get_view_dom_columns(selector, s => {
+            let op = s.getAttribute("aggregate");
+            if (op[0] === "[") {
+                try {
+                    op = JSON.parse(op);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
             return {
-                op: s.getAttribute("aggregate"),
+                op,
                 column: s.getAttribute("name")
             };
         });

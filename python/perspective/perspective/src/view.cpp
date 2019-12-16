@@ -121,11 +121,16 @@ make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
     // to preserve order, do not cast to std::map - use keys and python 3.7's guarantee that dicts respect insertion order
     auto p_aggregates = py::dict(config.attr("get_aggregates")());
     auto aggregate_keys = py::list(p_aggregates.attr("keys")());
-    tsl::ordered_map<std::string, std::string> aggregates;
+    tsl::ordered_map<std::string, std::vector<std::string>> aggregates;
 
     for (auto& key : aggregate_keys) {
         const std::string key_str = key.cast<std::string>();
-        aggregates[key_str] = p_aggregates[key].cast<std::string>();
+        if (py::isinstance<py::str>(p_aggregates[key])) {
+            std::vector<std::string> agg{p_aggregates[key].cast<std::string>()};
+            aggregates[key_str] = agg;
+        } else {
+            aggregates[key_str] = p_aggregates[key].cast<std::vector<std::string>>();
+        }
     };
 
     bool column_only = false;

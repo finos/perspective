@@ -233,7 +233,7 @@ class PerspectiveViewer extends ActionElement {
         lis.map(x => {
             let agg = show[x.getAttribute("name")];
             if (agg) {
-                x.setAttribute("aggregate", agg);
+                x.setAttribute("aggregate", Array.isArray(agg) ? JSON.stringify(agg) : agg);
             }
         });
         this.dispatchEvent(new Event("perspective-config-update"));
