@@ -32,6 +32,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 |||
 |:--|:--|
 |[Superstore](https://bl.ocks.org/texodus/372d406997d5522ebaafb17f0f521d97)| A static `superstore.arrow` demo.|
+|[Editable Superstore](https://bl.ocks.org/texodus/45b868833c9f456bd39a51e606412c5d)| A static `superstore.arrow` demo with editing enabled.|
 |[Linked Superstore](https://bl.ocks.org/texodus/08fb5f1afccbd33e333453dc70db88ea)| An example of `<perspective-viewer>`s linked through click events.|
 |[Dataset Explorer](https://bl.ocks.org/texodus/ecb5d086e0c9d52e414d2de6c93b5db3)| A configurable dataset performance tester. |
 |[Fractal](https://bl.ocks.org/texodus/1ce655d6bc0cc0d9db852d562af3e487)| `<perspective-viewer>` fractal playground.|
