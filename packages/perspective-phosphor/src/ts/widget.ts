@@ -117,9 +117,9 @@ export class PerspectiveWidget extends Widget {
         super.onActivateRequest(msg);
     }
 
-    notifyResize(): void {
+    async notifyResize(): Promise<void> {
         if (this.isVisible) {
-            this.viewer.notifyResize();
+            await this.viewer.notifyResize();
         }
     }
 

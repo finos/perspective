@@ -66,7 +66,7 @@ export class PerspectiveDockPanel extends DockPanel {
     private listeners: WeakMap<PerspectiveWidget, Function>;
 
     constructor(name: string, options: PerspectiveDockPanelOptions = {enableContextMenu: true}) {
-        super({renderer: new PerspectiveDockPanelRenderer(), spacing: 14, ...options});
+        super({renderer: new PerspectiveDockPanelRenderer(), ...options});
 
         // Need a cleaner way to do this
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,16 +79,10 @@ export class PerspectiveDockPanel extends DockPanel {
         if (this.enableContextMenu) {
             this._onContextMenu.connect(this.showMenu);
         }
-        options.node && Widget.attach(this, options.node);
-    }
-
-    public duplicate(widget: PerspectiveWidget): void {
-        const newWidget = new PerspectiveWidget(widget.name);
-        newWidget.title.closable = true;
-        newWidget.restore(widget.save()).then(() => {
-            this.addWidget(newWidget, {mode: "split-right", ref: widget});
-            newWidget.load(widget.table);
-        });
+        if (options.node) {
+            Widget.attach(this, options.node);
+        } else {
+        }
     }
 
     public addWidget(widget: PerspectiveWidget, options: DockPanel.IAddOptions = {}): void {
@@ -138,7 +132,6 @@ export class PerspectiveDockPanel extends DockPanel {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private createMenu(widget: any): Menu {
         const contextMenu = new Menu({commands: this.commands});
-        contextMenu.addItem({command: "perspective:duplicate", args: {widget}});
 
         // could move these 3 to perspective widget
         contextMenu.addItem({command: "perspective:export", args: {widget}});
@@ -215,5 +208,9 @@ export class PerspectiveDockPanel extends DockPanel {
             layout.widgets = layout.widgets.map((x: PerspectiveWidget | PerspectiveWidgetOptions) => widgetFunc(x));
         }
         return layout;
+    }
+
+    onAfterAttach(): void {
+        this.spacing = parseInt(window.getComputedStyle(this.node).padding) || 0;
     }
 }

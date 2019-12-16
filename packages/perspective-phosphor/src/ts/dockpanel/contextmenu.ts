@@ -12,12 +12,6 @@ import {PerspectiveDockPanel} from "./dockpanel";
 
 export const createCommands = (dock: PerspectiveDockPanel): CommandRegistry => {
     const commands = new CommandRegistry();
-    commands.addCommand("perspective:duplicate", {
-        execute: ({widget}) => dock.duplicate(widget as any),
-        iconClass: "p-MenuItem-duplicate",
-        label: "Duplicate",
-        mnemonic: 0
-    });
 
     commands.addCommand("perspective:export", {
         execute: (args: any) => args.widget.viewer.download(),

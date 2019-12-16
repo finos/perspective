@@ -55,7 +55,15 @@ bindTemplate(
                 this.grid.get_styles = () => get_styles(this);
 
                 const grid_properties = default_grid_properties();
+                const styles = get_styles(this);
                 grid_properties.renderer = ["SimpleCell", "Borders"];
+
+                // Handle grouped header plugin bugs
+                Object.assign(grid_properties.groupedHeader, styles[""].groupedHeader);
+                if (typeof grid_properties.groupedHeader.flatHeight === "number") {
+                    grid_properties.groupedHeader.flatHeight = grid_properties.groupedHeader.flatHeight.toString();
+                }
+
                 this.grid.installPlugins([perspectivePlugin, [groupedHeaderPlugin, grid_properties.groupedHeader]]);
 
                 // Broken in fin-hypergrid-grouped-header 0.1.2
@@ -66,7 +74,6 @@ bindTemplate(
                 };
 
                 this.grid.addProperties(grid_properties);
-                const styles = get_styles(this);
                 this.grid.addProperties(styles[""]);
 
                 set_formatters(this.grid);

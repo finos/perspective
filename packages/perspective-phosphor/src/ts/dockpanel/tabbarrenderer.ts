@@ -41,26 +41,14 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
         return h.li(
             {key, className, title, style, dataset},
             this.renderConfigIcon(),
-            this.renderLoadingIcon(),
             this.renderLabel(data),
-            h.div({className: "p-TabBar-tabLinkIcon"}),
-            this.renderMaximizeIcon(),
             this.renderCloseIcon(data),
-            h.div({className: "divider"}),
-            h.div({className: "shadow"})
+            h.div({className: "divider"})
+            // h.div({className: "shadow"})
         );
-    }
-
-    public renderMaximizeIcon(): VirtualElement {
-        const name = "p-TabBar-tabMaximizeIcon";
-        return h.div({className: name, id: TabBarActions.Maximize});
     }
 
     public renderConfigIcon(): VirtualElement {
         return h.div({className: "p-TabBar-tabConfigIcon", id: TabBarActions.Config});
-    }
-
-    public renderLoadingIcon(): VirtualElement {
-        return h.div({className: "p-TabBar-tabLoadingIcon"}, h.div({className: "p-TabBar-tabLoadingAnimation"}));
     }
 }

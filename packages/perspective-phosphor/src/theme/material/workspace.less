@@ -3,12 +3,25 @@
     width: 100%;
 }
 
-.p-SplitPanel.p-Master{
+div.p-SplitPanel.p-Master div.p-Widget {
   background: #2e3136;
   perspective-viewer{
     padding-top: 5px;
     display: flex;
     width: 100%;
     height: 100%;
+    --settings-button--content: "expand_more";
+    --hypergrid--padding: 12px 12px 12px 12px;
   }
+}
+div.p-PerspectiveWorkspace {
+  background-color: #eee;
+  div.p-SplitPanel-handle {
+    background-color: #243136;
+  }
+
+  .p-DockPanel {
+    padding: 8px;
+  }
+
 }

@@ -26,7 +26,7 @@
         "test": "yarn test:run",
         "test:run": "npm-run-all test:unit test:integration",
         "test:unit": "jest  --color --silent --config=./config/jest.unit.config.js 2>&1",
-        "test:integration": "jest --color --silent --config=./config/jest.integration.config.js 2>&1"
+        "test:integration": "jest --color --silent --noStackTrace --config=./config/jest.integration.config.js 2>&1"
     },
     "dependencies": {
         "@finos/perspective": "^0.4.0-rc.4",

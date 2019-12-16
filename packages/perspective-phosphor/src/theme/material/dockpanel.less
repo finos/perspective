@@ -1,9 +1,5 @@
 .p-DockPanel {
     overflow: visible !important;
-    border-width: 24px 24px 20px 24px;
-    border-style: solid;
-    border-color: #eee;
-    background-color: #eee 
 }
 
 
@@ -17,10 +13,10 @@
     transition-property: top, left, right, bottom;
     transition-duration: 50ms;
     transition-timing-function: ease;
-    margin: 0px 5px 10px 5px;
+    margin: 0px;
 }
 
-.p-DockPanel {
+div.p-DockPanel div.p-Widget {
     perspective-viewer {
         flex: 1;
         display: flex;
@@ -29,11 +25,22 @@
         flex-direction: column;
         position: absolute;
         top: 0;
-        left: 4px;
-        right: 4px;
-        bottom: 8px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
         overflow: visible !important;
-        --plugin--border: 1px solid #eaeaea;;
-        --plugin--box-shadow: 0px 2px 3px rgba(0,0,0,0.2); 
+        --plugin--border: 1px solid #eaeaea;
+        --settings-button--content: "";
+       
+    }
+}
+
+div.p-DockPanel[data-mode="single-document"] div.p-Widget, div.p-Widget {
+    perspective-viewer:hover {
+        --button--padding: 1px 9px;
+        --settings-button--content: "expand_more";
+    }
+    perspective-viewer[settings-open] {
+        --settings-button--content: "expand_less";
     }
 }
