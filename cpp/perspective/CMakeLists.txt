@@ -314,7 +314,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# The instead use a statically built python.
 			# Cmake's default FindPython can't find the python headers
 			# without also finding (or failing to find) the python libraries
-			# so we use a custom FindPythonHeaders that is the same as the 
+			# so we use a custom FindPythonHeaders that is the same as the
 			# default, but ignores when the python libraries can't be found.
 			message("${Red}Manylinux build has no python shared libraries${ColorReset}")
 			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
@@ -341,6 +341,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if(NOT PYTHON_PYBIND_FOUND)
 		    message("${Red}PyBind11 could not be located${ColorReset}")
 			psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
+			set(PYTHON_PYBIND_INCLUDE_DIR "${CMAKE_BINARY_DIR}/pybind11-src/include/" )
 		else()
 		    message("${Cyan}Found PyBind11 in ${PYTHON_PYBIND_INCLUDE_DIR}${ColorReset}")
 		endif()

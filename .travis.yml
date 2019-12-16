@@ -1,27 +1,14 @@
 dist: xenial
 language: node_js
-node_js: "10"
+node_js: "12"
 sudo: required
 
 matrix:
   fast_finish: true
   include:
     # WASM Build
-    - node_js: "10"
-      language: node_js
-      env: TEST=WASM PSP_DOCKER=1
+    - env: TEST=WASM PSP_DOCKER=1
       services: docker
-
-    # Vanilla C++ Linux build
-    - language: c++
-      env: TEST=CPP PSP_DOCKER=1
-      services: docker
-
-    # Vanilla C++ Mac build
-    - language: c++
-      env: TEST=CPP_OSX
-      os: osx
-      osx_image: xcode11.2
 
     # Python 3.7 Linux build
     - python: "3.7"
@@ -70,23 +57,11 @@ matrix:
       os: osx
       osx_image: xcode11.2
 
-
   allow_failures:
     # Mac builds get extensively tested by the core developers.
     # They are also extremely slow to load on travis.
     # So pull requests should check these, but they are allowed
     # to fail
-
-    # Vanilla C++ Linux build
-    - language: c++
-      env: TEST=CPP PSP_DOCKER=1
-      services: docker
-
-    # Vanilla C++ Mac build
-    - language: c++
-      env: TEST=CPP_OSX
-      os: osx
-      osx_image: xcode11.2
 
     # Python 3.7 Linux manylinux2014 build
     - python: "3.7"
@@ -134,26 +109,11 @@ addons:
       - flatbuffers
       - rapidjson
 
+
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export CUR_DIR=`pwd` && wget "https://github.com/google/flatbuffers/archive/v1.11.0.tar.gz" -O /tmp/flatbuffers.tar.gz && cd /tmp && tar xfa /tmp/flatbuffers.tar.gz && cd flatbuffers-1.11.0 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DFLATBUFFERS_BUILD_SHAREDLIB=ON && sudo make install && sudo cp flatc /usr/bin && cd $CUR_DIR && sudo rm -rf /tmp/flatbuffers.tar.gz /tmp/flatbuffers-1.11.0; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget "https://cmake.org/files/v3.15/cmake-3.15.5-Linux-x86_64.tar.gz" -O /tmp/cmake.tar.gz  && cd /tmp && tar xfz cmake.tar.gz && sudo cp -r cmake-3.15.5-Linux-x86_64/* /usr && sudo rm -rf /usr/local/cmake-3.12.4 /tmp/cmake.tar.gz /tmp/cmake-3.15.5-Linux-x86_64 && cd $CUR_DIR; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then npm install -g yarn; fi
 
 install:
-  - if [ "$TEST" = "CPP" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "CPP" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
-  - if [ "$TEST" = "PYTHON" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "PYTHON" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
-  - if [ "$TEST" = "PYTHON2" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "PYTHON2" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
-  - if [ "$TEST" = "PYTHON_MANYLINUX2010" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "PYTHON_MANYLINUX2010" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
-  - if [ "$TEST" = "PYTHON_MANYLINUX2014" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "PYTHON_MANYLINUX2014" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
-  - if [ "$TEST" = "PYTHON2_MANYLINUX2010" ]; then nvm install 10.13.0 && nvm use 10.13.0; fi
-  - if [ "$TEST" = "PYTHON2_MANYLINUX2010" ]; then rm -rf ~/.yarn && npm install yarn@1.13.0 -g; fi
   - node --version
   - yarn
 
@@ -162,8 +122,6 @@ script:
   - if [ "$TEST" = "WASM" ]; then yarn lint; fi
   - if [ "$TEST" = "WASM" ]; then yarn build_js; fi
   - if [ "$TEST" = "WASM" ]; then yarn test_js --quiet; fi
-  - if [ "$TEST" = "CPP" ]; then yarn build_cpp --ci; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp --ci; fi
   - if [ "$TEST" = "PYTHON" ]; then yarn build_python --ci; fi
   - if [ "$TEST" = "PYTHON2" ]; then yarn build_python --ci --python2; fi
   - if [ "$TEST" = "PYTHON_MANYLINUX2010" ]; then yarn build_python --ci --manylinux2010; fi

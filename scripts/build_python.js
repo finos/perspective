@@ -11,9 +11,9 @@ const {execute, docker, clean, resolve, getarg, bash, python_image} = require(".
 const fs = require("fs-extra");
 
 const IS_DOCKER = process.env.PSP_DOCKER;
-const IS_PY2 = getarg("--python2"); 
+const IS_PY2 = getarg("--python2");
 const PYTHON = IS_PY2 ? "python2" : (getarg("--python38") ? "python3.8": "python3.7");
-const IMAGE = python_image(getarg("--manylinux2010") ? "manylinux2010": 
+const IMAGE = python_image(getarg("--manylinux2010") ? "manylinux2010":
                            getarg("--manylinux2014") ? "manylinux2014":
                            "", PYTHON);
 
@@ -36,10 +36,11 @@ try {
     let cmd;
     if (IS_CI) {
         if(IS_PY2)
+            // shutil_which is required in setup.py
             cmd = bash`${PYTHON} -m pip install backports.shutil_which &&`;
         else
             cmd = bash``;
-        // TODO undo
+
         cmd = cmd + `${PYTHON} -m pip install -e .[dev] && \
             ${PYTHON} -m flake8 perspective && echo OK && \
             ${PYTHON} -m pytest -vvv perspective --cov=perspective`;
