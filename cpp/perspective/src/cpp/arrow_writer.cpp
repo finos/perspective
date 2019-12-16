@@ -86,7 +86,6 @@ namespace arrow {
         return (ridx - extents.m_srow) * stride + (cidx - extents.m_scol);
     }
 
-    // TODO: split up arrow-loader and arrow-writer
     std::shared_ptr<::arrow::Array>
     boolean_col_to_array(
         const std::vector<t_tscalar>& data,

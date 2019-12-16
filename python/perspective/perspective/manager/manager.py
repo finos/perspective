@@ -13,6 +13,7 @@ import string
 import datetime
 from functools import partial
 from ..core.exception import PerspectiveError
+from ..table._callback_cache import _PerspectiveCallBackCache
 from ..table._date_validator import _PerspectiveDateValidator
 from ..table import Table
 from ..table.view import View
@@ -64,7 +65,7 @@ class PerspectiveManager(object):
     def __init__(self):
         self._tables = {}
         self._views = {}
-        self._callback_cache = {}
+        self._callback_cache = _PerspectiveCallBackCache()
         self._queue_process_callback = None
 
     def host(self, item, name=None):
@@ -141,7 +142,10 @@ class PerspectiveManager(object):
         Args:
             msg (:obj`dict`): a message from the client with instructions
                 that map to engine operations
-            post_callback (:obj`callable`): a function that returns data to the client
+            post_callback (:obj`callable`): a function that returns data to the
+                client. `post_callback` should be a callable that takes two
+                parameters: `data` (str), and `binary` (bool), a kwarg that
+                specifies whether `data` is a binary string.
         '''
         if isinstance(msg, str):
             if msg == "heartbeat":   # TODO fix this
@@ -179,7 +183,7 @@ class PerspectiveManager(object):
                 new_view._client_id = client_id
                 self._views[msg["view_name"]] = new_view
             elif cmd == "table_method" or cmd == "view_method":
-                self._process_method_call(msg, post_callback)
+                self._process_method_call(msg, post_callback, client_id)
         except(PerspectiveError, PerspectiveCppError) as e:
             # Catch errors and return them to client
             post_callback(
@@ -189,7 +193,7 @@ class PerspectiveManager(object):
                         str(e))),
                 cls=DateTimeEncoder)
 
-    def _process_method_call(self, msg, post_callback):
+    def _process_method_call(self, msg, post_callback, client_id):
         '''When the client calls a method, validate the instance it calls on
         and return the result.
         '''
@@ -206,7 +210,8 @@ class PerspectiveManager(object):
                         cls=DateTimeEncoder))
         try:
             if msg.get("subscribe", False) is True:
-                self._process_subscribe(msg, table_or_view, post_callback)
+                self._process_subscribe(
+                    msg, table_or_view, post_callback, client_id)
             else:
                 args = {}
                 if msg["method"] == "schema":
@@ -231,45 +236,93 @@ class PerspectiveManager(object):
                 elif msg["method"] != "delete":
                     # otherwise parse args as list
                     result = getattr(table_or_view, msg["method"])(*args)
-                # return the result to the client
-                post_callback(json.dumps(self._make_message(msg["id"], result), cls=DateTimeEncoder))
+                if type(result) == bytes:
+                    # return result to the client without JSON serialization
+                    self._process_bytes(result, msg, post_callback)
+                else:
+                    # return the result to the client
+                    post_callback(json.dumps(self._make_message(
+                            msg["id"], result), cls=DateTimeEncoder))
         except Exception as error:
-            post_callback(json.dumps(self._make_error_message(msg["id"], str(error)), cls=DateTimeEncoder))
+            post_callback(json.dumps(self._make_error_message(
+                msg["id"], str(error)), cls=DateTimeEncoder))
 
-    def _process_subscribe(self, msg, table_or_view, post_callback):
-        '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
+    def _process_subscribe(self, msg, table_or_view, post_callback, client_id):
+        '''When the client attempts to add or remove a subscription callback,
+        validate and perform the requested operation.
 
         Args:
             msg (dict): the message from the client
-            table_or_view {Table|View} : the instance that the subscription will be called on
-            post_callback (callable): a method that notifies the client with new data
+            table_or_view {Table|View} : the instance that the subscription
+                will be called on.
+            post_callback (callable): a method that notifies the client with
+                new data.
+            client_id (str) : a unique str id that identifies the
+                `PerspectiveSession` object that is passing the message.
         '''
         try:
             callback = None
             callback_id = msg.get("callback_id", None)
             method = msg.get("method", None)
+            args = msg.get("args", [])
             if method and method[:2] == "on":
                 # wrap the callback
-                callback = partial(self.callback, msg=msg, post_callback=post_callback)
+                callback = partial(
+                    self.callback, msg=msg, post_callback=post_callback)
                 if callback_id:
-                    self._callback_cache[callback_id] = callback
+                    self._callback_cache.add_callback({
+                        "client_id": client_id,
+                        "callback_id": callback_id,
+                        "callback": callback,
+                        "name": msg.get("name", None)
+                    })
             elif callback_id is not None:
                 # remove the callback with `callback_id`
-                self._callback_cache.pop(callback_id, None)
+                self._callback_cache.remove_callbacks(
+                    lambda cb: cb["callback_id"] != callback_id)
             if callback is not None:
-                # call the underlying method on the Table or View
-                getattr(table_or_view, method)(callback, *msg.get("args", []))
+                # call the underlying method on the Table or View, and apply
+                # the dictionary of kwargs that is passed through.
+                getattr(table_or_view, method)(callback, **args[0])
             else:
                 logging.info("callback not found for remote call {}".format(msg))
         except Exception as error:
             post_callback(json.dumps(self._make_error_message(msg["id"], error), cls=DateTimeEncoder))
 
-    def callback(self, **kwargs):
+    def _process_bytes(self, binary, msg, post_callback):
+        """Send a bytestring message to the client without attempting to
+        serialize as JSON.
+
+        Perspective's client expects two messages to be sent when a binary
+        payload is expected: the first message is a JSON-serialized string with
+        the message's `id` and `msg`, and the second message is a bytestring
+        without any additional metadata. Implementations of the `post_callback`
+        should have an optional kwarg named `binary`, which specifies whether
+        `data` is a bytestring or not.
+
+        Args:
+            binary (bytes, bytearray) : a byte message to be passed to the client.
+            msg (dict) : the original message that generated the binary
+                response from Perspective.
+            post_callback (callable) : a function that passes data to the
+                client, with a `binary` (bool) kwarg that allows it to pass
+                byte messages without serializing to JSON.
+        """
+        pre_msg = self._make_message(msg["id"], "")
+        pre_msg["is_transferable"] = True
+        post_callback(json.dumps(pre_msg, cls=DateTimeEncoder))
+        post_callback(binary, binary=True)
+
+    def callback(self, *args, **kwargs):
         '''Return a message to the client using the `post_callback` method.'''
         id = kwargs.get("msg")["id"]
         data = kwargs.get("event", None)
         post_callback = kwargs.get("post_callback")
-        post_callback(json.dumps(self._make_message(id, data), cls=DateTimeEncoder))
+        msg = self._make_message(id, data)
+        if type(args[0]) == bytes:
+            self._process_bytes(args[0], msg, post_callback)
+        else:
+            post_callback(json.dumps(msg, cls=DateTimeEncoder))
 
     def clear_views(self, client_id):
         '''Garbage collect views that belong to closed connections.'''
