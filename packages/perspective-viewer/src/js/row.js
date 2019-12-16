@@ -19,7 +19,7 @@ import {get_type_config} from "@finos/perspective/dist/esm/config";
 import template from "../html/row.html";
 
 import style from "../less/row.less";
-import {html, render} from "lit-html";
+import {html, render, nothing} from "lit-html";
 
 const SPAN = document.createElement("span");
 SPAN.style.visibility = "hidden";
@@ -45,17 +45,26 @@ class Row extends HTMLElement {
         elem.innerHTML = this.getAttribute("name");
     }
 
-    _option_template(agg) {
+    _option_template(agg, name) {
         return html`
-            <option value="${agg}">${agg}</option>
+            <option value="${agg}" data-desc="${name}">${name || agg}</option>
         `;
     }
 
     _select_template(category, type) {
         const items = perspective[category][type] || [];
-        return html`
-            ${items.map(this._option_template)}
+        const weighted_options = html`
+            <optgroup label="weighted mean">
+                ${this._weights.map(x => this._option_template(JSON.stringify(["weighted mean", x]), x))}
+            </optgroup>
         `;
+        return html`
+            ${items.map(x => this._option_template(x))} ${type === "integer" || type === "float" ? weighted_options : nothing}
+        `;
+    }
+
+    set_weights(xs) {
+        this._weights = xs;
     }
 
     set type(t) {
@@ -149,6 +158,7 @@ class Row extends HTMLElement {
             const type = this.getAttribute("type");
             agg_dropdown.value = aggregate || get_type_config(type).aggregate;
         }
+        this._blur_agg_dropdown();
     }
 
     set computed_column(c) {
@@ -219,6 +229,24 @@ class Row extends HTMLElement {
         this._filter_operand = this.shadowRoot.querySelector("#filter_operand");
         this._filter_operator = this.shadowRoot.querySelector("#filter_operator");
         this._edit_computed_column_button = this.shadowRoot.querySelector("#row_edit");
+        this._column_aggregate_category = this.shadowRoot.querySelector("#column_aggregate_category");
+    }
+
+    _blur_agg_dropdown() {
+        this._agg_dropdown.blur();
+        if (this._agg_dropdown.value[0] === "[") {
+            for (const option of this._agg_dropdown.querySelectorAll("optgroup option")) {
+                const name = option.getAttribute("data-desc");
+                option.innerHTML = `mean by ${name}`;
+            }
+        }
+    }
+
+    _focus_agg_dropdown() {
+        for (const option of this._agg_dropdown.querySelectorAll("optgroup option")) {
+            const name = option.getAttribute("data-desc");
+            option.innerHTML = `by ${name}`;
+        }
     }
 
     _register_callbacks() {
@@ -228,8 +256,12 @@ class Row extends HTMLElement {
         });
         this._visible.addEventListener("mousedown", event => this.dispatchEvent(new CustomEvent("visibility-clicked", {detail: event})));
         this._row_close.addEventListener("mousedown", event => this.dispatchEvent(new CustomEvent("close-clicked", {detail: event})));
+        this._agg_dropdown.addEventListener("focus", this._focus_agg_dropdown.bind(this));
+
         this._agg_dropdown.addEventListener("change", event => {
-            this.setAttribute("aggregate", this._agg_dropdown.value);
+            this._blur_agg_dropdown();
+            const value = this._agg_dropdown.value;
+            this.setAttribute("aggregate", value);
             this.dispatchEvent(new CustomEvent("aggregate-selected", {detail: event}));
         });
         this._sort_order.addEventListener("click", event => {

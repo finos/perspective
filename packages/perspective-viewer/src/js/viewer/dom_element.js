@@ -65,6 +65,10 @@ export class DomElement extends PerspectiveElement {
     }
 
     _set_row_type(row) {
+        const weights = this._get_view_dom_columns("#inactive_columns perspective-row")
+            .filter(x => x.getAttribute("type") === "integer" || x.getAttribute("type") === "float")
+            .map(x => x.getAttribute("name"));
+        row.set_weights(weights);
         row.setAttribute("type", this._get_type(row.getAttribute("name")));
     }
 
@@ -109,9 +113,13 @@ export class DomElement extends PerspectiveElement {
             }
         }
 
+        const weights = this._get_view_dom_columns("#inactive_columns perspective-row")
+            .filter(x => x.getAttribute("type") === "integer" || x.getAttribute("type") === "float")
+            .map(x => x.getAttribute("name"));
+        row.set_weights(weights);
         row.setAttribute("type", type);
         row.setAttribute("name", name);
-        row.setAttribute("aggregate", aggregate);
+        row.setAttribute("aggregate", Array.isArray(aggregate) ? JSON.stringify(aggregate) : aggregate);
 
         row.addEventListener("visibility-clicked", this._column_visibility_clicked.bind(this));
         row.addEventListener("aggregate-selected", this._column_aggregate_clicked.bind(this));
