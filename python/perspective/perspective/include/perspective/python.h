@@ -166,7 +166,7 @@ PYBIND11_MODULE(libbinding, m)
      */
     py::class_<t_view_config>(m, "t_view_config")
         .def(py::init<std::vector<std::string>, std::vector<std::string>,
-            tsl::ordered_map<std::string, std::string>, std::vector<std::string>,
+            tsl::ordered_map<std::string, std::vector<std::string>>, std::vector<std::string>,
             std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>,
             std::vector<std::vector<std::string>>, std::string, bool>())
         .def("add_filter_term", &t_view_config::add_filter_term);
