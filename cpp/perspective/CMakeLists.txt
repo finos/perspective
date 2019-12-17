@@ -335,9 +335,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if(MACOS)
 			# on mac, use the vanilla pybind11 finder
 			find_package(pybind11)
-			set(PYTHON_PYBIND_FOUND pybind11_FOUND)
+			if(pybind11_FOUND)
+				# Homebrew install pybind11
+				set(PYTHON_PYBIND_FOUND pybind11_FOUND)
+			else()
+				# see if python installed pybind11 is available
+				find_package(Pybind)
+			endif()
 		else()
-			# on linux or in docker, use our custom pybind finder
+			# on linux or in docker, use our custom pybind finder to look 
+			# for just the python installed pybind
 			find_package(Pybind)
 		endif()
 
