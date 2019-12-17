@@ -6,11 +6,13 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+ @import (reference) "~@finos/perspective-viewer/src/themes/material-dense.less";
+ @import (reference) "~@finos/perspective-viewer/src/themes/material-dense.dark.less";
 
-div.PSPContainer {
-    @import (less) "../../../perspective-viewer/src/themes/material-dense.less";
+ div.PSPContainer {
+     .perspective-viewer-material-dense()
 }
 
 div.PSPContainer-dark {
-    @import (less) "../../../perspective-viewer/src/themes/material-dense.dark.less";
+    .perspective-viewer-material-dense-dark()
 }

@@ -7,19 +7,26 @@
  *
  */
 
+@import "../less/fonts";
 @import "../less/variables";
 
-@import (css) url("https://fonts.googleapis.com/css?family=Material+Icons");
-@import (css) url("https://fonts.googleapis.com/css?family=Open+Sans:400,700");// ~typeface-open-sans/index.css");
-@import (css) url("https://fonts.googleapis.com/css?family=Roboto+Mono"); // ~typeface-roboto-mono/index.css");
+perspective-viewer, .perspective-viewer-material{
+    .perspective-viewer-material-base();
+    --active--color: @blue800;
+    
+    --hypergrid--color: #666;
+    --hypergrid--background: #fff;
+    
+    --hypergrid-positive--color: #1078d1;
+    --hypergrid-negative--color: #de3838;
+}
 
-perspective-viewer {
+.perspective-viewer-material-base(){
     font-family: "Open Sans";
 
     --interface-monospace--font-family: "Roboto Mono";
     --inactive-column-selector--content: "\E835";
     --active-column-selector--content: "\E834";
-    --active--color: @blue800;
     --column--background: none;
     --column--height: 21px;
     --active-column--height: 51px;
@@ -76,8 +83,6 @@ perspective-viewer {
     --column_selector--font-size: 16px;
 
     --hypergrid-gridline--color: #ddd;
-
-    --hypergrid--color: #666;
     --hypergrid--padding: 24px;
     --side_panel--padding: 24px 24px 24px 17px;
     --button--padding: 24px 17px 0px 17px;
@@ -86,11 +91,6 @@ perspective-viewer {
     --top_panel--padding: 0px 0px 24px 0px;
     --hypergrid-scrollbar--width: 8px;
     --hypergrid-scrollbar--border-radius: 5px;
-
-    --hypergrid--background: #fff;
-    
-    --hypergrid-positive--color: #1078d1;
-    --hypergrid-negative--color: #de3838;
 
     --hypergrid--font-size: 12px;
     --hypergrid-header--font-size: 12px;

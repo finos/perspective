@@ -1,4 +1,5 @@
-@import "~@finos/perspective-viewer/src/less/variables.less";
+@import (reference) "~@finos/perspective-viewer/src/themes/material.less";
+@import (reference) "~@finos/perspective-viewer/src/themes/material.dark.less";
 
 div.PSPContainer,
 div.PSPContainer-dark {
@@ -11,11 +12,11 @@ div.PSPContainer-dark {
 }
 
 div.PSPContainer {
-    @import "~@finos/perspective-viewer/src/themes/material.less";
+    .perspective-viewer-material();
 }
 
 div.PSPContainer-dark {
-    @import "~@finos/perspective-viewer/src/themes/material.dark.less";
+    .perspective-viewer-material-dark();
 }
 
 div.PSPContainer perspective-viewer,

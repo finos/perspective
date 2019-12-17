@@ -8,7 +8,7 @@
  */
 
 @import "../less/variables";
-@import "material";
+@import (reference) "material";
 
 @import (css) url("https://fonts.googleapis.com/css?family=Material+Icons");
 @import (css) url("https://fonts.googleapis.com/css?family=Roboto+Mono");
@@ -23,7 +23,8 @@ perspective-viewer[settings] {
     --settings-button--content: "check_box_outline_blank";
 }
 
-perspective-viewer {
+perspective-viewer, .perspective-viewer-vaporwave{
+    .perspective-viewer-material-base();
     padding: 24px;
     background-color: @background;
     color: #cfd8dc;
