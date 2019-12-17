@@ -344,7 +344,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 				if(PYTHON_PYBIND_FOUND)
 					# Need to add extra flags due to pybind weirness
 					# https://github.com/pybind/pybind11/blob/7830e8509f2adc97ce9ee32bf99cd4b82089cc4c/tools/pybind11Tools.cmake#L103
-				    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -undefined dynamic_lookup")
+				    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
 				endif()
 			endif()
 
