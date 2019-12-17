@@ -31,7 +31,7 @@ RUN tar xfz boost_1_71_0.tar.gz
 RUN cd boost_1_71_0 && ./bootstrap.sh
 RUN cd boost_1_71_0 && ./b2 -j8 --with-program_options --with-filesystem --with-system install 
 
-RUN python2 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.15.0'
+RUN python2 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.15.1'
 
 # install node
 RUN curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -

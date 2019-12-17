@@ -219,8 +219,7 @@ exports.docker = function docker(image = "puppeteer") {
     const PACKAGE = process.env.PACKAGE;
     const CWD = process.cwd();
     const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
-    const DOCKERHUB = image.indexOf("puppeteer") > -1 ? "perspective" : "timkpaine";
-    const IMAGE = `${DOCKERHUB}/${image}`;
+    const IMAGE = `perspective/${image}`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
         -ePACKAGE="${PACKAGE}"`;
     if (IS_MANYLINUX) {
@@ -247,7 +246,7 @@ exports.python_image = function python_image(image = "", python = "") {
     console.log(`-- Getting image for image: '${image}' and python: '${python}'`);
     if (python == "python2") {
         if (image == "manylinux2010") {
-            return "manylinux2010py2";
+            return "python2_manylinux2010";
         } else if (image == "manylinux2014") {
             throw "Python2 not supported for manylinux2014";
         } else {
@@ -257,9 +256,9 @@ exports.python_image = function python_image(image = "", python = "") {
         throw "Python 3.8 not implemented yet";
     } else {
         if (image == "manylinux2010" || image == "manylinux2014") {
-            return image;
+            return `python3_${image}`;
         } else {
-            return "python";
+            return "python3";
         }
     }
 };

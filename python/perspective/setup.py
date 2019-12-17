@@ -55,7 +55,7 @@ if sys.version_info.minor < 7:
     raise Exception("Requires Python 2.7/3.7 or later")
 
 if sys.platform == "darwin":
-    requires.append("pyarrow==0.15.0")  # Use standard pyarrow
+    requires.append("pyarrow==0.15.1")  # Use standard pyarrow
 elif sys.platform == "linux":
     logging.warning("Cannot use pyarrow wheel (https://github.com/pypa/manylinux/issues/118), make sure to install from source using a C++11 compatible compiler (e.g. gcc 4.9.3+)")
 else:
