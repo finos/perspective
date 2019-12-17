@@ -35,7 +35,7 @@ import {ActionElement} from "./viewer/action_element.js";
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
+const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
 
 /**
  * HTMLElement class for `<perspective-viewer>` custom element.  This class is
@@ -418,6 +418,26 @@ class PerspectiveViewer extends ActionElement {
         // Returns the throttle time, but also perform validaiton - we only want
         // the latter here.
         this._calculate_throttle_timeout();
+    }
+
+    /*
+     * Determines whether row selections is enabled on this viewer (though it is
+     * ultimately up to the plugin as to whether selectable is implemented).
+     *
+     * @kind member
+     * @type {boolean} Is this viewer editable?
+     * @fires PerspectiveViewer#perspective-config-update
+     */
+    set selectable(x) {
+        if (x === "null") {
+            if (this.hasAttribute("selectable")) {
+                this.removeAttribute("selectable");
+            }
+        } else {
+            this.toggleAttribute("selectable", true);
+        }
+        this._debounce_update({force_update: true});
+        this.dispatchEvent(new Event("perspective-config-update"));
     }
 
     /**

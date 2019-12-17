@@ -9,7 +9,7 @@
 
 import {get_type_config, get_types} from "@finos/perspective/dist/esm/config";
 
-function get_style(elem, name) {
+export function get_style(elem, name) {
     let value;
     if (window.ShadyCSS) {
         value = window.ShadyCSS.getComputedStyleValue(elem, name);

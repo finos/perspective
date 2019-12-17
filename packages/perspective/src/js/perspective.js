@@ -305,6 +305,7 @@ export default function(Module) {
         }
 
         const get_pkeys = !!options.index;
+        const get_ids = !!options.id;
         const leaves_only = !!options.leaves_only;
         const num_sides = this.sides();
         const has_row_path = num_sides !== 0 && !this.column_only;
@@ -324,6 +325,11 @@ export default function(Module) {
                 continue;
             }
             let row = formatter.initRowValue();
+
+            if (get_ids) {
+                formatter.initColumnValue(data, row, "__ID__");
+            }
+
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
                 const col_type = schema[col_name];
@@ -337,6 +343,9 @@ export default function(Module) {
                         for (let i = 0; i < row_path.size(); i++) {
                             const value = __MODULE__.scalar_vec_to_val(row_path, i);
                             formatter.addColumnValue(data, row, "__ROW_PATH__", value);
+                            if (get_ids) {
+                                formatter.addColumnValue(data, row, "__ID__", value);
+                            }
                         }
                     }
                 } else {
@@ -359,6 +368,16 @@ export default function(Module) {
                     // don't we need to make sure that it only emits one?
                     const value = __MODULE__.scalar_vec_to_val(keys, i);
                     formatter.addColumnValue(data, row, "__INDEX__", value);
+                }
+            }
+
+            // we could add an api to just clone the index column if
+            // it's already calculated
+            if (get_ids && num_sides === 0) {
+                const keys = slice.get_pkeys(ridx, 0);
+                for (let i = 0; i < keys.size(); i++) {
+                    const value = __MODULE__.scalar_vec_to_val(keys, i);
+                    formatter.addColumnValue(data, row, "__ID__", value);
                 }
             }
 

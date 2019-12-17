@@ -28,6 +28,7 @@ declare module '@finos/perspective-viewer' {
         "column-pivots"? : string[];
         filters?: Array<Array<string>>;
         sort?: string[][];
+        selectable? : boolean;
     }
     
 

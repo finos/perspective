@@ -29,7 +29,7 @@
     "superstore.html/shows a sort indicator": "f28db13f8eec8ed1e684f97e68b236b9",
     "superstore.html/shows multiple sort indicators": "07a6e1d272729c9a4a53219d001d3f79",
     "superstore.html/shows a sort indicator on column split": "527d0ee56ee4f1b4cfc3e6f9a9fdc7bb",
-    "__GIT_COMMIT__": "69f226c12c8f1325277c0be34a1aeeaec0da43f1",
+    "__GIT_COMMIT__": "4ebde1392dfda2cdff7910d0f3689d704438ebf8",
     "superstore.html/should reinterpret metadata when only row pivots are changed": "dcb44e291c98a15c57a19523ff6a3cd8",
     "empty.html/perspective-click is fired when an empty dataset is loaded first": "7e5b653226145e1ab9f82e2417d89d7b",
     "superstore.html/should not edit an immutable viewer": "13bf4213e51aea91d91540a5c5b93f83",
@@ -37,5 +37,9 @@
     "editable.html/should save edits to an integer column": "4d230ccf937d2697094b835bf1411e3a",
     "editable.html/should save edits of negative numbers to an integer column": "6dfeccf7a2c7b9143c0183ee82cf28d2",
     "editable.html/should fail to save edits of invalid integers": "41a364e1cfed53b3bfcbde33978c236f",
-    "editable.html/should follow the indexed row when the data updates": "1f9e8514f88efc7ad77f484c9ec6e344"
+    "editable.html/should follow the indexed row when the data updates": "1f9e8514f88efc7ad77f484c9ec6e344",
+    "selectable.html/highlights the row with no pivots": "4c468ef10481f506c30155ee1b61829d",
+    "selectable.html/keeps selection when row moves with no pivots": "08a10d12b2d7cf7a4a1108c92fcb221f",
+    "selectable.html/highlights the row with row pivots": "338a7b0ee35e716dfedbac70b0a39b1d",
+    "selectable.html/keeps selection when row moves with row pivots": "9ade48c0badce151c429678d42842ce5"
 }

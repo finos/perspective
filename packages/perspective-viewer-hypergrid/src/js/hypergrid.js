@@ -21,7 +21,7 @@ import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 import TEMPLATE from "../html/hypergrid.html";
 
 import style from "../less/hypergrid.less";
-import {get_styles, clear_styles, default_grid_properties} from "./styles.js";
+import {get_styles, clear_styles, get_dynamic_styles, default_grid_properties} from "./styles.js";
 import {set_formatters} from "./formatters.js";
 import {set_editors} from "./editors.js";
 import {treeLineRendererPaint} from "./hypergrid-tree-cell-renderer";
@@ -53,6 +53,7 @@ bindTemplate(
                 Canvas.prototype.stopPaintLoop();
                 host.removeAttribute("hidden");
                 this.grid.get_styles = () => get_styles(this);
+                this.grid.get_dynamic_styles = (...args) => get_dynamic_styles(this, ...args);
 
                 const grid_properties = default_grid_properties();
                 const styles = get_styles(this);
@@ -139,7 +140,7 @@ async function getOrCreateHypergrid(div) {
         perspectiveHypergridElement.setAttribute("tabindex", 1);
         perspectiveHypergridElement.addEventListener("blur", () => {
             if (perspectiveHypergridElement.grid && !perspectiveHypergridElement.grid._is_editing) {
-                perspectiveHypergridElement.grid.selectionModel.clear();
+                perspectiveHypergridElement.grid.selectionModel.clear(true); //keepRowSelections = true
                 perspectiveHypergridElement.grid.paintNow();
             }
         });
@@ -176,13 +177,12 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     if (task.cancelled) {
         return;
     }
-
     const colPivots = config.column_pivots;
     const rowPivots = config.row_pivots;
     const data_window = {
         start_row: 0,
         end_row: 1,
-        index: rowPivots.length === 0 && colPivots.length === 0
+        id: rowPivots.length === 0 && colPivots.length === 0
     };
 
     const [nrows, json, schema, tschema, all_columns] = await Promise.all([view.num_rows(), view.to_columns(data_window), view.schema(), this._table.schema(), view.column_paths()]);
@@ -204,6 +204,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
 
     dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
+    dataModel.clearSelectionState();
     dataModel._view = view;
     dataModel._table = this._table;
     dataModel._config = config;

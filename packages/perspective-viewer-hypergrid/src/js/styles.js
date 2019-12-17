@@ -7,7 +7,7 @@
  *
  */
 
-import {PropsBuilder} from "@finos/perspective-viewer/dist/esm/custom_styles";
+import {PropsBuilder, get_style} from "@finos/perspective-viewer/dist/esm/custom_styles";
 import {cloneDeep} from "lodash";
 
 const properties = new PropsBuilder();
@@ -26,8 +26,9 @@ properties.add_styles({
     treeHeaderBackgroundColor: `${title}-tree-header--background`,
     backgroundColor: `${title}--background`,
     treeHeaderColor: `${title}-tree-header--color`,
-    treeHeaderForegroundSelectionColor: `${title}-tree-header--color`,
-    treeHeaderBackgroundSelectionColor: `${title}-tree-header--background`,
+    treeHeaderForegroundSelectionColor: `${title}-tree-header-selection--color`,
+    treeHeaderBackgroundSelectionColor: `${title}-tree-header-selection--background`,
+    backgroundSelectionColor: `${title}-selection--background`,
     foregroundSelectionColor: [`${title}--color`, `color`],
     borderBottom: `${title}--border-bottom-color`,
     borderRight: `${title}--border-right-color`,
@@ -96,8 +97,8 @@ const base_grid_properties = {
     columnSelection: false,
     rowSelection: false,
     checkboxOnlyRowSelections: false,
-    backgroundSelectionColor: `#ffffff`,
     columnClip: true,
+    treeHeaderBackgroundSelectionColor: "rgba(147, 185, 255, 0.625)", // same as default hypergrid backgroundSelectionColor
     columnHeaderFont: COLUMN_HEADER_FONT,
     columnHeaderForegroundSelectionFont: COLUMN_HEADER_FONT,
     columnHeaderBackgroundSelectionColor: undefined,
@@ -185,6 +186,30 @@ const light_theme_overrides = {
         backgroundColor: "#f6f6f6"
     }
 };
+
+const dynamic_defaults = {
+    rowBackgroundSelectionColor: "rgba(147, 185, 255, 0.625)",
+    cellBackgroundSelectionColor: "#fff",
+    rowSelectionRegionOutlineColor: "transparent",
+    cellSelectionRegionOutlineColor: "rgba(0,0,0,0.2)"
+};
+
+export function get_dynamic_styles(elem, selectable) {
+    const properties = {
+        singleRowSelectionMode: selectable,
+        autoSelectRows: selectable,
+        rowSelection: selectable
+    };
+
+    if (selectable) {
+        properties.selectionRegionOutlineColor = get_style(elem, `${title}-selection--border-color`) || dynamic_defaults.rowSelectionRegionOutlineColor;
+        properties.backgroundSelectionColor = get_style(elem, `${title}-selection--background`) || dynamic_defaults.rowBackgroundSelectionColor;
+    } else {
+        properties.selectionRegionOutlineColor = get_style(elem, `${title}-editor--border-color`) || dynamic_defaults.cellSelectionRegionOutlineColor;
+        properties.backgroundSelectionColor = dynamic_defaults.rowSelectionRegionOutlineColor;
+    }
+    return properties;
+}
 
 export function default_grid_properties() {
     const properties = Object.assign({}, cloneDeep(base_grid_properties), cloneDeep(light_theme_overrides));

@@ -25,7 +25,7 @@ function get_rect(nrows) {
 
 function find_row(rows, index) {
     for (let ridx in rows) {
-        if (rows[ridx].__INDEX__ === index) {
+        if (rows[ridx].__ID__ === index) {
             return parseInt(ridx);
         }
     }
@@ -45,7 +45,7 @@ const _wrapper = function(f) {
     };
 };
 
-function pad_data_window(rect, rowPivots = [], colPivots = []) {
+function pad_data_window(rect, rowPivots = [], selection = false) {
     const range = {
         start_row: rect.origin.y,
         end_row: rect.corner.y + 1,
@@ -53,7 +53,7 @@ function pad_data_window(rect, rowPivots = [], colPivots = []) {
         end_col: rect.corner.x + 3
     };
     range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
-    range.index = rowPivots.length === 0 && colPivots.length === 0;
+    range.id = selection;
     return range;
 }
 
@@ -130,11 +130,18 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     _update_select_index: function() {
-        const has_selections = this._grid.selectionModel.hasSelections();
-        if (has_selections) {
-            const row = this.data[this._grid.selectionModel.getLastSelection().origin.y];
-            if (row) {
-                this._select_index = row.__INDEX__;
+        const has_cell_selections = this._grid.selectionModel.hasSelections();
+        const has_row_selections = this._grid.selectionModel.hasRowSelections();
+        if (has_cell_selections) {
+            const row_data = this.data[this._grid.selectionModel.getLastSelection().origin.y];
+            if (row_data) {
+                this._selected_cell_index = row_data.__ID__;
+            }
+        }
+        if (has_row_selections) {
+            const row_data = this.data[this._grid.getSelectedRows()[0]];
+            if (row_data) {
+                this._selected_row_index = row_data.__ID__;
             }
         }
     },
@@ -151,19 +158,27 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     _update_selection: function(new_index) {
-        const has_selections = this._grid.selectionModel.hasSelections();
-        if (has_selections) {
-            new_index = new_index || find_row(this.data, this._select_index);
+        const has_cell_selections = this._grid.selectionModel.hasSelections();
+        if (has_cell_selections) {
+            new_index = new_index || find_row(this.data, this._selected_cell_index);
             if (new_index !== -1) {
                 const col = this._grid.selectionModel.getLastSelection().origin.x;
                 this._grid.selectionModel.select(col, new_index, 0, 0);
             }
         }
+        if (this._selected_row_index) {
+            this._grid.selectionModel.clearRowSelection();
+            const row_index = new_index || find_row(this.data, this._selected_row_index);
+            if (row_index !== -1) {
+                this._grid.selectionModel.selectRow(row_index);
+            }
+        }
     },
 
     pspFetch: async function(rect) {
-        const range = pad_data_window(rect, this._config.row_pivots, this._config.column_pivots, this._pad_window);
-        let next_page = await this._view.to_columns(range);
+        const selection_enabled = this._grid.properties.rowSelection || this._viewer.hasAttribute("editable");
+        const range = pad_data_window(rect, this._config.row_pivots, this._viewer.hasAttribute("settings"), selection_enabled);
+        const next_page = await this._view.to_columns(range);
         this.data = [];
         const rows = page2hypergrid(next_page, this._config.row_pivots, this._columns);
         const base = range.start_row;
@@ -229,7 +244,7 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         editor._table = this._table;
         editor._data = this.data;
         editor._canvas = this._grid.canvas.canvas;
-        editor._index = this.data[rowIndex + offset - 1].__INDEX__;
+        editor._index = this.data[rowIndex + offset - 1].__ID__;
         return editor;
     },
 
@@ -245,6 +260,12 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
             config._type = this.schema[-1].type[config.value.rowPath.length - 2];
         }
         return config.grid.cellRenderers.get(rendererName);
+    },
+
+    clearSelectionState: function() {
+        this._selected_row_index = undefined;
+        this._selected_cell_index = undefined;
+        this._grid.selectionModel.clear();
     }
 });
 
