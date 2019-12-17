@@ -13,9 +13,10 @@ const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_PY2 = getarg("--python2");
 const PYTHON = IS_PY2 ? "python2" : (getarg("--python38") ? "python3.8": "python3.7");
-const IMAGE = python_image(getarg("--manylinux2010") ? "manylinux2010":
-                           getarg("--manylinux2014") ? "manylinux2014":
-                           "", PYTHON);
+const IMAGE = IS_DOCKER ?
+                python_image(getarg("--manylinux2010") ? "manylinux2010":
+                             getarg("--manylinux2014") ? "manylinux2014":
+                             "", PYTHON) :"";
 
 const IS_CI = getarg("--ci");
 const IS_INSTALL = getarg("--install");
