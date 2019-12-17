@@ -6,14 +6,28 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import logging
+import json
 import os
 import sys
 import signal
+import tornado
 from time import perf_counter
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
-from perspective import Table  # noqa: E402
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler  # noqa: E402
 
 logging.basicConfig(level=logging.INFO)
+
+
+class BenchmarkTornadoHandler(tornado.web.RequestHandler):
+    """Host the results of the benchmark suite over a websocket."""
+
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
+    def get(self):
+        self.render("benchmark.html")
 
 
 class Benchmark(object):
@@ -97,6 +111,7 @@ class Runner(object):
         self._suite = suite
         self._benchmarks = []
         self._table = None
+        self._HOSTING = False
 
         self._suite.register_benchmarks()
 
@@ -117,16 +132,32 @@ class Runner(object):
         signal.signal(signal.SIGINT, self.sigint_handler)
 
     def sigint_handler(self, signum, frame):
-        """On SIGINT, write benchmark results to Arrow and exit gracefully."""
-        self.write_results()
-        sys.exit(0)
+        """On SIGINT, host the results over a websocket."""
+        if not self._HOSTING:
+            self.host_results()
+        else:
+            sys.exit(0)
 
-    def write_results(self):
-        """Writes the results to an arrow file."""
-        if not self._table:
-            logging.info("No results to write, exiting.")
+    def host_results(self):
+        """Create a tornado application that hosts the results table over a
+        websocket."""
+        if self._table is None:
             return
-        logging.info("Writing results to Arrow...")
+        MANAGER = PerspectiveManager()
+        MANAGER.host_table("benchmark_results", self._table)
+        application = tornado.web.Application([
+            (r"/", BenchmarkTornadoHandler),
+            # create a websocket endpoint that the client Javascript can access
+            (r"/websocket", PerspectiveTornadoHandler, {
+                "manager": MANAGER,
+                "check_origin": True
+            })
+        ])
+        self._HOSTING = True
+        application.listen(8888)
+        logging.critical("Displaying results at http://localhost:8888")
+        loop = tornado.ioloop.IOLoop.current()
+        loop.start()
 
     def run_method(self, func, *args, **kwargs):
         """Wrap the benchmark `func` with timing code and run for n
@@ -159,4 +190,4 @@ class Runner(object):
                 self._table = Table([result])
             else:
                 self._table.update([result])
-        self.write_results()
+        self.host_results()

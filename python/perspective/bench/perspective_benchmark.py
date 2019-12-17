@@ -48,6 +48,7 @@ class PerspectiveBenchmark(Suite):
             self._view = tbl.view()
             self.dict = self._view.to_dict()
             self.records = self._view.to_records()
+            self.df = self._view.to_df()
             self.numpy = self._view.to_numpy()
             self.csv = self._view.to_csv()
             self.arrow = self._view.to_arrow()
@@ -58,19 +59,32 @@ class PerspectiveBenchmark(Suite):
         lambdas, and then calls `setattr` on the Suite itself so that the
         `Runner` can find the tests at runtime."""
         self.benchmark_table()
+        self.benchmark_table_arrow()
         self.benchmark_view_zero()
         self.benchmark_view_one()
         self.benchmark_view_two()
         self.benchmark_view_two_column_only()
-        self.benchmark_to_format()
+        self.benchmark_to_format_zero()
+        self.benchmark_to_format_one()
+        self.benchmark_to_format_two()
+        # self.benchmark_to_format_two_column_only()
 
     def benchmark_table(self):
         """Benchmark table creation from different formats."""
-        for name in ("dict", "records", "numpy"):
+        for name in ("df", "dict", "records", "numpy"):
             data = getattr(self, name)
             test_meta = make_meta("table", name)
             func = Benchmark(lambda: Table(data), meta=test_meta)
             setattr(self, "table_{0}".format(name), func)
+
+    def benchmark_table_arrow(self):
+        """Benchmark table from arrow separately as it requires opening the
+        Arrow file from the filesystem."""
+        with open(SUPERSTORE_ARROW, "rb") as arrow:
+            data = arrow.read()
+            test_meta = make_meta("table", "arrow")
+            func = Benchmark(lambda: Table(data), meta=test_meta)
+            setattr(self, "table_arrow", func)
 
     def benchmark_view_zero(self):
         """Benchmark view creation with zero pivots."""
@@ -94,7 +108,8 @@ class PerspectiveBenchmark(Suite):
             CP = PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS[i]
             if len(RP) == 0 and len(CP) == 0:
                 continue
-            test_meta = make_meta("view", "two_{0}x{1}_pivot".format(len(RP), len(CP)))
+            test_meta = make_meta(
+                "view", "two_{0}x{1}_pivot".format(len(RP), len(CP)))
             view_constructor = partial(
                 self._table.view, row_pivots=RP, column_pivots=CP)
             func = Benchmark(view_constructor, meta=test_meta)
@@ -103,19 +118,63 @@ class PerspectiveBenchmark(Suite):
     def benchmark_view_two_column_only(self):
         """Benchmark column-only view creation."""
         for pivot in PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS:
+            if len(pivot) == 0:
+                continue
             test_meta = make_meta(
                 "view", "two_column_only_{0}_pivot".format(len(pivot)))
             view_constructor = partial(self._table.view, column_pivots=pivot)
             func = Benchmark(view_constructor, meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
 
-    def benchmark_to_format(self):
+    def benchmark_to_format_zero(self):
         """Benchmark each `to_format` method."""
         for name in ("numpy", "dict", "records", "df"):
             test_meta = make_meta("to_format", name)
             func = Benchmark(
                 getattr(self._view, "to_{0}".format(name)), meta=test_meta)
             setattr(self, "to_format_{0}".format(name), func)
+
+    def benchmark_to_format_one(self):
+        """Benchmark each `to_format` method for one-sided contexts."""
+        for name in ("numpy", "dict", "records", "df"):
+            for pivot in PerspectiveBenchmark.ROW_PIVOT_OPTIONS:
+                if len(pivot) == 0:
+                    continue
+                test_meta = make_meta(
+                    "to_format", "{0}_{1}".format(name, len(pivot)))
+                view = self._table.view(row_pivots=pivot)
+                func = Benchmark(
+                    getattr(view, "to_{0}".format(name)), meta=test_meta)
+                setattr(self, "to_format_{0}".format(test_meta["name"]), func)
+
+    def benchmark_to_format_two(self):
+        """Benchmark each `to_format` method for two-sided contexts."""
+        for name in ("numpy", "dict", "records", "df"):
+            for i in range(len(PerspectiveBenchmark.ROW_PIVOT_OPTIONS)):
+                RP = PerspectiveBenchmark.ROW_PIVOT_OPTIONS[i]
+                CP = PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS[i]
+                if len(RP) == 0 and len(CP) == 0:
+                    continue
+                test_meta = make_meta(
+                    "to_format", "{0}_{1}x{2}".format(name, len(RP), len(CP)))
+                view = self._table.view(row_pivots=RP, column_pivots=CP)
+                func = Benchmark(
+                    getattr(view, "to_{0}".format(name)), meta=test_meta)
+                setattr(self, "to_format_{0}".format(test_meta["name"]), func)
+
+    def benchmark_to_format_two_column_only(self):
+        """Benchmark each `to_format` method for two-sided column-only
+        contexts."""
+        for name in ("dict", "records", "df"):
+            for pivot in PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS:
+                if len(pivot) == 0:
+                    continue
+                test_meta = make_meta(
+                    "to_format", "{0}_{1}_column".format(name, len(pivot)))
+                view = self._table.view(column_pivots=pivot)
+                func = Benchmark(
+                    getattr(view, "to_{0}".format(name)), meta=test_meta)
+                setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
 
 if __name__ == "__main__":
