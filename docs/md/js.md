@@ -122,7 +122,7 @@ const perspective = require("@finos/perspective");
 
 `@finos/perspective` also comes with pre-built bundle which exports the global
 `perspective` module name in vanilla Javascript, when e.g. importing
-[via a CDN](https://unpkg.com/@finos/perspective/build/perspective.js).
+[via a CDN](https://unpkg.com/@finos/perspective).
 
 ```html
 <script src="perspective.js"></script>
@@ -427,32 +427,57 @@ import "@finos/perspective-viewer-d3fc/xy-scatter";
 import "@finos/perspective-viewer-highcharts/treemap";
 ```
 
-You may also import a theme when bundling perspective-viewer. Even though there
-are only 2 of them.
-
-```javascript
-// A theme based on Google's Material Design Language
-import "@finos/perspective-viewer/build/material.css";
-```
-
-Alternatively, if you're fine with a default theme and don't want to bundle
-yourself, you can just import the pre-bundled assets from their respective
-modules, which export their default visualizations.
-
-```html
-<script src="perspective-viewer.js"></script>
-<script src="perspective-viewer-hypergrid.js"></script>
-<script src="perspective-viewer-d3fc.js"></script>
-
-<!-- Theme available separately if you are so inclined -->
-<link rel="stylesheet" href="material.css" />
-```
-
 Once imported, the `<perspective-viewer>` Web Component will be available in any
 standard HTML on your site. A simple example:
 
 ```html
 <perspective-viewer id="view1"></perspective-viewer>
+```
+
+### Theming
+Theming is supported in `perspective-viewer` and it's accompanying plugins. 
+A number of themes come bundled with `perspective-viewer`. You can import 
+any of these themes directly into your app and the `perspective-viewer`s 
+will be themed accordingly.
+
+```javascript
+//Themes based on Google's Material Design Language
+import "@finos/perspective-viewer/themes/material.css";
+import "@finos/perspective-viewer/themes/material.dark.css";
+import "@finos/perspective-viewer/themes/material-dense.css";
+import "@finos/perspective-viewer/themes/material-dense.dark.css";
+
+//Vaporwave theme
+import "@finos/perspective-viewer/themes/vaporwave.css";
+```
+
+***Note that importing multiple themes may override each other***
+
+Alternatively, you may use `all-themes.css`, which exposes all available 
+themes as css classes. This allows you to trivially apply different themes 
+to multiple `perspective-viewer`s by simply setting the `class` 
+attribute on each `perspective-viewer`
+
+*index.js*
+```javascript
+//Exposes all themes as css classes
+import "@finos/perspective-viewer/themes/all-themes.css";
+```
+
+*index.html*
+```html
+<perspective-viewer class='perspective-viewer-material'></perspective-viewer>
+<perspective-viewer class='perspective-viewer-material-dark'></perspective-viewer>
+<perspective-viewer class='perspective-viewer-material-dense'></perspective-viewer>
+<perspective-viewer class='perspective-viewer-material-dense-dark'></perspective-viewer>
+<perspective-viewer class='perspective-viewer-vaporwave'></perspective-viewer>
+```
+
+If you choose not to bundle the themes yourself, they are available on the [CDN](https://unpkg.com/@finos/perspective-viewer/dist/umd/). These can be directly linked in your html e.g.
+
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css"/>
 ```
 
 ### Loading data

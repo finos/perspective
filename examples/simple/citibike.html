@@ -21,7 +21,7 @@
 
     <script src="perspective.js"></script>
 
-    <link rel='stylesheet' href="material.css" is="custom-style">
+    <link rel='stylesheet' href="all-themes.css" is="custom-style">
 
     <style>
 
@@ -67,12 +67,14 @@
 <body>
 
     <div id="grid">
-        <perspective-viewer 
-            row-pivots='["name"]' 
-            columns='["num_bikes_available"]' 
-            sort='[["num_bikes_available","desc"]]'>
-        </perspective-viewer>
-        <perspective-viewer 
+        <perspective-viewer
+        class='perspective-viewer-material-dark'
+        row-pivots='["name"]' 
+        columns='["num_bikes_available"]' 
+        sort='[["num_bikes_available","desc"]]'>
+    </perspective-viewer>
+    <perspective-viewer 
+            class='perspective-viewer-material'
             plugin='d3_xy_scatter' 
             row-pivots='["name"]' 
             columns='["lon","lat","num_bikes_available"]' 
