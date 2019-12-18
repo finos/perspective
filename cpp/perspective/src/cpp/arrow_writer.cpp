@@ -230,7 +230,13 @@ namespace arrow {
         // get str out of vocab
         for (auto i = 0; i < vocab.get_vlenidx(); i++) {
             const char* str = vocab.unintern_c(i);
-            values_builder.Append(str, strlen(str));
+            ::arrow::Status s = values_builder.Append(str, strlen(str));
+            if (!s.ok()) {
+                std::stringstream ss;
+                ss << "Could not append string to dictionary array: "
+                   << s.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            }
         }
 
         // Write dictionary indices
