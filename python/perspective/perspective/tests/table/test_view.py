@@ -835,22 +835,6 @@ class TestView(object):
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
-    def test_view_row_delta_should_throw_invalid_callback(self):
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        update_data = {
-            "a": [5],
-            "b": [6]
-        }
-
-        def cb1():
-            pass
-
-        tbl = Table(data)
-        view = tbl.view()
-        view.on_update(cb1, mode="row")
-        with raises(RuntimeError):
-            tbl.update(update_data)
-
     # hidden rows
 
     def test_view_num_hidden_cols(self):

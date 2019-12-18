@@ -403,7 +403,7 @@ export default function(Module) {
             if (get_ids && num_sides === 0) {
                 const keys = slice.get_pkeys(ridx, 0);
                 for (let i = 0; i < keys.size(); i++) {
-                    const value = __MODULE__.scalar_vec_to_val(keys, i);
+                    const value = __MODULE__.scalar_to_val(keys.get(i), false, false);
                     formatter.addColumnValue(data, row, "__ID__", value);
                 }
             }
