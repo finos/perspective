@@ -1,3 +1,4 @@
+@import "~@finos/perspective-viewer/src/less/fonts.less";
 @import (reference) "~@finos/perspective-viewer/src/themes/material.less";
 @import (reference) "~@finos/perspective-viewer/src/themes/material.dark.less";
 
@@ -11,11 +12,12 @@ div.PSPContainer-dark {
     flex: 1;
 }
 
-div.PSPContainer {
+
+div.PSPContainer perspective-viewer{
     .perspective-viewer-material();
 }
 
-div.PSPContainer-dark {
+div.PSPContainer-dark perspective-viewer {
     .perspective-viewer-material-dark();
 }
 
