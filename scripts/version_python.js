@@ -41,9 +41,6 @@ const parse_version = function(version) {
         let optional_versions = split[split.length - 2].split("-");
         patch = optional_versions[0];
         release_level = optional_versions[1];
-        if (release_level === "rc") {
-            release_level = "candidate"; // 'candidate' maps into bumpversion, 'rc' does not
-        }
         serial = split[split.length - 1];
     }
 
@@ -54,4 +51,6 @@ console.log(`Bumping \`perspective-python\` version to ${VERSION}`);
 
 const python_path = resolve`${__dirname}/../python/perspective`;
 const version_path = resolve`${__dirname}/../python/perspective/perspective/core/_version.py`;
+const bumpversion_path = resolve`${__dirname}/../python/perspective/.bumpversion.cfg`;
 execute`cd ${python_path} && bumpversion --allow-dirty --new-version "${parse_version(VERSION)}" ${version_path}`;
+execute`git add ${version_path} ${bumpversion_path}`;
