@@ -100,6 +100,54 @@ export const COMPUTATIONS = {
     week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", week_bucket, ["Time"]),
     month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", month_bucket, ["Time"]),
     year_bucket: new Computation("Bucket (Y)", x => `year_bucket(${x})`, "datetime", "date", year_bucket, ["Time"]),
+    "10_bucket": new Computation(
+        "Bucket (10)",
+        x => `bin10(${x})`,
+        "float",
+        "float",
+        x => Math.floor(x / 10) * 10,
+        ["Math"]
+    ),
+    "100_bucket": new Computation(
+        "Bucket (100)",
+        x => `bin100(${x})`,
+        "float",
+        "float",
+        x => Math.floor(x / 100) * 100,
+        ["Math"]
+    ),
+    "1000_bucket": new Computation(
+        "Bucket (1000)",
+        x => `bin1000(${x})`,
+        "float",
+        "float",
+        x => Math.floor(x / 1000) * 1000,
+        ["Math"]
+    ),
+    "0.1_bucket": new Computation(
+        "Bucket (1/10)",
+        x => `bin10th(${x})`,
+        "float",
+        "float",
+        x => Math.floor(x / 0.1) * 0.1,
+        ["Math"]
+    ),
+    "0.01_bucket": new Computation(
+        "Bucket (1/100)",
+        x => `bin100th(${x})`,
+        "float",
+        "float",
+        x => Math.floor(x / 0.01) * 0.01,
+        ["Math"]
+    ),
+    "0.001_bucket": new Computation(
+        "Bucket (1/1000)",
+        x => `bin1000th(${x})`,
+        "float",
+        "float",
+        x => Math.floor(x / 0.001) * 0.001,
+        ["Math"]
+    ),
     add: new Computation(
         "+",
         (x, y) => `${x} + ${y}`,
