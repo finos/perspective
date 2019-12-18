@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-phosphor",
-    "version": "0.4.0-rc.4",
+    "version": "0.4.0-rc.5",
     "description": "Perspective.js",
     "files": [
         "dist/**/*",
@@ -29,15 +29,15 @@
         "test:integration": "jest --color --silent --noStackTrace --config=./config/jest.integration.config.js 2>&1"
     },
     "dependencies": {
-        "@finos/perspective": "^0.4.0-rc.4",
-        "@finos/perspective-viewer": "^0.4.0-rc.4",
+        "@finos/perspective": "^0.4.0-rc.5",
+        "@finos/perspective-viewer": "^0.4.0-rc.5",
         "@phosphor/application": "^1.7.3",
         "@phosphor/default-theme": "0.1.8",
         "@phosphor/widgets": "^1.9.3",
         "lodash.uniqby": "^4.7.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.4.0-rc.4",
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.5",
         "@types/jest": "^24.0.19",
         "@types/lodash.uniqby": "^4.7.6",
         "file-loader": "^0.11.1",

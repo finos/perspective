@@ -1,12 +1,12 @@
 {
   "private": true,
   "name": "perspective-python.node",
-  "version": "0.4.0-rc.4",
+  "version": "0.4.0-rc.5",
   "dependencies": {
-    "@finos/perspective": "^0.4.0-rc.4"
+    "@finos/perspective": "^0.4.0-rc.5"
   },
   "devDependencies": {
-    "@finos/perspective-webpack-plugin": "^0.4.0-rc.4",
+    "@finos/perspective-webpack-plugin": "^0.4.0-rc.5",
     "cpx": "^1.5.0",
     "file-loader": "^0.11.1",
     "jest": "^24.8.0",

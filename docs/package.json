@@ -1,7 +1,7 @@
 {
     "name": "@finos/docs",
     "private": true,
-    "version": "0.4.0-rc.4",
+    "version": "0.4.0-rc.5",
     "scripts": {
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
@@ -14,8 +14,8 @@
     },
     "devDependencies": {
         "@babel/plugin-proposal-class-properties": "^7.4.0",
-        "@finos/perspective": "^0.4.0-rc.4",
-        "@finos/perspective-viewer": "^0.4.0-rc.4",
+        "@finos/perspective": "^0.4.0-rc.5",
+        "@finos/perspective-viewer": "^0.4.0-rc.5",
         "docusaurus": "^1.8.0",
         "less": "^3.9.0"
     },
