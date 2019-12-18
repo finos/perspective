@@ -83,7 +83,6 @@ class TestAsync(object):
         SENTINEL = AsyncSentinel(0)
 
     def test_async_queue_process(self):
-        assert TestAsync.loop_is_running() is True
         tbl = Table({
             "a": int,
             "b": float,
@@ -101,9 +100,6 @@ class TestAsync(object):
         table_id = tbl._table.get_id()
         pool = tbl._table.get_pool()
 
-        # the first call to `update` sets process - the rest are no-ops
-        assert SENTINEL.get() == 1
-
         assert _PerspectiveStateManager.TO_PROCESS == {
             table_id: pool
         }
@@ -113,7 +109,6 @@ class TestAsync(object):
         assert _PerspectiveStateManager.TO_PROCESS == {}
 
     def test_async_multiple_managers_queue_process(self):
-        assert TestAsync.loop_is_running() is True
         tbl = Table({
             "a": int,
             "b": float,
@@ -152,8 +147,6 @@ class TestAsync(object):
         def sync_queue_process(table_id, state_manager):
             SENTINEL_2.set(SENTINEL_2.get() - 1)
             state_manager.call_process(table_id)
-
-        assert TestAsync.loop_is_running() is True
 
         tbl = Table({
             "a": int,
@@ -197,8 +190,6 @@ class TestAsync(object):
                                             delay=0.5, loop=TestAsync.loop)
         long_delay_queue_process = partial(queue_process_async_delay,
                                            delay=1, loop=TestAsync.loop)
-
-        assert TestAsync.loop_is_running() is True
 
         tbl = Table({
             "a": int,

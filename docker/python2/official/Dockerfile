@@ -7,7 +7,6 @@
 #
 
 FROM python:2.7
-
 RUN apt-get update
 RUN apt-get -y install apt-transport-https libtbb-dev rapidjson-dev sudo
 RUN apt-get -y remove python
@@ -22,22 +21,23 @@ RUN rm -fr /opt/cmake/bin/cpack
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 RUN ln -s /opt/cmake/bin/ctest /usr/local/bin/ctest
 
-RUN python2.7 -m pip install numpy pandas
+RUN python2.7 -m pip install numpy pandas cython 'mock==2.0.0' codecov nose2 flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc 'backports.shutil_which'
 
-RUN ls -al /usr/local/lib/python2.7/site-packages/numpy
-
-RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1  || echo "wget failed"
+# install boost
+RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
 RUN tar xfz boost_1_71_0.tar.gz
 # https://github.com/boostorg/build/issues/468
-RUN cd boost_1_71_0 && CPLUS_INCLUDE_PATH="/usr/local/include/python2.7m" C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include/python2.7m" ./bootstrap.sh --with-python=/usr/local/bin/python2.7 || echo "boostrap failed"
-RUN cd boost_1_71_0 && CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/include/python2.7m" C_INCLUDE_PATH="$C_INCLUDE_PATH:/usr/local/include/python2.7m" ./b2 -j4 install || echo "build boost failed" 
+RUN cd boost_1_71_0 && ./bootstrap.sh
+RUN cd boost_1_71_0 && ./b2 -j8 --with-program_options --with-filesystem --with-system install 
 
-RUN ln -s /usr/local/lib/libboost_python27.so /usr/local/lib/libboost_python.so
-RUN ln -s /usr/local/lib/libboost_numpy27.so /usr/local/lib/libboost_numpy.so
+RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' git+https://chromium.googlesource.com/external/gyp
 
-RUN python2.7 -m pip install 'mock==2.0.0' codecov nose2 flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc 'backports.shutil_which'
-RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.15.0' git+https://chromium.googlesource.com/external/gyp
+# install pyarrow
+RUN wget https://github.com/apache/arrow/archive/apache-arrow-0.15.1.tar.gz >/dev/null 2>&1  || echo "wget arrow failed"
+RUN tar xfz apache-arrow-0.15.1.tar.gz
+RUN cd arrow-apache-arrow-0.15.1 && mkdir build && cd build && cmake ../cpp/ -DARROW_RPATH_ORIGIN=ON -DARROW_PYTHON=ON -DARROW_FLIGHT=OFF -DARROW_IPC=ON -DARROW_COMPUTE=ON -DCMAKE_INSTALL_PREFIX=/usr -DARROW_DATASET=OFF -DARROW_BUILD_UTILITIES=OFF -DARROW_JEMALLOC=OFF -DARROW_DEPENDENCY_SOURCE=BUNDLED -DARROW_HDFS=OFF -DARROW_WITH_BACKTRACE=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=OFF && make -j2 && sudo make install && cd ../python && PYARROW_BUNDLE_ARROW_CPP=1 sudo python2.7 setup.py install --single-version-externally-managed --record RECORD 
 
+# install node
 RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
 RUN apt-get -y install nodejs
 

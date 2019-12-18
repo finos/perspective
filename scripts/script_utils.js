@@ -140,7 +140,7 @@ const bash = (exports.bash = function bash(strings, ...args) {
     }
     for (let i = 0; i < strings.length - 1; i++) {
         const arg = args[i];
-        const start = terms.pop() || strings[i];
+        const start = terms.length === 0 ? strings[i] : terms.pop();
         if (arg === undefined || arg !== arg || arg === false) {
             terms = [...terms, cut_last(start), " ", cut_first(strings[i + 1])];
         } else if (Array.isArray(arg)) {
@@ -218,10 +218,49 @@ exports.docker = function docker(image = "puppeteer") {
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
     const PACKAGE = process.env.PACKAGE;
     const CWD = process.cwd();
-    return bash`docker run -it --rm -eWRITE_TESTS=${IS_WRITE} \
-        -ePACKAGE="${PACKAGE}" -v${CWD}:/usr/src/app/perspective \
+    const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
+    const IMAGE = `perspective/${image}`;
+    let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
+        -ePACKAGE="${PACKAGE}"`;
+    if (IS_MANYLINUX) {
+        console.log(`-- Using manylinux build`);
+        env_vars += bash`-ePSP_MANYLINUX=1`;
+    }
+
+    let ret = bash`docker run -it --rm \
+        ${env_vars} \
+        -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" perspective/${image}`;
+        --cpus="${CPUS}.0" ${IMAGE}`;
+    return ret;
+};
+
+/**
+ * Get the docker image to use for the given image/python combination
+ *
+ * @param {string} image The Docker image name.
+ * @param {string} python The python version requested
+ * @returns {string} The docker image to use
+ */
+exports.python_image = function python_image(image = "", python = "") {
+    console.log(`-- Getting image for image: '${image}' and python: '${python}'`);
+    if (python == "python2") {
+        if (image == "manylinux2010") {
+            return "python2_manylinux2010";
+        } else if (image == "manylinux2014") {
+            throw "Python2 not supported for manylinux2014";
+        } else {
+            return "python2";
+        }
+    } else if (python == "python3.8") {
+        throw "Python 3.8 not implemented yet";
+    } else {
+        if (image == "manylinux2010" || image == "manylinux2014") {
+            return `python3_${image}`;
+        } else {
+            return "python3";
+        }
+    }
 };
 
 /*******************************************************************************
@@ -268,5 +307,6 @@ run_suite([
     [bash`TEST=${1}`, `TEST=1`],
     [bash`TEST=${undefined}`, ``],
     [bash`this is a test`, `this is a test`],
-    [bash`this is a test `, `this is a test `]
+    [bash`this is a test `, `this is a test `],
+    [bash`--test="${undefined}.0" ${1}`, `1`]
 ]);
