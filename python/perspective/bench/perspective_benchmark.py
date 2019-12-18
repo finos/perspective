@@ -12,6 +12,9 @@ from functools import partial
 from bench import Benchmark, Suite, Runner
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table  # noqa: E402
+from perspective.tests.common import superstore  # noqa: E402
+
+SUPERSTORE = superstore(9994)
 
 SUPERSTORE_ARROW = os.path.join(
     os.path.dirname(__file__),
@@ -43,16 +46,14 @@ class PerspectiveBenchmark(Suite):
 
     def __init__(self):
         """Create a benchmark suite for `perspective-python`."""
-        with open(SUPERSTORE_ARROW, "rb") as arrow:
-            tbl = Table(arrow.read())
-            self._view = tbl.view()
-            self.dict = self._view.to_dict()
-            self.records = self._view.to_records()
-            self.df = self._view.to_df()
-            self.numpy = self._view.to_numpy()
-            self.csv = self._view.to_csv()
-            self.arrow = self._view.to_arrow()
-            self._table = tbl
+        tbl = Table(SUPERSTORE)
+        self._view = tbl.view()
+        self.dict = self._view.to_dict()
+        self.records = self._view.to_records()
+        self.df = SUPERSTORE
+        self.csv = self._view.to_csv()
+        self.arrow = self._view.to_arrow()
+        self._table = tbl
 
     def register_benchmarks(self):
         """Register all the benchmark methods - each method creates a number of
@@ -71,7 +72,7 @@ class PerspectiveBenchmark(Suite):
 
     def benchmark_table(self):
         """Benchmark table creation from different formats."""
-        for name in ("df", "dict", "records", "numpy"):
+        for name in ("df", "dict", "records"):
             data = getattr(self, name)
             test_meta = make_meta("table", name)
             func = Benchmark(lambda: Table(data), meta=test_meta)
@@ -128,7 +129,7 @@ class PerspectiveBenchmark(Suite):
 
     def benchmark_to_format_zero(self):
         """Benchmark each `to_format` method."""
-        for name in ("numpy", "dict", "records", "df"):
+        for name in ("numpy", "dict", "records", "df", "arrow"):
             test_meta = make_meta("to_format", name)
             func = Benchmark(
                 getattr(self._view, "to_{0}".format(name)), meta=test_meta)
@@ -136,7 +137,7 @@ class PerspectiveBenchmark(Suite):
 
     def benchmark_to_format_one(self):
         """Benchmark each `to_format` method for one-sided contexts."""
-        for name in ("numpy", "dict", "records", "df"):
+        for name in ("numpy", "dict", "records", "df", "arrow"):
             for pivot in PerspectiveBenchmark.ROW_PIVOT_OPTIONS:
                 if len(pivot) == 0:
                     continue
@@ -149,7 +150,7 @@ class PerspectiveBenchmark(Suite):
 
     def benchmark_to_format_two(self):
         """Benchmark each `to_format` method for two-sided contexts."""
-        for name in ("numpy", "dict", "records", "df"):
+        for name in ("numpy", "dict", "records", "df", "arrow"):
             for i in range(len(PerspectiveBenchmark.ROW_PIVOT_OPTIONS)):
                 RP = PerspectiveBenchmark.ROW_PIVOT_OPTIONS[i]
                 CP = PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS[i]
@@ -165,7 +166,7 @@ class PerspectiveBenchmark(Suite):
     def benchmark_to_format_two_column_only(self):
         """Benchmark each `to_format` method for two-sided column-only
         contexts."""
-        for name in ("dict", "records", "df"):
+        for name in ("dict", "records", "df", "arrow"):
             for pivot in PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS:
                 if len(pivot) == 0:
                     continue

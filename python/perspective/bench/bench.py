@@ -6,12 +6,11 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import logging
-import json
 import os
 import sys
 import signal
 import tornado
-from time import perf_counter
+from timeit import timeit
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler  # noqa: E402
 
@@ -111,6 +110,7 @@ class Runner(object):
         self._suite = suite
         self._benchmarks = []
         self._table = None
+        self._WROTE_RESULTS = False
         self._HOSTING = False
 
         self._suite.register_benchmarks()
@@ -133,6 +133,8 @@ class Runner(object):
 
     def sigint_handler(self, signum, frame):
         """On SIGINT, host the results over a websocket."""
+        if not self._WROTE_RESULTS:
+            self.write_results()
         if not self._HOSTING:
             self.host_results()
         else:
@@ -159,6 +161,16 @@ class Runner(object):
         loop = tornado.ioloop.IOLoop.current()
         loop.start()
 
+    def write_results(self):
+        if self._table is None:
+            return
+        logging.info("Writing results to `benchmark.arrow`")
+        arrow_path = os.path.join(os.path.dirname(__file__), "benchmark.arrow")
+        with open(arrow_path, "wb") as file:
+            arrow = self._table.view().to_arrow()
+            file.write(arrow)
+        self._WROTE_RESULTS = True
+
     def run_method(self, func, *args, **kwargs):
         """Wrap the benchmark `func` with timing code and run for n
         `ITERATIONS`, returning a result row that can be fed into Perspective.
@@ -168,14 +180,8 @@ class Runner(object):
                 v for (k, v) in func.__dict__.items() if "__BENCH__" in k
         }
 
-        iter_results = []
-        for i in range(Runner.ITERATIONS):
-            start = perf_counter()
-            func(*args, **kwargs)
-            end = perf_counter()
-            iter_results.append(end - start)
-
-        overall_result["__TIME__"] = sum(iter_results) / len(iter_results)
+        result = timeit(func, number=Runner.ITERATIONS) / Runner.ITERATIONS
+        overall_result["__TIME__"] = result
         return overall_result
 
     def run(self):
@@ -190,4 +196,5 @@ class Runner(object):
                 self._table = Table([result])
             else:
                 self._table.update([result])
+        self.write_results()
         self.host_results()
