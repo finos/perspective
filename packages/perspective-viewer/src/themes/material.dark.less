@@ -7,14 +7,13 @@
  *
  */
 
+@import "../less/fonts";
 @import "../less/variables";
-@import "material";
+@import (reference) "material";
 
-@import (css) url("https://fonts.googleapis.com/css?family=Open+Sans");
-@import (css) url("https://fonts.googleapis.com/css?family=Material+Icons");
-@import (css) url("https://fonts.googleapis.com/css?family=Roboto+Mono");
 
-perspective-viewer {
+perspective-viewer, .perspective-viewer-material-dark{
+    .perspective-viewer-material-base();
     background-color: @coolgrey800;
     color: #cfd8dc;
 
@@ -38,11 +37,6 @@ perspective-viewer {
 
     --hypergrid-positive--color: @lightblue600;
     --hypergrid-negative--color: rgb(255, 136, 136);
-
-    --hypergrid--font-size: 12px;
-    --hypergrid-header--font-size: 12px;
-    --hypergrid--font-family: "Open Sans";
-    --hypergrid-header--font-family: "Open Sans";
 
     --hypergrid-row-hover--background: #555;
     --hypergrid-row-hover--color: #eee;

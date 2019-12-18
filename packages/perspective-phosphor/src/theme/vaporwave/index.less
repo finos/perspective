@@ -1,4 +1,5 @@
 @import "../material/material-phosphor.less";
+@import (reference) "~@finos/perspective-viewer/dist/themes/vaporwave.less";
 
 .p-DockPanel {
     background-color: #150442;
@@ -21,7 +22,7 @@ div.PSPContainer perspective-viewer[settings] {
 }
 
 div.PSPContainer, div.PSPContainer-dark {
-    @import "~@finos/perspective-viewer/dist/themes/vaporwave.less";
+    .perspective-viewer-vaporwave()
 }
 
 div.PSPContainer {

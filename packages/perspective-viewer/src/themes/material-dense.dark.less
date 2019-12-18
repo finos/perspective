@@ -7,6 +7,11 @@
  *
  */
 
- @import "../less/variables";
- @import "./material.dark.less";
- @import "./material-dense.less";
+ @import "../less/fonts";
+ @import (reference) "./material.dark.less";
+ @import (reference) "./material-dense.less";
+
+perspective-viewer, .perspective-viewer-material-dense-dark{
+    .perspective-viewer-material-dark();
+    .perspective-viewer-material-dense-base();
+} 
