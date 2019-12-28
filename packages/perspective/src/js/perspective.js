@@ -15,12 +15,6 @@ import {extract_vector, extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
-import {Table} from "@apache-arrow/es5-esm/table";
-import {Data} from "@apache-arrow/es5-esm/data";
-import {Vector} from "@apache-arrow/es5-esm/vector";
-
-import {Utf8, Float64, Int32, Bool, TimestampMillisecond, Dictionary} from "@apache-arrow/es5-esm/type";
-
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
@@ -619,66 +613,6 @@ export default function(Module) {
         } else if (sides === 2) {
             return __MODULE__.to_arrow_two(this._View, start_row, end_row, start_col, end_col);
         }
-    };
-
-    /**
-     * Serializes a view to arrow.
-     *
-     * @async
-     *
-     * @param {Object} [options] An optional configuration object.
-     *
-     * @param {*} options.data_slice A data slice object from which to
-     * serialize.
-     *
-     * @param {number} options.start_row The starting row index from which to
-     * serialize.
-     * @param {number} options.end_row The ending row index from which to
-     * serialize.
-     * @param {number} options.start_col The starting column index from which to
-     * serialize.
-     * @param {number} options.end_col The ending column index from which to
-     * serialize.
-     *
-     * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format
-     * containing data from the view.
-     */
-    view.prototype._to_arrow = function(options = {}) {
-        const names = this._column_names();
-        const schema = this.schema();
-
-        const vectors = [];
-
-        const start_col = options.start_col || 0;
-        const end_col = options.end_col || names.length;
-
-        for (let i = start_col; i < end_col; i++) {
-            const name = names[i];
-            const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
-            const type = schema[col_path[col_path.length - 1]];
-            if (type === "float") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
-            } else if (type === "integer") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
-            } else if (type === "boolean") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
-            } else if (type === "date" || type === "datetime") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
-            } else if (type === "string") {
-                const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
-                const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
-                vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
-            } else {
-                throw new Error(`Type ${type} not supported`);
-            }
-        }
-
-        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
     };
 
     /**
@@ -1531,7 +1465,7 @@ export default function(Module) {
             let is_arrow = false;
             let overridden_types = {};
 
-            if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
+            if (data instanceof ArrayBuffer || (typeof Buffer !== "undefined" && data instanceof Buffer)) {
                 data_accessor = new Uint8Array(data);
                 is_arrow = true;
             } else {
@@ -1612,7 +1546,7 @@ export default function(Module) {
          * When initialized, replace Perspective's internal `__MODULE` variable
          * with the WASM binary.
          *
-         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective
+         * @param {ArrayBuffer} buffer an ArrayBuffer or Buffer containing the Perspective
          * WASM code
          */
         init(msg) {
