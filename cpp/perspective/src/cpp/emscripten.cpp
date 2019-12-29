@@ -48,14 +48,7 @@ namespace binding {
 
     t_val
     t_date_to_jsdate(t_date date) {
-        t_val jsdate = t_val::global("Date").new_();
-        jsdate.call<t_val>("setYear", date.year());
-        jsdate.call<t_val>("setMonth", date.month());
-        jsdate.call<t_val>("setDate", date.day());
-        jsdate.call<t_val>("setHours", 0);
-        jsdate.call<t_val>("setMinutes", 0);
-        jsdate.call<t_val>("setSeconds", 0);
-        jsdate.call<t_val>("setMilliseconds", 0);
+        t_val jsdate = t_val::global("Date").new_(date.year(), date.month(), date.day());       
         return jsdate;
     }
 
