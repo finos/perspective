@@ -15,12 +15,6 @@ import {extract_vector, extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
-import {Table} from "@apache-arrow/es5-esm/table";
-import {Data} from "@apache-arrow/es5-esm/data";
-import {Vector} from "@apache-arrow/es5-esm/vector";
-
-import {Utf8, Float64, Int32, Bool, TimestampMillisecond, Dictionary} from "@apache-arrow/es5-esm/type";
-
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
@@ -41,6 +35,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 export default function(Module) {
     let __MODULE__ = Module;
     let accessor = new DataAccessor();
+    const SIDES = ["zero", "one", "two"];
 
     /***************************************************************************
      *
@@ -216,7 +211,7 @@ export default function(Module) {
     function col_path_vector_to_string(vector) {
         let extracted = [];
         for (let i = 0; i < vector.size(); i++) {
-            extracted.push(__MODULE__.scalar_vec_to_string(vector, i));
+            extracted.push(__MODULE__.scalar_to_val(vector.get(i), false, true));
         }
         vector.delete();
         return extracted;
@@ -278,17 +273,19 @@ export default function(Module) {
 
     view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
         const num_sides = this.sides();
-        const nidx = ["zero", "one", "two"][num_sides];
+        const nidx = SIDES[num_sides];
         return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
     };
 
     /**
-     * Generic base function from which `to_json`, `to_columns` etc. derives.
+     * Given an `options` Object, calculate the correct start/end rows and
+     * columns, as well as other metadata required by the data formatter.
      *
      * @private
+     * @param {Object} options User-provided options for `to_format`.
+     * @returns {Object} an Object containing the parsed options.
      */
-    const to_format = function(options, formatter) {
-        _call_process(this.table.get_id());
+    const _parse_format_options = function(options) {
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -299,6 +296,30 @@ export default function(Module) {
         const end_row = Math.min(max_rows, options.end_row !== undefined ? options.end_row : viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
+
+        // Return the calculated values
+        options.start_row = start_row;
+        options.end_row = end_row;
+        options.start_col = start_col;
+        options.end_col = end_col;
+
+        return options;
+    };
+
+    /**
+     * Generic base function from which `to_json`, `to_columns` etc. derives.
+     *
+     * @private
+     */
+    const to_format = function(options, formatter) {
+        _call_process(this.table.get_id());
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const hidden = this._num_hidden();
+
         let date_format;
         if (options.date_format) {
             date_format = new Intl.DateTimeFormat(options.date_format);
@@ -309,7 +330,7 @@ export default function(Module) {
         const leaves_only = !!options.leaves_only;
         const num_sides = this.sides();
         const has_row_path = num_sides !== 0 && !this.column_only;
-        const nidx = ["zero", "one", "two"][num_sides];
+        const nidx = SIDES[num_sides];
 
         const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
         const ns = slice.get_column_names();
@@ -341,7 +362,7 @@ export default function(Module) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
+                            const value = __MODULE__.scalar_to_val(row_path.get(i), false, false);
                             formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                             if (get_ids) {
                                 formatter.addColumnValue(data, row, "__ID__", value);
@@ -366,7 +387,7 @@ export default function(Module) {
                 for (let i = 0; i < keys.size(); i++) {
                     // TODO: if __INDEX__ and set index have the same value,
                     // don't we need to make sure that it only emits one?
-                    const value = __MODULE__.scalar_vec_to_val(keys, i);
+                    const value = __MODULE__.scalar_to_val(keys.get(i), false, false);
                     formatter.addColumnValue(data, row, "__INDEX__", value);
                 }
             }
@@ -376,7 +397,7 @@ export default function(Module) {
             if (get_ids && num_sides === 0) {
                 const keys = slice.get_pkeys(ridx, 0);
                 for (let i = 0; i < keys.size(); i++) {
-                    const value = __MODULE__.scalar_vec_to_val(keys, i);
+                    const value = __MODULE__.scalar_to_val(keys.get(i), false, false);
                     formatter.addColumnValue(data, row, "__ID__", value);
                 }
             }
@@ -555,7 +576,7 @@ export default function(Module) {
     };
 
     /**
-     * Serializes a view to arrow.
+     * Serializes a view to the Apache Arrow data format.
      *
      * @async
      *
@@ -573,45 +594,25 @@ export default function(Module) {
      * @param {number} options.end_col The ending column index from which to
      * serialize.
      *
-     * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format
-     * containing data from the view.
+     * @returns {Promise<ArrayBuffer>} An `ArrayBuffer` in the Apache Arrow
+     * format containing data from the view.
      */
     view.prototype.to_arrow = function(options = {}) {
-        const names = this._column_names();
-        const schema = this.schema();
+        _call_process(this.table.get_id());
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const sides = this.sides();
 
-        const vectors = [];
-
-        const start_col = options.start_col || 0;
-        const end_col = options.end_col || names.length;
-
-        for (let i = start_col; i < end_col; i++) {
-            const name = names[i];
-            const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
-            const type = schema[col_path[col_path.length - 1]];
-            if (type === "float") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
-            } else if (type === "integer") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
-            } else if (type === "boolean") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
-            } else if (type === "date" || type === "datetime") {
-                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
-            } else if (type === "string") {
-                const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
-                const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
-                vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
-            } else {
-                throw new Error(`Type ${type} not supported`);
-            }
+        if (sides === 0) {
+            return __MODULE__.to_arrow_zero(this._View, start_row, end_row, start_col, end_col);
+        } else if (sides === 1) {
+            return __MODULE__.to_arrow_one(this._View, start_row, end_row, start_col, end_col);
+        } else if (sides === 2) {
+            return __MODULE__.to_arrow_two(this._View, start_row, end_row, start_col, end_col);
         }
-
-        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
     };
 
     /**
@@ -714,15 +715,16 @@ export default function(Module) {
 
     /**
      * Returns an Arrow-serialized dataset that contains the data from updated
-     * rows.
+     * rows. Do not call this function directly, instead use the
+     * {@link module:perspective~view}'s `on_update` method with `{mode: "row"}`
+     * in order to access the row deltas.
      *
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        let delta_slice = this._View.get_row_delta();
-        let arrow = this.to_arrow({data_slice: delta_slice});
-        delta_slice.delete();
-        return arrow;
+        const sides = this.sides();
+        const nidx = SIDES[sides];
+        return __MODULE__[`get_row_delta_${nidx}`](this._View);
     };
 
     /**
@@ -1463,7 +1465,7 @@ export default function(Module) {
             let is_arrow = false;
             let overridden_types = {};
 
-            if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
+            if (data instanceof ArrayBuffer || (typeof Buffer !== "undefined" && data instanceof Buffer)) {
                 data_accessor = new Uint8Array(data);
                 is_arrow = true;
             } else {
@@ -1544,7 +1546,7 @@ export default function(Module) {
          * When initialized, replace Perspective's internal `__MODULE` variable
          * with the WASM binary.
          *
-         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective
+         * @param {ArrayBuffer} buffer an ArrayBuffer or Buffer containing the Perspective
          * WASM code
          */
         init(msg) {

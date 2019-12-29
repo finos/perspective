@@ -103,7 +103,6 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_filter", &View<t_ctx0>::get_filter)
         .def("get_sort", &View<t_ctx0>::get_sort)
         .def("get_step_delta", &View<t_ctx0>::get_step_delta)
-        .def("get_row_delta", &View<t_ctx0>::get_row_delta)
         .def("get_column_dtype", &View<t_ctx0>::get_column_dtype)
         .def("is_column_only", &View<t_ctx0>::is_column_only);
 
@@ -129,7 +128,6 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_filter", &View<t_ctx1>::get_filter)
         .def("get_sort", &View<t_ctx1>::get_sort)
         .def("get_step_delta", &View<t_ctx1>::get_step_delta)
-        .def("get_row_delta", &View<t_ctx1>::get_row_delta)
         .def("get_column_dtype", &View<t_ctx1>::get_column_dtype)
         .def("is_column_only", &View<t_ctx1>::is_column_only);
 
@@ -156,7 +154,6 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_sort", &View<t_ctx2>::get_sort)
         .def("get_row_path", &View<t_ctx2>::get_row_path)
         .def("get_step_delta", &View<t_ctx2>::get_step_delta)
-        .def("get_row_delta", &View<t_ctx2>::get_row_delta)
         .def("get_column_dtype", &View<t_ctx2>::get_column_dtype)
         .def("is_column_only", &View<t_ctx2>::is_column_only);
 
@@ -365,6 +362,12 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_data_slice_two", &get_data_slice_ctx2);
     m.def("get_from_data_slice_two", &get_from_data_slice_ctx2);
     m.def("get_pkeys_from_data_slice_two", &get_pkeys_from_data_slice_ctx2);
+    m.def("to_arrow_zero", &to_arrow_zero);
+    m.def("to_arrow_one", &to_arrow_one);
+    m.def("to_arrow_two", &to_arrow_two);
+    m.def("get_row_delta_zero", &get_row_delta_zero);
+    m.def("get_row_delta_one", &get_row_delta_one);
+    m.def("get_row_delta_two", &get_row_delta_two);
 }
 
 #endif

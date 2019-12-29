@@ -188,13 +188,10 @@ std::shared_ptr<View<CTX_T>>
 make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
     t_val view_config, t_val date_parser) {
     auto schema = table->get_schema();
-
-    t_view_config config = make_view_config<t_val>(schema, date_parser, view_config);
-
+    t_view_config config = 
+        make_view_config<t_val>(schema, date_parser, view_config);
     auto ctx = make_context<CTX_T>(table, schema, config, name);
-
     auto view_ptr = std::make_shared<View<CTX_T>>(table, ctx, name, separator, config);
-
     return view_ptr;
 }
 
@@ -215,6 +212,70 @@ make_view_ctx2(std::shared_ptr<Table> table, std::string name, std::string separ
     t_val view_config, t_val date_parser) {
     return make_view<t_ctx2>(table, name, separator, view_config, date_parser);
 }
+
+py::bytes
+to_arrow_zero(
+    std::shared_ptr<View<t_ctx0>> view,
+    std::int32_t start_row,
+    std::int32_t end_row,
+    std::int32_t start_col,
+    std::int32_t end_col
+) {
+    std::shared_ptr<std::string> str = 
+        view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*str);
+}
+
+py::bytes
+to_arrow_one(
+    std::shared_ptr<View<t_ctx1>> view,
+    std::int32_t start_row,
+    std::int32_t end_row,
+    std::int32_t start_col, 
+    std::int32_t end_col
+) {
+    std::shared_ptr<std::string> str = 
+        view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*str);
+}
+
+py::bytes
+to_arrow_two(
+    std::shared_ptr<View<t_ctx2>> view,
+    std::int32_t start_row,
+    std::int32_t end_row,
+    std::int32_t start_col, 
+    std::int32_t end_col
+) {
+    std::shared_ptr<std::string> str = 
+        view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*str);
+}
+
+py::bytes
+get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view) {
+    std::shared_ptr<t_data_slice<t_ctx0>> slice = view->get_row_delta();
+    std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+    return py::bytes(*arrow);
+}
+
+py::bytes
+get_row_delta_one(std::shared_ptr<View<t_ctx1>> view) {
+    std::shared_ptr<t_data_slice<t_ctx1>> slice = view->get_row_delta();
+    std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+    return py::bytes(*arrow);
+}
+
+py::bytes
+get_row_delta_two(
+    std::shared_ptr<View<t_ctx2>> view) {
+    std::shared_ptr<t_data_slice<t_ctx2>> slice = view->get_row_delta();
+    std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+    return py::bytes(*arrow);
+}
+
+
+
 
 } //namespace binding
 } //namespace perspective

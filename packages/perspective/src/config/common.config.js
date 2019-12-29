@@ -28,28 +28,13 @@ module.exports = function({build_worker, no_minify} = {}) {
                         loader: "arraybuffer-loader",
                         options: {}
                     }
-                },
-                // FIXME Workaround for performance regression in @apache-arrow
-                // 4.0
-                {
-                    test: /\.js$/,
-                    include: /\@apache-arrow[/\\]es5-esm/,
-                    use: [
-                        {loader: "source-map-loader"},
-                        {
-                            loader: "string-replace-loader",
-                            options: {
-                                search: "BaseVector.prototype[Symbol.isConcatSpreadable] = true;",
-                                replace: ""
-                            }
-                        }
-                    ]
                 }
             ]
         },
         devtool: "source-map",
         node: {
-            fs: "empty"
+            fs: "empty",
+            Buffer: false
         },
         performance: {
             hints: false,

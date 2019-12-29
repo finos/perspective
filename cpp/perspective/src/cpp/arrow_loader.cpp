@@ -7,12 +7,8 @@
  *
  */
 
-#include <perspective/arrow.h>
+#include <perspective/arrow_loader.h>
 
-#include <arrow/api.h>
-#include <arrow/util/decimal.h>
-#include <arrow/io/memory.h>
-#include <arrow/ipc/reader.h>
 
 using namespace perspective;
 using namespace ::arrow;
@@ -20,6 +16,9 @@ using namespace ::arrow;
 namespace perspective {
 namespace arrow {
 
+    ArrowLoader::ArrowLoader() {}
+    ArrowLoader::~ArrowLoader() {}
+    
     t_dtype
     convert_type(const std::string& src) {
         if (src == "dictionary" || src == "utf8" || src == "binary") {
@@ -28,10 +27,18 @@ namespace arrow {
             return DTYPE_BOOL;
         } else if (src == "int8") {
             return DTYPE_INT8;
+        } else if (src == "uint8") {
+            return DTYPE_UINT8;
         } else if (src == "int16") {
             return DTYPE_INT16;
+        } else if (src == "uint16") {
+            return DTYPE_UINT16;
         } else if (src == "int32") {
             return DTYPE_INT32;
+        } else if (src == "uint32") {
+            return DTYPE_UINT32;
+        } else if (src == "uint64") {
+            return DTYPE_UINT64;
         } else if (src == "decimal" || src == "decimal128" || src == "int64") {
             return DTYPE_INT64;
         } else if (src == "float") {
@@ -49,9 +56,6 @@ namespace arrow {
         return DTYPE_STR;
     }
 
-    ArrowLoader::ArrowLoader() {}
-    ArrowLoader::~ArrowLoader() {}
-
     void
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
         io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
@@ -59,8 +63,9 @@ namespace arrow {
             std::shared_ptr<ipc::RecordBatchFileReader> batch_reader;
             ::arrow::Status status = ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
             if (!status.ok()) {
-                std::cerr << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(status.message());
+                std::stringstream ss;
+                ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             } else {
                 std::vector<std::shared_ptr<RecordBatch>> batches;
                 auto num_batches = batch_reader->num_record_batches();
@@ -75,21 +80,25 @@ namespace arrow {
                 }
                 status = ::arrow::Table::FromRecordBatches(batches, &m_table);
                 if (!status.ok()) {
-                    std::cerr << status.message() << std::endl;
-                    PSP_COMPLAIN_AND_ABORT(status.message());
+                    std::stringstream ss;
+                    ss << "Failed to create Table from RecordBatches: "
+                       << status.message() << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
                 };
             };
         } else {
             std::shared_ptr<ipc::RecordBatchReader> batch_reader;
             ::arrow::Status status = ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
             if (!status.ok()) {
-                std::cerr << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(status.message());
+                std::stringstream ss;
+                ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             } else { 
                 status = batch_reader->ReadAll(&m_table);
                 if (!status.ok()) {
-                    std::cerr << status.message() << std::endl;
-                    PSP_COMPLAIN_AND_ABORT(status.message());
+                    std::stringstream ss;
+                    ss << "Failed to read batch: " << status.message() << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
                 };
             }
         }
@@ -220,17 +229,33 @@ namespace arrow {
                 auto scol = std::static_pointer_cast<::arrow::Int8Array>(src);
                 std::memcpy(dest->get_nth<std::int8_t>(offset), (void*)scol->raw_values(), len);
             } break;
+            case ::arrow::UInt8Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt8Array>(src);
+                std::memcpy(dest->get_nth<std::uint8_t>(offset), (void*)scol->raw_values(), len);
+            } break;
             case ::arrow::Int16Type::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::Int16Array>(src);
                 std::memcpy(dest->get_nth<std::int16_t>(offset), (void*)scol->raw_values(), len * 2);
+            } break;
+            case ::arrow::UInt16Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt16Array>(src);
+                std::memcpy(dest->get_nth<std::uint16_t>(offset), (void*)scol->raw_values(), len * 2);
             } break;
             case ::arrow::Int32Type::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::Int32Array>(src);
                 std::memcpy(dest->get_nth<std::int32_t>(offset), (void*)scol->raw_values(), len * 4);
             } break;
+            case ::arrow::UInt32Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt32Array>(src);
+                std::memcpy(dest->get_nth<std::uint32_t>(offset), (void*)scol->raw_values(), len * 4);
+            } break;
             case ::arrow::Int64Type::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::Int64Array>(src);
                 std::memcpy(dest->get_nth<std::int64_t>(offset), (void*)scol->raw_values(), len * 8);
+            } break;
+            case ::arrow::UInt64Type::type_id: {
+                auto scol = std::static_pointer_cast<::arrow::UInt64Array>(src);
+                std::memcpy(dest->get_nth<std::uint64_t>(offset), (void*)scol->raw_values(), len * 8);
             } break;
             case ::arrow::TimestampType::type_id: {
                 std::shared_ptr<::arrow::TimestampType> tunit
@@ -286,6 +311,7 @@ namespace arrow {
                     auto ymd = date::year_month_day{
                         date::sys_days{days}
                     };
+                    // years are signed, month/day are unsigned
                     std::int32_t year = static_cast<std::int32_t>(ymd.year());
                     std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
                     std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
@@ -356,6 +382,8 @@ namespace arrow {
             offset += len;
         }
     }
+
+    // Getters
 
     std::uint32_t
     ArrowLoader::row_count() const {

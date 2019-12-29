@@ -78,7 +78,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         message = json.loads(message)
         self._session.process(message, self.post)
 
-    def post(self, message):
+    def post(self, message, binary=False):
         '''When `post` is called by `PerspectiveManager`, serialize the data to
         JSON and send it to the client.
 
@@ -86,7 +86,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
             message (str): a JSON-serialized string containing a message to the
                 front-end `perspective-viewer`.
         '''
-        self.write_message(message)
+        self.write_message(message, binary)
 
     def on_close(self):
         '''Remove the views associated with the client when the websocket
