@@ -504,8 +504,8 @@ View<CTX_T>::data_slice_to_arrow(
     auto res = ::arrow::ipc::RecordBatchStreamWriter::Open(&sink, arrow_schema, options);
     std::shared_ptr<::arrow::ipc::RecordBatchWriter> writer = *res;
 
-    writer->WriteRecordBatch(*batches);
-    writer->Close();
+    PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
+    PSP_CHECK_ARROW_STATUS(writer->Close());
     return std::make_shared<std::string>(buffer->ToString());
 }
 

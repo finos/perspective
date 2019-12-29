@@ -69,6 +69,16 @@ PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
     x // https://stackoverflow.com/questions/25144589/c-macro-overloading-is-not-working
 #define GET_PSP_VERBOSE_ASSERT(_1, _2, _3, NAME, ...) NAME
 
+#define PSP_CHECK_ARROW_STATUS(X)                                              \
+    {                                                                          \
+        ::arrow::Status st = X;                                                \
+        if (!st.ok()) {                                                        \
+            std::stringstream ss;                                              \
+            ss << "Arrow operation failed: " << st.message();                  \
+            PSP_COMPLAIN_AND_ABORT(ss.str())                                   \
+        }                                                                      \
+    }
+    
 #ifdef PSP_DEBUG
 #define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
     {                                                                                          \

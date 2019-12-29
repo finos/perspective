@@ -264,8 +264,8 @@ namespace arrow {
             ::arrow::dictionary(::arrow::int32(), ::arrow::utf8());
 
         std::shared_ptr<::arrow::Array> dictionary_array;
-        ::arrow::DictionaryArray::FromArrays(
-            dictionary_type, indices_array, values_array, &dictionary_array);
+        PSP_CHECK_ARROW_STATUS(::arrow::DictionaryArray::FromArrays(
+            dictionary_type, indices_array, values_array, &dictionary_array));
         
         return dictionary_array;
     }
