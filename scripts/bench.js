@@ -7,6 +7,8 @@
  *
  */
 
+require("./script_utils.js");
+
 const execSync = require("child_process").execSync;
 
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
@@ -36,7 +38,7 @@ function docker() {
 }
 
 try {
-    if (!process.env.PSP_LOCAL_PUPPETEER) {
+    if (!process.env.PSP_DOCKER_PUPPETEER) {
         execute(docker());
     } else {
         execute(`nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench`);

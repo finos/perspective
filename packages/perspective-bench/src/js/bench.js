@@ -13,6 +13,8 @@ const perspective = require("@finos/perspective");
 const chalk = require("chalk");
 const program = require("commander");
 
+const execSync = require("child_process").execSync;
+
 chalk.enabled = true;
 chalk.level = 1;
 
@@ -98,6 +100,8 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
             headless: true,
             args: ["--no-sandbox"]
         });
+
+        execSync(`renice -n -20 ${browser.process().pid}`, {stdio: "inherit"});
 
         bins = await run_version(browser, cmdArgs, RUN_TEST);
 
