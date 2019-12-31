@@ -1,9 +1,10 @@
 const webpack = require("webpack");
+const path = require("path");
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const plugins = [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)];
 
-module.exports = function({build_worker, no_minify} = {}) {
+function common({build_worker, no_minify} = {}) {
     plugins.push(new PerspectivePlugin({build_worker: build_worker}));
     return {
         mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG || no_minify ? "development" : process.env.NODE_ENV || "production",
@@ -60,4 +61,16 @@ module.exports = function({build_worker, no_minify} = {}) {
             ]
         }
     };
+}
+
+// Remove absolute paths from webpack source-maps
+
+const ABS_PATH = path.resolve(__dirname, "..", "..", "..", "..");
+const devtoolModuleFilenameTemplate = info => `webpack:///${path.relative(ABS_PATH, info.absoluteResourcePath)}`;
+
+module.exports = (options, f) => {
+    let new_config = Object.assign({}, common(options));
+    new_config = f(new_config);
+    new_config.output.devtoolModuleFilenameTemplate = devtoolModuleFilenameTemplate;
+    return new_config;
 };

@@ -1,12 +1,12 @@
 import {SplitPanel, DockLayout, Widget, DockPanel} from "@phosphor/widgets";
 import {PerspectiveDockPanel, ContextMenuArgs} from "../dockpanel/dockpanel";
-import {uniqBy} from "lodash";
 import {Menu} from "@phosphor/widgets";
 import {createCommands} from "../dockpanel/contextmenu";
 import {CommandRegistry} from "@phosphor/commands";
 import PerspectiveViewer from "@finos/perspective-viewer";
 import {PerspectiveWidget} from "../widget";
 import {toArray} from "@phosphor/algorithm";
+import uniqBy from "lodash/uniqBy";
 
 export interface PerspectiveWorkspaceOptions {
     node?: HTMLElement;

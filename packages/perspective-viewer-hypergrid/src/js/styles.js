@@ -8,7 +8,7 @@
  */
 
 import {PropsBuilder, get_style} from "@finos/perspective-viewer/dist/esm/custom_styles";
-import {cloneDeep} from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 
 const properties = new PropsBuilder();
 const title = `--hypergrid`;

@@ -9,7 +9,7 @@
 
 import rectangular from "rectangular";
 import superscript from "superscript-number";
-import lodash from "lodash";
+import isEqual from "lodash/isEqual";
 
 import cellRenderersRegistry from "faux-hypergrid/src/cellRenderers";
 
@@ -113,8 +113,8 @@ function setPSP(payload, force = false) {
     if (
         !force &&
         this._memoized_schema &&
-        lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length)) &&
-        lodash.isEqual(payload.rowPivots, this._memoized_pivots)
+        isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length)) &&
+        isEqual(payload.rowPivots, this._memoized_pivots)
     ) {
         this.grid.sbVScroller.index = 0;
         this.grid.behavior.dataModel.data = payload.rows;

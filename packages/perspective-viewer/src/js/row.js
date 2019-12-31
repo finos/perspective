@@ -7,7 +7,7 @@
  *
  */
 
-import _ from "lodash";
+import debounce from "lodash/debounce";
 
 import Awesomplete from "awesomplete";
 import awesomplete_style from "!!css-loader!awesomplete/awesomplete.css";
@@ -268,7 +268,7 @@ class Row extends HTMLElement {
             this.dispatchEvent(new CustomEvent("sort-order", {detail: event}));
         });
 
-        const debounced_filter = _.debounce(event => this._update_filter(event), 50);
+        const debounced_filter = debounce(event => this._update_filter(event), 50);
         this._filter_operator.addEventListener("change", () => {
             this._filter_operand.focus();
             this._filter_operator.style.width = get_text_width(this._filter_operator.value);
