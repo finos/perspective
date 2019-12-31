@@ -1,8 +1,18 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 import {SplitPanel, DockLayout, Widget, DockPanel} from "@phosphor/widgets";
 import {PerspectiveDockPanel, ContextMenuArgs} from "../dockpanel/dockpanel";
 import {Menu} from "@phosphor/widgets";
 import {createCommands} from "../dockpanel/contextmenu";
 import {CommandRegistry} from "@phosphor/commands";
+
 import PerspectiveViewer from "@finos/perspective-viewer";
 import {PerspectiveWidget} from "../widget";
 import {toArray} from "@phosphor/algorithm";

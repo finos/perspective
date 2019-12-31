@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 /******************************************************************************
  *
  * Copyright (c) 2018, the Perspective Authors.
@@ -7,6 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+/* eslint-disable @typescript-eslint/camelcase */
 
 import "@finos/perspective-viewer";
 
