@@ -16,6 +16,7 @@ import {PerspectiveTabBarRenderer} from "./tabbarrenderer";
 import {PerspectiveWidget, PerspectiveWidgetOptions} from "../widget";
 import {Signal} from "@phosphor/signaling";
 import {CommandRegistry} from "@phosphor/commands";
+import {DiscreteDockPanel} from "./discrete";
 
 export interface SerializableITabAreaConfig extends Omit<DockLayout.ITabAreaConfig, "widgets"> {
     widgets: PerspectiveWidgetOptions[];
@@ -53,7 +54,7 @@ export interface ContextMenuArgs {
     event: MouseEvent;
 }
 // tslint:disable-next-line: max-classes-per-file
-export class PerspectiveDockPanel extends DockPanel {
+export class PerspectiveDockPanel extends DiscreteDockPanel {
     public id = "main";
 
     public maximized: boolean;

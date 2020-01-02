@@ -7,7 +7,7 @@
  *
  */
 
-import {SplitPanel, DockLayout, Widget, DockPanel} from "@phosphor/widgets";
+import {SplitPanel, DockLayout, Widget, DockPanel, Panel} from "@phosphor/widgets";
 import {PerspectiveDockPanel, ContextMenuArgs} from "../dockpanel/dockpanel";
 import {Menu} from "@phosphor/widgets";
 import {createCommands} from "../dockpanel/contextmenu";
@@ -17,14 +17,16 @@ import PerspectiveViewer from "@finos/perspective-viewer";
 import {PerspectiveWidget} from "../widget";
 import {toArray} from "@phosphor/algorithm";
 import uniqBy from "lodash/uniqBy";
+import {DiscreteSplitPanel} from "../dockpanel/discrete";
 
 export interface PerspectiveWorkspaceOptions {
     node?: HTMLElement;
     side?: "left" | "right";
 }
 
-export class PerspectiveWorkspace extends SplitPanel {
+export class PerspectiveWorkspace extends DiscreteSplitPanel {
     private dockpanel: PerspectiveDockPanel;
+    private boxPanel: Panel;
     private masterpanel: SplitPanel;
     private commands: CommandRegistry;
     private side: string;
@@ -35,9 +37,13 @@ export class PerspectiveWorkspace extends SplitPanel {
         super({orientation: "horizontal"});
         this.addClass("p-PerspectiveWorkspace");
         this.dockpanel = new PerspectiveDockPanel("main", {enableContextMenu: false});
-        this.masterpanel = new SplitPanel({orientation: "vertical"});
+        this.boxPanel = new Panel();
+        this.boxPanel.layout.fitPolicy = "set-no-constraint";
+        this.boxPanel.addClass("p-PerspectiveScrollPanel");
+        this.boxPanel.addWidget(this.dockpanel);
+        this.masterpanel = new DiscreteSplitPanel({orientation: "vertical"});
         this.masterpanel.addClass("p-Master");
-        this.addWidget(this.dockpanel);
+        this.addWidget(this.boxPanel);
         this.commands = this.createCommands();
         this.dockpanel.onContextMenu.connect(this.showContextMenu.bind(this));
         this.side = options.side || "left";
@@ -99,13 +105,13 @@ export class PerspectiveWorkspace extends SplitPanel {
         widget.dark = true;
 
         if (this.masterpanel.widgets.length === 0) {
-            this.dockpanel.close();
+            this.boxPanel.close();
             if (this.side === "left") {
                 this.addWidget(this.masterpanel);
-                this.addWidget(this.dockpanel);
+                this.addWidget(this.boxPanel);
                 this.setRelativeSizes([1, 3]);
             } else {
-                this.addWidget(this.dockpanel);
+                this.addWidget(this.boxPanel);
                 this.addWidget(this.masterpanel);
                 this.setRelativeSizes([3, 1]);
             }
@@ -126,9 +132,9 @@ export class PerspectiveWorkspace extends SplitPanel {
         this.dockpanel.addWidget(widget, {mode: "split-right"});
 
         if (this.masterpanel.widgets.length === 0) {
-            this.dockpanel.close();
+            this.boxPanel.close();
             this.masterpanel.close();
-            this.addWidget(this.dockpanel);
+            this.addWidget(this.boxPanel);
         }
         widget.selectable = false;
         widget.viewer.restyleElement();

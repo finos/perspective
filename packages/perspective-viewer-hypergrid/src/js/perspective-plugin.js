@@ -350,6 +350,12 @@ export const install = function(grid) {
         this.renderLastSelection(gc);
     };
 
+    grid.canvas.canvas.addEventListener("mousewheel", e => {
+        if (e.shiftKey) {
+            e.stopPropagation();
+        }
+    });
+
     // Corrects for deselection behavior on keyiup due to shadow-dom
     grid.canvas.hasFocus = function() {
         if (!grid.div.isConnected) {
