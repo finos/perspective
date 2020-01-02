@@ -61,6 +61,13 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
     const oldDecorate = chart.decorate();
     chart.decorate((container, data) => {
+        const plotArea = container.select("d3fc-svg.plot-area");
+
+        plotArea
+            .select("svg")
+            .node()
+            .setAttribute("viewBox", `0 0 ${plotArea.node().clientWidth} ${plotArea.node().clientHeight}`);
+
         oldDecorate(container, data);
         if (!axisSplitter) return;
 
