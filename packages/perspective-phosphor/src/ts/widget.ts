@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 /******************************************************************************
  *
  * Copyright (c) 2018, the Perspective Authors.
@@ -7,6 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+/* eslint-disable @typescript-eslint/camelcase */
 
 import "@finos/perspective-viewer";
 
@@ -379,12 +380,6 @@ export class PerspectiveWidget extends Widget {
         div.style.setProperty("flex-direction", "row");
         node.appendChild(div);
 
-        if (!viewer.notifyResize) {
-            console.warn("Warning: not bound to real element");
-        } else {
-            const resize_observer = new MutationObserver(() => viewer.notifyResize.call(viewer));
-            resize_observer.observe(node, {attributes: true});
-        }
         return viewer;
     }
 

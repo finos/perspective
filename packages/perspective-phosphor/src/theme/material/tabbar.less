@@ -1,3 +1,12 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 @import "~@finos/perspective-viewer/src/less/variables.less";
 
 .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
@@ -50,8 +59,7 @@
 }
 
 .p-BoxPanel {
-    margin: 24px 20px 16px 20px;
-    overflow: visible !important;
+    overflow: scroll !important;
 }
 
 
@@ -127,7 +135,7 @@
 .p-TabBar-content {
     padding: 0px;
     overflow: hidden;
-    margin: 0px 0px -1px 0px;
+    margin: 0px -4px -1px -4px;
     border-bottom: 0px solid #fff !important;
     border-left: 1px solid #eaeaea;
     border-right: 1px solid #eaeaea;
@@ -149,6 +157,7 @@
 }
 
 .p-TabBar-tab {
+    margin: 0px 4px;
     border-color: #eaeaea;
 }
 

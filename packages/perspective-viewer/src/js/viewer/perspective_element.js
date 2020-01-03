@@ -7,7 +7,8 @@
  *
  */
 
-import _ from "lodash";
+import debounce from "lodash/debounce";
+import isEqual from "lodash/isEqual";
 import {html, render} from "lit-html";
 
 import perspective from "@finos/perspective";
@@ -345,7 +346,7 @@ export class PerspectiveElement extends StateElement {
 
     _is_config_changed(config) {
         const plugin_name = this.getAttribute("plugin");
-        if (_.isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
+        if (isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
             return false;
         } else {
             this._previous_config = config;
@@ -499,7 +500,7 @@ export class PerspectiveElement extends StateElement {
     }
 
     _register_debounce_instance() {
-        const _update = _.debounce((resolve, ignore_size_check, force_update, limit_points) => {
+        const _update = debounce((resolve, ignore_size_check, force_update, limit_points) => {
             this._new_view({ignore_size_check, force_update, limit_points}).then(resolve);
         }, 0);
 

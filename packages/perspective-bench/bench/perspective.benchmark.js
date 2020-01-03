@@ -53,11 +53,13 @@ describe("Table", async () => {
     });
 
     for (const name of Object.keys(data)) {
-        describe(name, () => {
-            benchmark("table()", async () => {
-                let test = data[name];
-                table = worker.table(test.slice ? test.slice() : test);
-                await table.size();
+        describe("mixed", async () => {
+            describe("table", () => {
+                benchmark(name, async () => {
+                    let test = data[name];
+                    table = worker.table(test.slice ? test.slice() : test);
+                    await table.size();
+                });
             });
         });
     }
@@ -79,36 +81,40 @@ describe("View", async () => {
             for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
                 const config = {aggregate, row_pivot, column_pivot};
 
-                describe(to_name(config), async () => {
-                    let view;
+                const [cat, type] = to_name(config);
 
-                    afterEach(async () => {
-                        await view.delete();
-                    });
+                describe(type, async () => {
+                    describe(cat, async () => {
+                        let view;
 
-                    benchmark(`view()`, async () => {
-                        view = table.view(config);
-                        await view.schema();
-                    });
-                });
-
-                describe(to_name(config), async () => {
-                    let view;
-
-                    beforeAll(async () => {
-                        view = table.view(config);
-                        await view.schema();
-                    });
-
-                    afterAll(async () => {
-                        await view.delete();
-                    });
-
-                    for (const format of ["to_json", "to_columns", "to_arrow"]) {
-                        benchmark(`${format}()`, async () => {
-                            await view[format]();
+                        afterEach(async () => {
+                            await view.delete();
                         });
-                    }
+
+                        benchmark(`view`, async () => {
+                            view = table.view(config);
+                            await view.schema();
+                        });
+                    });
+
+                    describe(cat, async () => {
+                        let view;
+
+                        beforeAll(async () => {
+                            view = table.view(config);
+                            await view.schema();
+                        });
+
+                        afterAll(async () => {
+                            await view.delete();
+                        });
+
+                        for (const format of ["json", "columns", "arrow"]) {
+                            benchmark(format, async () => {
+                                await view[`to_${format}`]();
+                            });
+                        }
+                    });
                 });
             }
         }
@@ -126,14 +132,14 @@ const wait_for_perspective = () => new Promise(resolve => window.addEventListene
 function to_name({aggregate, row_pivot, column_pivot}) {
     const type = COLUMN_TYPES[aggregate[0].column];
     const sides = {
-        "00": "0 Sided",
-        "10": "1 Sided",
-        "20": "1 Sided (Deep)",
-        "21": "2 Sided (Deep)",
-        "11": "2 Sided",
-        "01": "2 Sided (Column Only)"
+        "00": "ctx0",
+        "10": "ctx1",
+        "20": "ctx1 deep",
+        "21": "ctx2 deep",
+        "11": "ctx2",
+        "01": "ctx1.5"
     }[row_pivot.length.toString() + column_pivot.length.toString()];
-    return `${sides}, ${type}`;
+    return [`${sides}`, type];
     //    return `${COLUMN_TYPES[aggregate[0].column]},${row_pivot.join("/") || "-"}*${column_pivot.join("/") || "-"}`;
 }
 
@@ -176,12 +182,12 @@ async function get_data_browser(worker) {
     console.log("Generating JSON");
     const tbl = worker.table(arrow.slice());
     const view = tbl.view();
-    const rows = await view.to_json();
+    const json = await view.to_json();
     const columns = await view.to_columns();
     view.delete();
     tbl.delete();
 
-    return {csv, arrow, rows, columns};
+    return {csv, arrow, json, columns};
 }
 
 async function get_data_node(worker) {

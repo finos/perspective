@@ -8,35 +8,16 @@
  */
 
 const path = require("path");
-const webpack = require("webpack");
+const common = require("@finos/perspective/src/config/common.config.js");
 
-module.exports = {
-    mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
-    entry: path.join(__dirname, "../dist/esm/index.js"),
-    devtool: "source-map",
-    resolve: {
-        extensions: [".ts", ".js", ".json"]
-    },
-    externals: [/^[a-z0-9@]/],
-    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
-    performance: {
-        hints: false,
-        maxEntrypointSize: 512000,
-        maxAssetSize: 512000
-    },
-    stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
-    module: {
-        rules: [
-            {
-                test: /\.less$/,
-                use: [{loader: "css-loader"}, {loader: "less-loader"}]
-            },
-            {test: /\.ts?$/, loader: "ts-loader", options: {configFile: "config/tsconfig.json"}}
-        ]
-    },
-    output: {
-        filename: "index.js",
-        libraryTarget: "commonjs",
-        path: path.resolve(__dirname, "../dist/cjs")
-    }
-};
+module.exports = common({}, config =>
+    Object.assign(config, {
+        entry: path.join(__dirname, "../dist/esm/index.js"),
+        externals: [/^[a-z0-9@]/],
+        output: {
+            filename: "index.js",
+            libraryTarget: "commonjs",
+            path: path.resolve(__dirname, "../dist/cjs")
+        }
+    })
+);

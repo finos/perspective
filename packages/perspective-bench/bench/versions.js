@@ -37,7 +37,10 @@ const FINOS_VERSIONS = ["0.3.1", "0.3.0", "0.3.0-rc.3", "0.3.0-rc.2", "0.3.0-rc.
 const UMD_VERSIONS = ["0.3.9", "0.3.8", "0.3.7", "0.3.6"];
 
 async function run() {
-    await PerspectiveBench.run("master", "bench/perspective.benchmark.js", `http://host.docker.internal:8080/perspective.js`, {output: "dist/benchmark", puppeteer: true});
+    await PerspectiveBench.run("master", "bench/perspective.benchmark.js", `http://${process.env.PSP_DOCKER_PUPPETEER ? `localhost` : `host.docker.internal`}:8080/perspective.js`, {
+        output: "dist/benchmark",
+        puppeteer: true
+    });
 
     for (const version of UMD_VERSIONS) {
         const url = `https://unpkg.com/@finos/perspective@${version}/dist/umd/perspective.js`;
