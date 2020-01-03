@@ -81,6 +81,7 @@ class PerspectiveViewer extends ActionElement {
         this._register_view_options();
         this._register_data_attribute();
         this.toggleConfig();
+        this._check_loaded_table();
     }
 
     /**
@@ -506,7 +507,11 @@ class PerspectiveViewer extends ActionElement {
             table = this.worker.table(data, options);
             table._owner_viewer = this;
         }
-        return this._load_table(table);
+        if (this.isConnected) {
+            return this._load_table(table);
+        } else {
+            this._table = table;
+        }
     }
 
     /**
