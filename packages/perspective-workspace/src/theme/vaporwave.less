@@ -1,0 +1,51 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+@import (css) url("https://fonts.googleapis.com/css?family=Material+Icons");
+@import (css) url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+@import (css) url("https://fonts.googleapis.com/css?family=Orbitron");
+@import (css) url("https://fonts.googleapis.com/css?family=Open+Sans");
+
+@import (reference) "./material.less";
+@import (reference) "~@finos/perspective-viewer/dist/themes/vaporwave.less";
+
+perspective-workspace {
+    .perspective-workspace-material-base();
+    --detail--background-color: #150442;
+    --detail-tabbar--border: none;
+    --detail-tabbar--background-color: none;
+    --detail-tabbar--color: #cfd8dc !important;
+    --master-divider--background-color: #0e0611;
+}
+
+perspective-viewer.p-Detail {
+    .perspective-viewer-vaporwave();
+    padding: 0px;
+    --hypergrid-header--background: #150442;
+    --hypergrid--background: #150442;
+    --plugin--background: #150442;
+    --plugin--border: 0px solid #150442;
+    --plugin--box-shadow: none;
+    --hypergrid--padding: 0px;
+    --settings-button--content: "";
+}
+
+perspective-viewer.p-Master {
+    .perspective-viewer-vaporwave();
+    padding: 0px;
+    --plugin--border: 0px solid #0e0611;
+    --hypergrid-header--background: #0e0611;
+    --hypergrid--background: #0e0611;
+    --plugin--background: #0e0611;
+    --plugin--border: 0px solid #0e0611;
+    --plugin--box-shadow: none;
+    --settings-button--content: "";
+    --integer--hypergrid--background: #0e0611;
+    --hypergrid-tree-header--background: #0e0611;
+    background-color: #0e0611;
+}

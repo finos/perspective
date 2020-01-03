@@ -118,6 +118,11 @@ async function focus_package() {
                     key: "l",
                     name: "perspective-jupyterlab",
                     value: "perspective-jupyterlab"
+                },
+                {
+                    key: "w",
+                    name: "perspective-workspace",
+                    value: "perspective-workspace"
                 }
             ]
         }
