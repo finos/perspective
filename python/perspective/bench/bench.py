@@ -30,7 +30,7 @@ class BenchmarkTornadoHandler(tornado.web.RequestHandler):
 
 
 class Benchmark(object):
-    """A single Benchmark function. Use as a decorator for stateless lambdas
+    """A single Benchmark function. Use as a wrapper for stateless lambdas
     with no parameters.
 
     Example:

@@ -51,9 +51,9 @@ def to_format(options, view, output_format):
             data.append({})
 
         for cidx in range(options["start_col"], options["end_col"]):
-            name = COLUMN_SEPARATOR_STRING.join([n.to_string(False) for n in column_names[cidx]])
+            name = column_names[cidx]
 
-            if _mod((cidx - (1 if view._sides > 0 else 0)), (num_columns + num_hidden)) >= len(view._config.get_columns()):
+            if _mod((cidx - (1 if view._sides > 0 else 0)), (num_columns + num_hidden)) >= num_columns:
                 # don't emit columns used for hidden sort
                 continue
             elif cidx == options["start_col"] and view._sides > 0:
@@ -127,7 +127,12 @@ def _to_format_helper(view, options=None):
     else:
         data_slice = get_data_slice_two(view._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
 
-    column_names = data_slice.get_column_names()
+    raw_names = data_slice.get_column_names()
+    column_names = []
+
+    for n in raw_names:
+        column_names.append(COLUMN_SEPARATOR_STRING.join(
+            [path.to_string(False) for path in n]))
 
     return opts, column_names, data_slice
 
