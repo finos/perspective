@@ -68,7 +68,7 @@ class PerspectiveBenchmark(Suite):
         self.benchmark_to_format_zero()
         self.benchmark_to_format_one()
         self.benchmark_to_format_two()
-        # self.benchmark_to_format_two_column_only()
+        self.benchmark_to_format_two_column_only()
 
     def benchmark_table(self):
         """Benchmark table creation from different formats."""

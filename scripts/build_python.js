@@ -44,7 +44,11 @@ try {
 
         cmd = cmd + `${PYTHON} -m pip install -e .[dev] && \
             ${PYTHON} -m flake8 perspective && echo OK && \
-            ${PYTHON} -m pytest -vvv perspective --cov=perspective`;
+            ${PYTHON} -m pytest -vvv perspective
+            --noconftest perspective/tests/client && \
+            ${PYTHON} -m pytest -vvv perspective
+            --ignore=perspective/tests/client
+            --cov=perspective`;
         if (IMAGE == "python") {
             cmd = cmd + `&& \
                 ${PYTHON} setup.py sdist && \
