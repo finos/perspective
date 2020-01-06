@@ -7,11 +7,7 @@
 #
 
 from datetime import date, datetime
-
-try:
-    from .libbinding import t_dtype
-except ImportError:
-    pass
+from .libbinding import t_dtype
 
 
 def _extract_type(type, typemap):

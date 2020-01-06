@@ -13,12 +13,8 @@ from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
 from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
-
-try:
-    from .libbinding import make_table, str_to_filter_op, t_filter_op, \
-                            t_op, t_dtype
-except ImportError:
-    pass
+from .libbinding import make_table, str_to_filter_op, t_filter_op, \
+                        t_op, t_dtype
 
 
 class Table(object):

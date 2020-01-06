@@ -16,7 +16,7 @@ from ipywidgets import Widget
 from traitlets import observe, Unicode
 from ..core.data import deconstruct_pandas
 from ..core.exception import PerspectiveError
-from ..table import Table, is_libpsp
+from ..libpsp import is_libpsp
 from ..viewer import PerspectiveViewer
 
 
@@ -225,8 +225,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         self.on_msg(self.handle_message)
 
         if self.client:
-            if isinstance(table_or_data, Table):
-                raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
+            if is_libpsp():
+                from ..libpsp import Table
+                if isinstance(table_or_data, Table):
+                    raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
 
             if index is not None:
                 self._client_options["index"] = index

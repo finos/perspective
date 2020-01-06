@@ -10,8 +10,10 @@ from random import random
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
 from .viewer_traitlets import PerspectiveTraitlets
-from ..manager import PerspectiveManager
-from ..table import Table
+from ..libpsp import is_libpsp
+
+if is_libpsp():
+    from ..libpsp import Table, PerspectiveManager
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -75,7 +77,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         # Create an instance of `PerspectiveManager`, which receives messages
         # from the `PerspectiveJupyterClient` on the front-end.
-        self.manager = PerspectiveManager()
+        if is_libpsp():
+            self.manager = PerspectiveManager()
         self.table_name = None  # not a traitlet - only used in python
         self.view_name = None
 

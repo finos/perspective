@@ -16,11 +16,7 @@ from ._date_validator import _PerspectiveDateValidator
 from ..core.data import deconstruct_numpy, deconstruct_pandas
 from ..core.data.pd import _parse_datetime_index
 from ..core.exception import PerspectiveError
-
-try:
-    from .libbinding import t_dtype
-except ImportError:
-    pass
+from .libbinding import t_dtype
 
 
 def _flatten_structure(array):

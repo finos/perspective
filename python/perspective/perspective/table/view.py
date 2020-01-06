@@ -16,13 +16,9 @@ from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
-
-try:
-    from .libbinding import make_view_zero, make_view_one, make_view_two,\
-        to_arrow_zero, to_arrow_one, to_arrow_two, get_row_delta_zero,\
-        get_row_delta_one, get_row_delta_two
-except ImportError:
-    pass
+from .libbinding import make_view_zero, make_view_one, make_view_two,\
+    to_arrow_zero, to_arrow_one, to_arrow_two, get_row_delta_zero,\
+    get_row_delta_one, get_row_delta_two
 
 
 class View(object):

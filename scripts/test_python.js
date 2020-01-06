@@ -23,11 +23,26 @@ try {
     if (process.env.PSP_DOCKER) {
         execute`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective"`;
+            ${VERBOSE ? "-vv" : "-v"} --noconftest 
+            perspective/tests/client"`;
+
+        execute`${docker(IMAGE)} bash -c "cd \
+            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv" : "-v"} perspective
+            --ignore=perspective/tests/client 
+            --cov=perspective"`;
     } else {
         const python_path = resolve`${__dirname}/../python/perspective`;
+        // Tests for client mode (when C++ assets are not present) require
+        // a new runtime.
         execute`cd ${python_path} && TZ=UTC ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective`;
+            ${VERBOSE ? "-vv" : "-v"} --noconftest 
+            perspective/tests/client`;
+
+        execute`cd ${python_path} && TZ=UTC ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv" : "-v"} perspective
+            --ignore=perspective/tests/client
+            --cov=perspective`;
     }
 } catch (e) {
     console.log(e.message);

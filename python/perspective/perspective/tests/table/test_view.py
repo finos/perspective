@@ -12,6 +12,12 @@ from perspective.table import Table
 from datetime import date, datetime
 
 
+
+def compare_delta(received, expected):
+    """Compare an arrow-serialized row delta by constructing a Table."""
+    tbl = Table(received)
+    assert tbl.view().to_dict() == expected
+
 class TestView(object):
     def test_view_zero(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -748,7 +754,7 @@ class TestView(object):
         }
 
         def cb1(delta):
-            util.compare_delta(delta, update_data)
+            compare_delta(delta, update_data)
 
         tbl = Table(data)
         view = tbl.view()
@@ -763,7 +769,7 @@ class TestView(object):
         }
 
         def cb1(delta):
-            util.compare_delta(delta, {
+            compare_delta(delta, {
                 "a": [9, 5],
                 "b": [12, 6]
             })
@@ -786,7 +792,7 @@ class TestView(object):
         }
 
         def cb1(delta):
-            util.compare_delta(delta, {
+            compare_delta(delta, {
                 "2|a": [1, None],
                 "2|b": [2, None],
                 "4|a": [3, None],
@@ -815,7 +821,7 @@ class TestView(object):
         }
 
         def cb1(delta):
-            util.compare_delta(delta, {
+            compare_delta(delta, {
                 "2|a": [1, None],
                 "2|b": [2, None],
                 "4|a": [3, None],
