@@ -116,7 +116,7 @@ namespace arrow {
         std::shared_ptr<::arrow::Array> array;
         ::arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
-            PSP_COMPLAIN_AND_ABORT(status.message());
+            PSP_COMPLAIN_AND_ABORT("Could not serialize boolean column: " + status.message());
         }
         return array;
     }
@@ -158,7 +158,7 @@ namespace arrow {
         std::shared_ptr<::arrow::Array> array;
         ::arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
-            PSP_COMPLAIN_AND_ABORT(status.message());
+            PSP_COMPLAIN_AND_ABORT("Could not serialize date column: " + status.message());
         }
         return array;
     }
@@ -193,7 +193,7 @@ namespace arrow {
         std::shared_ptr<::arrow::Array> array;
         ::arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
-            PSP_COMPLAIN_AND_ABORT(status.message());
+            PSP_COMPLAIN_AND_ABORT("Could not serialize timestamp column: " + status.message());
         }
         return array;
     }

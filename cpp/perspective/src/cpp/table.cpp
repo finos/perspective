@@ -180,8 +180,8 @@ Table::validate_columns(const std::vector<std::string>& column_names) {
         bool explicit_index
             = std::find(column_names.begin(), column_names.end(), m_index) != column_names.end();
         if (!explicit_index) {
-            std::cout << "Specified index " << m_index << " does not exist in data." << std::endl;
-            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' does not exist in data.");
+            PSP_COMPLAIN_AND_ABORT(
+                "Specified index `" + m_index + "` does not exist in dataset.");
         }
     }
 }
