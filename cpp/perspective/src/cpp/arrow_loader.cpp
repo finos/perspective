@@ -73,8 +73,8 @@ namespace arrow {
                     std::shared_ptr<RecordBatch> chunk;
                     status = batch_reader->ReadRecordBatch(i, &chunk);
                     if (!status.ok()) {
-                        std::cerr << status.message() << std::endl;
-                        PSP_COMPLAIN_AND_ABORT(status.message());
+                        PSP_COMPLAIN_AND_ABORT(
+                            "Failed to read file record batch: " + status.message());
                     }
                     batches.push_back(chunk);
                 }
@@ -97,7 +97,7 @@ namespace arrow {
                 status = batch_reader->ReadAll(&m_table);
                 if (!status.ok()) {
                     std::stringstream ss;
-                    ss << "Failed to read batch: " << status.message() << std::endl;
+                    ss << "Failed to read stream record batch: " << status.message() << std::endl;
                     PSP_COMPLAIN_AND_ABORT(ss.str());
                 };
             }
@@ -333,7 +333,7 @@ namespace arrow {
                 for (uint32_t i = 0; i < len; ++i) {
                     ::arrow::Status status = vals[i].ToInteger(dest->get_nth<int64_t>(offset + i));
                     if (!status.ok()) {
-                        PSP_COMPLAIN_AND_ABORT(status.message());
+                        PSP_COMPLAIN_AND_ABORT("Could not write Decimal to column: " + status.message());
                     };
                 }
             } break;
@@ -347,7 +347,10 @@ namespace arrow {
                 }
             } break;
             default: {
-                PSP_COMPLAIN_AND_ABORT("Could not copy Arrow column of unknown type.");
+                std::stringstream ss;
+                std::string arrow_type = src->type()->ToString();
+                ss << "Could not load Arrow column of type `" << arrow_type << "`." << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             }
         }
     }

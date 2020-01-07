@@ -124,13 +124,13 @@ class TestUpdateArrow(object):
             "b": data[1]
         }
 
-    def test_update_arrow_updates_decimal_stream(self, util):
+    def test_update_arrow_updates_decimal128_stream(self, util):
         data = [
-            [i * 1000 for i in range(10)]
+            [i * 1000000000 for i in range(10)]
         ]
-        arrow_data = util.make_arrow(["a"], data, types=[pa.decimal128(4)])
+        arrow_data = util.make_arrow(["a"], data, types=[pa.decimal128(10)])
         tbl = Table({
-            "a": int,
+            "a": int
         })
         tbl.update(arrow_data)
         assert tbl.size() == 10

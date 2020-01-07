@@ -292,8 +292,12 @@ str_to_dtype(const std::string& typestring) {
         return DTYPE_DATE;
     } else if (typestring == "datetime") {
         return DTYPE_TIME;
-    } else {
+    } else if (typestring == "string") {
         return DTYPE_STR;
+    } else {
+        PSP_COMPLAIN_AND_ABORT(
+            "Could not convert unknown type string `" + typestring + "` to dtype.");
+        return DTYPE_NONE;
     }
 }
 

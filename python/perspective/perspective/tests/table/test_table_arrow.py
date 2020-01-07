@@ -365,7 +365,7 @@ class TestTableArrow(object):
             "b": data[1]
         }
 
-    def test_table_arrow_loads_decimal_legacy(self, util):
+    def test_table_arrow_loads_decimal128_legacy(self, util):
         data = [
             [i * 1000 for i in range(10)]
         ]

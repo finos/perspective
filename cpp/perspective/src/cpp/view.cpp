@@ -482,7 +482,6 @@ View<CTX_T>::data_slice_to_arrow(
     if (!valid.ok()) {
         std::stringstream ss;
         ss << "Invalid RecordBatch: " << valid.message() << std::endl;
-        std::cout << ss.str();
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 

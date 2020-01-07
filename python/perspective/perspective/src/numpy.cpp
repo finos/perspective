@@ -469,7 +469,7 @@ namespace numpy {
                     return;
                 } break;
                 default:
-                    PSP_COMPLAIN_AND_ABORT("Unable to fill non-numeric column in `fill_numeric_iter`.")
+                    PSP_COMPLAIN_AND_ABORT("Unable to fill non-numeric column `"  + name + "` in `fill_numeric_iter`.")
             }
         }
 
