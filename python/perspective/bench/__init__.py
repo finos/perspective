@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from .table import Table
-from .libbinding import PerspectiveCppError
+from bench import Benchmark, Suite, Runner
 
-__all__ = ["Table", "PerspectiveCppError"]
+__all__ = ["Benchmark", "Suite", "Runner"]

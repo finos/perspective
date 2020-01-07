@@ -13,11 +13,7 @@ from pandas import Period
 from datetime import date, datetime
 from re import search
 from dateutil.parser import parse
-
-try:
-    from .libbinding import t_dtype
-except ImportError:
-    pass
+from .libbinding import t_dtype
 
 if six.PY2:
     from past.builtins import long

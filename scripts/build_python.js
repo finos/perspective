@@ -12,15 +12,11 @@ const fs = require("fs-extra");
 
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_PY2 = getarg("--python2");
-const PYTHON = IS_PY2 ? "python2" : (getarg("--python38") ? "python3.8": "python3.7");
-const IMAGE = IS_DOCKER ?
-                python_image(getarg("--manylinux2010") ? "manylinux2010":
-                             getarg("--manylinux2014") ? "manylinux2014":
-                             "", PYTHON) :"";
+const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
+const IMAGE = IS_DOCKER ? python_image(getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "", PYTHON) : "";
 
 const IS_CI = getarg("--ci");
 const IS_INSTALL = getarg("--install");
-
 
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
@@ -36,17 +32,23 @@ try {
 
     let cmd;
     if (IS_CI) {
-        if(IS_PY2)
+        if (IS_PY2)
             // shutil_which is required in setup.py
             cmd = bash`${PYTHON} -m pip install backports.shutil_which &&`;
-        else
-            cmd = bash``;
+        else cmd = bash``;
 
-        cmd = cmd + `${PYTHON} -m pip install -e .[dev] && \
+        cmd =
+            cmd +
+            `${PYTHON} -m pip install -e .[dev] && \
             ${PYTHON} -m flake8 perspective && echo OK && \
-            ${PYTHON} -m pytest -vvv perspective --cov=perspective`;
+            ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
+            ${PYTHON} -m pytest -vvv perspective
+            --ignore=perspective/tests/client
+            --cov=perspective`;
         if (IMAGE == "python") {
-            cmd = cmd + `&& \
+            cmd =
+                cmd +
+                `&& \
                 ${PYTHON} setup.py sdist && \
                 ${PYTHON} -m pip install -U dist/*.tar.gz`;
         }

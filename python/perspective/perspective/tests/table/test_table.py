@@ -8,16 +8,12 @@
 #
 import six
 import sys
+from datetime import date, datetime
 from pytest import raises
 from perspective.table import Table
 from perspective.core.exception import PerspectiveError
 from perspective.table._state import _PerspectiveStateManager
-from datetime import date, datetime
-
-try:
-    from perspective.table.libbinding import t_filter_op, PerspectiveCppError
-except ImportError:
-    pass
+from perspective.table.libbinding import t_filter_op, PerspectiveCppError
 
 
 class TestTable(object):

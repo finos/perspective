@@ -15,14 +15,9 @@ from functools import partial
 from ..core.exception import PerspectiveError
 from ..table._callback_cache import _PerspectiveCallBackCache
 from ..table._date_validator import _PerspectiveDateValidator
-from ..table import Table
+from ..table import Table, PerspectiveCppError
 from ..table.view import View
 from .session import PerspectiveSession
-
-try:
-    from ..table import PerspectiveCppError
-except ImportError:
-    pass
 
 
 def gen_name(size=10, chars=string.ascii_uppercase + string.digits):

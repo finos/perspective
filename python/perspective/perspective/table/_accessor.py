@@ -16,11 +16,7 @@ from ._date_validator import _PerspectiveDateValidator
 from ..core.data import deconstruct_numpy, deconstruct_pandas
 from ..core.data.pd import _parse_datetime_index
 from ..core.exception import PerspectiveError
-
-try:
-    from .libbinding import t_dtype
-except ImportError:
-    pass
+from .libbinding import t_dtype
 
 
 def _flatten_structure(array):
@@ -194,48 +190,46 @@ class _PerspectiveAccessor(object):
         # first, check for numpy nans without using numpy.isnan as it tries to
         # cast values
         if isinstance(val, float) and isnan(val):
-            val = None
+            return None
         elif isinstance(val, list) and len(val) == 1:
             # strip out values encased lists
             val = val[0]
-        elif dtype == t_dtype.DTYPE_BOOL:
-            # True values are y, yes, t, true, on and 1; false values are n, no,
-            # f, false, off and 0.
-            val = bool(strtobool(str(val)))
-        elif dtype == t_dtype.DTYPE_INT32 or dtype == t_dtype.DTYPE_INT64:
-            if not isinstance(val, bool) and isinstance(val, (float, numpy.floating)):
-                # should be able to update int columns with either ints or
-                # floats
-                val = int(val)
-        elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
-                # should be able to update float columns with either ints or
-                # floats
-                val = float(val)
-        elif dtype == t_dtype.DTYPE_DATE:
-            # return datetime.date
-            if isinstance(val, str):
-                parsed = self._date_validator.parse(val)
-                val = self._date_validator.to_date_components(parsed)
-            else:
-                val = self._date_validator.to_date_components(val)
-        elif dtype == t_dtype.DTYPE_TIME:
-            # return unix timestamps for time
-            if isinstance(val, str):
-                parsed = self._date_validator.parse(val)
-                val = self._date_validator.to_timestamp(parsed)
-            else:
-                val = self._date_validator.to_timestamp(val)
         elif dtype == t_dtype.DTYPE_STR:
             if isinstance(val, (bytes, bytearray)):
-                val = val.decode("utf-8")
+                return val.decode("utf-8")
             else:
                 if six.PY2:
                     # six.u mangles quotes with escape sequences - use native
                     # unicode()
-                    val = unicode(val)  # noqa: F821
+                    return unicode(val)  # noqa: F821
                 else:
-                    val = str(val)
+                    return str(val)
+        elif dtype == t_dtype.DTYPE_DATE:
+            # return datetime.date
+            if isinstance(val, str):
+                parsed = self._date_validator.parse(val)
+                return self._date_validator.to_date_components(parsed)
+            else:
+                return self._date_validator.to_date_components(val)
+        elif dtype == t_dtype.DTYPE_TIME:
+            # return unix timestamps for time
+            if isinstance(val, str):
+                parsed = self._date_validator.parse(val)
+                return self._date_validator.to_timestamp(parsed)
+            else:
+                return self._date_validator.to_timestamp(val)
+        elif dtype == t_dtype.DTYPE_BOOL:
+            # True values are y, yes, t, true, on and 1; false values are n, no,
+            # f, false, off and 0.
+            return bool(strtobool(str(val)))
+        elif dtype == t_dtype.DTYPE_INT32 or dtype == t_dtype.DTYPE_INT64:
+            if not isinstance(val, bool) and isinstance(val, (float, numpy.floating)):
+                # update int columns with either ints or floats
+                return int(val)
+        elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
+            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
+                # update float columns with either ints or floats
+                return float(val)
 
         return val
 
@@ -269,10 +263,8 @@ class _PerspectiveAccessor(object):
             bool: True if column is in row, or if column belongs to pkey/op
                 columns required by the engine. False otherwise.
         '''
-        if name in ("psp_pkey", "psp_okey", "psp_op"):
+        if self._format != 0 or name in ("psp_pkey", "psp_okey", "psp_op"):
+            # no partial updates available on meta column, schema, dict updates
             return True
-        if self._format == 0:
-            return name in self._data_or_schema[ridx]
         else:
-            # no partial updates available on schema or dict updates
-            return True
+            return name in self._data_or_schema[ridx]
