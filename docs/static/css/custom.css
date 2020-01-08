@@ -202,3 +202,7 @@ p, span, oi, li {
 code *, pre * {
     font-family: "Roboto Mono";
 }
+
+a {
+    color: #1A7DA1;
+}

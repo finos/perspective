@@ -1,5 +1,16 @@
 {
     "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective"
+    },
+    "changelog": {
+        "labels": {
+            "feature": "Added",
+            "bug": "Fixed",
+            "internal": "Internal"
+        }
+    },
     "workspaces": [
         "packages/*",
         "examples/*",
