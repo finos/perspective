@@ -92,10 +92,10 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
             return;
         }
         if (nrows !== this._nrows) {
-            this._grid.renderer.computeCellsBounds();
+            this._nrows = nrows;
+            this._grid.synchronizeScrollingBoundaries();
         }
         this._dirty = true;
-        this._nrows = nrows;
     },
 
     // Called when clicking on a row group expand
@@ -124,6 +124,7 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
                 }
             }
             let nrows = await this._view.num_rows();
+            console.log(this._nrows, nrows);
             this.setDirty(nrows);
             this._grid.canvas.paintNow();
         }
