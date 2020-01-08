@@ -9,6 +9,7 @@
 
 const utils = require("@finos/perspective-test");
 const path = require("path");
+const {scroll} = require("./utils");
 
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
@@ -43,6 +44,109 @@ utils.with_server({}, () => {
                         element.view.set_depth(0);
                         await element.notifyResize();
                     }, viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
+                test.capture("should not scroll vertically when collapsed smaller than viewport", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Category","State", "City"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(0);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    await scroll(page, 0, 1000);
+
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
+                test.capture("should not scroll horizontally when collapsed smaller than viewport", async page => {
+                    const viewer = await page.$("perspective-viewer");
+
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Category", "State", "City"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+
+                    await page.evaluate(element => element.setAttribute("columns", '["Row ID", "Order ID"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(0);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    await scroll(page, 1000, 0);
+
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
+                test.capture("should scroll vertically when expanded from inside viewport to taller than viewport", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Category","State", "City"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(0);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    await scroll(page, 0, 30); // Hide the scrollbar from the page, as hypergrid sees no off-viewport rows
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(3);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    // Should be able to scroll down
+                    await scroll(page, 0, 1000);
+
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
+                test.capture("should scroll horizontally when expanded from inside viewport to taller than viewport", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Category","State", "City"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(0);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    await scroll(page, 0, 30); // Hide the scrollbar from the page, as hypergrid sees no off-viewport rows
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(3);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    // Should be able to scroll right
+                    await scroll(page, 500, 0);
+
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
+                test.capture("should scroll horizontally and vertically when expanded from inside viewport to taller than viewport", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Category","State", "City"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(0);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    await scroll(page, 0, 30); // Hide the scrollbar from the page, as hypergrid sees no off-viewport rows
+
+                    await page.evaluate(async element => {
+                        element.view.set_depth(3);
+                        await element.notifyResize();
+                    }, viewer);
+
+                    // Should be able to scroll right
+                    await scroll(page, 500, 1000);
+
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 });
 

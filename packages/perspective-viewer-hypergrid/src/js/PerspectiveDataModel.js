@@ -124,7 +124,6 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
                 }
             }
             let nrows = await this._view.num_rows();
-            console.log(this._nrows, nrows);
             this.setDirty(nrows);
             this._grid.canvas.paintNow();
         }

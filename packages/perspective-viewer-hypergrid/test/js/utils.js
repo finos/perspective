@@ -7,6 +7,25 @@
  *
  */
 
+exports.scroll = async (page, x = 0, y = 100) => {
+    await page.evaluate(
+        ({x, y}) => {
+            const grid = document
+                .querySelector("perspective-viewer")
+                .shadowRoot.querySelector("perspective-hypergrid")
+                .shadowRoot.querySelector("canvas");
+            const wheel_event = new WheelEvent("wheel", {
+                bubbles: true,
+                cancelable: true,
+                deltaX: x,
+                deltaY: y
+            });
+            grid.dispatchEvent(wheel_event);
+        },
+        {x, y}
+    );
+};
+
 exports.dblclick = async (page, x = 310, y = 300) => {
     await page.evaluate(
         ({x, y}) => {
