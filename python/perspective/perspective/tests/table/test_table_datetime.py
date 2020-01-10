@@ -63,18 +63,23 @@ for TZ in TIMEZONES:
     TZ_TIMESTAMPS_DST[TZ.zone] = [d.tz_convert(TZ) for d in UTC_TIMESTAMPS_DST]
 
 
-class TestTableDateTime(object):
+class TestTableLocalDateTime(object):
     """Test datetimes across configurations such as local time, timezone-aware,
     timezone-naive, and UTC implementations.
     """
+    def setup_method(self):
+        # To make sure that local times are not changed, set timezone to EST
+        os.environ["TZ"] = "US/Eastern"
+        time.tzset()
+
+    def teardown_method(self):
+        # go back to UTC at end of each test method, for consistency
+        os.environ["TZ"] = "UTC"
+        time.tzset()
 
     def test_table_should_assume_local_time(self):
         """If a datetime object has no `tzinfo`, it should be assumed to be in
-        local time.
-
-        It should be stored as UTC in Perspective, but serialized as local time.
-        Since the test harness runs in `TZ=UTC`, there should be no difference
-        between ingested and serialized time.
+        local time and not be converted at all.
         """
         data = {
             "a": LOCAL_DATETIMES
@@ -90,19 +95,34 @@ class TestTableDateTime(object):
         assert table.view().to_dict()["a"] == LOCAL_DATETIMES
 
     def test_table_should_assume_local_time_pandas_timestamp(self):
+        data = {
+            "a": LOCAL_TIMESTAMPS
+        }
+
+        # Timestamps are assumed to be in UTC by pandas
+        table = Table(data)
+
+        # Timestamps are read out in local time
+        assert table.view().to_dict()["a"] == LOCAL_DATETIMES
+
+    def test_table_should_assume_local_time_pandas_timestamp_df(self):
         data = pd.DataFrame({
             "a": LOCAL_TIMESTAMPS
         })
+
+        # Timestamps are assumed to be in UTC by pandas
         table = Table(data)
-        assert table.view().to_dict()["a"] == LOCAL_DATETIMES
+
+        # Timestamps are read out in local time
+        assert table.view().to_dict()["a"] == [
+            datetime(2019, 1, 10, 19, 10, 20),
+            datetime(2019, 1, 11, 6, 10, 20),
+            datetime(2019, 1, 11, 14, 10, 20)
+        ]
 
     def test_table_should_assume_local_time_dst(self):
         """If a datetime object has no `tzinfo`, it should be assumed to be in
-        local time.
-
-        It should be stored as UTC in Perspective, but serialized as local time.
-        Since the test harness runs in `TZ=UTC`, there should be no difference
-        between ingested and serialized time.
+        local time and not be converted at all.
         """
         data = {
             "a": LOCAL_DATETIMES_DST
@@ -118,11 +138,23 @@ class TestTableDateTime(object):
         assert table.view().to_dict()["a"] == LOCAL_DATETIMES_DST
 
     def test_table_should_assume_local_time_pandas_timestamp_dst(self):
+        data = {
+            "a": LOCAL_TIMESTAMPS_DST
+        }
+        table = Table(data)
+        assert table.view().to_dict()["a"] == LOCAL_DATETIMES_DST
+
+    def test_table_should_assume_local_time_pandas_timestamp_dst_df(self):
         data = pd.DataFrame({
             "a": LOCAL_TIMESTAMPS_DST
         })
         table = Table(data)
-        assert table.view().to_dict()["a"] == LOCAL_DATETIMES_DST
+        assert table.view().to_dict()["a"] == [
+            datetime(2019, 3, 9, 7, 10, 20),
+            datetime(2019, 3, 19, 8, 10, 20),
+            datetime(2019, 11, 2, 8, 10, 20),
+            datetime(2019, 11, 3, 7, 10, 20)
+        ]
 
 
 class TestTableDateTimeUTCToLocal(object):

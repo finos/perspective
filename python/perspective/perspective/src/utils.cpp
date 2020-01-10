@@ -115,10 +115,11 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
                 return py::cast(scalar.to_string(false)); // should reimplement
             } else {
                 /**
-                 * datetimes are stored as milliseconds since epoch in UTC.
-                 * Before datetimes are loaded into Perspective, they should be
-                 * converted into UTC for consistency.
+                 * datetimes are stored as milliseconds since epoch.
+                 * Before datetimes are loaded into Perspective, if they are
+                 * time zone aware, they must be converted into UTC.
                  */
+                std::cout << "cp: " <<  scalar.to_int64() << std::endl;
                 auto ms = std::chrono::milliseconds(scalar.to_int64());
                 auto time_point = std::chrono::time_point<std::chrono::system_clock>(ms);
                 /**
