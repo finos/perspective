@@ -8,49 +8,31 @@
  */
 
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-    context: __dirname,
-    entry: "./index.js",
-    mode: "development",
+    mode: process.env.NODE_ENV || "development",
+    entry: "./src/index.js",
     output: {
-        filename: "public/bundle.js",
-        publicPath: "http://localhost:8080/",
-        path: path.resolve(__dirname, "./output")
+        filename: "index.js"
     },
     plugins: [
-        new PerspectivePlugin({
-            wasmLoaderOptions: {
-                name: "[hash].wasm"
-            },
-            workerLoaderOptions: {
-                name: "[hash].worker.[ext]"
-            }
-        })
+        new HtmlWebPackPlugin({
+            title: "Perspective Webpack Example"
+        }),
+        new PerspectivePlugin()
     ],
     module: {
         rules: [
             {
-                test: /\.less$/,
-                exclude: [/packages/, /node_modules/],
-                use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
-            },
-            {
                 test: /\.css$/,
-                exclude: [/packages/, /node_modules/],
                 use: [{loader: "style-loader"}, {loader: "css-loader"}]
             }
         ]
     },
-    devtool: "source-map",
     devServer: {
-        historyApiFallback: true,
-        watchOptions: {aggregateTimeout: 300, poll: 1000},
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-            "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
-        }
-    }
+        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../simple")]
+    },
+    devtool: "source-map"
 };
