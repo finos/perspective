@@ -62,13 +62,16 @@ def _serialize(data):
         columns = [data[col].tolist() for col in data.dtype.names]
         return dict(zip(data.dtype.names, columns))
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
-        # take flattened dataframe and make it serializable
+        # Take flattened dataframe and make it serializable
         d = {}
         for name in data.columns:
             column = data[name]
             values = column.values
-            if numpy.issubdtype(column.dtype, numpy.datetime64):
-                # put it into a format parsable by perspective.js
+            # Timezone-aware datetime64 dtypes throw an exception when using
+            # `numpy.issubdtype` - match strings here instead.
+            str_dtype = str(column.dtype)
+            if "datetime64" in str_dtype:
+                # Convert all datetimes to string for serializing
                 values = numpy.datetime_as_string(column.values, unit="ms")
             d[name] = values.tolist()
         return d

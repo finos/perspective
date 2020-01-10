@@ -7,12 +7,13 @@
 #
 
 import six
-import time
+import calendar
 import numpy
-from pandas import Period
 from datetime import date, datetime
-from re import search
 from dateutil.parser import parse
+from dateutil.tz import UTC
+from pandas import Period, Timestamp
+from re import search
 from .libbinding import t_dtype
 
 if six.PY2:
@@ -40,10 +41,11 @@ class _PerspectiveDateValidator(object):
         None if the date is invalid.
 
         If a ISO date string with a timezone is provided, there is no guarantee
-        that timezones will be properly handled, as the core engine stores the
-        timestamp as milliseconds since epoch. When a datetime is retrieved from
-        the engine, it is constructed with the timestamp, thus any timezone set
-        on the input data will not apply to the output data.
+        that timezones will be properly handled by the parser. Perspective
+        stores and serializes times in UTC as a milliseconds
+        since epoch timestamp. For more definitive timezone support, use
+        `datetime.datetime` objects or `pandas.Timestamp` objects with the
+        `timezone` property set.
 
         Args:
             str (str): the datestring to parse
@@ -89,11 +91,11 @@ class _PerspectiveDateValidator(object):
         }
 
     def to_timestamp(self, obj):
-        '''Return an integer that corresponds to the Unix timestamp, i.e.
-        number of milliseconds since epoch.
+        '''Returns an integer corresponding to the number of milliseconds since
+        epoch in the local timezone.
 
-        This method converts both datetime.datetime and numpy.datetime64
-        objects.
+        If the `datetime.datetime` object has a `timezone` property set, this
+        method will convert the object into UTC before returning a timestamp.
         '''
         if obj is None:
             return obj
@@ -105,6 +107,23 @@ class _PerspectiveDateValidator(object):
         if isinstance(obj, Period):
             # extract the start of the Period
             obj = obj.to_timestamp()
+
+        if hasattr(obj, "tzinfo"):
+            # Convert all datetimes into UTC. If a datetime with a valid
+            # `tzinfo` object has been passed in, this will read `tzinfo`
+            # and convert the datetime into UTC. If the datetime has no
+            # `tzinfo` object, it is assumed to be in local time, and will
+            # be converted and stored in Perspective as UTC.
+            is_timestamp = isinstance(obj, Timestamp)
+            if is_timestamp:
+                if obj.tzinfo is not None:
+                    # Convert aware Timestamp to aware Timestamp
+                    obj = obj.tz_convert("UTC")
+                else:
+                    # Convert non-aware Timestamp to aware Timestamp
+                    obj = obj.tz_localize("UTC")
+            else:
+                obj = obj.astimezone(UTC)
 
         if six.PY2:
             if isinstance(obj, long):
@@ -120,8 +139,9 @@ class _PerspectiveDateValidator(object):
             obj = obj.astype(datetime)
 
             if isinstance(obj, date) and not isinstance(obj, datetime):
-                # handle numpy "datetime64[D/W/M/Y]" - mktime output in seconds
-                return int((time.mktime(obj.timetuple())) * 1000)
+                # Convert numpy "datetime64[D/W/M/Y]", as they are converted
+                # into `datetime.date`.
+                return int((calendar.timegm(obj.utctimetuple())) * 1000)
 
             if six.PY2:
                 if isinstance(obj, long):
@@ -133,9 +153,14 @@ class _PerspectiveDateValidator(object):
         if isinstance(obj, (int, float)):
             return _normalize_timestamp(obj)
 
-        return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)
-        # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond
-        # timestamps
+        # At this point, the datetime object is in UTC. All `datetime` objects
+        # passed in should either be converted into UTC, or if there is no
+        # `tzinfo` property, assumed to be in UTC. Once the timestamp is
+        # created, it should be assumed to be in UTC until it is serialized
+        # using `to_format`, as Pybind will automatically localize any
+        # conversion to `datetime.datetime` from C++ to Python.
+        return int((calendar.timegm(
+            obj.utctimetuple()) + obj.microsecond / 1000000.0) * 1000)
 
     def format(self, s):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on

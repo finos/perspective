@@ -7,7 +7,6 @@
 #
 
 import six
-import time
 import numpy as np
 from pytest import raises
 from perspective import PerspectiveError

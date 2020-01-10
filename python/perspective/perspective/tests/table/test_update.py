@@ -5,10 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-import six
-import time
 import numpy as np
-import pandas as pd
 from datetime import date, datetime
 from perspective.table import Table
 
