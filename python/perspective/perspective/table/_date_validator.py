@@ -12,7 +12,7 @@ import numpy
 from datetime import date, datetime
 from dateutil.parser import parse
 from dateutil.tz import UTC
-from pandas import Period, Timestamp
+from pandas import Period
 from re import search
 from .libbinding import t_dtype
 
@@ -114,16 +114,12 @@ class _PerspectiveDateValidator(object):
             # and convert the datetime into UTC. If the datetime has no
             # `tzinfo` object, it is assumed to be in local time, and will
             # be converted and stored in Perspective as UTC.
-            is_timestamp = isinstance(obj, Timestamp)
-            if is_timestamp:
-                if obj.tzinfo is not None:
-                    # Convert aware Timestamp to aware Timestamp
-                    obj = obj.tz_convert("UTC")
-                else:
-                    # Convert non-aware Timestamp to aware Timestamp
-                    obj = obj.tz_localize("UTC")
-            else:
+            if obj.tzinfo is not None:
+                # Convert aware datetime to UTC
                 obj = obj.astimezone(UTC)
+            else:
+                # Make naive datetime aware
+                obj = obj.replace(tzinfo=UTC)
 
         if six.PY2:
             if isinstance(obj, long):

@@ -57,10 +57,10 @@ TZ_DATETIMES_DST = {}
 TZ_TIMESTAMPS_DST = {}
 
 for TZ in TIMEZONES:
-    TZ_DATETIMES[TZ.zone] = [d.astimezone(TZ) for d in LOCAL_DATETIMES]
+    TZ_DATETIMES[TZ.zone] = [TZ.localize(d) for d in LOCAL_DATETIMES]
     TZ_TIMESTAMPS[TZ.zone] = [d.tz_localize(TZ) for d in LOCAL_TIMESTAMPS]
-    TZ_DATETIMES_DST[TZ.zone] = [d.astimezone(TZ) for d in LOCAL_DATETIMES_DST]
-    TZ_TIMESTAMPS_DST[TZ.zone] = [d.tz_localize(TZ) for d in LOCAL_TIMESTAMPS_DST]
+    TZ_DATETIMES_DST[TZ.zone] = [d.astimezone(TZ) for d in UTC_DATETIMES_DST]
+    TZ_TIMESTAMPS_DST[TZ.zone] = [d.tz_convert(TZ) for d in UTC_TIMESTAMPS_DST]
 
 
 class TestTableDateTime(object):
@@ -293,8 +293,6 @@ class TestTableDateTimeUTCToLocal(object):
         }
         table = Table(data)
 
-        print(TZ_DATETIMES_DST)
-
         os.environ["TZ"] = "US/Pacific"
         time.tzset()
 
@@ -345,6 +343,54 @@ class TestTableDateTimeUTCToLocal(object):
             "a": [d.replace(tzinfo=None) for d in TZ_DATETIMES_DST["GMT"]]
         }
 
+    def test_table_should_convert_UTC_to_local_time_dateutil_pacific_DST_timestamp(self):
+        data = pd.DataFrame({
+            "a": UTC_TIMESTAMPS_DST
+        })
+        table = Table(data)
+
+        os.environ["TZ"] = "US/Pacific"
+        time.tzset()
+
+        # Should be in PST now
+        assert table.view().to_dict()["a"] == [d.replace(tzinfo=None) for d in TZ_DATETIMES_DST["US/Pacific"]]
+
+    def test_table_should_convert_UTC_to_local_time_dateutil_central_DST_timestamp(self):
+        data = pd.DataFrame({
+            "a": UTC_TIMESTAMPS_DST
+        })
+        table = Table(data)
+
+        os.environ["TZ"] = "US/Central"
+        time.tzset()
+
+        # Should be in CST now
+        assert table.view().to_dict()["a"] == [d.replace(tzinfo=None) for d in TZ_DATETIMES_DST["US/Central"]]
+
+    def test_table_should_convert_UTC_to_local_time_dateutil_eastern_DST_timestamp(self):
+        data = pd.DataFrame({
+            "a": UTC_TIMESTAMPS_DST
+        })
+        table = Table(data)
+
+        os.environ["TZ"] = "US/Eastern"
+        time.tzset()
+
+        # Should be in EST now
+        assert table.view().to_dict()["a"] == [d.replace(tzinfo=None) for d in TZ_DATETIMES_DST["US/Eastern"]]
+
+    def test_table_should_convert_UTC_to_local_time_dateutil_GMT_DST_timestamp(self):
+        data = pd.DataFrame({
+            "a": UTC_TIMESTAMPS_DST
+        })
+        table = Table(data)
+
+        os.environ["TZ"] = "GMT"
+        time.tzset()
+
+        # Should be in GMT now
+        assert table.view().to_dict()["a"] == [d.replace(tzinfo=None) for d in TZ_DATETIMES_DST["GMT"]]
+
     def test_table_should_convert_UTC_to_local_time_dateutil_HKT(self):
         data = {
             "a": UTC_DATETIMES
@@ -387,118 +433,102 @@ class TestTableDateTimeUTCToLocal(object):
         }
 
     def test_table_should_convert_UTC_to_local_time_pytz_pacific_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "US/Pacific"
         time.tzset()
 
         # Should be in PST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(PST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(PST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_pytz_central_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "US/Central"
         time.tzset()
 
         # Should be in CST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_pytz_eastern_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "US/Eastern"
         time.tzset()
 
         # Should be in EST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_pytz_GMT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "GMT"
         time.tzset()
 
         # Should be in GMT now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_pytz_HKT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "Asia/Hong_Kong"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_pytz_JPT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "Asia/Tokyo"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_pytz_ACT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "Australia/Sydney"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_pacific_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "US/Pacific"
         time.tzset()
 
         # Should be in PST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(PST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(PST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_central_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "US/Central"
@@ -507,28 +537,24 @@ class TestTableDateTimeUTCToLocal(object):
         CST = tz.gettz("US/Central")
 
         # Should be in CST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_eastern_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "US/Eastern"
         time.tzset()
 
         # Should be in EST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_GMT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "GMT"
@@ -537,48 +563,40 @@ class TestTableDateTimeUTCToLocal(object):
         GMT = tz.gettz("GMT")
 
         # Should be in GMT now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_HKT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "Asia/Hong_Kong"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_JPT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "Asia/Tokyo"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_UTC_to_local_time_dateutil_ACT_timestamp(self):
-        data = {
+        data = pd.DataFrame({
             "a": UTC_TIMESTAMPS
-        }
+        })
         table = Table(data)
 
         os.environ["TZ"] = "Australia/Sydney"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
 
 
 class TestTableDateTimeArbitaryToLocal(object):
@@ -754,160 +772,136 @@ class TestTableDateTimeArbitaryToLocal(object):
         data = {
             "a": TZ_TIMESTAMPS["US/Pacific"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "US/Central"
         time.tzset()
 
         # Should be in CST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_CST_to_local_time_pytz_eastern_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["US/Central"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "US/Eastern"
         time.tzset()
 
         # Should be in EST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_EST_to_local_time_pytz_GMT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["US/Eastern"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "GMT"
         time.tzset()
 
         # Should be in GMT now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_GMT_to_local_time_pytz_HKT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["GMT"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "Asia/Hong_Kong"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_HKT_to_local_time_pytz_JPT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["Asia/Hong_Kong"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "Asia/Tokyo"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_JPT_to_local_time_pytz_ACT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["Asia/Tokyo"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "Australia/Sydney"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_PST_to_local_time_dateutil_central_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["US/Pacific"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "US/Central"
         time.tzset()
 
         # Should be in CST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(CST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_CST_to_local_time_dateutil_eastern_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["US/Central"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "US/Eastern"
         time.tzset()
 
         # Should be in EST now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(EST).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_EST_to_local_time_dateutil_GMT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["US/Eastern"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "GMT"
         time.tzset()
 
         # Should be in GMT now
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(GMT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_GMT_to_local_time_dateutil_HKT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["GMT"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "Asia/Hong_Kong"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(HKT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_HKT_to_local_time_dateutil_JPT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["Asia/Hong_Kong"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "Asia/Tokyo"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(JPT).replace(tzinfo=None) for d in data["a"]]
 
     def test_table_should_convert_JPT_to_local_time_dateutil_ACT_timestamp(self):
         data = {
             "a": TZ_TIMESTAMPS["Asia/Tokyo"]
         }
-        table = Table(data)
+        table = Table(pd.DataFrame(data))
 
         os.environ["TZ"] = "Australia/Sydney"
         time.tzset()
 
-        assert table.view().to_dict() == {
-            "a": [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
-        }
+        assert table.view().to_dict()["a"] == [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
