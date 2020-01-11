@@ -21,9 +21,7 @@ const cp = require("child_process");
 
 const {WebSocketServer} = require("@finos/perspective");
 
-const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
-const LOCAL_RESULTS_FILENAME = `results.${process.platform}.json`;
-const RESULTS_FILENAME = IS_LOCAL_PUPPETEER ? LOCAL_RESULTS_FILENAME : "results.json";
+const {IS_LOCAL_PUPPETEER, RESULTS_TAGNAME, RESULTS_FILENAME} = require("./paths.js");
 
 let __PORT__;
 
@@ -127,7 +125,7 @@ beforeAll(async done => {
 
         if (results.__GIT_COMMIT__) {
             const hash = execSync(`git cat-file -e ${results.__GIT_COMMIT__}`);
-            if (!hash || hash.length == 0) {
+            if (!hash || hash.toString().length != 0) {
                 private_console.error(`-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`);
             }
         }
@@ -181,7 +179,7 @@ function mkdirSyncRec(targetDir) {
 describe.page = (url, body, {reload_page = true, name, root} = {}) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
-    const dir_name = path.join(test_root, "screenshots", _url.replace(".html", ""));
+    const dir_name = path.join(test_root, "screenshots", RESULTS_TAGNAME, _url.replace(".html", ""));
     if (!fs.existsSync(dir_name)) {
         mkdirSyncRec(dir_name);
     }
@@ -196,7 +194,7 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         return result;
     });
 
-    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", LOCAL_RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
+    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
         throw new Error(`
         
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
@@ -315,7 +313,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     .update(screenshot)
                     .digest("hex");
 
-                const filename = path.join(test_root, "screenshots", `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
+                const filename = path.join(test_root, "screenshots", RESULTS_TAGNAME, `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
 
                 if (hash === results[_url + "/" + name]) {
                     fs.writeFileSync(filename + ".png", screenshot);

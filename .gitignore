@@ -159,4 +159,5 @@ python/perspective/perspective/node/assets/*
 docs/static/js/logo.js
 docs/static/js/logo.js.map
 python/perspective/pip-wheel-metadata
-results.darwin.json
+darwin.json
+darwin.interactive.json
