@@ -17,6 +17,10 @@
         "docs",
         "python/perspective"
     ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective"
+    },
     "devDependencies": {
         "@babel/cli": "^7.2.3",
         "@babel/core": "^7.1.0",
