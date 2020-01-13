@@ -160,20 +160,6 @@ supported by `perspective.Table`.
 Additionally, when created with `client=true` as a keyword argument to
 `__init__`, it can be used without accessing the built C++ binary.
 
-## Client Mode
-
-For certain systems, it may be difficult or infeasible to build the C++ library
-for Perspective, which `perspective.Table` depends on. However, we can leverage
-`Perspective.js` in the browser to provide the same widget experience to users.
-If created with `client=true`, `PerspectiveWidget` will serialize the data to
-the best of its ability and pass it off to the browser's Perspective engine to
-load.
-
-If `perspective-python` cannot find the built C++ libraries, it automatically
-defaults to client mode when initializing the widget.
-
-## `PerspectiveWidget`
-
 Similar to the viewer API, `PerspectiveWidget` takes keyword arguments that
 transform the `View` under ownsership:
 
@@ -216,7 +202,19 @@ w = perspective.PerspectiveWidget(
 w.sort = [["date", Sort.DESC]]
 ```
 
-## Creating a widget
+### Client Mode
+
+For certain systems, it may be difficult or infeasible to build the C++ library
+for Perspective, which `perspective.Table` depends on. However, we can leverage
+`Perspective.js` in the browser to provide the same widget experience to users.
+If created with `client=true`, `PerspectiveWidget` will serialize the data to
+the best of its ability and pass it off to the browser's Perspective engine to
+load.
+
+If `perspective-python` cannot find the built C++ libraries, it automatically
+defaults to client mode when initializing the widget.
+
+### Creating a widget
 
 A widget is created through the `PerspectiveWidget` constructor, which takes as
 its first, required parameter a `perspective.Table`, a dataset, a schema, or
@@ -258,7 +256,7 @@ front-end `<perspective-viewer>`:
 widget
 ```
 
-## `load()`
+### `load()`
 
 Calling `load()` on the widget provides it with a dataset. If the widget already
 has a dataset, and the new data has different columns to the old one, then the
@@ -275,7 +273,7 @@ widget = PerspectiveWidget(None)
 widget.load(data)
 ```
 
-## `update()`
+### `update()`
 
 Call `update()` on the widget to update it with new data. When called in client
 mode, this method serializes the data and passes it off to the Perspective

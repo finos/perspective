@@ -3,21 +3,40 @@ id: installation
 title: Installation
 ---
 
-## Javascript / WebAssembly
+## Javascript
 
-### (!) An important note about Hosting
+Because Perspective uses both WebAssembly and Web Workers, each of which place
+constraints on how assets and scripts must be loaded, the installation process
+for Perspective in a Javascript environment is more complex than most "pure"
+Javascript libraries.
 
-Whether you use just the `perspective` engine itself, or the
-`perspective-viewer` web component, your browser will need to have access to the
-`.worker.*.js` and `.wasm` assets in addition to the bundled scripts themselves.
-These are downloaded asynchronously at runtime after detecting whether or not
-WebAssembly is supported by your browser. The assets can be found in the
-`build/` directory of the `@finos/perspective` and `@finos/perspective-viewer`
-packages.
+### From NPM
 
-When importing from NPM modules, you should use
-`@finos/perspective-webpack-plugin` to manage the `.worker.*.js` and `.wasm`
-assets for you. A sample config:
+For using Perspective from Node.js, or as a dependency in a `package.json` based
+`webpack` or other browser application build toolchain, Perspective is available
+via NPM:
+
+```bash
+$ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-hypergrid
+```
+
+#### An important note about Hosting
+
+All uses of Perspective from NPM require the browser to have access to
+Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
+`.js` scripts. By default, Perspective [inlines](https://github.com/finos/perspective/pull/870)
+these assets into the `.js` scripts, and delivers them in one file. This has no
+performance impact, but does increase asset load time. Any non-trivial application
+should make use of `@finos/perspective-webpack-plugin`, which automatically
+splits the assets into separate files and downloads them when the bundling
+step runs.
+
+### Webpack Plugin
+
+When importing `perspective` from NPM modules for a browser application, you
+should use `@finos/perspective-webpack-plugin` to manage the `.worker.*.js` and
+`.wasm` assets for you. The plugin handles downloading and packaging
+Perspective's additional assets, and is easy to set up in your `webpack.config`:
 
 ```javascript
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
@@ -32,20 +51,16 @@ module.exports = {
 };
 ```
 
-Alternatively, you may use the built-in `WebSocketServer` Node.js server, host
-the contents of a package's `build/` in your application's build script, or
-otherwise making sure these directories are visible to your web server, e.g.:
-
-```javascript
-cp -r node_modules/@finos/perspective/build my_build/assets/
-```
-
 ### From CDN
 
-By far the easiest way to get started with Perspective in the browser, the full
-library can be used directly from
-[unpkg.com](https://unpkg.com/@finos/perspective-examples/build/perspective-viewer.js)
-CDN by simply adding these scripts to your `.html`'s `<head>` section:
+Perspective can be loaded directly from
+[unpkg.com](https://unpkg.com/@finos/perspective-viewer), which is the easiest
+way to get started with Perspective in the browser, and absolutely perfect
+for spinning up quick instances of `perspective-viewer`. An example is
+demonstrated in [`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
+which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
+
+Add these scripts to your `.html`'s `<head>` section:
 
 ```html
 <script src="https://unpkg.com/@finos/perspective"></script>
@@ -66,8 +81,7 @@ const view = table.view({ sort: [["A", "desc"]] });
 Or create a `<perspective-viewer>` in HTML:
 
 ```html
-<perspective-viewer columns="['Sales', 'Profit']"
-  >`
+<perspective-viewer columns="['Sales', 'Profit']">`
   <script>
     const data = {
       Sales: [500, 1000, 1500],
@@ -76,24 +90,13 @@ Or create a `<perspective-viewer>` in HTML:
     // The `<perspective-viewer>` HTML element exposes the viewer API
     const el = document.getElementsByTagName("perspective-viewer")[0];
     el.load(data);
-  </script></perspective-viewer
->
+  </script>
+</perspective-viewer>
 ```
 
-Ultimately, for production you'll want Perspective incorporated directly into
-your application's build script for load performance, via another option below.
-
-### From NPM
-
-For using Perspective from Node.js, or as a depedency in a `package.json` based
-`webpack` or other browser application build toolchain, Perspective is available
-via NPM:
-
-```bash
-yarn add @finos/perspective-viewer
-yarn add @finos/perspective-viewer-d3fc
-yarn add @finos/perspective-viewer-hypergrid
-```
+This makes it extremely easy to spin up Perspective locally without depending
+on a build chain or other tooling. For production usage, you should incorporate
+Perspective into your application's bundled scripts using `NPM` and `Webpack`.
 
 ## Python
 
@@ -111,7 +114,7 @@ NumPy record arrays are all supported in `perspective-python`.
 pip install perspective-python
 ```
 
-#### Jupyterlab
+### Jupyterlab
 
 `PerspectiveWidget` is a JupyterLab widget that implements the same API as
 `<perspective-viewer>`, allowing for fast, intuitive
