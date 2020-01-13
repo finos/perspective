@@ -33,17 +33,14 @@ const override = new (class {
         });
     }
 
-    set({wasm, worker}) {
-        this._wasm = wasm || this._wasm;
-        this._worker = worker || this._worker;
-    }
-
     worker() {
-        return (this._worker || wasm_worker)();
+        return wasm_worker();
     }
 
     async wasm() {
-        if (!this._wasm) {
+        if (wasm instanceof ArrayBuffer) {
+            this._wasm = wasm;
+        } else {
             this._wasm = await this._fetch(wasm);
         }
         return this._wasm;

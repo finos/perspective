@@ -44,20 +44,19 @@ exports.default = function loader(content) {
 
     if (!options.compiled) {
         var inputPath = this.resourcePath;
-        if (!options.inline) {
-            inputPath = inputPath
-                .replace(path.join("perspective", "dist", "esm"), path.join("perspective", "dist", "umd"))
-                .replace(path.join("perspective", "dist", "cjs"), path.join("perspective", "dist", "umd"))
-                .replace(/\.js/, ".worker.js")
-                .replace(path.join("dist", "esm"), path.join("dist", "umd"));
-        }
+        inputPath = inputPath
+            .replace(path.join("perspective", "dist", "esm"), path.join("perspective", "dist", "umd"))
+            .replace(path.join("perspective", "dist", "cjs"), path.join("perspective", "dist", "umd"))
+            .replace(/\.js/, ".worker.js")
+            .replace(path.join("dist", "esm"), path.join("dist", "umd"));
         content = fs.readFileSync(inputPath).toString();
         if (!options.inline) {
-            this.emitFile(emitPath, "" + content);
             const map_file = `${inputPath}.map`;
             if (fs.existsSync(map_file)) {
                 const map_content = fs.readFileSync(map_file).toString();
-                this.emitFile(`${emitPath}.map`, "" + map_content);
+                this.emitFile(emitPath, "" + content, map_content);
+            } else {
+                this.emitFile(emitPath, "" + content);
             }
         }
     }
