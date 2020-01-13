@@ -33,15 +33,10 @@
 
     <script>
         window.addEventListener('WebComponentsReady', function() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'superstore.arrow', true);
-            xhr.responseType = "arraybuffer"
-            xhr.onload = function() {
-                var el = document.getElementsByTagName('perspective-viewer')[0];
-                el.load(xhr.response, {index: "Row ID"});
-                el.toggleConfig();
-            }
-            xhr.send(null);
+            const viewer = document.getElementsByTagName('perspective-viewer')[0];
+            const data = await fetch("superstore.arrow");
+            viewer.load(await data.arrayBuffer(), {index: "Row ID"});
+            viewer.toggleConfig();
         });
     </script>
 

@@ -33,16 +33,11 @@
     </perspective-viewer>
 
     <script>
-        window.addEventListener('WebComponentsReady', function() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'superstore.arrow', true);
-            xhr.responseType = "arraybuffer"
-            xhr.onload = function() {
-                var el = document.getElementsByTagName('perspective-viewer')[0];
-                el.load(xhr.response);
-                el.toggleConfig();
-            }
-            xhr.send(null);
+        window.addEventListener('WebComponentsReady', async function() {
+            const viewer = document.getElementsByTagName('perspective-viewer')[0];
+            const data = await fetch("superstore.arrow");
+            viewer.load(await data.arrayBuffer());
+            viewer.toggleConfig();
         });
     </script>
 
