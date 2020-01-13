@@ -8,7 +8,7 @@
  */
 
 import perspective from "@finos/perspective";
-import "./index.less";
+import "./index.css";
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-hypergrid";
 import "@finos/perspective-viewer-d3fc";
