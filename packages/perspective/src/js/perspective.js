@@ -29,7 +29,11 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 }
 
 /**
- * The main API module for Perspective.
+ * The main API module for `@finos/perspective`.
+ *
+ * For more information, see the Javascript user guide:
+ * https://perspective.finos.org/docs/md/js.html.
+ *
  * @module perspective
  */
 export default function(Module) {

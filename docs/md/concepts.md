@@ -196,8 +196,8 @@ table.update(new_data);
 #### Partial Updates
 
 If `index` is not set, updates _append_ new data to the end of the `Table`.
-However, if `index` is set, Perspective allows _partial updates_ using the
-`index` to determine which rows to update:
+However, if `index` is set, Perspective allows _partial updates_ (in-place)
+using the `index` to determine which rows to update:
 
 ```javascript
 // Create an indexed table

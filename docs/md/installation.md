@@ -83,16 +83,23 @@ Or create a `<perspective-viewer>` in HTML:
 ```html
 <perspective-viewer columns="['Sales', 'Profit']">`
   <script>
-    const data = {
-      Sales: [500, 1000, 1500],
-      Profit: [100.25, 200.5, 300.75]
-    };
-    // The `<perspective-viewer>` HTML element exposes the viewer API
-    const el = document.getElementsByTagName("perspective-viewer")[0];
-    el.load(data);
+    document.addEventListener("WebComponentsReady", function() {
+      const data = {
+        Sales: [500, 1000, 1500],
+        Profit: [100.25, 200.5, 300.75]
+      };
+      // The `<perspective-viewer>` HTML element exposes the viewer API
+      const el = document.getElementsByTagName("perspective-viewer")[0];
+      el.load(data);
+    });
   </script>
 </perspective-viewer>
 ```
+
+You must wait for the document `WebComponentsReady` event to fire,
+which indicates that the provided
+[webcomponents.js polyfill](https://github.com/webcomponents/webcomponentsjs)
+has loaded.
 
 This makes it extremely easy to spin up Perspective locally without depending
 on a build chain or other tooling. For production usage, you should incorporate
