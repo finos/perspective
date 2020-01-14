@@ -13,7 +13,7 @@ import {Menu} from "@phosphor/widgets";
 import {createCommands} from "../dockpanel/contextmenu";
 import {CommandRegistry} from "@phosphor/commands";
 
-import PerspectiveViewer from "@finos/perspective-viewer";
+import {HTMLPerspectiveViewerElement} from "@finos/perspective-viewer";
 import {PerspectiveWidget} from "../widget";
 import {toArray} from "@phosphor/algorithm";
 import uniqBy from "lodash/uniqBy";
@@ -94,7 +94,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     private onPerspectiveClick = (event: CustomEvent): void => {
-        const config = (event.target as PerspectiveViewer).save();
+        const config = (event.target as HTMLPerspectiveViewerElement).save();
         const candidates = new Set([...(config["row-pivots"] || []), ...(config["column-pivots"] || []), ...(config.filters || []).map(x => x[0])]);
         const filters = [...event.detail.config.filters];
         this.filterWidget(candidates, filters);
