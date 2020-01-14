@@ -1,3 +1,12 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 import React from "react";
 import {Table, TableData, TableOptions, Schema} from "@finos/perspective";
 
@@ -26,14 +35,24 @@ export interface PerspectiveViewerOptions {
     "computed-columns"?: {[column_name: string]: string}[];
     "row-pivots"?: string[];
     "column-pivots"?: string[];
-    filters?: Array<Array<string>>;
-    sort?: string[][];
+    filters?: Array<Tuple<string, string, string>>;
+    sort?: Array<Tuple<string, string> | string>;
     selectable?: boolean;
 }
 
-interface PerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerOptions, React.HTMLAttributes<T> {}
+interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions, "editable" | "plugin" | "selectable"> {
+    aggregates?: string;
+    "computed-columns"?: string;
+    "row-pivots"?: string;
+    "column-pivots"?: string;
+    filters?: string;
+    sort?: string;
+    columns?: string;
+}
 
-type PerspectiveElement = React.DetailedHTMLProps<PerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
+interface ReactPerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerHTMLAttributes, React.HTMLAttributes<T> {}
+
+type PerspectiveElement = React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
 
 declare global {
     namespace JSX {
