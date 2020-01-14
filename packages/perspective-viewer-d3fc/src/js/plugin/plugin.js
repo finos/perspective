@@ -7,6 +7,7 @@
  *
  */
 
+import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 import charts from "../charts/charts";
 import "./polyfills/index";
 import "./template";
@@ -25,7 +26,7 @@ export function register(...plugins) {
     plugins = new Set(plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.type));
     charts.forEach(chart => {
         if (plugins.has(chart.plugin.type)) {
-            global.registerPlugin(chart.plugin.type, {
+            registerPlugin(chart.plugin.type, {
                 ...DEFAULT_PLUGIN_SETTINGS,
                 ...chart.plugin,
                 create: drawChart(chart),

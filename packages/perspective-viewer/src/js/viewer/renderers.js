@@ -54,6 +54,10 @@ global.registerPlugin = renderers.registerPlugin;
 
 global.getPlugin = renderers.getPlugin;
 
+if (global.__perspective_plugins__) {
+    global.__perspective_plugins__.forEach(([name, plugin]) => global.registerPlugin(name, plugin));
+}
+
 const template = csv =>
     html`
         <pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>

@@ -233,3 +233,12 @@ export function throttlePromise(target, property, descriptor) {
 
 export const json_attribute = _attribute(() => ({}));
 export const array_attribute = _attribute(() => []);
+
+export const registerPlugin = (name, plugin) => {
+    if (global.registerPlugin) {
+        global.registerPlugin(name, plugin);
+    } else {
+        global.__perspective_plugins__ = global.__perspective_plugins__ || [];
+        global.__perspective_plugins__.push([name, plugin]);
+    }
+};

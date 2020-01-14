@@ -8,6 +8,7 @@
  */
 
 import {draw, PRIVATE} from "./draw.js";
+import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 
 function resize() {
     if (this[PRIVATE]) {
@@ -205,6 +206,6 @@ const PLUGINS = {
 export default function(...plugins) {
     plugins = plugins.length > 0 ? plugins : Object.keys(PLUGINS);
     for (const plugin of plugins) {
-        global.registerPlugin(plugin, PLUGINS[plugin]);
+        registerPlugin(plugin, PLUGINS[plugin]);
     }
 }

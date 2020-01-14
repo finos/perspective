@@ -16,7 +16,7 @@ import * as perspectivePlugin from "./perspective-plugin";
 import PerspectiveDataModel from "./PerspectiveDataModel";
 import {psp2hypergrid} from "./psp-to-hypergrid";
 
-import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
+import {bindTemplate, registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 
 import TEMPLATE from "../html/hypergrid.html";
 
@@ -222,7 +222,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     hypergrid.allowEvents(true);
 }
 
-global.registerPlugin("hypergrid", {
+const plugin = {
     name: "Grid",
     create: grid_create,
     selectMode: "toggle",
@@ -252,4 +252,6 @@ global.registerPlugin("hypergrid", {
             delete this[HYPERGRID_INSTANCE];
         }
     }
-});
+};
+
+registerPlugin("hypergrid", plugin);
