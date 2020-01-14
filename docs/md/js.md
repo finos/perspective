@@ -163,31 +163,6 @@ your project:
   and
   [binding a viewer to a remote view in Node.js](#remote-perspective-via-workerhost), you will likely need all Perspective modules.
 
-The core concepts of Perspective are the `table()`, `view()` and
-`<perspective-viewer>` web component, though your project need not necessarily
-use them all.
-
-A `table()` represents a single data set, and is the interface used to input
-static and streaming data into Perspective; in the Browser, `table()`s live in a
-Web Worker to isolate their runtime from the renderer.
-
-A `view()` represents a specific continuous query of a `table()`, and is used to
-read data or calculate analytics from a `table()`; `view()`s also live in a Web
-Worker when used in a Browser, and a single `table()` may have many `view()`s
-attached at once.
-
-`<perspective-viewer>` is a UI widget which allows the user to interact and
-create `view()`s on a loaded `table()`.
-
-Each `<perspective-viewer>` encapsulates and manages a single `view()` at a
-time, and optionally manages it's underlying `table()` for simple use cases,
-though you can instantiate this separately if you wish - this is helpful for
-e.g.
-[sharing a table](<(#sharing-a-table-between-multiple-perspective-viewers)>)
-between multiple `<perspective-viewer>`s.
-
-<img src="https://perspective.finos.org/svg/architecture.svg">
-
 ## `perspective` library
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate,
