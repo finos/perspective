@@ -13,7 +13,7 @@ import {Menu} from "@phosphor/widgets";
 import {createCommands} from "../dockpanel/contextmenu";
 import {CommandRegistry} from "@phosphor/commands";
 
-import {HTMLPerspectiveViewerElement} from "@finos/perspective-viewer";
+import {HTMLPerspectiveViewerElement, Filters} from "@finos/perspective-viewer";
 import {PerspectiveWidget} from "../widget";
 import {toArray} from "@phosphor/algorithm";
 import uniqBy from "lodash/uniqBy";
@@ -79,7 +79,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         event.stopPropagation();
     }
 
-    private filterWidget(candidates: Set<string>, filters: string[][]): void {
+    private filterWidget(candidates: Set<string>, filters: Filters): void {
         toArray(this.dockpanel.widgets()).forEach(async (widget: PerspectiveWidget): Promise<void> => {
             const config = widget.save();
             const availableColumns = Object.keys(await (widget.table as any).schema());
@@ -88,7 +88,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             const validFilters = filters.filter(columnAvailable);
 
             validFilters.push(...currentFilters.filter(x => !candidates.has(x[0])));
-            const newFilters = uniqBy(validFilters, (item: string[]) => item[0]);
+            const newFilters = uniqBy(validFilters, (item: [string, string, string]) => item[0]);
             widget.restore({filters: newFilters});
         }, this.dockpanel.saveLayout());
     }

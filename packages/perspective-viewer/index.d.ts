@@ -1,3 +1,12 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 import React from "react";
 import {Table, TableData, TableOptions, Schema} from "@finos/perspective";
 
@@ -17,23 +26,45 @@ export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, 
     restyleElement(): void;
     readonly table?: Table;
 }
+interface ComputedColumn {
+    name: string;
+    inputs: string[];
+    func: string;
+}
+
+export type Filters = Array<[string, string, string]>;
+export type Sort = Array<[string, string] | string>;
+export type ComputedColumns = ComputedColumn[];
+export type Aggregates = {[column_name: string]: string};
+export type Pivots = string[];
+export type Columns = string[];
 
 export interface PerspectiveViewerOptions {
-    aggregates?: {[column_name: string]: string};
+    aggregates?: Aggregates;
     editable?: boolean;
     plugin?: string;
-    columns?: string[];
-    "computed-columns"?: {[column_name: string]: string}[];
-    "row-pivots"?: string[];
-    "column-pivots"?: string[];
-    filters?: Array<Array<string>>;
-    sort?: string[][];
+    columns?: Columns;
+    "computed-columns"?: ComputedColumns;
+    "row-pivots"?: Pivots;
+    "column-pivots"?: Pivots;
+    filters?: Filters;
+    sort?: Sort;
     selectable?: boolean;
 }
 
-interface PerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerOptions, React.HTMLAttributes<T> {}
+interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions, "editable" | "plugin" | "selectable"> {
+    aggregates?: string;
+    "computed-columns"?: string;
+    "row-pivots"?: string;
+    "column-pivots"?: string;
+    filters?: string;
+    sort?: string;
+    columns?: string;
+}
 
-type PerspectiveElement = React.DetailedHTMLProps<PerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
+interface ReactPerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerHTMLAttributes, React.HTMLAttributes<T> {}
+
+type PerspectiveElement = React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
 
 declare global {
     namespace JSX {
