@@ -76,10 +76,14 @@ body {
     color: #1A7DA1 !important;
 }
 
-h2.headerTitle, h2.headerTitleWithLogo {
+h2.headerTitle {
     font-family: "Public Sans", Arial, Helvetica, sans-serif;
     color: #f9f9f9 !important;
     transition: opacity 0.1s ease-in;
+}
+
+.fixedHeaderContainer header h2.headerTitleWithLogo {
+    display: none;
 }
 
 .sideNavVisible .logo {

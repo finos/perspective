@@ -53,6 +53,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [Javascript User's Guide](https://perspective.finos.org/docs/md/js.html)
 * [Python User's Guide](https://perspective.finos.org/docs/md/python.html)
 * [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
+* [Conceptual Overview](https://perspective.finos.org/docs/md/concepts.html)
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
 * [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)

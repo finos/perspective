@@ -1,6 +1,6 @@
 ``perspective.table`` contains ``Table`` and ``View``, the data primitives of Perspective. 
 
-For usage, see the User Guide from the sidebar.
+For usage, see the `Python User Guide </docs/md/python.html>`_.
 
 Table
 =====

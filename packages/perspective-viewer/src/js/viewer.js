@@ -23,11 +23,14 @@ import default_style from "../less/default.less";
 import {ActionElement} from "./viewer/action_element.js";
 
 /**
- * Module for `<perspective-viewer>` custom element.  There are no exports from
- * this module, however importing it has a side effect:  the
- * {@link module:perspective_viewer~PerspectiveViewer} class is registered as a
- * custom element, after which it can be used as a standard DOM element.  The
- * documentation in this module defines the instance structure of a
+ * Module for the `<perspective-viewer>` custom element.
+ *
+ * This module has no exports, but importing it has a side
+ * effect: the {@link module:perspective_viewer~PerspectiveViewer} class is
+ * registered as a custom element, after which it can be used as a standard DOM
+ * element.
+ *
+ * The documentation in this module defines the instance structure of a
  * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
  * relevent DOM method e.g. `document.createElement("perspective-viewer")` or
  * `document.getElementsByTagName("perspective-viewer")`.
@@ -38,10 +41,11 @@ import {ActionElement} from "./viewer/action_element.js";
 const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
 
 /**
- * HTMLElement class for `<perspective-viewer>` custom element.  This class is
- * not exported, so this constructor cannot be invoked in the typical manner;
- * instead, instances of the class are created through the Custom Elements DOM
- * API.
+ * The HTMLElement class for `<perspective-viewer>` custom element.
+ *
+ * This class is not exported, so this constructor cannot be invoked in the
+ * typical manner; instead, instances of the class are created through the
+ * Custom Elements DOM API.
  *
  * Properties of an instance of this class, such as
  * {@link module:perspective_viewer~PerspectiveViewer#columns}, are reflected on
@@ -209,8 +213,8 @@ class PerspectiveViewer extends ActionElement {
      *
      * @kind member
      * @param {object} aggregates A dictionary whose keys are column names, and
-     * values are valid aggregations.  The `aggergates` attribute works as an
-     * override;  in lieu of a key for a column supplied by the developers, a
+     * values are valid aggregations. The `aggregates` attribute works as an
+     * override; in lieu of a key for a column supplied by the developers, a
      * default will be selected and reflected to the attribute based on the
      * column's type.  See {@link perspective/src/js/defaults.js}
      * @fires PerspectiveViewer#perspective-config-update
@@ -245,9 +249,9 @@ class PerspectiveViewer extends ActionElement {
      * The set of column filter configurations.
      *
      * @kind member
-     * @type {array} filters An arry of filter config objects.  A filter config
+     * @type {array} filters An array of filter config objects. A filter config
      * object is an array of three elements: * The column name. * The filter
-     * operation as a string.  See
+     * operation as a string. See
      * {@link perspective/src/js/config/constants.js} * The filter argument, as
      * a string, float or Array<string> as the filter operation demands.
      * @fires PerspectiveViewer#perspective-config-update
@@ -398,8 +402,8 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * Determines the render throttling behavior.  Can be an integer, for
-     * millisecond window to throttle render event;  or, if `undefined`,
+     * Determines the render throttling behavior. Can be an integer, for
+     * millisecond window to throttle render event; or, if `undefined`,
      * will try to determine the optimal throttle time from this component's
      * render framerate.
      *
@@ -442,8 +446,8 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * This element's `perspective` worker instance.  This property is not
-     * reflected as an HTML attribute, and is readonly;  it can be effectively
+     * This element's `perspective` worker instance. This property is not
+     * reflected as an HTML attribute, and is readonly; it can be effectively
      * set however by calling the `load() method with a `perspective.table`
      * instance from the preferred worker.
      *
@@ -467,7 +471,7 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * This element's `perspective.table.view` instance.  The instance itself
+     * This element's `perspective.table.view` instance. The instance itself
      * will change after every `PerspectiveViewer#perspective-config-update`
      * event.
      *
@@ -478,7 +482,7 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * Load data.  If `load` or `update` have already been called on this
+     * Load data. If `load` or `update` have already been called on this
      * element, its internal `perspective.table` will also be deleted.
      *
      * @param {any} data The data to load.  Works with the same input types

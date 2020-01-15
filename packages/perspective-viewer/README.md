@@ -1,7 +1,7 @@
 <a name="module_perspective-viewer"></a>
 
 ## perspective-viewer
-Module for `<perspective-viewer>` custom element.  There are no exports fromthis module, however importing it has a side effect:  the[module:perspective_viewer~PerspectiveViewer](module:perspective_viewer~PerspectiveViewer) class is registered as acustom element, after which it can be used as a standard DOM element.  Thedocumentation in this module defines the instance structure of a`<perspective-viewer>` DOM object instantiated typically, through HTML or anyrelevent DOM method e.g. `document.createElement("perspective-viewer")` or`document.getElementsByTagName("perspective-viewer")`.
+Module for the `<perspective-viewer>` custom element.This module has no exports, but importing it has a sideeffect: the [module:perspective_viewer~PerspectiveViewer](module:perspective_viewer~PerspectiveViewer) class isregistered as a custom element, after which it can be used as a standard DOMelement.The documentation in this module defines the instance structure of a`<perspective-viewer>` DOM object instantiated typically, through HTML or anyrelevent DOM method e.g. `document.createElement("perspective-viewer")` or`document.getElementsByTagName("perspective-viewer")`.
 
 
 * [perspective-viewer](#module_perspective-viewer)
@@ -16,6 +16,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
         * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
         * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
         * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>boolean</code>
+        * [.throttle](#module_perspective-viewer..PerspectiveViewer+throttle) : <code>integer</code> \| <code>string</code>
         * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
         * [.table](#module_perspective-viewer..PerspectiveViewer+table)
         * [.view](#module_perspective-viewer..PerspectiveViewer+view)
@@ -54,6 +55,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
     * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
     * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>[ &#x27;array&#x27; ].&lt;string&gt;</code>
     * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>boolean</code>
+    * [.throttle](#module_perspective-viewer..PerspectiveViewer+throttle) : <code>integer</code> \| <code>string</code>
     * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
     * [.table](#module_perspective-viewer..PerspectiveViewer+table)
     * [.view](#module_perspective-viewer..PerspectiveViewer+view)
@@ -78,7 +80,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
 <a name="new_module_perspective-viewer..PerspectiveViewer_new"></a>
 
 #### new PerspectiveViewer()
-HTMLElement class for `<perspective-viewer>` custom element.  This class isnot exported, so this constructor cannot be invoked in the typical manner;instead, instances of the class are created through the Custom Elements DOMAPI.Properties of an instance of this class, such as [module:perspective_viewer~PerspectiveViewer#columns](module:perspective_viewer~PerspectiveViewer#columns),are reflected on the DOM element as Attributes, and should be accessed assuch - e.g. `instance.setAttribute("columns", JSON.stringify(["a", "b"]))`.
+The HTMLElement class for `<perspective-viewer>` custom element.This class is not exported, so this constructor cannot be invoked in thetypical manner; instead, instances of the class are created through theCustom Elements DOM API.Properties of an instance of this class, such as[module:perspective_viewer~PerspectiveViewer#columns](module:perspective_viewer~PerspectiveViewer#columns), are reflected onthe DOM element as Attributes, and should be accessed as such - e.g.`instance.setAttribute("columns", JSON.stringify(["a", "b"]))`.
 
 **Example**  
 ```js
@@ -161,7 +163,7 @@ The set of column aggregate configurations.
 **Emits**: <code>PerspectiveViewer#event:perspective-config-update</code>  
 **Params**
 
-- aggregates <code>object</code> - A dictionary whose keys are column names, andvalues are valid aggregations.  The `aggergates` attribute works as anoverride;  in lieu of a key for a column supplied by the developers, adefault will be selected and reflected to the attribute based on thecolumn's type.  See [perspective/src/js/defaults.js](perspective/src/js/defaults.js)
+- aggregates <code>object</code> - A dictionary whose keys are column names, andvalues are valid aggregations. The `aggregates` attribute works as anoverride; in lieu of a key for a column supplied by the developers, adefault will be selected and reflected to the attribute based on thecolumn's type.  See [perspective/src/js/defaults.js](perspective/src/js/defaults.js)
 
 **Example** *(via Javascript DOM)*  
 ```js
@@ -170,7 +172,8 @@ elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
+<perspective-viewer aggregates='{"x": "distinct count"}'>
+</perspective-viewer>
 ```
 
 * * *
@@ -193,7 +196,8 @@ elem.setAttribute('filters', JSON.stringify(filters));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
+<perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'>
+</perspective-viewer>
 ```
 
 * * *
@@ -238,10 +242,23 @@ Determines whether this viewer is editable or not (though it isultimately up to
 
 * * *
 
+<a name="module_perspective-viewer..PerspectiveViewer+throttle"></a>
+
+#### perspectiveViewer.throttle : <code>integer</code> \| <code>string</code>
+Determines the render throttling behavior. Can be an integer, formillisecond window to throttle render event; or, if `undefined`,will try to determine the optimal throttle time from this component'srender framerate.
+
+**Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
+**Example**  
+```js
+<!-- Only draws at most 1 frame/sec. --><perspective-viewer throttle="1000"></perspective-viewer>
+```
+
+* * *
+
 <a name="module_perspective-viewer..PerspectiveViewer+worker"></a>
 
 #### perspectiveViewer.worker
-This element's `perspective` worker instance.  This property is notreflected as an HTML attribute, and is readonly;  it can be effectivelyset however by calling the `load() method with a `perspective.table`instance from the preferred worker.
+This element's `perspective` worker instance. This property is notreflected as an HTML attribute, and is readonly; it can be effectivelyset however by calling the `load() method with a `perspective.table`instance from the preferred worker.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Read only**: true  
@@ -265,7 +282,7 @@ This element's `perspective.table` instance.
 <a name="module_perspective-viewer..PerspectiveViewer+view"></a>
 
 #### perspectiveViewer.view
-This element's `perspective.table.view` instance.  The instance itselfwill change after every `PerspectiveViewer#perspective-config-update` event.
+This element's `perspective.table.view` instance. The instance itselfwill change after every `PerspectiveViewer#perspective-config-update`event.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Read only**: true  
@@ -275,23 +292,15 @@ This element's `perspective.table.view` instance.  The instance itselfwill chan
 <a name="module_perspective-viewer..PerspectiveViewer+load"></a>
 
 #### perspectiveViewer.load(data) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-Load data.  If `load` or `update` have already been called on thiselement, its internal `perspective.table` will also be deleted.
+Load data. If `load` or `update` have already been called on thiselement, its internal `perspective.table` will also be deleted.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code> - A promise which resolves once the data isloaded and a `perspective.view` has been created.  
-**Emits**: <code>module:perspective\_viewer~PerspectiveViewer#perspective-click PerspectiveViewer#event:perspective-view-update</code>  
+**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code> - A promise which resolves once the data is loadedand a `perspective.view` has been created.  
+**Emits**: <code>module:perspective\_viewer~PerspectiveViewer#perspective-clickPerspectiveViewer#perspective-view-update]);event:</code>  
 **Params**
 
 - data <code>any</code> - The data to load.  Works with the same input typessupported by `perspective.table`.
 
-**Example** *(Load JSON)*  
-```js
-const my_viewer = document.getElementById('#my_viewer');
-my_viewer.load([
-    {x: 1, y: 'a'},
-    {x: 2, y: 'b'}
-]);
-```
 **Example** *(Load CSV)*  
 ```js
 const my_viewer = document.getElementById('#my_viewer');

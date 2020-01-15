@@ -35,6 +35,15 @@
       "md/styles": {
         "title": "CSS Styles"
       },
+      "obj/perspective-python": {
+        "title": "perspective-python API"
+      },
+      "obj/perspective-viewer": {
+        "title": "perspective-viewer API"
+      },
+      "obj/perspective": {
+        "title": "perspective API"
+      },
       "README": {
         "title": "README"
       }

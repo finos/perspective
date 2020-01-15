@@ -213,7 +213,7 @@ const GETTING_STARTED_TEXT = `
 \`\`\`bash
 $ yarn add --dev @finos/perspective-cli
 \`\`\`
-2. Run a test server on a CSV, JSON or [Apache Arrow]():
+2. Run a test server on a CSV, JSON or [Apache Arrow](https://arrow.apache.org/):
 \`\`\`bash
 $ yarn perspective host < superstore.arrow
 Listening on port 8080

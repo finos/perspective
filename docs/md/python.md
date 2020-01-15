@@ -4,9 +4,9 @@ title: Python User Guide
 ---
 
 Perspective for Python uses the exact same C++ data engine used by the
-[WebAssembly version](https://perspective.finos.org/docs/md/js.html) The library
-consists of many of the same abstractions and API as in Javascript, as well as
-Python-specific data loading support for [NumPy](https://numpy.org/),
+[WebAssembly version](https://perspective.finos.org/docs/md/js.html). The
+library consists of many of the same abstractions and API as in Javascript,
+as well as Python-specific data loading support for [NumPy](https://numpy.org/),
 [Pandas](https://pandas.pydata.org/) (and
 [Apache Arrow](https://arrow.apache.org/), as in Javascript).
 
@@ -14,12 +14,15 @@ Additionally, `perspective-python` provides a session manager suitable for
 integration into server systems such as
 [Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html), which
 allows fully _virtual_ Perspective tables to be interacted with by multiple
-`<perspective-viewer>` in a Web Browser. As `<perspective-viewer>` will only
-consume the data necessary to render the current screen, this runtime mode
-allows _ludicrous_ _size_ datasets with instant-load after they've been manifest
-on the server (at the expense of network latency on UI interaction). The
-included `PerspectiveWidget` allows running such a viewer in
-[Jupyter Lab](https://jupyterlab.readthedocs.io/en/stable/) in either server or
+`<perspective-viewer>` in a Web Browser.
+
+As `<perspective-viewer>` will only consume the data necessary to render the
+current screen, this runtime mode allows _ludicrous_ _size_ datasets with
+instant-load after they've been manifest on the server (at the expense of
+network latency on UI interaction).
+
+The included `PerspectiveWidget` allows running such a viewer in
+[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/) in either server or
 client (via WebAssembly) mode, and the included `PerspectiveTornadoHandler`
 makes it simple to extend a Tornado server with virtual Perspective support.
 
@@ -33,8 +36,11 @@ The `perspective` module exports several tools:
 
 This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
-handler. For more information, see
-[Python API](https://perspective.finos.org/docs/obj/perspective-viewer.html).
+handler.
+
+For an understanding of Perspective's core concepts, see the
+[Conceptual Overview](/docs/md/concepts.html). For API documentation, see the
+[Python API](/docs/obj/perspective-python.html).
 
 ## `Table`
 
@@ -128,6 +134,22 @@ with any of the datetime types that were just mentioned. Thus, Perspective is
 aware of the basic type primitives that it supports, but agnostic towards the
 actual Python `type` of the data that it receives.
 
+#### Time Zone Handling
+
+When passing in `datetime` objects, Perspective checks the `tzinfo` attribute
+to see if a time zone is set. Objects with an unset `tzinfo` attribute are
+treated as local time, and do not undergo any time zone conversion. Objects with
+the `tzinfo` attribute set will be _converted into UTC_ before being stored in
+Perspective, and they will be _serialized as local time_.
+
+`pandas.Timestamp` objects stored in a `pandas.DataFrame` are _always_ treated
+as UTC times, and will be converted to local time when serialized to the user.
+To treat a `Timestamp` in a `DataFrame` as local time, use `tz_localize` or
+`tz_convert` to provide the `Timestamp` with a time zone.
+
+For more details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
+of Perspective's semantics around time zone handling.
+
 ### Callbacks and Events
 
 `perspective.Table` allows for `on_update` and `on_delete` callbacks to be
@@ -143,11 +165,175 @@ view.on_delete(lambda: print("Updated again!"))
 
 If the callback is a named reference to a function, it can be removed with
 `remove_update` or `remove_delete`. Callbacks defined with a lambda function
-cannot be removed at this time.
+cannot be removed, as lambda functions have no identifier.
 
 ```python
 view.remove_update(callback)
 ```
+
+## `PerspectiveManager`
+
+`PerspectiveManager` offers an interface for hosting multiple
+`perspective.Table` and `perspective.View` instances, extending their
+interfaces to operate with the [Javascript library](/docs/md/js.html) over a
+websocket connection.
+
+`PerspectiveManager` is required to enable `perspective-python` to
+[operate remotely](/docs/md/js.html#remote-perspective-via-perspective-python-and-tornado)
+using a websocket API.
+
+### Hosting `Table` and `View` instances
+
+`PerspectiveManager` has the ability to "host" `perspective.Table` and
+`perspective.View` instances. Hosted tables/views can have their methods
+called from other sources than the user, i.e. by a `perspective-viewer` running
+in Javascript over the network, interfacing with `perspective-python` through
+the websocket API.
+
+The user has full control of all hosted `Table` and `View` instances, and can
+call any API method on hosted instances. This makes it extremely easy to
+stream data to a hosted `Table` using `.update()`:
+
+```python
+manager = PerspectiveManager()
+table = Table(data)
+manager.host_table("data_source", table)
+
+for i in range(10):
+    # updates continue to propagate automatically
+    table.update(new_data)
+```
+
+A `PerspectiveManager` instance can host as many `Table`s and `View`s as
+necessary, but each `Table` should only be hosted by _one_ `PerspectiveManager`.
+
+To host a `Table` or a `View`, call the corresponding method on an instance
+of `PerspectiveManager` with a string name and the instance to be hosted:
+
+```python
+manager = PerspectiveManager()
+table = Table(data)
+view = table.view()
+manager.host_table("data_source", table)
+manager.host_view("view_1", view)
+```
+
+The `name` provided is important, as it enables Perspective in Javascript to look
+up a `Table`/`View` and get a handle to it over the network. This enables
+several powerful server/client implementations of Perspective, as explained in
+the next section.
+
+### Using a hosted `Table` in Javascript
+
+Using Tornado and [`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
+as well as `Perspective`'s Javascript library, we can create a client/server
+architecture that hosts and transforms _massive_ datasets with minimal
+client resource usage.
+
+Perspective's design allows a `table()` created in Javascript to _proxy_ its
+operations to a `Table` created in Python, which executes the operations in
+the Python kernel, and returns the results of the operation to the browser.
+All of this is _enabled_ through `PerspectiveManager`, which handles messaging,
+processing method calls, serializing outputs for the network, etc.
+
+In Python, use `PerspectiveManager` and `PerspectiveTornadoServer` to create
+a websocket server that exposes a `Table`:
+
+_*server.py*_
+
+```python
+from perspective import Table, PerspectiveManager, PerspectiveTornadoServer
+
+# Create an instance of PerspectiveManager, and host a Table
+MANAGER = PerspectiveManager()
+TABLE = Table(large_dataset)
+
+# The Table is exposed at `localhost:8888/websocket` with the name `data_source`
+MANAGER.host_table("data_source", TABLE)
+
+app = tornado.web.Application([
+    (r"/", MainHandler),
+    # create a websocket endpoint that the client Javascript can access
+    (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
+])
+
+# Start the Tornado server
+app.listen(8888)
+loop = tornado.ioloop.IOLoop.current()
+loop.start()
+```
+
+`PerspectiveTornadoHandler`, as outlined in the [docs](/docs/md/python.html#perspectivetornadohandler),
+takes a `PerspectiveManager` instance exposes it over a websocket at the URL
+specified. This allows a `table()` in Javascript to access the `Table` in
+Python and read data from it.
+
+Most importantly, the client code in Javascript does not require Webpack or any
+bundler, and can be implemented in a single HTML file:
+
+_*index.html*_
+
+```html
+<perspective-viewer id="viewer" editable></perspective-viewer>
+
+<script>
+    window.addEventListener('WebComponentsReady', async function() {
+        // Create a client that expects a Perspective server
+        // to accept connections at the specified URL.
+        const websocket = perspective.websocket("ws://localhost:8888/websocket");
+
+        /* `table` is a proxy for the `Table` we created on the server.
+
+        All operations that are possible through the Javascript API are possible
+        on the Python API as well, thus calling `view()`, `schema()`, `update()`
+        etc. on `const table` will pass those operations to the Python `Table`,
+        execute the commands, and return the result back to Javascript.*/
+        const table = websocket.open_table('data_source_one');
+
+        // Load this in the `<perspective-viewer>`.
+        document.getElementById('viewer').load(table);
+    });
+</script>
+```
+
+### Using a hosted `View` in Javascript
+
+An alternative client/server architecture using `PerspectiveTornadoServer` and
+`PerspectiveManager` involves hosting a `View`, and creating a new `table()` in
+Javascript on top of the Python `View`.
+
+When the `table()` is created in Javascript, it serializes the Python `View`'s
+data into Arrow, transfers it into the Javascript `table()`, and sets up an
+`on_update` callback to `update()` the Table whenever the Python `View`'s
+`Table` updates.
+
+Implementing the server in Python is extremely similar to the implementation
+described in the last section.
+
+Replace `host_table` with `host_view`:
+
+```python
+# we have an instance of `PerspectiveManager`
+TABLE = Table(data)
+VIEW = TABLE.view()
+MANAGER.host_view("view_one", VIEW)
+
+# Continue with Tornado setup
+```
+
+Changes to the client code are also minimal. Use `open_view` instead of 
+`open_table`:
+
+```javascript
+// const websocket has been defined already
+const view = websocket.open_view("view_one");
+const table = perspective.table(view);
+// continue with loading the table into `<perspective-viewer>
+```
+
+The benefit of this design is that only new updates will be sent to the client,
+efficiently serialized in the Apache Arrow format. In exchange for sending the
+entire dataset to the client on initialization, it reduces load on the server.
 
 ## `PerspectiveWidget`
 

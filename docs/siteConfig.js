@@ -6,7 +6,7 @@
  */
 
 const siteConfig = {
-    title: "" /* title for your website */,
+    title: "Perspective" /* title for your website */,
     tagline: "Streaming Analytics via WebAssembly",
     url: "https://perspective.finos.org/" /* your website url */,
     cname: "perspective.finos.org",
