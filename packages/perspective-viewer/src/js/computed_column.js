@@ -150,7 +150,7 @@ export const COMPUTATIONS = {
     ),
     add: new Computation(
         "+",
-        (x, y) => `${x} + ${y}`,
+        (x, y) => `(${x} + ${y})`,
         "float",
         "float",
         (a, b) => a + b,
@@ -159,7 +159,7 @@ export const COMPUTATIONS = {
     ),
     subtract: new Computation(
         "-",
-        (x, y) => `${x} - ${y}`,
+        (x, y) => `(${x} - ${y})`,
         "float",
         "float",
         (a, b) => a - b,
@@ -168,7 +168,7 @@ export const COMPUTATIONS = {
     ),
     multiply: new Computation(
         "*",
-        (x, y) => `${x} * ${y}`,
+        (x, y) => `(${x} * ${y})`,
         "float",
         "float",
         (a, b) => a * b,
@@ -177,16 +177,52 @@ export const COMPUTATIONS = {
     ),
     divide: new Computation(
         "/",
-        (x, y) => `${x} / ${y}`,
+        (x, y) => `(${x} / ${y})`,
         "float",
         "float",
         (a, b) => a / b,
         ["Math"],
         2
     ),
+    invert: new Computation(
+        "1/x",
+        x => `(1 / ${x})`,
+        "float",
+        "float",
+        a => 1 / a,
+        ["Math"],
+        1
+    ),
+    pow: new Computation(
+        "x^2",
+        x => `(${x} ^ 2)`,
+        "float",
+        "float",
+        a => Math.pow(a, 2),
+        ["Math"],
+        1
+    ),
+    sqrt: new Computation(
+        "sqrt",
+        x => `sqrt(${x})`,
+        "float",
+        "float",
+        a => Math.sqrt(a),
+        ["Math"],
+        1
+    ),
+    abs: new Computation(
+        "abs",
+        x => `abs(${x})`,
+        "float",
+        "float",
+        a => Math.abs(a),
+        ["Math"],
+        1
+    ),
     percent_a_of_b: new Computation(
         "%",
-        (x, y) => `${x} %% ${y}`,
+        (x, y) => `(${x} %% ${y})`,
         "float",
         "float",
         (a, b) => (a / b) * 100,
