@@ -16,7 +16,7 @@ import {Message} from "@phosphor/messaging";
 import {Widget} from "@phosphor/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
 
-import {PerspectiveViewer, PerspectiveViewerOptions} from "@finos/perspective-viewer";
+import {HTMLPerspectiveViewerElement, PerspectiveViewerOptions} from "@finos/perspective-viewer";
 
 let _increment = 0;
 
@@ -199,7 +199,7 @@ export class PerspectiveWidget extends Widget {
      *
      * @returns {PerspectiveViewer} The widget's viewer instance.
      */
-    get viewer(): PerspectiveViewer {
+    get viewer(): HTMLPerspectiveViewerElement {
         return this._viewer;
     }
 
@@ -359,10 +359,10 @@ export class PerspectiveWidget extends Widget {
         this._viewer.toggleConfig();
     }
 
-    static createNode(node: HTMLDivElement): PerspectiveViewer {
+    static createNode(node: HTMLDivElement): HTMLPerspectiveViewerElement {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
-        const viewer = document.createElement("perspective-viewer") as PerspectiveViewer;
+        const viewer = document.createElement("perspective-viewer");
         viewer.classList.add(PSP_CLASS);
         viewer.setAttribute("type", MIME_TYPE);
 
@@ -383,7 +383,7 @@ export class PerspectiveWidget extends Widget {
         return viewer;
     }
 
-    private _viewer: PerspectiveViewer;
+    private _viewer: HTMLPerspectiveViewerElement;
     private _plugin_config: PerspectiveViewerOptions;
     private _client: boolean;
     private _dark: boolean;
