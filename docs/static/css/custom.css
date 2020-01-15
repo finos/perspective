@@ -94,6 +94,11 @@ h2.headerTitle {
     height: 50% !important;
     opacity: 0;
     transition: opacity 0.2s;
+
+    /* hide alt text just in case */
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .mainContainer .blockImage img {
