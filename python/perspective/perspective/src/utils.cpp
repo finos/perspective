@@ -114,9 +114,20 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
             } else if (cast_string) {
                 return py::cast(scalar.to_string(false)); // should reimplement
             } else {
-                // Stored timestamp should always be milliseconds
+                /**
+                 * datetimes are stored as milliseconds since epoch.
+                 * Before datetimes are loaded into Perspective, if they are
+                 * time zone aware, they must be converted into UTC.
+                 */
+                std::cout << "cp: " <<  scalar.to_int64() << std::endl;
                 auto ms = std::chrono::milliseconds(scalar.to_int64());
                 auto time_point = std::chrono::time_point<std::chrono::system_clock>(ms);
+                /**
+                 * Pybind converts std::time_point to local time, and the
+                 * `datetime.datetime` object created by `py::cast` has NO
+                 * `timezone` property. It is created using `std::localtime`,
+                 * and cannot be made timezone-aware.
+                 */
                 return py::cast(time_point);
             }
         }
