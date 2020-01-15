@@ -12,17 +12,6 @@ import {DOMWidgetView} from "@jupyter-widgets/base";
 import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
 import {PerspectiveWidget, PerspectiveWidgetOptions} from "@finos/perspective-phosphor";
 
-import perspective from "@finos/perspective";
-
-import * as wasm from "@finos/perspective/dist/umd/psp.async.wasm";
-import * as worker from "!!file-worker-loader?inline=true!@finos/perspective/dist/umd/perspective.wasm.worker.js";
-
-if (perspective) {
-    perspective.override({wasm, worker});
-} else {
-    console.warn("Perspective was undefined in jlab - wasm load errors may occur");
-}
-
 export type PerspectiveJupyterWidgetOptions = {
     view: DOMWidgetView;
 };

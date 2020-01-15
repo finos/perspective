@@ -4,8 +4,8 @@
     "description": "Perspective.js",
     "main": "dist/umd/perspective.node.js",
     "unpkg": "dist/umd/perspective.js",
-    "browser": "dist/esm/perspective.parallel.js",
-    "module": "dist/esm/perspective.parallel.js",
+    "browser": "dist/umd/perspective.inline.js",
+    "module": "dist/umd/perspective.inline.js",
     "publishConfig": {
         "access": "public"
     },
@@ -17,11 +17,11 @@
     "typings": "index.d.ts",
     "scripts": {
         "prebuild": "mkdirp dist && mkdirp obj",
-        "cpp": "npm-run-all build:cpp test:cpp",
-        "build": "npm-run-all build:babel:* build:webpack",
+        "build": "npm-run-all build:babel:* build:webpack build:webpack:umd:inline",
         "build:babel:js": "babel src/js --source-maps --out-dir dist/esm",
         "build:babel:emsdk": "babel obj --source-maps --out-dir dist/esm",
-        "build:webpack": "npm-run-all -p build:webpack:*",
+        "build:webpack": "npm-run-all -p build:webpack:* ",
+        "build:webpack:umd:inline": "webpack --color --config src/config/perspective.inline.config.js",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
         "docs": "npm-run-all docs:jsdoc docs:deploy",

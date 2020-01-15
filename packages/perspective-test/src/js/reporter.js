@@ -8,6 +8,7 @@
  */
 
 const cp = require("child_process");
+const paths = require("./paths.js");
 const fs = require("fs");
 const termimg = require("term-img");
 
@@ -48,7 +49,7 @@ module.exports = class ImageViewerReporter {
                 const ancestors = test.ancestorTitles.filter(x => x.indexOf(".html") > -1).map(x => x.replace(".html", "").replace(/ /g, "_"));
                 const desc = ancestors.join("/");
                 const name = test.title.replace(/ /g, "_").replace(/[\.']/g, "");
-                const filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${desc}/${name}.diff.png`;
+                const filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.diff.png`;
                 const alt_filename = `screenshots/${desc}/${name}.diff.png`;
                 if (filename) {
                     this.write_img(test.title, ancestors, filename);

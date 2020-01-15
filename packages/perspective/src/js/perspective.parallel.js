@@ -17,6 +17,11 @@ import {override_config} from "../../dist/esm/config/index.js";
 
 const HEARTBEAT_TIMEOUT = 15000;
 
+// eslint-disable-next-line max-len
+const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While Perspective's runtime performance is not affected, you may see smaller assets size and faster engine initial load time using "@finos/perspective-webpack-plugin" to build your application.
+
+https://perspective.finos.org/docs/md/installation.html#-an-important-note-about-hosting`;
+
 /**
  * Singleton WASM file download cache.
  */
@@ -33,17 +38,15 @@ const override = new (class {
         });
     }
 
-    set({wasm, worker}) {
-        this._wasm = wasm || this._wasm;
-        this._worker = worker || this._worker;
-    }
-
     worker() {
-        return (this._worker || wasm_worker)();
+        return wasm_worker();
     }
 
     async wasm() {
-        if (!this._wasm) {
+        if (wasm instanceof ArrayBuffer) {
+            console.warn(INLINE_WARNING);
+            this._wasm = wasm;
+        } else {
             this._wasm = await this._fetch(wasm);
         }
         return this._wasm;

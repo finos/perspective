@@ -8,7 +8,6 @@
  */
 
 const path = require("path");
-const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
@@ -16,7 +15,6 @@ module.exports = {
     entry: {
         index: "./src/ts/index.ts"
     },
-    devtool: "cheap-eval-source-map",
     resolveLoader: {
         alias: {
             "file-worker-loader": "@finos/perspective-webpack-plugin/src/js/psp-worker-loader.js"
@@ -32,7 +30,7 @@ module.exports = {
     },
     externals: /\@jupyterlab|\@phosphor|\@jupyter-widgets/,
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
-    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
+    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
     module: {
         rules: [
             {

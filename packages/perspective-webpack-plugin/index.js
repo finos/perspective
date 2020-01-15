@@ -30,7 +30,34 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
+        const compilerOptions = compiler.options;
+        const moduleOptions = compilerOptions.module || (compilerOptions.module = {});
+
         const rules = [];
+
+        if (!this.options.inline) {
+            rules.push({
+                test: /perspective\.inline\.js/,
+                include: this.options.load_path,
+                use: [
+                    {
+                        loader: require.resolve("./src/js/switch-inline-loader.js")
+                    }
+                ]
+            });
+
+            if (compilerOptions.target !== "node") {
+                rules.push({
+                    test: /__node\.js$/,
+                    include: this.options.load_path,
+                    use: [
+                        {
+                            loader: require.resolve("./src/js/null-loader.js")
+                        }
+                    ]
+                });
+            }
+        }
 
         if (this.options.build_worker) {
             rules.push({
@@ -89,8 +116,6 @@ class PerspectiveWebpackPlugin {
             }
         });
 
-        const compilerOptions = compiler.options;
-        const moduleOptions = compilerOptions.module || (compilerOptions.module = {});
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }
 }

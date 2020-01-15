@@ -8,8 +8,7 @@
  */
 
 const DEFAULT_CONFIG = require("./settings.js").default;
-
-const NAMES = ["perspective.config.js", "perspective.config.json", "package.json"];
+const get_config_file = require("./__node.js").default;
 
 module.exports.get_types = function() {
     return Object.keys(module.exports.get_config().types);
@@ -49,35 +48,6 @@ function mergeDeep(target, ...sources) {
     }
 
     return mergeDeep(target, ...sources);
-}
-
-function get_config_file() {
-    // eslint-disable-next-line no-undef
-    const REQUIRE = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__ : module.require;
-    const path = REQUIRE("path");
-    const fs = REQUIRE("fs");
-    const [root, ...curr] = process.cwd().split(path.sep);
-    while (curr.length > 0) {
-        for (const name of NAMES) {
-            const candidate = `${root}${path.sep}${path.join(...curr, name)}`;
-            if (fs.existsSync(candidate)) {
-                if (name.endsWith("json")) {
-                    const json = JSON.parse(fs.readFileSync(candidate));
-                    if (name === "package.json") {
-                        if (json.perspective) {
-                            return json.perspective;
-                        }
-                    } else {
-                        return json;
-                    }
-                } else {
-                    const mod = REQUIRE(candidate);
-                    return mod.default || mod;
-                }
-            }
-        }
-        curr.pop();
-    }
 }
 
 global.__PERSPECTIVE_CONFIG__ = undefined;

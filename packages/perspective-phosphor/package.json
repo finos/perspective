@@ -23,6 +23,7 @@
         "build:styles": "webpack --color --config config/webpack.theme.config.js",
         "build:umd": "webpack --color --config config/webpack.umd.config.js",
         "clean": "rimraf dist",
+        "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
         "test": "yarn test:run",
         "test:run": "npm-run-all test:unit test:integration",
         "test:unit": "jest  --color --silent --config=./config/jest.unit.config.js 2>&1",
