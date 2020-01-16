@@ -56,3 +56,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
 * [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
+
+## Hiring
+
+Interested in working on Perspective full time?  [Send us your resume](mailto:join_perspective@jpmorgan.com)
