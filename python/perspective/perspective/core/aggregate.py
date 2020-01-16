@@ -29,7 +29,6 @@ class Aggregate(Enum):
     HIGH = 'high'
     LOW = 'low'
     MEAN = 'mean'
-    MEAN_BY_COUNT = 'mean by count'
     MEDIAN = 'median'
     OR = 'or'
     PCT_SUM_PARENT = 'pct sum parent'

@@ -35,20 +35,23 @@ join_column_names(
 }
 
 template <typename CTX_T>
-View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
-    std::string separator, t_view_config view_config)
+View<CTX_T>::View(
+        std::shared_ptr<Table> table,
+        std::shared_ptr<CTX_T> ctx,
+        const std::string& name,
+        const std::string& separator,
+        std::shared_ptr<t_view_config> view_config)
     : m_table(table)
     , m_ctx(ctx)
-    , m_name(std::move(name))
-    , m_separator(std::move(separator))
-    , m_view_config(std::move(view_config)) {
-
-    m_row_pivots = m_view_config.get_row_pivots();
-    m_column_pivots = m_view_config.get_column_pivots();
-    m_aggregates = m_view_config.get_aggspecs();
-    m_columns = m_view_config.get_columns();
-    m_filter = m_view_config.get_fterm();
-    m_sort = m_view_config.get_sortspec();
+    , m_name(name)
+    , m_separator(separator)
+    , m_view_config(view_config) {
+    m_row_pivots = m_view_config->get_row_pivots();
+    m_column_pivots = m_view_config->get_column_pivots();
+    m_aggregates = m_view_config->get_aggspecs();
+    m_columns = m_view_config->get_columns();
+    m_filter = m_view_config->get_fterm();
+    m_sort = m_view_config->get_sortspec();
 
     // Add hidden columns used in sorts to the `m_hidden_sort` vector.
     if (m_sort.size() > 0) {
@@ -56,7 +59,7 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     }
 
     if (m_column_pivots.size() > 0) {
-        auto column_sort = m_view_config.get_col_sortspec();
+        auto column_sort = m_view_config->get_col_sortspec();
         _find_hidden_sort(column_sort);
     }
 
@@ -74,7 +77,7 @@ View<CTX_T>::~View() {
 }
 
 template <typename CTX_T>
-t_view_config
+std::shared_ptr<t_view_config>
 View<CTX_T>::get_view_config() const {
     return m_view_config;
 }
@@ -690,7 +693,7 @@ View<CTX_T>::get_column_dtype(t_uindex idx) const {
 template <typename CTX_T>
 bool
 View<CTX_T>::is_column_only() const {
-    return m_view_config.is_column_only();
+    return m_view_config->is_column_only();
 }
 
 /******************************************************************************

@@ -41,6 +41,80 @@ export default function(Module) {
     let accessor = new DataAccessor();
     const SIDES = ["zero", "one", "two"];
 
+    /**
+     * Map a string name of a computation method to a value in the
+     * `t_computation_method` enum.
+     *
+     * @param {String} name The name of a computation method.
+     */
+    // eslint-disable-next-line no-unused-vars
+    function name_to_computation(name) {
+        switch (name) {
+            case "+":
+                return __MODULE__.t_computation_method.ADD;
+            case "-":
+                return __MODULE__.t_computation_method.SUBTRACT;
+            case "*":
+                return __MODULE__.t_computation_method.MULTIPLY;
+            case "/":
+                return __MODULE__.t_computation_method.DIVIDE;
+            case "1/x":
+                return __MODULE__.t_computation_method.INVERT;
+            case "x^2":
+                return __MODULE__.t_computation_method.POW;
+            case "sqrt":
+                return __MODULE__.t_computation_method.SQRT;
+            case "abs":
+                return __MODULE__.t_computation_method.ABS;
+            case "%":
+                return __MODULE__.t_computation_method.PERCENT_A_OF_B;
+            case "Uppercase":
+                return __MODULE__.t_computation_method.UPPERCASE;
+            case "Lowercase":
+                return __MODULE__.t_computation_method.LOWERCASE;
+            case "length":
+                return __MODULE__.t_computation_method.LENGTH;
+            case "concat_space":
+                return __MODULE__.t_computation_method.CONCAT_SPACE;
+            case "concat_comma":
+                return __MODULE__.t_computation_method.CONCAT_COMMA;
+            case "Bucket (10)":
+                return __MODULE__.t_computation_method.BUCKET_10;
+            case "Bucket (100)":
+                return __MODULE__.t_computation_method.BUCKET_100;
+            case "Bucket (1000)":
+                return __MODULE__.t_computation_method.BUCKET_1000;
+            case "Bucket (1/10)":
+                return __MODULE__.t_computation_method.BUCKET_0_1;
+            case "Bucket (1/100)":
+                return __MODULE__.t_computation_method.BUCKET_0_0_1;
+            case "Bucket (1/1000)":
+                return __MODULE__.t_computation_method.BUCKET_0_0_0_1;
+            case "Hour of Day":
+                return __MODULE__.t_computation_method.HOUR_OF_DAY;
+            case "Day of Week":
+                return __MODULE__.t_computation_method.DAY_OF_WEEK;
+            case "Month of Year":
+                return __MODULE__.t_computation_method.MONTH_OF_YEAR;
+            case "Bucket (s)":
+                return __MODULE__.t_computation_method.SECOND_BUCKET;
+            case "Bucket (m)":
+                return __MODULE__.t_computation_method.MONTH_BUCKET;
+            case "Bucket (h)":
+                return __MODULE__.t_computation_method.HOUR_BUCKET;
+            case "Bucket (D)":
+                return __MODULE__.t_computation_method.DAY_BUCKET;
+            case "Bucket (W)":
+                return __MODULE__.t_computation_method.WEEK_BUCKET;
+            case "Bucket (M)":
+                return __MODULE__.t_computation_method.MONTH_BUCKET;
+            case "Bucket (Y)":
+                return __MODULE__.t_computation_method.YEAR_BUCKET;
+            default:
+                return null;
+        }
+    }
+
     /***************************************************************************
      *
      * Private

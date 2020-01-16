@@ -958,20 +958,23 @@ module.exports = perspective => {
         });
 
         describe("Computed constructors", function() {
-            it("Computed column of arity 0", async function() {
-                var table = perspective.table(data);
+            it("Computed column of arity 1", async function() {
+                var table = perspective.table({
+                    x: [-1, -2, -3, -4]
+                });
 
                 let table2 = table.add_computed([
                     {
-                        column: "const",
-                        type: "integer",
+                        column_name: "abs(x)",
+                        func_name: "abs",
                         func: () => 1,
-                        inputs: []
+                        return_type: "integer",
+                        input_columns: ["x"]
                     }
                 ]);
-                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
+                let view = table2.view({columns: ["abs"], aggregates: {abs: "count"}});
                 let result = await view.to_json();
-                expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
+                expect(result).toEqual([{abs: 1}, {abs: 2}, {abs: 3}, {abs: 4}]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -982,10 +985,11 @@ module.exports = perspective => {
 
                 let table2 = table.add_computed([
                     {
-                        column: "ratio",
-                        type: "float",
+                        column_name: "ratio",
+                        return_type: "float",
+                        func_name: "/",
                         func: (w, x) => w / x,
-                        inputs: ["w", "x"]
+                        input_columns: ["w", "x"]
                     }
                 ]);
                 let view = table2.view({columns: ["ratio"], aggregates: {ratio: "count"}});
@@ -1006,10 +1010,11 @@ module.exports = perspective => {
                 var table = perspective.table(meta, {index: "y"});
                 let table2 = table.add_computed([
                     {
-                        column: "ratio",
-                        type: "float",
+                        func_name: "/",
                         func: (w, x) => w / x,
-                        inputs: ["w", "x"]
+                        column_name: "ratio",
+                        return_type: "float",
+                        input_columns: ["w", "x"]
                     }
                 ]);
 
@@ -1041,15 +1046,16 @@ module.exports = perspective => {
 
                 let table2 = table.add_computed([
                     {
-                        column: "yes/no",
-                        type: "string",
-                        func: z => (z === true ? "yes" : "no"),
-                        inputs: ["z"]
+                        func_name: "Uppercase",
+                        func: z => z.toUpperCase(),
+                        column_name: "uppercase(z)",
+                        return_type: "string",
+                        input_columns: ["z"]
                     }
                 ]);
-                let view = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
+                let view = table2.view({columns: ["uppercase(z)"], aggregates: {"uppercase(z)": "count"}});
                 let result = await view.to_json();
-                let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
+                let expected = [{"uppercase(z)": "A"}, {"uppercase(z)": "B"}, {"uppercase(z)": "C"}, {"uppercase(z)": "D"}];
                 expect(result).toEqual(expected);
                 view.delete();
                 table2.delete();
@@ -1057,35 +1063,34 @@ module.exports = perspective => {
             });
 
             it("Computed schema returns names and metadata", async function() {
-                const func = i => i + 2;
-
+                const func = (x, y) => x - y;
                 const computation = {
-                    name: "+2",
-                    input_type: "integer",
-                    return_type: "integer",
-                    func: func.toString()
+                    name: "-",
+                    func: func.toString(),
+                    input_type: "float",
+                    return_type: "float"
                 };
 
                 const table = perspective.table(data);
 
                 const table2 = table.add_computed([
                     {
-                        computation: computation,
-                        column: "plus2",
-                        type: "integer",
-                        inputs: ["x"],
-                        input_type: "integer",
-                        func: func
+                        func_name: "+",
+                        func: func,
+                        column_name: "minus",
+                        input_type: "float",
+                        return_type: "float",
+                        input_columns: ["x", "y"]
                     }
                 ]);
 
                 const result = await table2.computed_schema();
                 const expected = {
                     plus2: {
-                        input_columns: ["x"],
-                        input_type: "integer",
+                        input_columns: ["x", "y"],
+                        input_type: "float",
                         computation: computation,
-                        type: "integer"
+                        type: "float"
                     }
                 };
 

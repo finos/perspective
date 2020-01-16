@@ -23,6 +23,9 @@ namespace perspective {
 
 enum t_status : std::uint8_t { STATUS_INVALID, STATUS_VALID, STATUS_CLEAR };
 
+class t_date;
+class t_time;
+
 enum t_dtype {
     DTYPE_NONE,
     DTYPE_INT64,
@@ -48,6 +51,78 @@ enum t_dtype {
     DTYPE_LAST_VLEN,
     DTYPE_LAST,
     DTYPE_OBJECT
+};
+
+template<t_dtype> struct t_dtype_to_type;
+
+template<>
+struct t_dtype_to_type<DTYPE_INT64> {
+    using type = std::int64_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_INT32> {
+    using type = std::int32_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_INT16> {
+    using type = std::int16_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_INT8> {
+    using type = std::int8_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_UINT64> {
+    using type = std::uint64_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_UINT32> {
+    using type = std::uint32_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_UINT16> {
+    using type = std::uint16_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_UINT8> {
+    using type = std::uint8_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_FLOAT64> {
+    using type = double;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_FLOAT32> {
+    using type = float;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_BOOL> {
+    using type = bool;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_TIME> {
+    using type = std::int64_t;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_DATE> {
+    using type = t_date;
+};
+
+template<>
+struct t_dtype_to_type<DTYPE_STR> {
+    using type = std::string;
 };
 
 #ifdef PSP_ENABLE_WASM

@@ -34,7 +34,6 @@ const NUMBER_AGGREGATES = [
     "high",
     "low",
     "mean",
-    "mean by count",
     "median",
     "pct sum parent",
     "pct sum grand total",
@@ -44,9 +43,9 @@ const NUMBER_AGGREGATES = [
     "unique"
 ];
 
-const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique"];
+const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique"];
 
-const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique", "and", "or"];
+const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique", "and", "or"];
 
 export const SORT_ORDERS = ["none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs"];
 

@@ -24,11 +24,11 @@ namespace binding {
 template <>
 std::shared_ptr<t_ctx0>
 make_context(std::shared_ptr<Table> table, const t_schema& schema,
-    const t_view_config& view_config, const std::string& name) {
-    auto columns = view_config.get_columns();
-    auto filter_op = view_config.get_filter_op();
-    auto fterm = view_config.get_fterm();
-    auto sortspec = view_config.get_sortspec();
+    std::shared_ptr<t_view_config> view_config, const std::string& name) {
+    auto columns = view_config->get_columns();
+    auto filter_op = view_config->get_filter_op();
+    auto fterm = view_config->get_fterm();
+    auto sortspec = view_config->get_sortspec();
 
     auto cfg = t_config(columns, filter_op, fterm);
     auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
@@ -46,13 +46,13 @@ make_context(std::shared_ptr<Table> table, const t_schema& schema,
 template <>
 std::shared_ptr<t_ctx1>
 make_context(std::shared_ptr<Table> table, const t_schema& schema,
-    const t_view_config& view_config, const std::string& name) {
-    auto row_pivots = view_config.get_row_pivots();
-    auto aggspecs = view_config.get_aggspecs();
-    auto filter_op = view_config.get_filter_op();
-    auto fterm = view_config.get_fterm();
-    auto sortspec = view_config.get_sortspec();
-    auto row_pivot_depth = view_config.get_row_pivot_depth();
+    std::shared_ptr<t_view_config> view_config, const std::string& name) {
+    auto row_pivots = view_config->get_row_pivots();
+    auto aggspecs = view_config->get_aggspecs();
+    auto filter_op = view_config->get_filter_op();
+    auto fterm = view_config->get_fterm();
+    auto sortspec = view_config->get_sortspec();
+    auto row_pivot_depth = view_config->get_row_pivot_depth();
 
     auto cfg = t_config(row_pivots, aggspecs, filter_op, fterm);
     auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
@@ -77,17 +77,17 @@ make_context(std::shared_ptr<Table> table, const t_schema& schema,
 template <>
 std::shared_ptr<t_ctx2>
 make_context(std::shared_ptr<Table> table, const t_schema& schema,
-    const t_view_config& view_config, const std::string& name) {
-    bool column_only = view_config.is_column_only();
-    auto row_pivots = view_config.get_row_pivots();
-    auto column_pivots = view_config.get_column_pivots();
-    auto aggspecs = view_config.get_aggspecs();
-    auto filter_op = view_config.get_filter_op();
-    auto fterm = view_config.get_fterm();
-    auto sortspec = view_config.get_sortspec();
-    auto col_sortspec = view_config.get_col_sortspec();
-    auto row_pivot_depth = view_config.get_row_pivot_depth();
-    auto column_pivot_depth = view_config.get_column_pivot_depth();
+    std::shared_ptr<t_view_config> view_config, const std::string& name) {
+    bool column_only = view_config->is_column_only();
+    auto row_pivots = view_config->get_row_pivots();
+    auto column_pivots = view_config->get_column_pivots();
+    auto aggspecs = view_config->get_aggspecs();
+    auto filter_op = view_config->get_filter_op();
+    auto fterm = view_config->get_fterm();
+    auto sortspec = view_config->get_sortspec();
+    auto col_sortspec = view_config->get_col_sortspec();
+    auto row_pivot_depth = view_config->get_row_pivot_depth();
+    auto column_pivot_depth = view_config->get_column_pivot_depth();
 
     t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 

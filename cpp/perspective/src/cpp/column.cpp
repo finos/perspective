@@ -688,7 +688,7 @@ t_column::clear() {
 
 void
 t_column::pprint() const {
-    for (t_uindex idx = 0, loop_end = size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = 10; idx < loop_end; ++idx) {
         std::cout << idx << ": " << get_scalar(idx) << std::endl;
     }
 }

@@ -110,7 +110,7 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
 }
 
 template <>
-t_view_config
+std::shared_ptr<t_view_config>
 make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
     auto row_pivots = config.attr("get_row_pivots")().cast<std::vector<std::string>>();
     auto column_pivots = config.attr("get_column_pivots")().cast<std::vector<std::string>>();
@@ -165,19 +165,19 @@ make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
     }
 
     // create the `t_view_config`
-    t_view_config view_config(row_pivots, column_pivots, aggregates, columns, filter, sort,
+    auto view_config = std::make_shared<t_view_config>(row_pivots, column_pivots, aggregates, columns, filter, sort,
         filter_op, column_only);
 
     // transform primitive values into abstractions that the engine can use
-    view_config.init(schema);
+    view_config->init(schema);
 
     // set pivot depths if provided
     if (! config.attr("row_pivot_depth").is_none()) {
-        view_config.set_row_pivot_depth(config.attr("row_pivot_depth").cast<std::int32_t>());
+        view_config->set_row_pivot_depth(config.attr("row_pivot_depth").cast<std::int32_t>());
     }
 
     if (! config.attr("column_pivot_depth").is_none()) {
-        view_config.set_column_pivot_depth(config.attr("column_pivot_depth").cast<std::int32_t>());
+        view_config->set_column_pivot_depth(config.attr("column_pivot_depth").cast<std::int32_t>());
     }
 
     return view_config;
@@ -188,7 +188,7 @@ std::shared_ptr<View<CTX_T>>
 make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
     t_val view_config, t_val date_parser) {
     auto schema = table->get_schema();
-    t_view_config config = 
+    std::shared_ptr<t_view_config> config = 
         make_view_config<t_val>(schema, date_parser, view_config);
     auto ctx = make_context<CTX_T>(table, schema, config, name);
     auto view_ptr = std::make_shared<View<CTX_T>>(table, ctx, name, separator, config);

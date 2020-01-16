@@ -375,6 +375,7 @@ PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string dtype_to_str(t_dtype dtype);
 PERSPECTIVE_EXPORT t_dtype str_to_dtype(const std::string& typestring);
+PERSPECTIVE_EXPORT unsigned dtype_bit_mask(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
@@ -469,9 +470,6 @@ PERSPECTIVE_EXPORT t_dtype type_to_dtype<float>();
 
 template <>
 PERSPECTIVE_EXPORT t_dtype type_to_dtype<bool>();
-
-class t_date;
-class t_time;
 
 template <>
 PERSPECTIVE_EXPORT t_dtype type_to_dtype<t_time>();

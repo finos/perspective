@@ -27,8 +27,13 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
-    View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx,
-         std::string name, std::string separator, t_view_config view_config);
+    View(
+        std::shared_ptr<Table> table,
+        std::shared_ptr<CTX_T> ctx,
+        const std::string& name,
+        const std::string& separator,
+        std::shared_ptr<t_view_config> view_config);
+
     ~View();
 
     /**
@@ -36,7 +41,7 @@ public:
      *
      * @return t_view_config
      */
-    t_view_config get_view_config() const;
+    std::shared_ptr<t_view_config> get_view_config() const;
 
     /**
      * @brief The number of pivoted sides of this View.
@@ -245,6 +250,6 @@ private:
     t_uindex m_row_offset;
     t_uindex m_col_offset;
 
-    t_view_config m_view_config;
+    std::shared_ptr<t_view_config> m_view_config;
 };
 } // end namespace perspective

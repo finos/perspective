@@ -180,10 +180,10 @@ namespace binding {
      * 
      * @tparam T 
      * @param computed 
-     * @return std::vector<t_computed_column_def> 
+     * @return std::vector<t_computed_column_lambda> 
      */
     template <typename T>
-    std::vector<t_computed_column_def> make_computed_lambdas(std::vector<T> computed);
+    std::vector<t_computed_column_lambda> make_computed_lambdas(std::vector<T> computed);
 
     /**
      * @brief Utility function for accessing columns and adding data.
@@ -283,7 +283,8 @@ namespace binding {
     std::tuple<std::string, std::string, std::vector<t_tscalar>> make_filter_term(
         t_dtype column_type, T date_parser, const std::string& column_name, const std::string& filter_op_str, T filter_term);
     /**
-     * @brief Create a `t_view_config` object from the binding language's `view_config` object.
+     * @brief Create a shared pointer to a `t_view_config` object from the
+     * binding language's `view_config` object.
      *
      * @tparam T
      * @param schema
@@ -292,7 +293,8 @@ namespace binding {
      * @return t_config
      */
     template <typename T>
-    t_view_config make_view_config(const t_schema& schema, T date_parser, T config);
+    std::shared_ptr<t_view_config> make_view_config(
+        const t_schema& schema, T date_parser, T config);
 
     /**
      * @brief Create a new view.
@@ -330,8 +332,11 @@ namespace binding {
      * @return std::shared_ptr<CTX_T>
      */
     template <typename CTX_T>
-    std::shared_ptr<CTX_T> make_context(std::shared_ptr<Table> table, const t_schema& schema,
-        const t_view_config& view_config, const std::string& name);
+    std::shared_ptr<CTX_T> make_context(
+        std::shared_ptr<Table> table,
+        const t_schema& schema,
+        std::shared_ptr<t_view_config> view_config,
+        const std::string& name);
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.

@@ -14,6 +14,7 @@
 #include <perspective/raw_types.h>
 #include <perspective/gnode.h>
 #include <perspective/pool.h>
+#include <perspective/computed.h>
 #include <perspective/data_table.h>
 
 namespace perspective {
@@ -40,9 +41,12 @@ public:
      * @param index - a string column name to be used as a primary key. If not explicitly set, a primary key will be generated.
      * @param op
      */
-    Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
-        std::vector<t_dtype> data_types, std::uint32_t limit,
-        std::string index);
+    Table(
+        std::shared_ptr<t_pool> pool,
+        const std::vector<std::string>& column_names,
+        const std::vector<t_dtype>& data_types,
+        std::uint32_t limit,
+        const std::string& index);
 
     /**
      * @brief Register the given `t_data_table` with the underlying pool and gnode, thus
@@ -84,7 +88,27 @@ public:
      * @param data_table
      * @param computed_lambdas
      */
-    void add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_def> computed_lambdas);
+    void add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_lambda> computed_lambdas);
+    
+    /**
+     * @brief Add a single computed column to the `data_table` using
+     * `flattened`, which represents the accumulated state of `data_table`
+     * after an `update()` has been applied but _before_ contexts have been
+     * notified.
+     * 
+     * Using `row_indices`, a vector of each row index that have been updated,
+     * only recalculate computed columns for the rows that have been updated.
+     * 
+     * @param data_table 
+     * @param flattened
+     * @param row_indices
+     * @param computed_column_def
+     */
+    void add_computed_column(
+        std::shared_ptr<t_data_table> data_table, 
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& row_indices,
+        t_computed_column_def computed_column_def);
 
     /**
      * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.
