@@ -35,22 +35,14 @@
     <script>
         window.addEventListener('WebComponentsReady', function() {
             const elem = document.getElementById("viewer");
-            fetch("date32.arrow").then((response) => {
+            fetch("all_numeric_types.arrow").then((response) => {
                 if (!response.ok) {
                     throw new Error("Error: status " + status);
                 }
 
                 const date32 = response.arrayBuffer();
                 date32.then(buffer => elem.load(buffer));
-            })
-            fetch("date64.arrow").then((response) => {
-                if (!response.ok) {
-                    throw new Error("Error: status " + status);
-                }
-
-                const date64 = response.arrayBuffer();
-                date64.then(buffer => elem.update(buffer));
-            })
+            });
         });
     </script>
 

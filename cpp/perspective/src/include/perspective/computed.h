@@ -17,10 +17,12 @@
 #include <perspective/column.h>
 #include <perspective/scalar.h>
 #include <perspective/rlookup.h>
+#include <perspective/computed_method.h>
 
 namespace perspective {
 
-enum t_computation_method {
+enum t_computation_method_name {
+    INVALID_COMPUTATION_METHOD,
     ADD,
     SUBTRACT,
     MULTIPLY,
@@ -63,20 +65,20 @@ struct PERSPECTIVE_EXPORT t_computation {
         t_dtype input_type_1,
         t_dtype input_type_2,
         t_dtype return_type,
-        t_computation_method name
+        t_computation_method_name name
     );
 
     t_dtype m_input_type_1;
     t_dtype m_input_type_2;
     t_dtype m_return_type;
-    t_computation_method m_name;
+    t_computation_method_name m_name;
 };
 
 constexpr t_computation::t_computation(
     t_dtype input_type_1,
     t_dtype input_type_2,
     t_dtype return_type,
-    t_computation_method name)
+    t_computation_method_name name)
     : m_input_type_1(input_type_1)
     , m_input_type_2(input_type_2)
     , m_return_type(return_type)
@@ -110,7 +112,7 @@ class PERSPECTIVE_EXPORT t_computed_column {
 public:
 
     static t_computation get_computation(
-        t_computation_method name, const std::vector<t_dtype>& input_types);
+        t_computation_method_name name, const std::vector<t_dtype>& input_types);
 
     static void apply_computation(
         const std::vector<std::shared_ptr<t_column>>& table_columns,
@@ -119,6 +121,7 @@ public:
         const std::vector<t_rlookup>& row_indices,
         const t_computation& computation);
 
+    /*
     template <typename V, typename T = V, typename U = V>
     static V add(T x, U y) {
         return static_cast<V>(static_cast<T>(x) + static_cast<U>(y));
@@ -131,7 +134,7 @@ public:
 
     static std::int32_t subtract(std::int32_t x, std::int32_t y) {
         return x - y;
-    };
+    };*/
 
     static std::int32_t multiply(std::int32_t x, std::int32_t y) {
         return x * y;
@@ -166,6 +169,8 @@ public:
         const std::string& x, const std::string& y) {
             return x + ", " + y;
     }
+
+    static void make_computations();
 
     static std::vector<t_computation> computations;
 };

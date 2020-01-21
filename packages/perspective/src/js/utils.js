@@ -13,7 +13,7 @@
  * @returns {string}
  */
 export function get_column_type(val) {
-    if (val >= 1 && val <= 4) {
+    if (val >= 1 && val <= 8) {
         return "integer";
     } else if (val === 19) {
         return "string";

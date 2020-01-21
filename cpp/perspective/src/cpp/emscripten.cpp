@@ -927,57 +927,73 @@ namespace binding {
 
     template <>
     void
-    add_computed_column(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices, t_val computed_def) {
+    add_computed_column(
+        std::shared_ptr<t_data_table> table, 
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& row_indices,
+        t_val computed_def) {
         std::uint32_t end = row_indices.size();
         if (end == 0) {
             end = flattened->size();
         }
 
         t_val input_names = computed_def["inputs"];
-        std::vector<std::string> input_column_names = vecFromArray<t_val, std::string>(input_names);
-        std::string output_column_name = computed_def["column"].as<std::string>();
+        std::vector<std::string> input_column_names = 
+            vecFromArray<t_val, std::string>(input_names);
+        std::string output_column_name = 
+            computed_def["column"].as<std::string>();
         t_val type = computed_def["type"];
-        t_val computed_func = computed_def["func"];
 
         if (has_value(computed_def["func_name"])) {
-            // Only run for +
-            std::vector<std::string> operators{"+"};
-            std::string op = computed_def["func_name"].as<std::string>();
-            if (std::find(operators.begin(), operators.end(), op) != operators.end()) {
-                std::vector<t_dtype> input_types;
-                std::vector<std::shared_ptr<t_column>> table_columns;
-                std::vector<std::shared_ptr<t_column>> flattened_columns;
-                for (const auto& column_name : input_column_names) {
-                    auto table_column = table->get_column(column_name);
-                    table_columns.push_back(table_column);
-                    input_types.push_back(table_column->get_dtype());
-                    flattened_columns.push_back(flattened->get_column(column_name));
+            t_computation_method_name method = 
+                computed_def["func_name"].as<t_computation_method_name>();
+            switch (method) {
+                case ADD:
+                case SUBTRACT:
+                case MULTIPLY:
+                case DIVIDE: {
+                    std::vector<t_dtype> input_types;
+                    std::vector<std::shared_ptr<t_column>> table_columns;
+                    std::vector<std::shared_ptr<t_column>> flattened_columns;
+                    for (const auto& column_name : input_column_names) {
+                        auto table_column = table->get_column(column_name);
+                        table_columns.push_back(table_column);
+                        input_types.push_back(table_column->get_dtype());
+                        flattened_columns.push_back(
+                            flattened->get_column(column_name));
+                    }
+
+                    // This uses the `t_computed_method` enum, not string name
+                    t_computation computation = t_computed_column::get_computation(
+                        method, input_types);
+                    t_dtype output_column_type = computation.m_return_type;
+
+                    // don't double create output column
+                    auto schema = flattened->get_schema();
+                    std::shared_ptr<t_column> output_column;
+                    if (schema.has_column(output_column_name)) {
+                        output_column = flattened->get_column(output_column_name);
+                    } else {
+                        output_column = flattened->add_column_sptr(
+                            output_column_name, output_column_type, true);
+                    }
+
+                    t_computed_column::apply_computation(
+                        table_columns,
+                        flattened_columns,
+                        output_column,
+                        row_indices,
+                        computation);
+                    return;
+                } break;
+                default: {
+                    break;
                 }
-
-                // This uses the `t_computed_method` enum, not string name
-                t_computation computation = t_computed_column::get_computation(t_computation_method::ADD, input_types);
-                t_dtype output_column_type = computation.m_return_type;
-
-                // don't double create output column
-                auto schema = flattened->get_schema();
-                std::shared_ptr<t_column> output_column;
-                if (schema.has_column(output_column_name)) {
-                    output_column = flattened->get_column(output_column_name);
-                } else {
-                    output_column = flattened->add_column_sptr(output_column_name, output_column_type, true);
-                }
-
-                t_computed_column::apply_computation(
-                    table_columns,
-                    flattened_columns,
-                    output_column,
-                    row_indices,
-                    computation);
-                return;
             }
         }
         
         // original path
+        t_val computed_func = computed_def["func"];
         std::string typestring;
 
         if (type.isUndefined()) {
@@ -1642,7 +1658,10 @@ using namespace perspective::binding;
  */
 int
 main(int argc, char** argv) {
-     // clang-format off
+// seed the computations vector
+t_computed_column::make_computations();
+
+// clang-format off
 EM_ASM({
 
     if (typeof self !== "undefined") {
@@ -1984,9 +2003,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_computation_method
+     * t_computation_method_name
      */
-    enum_<t_computation_method>("t_computation_method")
+    enum_<t_computation_method_name>("t_computation_method_name")
+        .value("INVALID_COMPUTATION_METHOD", INVALID_COMPUTATION_METHOD)
         .value("ADD", ADD)
         .value("SUBTRACT", SUBTRACT)
         .value("MULTIPLY", MULTIPLY)
