@@ -27,6 +27,9 @@ const int_float_subtract_data = [
     {u: 5.5, v: 5, w: 4.5, x: 4, y: "d", z: false}
 ];
 
+const arrows = require("./test_arrows.js");
+const arrow = arrows.numbers_arrow;
+
 module.exports = perspective => {
     describe("computed columns", function() {
         describe("constructors", function() {
@@ -419,6 +422,172 @@ module.exports = perspective => {
             });
         });
 
+        describe("types", function() {
+            const cols = ["i8", "ui8", "i16", "ui16", "i32", "ui32", "i64", "ui64", "f32", "f64"];
+
+            it("Should compute functions between all types, add", async function() {
+                const int_result = [0, 2, 6, 8, 12, 14, 18, 20, 24, 26];
+                const int_float_result = [0, 2.5, 6, 8.5, 12, 14.5, 18, 20.5, 24, 26.5];
+                const float_result = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27];
+                for (let i = 0; i < cols.length; i++) {
+                    for (let j = 0; j < cols.length; j++) {
+                        const x = cols[i];
+                        const y = cols[j];
+                        const name = `(${x} + ${y})`;
+                        let table = perspective.table(arrow.slice()).add_computed([
+                            {
+                                func_name: "+",
+                                inputs: [x, y],
+                                column: name
+                            }
+                        ]);
+
+                        let view = table.view({
+                            columns: [name]
+                        });
+
+                        let results = await view.to_columns();
+                        let comparison;
+
+                        if (i > 7 && j > 7) {
+                            comparison = float_result;
+                        } else if (i > 7 || j > 7) {
+                            comparison = int_float_result;
+                        } else {
+                            comparison = int_result;
+                        }
+
+                        expect(results[name]).toEqual(comparison);
+                        view.delete();
+                        table.delete();
+                    }
+                }
+            });
+
+            it("Should compute functions between all types, subtract", async function() {
+                const int_result = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                const int_float_result = [0, -0.5, 0, -0.5, 0, -0.5, 0, -0.5, 0, -0.5];
+                const float_int_result = [0, 0.5, 0, 0.5, 0, 0.5, 0, 0.5, 0, 0.5];
+                for (let i = 0; i < cols.length; i++) {
+                    for (let j = 0; j < cols.length; j++) {
+                        const x = cols[i];
+                        const y = cols[j];
+                        const name = `(${x} - ${y})`;
+                        let table = perspective.table(arrow.slice()).add_computed([
+                            {
+                                func_name: "-",
+                                inputs: [x, y],
+                                column: name
+                            }
+                        ]);
+
+                        let view = table.view({
+                            columns: [name]
+                        });
+
+                        let results = await view.to_columns();
+                        let comparison;
+
+                        if (x.includes("i") && y.includes("f")) {
+                            comparison = int_float_result;
+                        } else if (x.includes("f") && y.includes("i")) {
+                            comparison = float_int_result;
+                        } else {
+                            comparison = int_result;
+                        }
+
+                        expect(results[name]).toEqual(comparison);
+                        view.delete();
+                        table.delete();
+                    }
+                }
+            });
+
+            it("Should compute functions between all types, multiply", async function() {
+                const int_result = [0, 1, 9, 16, 36, 49, 81, 100, 144, 169];
+                const int_float_result = [0, 1.5, 9, 18, 36, 52.5, 81, 105, 144, 175.5];
+                const float_result = [0, 2.25, 9, 20.25, 36, 56.25, 81, 110.25, 144, 182.25];
+                for (let i = 0; i < cols.length; i++) {
+                    for (let j = 0; j < cols.length; j++) {
+                        const x = cols[i];
+                        const y = cols[j];
+                        const name = `(${x} * ${y})`;
+                        let table = perspective.table(arrow.slice()).add_computed([
+                            {
+                                func_name: "*",
+                                inputs: [x, y],
+                                column: name
+                            }
+                        ]);
+
+                        let view = table.view({
+                            columns: [name]
+                        });
+
+                        let results = await view.to_columns();
+                        let comparison;
+
+                        if (x.includes("f") && y.includes("f")) {
+                            comparison = float_result;
+                        } else if (x.includes("f") || y.includes("f")) {
+                            comparison = int_float_result;
+                        } else {
+                            comparison = int_result;
+                        }
+
+                        expect(results[name]).toEqual(comparison);
+                        view.delete();
+                        table.delete();
+                    }
+                }
+            });
+
+            it("Should compute functions between all types, divide", async function() {
+                const int_result = [null, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+                const int_float_result = [null, 0.6666666666666666, 1, 0.8888888888888888, 1, 0.9333333333333333, 1, 0.9523809523809523, 1, 0.9629629629629629];
+                const int_float_result_precise = [null, 0.6666666865348816, 1, 0.8888888955116272, 1, 0.9333333373069763, 1, 0.9523809552192688, 1, 0.9629629850387573];
+                const float_int_result = [null, 1.5, 1, 1.125, 1, 1.0714285714285714, 1, 1.05, 1, 1.0384615384615385];
+                for (let i = 0; i < cols.length; i++) {
+                    for (let j = 0; j < cols.length; j++) {
+                        const x = cols[i];
+                        const y = cols[j];
+                        const name = `(${x} / ${y})`;
+                        let table = perspective.table(arrow.slice()).add_computed([
+                            {
+                                func_name: "/",
+                                inputs: [x, y],
+                                column: name
+                            }
+                        ]);
+
+                        let view = table.view({
+                            columns: [name]
+                        });
+
+                        let results = await view.to_columns();
+                        let comparison;
+
+                        // 8 and 16-bit less precise when divided out
+                        const narrow = i < 8 && j > 7;
+
+                        if (narrow) {
+                            comparison = int_float_result;
+                        } else if (x.includes("f") && y.includes("i")) {
+                            comparison = float_int_result;
+                        } else if (x.includes("i") && y.includes("f")) {
+                            comparison = int_float_result_precise;
+                        } else {
+                            comparison = int_result;
+                        }
+
+                        expect(results[name]).toEqual(comparison);
+                        view.delete();
+                        table.delete();
+                    }
+                }
+            });
+        });
+
         describe("row pivots", function() {
             it("should update on dependent columns", async function() {
                 const table = perspective
@@ -454,6 +623,9 @@ module.exports = perspective => {
                     {__ROW_PATH__: [7.75], int: 3, "int+float": 7.75, float: 4.75, string: 1, datetime: 1, __INDEX__: [2]},
                     {__ROW_PATH__: [9.25], int: 4, "int+float": 9.25, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]}
                 ]);
+
+                view.delete();
+                table.delete();
             });
 
             it("should update on dependent columns, add", async function() {
@@ -490,6 +662,9 @@ module.exports = perspective => {
                     {__ROW_PATH__: [7.75], int: 3, "int+float": 7.75, float: 4.75, string: 1, datetime: 1, __INDEX__: [2]},
                     {__ROW_PATH__: [9.25], int: 4, "int+float": 9.25, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]}
                 ]);
+
+                view.delete();
+                table.delete();
             });
 
             it("should update on dependent columns, subtract", async function() {
@@ -526,6 +701,9 @@ module.exports = perspective => {
                     {__ROW_PATH__: [-1.25], int: 4, "int-float": -1.25, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]},
                     {__ROW_PATH__: [1.75], int: 4, "int-float": 1.75, float: 2.25, string: 1, datetime: 1, __INDEX__: [0]}
                 ]);
+
+                view.delete();
+                table.delete();
             });
 
             it("should update on dependent columns, multiply", async function() {
@@ -562,6 +740,9 @@ module.exports = perspective => {
                     {__ROW_PATH__: [14.25], int: 3, "int * float": 14.25, float: 4.75, string: 1, datetime: 1, __INDEX__: [2]},
                     {__ROW_PATH__: [21], int: 4, "int * float": 21, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]}
                 ]);
+
+                view.delete();
+                table.delete();
             });
 
             it("should update on dependent columns, divide", async function() {
@@ -598,6 +779,9 @@ module.exports = perspective => {
                     {__ROW_PATH__: [0.7619047619047619], int: 4, "int / float": 0.7619047619047619, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]},
                     {__ROW_PATH__: [1.7777777777777777], int: 4, "int / float": 1.7777777777777777, float: 2.25, string: 1, datetime: 1, __INDEX__: [0]}
                 ]);
+
+                view.delete();
+                table.delete();
             });
         });
     });

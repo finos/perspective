@@ -113,13 +113,16 @@ public:
 
     static t_computation get_computation(
         t_computation_method_name name, const std::vector<t_dtype>& input_types);
+    
+    static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_method(
+        t_computation computation);
 
     static void apply_computation(
         const std::vector<std::shared_ptr<t_column>>& table_columns,
         const std::vector<std::shared_ptr<t_column>>& flattened_columns,
         std::shared_ptr<t_column> output_column,
         const std::vector<t_rlookup>& row_indices,
-        const t_computation& computation);
+        const std::function<t_tscalar(t_tscalar, t_tscalar)>& method);
 
     /*
     template <typename V, typename T = V, typename U = V>

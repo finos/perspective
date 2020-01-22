@@ -47,9 +47,7 @@ export default function(Module) {
      *
      * @param {String} name The name of a computation method.
      */
-    // eslint-disable-next-line no-unused-vars
     function name_to_computation(name) {
-        console.log(name);
         switch (name) {
             case "+":
                 return __MODULE__.t_computation_method_name.ADD;

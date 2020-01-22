@@ -978,12 +978,13 @@ namespace binding {
                             output_column_name, output_column_type, true);
                     }
 
+                    std::function<t_tscalar(t_tscalar, t_tscalar)> method = t_computed_column::get_computed_method(computation);
                     t_computed_column::apply_computation(
                         table_columns,
                         flattened_columns,
                         output_column,
                         row_indices,
-                        computation);
+                        method);
                     return;
                 } break;
                 default: {

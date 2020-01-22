@@ -549,29 +549,29 @@ t_tscalar add(t_tscalar x, t_tscalar y) {
     t_dtype y_dtype = y.get_dtype();
 
     switch (x_dtype) {
-        case DTYPE_INT64: {
-            return add_helper<DTYPE_INT64>(x, y);
-        } break;
-        case DTYPE_INT32: {
-            return add_helper<DTYPE_INT32>(x, y);
-        } break;
-        case DTYPE_INT16: {
-            return add_helper<DTYPE_INT16>(x, y);
-        } break;
-        case DTYPE_INT8: {
-            return add_helper<DTYPE_INT8>(x, y);
-        } break;
-        case DTYPE_UINT64: {
-            return add_helper<DTYPE_UINT64>(x, y);
-        } break;
-        case DTYPE_UINT32: {
-            return add_helper<DTYPE_UINT32>(x, y);
+        case DTYPE_UINT8: {
+            return add_helper<DTYPE_UINT8>(x, y);
         } break;
         case DTYPE_UINT16: {
             return add_helper<DTYPE_UINT16>(x, y);
         } break;
-        case DTYPE_UINT8: {
-            return add_helper<DTYPE_UINT8>(x, y);
+        case DTYPE_UINT32: {
+            return add_helper<DTYPE_UINT32>(x, y);
+        } break;
+        case DTYPE_UINT64: {
+            return add_helper<DTYPE_UINT64>(x, y);
+        } break;
+        case DTYPE_INT8: {
+            return add_helper<DTYPE_INT8>(x, y);
+        } break;
+        case DTYPE_INT16: {
+            return add_helper<DTYPE_INT16>(x, y);
+        } break;
+        case DTYPE_INT32: {
+            return add_helper<DTYPE_INT32>(x, y);
+        } break;
+        case DTYPE_INT64: {
+            return add_helper<DTYPE_INT64>(x, y);
         } break;
         case DTYPE_FLOAT64: {
             return add_helper<DTYPE_FLOAT64>(x, y);
@@ -1812,7 +1812,7 @@ t_tscalar divide_helper<DTYPE_UINT8>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<std::uint8_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -1903,7 +1903,7 @@ t_tscalar divide_helper<DTYPE_UINT16>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<std::uint16_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -1992,15 +1992,15 @@ t_tscalar divide_helper<DTYPE_UINT32>(t_tscalar x, t_tscalar y) {
         } break;
         case DTYPE_FLOAT32: {
             auto lhs = x.get<std::uint32_t>();
-            auto rhs = y.get<double>();
+            auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
         case DTYPE_FLOAT64: {
             auto lhs = x.get<std::uint32_t>();
-            auto rhs = y.get<float>();
+            auto rhs = y.get<double>();
             if (rhs != 0) {
                 auto r = lhs / rhs; 
                 rval.set(static_cast<double>(r));
@@ -2085,7 +2085,7 @@ t_tscalar divide_helper<DTYPE_UINT64>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<uint64_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -2176,7 +2176,7 @@ t_tscalar divide_helper<DTYPE_INT8>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<std::int8_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -2267,7 +2267,7 @@ t_tscalar divide_helper<DTYPE_INT16>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<std::int16_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -2358,7 +2358,7 @@ t_tscalar divide_helper<DTYPE_INT32>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<std::int32_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -2449,7 +2449,7 @@ t_tscalar divide_helper<DTYPE_INT64>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<std::int64_t>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -2540,7 +2540,7 @@ t_tscalar divide_helper<DTYPE_FLOAT32>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<float>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;
@@ -2632,7 +2632,7 @@ t_tscalar divide_helper<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y) {
             auto lhs = x.get<double>();
             auto rhs = y.get<float>();
             if (rhs != 0) {
-                auto r = lhs / rhs; 
+                auto r = static_cast<double>(lhs) / static_cast<double>(rhs); 
                 rval.set(static_cast<double>(r));
             }
         } break;

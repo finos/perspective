@@ -32,13 +32,212 @@ t_computed_column::get_computation(
     PSP_COMPLAIN_AND_ABORT("Could not find computation.");
 };
 
+std::function<t_tscalar(t_tscalar, t_tscalar)>
+t_computed_column::get_computed_method(t_computation computation) {
+    switch (computation.m_input_type_1) {
+        case DTYPE_UINT8: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_UINT8>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_UINT8>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_UINT8>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_UINT8>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_UINT16: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_UINT16>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_UINT16>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_UINT16>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_UINT16>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_UINT32: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_UINT32>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_UINT32>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_UINT32>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_UINT32>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_UINT64: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_UINT64>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_UINT64>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_UINT64>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_UINT64>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_INT8: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_INT8>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_INT8>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_INT8>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_INT8>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_INT16: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_INT16>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_INT16>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_INT16>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_INT16>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_INT32: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_INT32>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_INT32>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_INT32>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_INT32>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_INT64: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_INT64>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_INT64>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_INT64>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_INT64>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_FLOAT32: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_FLOAT32>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_FLOAT32>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_FLOAT32>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_FLOAT32>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                }
+            }
+        } break;
+        case DTYPE_FLOAT64: {
+            switch (computation.m_name) {
+                case ADD: {
+                    return computed_method::add_helper<DTYPE_FLOAT64>;
+                } break;
+                case SUBTRACT: {
+                    return computed_method::subtract_helper<DTYPE_FLOAT64>;
+                } break;
+                case MULTIPLY: {
+                    return computed_method::multiply_helper<DTYPE_FLOAT64>;
+                } break;
+                case DIVIDE: {
+                    return computed_method::divide_helper<DTYPE_FLOAT64>;
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+                } break;
+            }
+        } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+        } break;
+    }
+}
+
 void
 t_computed_column::apply_computation(
     const std::vector<std::shared_ptr<t_column>>& table_columns,
     const std::vector<std::shared_ptr<t_column>>& flattened_columns,
     std::shared_ptr<t_column> output_column,
     const std::vector<t_rlookup>& row_indices,
-    const t_computation& computation) {
+    const std::function<t_tscalar(t_tscalar, t_tscalar)>& method) {
     std::uint32_t end = row_indices.size();
     if (end == 0) {
         end = flattened_columns[0]->size();
@@ -66,32 +265,13 @@ t_computed_column::apply_computation(
             args.push_back(t);
         }
 
-
         if (args[0].is_none() || args[1].is_none()) {
             output_column->set_scalar(idx, mknone());
             output_column->set_valid(idx, false);
             continue;
         }
 
-        t_tscalar rval;
-
-        switch (computation.m_name) {
-            case ADD: {
-                rval = computed_method::add(args[0], args[1]);
-            } break;
-            case SUBTRACT: {
-                rval = computed_method::subtract(args[0], args[1]);
-            } break;
-            case MULTIPLY: {
-                rval = computed_method::multiply(args[0], args[1]);
-            } break;
-            case DIVIDE: {
-                rval = computed_method::divide(args[0], args[1]);
-            } break;
-            default: {
-                PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-            }
-        }
+        t_tscalar rval = method(args[0], args[1]);
 
         output_column->set_scalar(idx, rval);
 
@@ -99,8 +279,6 @@ t_computed_column::apply_computation(
             output_column->set_valid(idx, false);
         }
     }
-
-    output_column->pprint();
 }
 
 std::vector<t_computation> t_computed_column::computations = {};
