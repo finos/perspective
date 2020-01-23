@@ -4,6 +4,7 @@ Language:        Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: false
 AlignConsecutiveAssignments: false
+AlignConsecutiveMacros: true
 AlignEscapedNewlinesLeft: false
 AlignOperands:   false
 AlignTrailingComments: true
@@ -22,7 +23,7 @@ BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Attach
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: true
-ColumnLimit:     96
+ColumnLimit: 80
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4

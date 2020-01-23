@@ -21,6 +21,10 @@
 
 namespace perspective {
 
+/**
+ * @brief The name for a single computed method. Names should be defined here,
+ * and are unique for each method.
+ */
 enum t_computation_method_name {
     INVALID_COMPUTATION_METHOD,
     ADD,
@@ -111,12 +115,41 @@ struct PERSPECTIVE_EXPORT t_computed_column_def {
 class PERSPECTIVE_EXPORT t_computed_column {
 public:
 
+    /**
+     * @brief Returns a `t_computation` object corresponding to the provided
+     * name and input types. Aborts if a method cannot be found.
+     * 
+     * @param name 
+     * @param input_types 
+     * @return t_computation 
+     */
     static t_computation get_computation(
         t_computation_method_name name, const std::vector<t_dtype>& input_types);
     
+    /**
+     * @brief Given a `t_computation`, return the std::function that should be
+     * called to perform the computation on each cell. 
+     * 
+     * @param computation 
+     * @return std::function<t_tscalar(t_tscalar, t_tscalar)> 
+     */
     static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_method(
         t_computation computation);
 
+    /**
+     * @brief Given a set of input columns and an output column, perform the
+     * provided computation on the input columns, writing into the output
+     * column.
+     * 
+     * When the `Table` is updated with new data, this method is called
+     * automatically to recompute the output column based on new inputs.
+     * 
+     * @param table_columns 
+     * @param flattened_columns 
+     * @param output_column 
+     * @param row_indices 
+     * @param method 
+     */
     static void apply_computation(
         const std::vector<std::shared_ptr<t_column>>& table_columns,
         const std::vector<std::shared_ptr<t_column>>& flattened_columns,
@@ -124,55 +157,11 @@ public:
         const std::vector<t_rlookup>& row_indices,
         const std::function<t_tscalar(t_tscalar, t_tscalar)>& method);
 
-    /*
-    template <typename V, typename T = V, typename U = V>
-    static V add(T x, U y) {
-        return static_cast<V>(static_cast<T>(x) + static_cast<U>(y));
-    };
-
-    template <typename V, typename T = V, typename U = V>
-    static V subtract(T x, U y) {
-        return static_cast<V>(static_cast<T>(x) - static_cast<U>(y));
-    };
-
-    static std::int32_t subtract(std::int32_t x, std::int32_t y) {
-        return x - y;
-    };*/
-
-    static std::int32_t multiply(std::int32_t x, std::int32_t y) {
-        return x * y;
-    };
-
-    static std::int32_t divide(std::int32_t x, std::int32_t y) {
-        return x / y;
-    };
-
-    static std::int32_t invert(std::int32_t x) {
-        return 1 / x;
-    }
-
-    static std::int32_t sqrt(std::int32_t x) {
-        return std::sqrt(x);
-    }
-
-    static std::string uppercase(const std::string& x) {
-        return x;
-    }
-
-    static std::string lowercase(const std::string& x) {
-        return x;
-    }
-
-    static std::string concat_space(
-        const std::string& x, const std::string& y) {
-            return x + " " + y;
-    }
-
-    static std::string concat_comma(
-        const std::string& x, const std::string& y) {
-            return x + ", " + y;
-    }
-
+    /**
+     * @brief Pregenerate all combinations of `t_computation` structs for
+     * each `t_dtype` and `t_computed_method_name`. This method should be run
+     * once at initialization of the Perspective C++ module.
+     */
     static void make_computations();
 
     static std::vector<t_computation> computations;

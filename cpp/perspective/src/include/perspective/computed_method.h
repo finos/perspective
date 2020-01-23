@@ -14,10 +14,18 @@
 #include <perspective/exports.h>
 #include <perspective/raw_types.h>
 #include <perspective/scalar.h>
+#include <boost/algorithm/string.hpp>
 
 namespace perspective {
-namespace computed_method {
 
+/**
+ * @brief The `computed_method` namespace contains all functions that will be
+ * used to generate values for a computed column. Computed functions should
+ * receive a parameter pack of `t_tscalar`s and return a `t_tscalar` value.
+ * 
+ */
+namespace computed_method {
+    
 // Add
 template <t_dtype T>
 t_tscalar add_helper(t_tscalar x, t_tscalar y);
@@ -164,6 +172,10 @@ template <>
 t_tscalar divide_helper<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y);
 
 t_tscalar divide(t_tscalar x, t_tscalar y);
+
+// Uppercase
+
+t_tscalar uppercase(t_tscalar x);
 
 } // end namespace computed_method
 } // end namespace perspective
