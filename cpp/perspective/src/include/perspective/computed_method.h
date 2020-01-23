@@ -15,6 +15,7 @@
 #include <perspective/raw_types.h>
 #include <perspective/scalar.h>
 #include <boost/algorithm/string.hpp>
+#include <type_traits>
 
 namespace perspective {
 

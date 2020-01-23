@@ -32,6 +32,7 @@ t_computed_column::get_computation(
     PSP_COMPLAIN_AND_ABORT("Could not find computation.");
 };
 
+// TODO: macro generate
 std::function<t_tscalar(t_tscalar, t_tscalar)>
 t_computed_column::get_computed_method(t_computation computation) {
     switch (computation.m_input_type_1) {
@@ -290,14 +291,8 @@ void t_computed_column::make_computations() {
     for (const auto method : methods) {
         for (auto i = 0; i < dtypes.size(); ++i) {
             for (auto j = 0; j < dtypes.size(); ++j) {
-                t_dtype return_type = DTYPE_INT64;
-
-                if (method == DIVIDE || (is_floating_point(dtypes[i]) || is_floating_point(dtypes[j]))) {
-                    return_type = DTYPE_FLOAT64;
-                };
-
                 t_computed_column::computations.push_back(
-                    t_computation{dtypes[i], dtypes[j], return_type, method}
+                    t_computation{dtypes[i], dtypes[j], DTYPE_FLOAT64, method}
                 );
             }
         }
