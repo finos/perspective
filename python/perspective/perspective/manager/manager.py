@@ -278,7 +278,15 @@ class PerspectiveManager(object):
             if callback is not None:
                 # call the underlying method on the Table or View, and apply
                 # the dictionary of kwargs that is passed through.
-                getattr(table_or_view, method)(callback, **args[0])
+                if (method == "on_update"):
+                    # If there are no arguments, make sure we call `on_update`
+                    # with mode set to "none".
+                    mode = {"mode": "none"}
+                    if len(args) > 0:
+                        mode = args[0]
+                    getattr(table_or_view, method)(callback, **mode)
+                else:
+                    getattr(table_or_view, method)(callback)
             else:
                 logging.info("callback not found for remote call {}".format(msg))
         except Exception as error:
@@ -314,7 +322,7 @@ class PerspectiveManager(object):
         data = kwargs.get("event", None)
         post_callback = kwargs.get("post_callback")
         msg = self._make_message(id, data)
-        if type(args[0]) == bytes:
+        if len(args) > 0 and type(args[0]) == bytes:
             self._process_bytes(args[0], msg, post_callback)
         else:
             post_callback(json.dumps(msg, cls=DateTimeEncoder))
