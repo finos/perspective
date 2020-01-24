@@ -183,13 +183,16 @@ It exports Perspective's data interfaces:
 
 `@finos/perspective` also exports process management functions such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in node.js). See the [API documentation](/obj/perspective.html) for a complete reference on all exported methods.
+(in node.js). See the [API documentation](/obj/perspective.html) for a complete 
+reference on all exported methods.
 
-This module is a dependency of `@finos/perspective-viewer`, and is not needed if you only intend to use `<perspective-viewer>` to visualize simple data.
+This module is a dependency of `@finos/perspective-viewer`, and is not needed if 
+you only intend to use `<perspective-viewer>` to visualize simple data.
 
 ### Importing in the browser
 
-`perspective` can be imported as an ES6 module and/or `require` syntax if you're using a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
+`perspective` can be imported as an ES6 module and/or `require` syntax if you're 
+using a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
 
 ```javascript
 import perspective from "@finos/perspective";
@@ -213,7 +216,8 @@ const perspective = require("@finos/perspective");
 
 Once imported, you'll need to instantiate a `perspective` engine via the
 `worker()` method. This will create a new WebWorker (browser) or
-Process (Node.js), and load the WebAssembly binary; all calculation and data accumulation will occur in this separate process.
+Process (Node.js), and load the WebAssembly binary; all calculation and data 
+accumulation will occur in this separate process.
 
 ```javascript
 const worker = perspective.worker();
@@ -253,8 +257,9 @@ var data = [
 const table1 = worker.table(data);
 ```
 
-`tables()` are columnar data structures, and each column must have a single
-type. When passing data directly to the `table()` constructor, the type of each column is inferred automatically.
+`table()`s are columnar data structures, and each column must have a single
+type. When passing data directly to the `table()` constructor, the type of each 
+column is inferred automatically.
 
 Perspective supports the following types:
 
@@ -283,8 +288,8 @@ var schema = {
 const table2 = worker.table(schema);
 ```
 
-Once instatiated, a `table()` can be updated with new data via the
-`update()` method:
+Once instatiated, a `table()` can be updated with new data via the `update()` 
+method:
 
 ```javascript
 // Add a new row to each table
@@ -356,7 +361,7 @@ table.update([{ x: 3, y: null }]);
 
 `update()` calls do not need values for _all columns_ in the `table()` schema.
 Missing keys, or keys with values set to `undefined`, will be omitted from
-`tables()` with `index` set, or populated with `null` otherwise:
+`table()`s with `index` set, or populated with `null` otherwise:
 
 ```javascript
 // Only updates the 'y' column for row 3, leaving the 'z' column alone
@@ -365,7 +370,7 @@ table.update([{ x: 3, y: "Just Y" }]);
 
 #### Deleting rows with `remove()`
 
-Rows can be removed entirely from a `table()` with `index` set. Call the
+Rows can be removed entirely from a `table()` with `index` set. Call the 
 `remove()` method with a list of the `index` values to be removed:
 
 ```javascript
