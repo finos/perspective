@@ -26,156 +26,63 @@ namespace perspective {
  * 
  */
 namespace computed_method {
+
+/**
+ * @brief Generate headers for numeric computations with one operand.
+ */
+#define NUMERIC_FUNCTION_1_HEADER(NAME)          \
+    t_tscalar NAME##_uint8(t_tscalar uint8);    \
+    t_tscalar NAME##_uint16(t_tscalar uint16);   \
+    t_tscalar NAME##_uint32(t_tscalar uint32);   \
+    t_tscalar NAME##_uint64(t_tscalar uint64);   \
+    t_tscalar NAME##_int8(t_tscalar int8);     \
+    t_tscalar NAME##_int16(t_tscalar int16);    \
+    t_tscalar NAME##_int32(t_tscalar int32);    \
+    t_tscalar NAME##_int64(t_tscalar int64);    \
+    t_tscalar NAME##_float32(t_tscalar float32);  \
+    t_tscalar NAME##_float64(t_tscalar float64);  \
+
+NUMERIC_FUNCTION_1_HEADER(pow);
+NUMERIC_FUNCTION_1_HEADER(invert);
+NUMERIC_FUNCTION_1_HEADER(sqrt);
+NUMERIC_FUNCTION_1_HEADER(abs);
+NUMERIC_FUNCTION_1_HEADER(bucket_10);
+NUMERIC_FUNCTION_1_HEADER(bucket_100);
+NUMERIC_FUNCTION_1_HEADER(bucket_1000);
+NUMERIC_FUNCTION_1_HEADER(bucket_0_1);
+NUMERIC_FUNCTION_1_HEADER(bucket_0_0_1);
+NUMERIC_FUNCTION_1_HEADER(bucket_0_0_0_1);
     
-// Add
 template <t_dtype T>
-t_tscalar add_helper(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_UINT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_UINT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_UINT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_UINT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_INT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_INT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_INT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_INT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_FLOAT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar add_helper<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y);
-
 t_tscalar add(t_tscalar x, t_tscalar y);
 
-// Subtract
-
 template <t_dtype T>
-t_tscalar subtract_helper(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_UINT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_UINT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_UINT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_UINT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_INT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_INT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_INT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_INT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_FLOAT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar subtract_helper<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y);
-
 t_tscalar subtract(t_tscalar x, t_tscalar y);
 
-// Multiply
-
 template <t_dtype T>
-t_tscalar multiply_helper(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_UINT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_UINT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_UINT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_UINT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_INT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_INT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_INT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_INT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_FLOAT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar multiply_helper<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y);
-
 t_tscalar multiply(t_tscalar x, t_tscalar y);
 
-// Divide
-
 template <t_dtype T>
-t_tscalar divide_helper(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_UINT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_UINT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_UINT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_UINT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_INT8>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_INT16>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_INT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_INT64>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_FLOAT32>(t_tscalar x, t_tscalar y);
-
-template <>
-t_tscalar divide_helper<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y);
-
 t_tscalar divide(t_tscalar x, t_tscalar y);
 
-// Uppercase
+#define NUMERIC_FUNCTION_2_HEADER(NAME)                                    \
+    template <> t_tscalar NAME<DTYPE_UINT8>(t_tscalar x, t_tscalar y);     \
+    template <> t_tscalar NAME<DTYPE_UINT16>(t_tscalar x, t_tscalar y);    \
+    template <> t_tscalar NAME<DTYPE_UINT32>(t_tscalar x, t_tscalar y);    \
+    template <> t_tscalar NAME<DTYPE_UINT64>(t_tscalar x, t_tscalar y);    \
+    template <> t_tscalar NAME<DTYPE_INT8>(t_tscalar x, t_tscalar y);      \
+    template <> t_tscalar NAME<DTYPE_INT16>(t_tscalar x, t_tscalar y);     \
+    template <> t_tscalar NAME<DTYPE_INT32>(t_tscalar x, t_tscalar y);     \
+    template <> t_tscalar NAME<DTYPE_INT64>(t_tscalar x, t_tscalar y);     \
+    template <> t_tscalar NAME<DTYPE_FLOAT32>(t_tscalar x, t_tscalar y);   \
+    template <> t_tscalar NAME<DTYPE_FLOAT64>(t_tscalar x, t_tscalar y);   \
 
+NUMERIC_FUNCTION_2_HEADER(add);
+NUMERIC_FUNCTION_2_HEADER(subtract);
+NUMERIC_FUNCTION_2_HEADER(multiply);
+NUMERIC_FUNCTION_2_HEADER(divide);
+
+// Uppercase
 t_tscalar uppercase(t_tscalar x);
 
 } // end namespace computed_method

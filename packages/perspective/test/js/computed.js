@@ -32,45 +32,129 @@ const arrow = arrows.numbers_arrow;
 
 module.exports = perspective => {
     describe("computed columns", function() {
-        describe("constructors", function() {
-            it("Computed column of arity 0", async function() {
-                var table = perspective.table(data);
+        describe("Numeric, arity 1", async function() {
+            it("Square root of int", async function() {
+                var table = perspective.table({
+                    a: [4, 9, 16, 20, 81, 1000]
+                });
 
                 let table2 = table.add_computed([
                     {
-                        column: "const",
-                        type: "integer",
-                        func: () => 1,
-                        inputs: []
+                        column: "sqrt",
+                        func_name: "sqrt",
+                        inputs: ["a"]
                     }
                 ]);
-                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
-                let result = await view.to_json();
-                expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
+                let view = table2.view({columns: ["sqrt"]});
+                let result = await view.to_columns();
+                expect(result.sqrt).toEqual([2, 3, 4, 4.47213595499958, 9, 31.622776601683793]);
                 view.delete();
                 table2.delete();
                 table.delete();
             });
 
-            it("Computed column of arity 1", async function() {
-                var table = perspective.table(data);
+            it("Square root of float", async function() {
+                var table = perspective.table({
+                    a: [4.5, 9.5, 16.5, 20.5, 81.5, 1000.5]
+                });
 
                 let table2 = table.add_computed([
                     {
-                        column: "const",
-                        type: "string",
-                        func: x => x + "123",
-                        inputs: ["y"]
+                        column: "sqrt",
+                        func_name: "sqrt",
+                        inputs: ["a"]
                     }
                 ]);
-                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
-                let result = await view.to_json();
-                expect(result).toEqual([{const: "a123"}, {const: "b123"}, {const: "c123"}, {const: "d123"}]);
+                let view = table2.view({columns: ["sqrt"]});
+                let result = await view.to_columns();
+                expect(result.sqrt).toEqual([2.1213203435596424, 3.082207001484488, 4.06201920231798, 4.527692569068709, 9.027735042633894, 31.63068130786942]);
                 view.delete();
                 table2.delete();
                 table.delete();
             });
 
+            it.skip("Pow^2 of int", async function() {
+                var table = perspective.table({
+                    a: [2, 4, 6, 8, 10]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "pow",
+                        func_name: "x^2",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["pow"]});
+                let result = await view.to_columns();
+                expect(result.pow).toEqual([4, 16, 36, 64, 100]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it.skip("Pow^2 of float", async function() {
+                var table = perspective.table({
+                    a: [2.5, 4.5, 6.5, 8.5, 10.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "pow",
+                        func_name: "x^2",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["pow"]});
+                let result = await view.to_columns();
+                expect(result.pow).toEqual([6.25, 20.25, 42.25, 72.25, 110.25]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Invert int", async function() {
+                var table = perspective.table({
+                    a: [2, 4, 6, 8, 10]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "invert",
+                        func_name: "1/x",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["invert"]});
+                let result = await view.to_columns();
+                expect(result.invert).toEqual([0.5, 0.25, 0.16666666666666666, 0.125, 0.1]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Invert float", async function() {
+                var table = perspective.table({
+                    a: [2.5, 4.5, 6.5, 8.5, 10.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "invert",
+                        func_name: "1/x",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["invert"]});
+                let result = await view.to_columns();
+                expect(result.invert).toEqual([0.4, 0.2222222222222222, 0.15384615384615385, 0.11764705882352941, 0.09523809523809523]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+        });
+
+        describe("Numeric, arity 2", async function() {
             it("Computed column of arity 2", async function() {
                 var table = perspective.table(int_float_data);
 
@@ -150,6 +234,28 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Computed column of arity 2, add with null", async function() {
+                var table = perspective.table({
+                    a: [1, 2, null, 3, 4],
+                    b: [1.5, null, 2.5, 3.5, 4.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "sum",
+                        type: "float",
+                        func_name: "+",
+                        inputs: ["a", "b"]
+                    }
+                ]);
+                let view = table2.view({columns: ["sum"]});
+                let result = await view.to_columns();
+                expect(result["sum"]).toEqual([2.5, null, null, 6.5, 8.5]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Computed column of arity 2, subtract ints", async function() {
                 var table = perspective.table(int_float_subtract_data);
 
@@ -205,6 +311,28 @@ module.exports = perspective => {
                 let view = table2.view({columns: ["difference"], aggregates: {difference: "count"}});
                 let result = await view.to_json();
                 expect(result).toEqual([{difference: 0.5}, {difference: 0.5}, {difference: 0.5}, {difference: 0.5}]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, subtract with null", async function() {
+                var table = perspective.table({
+                    a: [1, 2, null, 3, 4],
+                    b: [1.5, null, 2.5, 3.5, 4.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "difference",
+                        type: "float",
+                        func_name: "-",
+                        inputs: ["a", "b"]
+                    }
+                ]);
+                let view = table2.view({columns: ["difference"]});
+                let result = await view.to_columns();
+                expect(result["difference"]).toEqual([-0.5, null, null, -0.5, -0.5]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -267,6 +395,28 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Computed column of arity 2, multiply with null", async function() {
+                var table = perspective.table({
+                    a: [1, 2, null, 3, 4],
+                    b: [1.5, null, 2.5, 3.5, 4.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "product",
+                        type: "float",
+                        func_name: "*",
+                        inputs: ["a", "b"]
+                    }
+                ]);
+                let view = table2.view({columns: ["product"]});
+                let result = await view.to_columns();
+                expect(result["product"]).toEqual([1.5, null, null, 10.5, 18]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Computed column of arity 2, divide ints", async function() {
                 var table = perspective.table(int_float_subtract_data);
 
@@ -319,6 +469,28 @@ module.exports = perspective => {
                 let view = table2.view({columns: ["divide"], aggregates: {divide: "count"}});
                 let result = await view.to_json();
                 expect(result).toEqual([{divide: 1.5}, {divide: 1.25}, {divide: 1.1666666666666667}, {divide: 1.125}]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, divide with null", async function() {
+                var table = perspective.table({
+                    a: [1, 2, null, 3, 4],
+                    b: [1.5, null, 2.5, 3.5, 4.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "divide",
+                        type: "float",
+                        func_name: "/",
+                        inputs: ["a", "b"]
+                    }
+                ]);
+                let view = table2.view({columns: ["divide"]});
+                let result = await view.to_columns();
+                expect(result["divide"]).toEqual([0.6666666666666666, null, null, 0.8571428571428571, 0.8888888888888888]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -417,6 +589,46 @@ module.exports = perspective => {
                 };
 
                 expect(result).toEqual(expected);
+                table2.delete();
+                table.delete();
+            });
+        });
+
+        describe("constructors", function() {
+            it("Computed column of arity 0", async function() {
+                var table = perspective.table(data);
+
+                let table2 = table.add_computed([
+                    {
+                        column: "const",
+                        type: "integer",
+                        func: () => 1,
+                        inputs: []
+                    }
+                ]);
+                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
+                let result = await view.to_json();
+                expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 1", async function() {
+                var table = perspective.table(data);
+
+                let table2 = table.add_computed([
+                    {
+                        column: "const",
+                        type: "string",
+                        func: x => x + "123",
+                        inputs: ["y"]
+                    }
+                ]);
+                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
+                let result = await view.to_json();
+                expect(result).toEqual([{const: "a123"}, {const: "b123"}, {const: "c123"}, {const: "d123"}]);
+                view.delete();
                 table2.delete();
                 table.delete();
             });

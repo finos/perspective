@@ -65,28 +65,16 @@ enum t_computation_method_name {
  */
 struct PERSPECTIVE_EXPORT t_computation {
     
-    constexpr t_computation(
-        t_dtype input_type_1,
-        t_dtype input_type_2,
-        t_dtype return_type,
-        t_computation_method_name name
+    t_computation(
+        t_computation_method_name name,
+        const std::vector<t_dtype>& input_types,
+        t_dtype return_type
     );
 
-    t_dtype m_input_type_1;
-    t_dtype m_input_type_2;
-    t_dtype m_return_type;
     t_computation_method_name m_name;
+    std::vector<t_dtype> m_input_types;
+    t_dtype m_return_type;
 };
-
-constexpr t_computation::t_computation(
-    t_dtype input_type_1,
-    t_dtype input_type_2,
-    t_dtype return_type,
-    t_computation_method_name name)
-    : m_input_type_1(input_type_1)
-    , m_input_type_2(input_type_2)
-    , m_return_type(return_type)
-    , m_name(name) {}
 
 /**
  * @brief Stores metadata for a single computed column, including its name,
@@ -125,15 +113,25 @@ public:
      */
     static t_computation get_computation(
         t_computation_method_name name, const std::vector<t_dtype>& input_types);
-    
+        
     /**
      * @brief Given a `t_computation`, return the std::function that should be
-     * called to perform the computation on each cell. 
+     * called to perform the computation over a single input value.
+     * 
+     * @param computation 
+     * @return std::function<t_tscalar(t_tscalar)> 
+     */
+    static std::function<t_tscalar(t_tscalar)> get_computed_method_1(
+        t_computation computation);
+
+    /**
+     * @brief Given a `t_computation`, return the std::function that should be
+     * called to perform the computation over two input values.
      * 
      * @param computation 
      * @return std::function<t_tscalar(t_tscalar, t_tscalar)> 
      */
-    static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_method(
+    static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_method_2(
         t_computation computation);
 
     /**
@@ -155,7 +153,7 @@ public:
         const std::vector<std::shared_ptr<t_column>>& flattened_columns,
         std::shared_ptr<t_column> output_column,
         const std::vector<t_rlookup>& row_indices,
-        const std::function<t_tscalar(t_tscalar, t_tscalar)>& method);
+        t_computation computation);
 
     /**
      * @brief Pregenerate all combinations of `t_computation` structs for

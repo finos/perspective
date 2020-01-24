@@ -945,13 +945,23 @@ namespace binding {
         t_val type = computed_def["type"];
 
         if (has_value(computed_def["func_name"])) {
-            t_computation_method_name method = 
+            t_computation_method_name method_name = 
                 computed_def["func_name"].as<t_computation_method_name>();
-            switch (method) {
+            switch (method_name) {
                 case ADD:
                 case SUBTRACT:
                 case MULTIPLY:
-                case DIVIDE: {
+                case DIVIDE:
+                case POW:
+                case INVERT:
+                case SQRT:
+                case ABS:
+                case BUCKET_10:
+                case BUCKET_100:
+                case BUCKET_1000:
+                case BUCKET_0_1:
+                case BUCKET_0_0_1:
+                case BUCKET_0_0_0_1: {
                     std::vector<t_dtype> input_types;
                     std::vector<std::shared_ptr<t_column>> table_columns;
                     std::vector<std::shared_ptr<t_column>> flattened_columns;
@@ -965,7 +975,7 @@ namespace binding {
 
                     // This uses the `t_computed_method` enum, not string name
                     t_computation computation = t_computed_column::get_computation(
-                        method, input_types);
+                        method_name, input_types);
                     t_dtype output_column_type = computation.m_return_type;
 
                     // don't double create output column
@@ -978,13 +988,12 @@ namespace binding {
                             output_column_name, output_column_type, true);
                     }
 
-                    std::function<t_tscalar(t_tscalar, t_tscalar)> method = t_computed_column::get_computed_method(computation);
                     t_computed_column::apply_computation(
                         table_columns,
                         flattened_columns,
                         output_column,
                         row_indices,
-                        method);
+                        computation);
                     return;
                 } break;
                 default: {
