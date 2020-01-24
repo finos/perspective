@@ -9,6 +9,22 @@
 
 @import "~@finos/perspective-viewer/src/less/variables.less";
 
+.p-TabBar-tabLabel{
+    background-color: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+}
+
+.p-TabBar-tabLabel:focus{
+    outline: none;
+    color: #666 !important;
+    cursor: text;
+}
+.p-TabBar-tabLabel[value='[untitled]']{
+    color: #ddd
+}
+
 .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
     content: var(--close-button--content, "\2715");
     font-family: var(--settings--font-family, "Arial");

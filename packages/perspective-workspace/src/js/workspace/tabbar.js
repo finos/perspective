@@ -10,7 +10,7 @@
 import {ArrayExt} from "@phosphor/algorithm";
 import {ElementExt} from "@phosphor/domutils";
 import {TabBar} from "@phosphor/widgets";
-import {TabBarActions} from "./tabbarrenderer";
+import {TabBarItems, DEFAULT_TITLE} from "./tabbarrenderer";
 
 export class PerspectiveTabBar extends TabBar {
     constructor(options = {}) {
@@ -31,9 +31,20 @@ export class PerspectiveTabBar extends TabBar {
     handleEvent(event) {
         this.retargetEvent(event);
         switch (event.type) {
+            case "contextmenu":
+                const widget = this.currentTitle.owner;
+                this.parent.parent.parent.showContextMenu(widget, event);
+                event.preventDefault();
+                break;
+
+            case "dblclick":
+                if (event.target.id === TabBarItems.Label) {
+                    this.onTitleChangeRequest(event);
+                }
+                break;
+
             case "mousedown":
-                const action = event.target.id;
-                if (action === TabBarActions.Config) {
+                if (event.target.id === TabBarItems.Config) {
                     const tabs = this.contentNode.children;
 
                     // Find the index of the released tab.
@@ -51,6 +62,55 @@ export class PerspectiveTabBar extends TabBar {
                 break;
         }
         super.handleEvent(event);
+    }
+
+    onTitleChangeRequest(event) {
+        const oldValue = event.target.value;
+
+        const stopEvents = event => event.stopPropagation();
+
+        const onCancel = () => {
+            this.title.label = oldValue;
+            event.target.value = oldValue;
+            event.target.setAttribute("readonly", "");
+            removeEventListeners();
+        };
+
+        const onEnter = event => {
+            if (event.keyCode === 13) {
+                removeEventListeners();
+                this.currentTitle.label = event.target.value;
+                event.target.value = event.target.value || DEFAULT_TITLE;
+                event.target.setAttribute("readonly", "");
+                event.target.blur();
+            }
+        };
+
+        const listeners = {
+            mousemove: stopEvents,
+            mousedown: stopEvents,
+            mouseup: stopEvents,
+            keydown: onEnter,
+            blur: onCancel
+        };
+
+        const removeEventListeners = () => {
+            for (let eventName in listeners) {
+                event.target.removeEventListener(eventName, listeners[eventName]);
+            }
+        };
+
+        for (let eventName in listeners) {
+            event.target.addEventListener(eventName, listeners[eventName]);
+        }
+
+        event.target.removeAttribute("readonly");
+
+        if (oldValue === DEFAULT_TITLE) {
+            event.target.value = "";
+        }
+
+        event.target.focus();
     }
 
     onResize(msg) {
@@ -79,10 +139,7 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     _addEventListeners() {
-        this.node.addEventListener("contextmenu", event => {
-            const widget = this.currentTitle.owner;
-            this.parent.parent.parent.showContextMenu(widget, event);
-            event.preventDefault();
-        });
+        this.node.addEventListener("dblclick", this);
+        this.node.addEventListener("contextmenu", this);
     }
 }
