@@ -36,22 +36,21 @@ module.exports = perspective => {
     describe("computed columns", function() {
         describe("Numeric, arity 1", async function() {
             it("Square root of int", async function() {
-                var table = perspective.table({
-                    a: [4, 9, 16, 20, 81, 1000]
-                });
-
-                let table2 = table.add_computed([
-                    {
-                        column: "sqrt",
-                        func_name: "sqrt",
-                        inputs: ["a"]
-                    }
-                ]);
-                let view = table2.view({columns: ["sqrt"]});
+                const table = perspective
+                    .table({
+                        a: [4, 9, 16, 20, 81, 1000]
+                    })
+                    .add_computed([
+                        {
+                            column: "sqrt",
+                            func_name: "sqrt",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view({columns: ["sqrt"]});
                 let result = await view.to_columns();
                 expect(result.sqrt).toEqual([2, 3, 4, 4.47213595499958, 9, 31.622776601683793]);
                 view.delete();
-                table2.delete();
                 table.delete();
             });
 
@@ -228,7 +227,7 @@ module.exports = perspective => {
                         inputs: ["w", "x"]
                     }
                 ]);
-                let view = table2.view({columns: ["sum"], aggregates: {sum: "count"}});
+                let view = table2.view({columns: ["sum"]});
                 let result = await view.to_json();
                 expect(result).toEqual([{sum: 2.5}, {sum: 4.5}, {sum: 6.5}, {sum: 8.5}]);
                 view.delete();
@@ -270,7 +269,7 @@ module.exports = perspective => {
                         inputs: ["v", "x"]
                     }
                 ]);
-                let view = table2.view({columns: ["difference"], aggregates: {difference: "count"}});
+                let view = table2.view({columns: ["difference"]});
                 let result = await view.to_json();
                 expect(result).toEqual([{difference: 1}, {difference: 1}, {difference: 1}, {difference: 1}]);
                 view.delete();
@@ -592,6 +591,199 @@ module.exports = perspective => {
 
                 expect(result).toEqual(expected);
                 table2.delete();
+                table.delete();
+            });
+        });
+
+        describe("String, arity 1", async function() {
+            it("Length", async function() {
+                const table = perspective
+                    .table({
+                        a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "length",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.length).toEqual(result.a.map(x => x.length));
+                view.delete();
+                table.delete();
+            });
+
+            it("Uppercase", async function() {
+                const table = perspective
+                    .table({
+                        a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"]
+                    })
+                    .add_computed([
+                        {
+                            column: "upper",
+                            func_name: "uppercase",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.upper).toEqual(result.a.map(x => x.toUpperCase()));
+                view.delete();
+                table.delete();
+            });
+
+            it("Lowercase", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "lowercase",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.length).toEqual(result.a.map(x => x.toLowerCase()));
+                view.delete();
+                table.delete();
+            });
+        });
+
+        describe("String, arity 2", async function() {
+            it("Concat with space", async function() {
+                const table = perspective
+                    .table({
+                        a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
+                        b: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "concat_space",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.length).toEqual(result.a.map((x, idx) => x + " " + result.b[idx]));
+                view.delete();
+                table.delete();
+            });
+
+            it("Concat with comma", async function() {
+                const table = perspective
+                    .table({
+                        a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
+                        b: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "upper",
+                            func_name: "concat_comma",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.upper).toEqual(result.a.map((x, idx) => x + ", " + result.b[idx]));
+                view.delete();
+                table.delete();
+            });
+
+            it("Concats with space, nulls", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC", "DEF", null, "HIjK", "lMNoP"],
+                        b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "concat_space",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                let expected = result.a.map((x, idx) => x + " " + result.b[idx]);
+                expected[1] = null;
+                expected[2] = null;
+                expect(result.length).toEqual(expected);
+                view.delete();
+                table.delete();
+            });
+
+            it("Concats with comma, nulls", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC", "DEF", null, "HIjK", "lMNoP"],
+                        b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "concat_comma",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                let expected = result.a.map((x, idx) => x + ", " + result.b[idx]);
+                expected[1] = null;
+                expected[2] = null;
+                expect(result.length).toEqual(expected);
+                view.delete();
+                table.delete();
+            });
+
+            it("Concats with space, extra long", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC".repeat(10), "DEF".repeat(10), null, "HIjK".repeat(10), "lMNoP".repeat(10)],
+                        b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "concat_space",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                let expected = result.a.map((x, idx) => x + " " + result.b[idx]);
+                expected[1] = null;
+                expected[2] = null;
+                expect(result.length).toEqual(expected);
+                view.delete();
+                table.delete();
+            });
+
+            it("Concats with comma, extra long", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC".repeat(10), "DEF".repeat(10), null, "HIjK".repeat(10), "lMNoP".repeat(10)],
+                        b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            func_name: "concat_comma",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                let expected = result.a.map((x, idx) => x + ", " + result.b[idx]);
+                expected[1] = null;
+                expected[2] = null;
+                expect(result.length).toEqual(expected);
+                view.delete();
                 table.delete();
             });
         });

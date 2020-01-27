@@ -945,8 +945,8 @@ namespace binding {
         t_val type = computed_def["type"];
 
         if (has_value(computed_def["func_name"])) {
-            t_computation_method_name method_name = 
-                computed_def["func_name"].as<t_computation_method_name>();
+            t_computed_function_name method_name = 
+                computed_def["func_name"].as<t_computed_function_name>();
             switch (method_name) {
                 case ADD:
                 case SUBTRACT:
@@ -961,7 +961,12 @@ namespace binding {
                 case BUCKET_1000:
                 case BUCKET_0_1:
                 case BUCKET_0_0_1:
-                case BUCKET_0_0_0_1: {
+                case BUCKET_0_0_0_1:
+                case LOWERCASE:
+                case UPPERCASE:
+                case CONCAT_SPACE:
+                case CONCAT_COMMA:
+                case LENGTH: {
                     std::vector<t_dtype> input_types;
                     std::vector<std::shared_ptr<t_column>> table_columns;
                     std::vector<std::shared_ptr<t_column>> flattened_columns;
@@ -986,6 +991,7 @@ namespace binding {
                     } else {
                         output_column = flattened->add_column_sptr(
                             output_column_name, output_column_type, true);
+                        output_column->reserve(table_columns[0]->size());
                     }
 
                     t_computed_column::apply_computation(
@@ -2013,9 +2019,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_computation_method_name
+     * t_computed_function_name
      */
-    enum_<t_computation_method_name>("t_computation_method_name")
+    enum_<t_computed_function_name>("t_computed_function_name")
         .value("INVALID_COMPUTATION_METHOD", INVALID_COMPUTATION_METHOD)
         .value("ADD", ADD)
         .value("SUBTRACT", SUBTRACT)

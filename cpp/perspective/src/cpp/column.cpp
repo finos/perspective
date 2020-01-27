@@ -620,6 +620,8 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
             const char* tgt = value.get_char_ptr();
             std::string empty;
 
+            std::cout << tgt << std::endl;
+
             if (tgt) {
                 PSP_VERBOSE_ASSERT(
                     value.m_type == DTYPE_STR, "Setting non string scalar on string column");

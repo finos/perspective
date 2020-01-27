@@ -12,7 +12,7 @@
 namespace perspective {
 
 t_computation::t_computation(
-    t_computation_method_name name,
+    t_computed_function_name name,
     const std::vector<t_dtype>& input_types,
     t_dtype return_type)
     : m_name(name)
@@ -29,7 +29,7 @@ t_computed_column_def::t_computed_column_def(
 
 t_computation
 t_computed_column::get_computation(
-    t_computation_method_name name, const std::vector<t_dtype>& input_types) {
+    t_computed_function_name name, const std::vector<t_dtype>& input_types) {
     for (const t_computation& computation : t_computed_column::computations) {
         if (computation.m_name == name && computation.m_input_types == input_types) {
             return computation;
@@ -88,14 +88,14 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         } break;
         case DTYPE_STR: {
             switch (computation.m_name) {
-                case UPPERCASE: return computed_function::uppercase;
+                case LENGTH: return computed_function::length;
                 default: break;
             }
         }
         default: break;
     }
 
-    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+    PSP_COMPLAIN_AND_ABORT("Invalid computation function");
 }
 
 #define GET_COMPUTED_FUNCTION_2(DTYPE)                                         \
@@ -141,8 +141,26 @@ t_computed_column::get_computed_function_2(t_computation computation) {
             GET_COMPUTED_FUNCTION_2(DTYPE_FLOAT64);
         } break;
         default: {
-            PSP_COMPLAIN_AND_ABORT("Invalid computation method");
+            PSP_COMPLAIN_AND_ABORT("Invalid computation function");
         } break;
+    }
+}
+
+std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column> output_column)>
+t_computed_column::get_computed_function_string_1(t_computation computation) {
+    switch (computation.m_name) {
+        case UPPERCASE: return computed_function::uppercase;
+        case LOWERCASE: return computed_function::lowercase;
+        default: PSP_COMPLAIN_AND_ABORT("Invalid computation function");
+    }
+}
+
+std::function<void(t_tscalar, t_tscalar, std::int32_t idx, std::shared_ptr<t_column> output_column)>
+t_computed_column::get_computed_function_string_2(t_computation computation) {
+    switch (computation.m_name) {
+        case CONCAT_SPACE: return computed_function::concat_space;
+        case CONCAT_COMMA: return computed_function::concat_comma;
+        default: PSP_COMPLAIN_AND_ABORT("Invalid computation function");
     }
 }
 
@@ -160,15 +178,33 @@ t_computed_column::apply_computation(
     auto arity = table_columns.size();
 
     // TODO: track these in an union type?
-    std::function<t_tscalar(t_tscalar)> method_1;
-    std::function<t_tscalar(t_tscalar, t_tscalar)> method_2;
+    std::function<t_tscalar(t_tscalar)> function_1;
+    std::function<t_tscalar(t_tscalar, t_tscalar)> function_2;
+    std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_1;
+    std::function<void(t_tscalar, t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_2;
 
     switch (arity) {
         case 1: {
-            method_1 = t_computed_column::get_computed_function_1(computation);
+            // Functions that generate strings need to have access to vocab so
+            // that strings can be stored.
+            switch (computation.m_return_type) {
+                case DTYPE_STR: {
+                    string_function_1 = t_computed_column::get_computed_function_string_1(computation);
+                } break;  
+                default: {
+                    function_1 = t_computed_column::get_computed_function_1(computation);
+                } break;
+            } 
         } break;
         case 2: {
-            method_2 = t_computed_column::get_computed_function_2(computation);    
+            switch (computation.m_return_type) {
+                case DTYPE_STR: {
+                    string_function_2 = t_computed_column::get_computed_function_string_2(computation);
+                } break;  
+                default: {
+                    function_2 = t_computed_column::get_computed_function_2(computation);
+                } break;
+            }   
         } break;
         default: {
             PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
@@ -198,22 +234,36 @@ t_computed_column::apply_computation(
 
         t_tscalar rval = mknone();
 
-        switch (arity) {
-            case 1: {
-                rval = method_1(args[0]);
-            } break;
-            case 2: {
-                rval = method_2(args[0], args[1]);  
-            } break;
-            default: {
-                PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+        if (computation.m_return_type == DTYPE_STR) {
+            switch (arity) {
+                case 1: {
+                    string_function_1(args[0], idx, output_column);
+                } break;
+                case 2: {
+                    string_function_2(args[0], args[1], idx, output_column); 
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+                }
             }
-        }
+        } else {
+            switch (arity) {
+                case 1: {
+                    rval = function_1(args[0]);
+                } break;
+                case 2: {
+                    rval = function_2(args[0], args[1]); 
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+                }
+            }
 
-        output_column->set_scalar(idx, rval);
+            output_column->set_scalar(idx, rval);
 
-        if (rval.is_none()) {
-            output_column->set_valid(idx, false);
+            if (rval.is_none()) {
+                output_column->set_valid(idx, false);
+            }
         }
     }
 }
@@ -222,8 +272,10 @@ std::vector<t_computation> t_computed_column::computations = {};
 
 void t_computed_column::make_computations() {
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
-    std::vector<t_computation_method_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
-    std::vector<t_computation_method_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE};
+    std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
+    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE};
+    std::vector<t_computed_function_name> string_function_1 = {UPPERCASE, LOWERCASE};
+    std::vector<t_computed_function_name> string_function_2 = {CONCAT_SPACE, CONCAT_COMMA};
 
     for (const auto f : numeric_function_1) {
         for (auto i = 0; i < dtypes.size(); ++i) {
@@ -251,6 +303,30 @@ void t_computed_column::make_computations() {
         }
     }
 
+    for (const auto f : string_function_1) {
+        t_computed_column::computations.push_back(
+            t_computation{
+                f, 
+                std::vector<t_dtype>{DTYPE_STR},
+                DTYPE_STR
+            }
+        );
+    }
+    
+    for (const auto f : string_function_2) {
+        t_computed_column::computations.push_back(
+            t_computation{
+                f, 
+                std::vector<t_dtype>{DTYPE_STR, DTYPE_STR},
+                DTYPE_STR
+            }
+        );
+    }
+
+    // Length takes a string and returns an int
+    t_computed_column::computations.push_back(
+        t_computation{LENGTH, std::vector<t_dtype>{DTYPE_STR}, DTYPE_INT64}
+    );
     
 }
 

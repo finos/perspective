@@ -25,7 +25,7 @@ namespace perspective {
  * @brief The name for a single computed method. Names should be defined here,
  * and are unique for each method.
  */
-enum t_computation_method_name {
+enum t_computed_function_name {
     INVALID_COMPUTATION_METHOD,
     ADD,
     SUBTRACT,
@@ -66,12 +66,12 @@ enum t_computation_method_name {
 struct PERSPECTIVE_EXPORT t_computation {
     
     t_computation(
-        t_computation_method_name name,
+        t_computed_function_name name,
         const std::vector<t_dtype>& input_types,
         t_dtype return_type
     );
 
-    t_computation_method_name m_name;
+    t_computed_function_name m_name;
     std::vector<t_dtype> m_input_types;
     t_dtype m_return_type;
 };
@@ -112,7 +112,7 @@ public:
      * @return t_computation 
      */
     static t_computation get_computation(
-        t_computation_method_name name, const std::vector<t_dtype>& input_types);
+        t_computed_function_name name, const std::vector<t_dtype>& input_types);
         
     /**
      * @brief Given a `t_computation`, return the std::function that should be
@@ -132,6 +132,12 @@ public:
      * @return std::function<t_tscalar(t_tscalar, t_tscalar)> 
      */
     static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_function_2(
+        t_computation computation);
+
+    static std::function<void(t_tscalar, std::int32_t, std::shared_ptr<t_column>)> get_computed_function_string_1(
+        t_computation computation);
+
+    static std::function<void(t_tscalar, t_tscalar, std::int32_t, std::shared_ptr<t_column>)> get_computed_function_string_2(
         t_computation computation);
 
     /**
