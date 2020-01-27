@@ -14,7 +14,8 @@ This document outlines the main concepts behind Perspective:
 - [`Table`](#table) Perspective's typed data interface
 - [`View`](#view) a query from a `Table` that calculates and returns data
 
-and explains the query options that can be used to create a `View`:
+and explains (with live examples) the query options that can be used to create
+a `View`:
 
 - [`row_pivots`](#row-pivots) splitting the dataset by unique row values
 - [`column_pivots`](#column-pivots) splitting the dataset by unique column
@@ -30,6 +31,11 @@ use the sidebar to find the documentation for the language of choice. Though
 the way these concepts operate in practice may vary slightly across different
 languages based on nuance, the concepts documented here hold true across all
 implementations of the Perspective library.
+
+<!--truncate-->
+
+<script src="../../../../js/concepts/index.js"></script>
+<link rel="stylesheet" href="../../../../css/concepts/index.css">
 
 ## Table
 
@@ -125,7 +131,7 @@ const table = perspective.table(data, {limit: 1000})
 ### Index
 
 Initializing a `Table` with an `index` allows Perspective to treat a column as
-the primary key, allowind in-place updates of rows. Only a
+the primary key, allowing in-place updates of rows. Only a
 single column can be used as an `index`, and like other `Table` parameters, 
 cannot be changed or removed after the `Table` creation. A column of any type
 may be used as an `index`.
@@ -138,7 +144,7 @@ const table = perspective.table(data, {index: "a"})
 ```
 
 An indexed `Table` allows for in-place _updates_ whenever a new rows shares an
-`index` values with an exisiting row, _partial updates_ when such a row leaves 
+`index` values with an existing row, _partial updates_ when such a row leaves 
 some column values `undefined`, and _removes_ to delete a row by `index`.
 
 ### `update()`
@@ -252,7 +258,7 @@ view.delete();
 
 `View` objects are immutable with respect to the arguments provided to the
 `view()` method;  to change these parameters, you must create a new `View` on
-the same `Table`.  `View`s are live with respect to the `Table`'s data however,
+the same `Table`. However, `View`s are live with respect to the `Table`'s data,
 and will (within a conflation window) update with the latest state as its
 parent's state updates, including incrementally recalculating all aggregates,
 pivots, filters, etc.
@@ -301,6 +307,10 @@ data query and transformation. All parameters can be applied in conjunction
 with each other, and there is no limit to the number of pivots, filters, etc.
 that can be applied.
 
+*All* examples in this section are live—feel free to play around with each
+`<perspective-viewer>` instance to see how different query parameters affect
+what you see.
+
 ### Row Pivots
 
 A row pivot _groups_ the dataset by the unique values of each column used as a
@@ -325,6 +335,17 @@ pivot of `["State", "City", "Neighborhood"]` shows the values for each
 neighborhood, which is grouped by city, which is in turn grouped by state. This
 allows for extremely fine-grained analysis applied over a large dataset.
 
+#### Example
+
+```html
+<perspective-viewer row-pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+```
+
+<div>
+<perspective-viewer row-pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+</perspective-viewer>
+</div>
+
 ### Column Pivots
 
 A column pivot _splits_ the dataset by the unique values of each column used as
@@ -344,6 +365,20 @@ const view = table.view({column_pivots: ["a", "c"]});
 Row pivots and column pivots can be used in conjunction to categorize and
 traverse over datasets, showing the insights a user is interested in. Row and
 column pivots are also easily transposable in `perspective-viewer`.
+
+#### Example
+
+```html
+<perspective-viewer
+    row-pivots='["Category"]'
+    column-pivots='["Region"]'
+    columns='["Sales", "Profit"]'>
+```
+
+<div>
+<perspective-viewer row-pivots='["Category"]' column-pivots='["Region"]' columns='["Sales", "Profit"]'>
+</perspective-viewer>
+</div>
 
 ### Aggregates
 
@@ -368,6 +403,20 @@ const view = table.view({
 });
 ```
 
+#### Example
+
+```html
+<perspective-viewer
+    aggregates='{"Sales": "avg", "Profit", "median"}'
+    row-pivots='["State", "City"]'
+    columns='["Sales", "Profit"]'>
+```
+
+<div>
+<perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' row-pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+</perspective-viewer>
+</div>
+
 ### Columns
 
 The `columns` property specifies which columns should be included in the
@@ -383,6 +432,17 @@ const view = table.view({
 });
 ```
 
+#### Example
+
+```html
+<perspective-viewer columns='["Sales", "Profit", "Segment"]'>
+```
+
+<div>
+<perspective-viewer columns='["Sales", "Profit", "Segment"]'>
+</perspective-viewer>
+</div>
+
 ### Sort
 
 The `sort` property specifies columns on which the query should be sorted,
@@ -397,6 +457,17 @@ const view = table.view({
     sort: [["a", "asc"]]
 });
 ```
+
+#### Example
+
+```html
+<perspective-viewer columns='["Sales", "Profit"]' sort='[["Sales", "desc"]]'>
+```
+
+<div>
+<perspective-viewer columns='["Sales", "Profit"]' sort='[["Sales", "desc"]]'>
+</perspective-viewer>
+</div>
 
 ### Filter
 
@@ -415,3 +486,17 @@ const view = table.view({
     filter: [["a", "<", 100]]
 });
 ```
+
+#### Example
+
+Note: Use the `filters` attribute on `<perspective-viewer>` instead of
+`filter`.
+
+```html
+<perspective-viewer columns='["Sales", "Profit"]' filters='[["State", "==", "Texas"]]'>
+```
+
+<div>
+<perspective-viewer columns='["Sales", "Profit"]' filters='[["State","==","Texas"]]'>
+</perspective-viewer>
+</div>
