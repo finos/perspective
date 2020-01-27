@@ -11,17 +11,19 @@ and easily composable, making fine-grained analysis possible on any dataset.
 
 This document outlines the main concepts behind Perspective:
 
-- [`Table`](#table), Perspective's typed data interface
-- [`View`](#view), a query from a `Table` that calculates and returns data
+- [`Table`](#table) Perspective's typed data interface
+- [`View`](#view) a query from a `Table` that calculates and returns data
 
 and explains the query options that can be used to create a `View`:
 
-- [`row_pivots`](#row-pivots), splitting the dataset by unique row values
-- [`column_pivots`](#column-pivots), splitting the dataset by unique column values
-- [`aggregates`](#aggregates), calculations over the dataset such as `sum`, `average`, or `distinct count`
-- [`columns`](#columns), specifying the columns the user is interested in seeing
-- [`sort`](#sort), ordering the dataset based on a column's values
-- [`filter`](#filter), filtering the dataset based on a column's values
+- [`row_pivots`](#row-pivots) splitting the dataset by unique row values
+- [`column_pivots`](#column-pivots) splitting the dataset by unique column
+  values
+- [`aggregates`](#aggregates) calculations over the dataset such as `sum`,
+  `average`, or `distinct count`
+- [`columns`](#columns) specifying the columns the user is interested in seeing
+- [`sort`](#sort) ordering the dataset based on a column's values
+- [`filter`](#filter) filtering the dataset based on a column's values
 
 For language-specific guidance, API documentation, or quick-start user guides,
 use the sidebar to find the documentation for the language of choice. Though
@@ -49,7 +51,7 @@ The immutability of columns and data types after creation is important, as it
 allows Perspective to operate quickly over a large dataset and accumulate data
 without additional recalculation.
 
-### Schema and Data Types
+### Schema and Supported Data Types
 
 The mapping of a `Table`'s column names to data types is referred to as a
 `schema`. Each column has a unique name and a single data type:
@@ -65,27 +67,19 @@ const schema = {
 }
 ```
 
-Because Perspective is built in multiple languages, data types must be
-expressible in the same way across different languages, both statically and
-dynamically typed.
-
-_Strings_ are used to represent the data types supported by Perspective:
+Because Perspective is built in multiple languages, data types are
+expressed with a common vocabulary of across all supported host languyages.
+These _String_ types are used to represent the data supported by Perspective:
 
 - `"integer"`: a 32-bit (or 64-bit depending on platform) integer
 - `"float"`: a 64-bit float
 - `"boolean"`: a boolean value of true or false
 - `"date"`: a date containing year, month, and day
-- `"datetime"`: a datetime containing year, month, day, hour, minute, second, and microsecond
+- `"datetime"`: a datetime containing year, month, day, hour, minute, second,
+  and microsecond
 - `"string"`: a unicode string without any character limits
 
-Implementations of these data types will differ slightly based on language and
-platform. For example, "integer" in Perspective's Javascript library will always
-be 32-bit, whereas an "integer" in Perspective's Python library is 32-bit in
-Python 2, and 64-bit in Python 3.
-
-Additionally, if a defined type system is provided (that differentiates between
-integers and floats, as well as date and datetimes), Perspective allows the
-usage of type instances in the place of strings, such as in Python:
+In supported languages e.g. Python, you may alternatively use native types:
 
 ```python
 from datetime import date, datetime
@@ -102,50 +96,22 @@ schema = {
 
 ### Constructing a `Table`
 
-`Table`s are constructed with either a dataset or a
-[`schema`](#schema-and-data-types). If a dataset is provided, Perspective reads
-the dataset and _infers_ a schema. When exact conformity to data types is
-necessary, always construct the `Table` using a schema.
+A `Table` can be initialized in two ways:
 
-#### Data Formats
-
-`Table`s accept data in row or columnar orientation.
-
-A _row-oriented_ dataset is an array where each element is a dictionary with
-string column names as keys, and values that conform to the _data type_ of
-the column:
-
-```javascript
-data = [
-    {"a": 100, "b": 0.25, "c": new Date()},
-    {"a": 200, "b": 0.5, "c": new Date()}
-]
-```
-
-Rows should be consistent, with no additional or missing columns between each
-row.
-
-A _column oriented_ dataset is a dictionary where each key is a string column
-name, and each element is an array containing values that conform to the
-_data type_ of the column:
-
-```javascript
-data = {
-    "a": [100, 200, 300],
-    "b": [0.25, 0.5, 0.75],
-    "c": [new Date(), new Date(), new Date()]
-}
-```
-
-Each array in a column oriented dataset should be of equal length, and each
-element inside it should be of the same type.
+- With a [`schema`](#schema-and-data-types);  this table will be initialized
+  empty.
+- With a dataset in a supported format;  in this case, a `schema` is inferred
+  from the dataset's structure upon initialization.  Perspective supports a
+  variety of table-like data structures in Python and Javascript such as CSV, 
+  `pandas.DataFrame` and JSON; see the language specific API documentation for
+  a comprehensive list of supported formats.
 
 ### Limit
 
-Initializing a `Table` with a `limit` sets a limitation on the total number of
-rows the `Table` can have. When the `Table` is updated, and the resulting size of
-the `Table` would exceed its `limit`, rows that exceed `limit` overwrite old
-rows starting at row 0.
+Initializing a `Table` with a `limit` sets the total number of rows the `Table`
+is allowed to have.  When the `Table` is updated, and the resulting size of
+the `Table` would exceed its `limit`, rows that exceed `limit` overwrite the
+oldest rows in the `Table`.
 
 To create a `Table` with a `limit`, provide the `limit` property with an integer
 indicating the `limit`:
@@ -159,11 +125,10 @@ const table = perspective.table(data, {limit: 1000})
 ### Index
 
 Initializing a `Table` with an `index` allows Perspective to treat a column as
-the primary key, automatically sorting each row by ascending order of the
-primary key, and eliminating duplicate values in the primary key column. Only a
-single column can be used as an `index`, and it cannot be changed or removed
-after the creation of the `Table`. A column of any type may be used as an
-`index`.
+the primary key, allowind in-place updates of rows. Only a
+single column can be used as an `index`, and like other `Table` parameters, 
+cannot be changed or removed after the `Table` creation. A column of any type
+may be used as an `index`.
 
 To create an indexed `Table`, provide the `index` property with a string column
 name to be used as an index:
@@ -172,13 +137,14 @@ name to be used as an index:
 const table = perspective.table(data, {index: "a"})
 ```
 
-An indexed `Table` allows for _partial update_ and _remove_ operations, as
-explained in the next section.
+An indexed `Table` allows for in-place _updates_ whenever a new rows shares an
+`index` values with an exisiting row, _partial updates_ when such a row leaves 
+some column values `undefined`, and _removes_ to delete a row by `index`.
 
-### Update
+### `update()`
 
 Once a `Table` has been created, it can be updated with new data conforming to
-the `Table`'s `schema`. The dataset used for `update` must conform with the
+the `Table`'s `schema`. The dataset used for `update()` must conform with the
 formats supported by Perspective, and cannot be a `schema` (as the `schema`
 is immutable).
 
@@ -192,8 +158,6 @@ const table = perspective.table({
 });
 table.update(new_data);
 ```
-
-#### Partial Updates
 
 If `index` is not set, updates _append_ new data to the end of the `Table`.
 However, if `index` is set, Perspective allows _partial updates_ (in-place)
@@ -219,7 +183,7 @@ updates from the dataset. If `update` is called on an indexed `Table` and
 no primary keys are specified, or if the specified keys are not present in the
 `Table`, Perspective will append the dataset to the end of the `Table`.
 
-### Remove
+### `remove()`
 
 An indexed `Table` can also have rows removed by primary key:
 
@@ -237,12 +201,11 @@ table.remove([1, 4]);
 To `remove` rows on an indexed `Table`, provide the `Table`'s `remove` method
 with an array of primary key values indicating which rows should be removed.
 
-### Delete
+### `delete()`
 
-Because Perspective's runtime is composed of different languages (due to the
-C++ engine), it is important to clean up resources that might have been created
-in C++ and cannot be reached by garbage collectors in the binding language
-(Javascript, Python etc.).
+Due to Perspective's runtime composition, it is important to clean up resources
+that might have been created by the engine in C++ but cannot be reached by the
+binding language's garbage collector (Javascript, Python etc.)
 
 The `Table`'s `delete` method guarantees the cleanup of all resources associated
 with a `Table`, which is _especially important_ in Javascript, as the JS garbage
@@ -262,11 +225,12 @@ run in the order in which they were set. If a callback is no longer needed, call
 the `remove_delete` method on the `Table` and provide the reference to a
 callback which should be removed and no longer called by Perspective.
 
-## View
+## `View`
 
-The `View` is Perspective's query and serialization interface. It represents a
-query on the dataset represented by the `Table`, and is always created on an
-existing `Table` instance:
+The View is Perspective's query and serialization interface. It represents a
+query on the `Table`'s dataset and is always created from an existing `Table`
+instance via the `view()` method with a set of
+[`View` configuration parameters](https://perspective.finos.org/docs/obj/perspective.html#module_perspective..table+view):
 
 ```javascript
 const table = perspective.table({
@@ -274,25 +238,24 @@ const table = perspective.table({
     "name": ["a", "b", "c", "d"]
 });
 
-// Create a view showing just the `name` column
+// Create a view showing just the `name` column.
 const view = table.view({
     columns: ["name"]
 });
+
+// Now you have a `View`!  Get your data!
+const json = await view.to_json();
+
+// Delete the Query!
+view.delete();
 ```
 
-A `View` is guaranteed to contain the latest state
-of the `Table`: a `View` created before its `Table` was updated with
-new data will always contain the updated dataset, and all aggregates, pivots,
-etc. will be recalculated to include the updated dataset.
-
-The `Table` does not offer any query, transformation, or
-serialization methods; all such operations are achieved by creating a `View`
-with the desired query, and then serializing the data from the `View`. This
-design decouples data loading with data querying, which means `View`s are
-extremely cheap to create.
-
-Like the `Table`, `View`s are immutable after creation, and a new `View` should
-be created for each new query on the `Table`.
+`View` objects are immutable with respect to the arguments provided to the
+`view()` method;  to change these parameters, you must create a new `View` on
+the same `Table`.  `View`s are live with respect to the `Table`'s data however,
+and will (within a conflation window) update with the latest state as its
+parent's state updates, including incrementally recalculating all aggregates,
+pivots, filters, etc.
 
 ### Schema
 
@@ -324,19 +287,19 @@ The `on_delete` callback allows users to execute an action immediately after the
 they will run in the order in which they were set. If a callback is no longer
 needed, call the `remove_delete` method on the `View` instance.
 
-### Delete
+### `delete()`
 
 Similar to the `Table`, the `View`'s `delete` method guarantees cleanup of the
 resources associated with the `View`. It is best practice to explicit delete
 `View`s when they are no longer needed. All `View`s created from a `Table`
 instance must be explicitly deleted before the `Table` can be deleted.
 
-## Query Options
+## `View` Query Parameters
 
-The `View`'s query options present a powerful and composable interface for data
-query and transformation. All query options can be applied in conjunction with
-each other, and there is no limit to the number of pivots, filters, etc. that
-can be applied.
+The `View`'s query parameters present a powerful and composable interface for
+data query and transformation. All parameters can be applied in conjunction
+with each other, and there is no limit to the number of pivots, filters, etc.
+that can be applied.
 
 ### Row Pivots
 
@@ -344,10 +307,10 @@ A row pivot _groups_ the dataset by the unique values of each column used as a
 row pivot - a close analogue in SQL would be the `GROUP BY` statement.
 
 The underlying dataset is aggregated to show the values belonging to
-each group, and a total row is calculated for each column, showing the sum of
-all aggregated values inside the column. Row pivots are useful for hierarchies,
-categorizing data and attributing values, i.e. showing the number of units sold
-based on State and City.
+each group, and a total row is calculated for each group, showing the currently
+selected aggregated value (e.g. `sum`) of the column. Row pivots are useful for
+hierarchies, categorizing data and attributing values, i.e. showing the number
+of units sold based on State and City.
 
 In Perspective, row pivots are represented as an array of string column names
 which will be applied as row pivots:
@@ -404,9 +367,6 @@ const view = table.view({
     }
 });
 ```
-
-The `aggregates` dictionary only needs to contain columns for which the default
-should be overridden.
 
 ### Columns
 

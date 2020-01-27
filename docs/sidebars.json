@@ -1,6 +1,6 @@
 {
   "docs": {
-    "Getting Started": ["md/installation", "md/concepts", "md/js", "md/python", "md/styles", "md/development"],
+    "Getting Started": ["md/installation", "md/js", "md/python", "md/concepts", "md/styles", "md/development"],
     "Javascript API": ["obj/perspective", "obj/perspective-viewer"],
     "Python API": ["obj/perspective-python"]
   }
