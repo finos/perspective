@@ -17,7 +17,7 @@
 #include <perspective/column.h>
 #include <perspective/scalar.h>
 #include <perspective/rlookup.h>
-#include <perspective/computed_method.h>
+#include <perspective/computed_function.h>
 
 namespace perspective {
 
@@ -121,7 +121,7 @@ public:
      * @param computation 
      * @return std::function<t_tscalar(t_tscalar)> 
      */
-    static std::function<t_tscalar(t_tscalar)> get_computed_method_1(
+    static std::function<t_tscalar(t_tscalar)> get_computed_function_1(
         t_computation computation);
 
     /**
@@ -131,7 +131,7 @@ public:
      * @param computation 
      * @return std::function<t_tscalar(t_tscalar, t_tscalar)> 
      */
-    static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_method_2(
+    static std::function<t_tscalar(t_tscalar, t_tscalar)> get_computed_function_2(
         t_computation computation);
 
     /**
@@ -157,7 +157,7 @@ public:
 
     /**
      * @brief Pregenerate all combinations of `t_computation` structs for
-     * each `t_dtype` and `t_computed_method_name`. This method should be run
+     * each `t_dtype` and `t_computed_function_name`. This method should be run
      * once at initialization of the Perspective C++ module.
      */
     static void make_computations();

@@ -973,7 +973,7 @@ namespace binding {
                             flattened->get_column(column_name));
                     }
 
-                    // This uses the `t_computed_method` enum, not string name
+                    // This uses the `t_computed_function` enum, not string name
                     t_computation computation = t_computed_column::get_computation(
                         method_name, input_types);
                     t_dtype output_column_type = computation.m_return_type;
@@ -2021,6 +2021,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("SUBTRACT", SUBTRACT)
         .value("MULTIPLY", MULTIPLY)
         .value("DIVIDE", DIVIDE)
+        .value("POW", POW)
         .value("INVERT", INVERT)
         .value("SQRT", SQRT)
         .value("ABS", ABS)

@@ -38,163 +38,57 @@ t_computed_column::get_computation(
     PSP_COMPLAIN_AND_ABORT("Could not find computation.");
 };
 
-// TODO: generate the case statements automatically
+#define GET_COMPUTED_FUNCTION_1(TYPE) \
+    switch (computation.m_name) { \
+        case POW: return computed_function::pow_##TYPE; \
+        case INVERT: return computed_function::invert_##TYPE;\
+        case SQRT: return computed_function::sqrt_##TYPE;\
+        case ABS: return computed_function::abs_##TYPE;\
+        case BUCKET_10: return computed_function::bucket_10_##TYPE;\
+        case BUCKET_100: return computed_function::bucket_100_##TYPE;\
+        case BUCKET_1000: return computed_function::bucket_1000_##TYPE;\
+        case BUCKET_0_1: return computed_function::bucket_0_1_##TYPE;\
+        case BUCKET_0_0_1: return computed_function::bucket_0_0_1_##TYPE;\
+        case BUCKET_0_0_0_1: return computed_function::bucket_0_0_0_1_##TYPE;\
+        default: break;\
+    }
+
 std::function<t_tscalar(t_tscalar)>
-t_computed_column::get_computed_method_1(t_computation computation) {
+t_computed_column::get_computed_function_1(t_computation computation) {
     switch (computation.m_input_types[0]) {
         case DTYPE_UINT8: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_uint8;
-                case INVERT: return computed_method::invert_uint8;
-                case SQRT: return computed_method::sqrt_uint8;
-                case ABS: return computed_method::abs_uint8;
-                case BUCKET_10: return computed_method::bucket_10_uint8;
-                case BUCKET_100: return computed_method::bucket_100_uint8;
-                case BUCKET_1000: return computed_method::bucket_1000_uint8;
-                case BUCKET_0_1: return computed_method::bucket_0_1_uint8;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_uint8;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_uint8;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(uint8);
         } break;
         case DTYPE_UINT16: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_uint16;
-                case INVERT: return computed_method::invert_uint16;
-                case SQRT: return computed_method::sqrt_uint16;
-                case ABS: return computed_method::abs_uint16;
-                case BUCKET_10: return computed_method::bucket_10_uint16;
-                case BUCKET_100: return computed_method::bucket_100_uint16;
-                case BUCKET_1000: return computed_method::bucket_1000_uint16;
-                case BUCKET_0_1: return computed_method::bucket_0_1_uint16;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_uint16;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_uint16;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(uint16);
         } break;
         case DTYPE_UINT32: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_uint32;
-                case INVERT: return computed_method::invert_uint32;
-                case SQRT: return computed_method::sqrt_uint32;
-                case ABS: return computed_method::abs_uint32;
-                case BUCKET_10: return computed_method::bucket_10_uint32;
-                case BUCKET_100: return computed_method::bucket_100_uint32;
-                case BUCKET_1000: return computed_method::bucket_1000_uint32;
-                case BUCKET_0_1: return computed_method::bucket_0_1_uint32;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_uint32;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_uint32;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(uint32);
         } break;
         case DTYPE_UINT64: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_uint64;
-                case INVERT: return computed_method::invert_uint64;
-                case SQRT: return computed_method::sqrt_uint64;
-                case ABS: return computed_method::abs_uint64;
-                case BUCKET_10: return computed_method::bucket_10_uint64;
-                case BUCKET_100: return computed_method::bucket_100_uint64;
-                case BUCKET_1000: return computed_method::bucket_1000_uint64;
-                case BUCKET_0_1: return computed_method::bucket_0_1_uint64;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_uint64;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_uint64;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(uint64);
         } break;
         case DTYPE_INT8: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_int8;
-                case INVERT: return computed_method::invert_int8;
-                case SQRT: return computed_method::sqrt_int8;
-                case ABS: return computed_method::abs_int8;
-                case BUCKET_10: return computed_method::bucket_10_int8;
-                case BUCKET_100: return computed_method::bucket_100_int8;
-                case BUCKET_1000: return computed_method::bucket_1000_int8;
-                case BUCKET_0_1: return computed_method::bucket_0_1_int8;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_int8;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_int8;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(int8);
         } break;
         case DTYPE_INT16: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_int16;
-                case INVERT: return computed_method::invert_int16;
-                case SQRT: return computed_method::sqrt_int16;
-                case ABS: return computed_method::abs_int16;
-                case BUCKET_10: return computed_method::bucket_10_int16;
-                case BUCKET_100: return computed_method::bucket_100_int16;
-                case BUCKET_1000: return computed_method::bucket_1000_int16;
-                case BUCKET_0_1: return computed_method::bucket_0_1_int16;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_int16;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_int16;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(int16);
         } break;
         case DTYPE_INT32: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_int32;
-                case INVERT: return computed_method::invert_int32;
-                case SQRT: return computed_method::sqrt_int32;
-                case ABS: return computed_method::abs_int32;
-                case BUCKET_10: return computed_method::bucket_10_int32;
-                case BUCKET_100: return computed_method::bucket_100_int32;
-                case BUCKET_1000: return computed_method::bucket_1000_int32;
-                case BUCKET_0_1: return computed_method::bucket_0_1_int32;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_int32;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_int32;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(int32);
         } break;
         case DTYPE_INT64: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_int64;
-                case INVERT: return computed_method::invert_int64;
-                case SQRT: return computed_method::sqrt_int64;
-                case ABS: return computed_method::abs_int64;
-                case BUCKET_10: return computed_method::bucket_10_int64;
-                case BUCKET_100: return computed_method::bucket_100_int64;
-                case BUCKET_1000: return computed_method::bucket_1000_int64;
-                case BUCKET_0_1: return computed_method::bucket_0_1_int64;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_int64;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_int64;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(int64);
         } break;
         case DTYPE_FLOAT32: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_float32;
-                case INVERT: return computed_method::invert_float32;
-                case SQRT: return computed_method::sqrt_float32;
-                case ABS: return computed_method::abs_float32;
-                case BUCKET_10: return computed_method::bucket_10_float32;
-                case BUCKET_100: return computed_method::bucket_100_float32;
-                case BUCKET_1000: return computed_method::bucket_1000_float32;
-                case BUCKET_0_1: return computed_method::bucket_0_1_float32;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_float32;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_float32;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(float32);
         } break;
         case DTYPE_FLOAT64: {
-            switch (computation.m_name) {
-                case POW: return computed_method::pow_float64;
-                case INVERT: return computed_method::invert_float64;
-                case SQRT: return computed_method::sqrt_float64;
-                case ABS: return computed_method::abs_float64;
-                case BUCKET_10: return computed_method::bucket_10_float64;
-                case BUCKET_100: return computed_method::bucket_100_float64;
-                case BUCKET_1000: return computed_method::bucket_1000_float64;
-                case BUCKET_0_1: return computed_method::bucket_0_1_float64;
-                case BUCKET_0_0_1: return computed_method::bucket_0_0_1_float64;
-                case BUCKET_0_0_0_1: return computed_method::bucket_0_0_0_1_float64;
-                default: break;
-            }
+            GET_COMPUTED_FUNCTION_1(float64);
         } break;
         case DTYPE_STR: {
             switch (computation.m_name) {
-                case UPPERCASE: return computed_method::uppercase;
+                case UPPERCASE: return computed_function::uppercase;
                 default: break;
             }
         }
@@ -204,198 +98,47 @@ t_computed_column::get_computed_method_1(t_computation computation) {
     PSP_COMPLAIN_AND_ABORT("Invalid computation method");
 }
 
+#define GET_COMPUTED_FUNCTION_2(DTYPE)                                         \
+    switch (computation.m_name) {                                              \
+        case ADD: return computed_function::add<DTYPE>;                      \
+        case SUBTRACT: return computed_function::subtract<DTYPE>;            \
+        case MULTIPLY: return computed_function::multiply<DTYPE>;            \
+        case DIVIDE: return computed_function::divide<DTYPE>;                \
+        default: break;                                                        \
+    }
+
 std::function<t_tscalar(t_tscalar, t_tscalar)>
-t_computed_column::get_computed_method_2(t_computation computation) {
+t_computed_column::get_computed_function_2(t_computation computation) {
     switch (computation.m_input_types[0]) {
         case DTYPE_UINT8: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_UINT8>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_UINT8>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_UINT8>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_UINT8>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_UINT8);
         } break;
         case DTYPE_UINT16: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_UINT16>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_UINT16>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_UINT16>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_UINT16>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_UINT16);
         } break;
         case DTYPE_UINT32: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_UINT32>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_UINT32>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_UINT32>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_UINT32>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_UINT32);
         } break;
         case DTYPE_UINT64: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_UINT64>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_UINT64>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_UINT64>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_UINT64>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_UINT64);
         } break;
         case DTYPE_INT8: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_INT8>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_INT8>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_INT8>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_INT8>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_INT8);
         } break;
         case DTYPE_INT16: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_INT16>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_INT16>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_INT16>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_INT16>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_INT16);
         } break;
         case DTYPE_INT32: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_INT32>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_INT32>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_INT32>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_INT32>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_INT32);
         } break;
         case DTYPE_INT64: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_INT64>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_INT64>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_INT64>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_INT64>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_INT64);
         } break;
         case DTYPE_FLOAT32: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_FLOAT32>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_FLOAT32>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_FLOAT32>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_FLOAT32>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                }
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_FLOAT32);
         } break;
         case DTYPE_FLOAT64: {
-            switch (computation.m_name) {
-                case ADD: {
-                    return computed_method::add<DTYPE_FLOAT64>;
-                } break;
-                case SUBTRACT: {
-                    return computed_method::subtract<DTYPE_FLOAT64>;
-                } break;
-                case MULTIPLY: {
-                    return computed_method::multiply<DTYPE_FLOAT64>;
-                } break;
-                case DIVIDE: {
-                    return computed_method::divide<DTYPE_FLOAT64>;
-                } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Invalid computation method");
-                } break;
-            }
+            GET_COMPUTED_FUNCTION_2(DTYPE_FLOAT64);
         } break;
         default: {
             PSP_COMPLAIN_AND_ABORT("Invalid computation method");
@@ -422,10 +165,10 @@ t_computed_column::apply_computation(
 
     switch (arity) {
         case 1: {
-            method_1 = t_computed_column::get_computed_method_1(computation);
+            method_1 = t_computed_column::get_computed_function_1(computation);
         } break;
         case 2: {
-            method_2 = t_computed_column::get_computed_method_2(computation);    
+            method_2 = t_computed_column::get_computed_function_2(computation);    
         } break;
         default: {
             PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");

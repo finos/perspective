@@ -441,7 +441,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
 	${PSP_CPP_SRC}/src/cpp/computed.cpp
-	${PSP_CPP_SRC}/src/cpp/computed_method.cpp
+	${PSP_CPP_SRC}/src/cpp/computed_function.cpp
 	${PSP_CPP_SRC}/src/cpp/config.cpp
 	${PSP_CPP_SRC}/src/cpp/context_base.cpp
 	${PSP_CPP_SRC}/src/cpp/context_grouped_pkey.cpp
