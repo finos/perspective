@@ -313,7 +313,7 @@ class MakeTick {
         return tick;
     }
 
-    make_col(cols, col_names, num_cols, pivot_length, row_path, color_range) {
+    make_col(cols, col_names, num_cols, pivot_length, row_path, color_range, is_line = false) {
         let ticks = [];
         let data = cols;
 
@@ -352,15 +352,22 @@ class MakeTick {
                 tick.y = this.yaxis_clean.clean(data[1][i]);
             }
 
-            if (num_cols > 2) {
+            if (col_names.length > 2 && col_names[2] !== null) {
                 // set color
                 let color = data[2][i];
                 if (this.schema[col_names[2]] === "string") {
-                    let color_index = this.color_clean.clean(color);
-                    tick.marker = {
-                        lineColor: color_index,
-                        fillColor: color_index
-                    };
+                    if (is_line) {
+                        // This is a line, use colorValue to pass tooltip
+                        tick.colorValue = color;
+                    } else {
+                        // This is a literal color, coerce to unique number;
+                        let color_index = this.color_clean.clean(color);
+                        tick.marker = {
+                            lineColor: color_index,
+                            fillColor: color_index
+                        };
+                        tick.colorValue = color_index;
+                    }
                 } else {
                     if (!isNaN(color)) {
                         color_range[0] = Math.min(color_range[0], color);
@@ -370,12 +377,17 @@ class MakeTick {
                 }
             }
 
-            if (num_cols > 3) {
+            if (col_names.length > 3 && col_names[3] !== null) {
                 // set size
                 let size = data[3][i];
-                tick.z = isNaN(size) ? 1 : size;
+                tick.z = is_line ? size : isNaN(size) ? 1 : size;
             }
 
+            let tooltip_index = 3;
+            while (typeof col_names[++tooltip_index] === "string") {
+                tick.tooltip = [] || tick.tooltip;
+                tick.tooltip.push(data[tooltip_index][i]);
+            }
             ticks.push(tick);
         }
 
@@ -386,13 +398,14 @@ class MakeTick {
 export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
     const columns = new ColumnIterator(cols, pivots.length);
     let series = [];
+    const data_cols = aggs.filter(x => x !== null);
     let color_range = [Infinity, -Infinity];
     let make_tick = new MakeTick(schema, columns.column_names);
 
     let row_path = columns.columns.__ROW_PATH__;
 
     if (col_pivots.length === 0) {
-        let ticks = make_tick.make_col(columns.columns, columns.column_names, aggs.length, columns.pivot_length, row_path, color_range);
+        let ticks = make_tick.make_col(columns.columns, aggs, data_cols.length, columns.pivot_length, row_path, color_range, true);
 
         let s = column_to_series(ticks, " ");
         series.push(s);
@@ -412,6 +425,7 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
             row_path = clean_row_path;
         }
 
+        let real_index = 0;
         for (let col of columns) {
             let column_levels = col.name.split(COLUMN_SEPARATOR_STRING);
             let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
@@ -421,11 +435,14 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
             }
 
             groups[group_name].push(col.data);
+            while (aggs[++real_index] === null) {
+                groups[group_name].push(null);
+            }
 
             if (groups[group_name].length === aggs.length) {
                 // generate series as soon as we have enough data
-                let ticks = make_tick.make_col(groups[group_name], aggs, aggs.length, columns.pivot_length, row_path, color_range);
-
+                let ticks = make_tick.make_col(groups[group_name], aggs, data_cols.length, columns.pivot_length, row_path, color_range);
+                real_index = 0;
                 let s = column_to_series(ticks, group_name);
                 series.push(s);
             }

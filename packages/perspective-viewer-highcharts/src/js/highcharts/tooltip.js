@@ -45,6 +45,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
 
         let row_pivots_text = "",
             column_pivot_text = "",
+            extra_text = "",
             x_text = "",
             y_text = "",
             z_text = "",
@@ -81,12 +82,18 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
 
         if (has_w_values) {
             let w_axis_title = axis_titles[3],
-                raw_w_axis_value = context.point.colorValue;
+                raw_w_axis_value = context.point.z;
 
             w_text = collate_single_value(w_axis_title, raw_w_axis_value, schema);
         }
 
-        const tooltip_text = [row_pivots_text, column_pivot_text, x_text, y_text, z_text, w_text];
+        if (context.point.tooltip && context.point.tooltip.length > 0) {
+            for (let i = 0; i < context.point.tooltip.length; i++) {
+                extra_text += collate_single_value(axis_titles[4 + i], context.point.tooltip[i], schema);
+            }
+        }
+
+        const tooltip_text = [row_pivots_text, column_pivot_text, x_text, y_text, z_text, w_text, extra_text];
         return tooltip_text.join("");
     } else if (type === "xyz") {
         return `<span>${format_value(context.point.value)}</span>`;
@@ -142,7 +149,7 @@ function get_axis_type(axis_title, schema) {
 }
 
 function value_exists(value) {
-    return value !== undefined && value !== " ";
+    return value !== null && value !== undefined && value !== " ";
 }
 
 function format_value(value, type) {

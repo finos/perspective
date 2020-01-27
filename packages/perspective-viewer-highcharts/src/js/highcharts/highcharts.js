@@ -128,7 +128,7 @@ const PLUGINS = {
         initial: {
             type: "number",
             count: 2,
-            names: ["X Axis", "Y Axis"]
+            names: ["X Axis", "Y Axis", "Tooltip"]
         },
         selectMode: "toggle",
         delete: delete_chart,
@@ -145,7 +145,7 @@ const PLUGINS = {
         initial: {
             type: "number",
             count: 2,
-            names: ["X Axis", "Y Axis", "Color", "Size"]
+            names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"]
         },
         selectMode: "toggle",
         delete: delete_chart,
@@ -161,7 +161,7 @@ const PLUGINS = {
         styleElement: draw("treemap", false, true),
         initial: {
             type: "number",
-            count: 2,
+            count: 1,
             names: ["Size", "Color"]
         },
         selectMode: "toggle",
@@ -178,7 +178,7 @@ const PLUGINS = {
         resize: resize,
         initial: {
             type: "number",
-            count: 2,
+            count: 1,
             names: ["Size", "Color"]
         },
         selectMode: "toggle",
