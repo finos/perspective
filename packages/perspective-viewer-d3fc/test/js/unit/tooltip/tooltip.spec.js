@@ -98,8 +98,7 @@ describe("tooltip with", () => {
         test("hide a tooltip if no element", async () => {
             tooltipComponent(container.select("div.notexists"));
             await awaitTransition(tooltipDiv);
-
-            expect(tooltipDiv.style("opacity")).not.toEqual("0");
+            expect(Math.floor(parseFloat(tooltipDiv.style("opacity")))).toEqual(0);
         });
     });
 });
