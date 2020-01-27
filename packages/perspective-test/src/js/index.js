@@ -12,6 +12,7 @@ const crypto = require("crypto");
 const puppeteer = require("puppeteer");
 const path = require("path");
 const execSync = require("child_process").execSync;
+const {track_mouse} = require("./mouse_helper.js");
 
 const readline = require("readline");
 
@@ -60,6 +61,7 @@ let browser,
 async function get_new_page() {
     page = await browser.newPage();
 
+    page.track_mouse = track_mouse.bind(page);
     page.shadow_click = async function(...path) {
         await this.evaluate(path => {
             let elem = document;
@@ -238,7 +240,7 @@ expect.extend({
     }
 });
 
-test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true} = {}) {
+test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
     const _url = page_url;
     const _reload_page = page_reload;
     const spec = test(
@@ -302,9 +304,12 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     });
                 }
 
+                // Move the mouse offscreen so prev tests dont get hover effects
+                await page.mouse.move(10000, 10000);
                 await body(page);
-
-                await page.mouse.move(1000, 1000);
+                if (!preserve_hover) {
+                    await page.mouse.move(10000, 10000);
+                }
 
                 if (wait_for_update) {
                     await page.waitForSelector("perspective-viewer:not([updating])");
