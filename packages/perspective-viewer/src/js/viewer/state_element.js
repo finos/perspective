@@ -15,20 +15,54 @@ export class StateElement extends HTMLElement {
         let view = this.getAttribute("plugin");
         if (!view) {
             view = Object.keys(current_renderers)[0];
+            this.setAttribute("plugin", view);
         }
-        this.setAttribute("plugin", view);
         return current_renderers[view] || current_renderers[Object.keys(current_renderers)[0]];
     }
 
+    // deprecate
     _get_view_dom_columns(selector, callback) {
         selector = selector || "#active_columns perspective-row";
         let columns = Array.prototype.slice.call(this.shadowRoot.querySelectorAll(selector));
         if (!callback) {
             return columns;
         }
-        return columns.map(callback);
+        return columns.map(callback).filter(x => x);
     }
 
+    _get_view_all_columns() {
+        return Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#inactive_columns perspective-row"));
+    }
+
+    _get_view_active_columns() {
+        return Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#active_columns perspective-row"));
+    }
+
+    _get_view_active_valid_columns() {
+        return Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#active_columns perspective-row")).filter(x => !x.classList.contains("null-column"));
+    }
+
+    _get_view_all_column_names() {
+        return this._get_view_all_columns().map(x => x.getAttribute("name"));
+    }
+
+    _get_view_active_column_names() {
+        return this._get_view_active_columns().map(x => x.getAttribute("name"));
+    }
+
+    _get_view_all_valid_column_names() {
+        return this._get_view_all_column_names().filter(x => x);
+    }
+
+    _get_view_active_valid_column_names() {
+        return this._get_view_active_column_names().filter(x => x);
+    }
+
+    _get_view_active_valid_column_count() {
+        return this._get_view_active_valid_column_names().length;
+    }
+
+    // deprecate
     _get_view_columns({active = true} = {}) {
         let selector;
         if (active) {
@@ -52,10 +86,8 @@ export class StateElement extends HTMLElement {
                     console.error(e);
                 }
             }
-            return {
-                op,
-                column: s.getAttribute("name")
-            };
+            const column = s.getAttribute("name");
+            return column && {op, column};
         });
     }
 

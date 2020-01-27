@@ -7,6 +7,8 @@
  *
  */
 
+import {swap} from "../utils.js";
+
 function calc_index(event) {
     if (this._active_columns.children.length == 0) {
         return 0;
@@ -18,12 +20,6 @@ function calc_index(event) {
             }
         }
         return this._active_columns.children.length;
-    }
-}
-
-function _clear_classes() {
-    for (const active_column of this._active_columns.children) {
-        active_column.className = "";
     }
 }
 
@@ -89,11 +85,9 @@ export function drop(ev) {
     this._debounce_update();
 }
 
-// Handle column actions
 export function column_dragend(event) {
     let data = event.target.parentElement.parentElement;
-    _clear_classes.bind(this)();
-    if (this._get_visible_column_count() > 1 && event.dataTransfer.dropEffect !== "move") {
+    if (Array.prototype.slice(this._active_columns.children).indexOf(data) > -1 && this._get_visible_column_count() > 1 && event.dataTransfer.dropEffect !== "move") {
         this._active_columns.removeChild(data);
         this._update_column_view();
     }
@@ -107,6 +101,10 @@ export function column_dragleave(event) {
     }
     if (src === null) {
         this._active_columns.classList.remove("dropping");
+        if (this._drop_target_null) {
+            this._active_columns.replaceChild(this._drop_target_null, this._drop_target_hover);
+            delete this._drop_target_null;
+        }
         if (this._drop_target_hover.parentElement === this._active_columns) {
             this._active_columns.removeChild(this._drop_target_hover);
         }
@@ -114,6 +112,35 @@ export function column_dragleave(event) {
             this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
         }
         this._drop_target_hover.removeAttribute("drop-target");
+    }
+}
+
+function _unset_drop_target_null() {
+    if (this._drop_target_null) {
+        if (this._drop_target_null.parentElement === this._active_columns) {
+            swap(this._active_columns, this._drop_target_hover, this._drop_target_null);
+        } else {
+            this._active_columns.replaceChild(this._drop_target_null, this._drop_target_hover);
+        }
+        delete this._drop_target_null;
+    }
+}
+
+function column_swap(new_index) {
+    _unset_drop_target_null.call(this);
+    if (this._active_columns.children[new_index]) {
+        if (this._drop_target_hover !== this._active_columns.children[new_index]) {
+            this._drop_target_null = this._active_columns.children[new_index];
+            swap(this._active_columns, this._active_columns.children[new_index], this._drop_target_hover);
+        }
+    }
+}
+
+function column_replace(new_index) {
+    _unset_drop_target_null.call(this);
+    if (this._active_columns.children[new_index]) {
+        this._drop_target_null = this._active_columns.children[new_index];
+        this._active_columns.replaceChild(this._drop_target_hover, this._active_columns.children[new_index]);
     }
 }
 
@@ -127,14 +154,67 @@ export function column_dragover(event) {
         this._drop_target_hover.toggleAttribute("drop-target", true);
     }
     let new_index = calc_index.call(this, event);
-    let current_index = Array.prototype.slice.call(this._active_columns.children).indexOf(this._drop_target_hover);
-    if (current_index < new_index) new_index += 1;
-    if (new_index < this._active_columns.children.length) {
+    const current_index = Array.prototype.slice.call(this._active_columns.children).indexOf(this._drop_target_hover);
+    const over_elem = this._active_columns.children[new_index];
+    const to_replace = new_index < this._plugin.initial?.names?.length - 1;
+    const is_diff = this._drop_target_hover !== this._active_columns.children[new_index];
+    const from_active = this._original_index !== -1;
+    const from_replace = from_active && this._original_index < this._plugin.initial?.names?.length - 1;
+    const from_append = from_active && this._original_index >= this._plugin.initial?.names?.length - 1;
+    const from_required = from_active && this._original_index < this._plugin.initial?.count;
+    const to_required = new_index < this._plugin.initial?.count;
+    const to_null = !to_required && over_elem?.classList.contains("null-column");
+    if (from_required && to_null) {
+        _unset_drop_target_null.call(this);
+    } else if (to_replace && from_append && is_diff) {
+        _unset_drop_target_null.call(this);
+        const from_last =
+            this._original_index === this._plugin.initial?.names?.length - 1 &&
+            this._drop_target_hover === this._active_columns.children[this._original_index] &&
+            this._active_columns.children.length === this._plugin.initial?.names?.length;
+        if (from_last) {
+            this._drop_target_null = this._active_columns.children[new_index];
+            swap(this._active_columns, this._active_columns.children[new_index], this._drop_target_hover);
+        } else if (!this._active_columns.children[new_index]?.classList.contains("null-column")) {
+            this._drop_target_null = this._active_columns.children[new_index];
+            this._active_columns.replaceChild(this._drop_target_hover, this._active_columns.children[new_index]);
+            this._active_columns.insertBefore(this._drop_target_null, this._active_columns.children[this._original_index]);
+        } else {
+            if (this._drop_target_hover !== this._active_columns.children[new_index]) {
+                this._drop_target_null = this._active_columns.children[new_index];
+                this._active_columns.replaceChild(this._drop_target_hover, this._active_columns.children[new_index]);
+            }
+        }
+    } else if (to_replace && from_active && is_diff) {
+        column_swap.call(this, new_index);
+    } else if (to_replace && !from_active && is_diff) {
+        column_replace.call(this, new_index);
+    } else if (!to_replace && from_replace && is_diff) {
+        column_swap.call(this, new_index);
+    } else if (to_null && from_active) {
+        column_swap.call(this, new_index);
+    } else if (to_null && !from_active) {
+        column_replace.call(this, new_index);
+    } else if (current_index < new_index) {
+        if (new_index + 1 < this._active_columns.children.length) {
+            if (!this._active_columns.children[new_index + 1].hasAttribute("drop-target")) {
+                _unset_drop_target_null.call(this);
+                this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[new_index + 1]);
+            }
+        } else {
+            if (!this._active_columns.children[this._active_columns.children.length - 1].hasAttribute("drop-target")) {
+                _unset_drop_target_null.call(this);
+                this._active_columns.appendChild(this._drop_target_hover);
+            }
+        }
+    } else if (new_index < this._active_columns.children.length) {
         if (!this._active_columns.children[new_index].hasAttribute("drop-target")) {
+            _unset_drop_target_null.call(this);
             this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[new_index]);
         }
     } else {
         if (!this._active_columns.children[this._active_columns.children.length - 1].hasAttribute("drop-target")) {
+            _unset_drop_target_null.call(this);
             this._active_columns.appendChild(this._drop_target_hover);
         }
     }
@@ -142,11 +222,11 @@ export function column_dragover(event) {
 
 export function column_drop(ev) {
     ev.preventDefault();
+    delete this._drop_target_null;
     ev.currentTarget.classList.remove("dropping");
     if (this._drop_target_hover.parentElement === this._active_columns) {
         this._drop_target_hover.removeAttribute("drop-target");
     }
-    _clear_classes.bind(this)();
     let data = ev.dataTransfer.getData("text");
     if (!data) return;
 
