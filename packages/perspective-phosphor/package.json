@@ -48,7 +48,7 @@
         "mini-css-extract-plugin": "^0.8.0",
         "rimraf": "^2.5.2",
         "source-map-support": "^0.5.9",
-        "typescript": "^3.6.0",
+        "typescript": "^3.7.4",
         "webpack-fix-style-only-entries": "^0.4.0"
     }
 }

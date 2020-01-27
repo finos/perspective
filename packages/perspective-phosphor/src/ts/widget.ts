@@ -16,7 +16,7 @@ import {Message} from "@phosphor/messaging";
 import {Widget} from "@phosphor/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
 
-import {HTMLPerspectiveViewerElement, PerspectiveViewerOptions} from "@finos/perspective-viewer";
+import {HTMLPerspectiveViewerElement, Pivots, Aggregates, Sort, ComputedColumns, PerspectiveViewerOptions, Filters, Columns} from "@finos/perspective-viewer";
 
 let _increment = 0;
 
@@ -29,9 +29,9 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
 
     // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
     // ["row-pivots"]
-    column_pivots?: string[];
-    row_pivots?: string[];
-    computed_columns?: {[column_name: string]: string}[];
+    column_pivots?: Pivots;
+    row_pivots?: Pivots;
+    computed_columns?: ComputedColumns;
 }
 
 /**
@@ -59,13 +59,13 @@ export class PerspectiveWidget extends Widget {
      */
     _set_attributes(options: PerspectiveWidgetOptions): void {
         const plugin: string = options.plugin || "hypergrid";
-        const columns: Array<string> = options.columns || [];
-        const row_pivots: Array<string> = options.row_pivots || options["row-pivots"] || [];
-        const column_pivots: Array<string> = options.column_pivots || options["column-pivots"] || [];
-        const aggregates: {[column_name: string]: string} = options.aggregates || {};
-        const sort: Array<Array<string>> = options.sort || [];
-        const filters: Array<Array<string>> = options.filters || [];
-        const computed_columns: {[colname: string]: string}[] = options.computed_columns || options["computed-columns"] || [];
+        const columns: Columns = options.columns || [];
+        const row_pivots: Pivots = options.row_pivots || options["row-pivots"] || [];
+        const column_pivots: Pivots = options.column_pivots || options["column-pivots"] || [];
+        const aggregates: Aggregates = options.aggregates || {};
+        const sort: Sort = options.sort || [];
+        const filters: Filters = options.filters || [];
+        const computed_columns: ComputedColumns = options.computed_columns || options["computed-columns"] || [];
         const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
@@ -229,10 +229,10 @@ export class PerspectiveWidget extends Widget {
      * If a column in the dataset is not in this array, it is not shown but can
      * be used for aggregates, sort, and filter.
      */
-    get columns(): string[] {
+    get columns(): Columns {
         return JSON.parse(this.viewer.getAttribute("columns"));
     }
-    set columns(columns: string[]) {
+    set columns(columns: Columns) {
         if (columns.length > 0) {
             this.viewer.setAttribute("columns", JSON.stringify(columns));
         } else {
@@ -240,38 +240,38 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    get row_pivots(): string[] {
+    get row_pivots(): Pivots {
         return JSON.parse(this.viewer.getAttribute("row-pivots"));
     }
-    set row_pivots(row_pivots: string[]) {
+    set row_pivots(row_pivots: Pivots) {
         this.viewer.setAttribute("row-pivots", JSON.stringify(row_pivots));
     }
 
-    get column_pivots(): string[] {
+    get column_pivots(): Pivots {
         return JSON.parse(this.viewer.getAttribute("column-pivots"));
     }
-    set column_pivots(column_pivots: string[]) {
+    set column_pivots(column_pivots: Pivots) {
         this.viewer.setAttribute("column-pivots", JSON.stringify(column_pivots));
     }
 
-    get aggregates(): {[column_name: string]: string} {
+    get aggregates(): Aggregates {
         return JSON.parse(this.viewer.getAttribute("aggregates"));
     }
-    set aggregates(aggregates: {[colname: string]: string}) {
+    set aggregates(aggregates: Aggregates) {
         this.viewer.setAttribute("aggregates", JSON.stringify(aggregates));
     }
 
-    get sort(): string[][] {
+    get sort(): Sort {
         return JSON.parse(this.viewer.getAttribute("sort"));
     }
-    set sort(sort: string[][]) {
+    set sort(sort: Sort) {
         this.viewer.setAttribute("sort", JSON.stringify(sort));
     }
 
-    get computed_columns(): {[column_name: string]: string}[] {
+    get computed_columns(): ComputedColumns {
         return JSON.parse(this.viewer.getAttribute("computed-columns"));
     }
-    set computed_columns(computed_columns: {[column_name: string]: string}[]) {
+    set computed_columns(computed_columns: ComputedColumns) {
         if (computed_columns.length > 0) {
             this.viewer.setAttribute("computed-columns", JSON.stringify(computed_columns));
         } else {
@@ -279,10 +279,10 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    get filters(): string[][] {
+    get filters(): Filters {
         return JSON.parse(this.viewer.getAttribute("filters"));
     }
-    set filters(filters: string[][]) {
+    set filters(filters: Filters) {
         if (filters.length > 0) {
             this.viewer.setAttribute("filters", JSON.stringify(filters));
         } else {

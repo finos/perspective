@@ -1,0 +1,32 @@
+{
+    "name": "react",
+    "private": true,
+    "version": "0.4.0",
+    "description": "An example app built using `@finos/perspective-phosphor`.",
+    "scripts": {
+        "start": "webpack-dev-server --open",
+        "webpack": "webpack --colour"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "^0.4.0",
+        "@finos/perspective-viewer": "^0.4.0",
+        "@finos/perspective-viewer-d3fc": "^0.4.0",
+        "@finos/perspective-viewer-hypergrid": "^0.4.0",
+        "react": "16.8.6",
+        "react-dom": "16.8.6"
+    },
+    "devDependencies": {
+        "@finos/perspective-webpack-plugin": "^0.4.0",
+        "@types/react": "^16.9.17",
+        "@types/react-dom": "^16.9.4",
+        "css-loader": "^0.28.7",
+        "html-webpack-plugin": "^3.2.0",
+        "source-map-loader": "^0.2.4",
+        "style-loader": "^0.18.2",
+        "ts-loader": "^6.2.1",
+        "typescript": "^3.7.4",
+        "webpack-dev-server": "^3.8.0"
+    }
+}
