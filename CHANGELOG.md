@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.1] (2020-01-27)
+
+#### Fixed
+  * [#880](https://github.com/finos/perspective/pull/880) Fix `on_update` callbacks in Python ([@sc1f](https://github.com/sc1f))
+  * [#867](https://github.com/finos/perspective/pull/867) Time zone awareness in perspective-python ([@sc1f](https://github.com/sc1f))
+  * [#872](https://github.com/finos/perspective/pull/872) Improve `@finos/perspective-viewer` typings ([@zemeolotu](https://github.com/zemeolotu))
+  * [#868](https://github.com/finos/perspective/pull/868) Allow plugins to be importable before '`perspective-viewer` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#866](https://github.com/finos/perspective/pull/866) Fix scrolling for pivoted hypergrid ([@sc1f](https://github.com/sc1f))
+
 ## [0.4.0] (2020-01-07)
 #### Added
   * [#850](https://github.com/finos/perspective/pull/850) Implement `to_arrow` in C++ for JS/Python ([@sc1f](https://github.com/sc1f))
