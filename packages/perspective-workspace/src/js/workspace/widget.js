@@ -8,7 +8,7 @@
  */
 
 import "@finos/perspective-viewer";
-import {Widget} from "@lumino/widgets";
+import {Widget} from "@phosphor/widgets";
 
 let ID_COUNTER = 0;
 

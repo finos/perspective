@@ -7,8 +7,8 @@
  *
  */
 
-import {h} from "@lumino/virtualdom";
-import {Menu} from "@lumino/widgets";
+import {h} from "@phosphor/virtualdom";
+import {Menu} from "@phosphor/widgets";
 
 export class MenuRenderer extends Menu.Renderer {
     constructor(element) {

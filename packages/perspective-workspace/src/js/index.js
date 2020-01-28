@@ -11,8 +11,8 @@ import style from "../less/workspace.less";
 import template from "../html/workspace.html";
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils";
 import {PerspectiveWorkspace, SIDE} from "./workspace";
-import {MessageLoop} from "@lumino/messaging";
-import {Widget} from "@lumino/widgets";
+import {MessageLoop} from "@phosphor/messaging";
+import {Widget} from "@phosphor/widgets";
 
 import injectedStyles from "../less/injected.less";
 

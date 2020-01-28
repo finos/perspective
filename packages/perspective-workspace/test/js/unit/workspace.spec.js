@@ -8,7 +8,7 @@
  */
 
 import {PerspectiveWorkspace} from "../../../src/js/workspace/workspace";
-import {toArray} from "@lumino/algorithm";
+import {toArray} from "@phosphor/algorithm";
 
 describe("workspace", () => {
     test("restores detail to dockpanel", () => {

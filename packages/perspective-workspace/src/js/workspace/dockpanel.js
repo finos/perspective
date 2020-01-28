@@ -7,7 +7,7 @@
  *
  */
 
-import {DockPanel} from "@lumino/widgets";
+import {DockPanel} from "@phosphor/widgets";
 import {DiscreteDockPanel} from "./discrete";
 import {PerspectiveTabBar} from "./tabbar";
 import {PerspectiveTabBarRenderer} from "./tabbarrenderer";

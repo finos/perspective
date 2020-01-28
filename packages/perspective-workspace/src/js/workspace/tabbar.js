@@ -7,9 +7,9 @@
  *
  */
 
-import {ArrayExt} from "@lumino/algorithm";
-import {ElementExt} from "@lumino/domutils";
-import {TabBar} from "@lumino/widgets";
+import {ArrayExt} from "@phosphor/algorithm";
+import {ElementExt} from "@phosphor/domutils";
+import {TabBar} from "@phosphor/widgets";
 import {TabBarActions} from "./tabbarrenderer";
 
 export class PerspectiveTabBar extends TabBar {
