@@ -62,7 +62,7 @@ interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions,
     columns?: string;
 }
 
-interface ReactPerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerHTMLAttributes, React.HTMLAttributes<T> {}
+interface HTMLPerspectiveViewerElement extends PerspectiveViewerHTMLAttributes, HTMLElement {}
 
 type PerspectiveElement = React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
 
