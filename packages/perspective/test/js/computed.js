@@ -497,6 +497,86 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Computed column of arity 2, percent a of b, ints", async function() {
+                const table = perspective
+                    .table({
+                        a: [100, 75, 50, 25, 10, 1],
+                        b: [100, 100, 100, 100, 100, 100]
+                    })
+                    .add_computed([
+                        {
+                            column: "%",
+                            func_name: "%",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result["%"]).toEqual([100, 75, 50, 25, 10, 1]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, percent a of b, floats", async function() {
+                const table = perspective
+                    .table({
+                        a: [7.5, 5.5, 2.5, 1.5, 0.5],
+                        b: [22.5, 16.5, 7.5, 4.5, 1.5]
+                    })
+                    .add_computed([
+                        {
+                            column: "%",
+                            func_name: "%",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result["%"]).toEqual([33.33333333333333, 33.33333333333333, 33.33333333333333, 33.33333333333333, 33.33333333333333]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, percent a of b, mixed", async function() {
+                const table = perspective
+                    .table({
+                        a: [55.5, 65.5, 75.5, 85.5, 95.5],
+                        b: [100, 100, 100, 100, 100]
+                    })
+                    .add_computed([
+                        {
+                            column: "%",
+                            func_name: "%",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result["%"]).toEqual([55.50000000000001, 65.5, 75.5, 85.5, 95.5]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, percent a of b, with null", async function() {
+                const table = perspective
+                    .table({
+                        a: [100, null, 50, 25, 10, 1],
+                        b: [100, 100, 100, 100, null, 100]
+                    })
+                    .add_computed([
+                        {
+                            column: "%",
+                            func_name: "%",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result["%"]).toEqual([100, null, 50, 25, null, 1]);
+                view.delete();
+                table.delete();
+            });
+
             it("Computed column of arity 2 with updates on non-dependent columns, construct from schema", async function() {
                 var meta = {
                     w: "float",
@@ -1227,6 +1307,44 @@ module.exports = perspective => {
                             }
 
                             expect(results[name]).toEqual(comparison);
+                            view.delete();
+                            table.delete();
+                        }
+                    }
+                });
+
+                it("Should compute functions between all types, percent a of b", async function() {
+                    const int_result = [null, 100, 100, 100, 100, 100, 100, 100, 100, 100];
+                    const int_float_result = [null, 66.66666666666666, 100, 88.8888888888888888, 100, 93.33333333333333, 100, 95.23809523809523, 100, 96.29629629629629];
+                    const float_int_result = [null, 150, 100, 112.5, 100, 107.14285714285714, 100, 105, 100, 103.84615384615385];
+                    for (let i = 0; i < cols.length; i++) {
+                        for (let j = 0; j < cols.length; j++) {
+                            const x = cols[i];
+                            const y = cols[j];
+                            const name = `(${x} % ${y})`;
+                            let table = perspective.table(arrow.slice()).add_computed([
+                                {
+                                    func_name: "%",
+                                    inputs: [x, y],
+                                    column: name
+                                }
+                            ]);
+
+                            let view = table.view({
+                                columns: [name, x, y]
+                            });
+
+                            let results = await view.to_columns();
+                            let expected;
+
+                            if (x.includes("i") && y.includes("f")) {
+                                expected = int_float_result;
+                            } else if (x.includes("f") && y.includes("i")) {
+                                expected = float_int_result;
+                            } else {
+                                expected = int_result;
+                            }
+                            expect(results[name]).toEqual(expected);
                             view.delete();
                             table.delete();
                         }

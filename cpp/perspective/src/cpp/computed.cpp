@@ -38,19 +38,19 @@ t_computed_column::get_computation(
     PSP_COMPLAIN_AND_ABORT("Could not find computation.");
 };
 
-#define GET_COMPUTED_FUNCTION_1(TYPE) \
-    switch (computation.m_name) { \
-        case POW: return computed_function::pow_##TYPE; \
-        case INVERT: return computed_function::invert_##TYPE;\
-        case SQRT: return computed_function::sqrt_##TYPE;\
-        case ABS: return computed_function::abs_##TYPE;\
-        case BUCKET_10: return computed_function::bucket_10_##TYPE;\
-        case BUCKET_100: return computed_function::bucket_100_##TYPE;\
-        case BUCKET_1000: return computed_function::bucket_1000_##TYPE;\
-        case BUCKET_0_1: return computed_function::bucket_0_1_##TYPE;\
-        case BUCKET_0_0_1: return computed_function::bucket_0_0_1_##TYPE;\
-        case BUCKET_0_0_0_1: return computed_function::bucket_0_0_0_1_##TYPE;\
-        default: break;\
+#define GET_COMPUTED_FUNCTION_1(TYPE)                                          \
+    switch (computation.m_name) {                                              \
+        case POW: return computed_function::pow_##TYPE;                        \
+        case INVERT: return computed_function::invert_##TYPE;                  \
+        case SQRT: return computed_function::sqrt_##TYPE;                      \
+        case ABS: return computed_function::abs_##TYPE;                        \
+        case BUCKET_10: return computed_function::bucket_10_##TYPE;            \
+        case BUCKET_100: return computed_function::bucket_100_##TYPE;          \
+        case BUCKET_1000: return computed_function::bucket_1000_##TYPE;        \
+        case BUCKET_0_1: return computed_function::bucket_0_1_##TYPE;          \
+        case BUCKET_0_0_1: return computed_function::bucket_0_0_1_##TYPE;      \
+        case BUCKET_0_0_0_1: return computed_function::bucket_0_0_0_1_##TYPE;  \
+        default: break;                                                        \
     }
 
 std::function<t_tscalar(t_tscalar)>
@@ -100,10 +100,11 @@ t_computed_column::get_computed_function_1(t_computation computation) {
 
 #define GET_COMPUTED_FUNCTION_2(DTYPE)                                         \
     switch (computation.m_name) {                                              \
-        case ADD: return computed_function::add<DTYPE>;                      \
-        case SUBTRACT: return computed_function::subtract<DTYPE>;            \
-        case MULTIPLY: return computed_function::multiply<DTYPE>;            \
-        case DIVIDE: return computed_function::divide<DTYPE>;                \
+        case ADD: return computed_function::add<DTYPE>;                        \
+        case SUBTRACT: return computed_function::subtract<DTYPE>;              \
+        case MULTIPLY: return computed_function::multiply<DTYPE>;              \
+        case DIVIDE: return computed_function::divide<DTYPE>;                  \
+        case PERCENT_A_OF_B: return computed_function::percent_of<DTYPE>;      \
         default: break;                                                        \
     }
 
@@ -273,7 +274,7 @@ std::vector<t_computation> t_computed_column::computations = {};
 void t_computed_column::make_computations() {
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
     std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
-    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE};
+    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, PERCENT_A_OF_B};
     std::vector<t_computed_function_name> string_function_1 = {UPPERCASE, LOWERCASE};
     std::vector<t_computed_function_name> string_function_2 = {CONCAT_SPACE, CONCAT_COMMA};
 

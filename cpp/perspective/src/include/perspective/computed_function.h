@@ -72,6 +72,9 @@ t_tscalar multiply(t_tscalar x, t_tscalar y);
 template <t_dtype T>
 t_tscalar divide(t_tscalar x, t_tscalar y);
 
+template <t_dtype T>
+t_tscalar percent_of(t_tscalar x, t_tscalar y);
+
 #define NUMERIC_FUNCTION_2_HEADER(NAME)                                    \
     template <> t_tscalar NAME<DTYPE_UINT8>(t_tscalar x, t_tscalar y);     \
     template <> t_tscalar NAME<DTYPE_UINT16>(t_tscalar x, t_tscalar y);    \
@@ -88,6 +91,7 @@ NUMERIC_FUNCTION_2_HEADER(add);
 NUMERIC_FUNCTION_2_HEADER(subtract);
 NUMERIC_FUNCTION_2_HEADER(multiply);
 NUMERIC_FUNCTION_2_HEADER(divide);
+NUMERIC_FUNCTION_2_HEADER(percent_of);
 
 // String functions
 t_tscalar length(t_tscalar x);

@@ -272,18 +272,28 @@ NUMERIC_FUNCTION_1(BUCKET_0_0_0_1);
         return rval;                                                           \
     }
 
+#define PERCENT_OF(T1, T2)                                                     \
+    t_tscalar percent_of_##T1##_##T2(t_tscalar x, t_tscalar y) {               \
+        t_tscalar rval = mknone();                                             \
+        float64 lhs = static_cast<float64>(x.get<T1>());                       \
+        float64 rhs = static_cast<float64>(y.get<T2>());                       \
+        if (rhs != 0) rval.set(static_cast<float64>(lhs / rhs) * 100);         \
+        return rval;                                                           \
+    }
+
 NUMERIC_FUNCTION_2(ADD);
 NUMERIC_FUNCTION_2(SUBTRACT);
 NUMERIC_FUNCTION_2(MULTIPLY);
 NUMERIC_FUNCTION_2(DIVIDE);
+NUMERIC_FUNCTION_2(PERCENT_OF);
 
 /**
  * @brief Generate dispatch functions that call the correct computation method
  * with typings.
  */
-#define NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE, T1)                               \
+#define NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE, T1)                             \
     template <>                                                                \
-    t_tscalar OP<DTYPE>(t_tscalar x, t_tscalar y) {                   \
+    t_tscalar OP<DTYPE>(t_tscalar x, t_tscalar y) {                            \
         switch (y.get_dtype()) {                                               \
             case DTYPE_UINT8: return OP##_##T1##_uint8(x, y);                  \
             case DTYPE_UINT16: return OP##_##T1##_uint16(x, y);                \
@@ -300,46 +310,27 @@ NUMERIC_FUNCTION_2(DIVIDE);
         return mknone();                                                       \
     }
 
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_UINT8, uint8);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_UINT16, uint16);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_UINT32, uint32);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_UINT64, uint64);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_INT8, int8);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_INT16, int16);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_INT32, int32);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_INT64, int64);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_FLOAT32, float32);
-NUMERIC_FUNCTION_2_DISPATCH(add, DTYPE_FLOAT64, float64);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_UINT8, uint8);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_UINT16, uint16);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_UINT32, uint32);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_UINT64, uint64);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_INT8, int8);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_INT16, int16);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_INT32, int32);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_INT64, int64);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_FLOAT32, float32);
-NUMERIC_FUNCTION_2_DISPATCH(subtract, DTYPE_FLOAT64, float64);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_UINT8, uint8);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_UINT16, uint16);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_UINT32, uint32);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_UINT64, uint64);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_INT8, int8);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_INT16, int16);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_INT32, int32);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_INT64, int64);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_FLOAT32, float32);
-NUMERIC_FUNCTION_2_DISPATCH(multiply, DTYPE_FLOAT64, float64);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_UINT8, uint8);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_UINT16, uint16);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_UINT32, uint32);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_UINT64, uint64);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_INT8, int8);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_INT16, int16);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_INT32, int32);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_INT64, int64);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_FLOAT32, float32);
-NUMERIC_FUNCTION_2_DISPATCH(divide, DTYPE_FLOAT64, float64);
+/**
+ * @brief Given a single function token, generate the function for each t_dtype
+ * and matching type.
+ */
+#define NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(OP)                           \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_UINT8, uint8);                    \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_UINT16, uint16);                  \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_UINT32, uint32);                  \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_UINT64, uint64);                  \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_INT8, int8);                      \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_INT16, int16);                    \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_INT32, int32);                    \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_INT64, int64);                    \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_FLOAT32, float32);                \
+    NUMERIC_FUNCTION_2_DISPATCH(OP, DTYPE_FLOAT64, float64);                \
+
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(add);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(subtract);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(multiply);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(divide);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(percent_of);
 
 // String functions
 t_tscalar length(t_tscalar x) {

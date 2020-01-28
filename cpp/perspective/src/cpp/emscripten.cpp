@@ -952,6 +952,7 @@ namespace binding {
                 case SUBTRACT:
                 case MULTIPLY:
                 case DIVIDE:
+                case PERCENT_A_OF_B:
                 case POW:
                 case INVERT:
                 case SQRT:
