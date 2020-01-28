@@ -1,0 +1,59 @@
+@border-color: 1px solid #eaeaea;
+
+.p-Master{
+   --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
+}
+
+.p-Master[settings] {
+   --settings-button--content: var(--close-settings-button--content, "\1F527") !important;;
+}
+
+.p-Detail.p-Maximize{
+   --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
+}
+
+.p-Detail.p-Maximize[settings]{
+   --settings-button--content: var(--close-settings-button--content, "\1F527") !important;
+}
+
+
+.p-DockPanel-widget{
+   border: @border-color;
+   border-width: 0px !important;
+   min-width: 300px;
+   min-height: 200px;
+}
+
+.p-Detail{
+   min-width: 300px;
+   min-height: 200px;
+   --settings-button--content: "" !important;
+   --plugin--border: 1px solid #eaeaea;
+}
+
+perspective-viewer.p-Blur{
+   opacity: 0.5;
+}
+
+.p-ContextMenu > perspective-viewer.p-ContextFocus{
+   opacity: 1;
+}
+
+.p-ContextMenu > perspective-viewer{
+   opacity: 0.2;
+}
+
+perspective-viewer {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      position: absolute;
+      top: 0;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      overflow: visible !important;
+      font-family: "Open Sans", Arial, sans-serif;
+    }

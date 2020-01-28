@@ -1,0 +1,37 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="perspective.js"></script>
+        <script src="perspective-workspace.js"></script>
+        <script src="perspective-viewer-hypergrid.js"></script>
+
+        <link rel='stylesheet' href="index.css">
+    </head>
+    <body>
+        <perspective-workspace id="workspace"></perspective-workspace>
+        <perspective-viewer style="display: none;"></perspective-viewer>
+
+        <script>
+
+            const xhr = new XMLHttpRequest();
+            const worker = perspective.worker();
+            xhr.open('GET', 'superstore.csv', true);
+            xhr.onload = function () { 
+                window.__CSV__ = xhr.response;
+                const table = worker.table(xhr.response);
+                document.getElementById('workspace').addTable("superstore", table);
+            }
+            xhr.send(null);
+
+        </script>
+    </body>
+</html>
