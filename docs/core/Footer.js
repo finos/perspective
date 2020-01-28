@@ -28,11 +28,12 @@ class Footer extends React.Component {
                     </a>
                     <div>
                         <h5>Docs</h5>
-                        <a href={this.docUrl("md/installation.html", this.props.language)}>Installation</a>
-                        <a href={this.docUrl("md/usage.html", this.props.language)}>Usage</a>
-                        <a href={this.docUrl("obj/perspective.html", this.props.language)}>Perspective API</a>
-                        <a href={this.docUrl("obj/perspective-viewer.html", this.props.language)}>Perspective Viewer API</a>
-                        <a href={this.docUrl("obj/perspective-python-table.html", this.props.language)}>Perspective Python API</a>
+                        <a href={"/docs/md/installation.html"}>Installation</a>
+                        <a href={"/docs/md/js.html"}>Javascript User Guide</a>
+                        <a href={"/docs/md/python.html"}>Python User Guide</a>
+                        <a href={"/docs/obj/perspective.html"}>Perspective API</a>
+                        <a href={"/docs/obj/perspective-viewer.html"}>Perspective Viewer API</a>
+                        <a href={"/docs/obj/perspective-python-table.html"}>Perspective Python API</a>
                     </div>
                     {/* <div>
             <h5>Community</h5>

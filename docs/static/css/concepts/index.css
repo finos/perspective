@@ -1,0 +1,26 @@
+perspective-viewer {
+    display: block;
+    height: 500px;
+    flex: 1;
+    border: 1px solid #ccc;
+}
+
+#grid {
+    display: flex;
+    flex-direction: row;
+}
+
+#grid perspective-viewer {
+    margin-left: 3px;
+}
+
+@media (max-width: 1500px) { 
+    #grid {
+        flex-direction:column;
+    }
+    #grid perspective-viewer {
+        margin-left: 0px;
+        margin-bottom: 3px;
+    }
+    
+}

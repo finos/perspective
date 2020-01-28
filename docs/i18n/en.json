@@ -17,6 +17,9 @@
       "blog/2020-01-06-v0.4.0-release": {
         "title": "0.4.0 Release"
       },
+      "md/concepts": {
+        "title": "Conceptual Overview"
+      },
       "md/development": {
         "title": "Developer Guide"
       },
@@ -31,12 +34,6 @@
       },
       "md/styles": {
         "title": "CSS Styles"
-      },
-      "obj/perspective-python-core": {
-        "title": "perspective.core Python API"
-      },
-      "obj/perspective-python-table": {
-        "title": "perspective.table Python API"
       },
       "obj/perspective-python": {
         "title": "perspective-python API"

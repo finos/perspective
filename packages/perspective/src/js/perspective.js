@@ -29,7 +29,11 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 }
 
 /**
- * The main API module for Perspective.
+ * The main API module for `@finos/perspective`.
+ *
+ * For more information, see the
+ * [Javascript user guide](https://perspective.finos.org/docs/md/js.html).
+ *
  * @module perspective
  */
 export default function(Module) {
@@ -1123,7 +1127,8 @@ export default function(Module) {
 
     /**
      * Create a new {@link module:perspective~view} from this table with a
-     * specified configuration.
+     * specified configuration. For a conceptual understanding of the
+     * configuration options, see the [Conceptual Overview](https://perspective.finos.org/docs/md/installation.html).
      *
      * @param {Object} [config] The configuration object for this
      * {@link module:perspective~view}.
@@ -1132,15 +1137,15 @@ export default function(Module) {
      * @param {Array<string>} [config.column_pivots] An array of column names to
      * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
      * @param {Array<Object>} [config.columns] An array of column names for the
-     * output columns.  If none are provided, all columns are output.
+     * output columns. If none are provided, all columns are output.
      * @param {Object} [config.aggregates] An object, the keys of which are
      * column names, and their respective values are the aggregates calculations
-     * to use when this view has `row_pivots`.  A column provided to
+     * to use when this view has `row_pivots`. A column provided to
      * `config.columns` without an aggregate in this object, will use the
      * default aggregate calculation for its type.
      * @param {Array<Array<string>>} [config.filter] An Array of Filter
-     * configurations to apply.  A filter configuration is an array of 3
-     * elements:  A column name, a supported filter comparison string (e.g.
+     * configurations to apply. A filter configuration is an array of 3
+     * elements: A column name, a supported filter comparison string (e.g.
      * '===', '>'), and a value to compare.
      * @param {Array<string>} [config.sort] An Array of Sort configurations to
      * apply. A sort configuration is an array of 2 elements: A column name, and
@@ -1149,11 +1154,11 @@ export default function(Module) {
      *
      * @example
      * var view = table.view({
-     *      row_pivots: ['region'],
+     *      row_pivots: ["region"],
      *      columns: ["region"],
      *      aggregates: {"region": "dominant"},
-     *      filter: [['client', 'contains', 'fred']],
-     *      sort: [['value', 'asc']]
+     *      filter: [["client", "contains", "fred"]],
+     *      sort: [["value", "asc"]]
      * });
      *
      * @returns {view} A new {@link module:perspective~view} object for the
@@ -1217,7 +1222,7 @@ export default function(Module) {
         return v;
     };
 
-    /* eslint-enadle max-len */
+    /* eslint-enable max-len */
 
     let meter;
 
@@ -1244,9 +1249,11 @@ export default function(Module) {
      * pushed down to any derived {@link module:perspective~view} objects.
      *
      * @param {Object<string, Array>|Array<Object>|string} data The input data
-     * for this table.  The supported input types mirror the constructor
-     * options, minus the ability to pass a schema (Object<string, string>) as
-     * this table has already been constructed, thus its types are set in stone.
+     * for this table. {@link module:perspective~table}s are immutable after
+     * creation, so this method cannot be called with a schema.
+     *
+     * Otherwise, the supported input types are the same as the
+     * {@link module:perspective~table} constructor.
      *
      * @see {@link module:perspective~table}
      */
@@ -1408,7 +1415,7 @@ export default function(Module) {
         f(this);
     };
 
-    /******************************************************************************
+    /***************************************************************************
      *
      * Perspective
      *
@@ -1433,26 +1440,27 @@ export default function(Module) {
          * var table = perspective.table([{x: 1}, {x: 2}]);
          *
          * @example
-         * // Creating a table from a Web Worker (instantiated via the worker() method).
+         * // Creating a table from a Web Worker (instantiated via the worker()
+         * method).
          * var table = worker.table([{x: 1}, {x: 2}]);
          *
          * @param {Object<string, Array>|Object<string,
          *     string>|Array<Object>|string} data The input data for this table.
          *     When supplied an Object with string values, an empty table is
-         *     returned using this Object as a schema.  When an Object with
+         *     returned using this Object as a schema. When an Object with
          *     Array values is supplied, a table is returned using this object's
-         *     key/value pairs as name/columns respectively.  When an Array is
+         *     key/value pairs as name/columns respectively. When an Array is
          *     supplied, a table is constructed using this Array's objects as
-         *     rows.  When a string is supplied, the parameter as parsed as a
+         *     rows. When a string is supplied, the parameter as parsed as a
          *     CSV.
          * @param {Object} [options] An optional options dictionary.
          * @param {string} options.index The name of the column in the resulting
-         *     table to treat as an index.  When updating this table, rows
+         *     table to treat as an index. When updating this table, rows
          *     sharing an index of a new row will be overwritten. `index` is
-         *     mutually exclusive to `limit`
+         *     mutually exclusive to `limit`.
          * @param {integer} options.limit The maximum number of rows that can be
-         *     added to this table.  When exceeded, old rows will be overwritten
-         *     in the order they were inserted.  `limit` is mutually exclusive
+         *     added to this table. When exceeded, old rows will be overwritten
+         *     in the order they were inserted. `limit` is mutually exclusive
          *     to `index`.
          *
          * @returns {table} A new {@link module:perspective~table} object.
@@ -1546,8 +1554,8 @@ export default function(Module) {
          * When initialized, replace Perspective's internal `__MODULE` variable
          * with the WASM binary.
          *
-         * @param {ArrayBuffer} buffer an ArrayBuffer or Buffer containing the Perspective
-         * WASM code
+         * @param {ArrayBuffer} buffer an ArrayBuffer or Buffer containing the
+         * Perspective WASM code
          */
         init(msg) {
             if (typeof WebAssembly === "undefined") {
