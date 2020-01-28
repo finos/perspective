@@ -24,7 +24,7 @@ namespace perspective {
  * C++ types, we allow easy integration with binding languages.
  *
  */
-class t_view_config {
+class PERSPECTIVE_EXPORT t_view_config {
 public:
     /**
      * @brief Construct a `t_view_config` object.

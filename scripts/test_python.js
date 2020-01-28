@@ -31,11 +31,12 @@ try {
         const python_path = resolve`${__dirname}/../python/perspective`;
         // Tests for client mode (when C++ assets are not present) require
         // a new runtime.
-        execute`cd ${python_path} && TZ=UTC ${PYTHON} -m pytest \
+        process.env.TZ = "UTC";
+        execute`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : "-v"} --noconftest 
             perspective/tests/client`;
 
-        execute`cd ${python_path} && TZ=UTC ${PYTHON} -m pytest \
+        execute`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : "-v"} perspective
             --ignore=perspective/tests/client
             --cov=perspective`;

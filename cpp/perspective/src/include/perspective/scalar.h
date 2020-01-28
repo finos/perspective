@@ -207,49 +207,49 @@ template <>
 t_tscalar t_tscalar::coerce_numeric<bool>() const;
 
 template <>
-std::int64_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::int64_t t_tscalar::get() const;
 
 template <>
-std::int32_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::int32_t t_tscalar::get() const;
 
 template <>
-std::int16_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::int16_t t_tscalar::get() const;
 
 template <>
-std::int8_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::int8_t t_tscalar::get() const;
 
 template <>
-std::uint64_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::uint64_t t_tscalar::get() const;
 
 template <>
-std::uint32_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::uint32_t t_tscalar::get() const;
 
 template <>
-std::uint16_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::uint16_t t_tscalar::get() const;
 
 template <>
-std::uint8_t t_tscalar::get() const;
+PERSPECTIVE_EXPORT std::uint8_t t_tscalar::get() const;
 
 template <>
-t_date t_tscalar::get() const;
+PERSPECTIVE_EXPORT t_date t_tscalar::get() const;
 
 template <>
-t_time t_tscalar::get() const;
+PERSPECTIVE_EXPORT t_time t_tscalar::get() const;
 
 template <>
-const char* t_tscalar::get() const;
+PERSPECTIVE_EXPORT const char* t_tscalar::get() const;
 
 template <>
-t_none t_tscalar::get() const;
+PERSPECTIVE_EXPORT t_none t_tscalar::get() const;
 
 template <>
-double t_tscalar::get() const;
+PERSPECTIVE_EXPORT double t_tscalar::get() const;
 
 template <>
-float t_tscalar::get() const;
+PERSPECTIVE_EXPORT float t_tscalar::get() const;
 
 template <>
-bool t_tscalar::get() const;
+PERSPECTIVE_EXPORT bool t_tscalar::get() const;
 
 template <template <typename COMPARED_T> class COMPARER_T>
 bool

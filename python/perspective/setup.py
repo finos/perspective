@@ -163,37 +163,40 @@ class PSPBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join('perspective', 'table')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join('perspective', 'table')).replace('\\', '/'),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
             '-DPSP_CPP_BUILD_TESTS=0',
             '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
-            '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
-            '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX),
-            '-DPython_ROOT={}'.format(sysconfig.PREFIX),
-            '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')),
-            '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir),
-            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, "..", 'perspective'))
+            '-DPYTHON_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
+            '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX).replace('\\', '/'),
+            '-DPython_ROOT={}'.format(sysconfig.PREFIX).replace('\\', '/'),
+            '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')).replace('\\', '/'),
+            '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir).replace('\\', '/'),
+            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, "..", 'perspective').replace('\\', '/'))
         ]
 
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
-                cfg.upper(),
-                extdir)]
+            cmake_args.extend([
+                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
+                    cfg.upper(),
+                    extdir).replace('\\', '/'),
+                '-G', 'Visual Studio 14 2015'])
             if sys.maxsize > 2**32:
+                # build 64 bit to match python
                 cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m']
+            build_args += ['--', '/m', '/p:Configuration={}'.format(cfg)]
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(CPU_COUNT)]
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
-        env["PYTHONPATH"] = os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))
+        env["PYTHONPATH"] = os.path.sep.join((os.environ.get('PYTHONPATH', ''), os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))))
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -218,6 +221,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 
     keywords='analytics tools plotting',

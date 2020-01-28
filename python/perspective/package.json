@@ -3,7 +3,8 @@
   "name": "perspective-python.node",
   "version": "0.4.1",
   "dependencies": {
-    "@finos/perspective": "^0.4.1"
+    "@finos/perspective": "^0.4.1",
+    "zerorpc": "^0.9.8"
   },
   "devDependencies": {
     "@finos/perspective-webpack-plugin": "^0.4.1",

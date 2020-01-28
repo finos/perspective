@@ -12,11 +12,29 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 ### Dependencies
 
-You need to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
+It is recommended to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
 
-On MacOS:
+On MacOs:
 
 `brew install tbb`
+
+On CentOS/RHEL:
+
+`yum install tbb-devel`
+
+On Ubuntu:
+
+`apt-get install libtbb-dev`
+
+On Windows:
+
+`choco install tbb`
+
+Or install from source.
+
+`PyArrow` and `Numpy` are required build-time dependencies, and can both be installed via `pip`.
+
+All other dependencies will be vendored if missing as part of Perspective's CMake build, but you can install them yourself and CMake will detect them via the usual mechanisms. 
 
 ### Installation
 
@@ -24,17 +42,9 @@ To install the base package from pip:
 
 `pip install perspective-python`
 
-To Install from source:
-
-`make install`
-
 To install the JupyterLab extension:
 
 `jupyter labextension install @finos/perspective-jupyterlab`
-
-or from source:
-
-`make labextension`
 
 ## Getting Started
 
@@ -66,3 +76,6 @@ Then run `yarn build`, and if a `.perspectiverc` config file has not been create
 If you already have a `.perspectiverc` and want to reset your build configuration, simply run `yarn setup`.
 
 Once the build successfully completes, run `yarn test_python` from the project root in order to verify operation.
+
+### Windows
+By default, perspective attempts to build utilizing Microsoft Visual Studio 2017 (MSVC 14.1). You may change this to older versions by editing `setup.py`.

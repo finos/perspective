@@ -18,6 +18,16 @@
 #include <perspective/data_table.h>
 #include <perspective/python/utils.h>
 
+#ifdef WIN32
+#ifndef PERSPECTIVE_EXPORTS
+#define PERSPECTIVE_BINDING_EXPORT __declspec(dllexport)
+#else
+#define PERSPECTIVE_BINDING_EXPORT __declspec(dllimport)
+#endif
+#else
+#define PERSPECTIVE_BINDING_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace perspective {
 namespace numpy {
 
@@ -29,7 +39,7 @@ namespace numpy {
     /**
      * NumpyLoader fast-tracks the loading of Numpy arrays into Perspective, utilizing memcpy whenever possible.
      */
-    class PERSPECTIVE_EXPORT NumpyLoader {
+    class PERSPECTIVE_BINDING_EXPORT NumpyLoader {
         public:
             NumpyLoader(py::object accessor);
             ~NumpyLoader();
