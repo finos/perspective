@@ -64,7 +64,7 @@ interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions,
 
 interface ReactPerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerHTMLAttributes, React.HTMLAttributes<T> {}
 
-type PerspectiveElement = React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
+type PerspectiveElement = {class?: string} & React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
 
 declare global {
     namespace JSX {
