@@ -36,6 +36,7 @@ export const createCommands = workspace => {
     commands.addCommand("workspace:duplicate", {
         execute: ({widget}) => workspace.duplicate(widget),
         iconClass: "p-MenuItem-duplicate",
+        isVisible: args => (args.widget.parent === workspace.dockpanel ? true : false),
         label: "Duplicate",
         mnemonic: 0
     });
@@ -43,7 +44,7 @@ export const createCommands = workspace => {
     commands.addCommand("workspace:master", {
         execute: args => workspace.toggleMasterDetail(args.widget),
         iconClass: args => (args.widget.parent === workspace.dockpanel ? "p-MenuItem-master" : "p-MenuItem-detail"),
-        label: args => (args.widget.parent === workspace.dockpanel ? "Master" : "Detail"),
+        label: args => (args.widget.parent === workspace.dockpanel ? "Create Global Filter" : "Remove Global Filter"),
         mnemonic: 0
     });
 
