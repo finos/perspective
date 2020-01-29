@@ -35,13 +35,16 @@
     <script>
         window.addEventListener('WebComponentsReady', function() {
             const elem = document.getElementById("viewer");
-            fetch("all_numeric_types.arrow").then((response) => {
+            fetch("date32.arrow").then((response) => {
                 if (!response.ok) {
                     throw new Error("Error: status " + status);
                 }
 
                 const date32 = response.arrayBuffer();
-                date32.then(buffer => elem.load(buffer));
+                date32.then(buffer => elem.load({
+                    a: [new Date(2020, 0, 26), new Date(2020, 0, 27), new Date(2020, 0, 28), new Date(2020, 0, 29), new Date(2020, 0, 30)],
+                    b: [new Date(2020, 0, 26,1, 30), new Date(2020, 0, 27,1, 30), new Date(2020, 0, 28,3), new Date(2020, 0, 29,4), new Date(2020, 0, 30,5)]
+                }));
             });
         });
     </script>

@@ -108,6 +108,21 @@ class TestToArrow(object):
             "a": [datetime(2019, 7, 11), datetime(2016, 2, 29), datetime(2019, 12, 10)]
         }
 
+    def test_to_arrow_date_symmetric_january(self):
+        data = {
+            "a": [date(2019, 1, 1), date(2016, 1, 1), date(2019, 1, 1)]
+        }
+        tbl = Table(data)
+        assert tbl.schema() == {
+            "a": date
+        }
+        arr = tbl.view().to_arrow()
+        tbl2 = Table(arr)
+        assert tbl2.schema() == tbl.schema()
+        assert tbl2.view().to_dict() == {
+            "a": [datetime(2019, 1, 1), datetime(2016, 1, 1), datetime(2019, 1, 1)]
+        }
+
     def test_to_arrow_datetime_symmetric(self):
         data = {
             "a": [datetime(2019, 7, 11, 12, 30), datetime(2016, 2, 29, 11, 0), datetime(2019, 12, 10, 12, 0)]

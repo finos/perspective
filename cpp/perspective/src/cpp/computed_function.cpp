@@ -390,5 +390,362 @@ void concat_comma(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_
     output_column->set_nth(idx, val);
 }
 
+// Date/Datetime functions
+template<>
+t_tscalar hour_of_day<DTYPE_DATE>(t_tscalar x) {
+    t_tscalar rval;
+    // Hour of day for a date is always midnight, i.e. 0
+    rval.set(static_cast<std::int64_t>(0));
+    return rval;
+}
+
+template<>
+t_tscalar hour_of_day<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+
+    // Create a copy of the timestamp with day precision
+    date::sys_days days = date::floor<date::days>(ts);
+
+    // Subtract the day-precision `time_point` from the datetime-precision one
+    auto time_of_day = date::make_time(ts - days);
+
+    // Get the hour from the resulting `time_point`
+    rval.set(static_cast<std::int64_t>(time_of_day.hours().count()));
+    return rval;
+}
+
+template<>
+t_tscalar second_bucket<DTYPE_DATE>(t_tscalar x) {
+    return x;
+}
+
+template<>
+t_tscalar second_bucket<DTYPE_TIME>(t_tscalar x) {
+    // Retrieve the timestamp as an integer and bucket it
+    t_tscalar rval;
+    auto int_ts = x.to_int64();
+    std::int64_t bucketed_ts = (static_cast<double>(int_ts) / 1000) * 1000;
+    rval.set(t_time(bucketed_ts));
+    return rval;
+}
+
+template<>
+t_tscalar minute_bucket<DTYPE_DATE>(t_tscalar x) {
+    return x;
+}
+
+template<>
+t_tscalar minute_bucket<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds ms_timestamp(x.to_int64());
+
+    // Convert milliseconds to minutes
+    std::chrono::minutes m_timestamp = std::chrono::duration_cast<std::chrono::minutes>(ms_timestamp);
+
+    // Set a new `t_time` and return it.
+    rval.set(
+        t_time(std::chrono::duration_cast<std::chrono::milliseconds>(m_timestamp).count()));
+    return rval;
+}
+
+template<>
+t_tscalar hour_bucket<DTYPE_DATE>(t_tscalar x) {
+    return x;
+}
+
+template<>
+t_tscalar hour_bucket<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a millisecond duration timestamp
+    std::chrono::milliseconds ms_timestamp(x.to_int64());
+
+    // Convert the milliseconds to hours
+    std::chrono::hours hr_timestamp = std::chrono::duration_cast<std::chrono::hours>(ms_timestamp);
+
+    // Set a new `t_time` and return it.
+    rval.set(
+        t_time(std::chrono::duration_cast<std::chrono::milliseconds>(hr_timestamp).count()));
+    return rval;
+}
+
+template<>
+t_tscalar day_bucket<DTYPE_DATE>(t_tscalar x) {
+    return x;
+}
+
+template<>
+t_tscalar day_bucket<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds ms_timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(ms_timestamp);
+
+    // Create a copy of the timestamp with day precision
+    auto days = date::floor<date::days>(ts);
+
+    // Cast the `time_point` to contain year/month/day
+    auto ymd = date::year_month_day(days);
+
+    // Get the year and create a new `t_date`
+    std::int32_t year = static_cast<std::int32_t>(ymd.year());
+
+    // Month in `t_date` is [0-11]
+    std::int32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
+    std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
+    rval.set(t_date(year, month, day));
+    return rval;
+}
+
+template<>
+t_tscalar week_bucket<DTYPE_DATE>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Retrieve the `t_date` struct from the scalar
+    t_date val = x.get<t_date>();
+
+    // Construct a `date::year_month_day` value
+    date::year year {val.year()};
+
+    // date::month is [1-12], whereas `t_date.month()` is [0-11]
+    date::month month {static_cast<std::uint32_t>(val.month()) + 1};
+    date::day day {static_cast<std::uint32_t>(val.day())};
+    date::year_month_day ymd(year, month, day);
+
+    // Convert to a `sys_days` representing no. of days since epoch
+    date::sys_days days_since_epoch = ymd;
+
+    // Construct a `date::year_month_weekday` from `date::sys_days` since epoch
+    auto weekday = date::year_month_weekday(ymd).weekday_indexed().weekday();
+    
+    // Get the day of the week as an int from 0 to 6
+    auto day_of_week = (weekday - date::Sunday).count();
+
+    // Set the day to the beginning of the week
+    auto diff = static_cast<std::uint32_t>(val.day()) - day_of_week + (day_of_week == 0 ? - 6 : 1);
+
+    // Return the new `t_date`
+    t_date new_date = t_date(val.year(), val.month(), diff);
+    rval.set(new_date);
+    return rval;
+}
+
+template<>
+t_tscalar week_bucket<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+
+    // Create a copy of the timestamp with day precision
+    auto days = date::floor<date::days>(ts);
+
+    // Cast the `time_point` to contain year/month/day
+    auto ymd = date::year_month_day(days);
+
+    // Get the day of month and day of the week
+    std::int32_t year = static_cast<std::int32_t>(ymd.year());
+
+    // date::month is [1-12], whereas `t_date.month()` is [0-11]
+    std::uint32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
+    std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
+    auto weekday = date::year_month_weekday(days).weekday_indexed().weekday();
+
+    // Get the day of the week as an int from 0 to 6
+    auto day_of_week = (weekday - date::Sunday).count();
+
+    // Set the day to the beginning of the week
+    auto diff = day - day_of_week + (day_of_week == 0 ? - 6 : 1);
+
+    // Return the new `t_date`
+    t_date new_date = t_date(year, month, diff);
+    rval.set(new_date);
+    return rval;
+}
+
+template<>
+t_tscalar month_bucket<DTYPE_DATE>(t_tscalar x) {
+    t_tscalar rval;
+    t_date val = x.get<t_date>();
+    rval.set(t_date(val.year(), val.month(), 1));
+    return rval;
+}
+
+template<>
+t_tscalar month_bucket<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+
+    // Create a copy of the timestamp with day precision
+    auto days = date::floor<date::days>(ts);
+
+    // Cast the `time_point` to contain year/month/day
+    auto ymd = date::year_month_day(days);
+
+    // Construct a new year_month_day
+    auto new_ymd = date::year_month_day(ymd.year(), ymd.month(), date::day(1));
+
+    // Get the year and create a new `t_date`
+    std::int32_t year = static_cast<std::int32_t>(ymd.year());
+    std::int32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
+    rval.set(t_date(year, month, 1));
+    return rval;
+}
+
+
+template<>
+t_tscalar year_bucket<DTYPE_DATE>(t_tscalar x) {
+    t_tscalar rval;
+    t_date val = x.get<t_date>();
+    rval.set(t_date(val.year(), 0, 1));
+    std::cout << rval << std::endl;
+    return rval;
+}
+
+template<>
+t_tscalar year_bucket<DTYPE_TIME>(t_tscalar x) {
+    t_tscalar rval;
+
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+
+    // Create a copy of the timestamp with day precision
+    auto days = date::floor<date::days>(ts);
+
+    // Cast the `time_point` to contain year/month/day
+    auto ymd = date::year_month_day(days);
+
+    // Get the year and create a new `t_date`
+    std::int32_t year = static_cast<std::int32_t>(ymd.year());
+    rval.set(t_date(year, 0, 1));
+    std::cout << rval << std::endl;
+    return rval;
+}
+
+const std::string days_of_week[7] = {
+    "1 Sunday",
+    "2 Monday",
+    "3 Tuesday",
+    "4 Wednesday",
+    "5 Thursday",
+    "6 Friday",
+    "7 Saturday"
+};
+
+const std::string months_of_year[12] = {
+    "01 January",
+    "02 February",
+    "03 March",
+    "04 April",
+    "05 May",
+    "06 June",
+    "07 July",
+    "08 August",
+    "09 September",
+    "10 October",
+    "11 November",
+    "12 December"
+};
+
+template <>
+void day_of_week<DTYPE_DATE>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    // Retrieve the `t_date` struct from the scalar
+    t_date val = x.get<t_date>();
+
+    // Construct a `date::year_month_day` value
+    date::year year {val.year()};
+
+    // date::month is [1-12], whereas `t_date.month()` is [0-11]
+    date::month month {static_cast<std::uint32_t>(val.month()) + 1};
+    date::day day {static_cast<std::uint32_t>(val.day())};
+    date::year_month_day ymd(year, month, day);
+
+    // Convert to a `sys_days` representing no. of days since epoch
+    date::sys_days days_since_epoch = ymd;
+
+    // Construct a `date::year_month_weekday` from `date::sys_days` since epoch
+    auto weekday = date::year_month_weekday(ymd).weekday_indexed().weekday();
+
+    // Write the weekday string into the output column
+    output_column->set_nth(
+        idx, days_of_week[(weekday - date::Sunday).count()]);
+}
+
+template <>
+void day_of_week<DTYPE_TIME>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+
+    // Create a copy of the timestamp with day precision
+    auto days = date::floor<date::days>(ts);
+
+    // Find the weekday and write it to the output column
+    auto weekday = date::year_month_weekday(days).weekday_indexed().weekday();
+
+    output_column->set_nth(
+        idx, days_of_week[(weekday - date::Sunday).count()]);
+}
+
+template <>
+void month_of_year<DTYPE_DATE>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    t_date val = x.get<t_date>();
+
+    // `t_date.month()` is [0-11]
+    std::int32_t month = val.month();
+    std::string month_of_year = months_of_year[month];
+    output_column->set_nth(idx, month_of_year);
+}
+
+template <>
+void month_of_year<DTYPE_TIME>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    // Convert the int64 to a milliseconds duration timestamp
+    std::chrono::milliseconds timestamp(x.to_int64());
+
+    // Convert the timestamp to a `sys_time` (alias for `time_point`)
+    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+
+    // Create a copy of the timestamp with day precision
+    auto days = date::floor<date::days>(ts);
+
+    // Cast the `time_point` to contain year/month/day
+    auto ymd = date::year_month_day(days);
+
+    // Get the month as an integer from 0 to 11
+    auto month = (ymd.month() -  date::January).count();
+
+    // Get the month string and write into the output column
+    std::string month_of_year = months_of_year[month];
+    output_column->set_nth(idx, month_of_year);
+}
+
 } // end namespace computed_function
 } // end namespace perspective

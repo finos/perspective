@@ -48,7 +48,7 @@ export default function(Module) {
      * @param {String} name The name of a computation function.
      */
     function name_to_computation(name) {
-        switch (name.toLowerCase()) {
+        switch (name) {
             case "+":
                 return __MODULE__.t_computed_function_name.ADD;
             case "-":
@@ -67,9 +67,9 @@ export default function(Module) {
                 return __MODULE__.t_computed_function_name.ABS;
             case "%":
                 return __MODULE__.t_computed_function_name.PERCENT_A_OF_B;
-            case "uppercase":
+            case "Uppercase":
                 return __MODULE__.t_computed_function_name.UPPERCASE;
-            case "lowercase":
+            case "Lowercase":
                 return __MODULE__.t_computed_function_name.LOWERCASE;
             case "length":
                 return __MODULE__.t_computed_function_name.LENGTH;
@@ -77,37 +77,37 @@ export default function(Module) {
                 return __MODULE__.t_computed_function_name.CONCAT_SPACE;
             case "concat_comma":
                 return __MODULE__.t_computed_function_name.CONCAT_COMMA;
-            case "bucket (10)":
+            case "Bucket (10)":
                 return __MODULE__.t_computed_function_name.BUCKET_10;
-            case "bucket (100)":
+            case "Bucket (100)":
                 return __MODULE__.t_computed_function_name.BUCKET_100;
-            case "bucket (1000)":
+            case "Bucket (1000)":
                 return __MODULE__.t_computed_function_name.BUCKET_1000;
-            case "bucket (1/10)":
+            case "Bucket (1/10)":
                 return __MODULE__.t_computed_function_name.BUCKET_0_1;
-            case "bucket (1/100)":
+            case "Bucket (1/100)":
                 return __MODULE__.t_computed_function_name.BUCKET_0_0_1;
-            case "bucket (1/1000)":
+            case "Bucket (1/1000)":
                 return __MODULE__.t_computed_function_name.BUCKET_0_0_0_1;
-            case "hour of day":
+            case "Hour of Day":
                 return __MODULE__.t_computed_function_name.HOUR_OF_DAY;
-            case "day of week":
+            case "Day of Week":
                 return __MODULE__.t_computed_function_name.DAY_OF_WEEK;
-            case "month of year":
+            case "Month of Year":
                 return __MODULE__.t_computed_function_name.MONTH_OF_YEAR;
-            case "bucket (s)":
+            case "Bucket (s)":
                 return __MODULE__.t_computed_function_name.SECOND_BUCKET;
-            case "bucket (m)":
-                return __MODULE__.t_computed_function_name.MONTH_BUCKET;
-            case "bucket (h)":
+            case "Bucket (m)":
+                return __MODULE__.t_computed_function_name.MINUTE_BUCKET;
+            case "Bucket (h)":
                 return __MODULE__.t_computed_function_name.HOUR_BUCKET;
-            case "bucket (D)":
+            case "Bucket (D)":
                 return __MODULE__.t_computed_function_name.DAY_BUCKET;
-            case "bucket (W)":
+            case "Bucket (W)":
                 return __MODULE__.t_computed_function_name.WEEK_BUCKET;
-            case "bucket (M)":
+            case "Bucket (M)":
                 return __MODULE__.t_computed_function_name.MONTH_BUCKET;
-            case "bucket (Y)":
+            case "Bucket (Y)":
                 return __MODULE__.t_computed_function_name.YEAR_BUCKET;
             default:
                 return null;

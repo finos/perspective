@@ -947,66 +947,40 @@ namespace binding {
         if (has_value(computed_def["func_name"])) {
             t_computed_function_name method_name = 
                 computed_def["func_name"].as<t_computed_function_name>();
-            switch (method_name) {
-                case ADD:
-                case SUBTRACT:
-                case MULTIPLY:
-                case DIVIDE:
-                case PERCENT_A_OF_B:
-                case POW:
-                case INVERT:
-                case SQRT:
-                case ABS:
-                case BUCKET_10:
-                case BUCKET_100:
-                case BUCKET_1000:
-                case BUCKET_0_1:
-                case BUCKET_0_0_1:
-                case BUCKET_0_0_0_1:
-                case LOWERCASE:
-                case UPPERCASE:
-                case CONCAT_SPACE:
-                case CONCAT_COMMA:
-                case LENGTH: {
-                    std::vector<t_dtype> input_types;
-                    std::vector<std::shared_ptr<t_column>> table_columns;
-                    std::vector<std::shared_ptr<t_column>> flattened_columns;
-                    for (const auto& column_name : input_column_names) {
-                        auto table_column = table->get_column(column_name);
-                        table_columns.push_back(table_column);
-                        input_types.push_back(table_column->get_dtype());
-                        flattened_columns.push_back(
-                            flattened->get_column(column_name));
-                    }
-
-                    // This uses the `t_computed_function` enum, not string name
-                    t_computation computation = t_computed_column::get_computation(
-                        method_name, input_types);
-                    t_dtype output_column_type = computation.m_return_type;
-
-                    // don't double create output column
-                    auto schema = flattened->get_schema();
-                    std::shared_ptr<t_column> output_column;
-                    if (schema.has_column(output_column_name)) {
-                        output_column = flattened->get_column(output_column_name);
-                    } else {
-                        output_column = flattened->add_column_sptr(
-                            output_column_name, output_column_type, true);
-                        output_column->reserve(table_columns[0]->size());
-                    }
-
-                    t_computed_column::apply_computation(
-                        table_columns,
-                        flattened_columns,
-                        output_column,
-                        row_indices,
-                        computation);
-                    return;
-                } break;
-                default: {
-                    break;
-                }
+            std::vector<t_dtype> input_types;
+            std::vector<std::shared_ptr<t_column>> table_columns;
+            std::vector<std::shared_ptr<t_column>> flattened_columns;
+            for (const auto& column_name : input_column_names) {
+                auto table_column = table->get_column(column_name);
+                table_columns.push_back(table_column);
+                input_types.push_back(table_column->get_dtype());
+                flattened_columns.push_back(
+                    flattened->get_column(column_name));
             }
+
+            // This uses the `t_computed_function` enum, not string name
+            t_computation computation = t_computed_column::get_computation(
+                method_name, input_types);
+            t_dtype output_column_type = computation.m_return_type;
+
+            // don't double create output column
+            auto schema = flattened->get_schema();
+            std::shared_ptr<t_column> output_column;
+            if (schema.has_column(output_column_name)) {
+                output_column = flattened->get_column(output_column_name);
+            } else {
+                output_column = flattened->add_column_sptr(
+                    output_column_name, output_column_type, true);
+                output_column->reserve(table_columns[0]->size());
+            }
+
+            t_computed_column::apply_computation(
+                table_columns,
+                flattened_columns,
+                output_column,
+                row_indices,
+                computation);
+            return;
         }
         
         // original path

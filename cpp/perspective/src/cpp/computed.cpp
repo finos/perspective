@@ -86,6 +86,32 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         case DTYPE_FLOAT64: {
             GET_COMPUTED_FUNCTION_1(float64);
         } break;
+        case DTYPE_DATE: {
+            switch (computation.m_name) {
+                case HOUR_OF_DAY: return computed_function::hour_of_day<DTYPE_DATE>;
+                case SECOND_BUCKET: return computed_function::second_bucket<DTYPE_DATE>;
+                case MINUTE_BUCKET: return computed_function::minute_bucket<DTYPE_DATE>;
+                case HOUR_BUCKET: return computed_function::hour_bucket<DTYPE_DATE>;
+                case DAY_BUCKET: return computed_function::day_bucket<DTYPE_DATE>;
+                case WEEK_BUCKET: return computed_function::week_bucket<DTYPE_DATE>;
+                case MONTH_BUCKET: return computed_function::month_bucket<DTYPE_DATE>;
+                case YEAR_BUCKET: return computed_function::year_bucket<DTYPE_DATE>;
+                default: break;
+            }
+        } break;
+        case DTYPE_TIME: {
+            switch (computation.m_name) {
+                case HOUR_OF_DAY: return computed_function::hour_of_day<DTYPE_TIME>;
+                case SECOND_BUCKET: return computed_function::second_bucket<DTYPE_TIME>;
+                case MINUTE_BUCKET: return computed_function::minute_bucket<DTYPE_TIME>;
+                case HOUR_BUCKET: return computed_function::hour_bucket<DTYPE_TIME>;
+                case DAY_BUCKET: return computed_function::day_bucket<DTYPE_TIME>;
+                case WEEK_BUCKET: return computed_function::week_bucket<DTYPE_TIME>;
+                case MONTH_BUCKET: return computed_function::month_bucket<DTYPE_TIME>;
+                case YEAR_BUCKET: return computed_function::year_bucket<DTYPE_TIME>;
+                default: break;
+            }
+        } break;
         case DTYPE_STR: {
             switch (computation.m_name) {
                 case LENGTH: return computed_function::length;
@@ -142,6 +168,7 @@ t_computed_column::get_computed_function_2(t_computation computation) {
             GET_COMPUTED_FUNCTION_2(DTYPE_FLOAT64);
         } break;
         default: {
+            // TODO: Better error message and break fall-through
             PSP_COMPLAIN_AND_ABORT("Invalid computation function");
         } break;
     }
@@ -152,6 +179,20 @@ t_computed_column::get_computed_function_string_1(t_computation computation) {
     switch (computation.m_name) {
         case UPPERCASE: return computed_function::uppercase;
         case LOWERCASE: return computed_function::lowercase;
+        case DAY_OF_WEEK: {
+            switch (computation.m_input_types[0]) {
+                case DTYPE_DATE: return computed_function::day_of_week<DTYPE_DATE>;
+                case DTYPE_TIME: return computed_function::day_of_week<DTYPE_TIME>;
+                default: break;
+            }
+        } break;
+        case MONTH_OF_YEAR: {
+            switch (computation.m_input_types[0]) {
+                case DTYPE_DATE: return computed_function::month_of_year<DTYPE_DATE>;
+                case DTYPE_TIME: return computed_function::month_of_year<DTYPE_TIME>;
+                default: break;
+            }
+        } break;
         default: PSP_COMPLAIN_AND_ABORT("Invalid computation function");
     }
 }
@@ -272,12 +313,11 @@ t_computed_column::apply_computation(
 std::vector<t_computation> t_computed_column::computations = {};
 
 void t_computed_column::make_computations() {
+    // Generate numeric functions
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
     std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
     std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, PERCENT_A_OF_B};
-    std::vector<t_computed_function_name> string_function_1 = {UPPERCASE, LOWERCASE};
-    std::vector<t_computed_function_name> string_function_2 = {CONCAT_SPACE, CONCAT_COMMA};
-
+    
     for (const auto f : numeric_function_1) {
         for (auto i = 0; i < dtypes.size(); ++i) {
             t_computed_column::computations.push_back(
@@ -304,6 +344,10 @@ void t_computed_column::make_computations() {
         }
     }
 
+    // Generate string functions
+    std::vector<t_computed_function_name> string_function_1 = {UPPERCASE, LOWERCASE};
+    std::vector<t_computed_function_name> string_function_2 = {CONCAT_SPACE, CONCAT_COMMA};
+
     for (const auto f : string_function_1) {
         t_computed_column::computations.push_back(
             t_computation{
@@ -328,7 +372,77 @@ void t_computed_column::make_computations() {
     t_computed_column::computations.push_back(
         t_computation{LENGTH, std::vector<t_dtype>{DTYPE_STR}, DTYPE_INT64}
     );
-    
+
+    // Generate date/datetime functions
+    std::vector<t_dtype> date_dtypes = {DTYPE_DATE, DTYPE_TIME};
+
+    // Returns a `DTYPE_DATE` column
+    std::vector<t_computed_function_name> date_to_date_functions = {
+        DAY_BUCKET,
+        WEEK_BUCKET,
+        MONTH_BUCKET,
+        YEAR_BUCKET
+    };
+
+    // Returns a `DTYPE_TIME` column
+    std::vector<t_computed_function_name> date_to_datetime_functions = {
+        SECOND_BUCKET,
+        MINUTE_BUCKET,
+        HOUR_BUCKET,
+    };
+
+    // Returns a `DTYPE_STR` column
+    std::vector<t_computed_function_name> date_to_string_functions = {
+        DAY_OF_WEEK,
+        MONTH_OF_YEAR
+    };
+
+    for (auto i = 0; i < date_dtypes.size(); ++i) {
+        for (auto j = 0; j < date_to_date_functions.size(); ++j) {
+            t_computed_column::computations.push_back(
+                t_computation {
+                    date_to_date_functions[j],
+                    std::vector<t_dtype>{date_dtypes[i]},
+                    DTYPE_DATE
+                }
+            );
+        };
+
+        for (auto j = 0; j < date_to_datetime_functions.size(); ++j) {
+            t_dtype return_type = DTYPE_TIME;
+            if (date_dtypes[i] == DTYPE_DATE) {
+                // Second/minute/hour buckets have no meaning for date columns,
+                // so just return the column as is.
+                return_type = DTYPE_DATE;
+            }
+            t_computed_column::computations.push_back(
+                t_computation {
+                    date_to_datetime_functions[j],
+                    std::vector<t_dtype>{date_dtypes[i]},
+                    return_type
+                }
+            );
+        };
+
+        for (auto j = 0; j < date_to_string_functions.size(); ++j) {
+            t_computed_column::computations.push_back(
+                t_computation {
+                    date_to_string_functions[j],
+                    std::vector<t_dtype>{date_dtypes[i]},
+                    DTYPE_STR
+                }
+            );
+        };
+    };
+
+    // Hour of Day returns an int64
+    t_computed_column::computations.push_back(
+        t_computation{HOUR_OF_DAY, std::vector<t_dtype>{DTYPE_DATE}, DTYPE_INT64}
+    );
+
+    t_computed_column::computations.push_back(
+        t_computation{HOUR_OF_DAY, std::vector<t_dtype>{DTYPE_TIME}, DTYPE_INT64}
+    );    
 }
 
 } // end namespace perspective

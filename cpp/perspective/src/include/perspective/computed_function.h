@@ -17,19 +17,17 @@
 #include <perspective/column.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
-
-#ifdef PSP_ENABLE_WASM
-#include <codecvt>
-typedef std::codecvt_utf8<wchar_t> utf8convert_type;
-typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
-#endif
+#include <date/date.h>
 
 namespace perspective {
 
 /**
  * @brief The `computed_function` namespace contains all functions that will be
- * used to generate values for a computed column. Computed functions should
- * receive a parameter pack of `t_tscalar`s and return a `t_tscalar` value.
+ * used to generate values for a computed column.
+ * 
+ * Computed functions should receive one or more `t_tscalar`s and return a 
+ * single `t_tscalar` value, or receive a shared pointer to a `t_column` along
+ * with an input scalar, and return void.
  * 
  */
 namespace computed_function {
@@ -103,6 +101,74 @@ void uppercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_c
 void lowercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
 void concat_space(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_column> output_column);
 void concat_comma(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_column> output_column);
+
+// Datetime functions
+template <t_dtype T>
+t_tscalar hour_of_day(t_tscalar x);
+
+template <t_dtype T>
+void day_of_week(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
+
+template <t_dtype T>
+void month_of_year(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
+
+template <t_dtype T>
+t_tscalar second_bucket(t_tscalar x);
+
+template <t_dtype T>
+t_tscalar minute_bucket(t_tscalar x);
+
+template <t_dtype T>
+t_tscalar hour_bucket(t_tscalar x);
+
+template <t_dtype T>
+t_tscalar day_bucket(t_tscalar x);
+
+template <t_dtype T>
+t_tscalar week_bucket(t_tscalar x);
+
+template <t_dtype T>
+t_tscalar month_bucket(t_tscalar x);
+
+template <t_dtype T>
+t_tscalar year_bucket(t_tscalar x);
+
+#define DATETIME_FUNCTION_HEADER(NAME)                                      \
+    template <> t_tscalar NAME<DTYPE_DATE>(t_tscalar x);                    \
+    template <> t_tscalar NAME<DTYPE_TIME>(t_tscalar x);                    \
+
+DATETIME_FUNCTION_HEADER(hour_of_day);
+DATETIME_FUNCTION_HEADER(second_bucket);
+DATETIME_FUNCTION_HEADER(minute_bucket);
+DATETIME_FUNCTION_HEADER(hour_bucket);
+DATETIME_FUNCTION_HEADER(day_bucket);
+DATETIME_FUNCTION_HEADER(week_bucket);
+DATETIME_FUNCTION_HEADER(month_bucket);
+DATETIME_FUNCTION_HEADER(year_bucket);
+
+// Day of Week/Month of Year write strings directly, and use custom strings
+// so they are sorted by day/month and *not* alphabetically
+
+extern const std::string days_of_week[7];
+extern const std::string months_of_year[12];
+
+template <>
+void day_of_week<DTYPE_DATE>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
+
+template <>
+void day_of_week<DTYPE_TIME>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
+
+template <>
+void month_of_year<DTYPE_DATE>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
+
+template <>
+void month_of_year<DTYPE_TIME>(
+    t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column);
 
 } // end namespace computed_function
 } // end namespace perspective
