@@ -18,6 +18,7 @@ properties.add_fonts({
     columnHeaderFont: `${title}-header`,
     columnHeaderForegroundSelectionFont: `${title}-header`,
     foregroundSelectionFont: `${title}-header`,
+    treeHeaderForegroundSelectionFont: [`${title}-tree-header-selection`, `${title}-header`],
     rowHeaderFont: title,
     treeHeaderFont: title
 });
@@ -26,8 +27,8 @@ properties.add_styles({
     treeHeaderBackgroundColor: `${title}-tree-header--background`,
     backgroundColor: `${title}--background`,
     treeHeaderColor: `${title}-tree-header--color`,
-    treeHeaderForegroundSelectionColor: `${title}-tree-header-selection--color`,
-    treeHeaderBackgroundSelectionColor: `${title}-tree-header-selection--background`,
+    treeHeaderForegroundSelectionColor: [`${title}-tree-header-selection--color`, `${title}--color`],
+    treeHeaderBackgroundSelectionColor: [`${title}-tree-header-selection--background`, `${title}-selection--background`],
     backgroundSelectionColor: `${title}-selection--background`,
     foregroundSelectionColor: [`${title}--color`, `color`],
     borderBottom: `${title}--border-bottom-color`,
