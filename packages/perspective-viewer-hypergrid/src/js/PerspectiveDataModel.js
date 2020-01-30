@@ -177,7 +177,7 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
 
     pspFetch: async function(rect) {
         const selection_enabled = this._grid.properties.rowSelection || this._viewer.hasAttribute("editable");
-        const range = pad_data_window(rect, this._config.row_pivots, this._viewer.hasAttribute("settings"), selection_enabled);
+        const range = pad_data_window(rect, this._config.row_pivots, selection_enabled);
         const next_page = await this._view.to_columns(range);
         this.data = [];
         const rows = page2hypergrid(next_page, this._config.row_pivots, this._columns);

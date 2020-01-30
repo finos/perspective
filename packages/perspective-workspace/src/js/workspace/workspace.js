@@ -140,7 +140,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                     table: this.getTable(widgetConfig.table),
                     config: {master: true, ...widgetConfig}
                 });
-                widget.viewer.addEventListener("perspective-click", this.onPerspectiveClick);
+                widget.viewer.addEventListener("perspective-select", this.onPerspectiveSelect);
+                widget.viewer.addEventListener("perspective-click", this.onPerspectiveSelect);
                 this.masterPanel.addWidget(widget);
             });
             layout.master.sizes && this.masterPanel.setRelativeSizes(layout.master.sizes);
@@ -217,8 +218,12 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }, this.dockpanel.saveLayout());
     }
 
-    onPerspectiveClick = event => {
+    onPerspectiveSelect = event => {
         const config = event.target.save();
+        // perspective-select is already handled for hypergrid
+        if (event.type === "perspective-click" && config.plugin === "hypergrid") {
+            return;
+        }
         const candidates = new Set([...(config["row-pivots"] || []), ...(config["column-pivots"] || []), ...(config.filters || []).map(x => x[0])]);
         const filters = [...event.detail.config.filters];
         this.filterWidget(candidates, filters);
@@ -241,7 +246,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
 
         widget.selectable = true;
         widget.viewer.restyleElement();
-        widget.viewer.addEventListener("perspective-click", this.onPerspectiveClick);
+        widget.viewer.addEventListener("perspective-click", this.onPerspectiveSelect);
+        widget.viewer.addEventListener("perspective-select", this.onPerspectiveSelect);
     }
 
     makeDetail(widget) {
@@ -256,7 +262,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
         widget.selectable = false;
         widget.viewer.restyleElement();
-        widget.viewer.removeEventListener("perspective-click", this.onPerspectiveClick);
+        widget.viewer.removeEventListener("perspective-click", this.onPerspectiveSelect);
+        widget.viewer.removeEventListener("perspective-select", this.onPerspectiveSelect);
     }
 
     /*********************************************************************

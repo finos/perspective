@@ -19,7 +19,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            title: "Phosphor Example"
+            title: "Workspace Example"
         }),
         new PerspectivePlugin({})
     ],
