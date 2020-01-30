@@ -359,7 +359,6 @@ t_gnode::_process_table() {
         lkup[idx] = cstate.lookup(pkey);
     }
 
-    std::cout << "recomputing" << std::endl;
     recompute_columns(get_table_sptr(), flattened, lkup);
 
     if (m_state->mapping_size() == 0) {

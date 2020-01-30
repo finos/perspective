@@ -114,9 +114,6 @@ t_gstate::update_history(const t_data_table* tbl) {
     const t_schema& fschema = tbl->get_schema();
     const t_schema& sschema = m_table->get_schema();
 
-    std::cout << fschema << std::endl;
-    std::cout << sschema << std::endl;
-
     auto pkey_col = tbl->get_const_column("psp_pkey").get();
     auto op_col = tbl->get_const_column("psp_op").get();
 
