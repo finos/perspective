@@ -173,9 +173,9 @@ class PerspectiveViewer extends ActionElement {
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", func: "add", inputs: ["x", "y"]}]));
+     * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", computed_function_name: "add", inputs: ["x", "y"]}]));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""></perspective-viewer>
+     * <perspective-viewer computed-columns="[{name:'x+y',computed_function_name:'add',inputs:['x','y']}]""></perspective-viewer>
      */
     @array_attribute
     "computed-columns"(computed_columns) {
@@ -197,7 +197,7 @@ class PerspectiveViewer extends ActionElement {
                             detail: {
                                 column_name: col.name,
                                 input_columns: col.inputs.map(x => ({name: x})),
-                                computation: COMPUTATIONS[col.func]
+                                computation: COMPUTATIONS[col.computed_function_name]
                             }
                         });
                     }

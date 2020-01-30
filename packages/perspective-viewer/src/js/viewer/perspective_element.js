@@ -121,7 +121,7 @@ export class PerspectiveElement extends StateElement {
                     detail: {
                         column_name: col.name,
                         input_columns: col.inputs.map(x => ({name: x})),
-                        computation: COMPUTATIONS[col.func]
+                        computation: COMPUTATIONS[col.computed_function_name]
                     }
                 });
             }

@@ -168,7 +168,7 @@ async function script(page) {
         {
             name: "second_bucket(lastUpdate)",
             inputs: ["lastUpdate"],
-            func: "second_bucket"
+            computed_function_name: "second_bucket"
         }
     ]);
     await poke("plugin", "y_line");

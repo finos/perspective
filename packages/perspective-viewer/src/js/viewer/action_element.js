@@ -142,8 +142,7 @@ export class ActionElement extends DomElement {
             {
                 computation: data.computation,
                 column: computed_column_name,
-                computed_function_name: data.computation.name,
-                func: data.computation.func,
+                computed_function_name: data.computation.computed_function_name,
                 inputs: data.input_columns.map(col => col.name),
                 input_type: data.computation.input_type,
                 type: data.computation.return_type

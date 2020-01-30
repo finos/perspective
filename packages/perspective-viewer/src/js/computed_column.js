@@ -18,304 +18,37 @@ import style from "../less/computed_column.less";
 import {dragleave} from "./viewer/dragdrop.js";
 import {html, render} from "lit-html";
 
-// Computations
-const hour_of_day = function(val) {
-    return new Date(val).getHours();
-};
-
-const day_of_week = function(val) {
-    return ["1 Sunday", "2 Monday", "3 Tuesday", "4 Wednesday", "5 Thursday", "6 Friday", "7 Saturday"][new Date(val).getDay()];
-};
-
-const month_of_year = function(val) {
-    return ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"][new Date(val).getMonth()];
-};
-
-const second_bucket = function(val) {
-    return new Date(Math.floor(new Date(val).getTime() / 1000) * 1000);
-};
-
-const minute_bucket = function(val) {
-    let date = new Date(val);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-    return date;
-};
-
-const hour_bucket = function(val) {
-    let date = new Date(val);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-    return date;
-};
-
-const day_bucket = function(val) {
-    let date = new Date(val);
-    date.setHours(0);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-    return date;
-};
-
-const week_bucket = function(val) {
-    let date = new Date(val);
-    let day = date.getDay();
-    let diff = date.getDate() - day + (day == 0 ? -6 : 1);
-    date.setHours(0);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setDate(diff);
-    return date;
-};
-
-const month_bucket = function(val) {
-    let date = new Date(val);
-    date.setHours(0);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setDate(1);
-    return date;
-};
-
-const year_bucket = function(val) {
-    let date = new Date(val);
-    date.setHours(0);
-    date.setMinutes(0);
-    date.setSeconds(0);
-    date.setDate(1);
-    date.setMonth(1);
-    return date;
-};
-
 export const COMPUTATIONS = {
-    hour_of_day: new Computation("Hour of Day", x => `hour_of_day(${x})`, "datetime", "integer", hour_of_day, ["Time"]),
-    day_of_week: new Computation("Day of Week", x => `day_of_week(${x})`, "datetime", "string", day_of_week, ["Time"]),
-    month_of_year: new Computation("Month of Year", x => `month_of_year(${x})`, "datetime", "string", month_of_year, ["Time"]),
-    second_bucket: new Computation("Bucket (s)", x => `second_bucket(${x})`, "datetime", "datetime", second_bucket, ["Time"]),
-    minute_bucket: new Computation("Bucket (m)", x => `minute_bucket(${x})`, "datetime", "datetime", minute_bucket, ["Time"]),
-    hour_bucket: new Computation("Bucket (h)", x => `hour_bucket(${x})`, "datetime", "datetime", hour_bucket, ["Time"]),
-    day_bucket: new Computation("Bucket (D)", x => `day_bucket(${x})`, "datetime", "date", day_bucket, ["Time"]),
-    week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", week_bucket, ["Time"]),
-    month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", month_bucket, ["Time"]),
-    year_bucket: new Computation("Bucket (Y)", x => `year_bucket(${x})`, "datetime", "date", year_bucket, ["Time"]),
-    "10_bucket": new Computation(
-        "Bucket (10)",
-        x => `bin10(${x})`,
-        "float",
-        "float",
-        x => Math.floor(x / 10) * 10,
-        ["Math"]
-    ),
-    "100_bucket": new Computation(
-        "Bucket (100)",
-        x => `bin100(${x})`,
-        "float",
-        "float",
-        x => Math.floor(x / 100) * 100,
-        ["Math"]
-    ),
-    "1000_bucket": new Computation(
-        "Bucket (1000)",
-        x => `bin1000(${x})`,
-        "float",
-        "float",
-        x => Math.floor(x / 1000) * 1000,
-        ["Math"]
-    ),
-    "0.1_bucket": new Computation(
-        "Bucket (1/10)",
-        x => `bin10th(${x})`,
-        "float",
-        "float",
-        x => Math.floor(x / 0.1) * 0.1,
-        ["Math"]
-    ),
-    "0.01_bucket": new Computation(
-        "Bucket (1/100)",
-        x => `bin100th(${x})`,
-        "float",
-        "float",
-        x => Math.floor(x / 0.01) * 0.01,
-        ["Math"]
-    ),
-    "0.001_bucket": new Computation(
-        "Bucket (1/1000)",
-        x => `bin1000th(${x})`,
-        "float",
-        "float",
-        x => Math.floor(x / 0.001) * 0.001,
-        ["Math"]
-    ),
-    add: new Computation(
-        "+",
-        (x, y) => `(${x} + ${y})`,
-        "float",
-        "float",
-        (a, b) => a + b,
-        ["Math"],
-        2
-    ),
-    subtract: new Computation(
-        "-",
-        (x, y) => `(${x} - ${y})`,
-        "float",
-        "float",
-        (a, b) => a - b,
-        ["Math"],
-        2
-    ),
-    multiply: new Computation(
-        "*",
-        (x, y) => `(${x} * ${y})`,
-        "float",
-        "float",
-        (a, b) => a * b,
-        ["Math"],
-        2
-    ),
-    divide: new Computation(
-        "/",
-        (x, y) => `(${x} / ${y})`,
-        "float",
-        "float",
-        (a, b) => a / b,
-        ["Math"],
-        2
-    ),
-    invert: new Computation(
-        "1/x",
-        x => `(1 / ${x})`,
-        "float",
-        "float",
-        a => 1 / a,
-        ["Math"],
-        1
-    ),
-    pow: new Computation(
-        "x^2",
-        x => `(${x} ^ 2)`,
-        "float",
-        "float",
-        a => Math.pow(a, 2),
-        ["Math"],
-        1
-    ),
-    sqrt: new Computation(
-        "sqrt",
-        x => `sqrt(${x})`,
-        "float",
-        "float",
-        a => Math.sqrt(a),
-        ["Math"],
-        1
-    ),
-    abs: new Computation(
-        "abs",
-        x => `abs(${x})`,
-        "float",
-        "float",
-        a => Math.abs(a),
-        ["Math"],
-        1
-    ),
-    percent_a_of_b: new Computation(
-        "%",
-        (x, y) => `(${x} %% ${y})`,
-        "float",
-        "float",
-        (a, b) => (a / b) * 100,
-        ["Math"],
-        2
-    ),
-    equals: new Computation(
-        "==",
-        (x, y) => `(${x} == ${y})`,
-        "float",
-        "float",
-        (a, b) => a === b,
-        ["Math"],
-        2
-    ),
-    not_equals: new Computation(
-        "!=",
-        (x, y) => `(${x} != ${y})`,
-        "float",
-        "boolean",
-        (a, b) => a !== b,
-        ["Math"],
-        2
-    ),
-    greater_than: new Computation(
-        ">",
-        (x, y) => `(${x} > ${y})`,
-        "float",
-        "boolean",
-        (a, b) => a > b,
-        ["Math"],
-        2
-    ),
-    less_than: new Computation(
-        "<",
-        (x, y) => `(${x} < ${y})`,
-        "float",
-        "boolean",
-        (a, b) => a < b,
-        ["Math"],
-        2
-    ),
-    uppercase: new Computation(
-        "Uppercase",
-        x => `uppercase(${x})`,
-        "string",
-        "string",
-        x => x.toUpperCase(),
-        ["Text"]
-    ),
-    lowercase: new Computation(
-        "Lowercase",
-        x => `lowercase(${x})`,
-        "string",
-        "string",
-        x => x.toLowerCase(),
-        ["Text"]
-    ),
-    length: new Computation(
-        "length",
-        x => `length(${x})`,
-        "string",
-        "integer",
-        x => x.length,
-        ["Text"]
-    ),
-    is: new Computation(
-        "is",
-        (x, y) => `(${x} is ${y})`,
-        "string",
-        "boolean",
-        (x, y) => x === y,
-        ["Text"],
-        2
-    ),
-    concat_space: new Computation(
-        "concat_space",
-        x => `concat_space(${x})`,
-        "string",
-        "string",
-        (a, b) => a + " " + b,
-        ["Text"],
-        2
-    ),
-    concat_comma: new Computation(
-        "concat_comma",
-        x => `concat_comma(${x})`,
-        "string",
-        "string",
-        (a, b) => a + ", " + b,
-        ["Text"],
-        2
-    )
+    hour_of_day: new Computation("Hour of Day", x => `hour_of_day(${x})`, "datetime", "integer", ["Time"]),
+    day_of_week: new Computation("Day of Week", x => `day_of_week(${x})`, "datetime", "string", ["Time"]),
+    month_of_year: new Computation("Month of Year", x => `month_of_year(${x})`, "datetime", "string", ["Time"]),
+    second_bucket: new Computation("Bucket (s)", x => `second_bucket(${x})`, "datetime", "datetime", ["Time"]),
+    minute_bucket: new Computation("Bucket (m)", x => `minute_bucket(${x})`, "datetime", "datetime", ["Time"]),
+    hour_bucket: new Computation("Bucket (h)", x => `hour_bucket(${x})`, "datetime", "datetime", ["Time"]),
+    day_bucket: new Computation("Bucket (D)", x => `day_bucket(${x})`, "datetime", "date", ["Time"]),
+    week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", ["Time"]),
+    month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", ["Time"]),
+    year_bucket: new Computation("Bucket (Y)", x => `year_bucket(${x})`, "datetime", "date", ["Time"]),
+    "10_bucket": new Computation("Bucket (10)", x => `bin10(${x})`, "float", "float", ["Math"]),
+    "100_bucket": new Computation("Bucket (100)", x => `bin100(${x})`, "float", "float", ["Math"]),
+    "1000_bucket": new Computation("Bucket (1000)", x => `bin1000(${x})`, "float", "float", ["Math"]),
+    "0.1_bucket": new Computation("Bucket (1/10)", x => `bin10th(${x})`, "float", "float", ["Math"]),
+    "0.01_bucket": new Computation("Bucket (1/100)", x => `bin100th(${x})`, "float", "float", ["Math"]),
+    "0.001_bucket": new Computation("Bucket (1/1000)", x => `bin1000th(${x})`, "float", "float", ["Math"]),
+    add: new Computation("+", (x, y) => `(${x} + ${y})`, "float", "float", ["Math"], 2),
+    subtract: new Computation("-", (x, y) => `(${x} - ${y})`, "float", "float", ["Math"], 2),
+    multiply: new Computation("*", (x, y) => `(${x} * ${y})`, "float", "float", ["Math"], 2),
+    divide: new Computation("/", (x, y) => `(${x} / ${y})`, "float", "float", ["Math"], 2),
+    invert: new Computation("1/x", x => `(1 / ${x})`, "float", "float", ["Math"], 1),
+    pow: new Computation("x^2", x => `(${x} ^ 2)`, "float", "float", ["Math"], 1),
+    sqrt: new Computation("sqrt", x => `sqrt(${x})`, "float", "float", ["Math"], 1),
+    abs: new Computation("abs", x => `abs(${x})`, "float", "float", ["Math"], 1),
+    percent_a_of_b: new Computation("%", (x, y) => `(${x} %% ${y})`, "float", "float", ["Math"], 2),
+    uppercase: new Computation("Uppercase", x => `uppercase(${x})`, "string", "string", ["Text"]),
+    lowercase: new Computation("Lowercase", x => `lowercase(${x})`, "string", "string", ["Text"]),
+    length: new Computation("length", x => `length(${x})`, "string", "integer", ["Text"]),
+    concat_space: new Computation("concat_space", x => `concat_space(${x})`, "string", "string", ["Text"], 2),
+    concat_comma: new Computation("concat_comma", x => `concat_comma(${x})`, "string", "string", ["Text"], 2)
 };
 
 function _insert_tree(name, elem, tree) {
@@ -376,9 +109,9 @@ class ComputedColumn extends HTMLElement {
 
     *_selector_template(tree = TREE) {
         for (const [category, comp] of Object.entries(tree)) {
-            if (comp.name) {
+            if (comp.computed_function_name) {
                 yield html`
-                    <option value=${category}>${comp.name}</option>
+                    <option value=${category}>${comp.computed_function_name}</option>
                 `;
             } else {
                 yield html`
@@ -564,7 +297,7 @@ class ComputedColumn extends HTMLElement {
             if (this.state.computation[FORMATTER]) {
                 this._column_name_input.innerText = this.state.computation[FORMATTER].apply(undefined, names);
             } else {
-                this._column_name_input.innerText = `${this.state.computation.name}(${names.join(", ")})`;
+                this._column_name_input.innerText = `${this.state.computation.computed_function_name}(${names.join(", ")})`;
             }
         } else {
             this._column_name_input.innerText = "";
@@ -715,7 +448,7 @@ class ComputedColumn extends HTMLElement {
                 detail: {
                     name: computed_column.column_name,
                     inputs: computed_column.input_columns.map(x => x.name),
-                    func: computed_column.computed_function_name
+                    computed_function_name: computed_column.computed_function_name
                 }
             });
             this.dispatchEvent(event);
