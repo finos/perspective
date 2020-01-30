@@ -19,14 +19,6 @@ t_computation::t_computation(
     , m_input_types(input_types)
     , m_return_type(return_type) {}
 
-t_computed_column_def::t_computed_column_def(
-    const std::string& column_name,
-    const std::vector<std::string> input_columns,
-    const t_computation& computation)
-    : m_column_name(column_name)
-    , m_input_columns(input_columns)
-    , m_computation(computation) {}
-
 t_computation
 t_computed_column::get_computation(
     t_computed_function_name name, const std::vector<t_dtype>& input_types) {
@@ -38,7 +30,7 @@ t_computed_column::get_computation(
     PSP_COMPLAIN_AND_ABORT("Could not find computation.");
 };
 
-#define GET_COMPUTED_FUNCTION_1(TYPE)                                          \
+#define GET_NUMERIC_COMPUTED_FUNCTION_1(TYPE)                                  \
     switch (computation.m_name) {                                              \
         case POW: return computed_function::pow_##TYPE;                        \
         case INVERT: return computed_function::invert_##TYPE;                  \
@@ -53,64 +45,57 @@ t_computed_column::get_computation(
         default: break;                                                        \
     }
 
+#define GET_DATE_COMPUTED_FUNCTION_1(DTYPE)                                  \
+    switch (computation.m_name) {                                            \
+        case HOUR_OF_DAY: return computed_function::hour_of_day<DTYPE>;      \
+        case SECOND_BUCKET: return computed_function::second_bucket<DTYPE>;  \
+        case MINUTE_BUCKET: return computed_function::minute_bucket<DTYPE>;  \
+        case HOUR_BUCKET: return computed_function::hour_bucket<DTYPE>;      \
+        case DAY_BUCKET: return computed_function::day_bucket<DTYPE>;        \
+        case WEEK_BUCKET: return computed_function::week_bucket<DTYPE>;      \
+        case MONTH_BUCKET: return computed_function::month_bucket<DTYPE>;    \
+        case YEAR_BUCKET: return computed_function::year_bucket<DTYPE>;      \
+        default: break;                                                      \
+    }
+
 std::function<t_tscalar(t_tscalar)>
 t_computed_column::get_computed_function_1(t_computation computation) {
     switch (computation.m_input_types[0]) {
         case DTYPE_UINT8: {
-            GET_COMPUTED_FUNCTION_1(uint8);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(uint8);
         } break;
         case DTYPE_UINT16: {
-            GET_COMPUTED_FUNCTION_1(uint16);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(uint16);
         } break;
         case DTYPE_UINT32: {
-            GET_COMPUTED_FUNCTION_1(uint32);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(uint32);
         } break;
         case DTYPE_UINT64: {
-            GET_COMPUTED_FUNCTION_1(uint64);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(uint64);
         } break;
         case DTYPE_INT8: {
-            GET_COMPUTED_FUNCTION_1(int8);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(int8);
         } break;
         case DTYPE_INT16: {
-            GET_COMPUTED_FUNCTION_1(int16);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(int16);
         } break;
         case DTYPE_INT32: {
-            GET_COMPUTED_FUNCTION_1(int32);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(int32);
         } break;
         case DTYPE_INT64: {
-            GET_COMPUTED_FUNCTION_1(int64);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(int64);
         } break;
         case DTYPE_FLOAT32: {
-            GET_COMPUTED_FUNCTION_1(float32);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(float32);
         } break;
         case DTYPE_FLOAT64: {
-            GET_COMPUTED_FUNCTION_1(float64);
+            GET_NUMERIC_COMPUTED_FUNCTION_1(float64);
         } break;
         case DTYPE_DATE: {
-            switch (computation.m_name) {
-                case HOUR_OF_DAY: return computed_function::hour_of_day<DTYPE_DATE>;
-                case SECOND_BUCKET: return computed_function::second_bucket<DTYPE_DATE>;
-                case MINUTE_BUCKET: return computed_function::minute_bucket<DTYPE_DATE>;
-                case HOUR_BUCKET: return computed_function::hour_bucket<DTYPE_DATE>;
-                case DAY_BUCKET: return computed_function::day_bucket<DTYPE_DATE>;
-                case WEEK_BUCKET: return computed_function::week_bucket<DTYPE_DATE>;
-                case MONTH_BUCKET: return computed_function::month_bucket<DTYPE_DATE>;
-                case YEAR_BUCKET: return computed_function::year_bucket<DTYPE_DATE>;
-                default: break;
-            }
+            GET_DATE_COMPUTED_FUNCTION_1(DTYPE_DATE);
         } break;
         case DTYPE_TIME: {
-            switch (computation.m_name) {
-                case HOUR_OF_DAY: return computed_function::hour_of_day<DTYPE_TIME>;
-                case SECOND_BUCKET: return computed_function::second_bucket<DTYPE_TIME>;
-                case MINUTE_BUCKET: return computed_function::minute_bucket<DTYPE_TIME>;
-                case HOUR_BUCKET: return computed_function::hour_bucket<DTYPE_TIME>;
-                case DAY_BUCKET: return computed_function::day_bucket<DTYPE_TIME>;
-                case WEEK_BUCKET: return computed_function::week_bucket<DTYPE_TIME>;
-                case MONTH_BUCKET: return computed_function::month_bucket<DTYPE_TIME>;
-                case YEAR_BUCKET: return computed_function::year_bucket<DTYPE_TIME>;
-                default: break;
-            }
+            GET_DATE_COMPUTED_FUNCTION_1(DTYPE_TIME);
         } break;
         case DTYPE_STR: {
             switch (computation.m_name) {
@@ -167,11 +152,10 @@ t_computed_column::get_computed_function_2(t_computation computation) {
         case DTYPE_FLOAT64: {
             GET_COMPUTED_FUNCTION_2(DTYPE_FLOAT64);
         } break;
-        default: {
-            // TODO: Better error message and break fall-through
-            PSP_COMPLAIN_AND_ABORT("Invalid computation function");
-        } break;
+        default: break;
     }
+
+    PSP_COMPLAIN_AND_ABORT("Could not find computation function for arity 2.");
 }
 
 std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column> output_column)>
@@ -193,7 +177,8 @@ t_computed_column::get_computed_function_string_1(t_computation computation) {
                 default: break;
             }
         } break;
-        default: PSP_COMPLAIN_AND_ABORT("Invalid computation function");
+        default: PSP_COMPLAIN_AND_ABORT(
+            "Could not find computation function for arity 1, string.");
     }
 }
 
@@ -202,7 +187,8 @@ t_computed_column::get_computed_function_string_2(t_computation computation) {
     switch (computation.m_name) {
         case CONCAT_SPACE: return computed_function::concat_space;
         case CONCAT_COMMA: return computed_function::concat_comma;
-        default: PSP_COMPLAIN_AND_ABORT("Invalid computation function");
+        default: PSP_COMPLAIN_AND_ABORT(
+            "Could not find computation function for arity 2, string.");
     }
 }
 
@@ -219,7 +205,6 @@ t_computed_column::apply_computation(
     }
     auto arity = table_columns.size();
 
-    // TODO: track these in an union type?
     std::function<t_tscalar(t_tscalar)> function_1;
     std::function<t_tscalar(t_tscalar, t_tscalar)> function_2;
     std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_1;

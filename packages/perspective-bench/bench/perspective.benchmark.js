@@ -27,7 +27,7 @@ const COMPUTED_FUNCS = {
     "*": (x, y) => x * y,
     "/": (x, y) => x / y
 };
-const COMPUTED_CONFIG = {func_name: "+", column: "computed", inputs: ["Sales", "Profit"], type: "float", func: COMPUTED_FUNCS["+"]};
+const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"], type: "float", func: COMPUTED_FUNCS["+"]};
 
 /******************************************************************************
  *
@@ -142,7 +142,7 @@ describe("Computed Column", async () => {
             describe("table", () => {
                 table = worker.table(data.arrow.slice());
                 benchmark(`computed: \`${name}\``, async () => {
-                    COMPUTED_CONFIG.func_name = name;
+                    COMPUTED_CONFIG.computed_function_name = name;
                     COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
                     table = table.add_computed([COMPUTED_CONFIG]);
                     await table.size();

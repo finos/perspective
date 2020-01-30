@@ -104,7 +104,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "sqrt",
-                            func_name: "sqrt",
+                            computed_function_name: "sqrt",
                             inputs: ["a"]
                         }
                     ]);
@@ -123,7 +123,7 @@ module.exports = perspective => {
                 let table2 = table.add_computed([
                     {
                         column: "sqrt",
-                        func_name: "sqrt",
+                        computed_function_name: "sqrt",
                         inputs: ["a"]
                     }
                 ]);
@@ -143,7 +143,7 @@ module.exports = perspective => {
                 let table2 = table.add_computed([
                     {
                         column: "pow2",
-                        func_name: "x^2",
+                        computed_function_name: "x^2",
                         inputs: ["a"]
                     }
                 ]);
@@ -163,7 +163,7 @@ module.exports = perspective => {
                 let table2 = table.add_computed([
                     {
                         column: "pow2",
-                        func_name: "x^2",
+                        computed_function_name: "x^2",
                         inputs: ["a"]
                     }
                 ]);
@@ -183,7 +183,7 @@ module.exports = perspective => {
                 let table2 = table.add_computed([
                     {
                         column: "invert",
-                        func_name: "1/x",
+                        computed_function_name: "1/x",
                         inputs: ["a"]
                     }
                 ]);
@@ -203,7 +203,7 @@ module.exports = perspective => {
                 let table2 = table.add_computed([
                     {
                         column: "invert",
-                        func_name: "1/x",
+                        computed_function_name: "1/x",
                         inputs: ["a"]
                     }
                 ]);
@@ -243,7 +243,7 @@ module.exports = perspective => {
                     {
                         column: "sum",
                         type: "int",
-                        func_name: "+",
+                        computed_function_name: "+",
                         func: (w, x) => w + x,
                         inputs: ["x", "x"]
                     }
@@ -263,7 +263,7 @@ module.exports = perspective => {
                     {
                         column: "sum",
                         type: "float",
-                        func_name: "+",
+                        computed_function_name: "+",
                         func: (w, x) => w + x,
                         inputs: ["w", "w"]
                     }
@@ -283,7 +283,7 @@ module.exports = perspective => {
                     {
                         column: "sum",
                         type: "float",
-                        func_name: "+",
+                        computed_function_name: "+",
                         func: (w, x) => w + x,
                         inputs: ["w", "x"]
                     }
@@ -306,7 +306,7 @@ module.exports = perspective => {
                     {
                         column: "sum",
                         type: "float",
-                        func_name: "+",
+                        computed_function_name: "+",
                         inputs: ["a", "b"]
                     }
                 ]);
@@ -325,7 +325,7 @@ module.exports = perspective => {
                     {
                         column: "difference",
                         type: "int",
-                        func_name: "-",
+                        computed_function_name: "-",
                         func: (w, x) => w - x,
                         inputs: ["v", "x"]
                     }
@@ -345,7 +345,7 @@ module.exports = perspective => {
                     {
                         column: "difference",
                         type: "float",
-                        func_name: "-",
+                        computed_function_name: "-",
                         func: (w, x) => w - x,
                         inputs: ["u", "w"]
                     }
@@ -365,7 +365,7 @@ module.exports = perspective => {
                     {
                         column: "difference",
                         type: "float",
-                        func_name: "-",
+                        computed_function_name: "-",
                         func: (w, x) => w - x,
                         inputs: ["w", "x"]
                     }
@@ -388,7 +388,7 @@ module.exports = perspective => {
                     {
                         column: "difference",
                         type: "float",
-                        func_name: "-",
+                        computed_function_name: "-",
                         inputs: ["a", "b"]
                     }
                 ]);
@@ -407,7 +407,7 @@ module.exports = perspective => {
                     {
                         column: "multiply",
                         type: "float",
-                        func_name: "*",
+                        computed_function_name: "*",
                         inputs: ["v", "x"]
                     }
                 ]);
@@ -426,7 +426,7 @@ module.exports = perspective => {
                     {
                         column: "multiply",
                         type: "float",
-                        func_name: "*",
+                        computed_function_name: "*",
                         inputs: ["u", "w"]
                     }
                 ]);
@@ -445,7 +445,7 @@ module.exports = perspective => {
                     {
                         column: "multiply",
                         type: "float",
-                        func_name: "*",
+                        computed_function_name: "*",
                         inputs: ["w", "x"]
                     }
                 ]);
@@ -467,7 +467,7 @@ module.exports = perspective => {
                     {
                         column: "product",
                         type: "float",
-                        func_name: "*",
+                        computed_function_name: "*",
                         inputs: ["a", "b"]
                     }
                 ]);
@@ -486,7 +486,7 @@ module.exports = perspective => {
                     {
                         column: "divide",
                         type: "int",
-                        func_name: "/",
+                        computed_function_name: "/",
                         inputs: ["v", "x"]
                     }
                 ]);
@@ -505,7 +505,7 @@ module.exports = perspective => {
                     {
                         column: "divide",
                         type: "int",
-                        func_name: "/",
+                        computed_function_name: "/",
                         inputs: ["u", "w"]
                     }
                 ]);
@@ -524,7 +524,7 @@ module.exports = perspective => {
                     {
                         column: "divide",
                         type: "int",
-                        func_name: "/",
+                        computed_function_name: "/",
                         inputs: ["w", "x"]
                     }
                 ]);
@@ -546,7 +546,7 @@ module.exports = perspective => {
                     {
                         column: "divide",
                         type: "float",
-                        func_name: "/",
+                        computed_function_name: "/",
                         inputs: ["a", "b"]
                     }
                 ]);
@@ -567,7 +567,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "%",
-                            func_name: "%",
+                            computed_function_name: "%",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -587,7 +587,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "%",
-                            func_name: "%",
+                            computed_function_name: "%",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -607,7 +607,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "%",
-                            func_name: "%",
+                            computed_function_name: "%",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -627,7 +627,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "%",
-                            func_name: "%",
+                            computed_function_name: "%",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -745,7 +745,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "length",
+                            computed_function_name: "length",
                             inputs: ["a"]
                         }
                     ]);
@@ -764,7 +764,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "upper",
-                            func_name: "Uppercase",
+                            computed_function_name: "Uppercase",
                             inputs: ["a"]
                         }
                     ]);
@@ -783,7 +783,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "Lowercase",
+                            computed_function_name: "Lowercase",
                             inputs: ["a"]
                         }
                     ]);
@@ -805,7 +805,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "concat_space",
+                            computed_function_name: "concat_space",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -825,7 +825,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "upper",
-                            func_name: "concat_comma",
+                            computed_function_name: "concat_comma",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -845,7 +845,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "concat_space",
+                            computed_function_name: "concat_space",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -868,7 +868,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "concat_comma",
+                            computed_function_name: "concat_comma",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -891,7 +891,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "concat_space",
+                            computed_function_name: "concat_space",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -914,7 +914,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "length",
-                            func_name: "concat_comma",
+                            computed_function_name: "concat_comma",
                             inputs: ["a", "b"]
                         }
                     ]);
@@ -938,7 +938,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "hour",
-                        func_name: "Hour of Day",
+                        computed_function_name: "Hour of Day",
                         inputs: ["a"]
                     }
                 ]);
@@ -970,7 +970,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "day",
-                        func_name: "Day of Week",
+                        computed_function_name: "Day of Week",
                         inputs: ["a"]
                     }
                 ]);
@@ -1003,7 +1003,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "month",
-                        func_name: "Month of Year",
+                        computed_function_name: "Month of Year",
                         inputs: ["a"]
                     }
                 ]);
@@ -1035,7 +1035,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (s)",
+                        computed_function_name: "Bucket (s)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1067,7 +1067,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (m)",
+                        computed_function_name: "Bucket (m)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1099,7 +1099,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (h)",
+                        computed_function_name: "Bucket (h)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1130,7 +1130,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (D)",
+                        computed_function_name: "Bucket (D)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1162,7 +1162,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (W)",
+                        computed_function_name: "Bucket (W)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1195,7 +1195,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (M)",
+                        computed_function_name: "Bucket (M)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1228,7 +1228,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (Y)",
+                        computed_function_name: "Bucket (Y)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1263,7 +1263,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "hour",
-                        func_name: "Hour of Day",
+                        computed_function_name: "Hour of Day",
                         inputs: ["a"]
                     }
                 ]);
@@ -1294,7 +1294,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "day",
-                        func_name: "Day of Week",
+                        computed_function_name: "Day of Week",
                         inputs: ["a"]
                     }
                 ]);
@@ -1327,7 +1327,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "month",
-                        func_name: "Month of Year",
+                        computed_function_name: "Month of Year",
                         inputs: ["a"]
                     }
                 ]);
@@ -1359,7 +1359,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (s)",
+                        computed_function_name: "Bucket (s)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1391,7 +1391,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (m)",
+                        computed_function_name: "Bucket (m)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1423,7 +1423,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (h)",
+                        computed_function_name: "Bucket (h)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1455,7 +1455,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (D)",
+                        computed_function_name: "Bucket (D)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1487,7 +1487,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (W)",
+                        computed_function_name: "Bucket (W)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1520,7 +1520,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (M)",
+                        computed_function_name: "Bucket (M)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1553,7 +1553,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        func_name: "Bucket (Y)",
+                        computed_function_name: "Bucket (Y)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1627,7 +1627,7 @@ module.exports = perspective => {
                         const name = `abs(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "abs",
+                                computed_function_name: "abs",
                                 inputs: [x],
                                 column: name
                             }
@@ -1650,7 +1650,7 @@ module.exports = perspective => {
                         const name = `sqrt(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "sqrt",
+                                computed_function_name: "sqrt",
                                 inputs: [x],
                                 column: name
                             }
@@ -1673,7 +1673,7 @@ module.exports = perspective => {
                         const name = `invert(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "1/x",
+                                computed_function_name: "1/x",
                                 inputs: [x],
                                 column: name
                             }
@@ -1698,7 +1698,7 @@ module.exports = perspective => {
                         const name = `pow(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "x^2",
+                                computed_function_name: "x^2",
                                 inputs: [x],
                                 column: name
                             }
@@ -1722,7 +1722,7 @@ module.exports = perspective => {
                         const name = `bucket(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "Bucket (10)",
+                                computed_function_name: "Bucket (10)",
                                 inputs: [x],
                                 column: name
                             }
@@ -1746,7 +1746,7 @@ module.exports = perspective => {
                         const name = `bucket(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "Bucket (100)",
+                                computed_function_name: "Bucket (100)",
                                 inputs: [x],
                                 column: name
                             }
@@ -1770,7 +1770,7 @@ module.exports = perspective => {
                         const name = `bucket(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "Bucket (1000)",
+                                computed_function_name: "Bucket (1000)",
                                 inputs: [x],
                                 column: name
                             }
@@ -1794,7 +1794,7 @@ module.exports = perspective => {
                         const name = `bucket(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "Bucket (1/10)",
+                                computed_function_name: "Bucket (1/10)",
                                 inputs: [x],
                                 column: name
                             }
@@ -1818,7 +1818,7 @@ module.exports = perspective => {
                         const name = `bucket(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "Bucket (1/100)",
+                                computed_function_name: "Bucket (1/100)",
                                 inputs: [x],
                                 column: name
                             }
@@ -1842,7 +1842,7 @@ module.exports = perspective => {
                         const name = `bucket(${x})`;
                         let table = perspective.table(arrow.slice()).add_computed([
                             {
-                                func_name: "Bucket (1/1000)",
+                                computed_function_name: "Bucket (1/1000)",
                                 inputs: [x],
                                 column: name
                             }
@@ -1873,7 +1873,7 @@ module.exports = perspective => {
                             const name = `(${x} + ${y})`;
                             let table = perspective.table(arrow.slice()).add_computed([
                                 {
-                                    func_name: "+",
+                                    computed_function_name: "+",
                                     inputs: [x, y],
                                     column: name
                                 }
@@ -1912,7 +1912,7 @@ module.exports = perspective => {
                             const name = `(${x} - ${y})`;
                             let table = perspective.table(arrow.slice()).add_computed([
                                 {
-                                    func_name: "-",
+                                    computed_function_name: "-",
                                     inputs: [x, y],
                                     column: name
                                 }
@@ -1951,7 +1951,7 @@ module.exports = perspective => {
                             const name = `(${x} * ${y})`;
                             let table = perspective.table(arrow.slice()).add_computed([
                                 {
-                                    func_name: "*",
+                                    computed_function_name: "*",
                                     inputs: [x, y],
                                     column: name
                                 }
@@ -1991,7 +1991,7 @@ module.exports = perspective => {
                             const name = `(${x} / ${y})`;
                             let table = perspective.table(arrow.slice()).add_computed([
                                 {
-                                    func_name: "/",
+                                    computed_function_name: "/",
                                     inputs: [x, y],
                                     column: name
                                 }
@@ -2035,7 +2035,7 @@ module.exports = perspective => {
                             const name = `(${x} % ${y})`;
                             let table = perspective.table(arrow.slice()).add_computed([
                                 {
-                                    func_name: "%",
+                                    computed_function_name: "%",
                                     inputs: [x, y],
                                     column: name
                                 }
@@ -2076,8 +2076,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "int+float",
-                            type: "float",
-                            func: (w, x) => w + x,
+                            computed_function_name: "+",
                             inputs: ["int", "float"]
                         }
                     ]);
@@ -2115,8 +2114,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "int+float",
-                            func_name: "+",
-                            type: "float",
+                            computed_function_name: "+",
                             inputs: ["int", "float"]
                         }
                     ]);
@@ -2154,8 +2152,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "int-float",
-                            func_name: "-",
-                            type: "float",
+                            computed_function_name: "-",
                             inputs: ["int", "float"]
                         }
                     ]);
@@ -2193,8 +2190,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "int * float",
-                            func_name: "*",
-                            type: "float",
+                            computed_function_name: "*",
                             inputs: ["int", "float"]
                         }
                     ]);
@@ -2232,8 +2228,7 @@ module.exports = perspective => {
                     .add_computed([
                         {
                             column: "int / float",
-                            func_name: "/",
-                            type: "float",
+                            computed_function_name: "/",
                             inputs: ["int", "float"]
                         }
                     ]);
@@ -2255,6 +2250,78 @@ module.exports = perspective => {
                     {__ROW_PATH__: [0.7619047619047619], int: 4, "int / float": 0.7619047619047619, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]},
                     {__ROW_PATH__: [1.7777777777777777], int: 4, "int / float": 1.7777777777777777, float: 2.25, string: 1, datetime: 1, __INDEX__: [0]}
                 ]);
+
+                view.delete();
+                table.delete();
+            });
+        });
+
+        describe("Partial update with null", function() {
+            it.skip("Null poison", async function() {
+                const table = perspective
+                    .table(
+                        [
+                            {int: 1, float: 2.25, string: "a", datetime: new Date()},
+                            {int: 2, float: 3.5, string: "b", datetime: new Date()},
+                            {int: 3, float: 4.75, string: "c", datetime: new Date()},
+                            {int: 4, float: 5.25, string: "d", datetime: new Date()}
+                        ],
+                        {index: "int"}
+                    )
+                    .add_computed([
+                        {
+                            column: "new",
+                            computed_function_name: "+",
+                            inputs: ["int", "float"]
+                        }
+                    ]);
+
+                let view = table.view({columns: ["new", "int", "float"]});
+
+                table.update([{int: 2, float: null}]);
+
+                let result = await view.to_columns();
+
+                expect(result).toEqual({
+                    new: [3.25, null, 4.75, 5.25],
+                    int: [1, 2, 3, 4],
+                    float: [2.25, null, 4.75, 5.25]
+                });
+
+                view.delete();
+                table.delete();
+            });
+
+            it.skip("Null poison, unset", async function() {
+                const table = perspective
+                    .table(
+                        [
+                            {int: 1, float: 2.25, string: "a", datetime: new Date()},
+                            {int: 2, float: 3.5, string: "b", datetime: new Date()},
+                            {int: 3, float: 4.75, string: "c", datetime: new Date()},
+                            {int: 4, float: 5.25, string: "d", datetime: new Date()}
+                        ],
+                        {index: "int"}
+                    )
+                    .add_computed([
+                        {
+                            column: "new",
+                            computed_function_name: "+",
+                            inputs: ["int", "float"]
+                        }
+                    ]);
+
+                let view = table.view({columns: ["new", "int", "float"]});
+
+                table.update([{int: 2, float: undefined}]);
+
+                let result = await view.to_columns();
+
+                expect(result).toEqual({
+                    new: [3.25, null, 4.75, 5.25],
+                    int: [1, 2, 3, 4],
+                    float: [2.25, null, 4.75, 5.25]
+                });
 
                 view.delete();
                 table.delete();

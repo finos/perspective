@@ -77,25 +77,6 @@ struct PERSPECTIVE_EXPORT t_computation {
 };
 
 /**
- * @brief Stores metadata for a single computed column, including its name,
- * input columns, and its `t_computation`.
- * 
- */
-struct PERSPECTIVE_EXPORT t_computed_column_def {
-
-    t_computed_column_def(
-        const std::string& column_name,
-        const std::vector<std::string> input_columns,
-        const t_computation& computation
-    );
-
-    std::string m_column_name;
-    std::vector<std::string> m_input_columns;
-    t_computation m_computation;
-};
-
-
-/**
  * @brief Stores static functions used for computed columns, and a string to
  * function pointer map 
  * 

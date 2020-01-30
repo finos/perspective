@@ -474,7 +474,7 @@ class ComputedColumn extends HTMLElement {
 
     // When state changes are made manually, apply them to the UI
     _apply_state(columns, computation, name) {
-        this._update_computation(null, this.state.func_name);
+        this._update_computation(null, this.state.computed_function_name);
         this.state["input_columns"] = columns;
         const inputs = this._input_columns.children;
 
@@ -622,7 +622,7 @@ class ComputedColumn extends HTMLElement {
         this._computation_type.innerHTML = `<span class="${return_type}">${this.type_markers[return_type]}</span>`;
 
         this.state["computation"] = computation;
-        this.state.func_name = computation_name;
+        this.state.computed_function_name = computation_name;
 
         if (reset_inputs || event === null) {
             this._register_inputs();
@@ -670,7 +670,7 @@ class ComputedColumn extends HTMLElement {
                 detail: {
                     name: computed_column.column_name,
                     inputs: computed_column.input_columns.map(x => x.name),
-                    func: computed_column.func_name
+                    func: computed_column.computed_function_name
                 }
             });
             this.dispatchEvent(event);

@@ -944,9 +944,9 @@ namespace binding {
             computed_def["column"].as<std::string>();
         t_val type = computed_def["type"];
 
-        if (has_value(computed_def["func_name"])) {
+        if (has_value(computed_def["computed_function_name"])) {
             t_computed_function_name method_name = 
-                computed_def["func_name"].as<t_computed_function_name>();
+                computed_def["computed_function_name"].as<t_computed_function_name>();
             std::vector<t_dtype> input_types;
             std::vector<std::shared_ptr<t_column>> table_columns;
             std::vector<std::shared_ptr<t_column>> flattened_columns;

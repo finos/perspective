@@ -1446,8 +1446,8 @@ export default function(Module) {
         let _Table;
 
         for (let c of computed) {
-            if (c["func_name"]) {
-                c["func_name"] = name_to_computation(c["func_name"]);
+            if (c["computed_function_name"]) {
+                c["computed_function_name"] = name_to_computation(c["computed_function_name"]);
             }
         }
 
