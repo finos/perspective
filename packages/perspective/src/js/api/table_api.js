@@ -56,8 +56,7 @@ export function table(worker, data, options) {
 table.prototype.type = "table";
 
 /**
- * Create a new computed table, serializing each computation to a string for
- * processing by the engine.
+ * Create a new computed table.
  *
  * @param {*} worker
  * @param {*} computed
@@ -66,16 +65,8 @@ table.prototype.type = "table";
 function computed_table(worker, computed, name) {
     this._worker = worker;
     this._name = Math.random() + "";
-    let original = name;
-    // serialize functions
-    for (let i = 0; i < computed.length; ++i) {
-        let column = computed[i];
-        let func = column["func"];
-        if (typeof func == "function") {
-            column["func"] = func.toString();
-        }
-    }
-    var msg = {
+    const original = name;
+    const msg = {
         cmd: "add_computed",
         original: original,
         name: this._name,

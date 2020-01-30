@@ -336,25 +336,6 @@ module.exports = perspective => {
         });
 
         describe("Numeric, arity 2", function() {
-            it("Computed column of arity 2", async function() {
-                var table = perspective.table(int_float_data);
-
-                let table2 = table.add_computed([
-                    {
-                        column: "ratio",
-                        type: "float",
-                        func: (w, x) => w / x,
-                        inputs: ["w", "x"]
-                    }
-                ]);
-                let view = table2.view({columns: ["ratio"], aggregates: {ratio: "count"}});
-                let result = await view.to_json();
-                expect(result).toEqual([{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}]);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
             it("Computed column of arity 2, add ints", async function() {
                 var table = perspective.table(int_float_data);
 
@@ -363,7 +344,6 @@ module.exports = perspective => {
                         column: "sum",
                         type: "int",
                         computed_function_name: "+",
-                        func: (w, x) => w + x,
                         inputs: ["x", "x"]
                     }
                 ]);
@@ -383,7 +363,6 @@ module.exports = perspective => {
                         column: "sum",
                         type: "float",
                         computed_function_name: "+",
-                        func: (w, x) => w + x,
                         inputs: ["w", "w"]
                     }
                 ]);
@@ -403,7 +382,6 @@ module.exports = perspective => {
                         column: "sum",
                         type: "float",
                         computed_function_name: "+",
-                        func: (w, x) => w + x,
                         inputs: ["w", "x"]
                     }
                 ]);
@@ -445,7 +423,6 @@ module.exports = perspective => {
                         column: "difference",
                         type: "int",
                         computed_function_name: "-",
-                        func: (w, x) => w - x,
                         inputs: ["v", "x"]
                     }
                 ]);
@@ -465,7 +442,6 @@ module.exports = perspective => {
                         column: "difference",
                         type: "float",
                         computed_function_name: "-",
-                        func: (w, x) => w - x,
                         inputs: ["u", "w"]
                     }
                 ]);
@@ -485,7 +461,6 @@ module.exports = perspective => {
                         column: "difference",
                         type: "float",
                         computed_function_name: "-",
-                        func: (w, x) => w - x,
                         inputs: ["w", "x"]
                     }
                 ]);
@@ -1088,8 +1063,7 @@ module.exports = perspective => {
                 let table2 = table.add_computed([
                     {
                         column: "ratio",
-                        type: "float",
-                        func: (w, x) => w / x,
+                        computed_function_name: "/",
                         inputs: ["w", "x"]
                     }
                 ]);
@@ -1117,126 +1091,35 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("String computed column of arity 1", async function() {
-                var table = perspective.table(data);
-
-                let table2 = table.add_computed([
-                    {
-                        column: "yes/no",
-                        type: "string",
-                        func: z => (z === true ? "yes" : "no"),
-                        inputs: ["z"]
-                    }
-                ]);
-                let view = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
-                let result = await view.to_json();
-                let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
-                expect(result).toEqual(expected);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
-            it("Bucket (m), date with updates", async function() {
-                const table = perspective.table({
-                    a: "date"
-                });
-
-                const table2 = table.add_computed([
-                    {
-                        column: "bucket",
-                        computed_function_name: "Bucket (m)",
-                        inputs: ["a"]
-                    }
-                ]);
-
-                let view = table2.view();
-
-                const schema = await table2.schema();
-                expect(schema).toEqual({
-                    a: "date",
-                    bucket: "date"
-                });
-
-                table2.update({
-                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
-                });
-
-                table2.update({
-                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
-                });
-
-                let result = await view.to_columns();
-                expect(result.bucket).toEqual(result.a);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
-            it("Bucket (m), datetime with updates", async function() {
-                const table = perspective.table({
-                    a: "datetime"
-                });
-
-                const table2 = table.add_computed([
-                    {
-                        column: "bucket",
-                        computed_function_name: "Bucket (m)",
-                        inputs: ["a"]
-                    }
-                ]);
-
-                let view = table2.view();
-
-                const schema = await table2.schema();
-                expect(schema).toEqual({
-                    a: "datetime",
-                    bucket: "datetime"
-                });
-
-                table2.update({
-                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
-                });
-
-                table2.update({
-                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
-                });
-
-                let result = await view.to_columns();
-                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => minute_bucket(x)));
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
             it("Computed schema returns names and metadata", async function() {
-                const func = (x, y) => x - y;
-                const computation = {
-                    name: "+2",
-                    func: func.toString(),
-                    input_type: "float",
-                    return_type: "float"
-                };
-
                 const table = perspective.table(data);
 
+                // `column` is column name
                 const table2 = table.add_computed([
                     {
-                        computation: computation,
+                        computation: {
+                            computed_function_name: "+",
+                            input_type: "integer",
+                            type: "integer"
+                        },
+                        computed_function_name: "+",
                         column: "plus2",
-                        type: "integer",
-                        inputs: ["x"],
+                        inputs: ["x", "x"],
                         input_type: "integer",
-                        func: func
+                        type: "integer"
                     }
                 ]);
 
                 const result = await table2.computed_schema();
                 const expected = {
                     plus2: {
-                        input_columns: ["x"],
+                        computation: {
+                            computed_function_name: "+",
+                            input_type: "integer",
+                            type: "integer"
+                        },
+                        input_columns: ["x", "x"],
                         input_type: "integer",
-                        computation: computation,
                         type: "integer"
                     }
                 };
@@ -3005,46 +2888,6 @@ module.exports = perspective => {
                 let result = await view.to_columns();
 
                 expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? year_bucket(x) : null)));
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-        });
-
-        describe("constructors", function() {
-            it("Computed column of arity 0", async function() {
-                var table = perspective.table(data);
-
-                let table2 = table.add_computed([
-                    {
-                        column: "const",
-                        type: "integer",
-                        func: () => 1,
-                        inputs: []
-                    }
-                ]);
-                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
-                let result = await view.to_json();
-                expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
-            it("Computed column of arity 1", async function() {
-                var table = perspective.table(data);
-
-                let table2 = table.add_computed([
-                    {
-                        column: "const",
-                        type: "string",
-                        func: x => x + "123",
-                        inputs: ["y"]
-                    }
-                ]);
-                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
-                let result = await view.to_json();
-                expect(result).toEqual([{const: "a123"}, {const: "b123"}, {const: "c123"}, {const: "d123"}]);
                 view.delete();
                 table2.delete();
                 table.delete();

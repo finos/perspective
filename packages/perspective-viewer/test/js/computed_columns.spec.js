@@ -197,7 +197,7 @@ utils.with_server({}, () => {
             test.capture("adds computed column via attribute", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await page.evaluate(element => element.setAttribute("computed-columns", '[{"name":"test","func":"month_bucket","inputs":["Order Date"]}]'), viewer);
+                await page.evaluate(element => element.setAttribute("computed-columns", '[{"name":"test","computed_function_name":"month_bucket","inputs":["Order Date"]}]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", '["Quantity", "test"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
@@ -232,7 +232,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => {
                     element.restore({
                         aggregates: {Computed: "mean"},
-                        "computed-columns": [{name: "Computed", inputs: ["Sales", "Profit"], func: "add"}],
+                        "computed-columns": [{name: "Computed", inputs: ["Sales", "Profit"], computed_function_name: "add"}],
                         columns: ["Computed", "Quantity"],
                         "row-pivots": ["Category"]
                     });

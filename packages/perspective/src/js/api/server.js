@@ -102,11 +102,6 @@ export class Server {
             case "add_computed":
                 let table = this._tables[msg.original];
                 let computed = msg.computed;
-                // rehydrate computed column functions
-                for (let i = 0; i < computed.length; ++i) {
-                    let column = computed[i];
-                    eval("column.func = " + column.func);
-                }
                 this._tables[msg.name] = table.add_computed(computed);
                 break;
             case "table_generate":

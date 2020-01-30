@@ -944,56 +944,23 @@ namespace binding {
             computed_def["column"].as<std::string>();
         t_val type = computed_def["type"];
 
-        if (has_value(computed_def["computed_function_name"])) {
-            t_computed_function_name method_name = 
-                computed_def["computed_function_name"].as<t_computed_function_name>();
-            std::vector<t_dtype> input_types;
-            std::vector<std::shared_ptr<t_column>> table_columns;
-            std::vector<std::shared_ptr<t_column>> flattened_columns;
-            for (const auto& column_name : input_column_names) {
-                auto table_column = table->get_column(column_name);
-                table_columns.push_back(table_column);
-                input_types.push_back(table_column->get_dtype());
-                flattened_columns.push_back(
-                    flattened->get_column(column_name));
-            }
-
-            // This uses the `t_computed_function` enum, not string name
-            t_computation computation = t_computed_column::get_computation(
-                method_name, input_types);
-            t_dtype output_column_type = computation.m_return_type;
-
-            std::shared_ptr<t_column> output_column = 
-                flattened->add_column_sptr(
-                    output_column_name, output_column_type, true);
-
-            t_computed_column::apply_computation(
-                table_columns,
-                flattened_columns,
-                output_column,
-                row_indices,
-                computation);
-            return;
-        }
-        
-        // original path
-        t_val computed_func = computed_def["func"];
-        std::string typestring;
-
-        if (type.isUndefined()) {
-            typestring = "string";
-        } else {
-            typestring = type.as<std::string>();
-        }
-
-        t_dtype output_column_dtype = str_to_dtype(typestring);
-
+        t_computed_function_name method_name =
+            computed_def["computed_function_name"].as<t_computed_function_name>();
+        std::vector<t_dtype> input_types;
         std::vector<std::shared_ptr<t_column>> table_columns;
         std::vector<std::shared_ptr<t_column>> flattened_columns;
         for (const auto& column_name : input_column_names) {
-            table_columns.push_back(table->get_column(column_name));
-            flattened_columns.push_back(flattened->get_column(column_name));
+            auto table_column = table->get_column(column_name);
+            table_columns.push_back(table_column);
+            input_types.push_back(table_column->get_dtype());
+            flattened_columns.push_back(
+                flattened->get_column(column_name));
         }
+
+        // This uses the `t_computed_function` enum, not string name
+        t_computation computation = t_computed_column::get_computation(
+            method_name, input_types);
+        t_dtype output_column_type = computation.m_return_type;
 
         // don't double create output column
         auto schema = flattened->get_schema();
@@ -1001,76 +968,18 @@ namespace binding {
         if (schema.has_column(output_column_name)) {
             output_column = flattened->get_column(output_column_name);
         } else {
-            output_column = flattened->add_column_sptr(output_column_name, output_column_dtype, true);
+            output_column = flattened->add_column_sptr(
+                output_column_name, output_column_type, true);
+            output_column->reserve(table_columns[0]->size());
         }
 
-        t_val i1 = t_val::undefined(), i2 = t_val::undefined(), i3 = t_val::undefined(),
-                i4 = t_val::undefined();
-
-        auto arity = table_columns.size();
-        for (t_uindex idx = 0; idx < end; ++idx) {
-            // iterate through row indices OR through all rows
-            t_uindex ridx = idx;
-            if (row_indices.size() > 0) {
-                // if (!row_indices[idx].m_exists) {
-                //     continue;
-                // }
-                ridx = row_indices[idx].m_idx;
-            }
-            t_val value = t_val::undefined();
-
-            // create args
-            std::vector<t_val> args;
-            for (t_uindex x = 0; x < arity; ++x) {
-                t_tscalar t = flattened_columns[x]->get_scalar(idx);
-                if (t.m_status != STATUS_VALID) {
-                    t = table_columns[x]->get_scalar(ridx);
-                    if (t.m_status != STATUS_VALID) {
-                        break;
-                    }
-                }
-                t_val i = scalar_to_val(t);
-                if (!i.isNull()) {
-                    args.push_back(i);
-                }
-            }
-
-            if (args.size() != arity) {
-                continue;
-            }
-
-            switch (arity) {
-                case 0: {
-                    value = computed_func();
-                    break;
-                }
-                case 1: {
-                    value = computed_func(args[0]);
-                    break;
-                }
-                case 2: {
-                    value = computed_func(args[0], args[1]);
-                    break;
-                }
-                case 3: {
-                    value = computed_func(args[0], args[1], args[2]);
-                    break;
-                }
-                case 4: {
-                    value = computed_func(args[0], args[1], args[2], args[3]);
-                    break;
-                }
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Too many arguments");
-                    // Don't handle other arity values
-                    break;
-                }
-            }
-
-            if (!value.isUndefined()) {
-                set_column_nth(output_column, idx, value);
-            }
-        }
+        t_computed_column::apply_computation(
+            table_columns,
+            flattened_columns,
+            output_column,
+            row_indices,
+            computation);
+        return;
     }
 
     template <>
