@@ -18,6 +18,10 @@ import style from "../less/computed_column.less";
 import {dragleave} from "./viewer/dragdrop.js";
 import {html, render} from "lit-html";
 
+/**
+ * Metadata for computed functions, used by the UI and when the
+ * `computed-column` attribute is set manually.
+ */
 export const COMPUTATIONS = {
     hour_of_day: new Computation("Hour of Day", x => `hour_of_day(${x})`, "datetime", "integer", ["Time"]),
     day_of_week: new Computation("Day of Week", x => `day_of_week(${x})`, "datetime", "string", ["Time"]),
