@@ -22,49 +22,6 @@
 namespace perspective {
 
 /**
- * @brief The name for a single computed method. Names should be defined here,
- * and are unique for each method.
- */
-enum t_computed_function_name {
-    INVALID_COMPUTATION_METHOD,
-    ADD,
-    SUBTRACT,
-    MULTIPLY,
-    DIVIDE,
-    INVERT,
-    POW,
-    SQRT,
-    ABS,
-    PERCENT_A_OF_B,
-    EQUALS,
-    NOT_EQUALS,
-    GREATER_THAN,
-    LESS_THAN,
-    UPPERCASE,
-    LOWERCASE,
-    LENGTH,
-    IS,
-    CONCAT_SPACE,
-    CONCAT_COMMA,
-    BUCKET_10,
-    BUCKET_100,
-    BUCKET_1000,
-    BUCKET_0_1,
-    BUCKET_0_0_1,
-    BUCKET_0_0_0_1,
-    HOUR_OF_DAY,
-    DAY_OF_WEEK,
-    MONTH_OF_YEAR,
-    SECOND_BUCKET,
-    MINUTE_BUCKET,
-    HOUR_BUCKET,
-    DAY_BUCKET,
-    WEEK_BUCKET,
-    MONTH_BUCKET,
-    YEAR_BUCKET
-};
-
-/**
  * @brief Stores metadata for a single computation method.
  * 
  */
@@ -155,6 +112,8 @@ public:
     static void make_computations();
 
     static std::vector<t_computation> computations;
+
+    static std::map<std::string, std::map<std::string, std::string>> computed_functions;
 };
 
 } // end namespace perspective

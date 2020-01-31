@@ -944,8 +944,9 @@ namespace binding {
             computed_def["column"].as<std::string>();
         t_val type = computed_def["type"];
 
-        t_computed_function_name method_name =
-            computed_def["computed_function_name"].as<t_computed_function_name>();
+        t_computed_function_name method_name = str_to_computed_function_name(
+            computed_def["computed_function_name"].as<std::string>());
+
         std::vector<t_dtype> input_types;
         std::vector<std::shared_ptr<t_column>> table_columns;
         std::vector<std::shared_ptr<t_column>> flattened_columns;
@@ -994,6 +995,11 @@ namespace binding {
             );
         }
         return converted; 
+    }
+
+    std::map<std::string, std::map<std::string, std::string>>
+    get_computed_functions() {
+        return t_computed_column::computed_functions;
     }
 
     /******************************************************************************
@@ -1853,7 +1859,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
      *
      * map
      */
-    register_map<std::string, std::string>("std::map<std::string, std::string>");
+    register_map<std::string, std::string>(
+        "std::map<std::string, std::string>");
+    register_map<std::string, std::map<std::string, std::string>>(
+        "std::map<std::string, std::map<std::string, std::string>>");
 
     /******************************************************************************
      *
@@ -1899,7 +1908,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * t_computed_function_name
      */
     enum_<t_computed_function_name>("t_computed_function_name")
-        .value("INVALID_COMPUTATION_METHOD", INVALID_COMPUTATION_METHOD)
+        .value("INVALID_COMPUTED_FUNCTION", INVALID_COMPUTED_FUNCTION)
         .value("ADD", ADD)
         .value("SUBTRACT", SUBTRACT)
         .value("MULTIPLY", MULTIPLY)
@@ -1968,4 +1977,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_row_delta_one", &get_row_delta<t_ctx1>);
     function("get_row_delta_two", &get_row_delta<t_ctx2>);
     function("scalar_to_val", &scalar_to_val);
+    function("get_computed_functions", &get_computed_functions);
 }

@@ -106,7 +106,7 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         default: break;
     }
 
-    PSP_COMPLAIN_AND_ABORT("Invalid computation function");
+    PSP_COMPLAIN_AND_ABORT("Invalid computed function");
 }
 
 #define GET_COMPUTED_FUNCTION_2(DTYPE)                                         \
@@ -165,7 +165,7 @@ t_computed_column::get_computed_function_2(t_computation computation) {
         default: break;
     }
 
-    PSP_COMPLAIN_AND_ABORT("Could not find computation function for arity 2.");
+    PSP_COMPLAIN_AND_ABORT("Could not find computed function for arity 2.");
 }
 
 std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column> output_column)>
@@ -188,7 +188,7 @@ t_computed_column::get_computed_function_string_1(t_computation computation) {
             }
         } break;
         default: PSP_COMPLAIN_AND_ABORT(
-            "Could not find computation function for arity 1, string.");
+            "Could not find computed function for arity 1, string.");
     }
 }
 
@@ -198,7 +198,7 @@ t_computed_column::get_computed_function_string_2(t_computation computation) {
         case CONCAT_SPACE: return computed_function::concat_space;
         case CONCAT_COMMA: return computed_function::concat_comma;
         default: PSP_COMPLAIN_AND_ABORT(
-            "Could not find computation function for arity 2, string.");
+            "Could not find computed function for arity 2, string.");
     }
 }
 
@@ -462,5 +462,219 @@ void t_computed_column::make_computations() {
         t_computation{HOUR_OF_DAY, std::vector<t_dtype>{DTYPE_TIME}, DTYPE_INT64}
     );    
 }
+
+std::map<std::string, std::map<std::string, std::string>>
+t_computed_column::computed_functions = {
+    {"add", {
+        {"computed_function_name", "+"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} + ${y})`"}
+    }},
+    {"subtract", {
+        {"computed_function_name", "-"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} - ${y})`"}
+    }},
+    {"multiply", {
+        {"computed_function_name", "*"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} * ${y})`"}
+    }},
+    {"divide", {
+        {"computed_function_name", "/"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} / ${y})`"}
+    }},
+    {"invert", {
+        {"computed_function_name", "1/x"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `(1 / ${x})`"}
+    }},
+    {"pow", {
+        {"computed_function_name", "x^2"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `(${x} ^ 2)`"}
+    }},
+    {"sqrt", {
+        {"computed_function_name", "sqrt"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `sqrt(${x})`"}
+    }},
+    {"abs", {
+        {"computed_function_name", "abs"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `abs(${x})`"}
+    }},
+    {"percent_a_of_b", {
+        {"computed_function_name", "%"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `(x, y) => `(${x} % ${y})`"}
+    }},
+    {"10_bucket", {
+        {"computed_function_name", "Bucket (10)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin10(${x})`"}
+    }},
+    {"100_bucket", {
+        {"computed_function_name", "Bucket (100)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin100(${x})`"}
+    }},
+    {"1000_bucket", {
+        {"computed_function_name", "Bucket (1000)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin1000(${x})`"}
+    }},
+    {"0.1_bucket", {
+        {"computed_function_name", "Bucket (1/10)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin10th(${x})`"}
+    }},
+    {"0.01_bucket", {
+        {"computed_function_name", "Bucket (1/100)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin100th(${x})`"}
+    }},
+    {"0.001_bucket", {
+        {"computed_function_name", "Bucket (1/1000)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin1000th(${x})`"}
+    }},
+    {"length", {
+        {"computed_function_name", "length"},
+        {"input_type", "string"},
+        {"return_type", "integer"},
+        {"group", "Text"},
+        {"format_function", "x => `length(${x})`"}
+    }},
+    {"uppercase", {
+        {"computed_function_name", "Uppercase"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `uppercase(${x})`"}
+    }},
+    {"lowercase", {
+        {"computed_function_name", "Lowercase"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `lowercase(${x})`"}
+    }},
+    {"concat_space", {
+        {"computed_function_name", "concat_space"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `concat_space(${x})`"}
+    }},
+    {"concat_comma", {
+        {"computed_function_name", "concat_comma"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `concat_comma(${x})`"}
+    }},
+    {"hour_of_day", {
+        {"computed_function_name", "Hour of Day"},
+        {"input_type", "datetime"},
+        {"return_type", "integer"},
+        {"group", "Time"},
+        {"format_function", "x => `hour_of_day(${x})`"}
+    }},
+    {"day_of_week", {
+        {"computed_function_name", "Day of Week"},
+        {"input_type", "datetime"},
+        {"return_type", "string"},
+        {"group", "Time"},
+        {"format_function", "x => `day_of_week(${x})`"}
+    }},
+    {"month_of_year", {
+        {"computed_function_name", "Month of Year"},
+        {"input_type", "datetime"},
+        {"return_type", "string"},
+        {"group", "Time"},
+        {"format_function", "x => `month_of_year(${x})`"}
+    }},
+    {"second_bucket", {
+        {"computed_function_name", "Bucket (s)"},
+        {"input_type", "datetime"},
+        {"return_type", "datetime"},
+        {"group", "Time"},
+        {"format_function", "x => `second_bucket(${x})`"}
+    }},
+    {"minute_bucket", {
+        {"computed_function_name", "Bucket (m)"},
+        {"input_type", "datetime"},
+        {"return_type", "datetime"},
+        {"group", "Time"},
+        {"format_function", "x => `minute_bucket(${x})`"}
+    }},
+    {"hour_bucket", {
+        {"computed_function_name", "Bucket (h)"},
+        {"input_type", "datetime"},
+        {"return_type", "datetime"},
+        {"group", "Time"},
+        {"format_function", "x => `hour_bucket(${x})`"}
+    }},
+    {"day_bucket", {
+        {"computed_function_name", "Bucket (D)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `day_bucket(${x})`"}
+    }},
+    {"week_bucket", {
+        {"computed_function_name", "Bucket (W)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `week_bucket(${x})`"}
+    }},
+    {"month_bucket", {
+        {"computed_function_name", "Bucket (M)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `month_bucket(${x})`"}
+    }},
+    {"year_bucket", {
+        {"computed_function_name", "Bucket (Y)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `year_bucket(${x})`"}
+    }}
+};
 
 } // end namespace perspective

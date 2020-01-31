@@ -175,15 +175,33 @@ namespace binding {
     void add_computed_column(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices, T computed_def);
 
     /**
-     * @brief Given a list of computed column declarations in the binding language, convert them to C++ lambdas that allow
-     * access from deeper inside the engine without importing the semantics of t_val. 
+     * @brief Given a list of computed column declarations in the binding 
+     * language, convert them to C++ lambdas that allow access from deeper 
+     * inside the engine without importing the semantics of t_val. 
      * 
      * @tparam T 
      * @param computed 
      * @return std::vector<t_computed_column_lambda> 
      */
     template <typename T>
-    std::vector<t_computed_column_lambda> make_computed_lambdas(std::vector<T> computed);
+    std::vector<t_computed_column_lambda>
+    make_computed_lambdas(std::vector<T> computed);
+
+    /**
+     * @brief Return a map of computed function metadata for use in the binding
+     * language. Keys are strings that map to maps containing strings of
+     * the following metadata:
+     * 
+     * - computed_function_name: the name of the computed function
+     * - input_type: the type of its input columns (all input columns are of
+     * the same type)
+     * - return_type: the return type of its output column
+     * - group: a category for the function
+     * 
+     * @return std::map<std::string, std::map<std::string, std::string>> 
+     */
+    std::map<std::string, std::map<std::string, std::string>>
+    get_computed_functions();
 
     /**
      * @brief Utility function for accessing columns and adding data.
