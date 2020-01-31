@@ -16,6 +16,7 @@ import {createCommands} from "./commands";
 
 import {PerspectiveViewerWidget} from "./widget";
 import uniqBy from "lodash/uniqBy";
+import debounce from "lodash/debounce";
 import cloneDeep from "lodash/cloneDeep";
 import {DiscreteSplitPanel} from "./discrete";
 
@@ -38,6 +39,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.detailPanel.addWidget(this.dockpanel);
         this.masterPanel = new DiscreteSplitPanel({orientation: "vertical"});
         this.masterPanel.addClass("p-MasterPanel");
+
+        this.dockpanel.layoutModified.connect(() => this.workspaceUpdated());
+        this.masterPanel.layoutModified.connect(() => this.workspaceUpdated());
+        this.layoutModified.connect(() => this.workspaceUpdated());
 
         this.addWidget(this.detailPanel);
 
@@ -343,6 +348,22 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
      * Widget helper methods
      */
 
+    addViewer(config) {
+        const widget = this._createWidget(config);
+        if (config.master) {
+            if (!this.masterPanel.isAttached) {
+                this.setupMasterPanel(DEFAULT_WORKSPACE_SIZE);
+            }
+            this.masterPanel.addWidget(widget);
+        } else {
+            if (!this.detailPanel.isAttached) {
+                this.addWidget(this.detailPanel);
+            }
+            this.dockpanel.addWidget(widget, {mode: "split-right"});
+        }
+        this.update();
+    }
+
     _createWidget({title, table, config}) {
         const widget = new PerspectiveViewerWidget({title, table});
         widget.title.closable = true;
@@ -360,16 +381,43 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             widget.title.className = event.detail && "settings_open";
         };
         const contextMenu = event => this.showContextMenu(widget, event);
+        const updated = () => this.workspaceUpdated();
+
         widget.viewer.addEventListener("contextmenu", contextMenu);
         widget.viewer.addEventListener("perspective-toggle-settings", settings);
+        widget.viewer.addEventListener("perspective-config-update", updated);
+        widget.title.changed.connect(updated);
 
         this.listeners.set(widget, () => {
             widget.viewer.removeEventListener("contextmenu", contextMenu);
             widget.viewer.removeEventListener("perspective-toggle-settings", settings);
+            widget.viewer.removeEventListener("perspective-config-update", updated);
+            widget.title.changed.disconnect(updated);
         });
     }
 
     getAllWidgets() {
         return [...this.masterPanel.widgets, ...toArray(this.dockpanel.widgets())];
+    }
+
+    /*********************************************************************
+     * Workspace updated event
+     */
+    _fireUpdateEvent() {
+        const layout = this.save();
+        if (layout) {
+            const tables = {};
+            this.tables.forEach((value, key) => {
+                tables[key] = value;
+            });
+            this.element.dispatchEvent(new CustomEvent("workspace-layout-update", {detail: {tables, layout}}));
+        }
+    }
+
+    workspaceUpdated() {
+        if (!this._save) {
+            this._save = debounce(() => this.dockpanel.mode !== "single-document" && this._fireUpdateEvent(), 500);
+        }
+        this._save();
     }
 }

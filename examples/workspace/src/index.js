@@ -47,6 +47,7 @@ window.addEventListener("load", async () => {
         }
     };
 
+    workspace.addEventListener("workspace-layout-update", console.log);
     workspace.restore(config);
     window.workspace = workspace;
 });
