@@ -31,8 +31,8 @@ window.addEventListener("load", async () => {
     const config = {
         master: {
             widgets: [
-                {table: "superstore", name: "Three", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
-                {table: "superstore", name: "Four", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
+                {table: "superstore", title: "Three", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
+                {table: "superstore", title: "Four", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
             ]
         },
         detail: {
@@ -40,8 +40,8 @@ window.addEventListener("load", async () => {
                 currentIndex: 0,
                 type: "tab-area",
                 widgets: [
-                    {table: "superstore", name: "One"},
-                    {table: "superstore", name: "Two"}
+                    {table: "superstore", title: "One"},
+                    {table: "superstore", title: "Two"}
                 ]
             }
         }

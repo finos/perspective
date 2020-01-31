@@ -32,7 +32,7 @@ utils.with_server({paths: PATHS}, () => {
                             main: {
                                 currentIndex: 0,
                                 type: "tab-area",
-                                widgets: [{id: "viewer", table: "superstore", name: "One"}]
+                                widgets: [{id: "viewer", table: "superstore", title: "One"}]
                             }
                         }
                     };
@@ -53,7 +53,7 @@ utils.with_server({paths: PATHS}, () => {
                 async page => {
                     const config = {
                         master: {
-                            widgets: [{table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}]
+                            widgets: [{table: "superstore", title: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}]
                         }
                     };
 
@@ -73,13 +73,13 @@ utils.with_server({paths: PATHS}, () => {
                 async page => {
                     const config = {
                         master: {
-                            widgets: [{table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}]
+                            widgets: [{table: "superstore", title: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}]
                         },
                         detail: {
                             main: {
                                 currentIndex: 0,
                                 type: "tab-area",
-                                widgets: [{id: "viewer", table: "superstore", name: "One"}]
+                                widgets: [{id: "viewer", table: "superstore", title: "One"}]
                             }
                         }
                     };

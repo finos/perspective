@@ -13,41 +13,39 @@ import {Widget} from "@phosphor/widgets";
 let ID_COUNTER = 0;
 
 export class PerspectiveViewerWidget extends Widget {
-    constructor({title, table}) {
+    constructor() {
         const {viewer, node} = createNode();
         super({node});
         this.viewer = viewer;
-        this.table = table;
-
-        this.title.label = title;
-        this._loaded = false;
+        this.master = false;
     }
 
     set master(value) {
-        if (value) {
-            this.viewer.classList.add("p-Master");
-            this.viewer.classList.remove("p-Detail");
-            this.viewer.selectable = true;
-        } else {
-            this.viewer.classList.add("p-Detail");
-            this.viewer.classList.remove("p-Master");
-            this.viewer.selectable = null;
+        if (value !== undefined && this._master !== value) {
+            if (value) {
+                this.viewer.classList.add("workspace-master-widget");
+                this.viewer.classList.remove("workspace-detail-widget");
+                this.viewer.selectable = true;
+            } else {
+                this.viewer.classList.add("workspace-detail-widget");
+                this.viewer.classList.remove("workspace-master-widget");
+                this.viewer.selectable = null;
+            }
+            this._master = value;
         }
-        this._master = value;
     }
 
     get master() {
         return this._master;
     }
 
-    set table(value) {
+    async loadTable(value) {
         if (value) {
-            if (this._loaded) {
-                this.viewer.replace(value);
-            } else {
-                this.viewer.load(value);
+            try {
+                await this.viewer.load(value);
+            } catch {
+                this.viewer.reset();
             }
-            this._loaded = true;
         }
     }
 
@@ -60,8 +58,13 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     restore(config) {
-        const {master, table, ...viewerConfig} = config;
-        this.tableName = table;
+        const {master, table, title, ...viewerConfig} = config;
+        if (table !== undefined) {
+            this.tableName = table;
+        }
+        if (title !== undefined) {
+            this.title.label = title;
+        }
         this.master = master;
         this.viewer.restore({...viewerConfig});
     }
@@ -69,15 +72,10 @@ export class PerspectiveViewerWidget extends Widget {
     save() {
         return {
             ...this.viewer.save(),
-            name: this.title.label,
+            title: this.title.label,
             master: this.master,
             table: this.tableName
         };
-    }
-
-    addClass(name) {
-        super.addClass(name);
-        this.viewer && this.viewer.classList.add(name);
     }
 
     removeClass(name) {
@@ -104,13 +102,16 @@ export class PerspectiveViewerWidget extends Widget {
 }
 
 const createNode = () => {
+    const div = document.createElement("div");
     const slot = document.createElement("slot");
     const name = `AUTO_ID_${ID_COUNTER++}`;
     slot.setAttribute("name", name);
+    div.classList.add("viewer-container");
+    div.appendChild(slot);
 
     const node = document.createElement("div");
-    node.classList.add("p-Widget");
-    node.appendChild(slot);
+    node.classList.add("workspace-widget");
+    node.appendChild(div);
 
     const viewer = document.createElement("perspective-viewer");
     viewer.setAttribute("slot", name);

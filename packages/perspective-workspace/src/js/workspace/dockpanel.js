@@ -30,11 +30,11 @@ export class PerspectiveDockPanel extends DiscreteDockPanel {
         super._onTabDetachRequested(sender, args);
         // blur widget on when it's being moved
         const widget = sender.titles[0].owner;
-        widget.addClass("p-Blur");
+        widget.addClass("widget-blur");
 
         if (this._drag) {
             this._drag._promise.then(() => {
-                widget.removeClass("p-Blur");
+                widget.removeClass("widget-blur");
             });
         }
     }
