@@ -77,6 +77,6 @@ utils.with_server({}, () => {
                 });
             });
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..")}
+        {reload_page: true, root: path.join(__dirname, "..", "..")}
     );
 });
