@@ -13,13 +13,19 @@ function calc_index(event) {
     if (this._active_columns.children.length == 0) {
         return 0;
     } else {
+        let is_last_null = false;
         for (let cidx in this._active_columns.children) {
             let child = this._active_columns.children[cidx];
+            is_last_null = is_last_null || child?.classList?.contains("null-column");
             if (child.offsetTop + child.offsetHeight > event.offsetY + this._active_columns.scrollTop) {
                 return parseInt(cidx);
             }
         }
-        return this._active_columns.children.length;
+        let last_index = this._active_columns.children.length;
+        if (is_last_null) {
+            last_index--;
+        }
+        return last_index;
     }
 }
 
