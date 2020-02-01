@@ -12,11 +12,9 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 ### Dependencies
 
-You need to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
+*PyArrow 0.15.1* is a required dependency for Perspective. Install it first:
 
-On MacOS:
-
-`brew install tbb`
+`pip install pyarrow==0.15.1`
 
 ### Installation
 
@@ -24,23 +22,18 @@ To install the base package from pip:
 
 `pip install perspective-python`
 
-To Install from source:
-
-`make install`
-
 To install the JupyterLab extension:
 
 `jupyter labextension install @finos/perspective-jupyterlab`
 
-or from source:
-
-`make labextension`
-
 ## Getting Started
 
-[Example Notebooks](https://github.com/finos/perspective/tree/master/python/perspective/examples)
+[Python User Guide](https://perspective.finos.org/docs/md/python.html)
+[Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
+[Examples](https://github.com/finos/perspective/tree/master/python/perspective/examples)
 
 ## Developing
+
 To build `perspective-python` from source, you'll need the following C++ dependencies:
 
 - Python 3.7

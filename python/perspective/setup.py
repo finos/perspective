@@ -207,6 +207,7 @@ setup(
     version=version,
     description='Python bindings and JupyterLab integration for Perspective',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/finos/perspective',
     author='Perspective Authors',
     author_email='open_source@jpmorgan.com',
