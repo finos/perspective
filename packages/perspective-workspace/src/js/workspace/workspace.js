@@ -287,12 +287,26 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         tabbar && tabbar.node.classList.add("p-ContextFocus");
         this.element.classList.add("p-ContextMenu");
         this.addClass("p-ContextMenu");
+        if (widget.viewer.classList.contains("p-Master")) {
+            menu.node.classList.add("p-Master");
+        } else {
+            menu.node.classList.remove("p-Master");
+        }
+        this._menu_opened = true;
 
         menu.aboutToClose.connect(() => {
             widget.removeClass("p-ContextFocus");
             tabbar && tabbar.node.classList.remove("p-ContextFocus");
-            this.element.classList.remove("p-ContextMenu");
-            this.removeClass("p-ContextMenu");
+
+            // Delay to absorb opacity "bounce" due to animation technically
+            // being reset, when right click is made twice in succession.
+            this._menu_opened = false;
+            setTimeout(() => {
+                if (!this._menu_opened) {
+                    this.element.classList.remove("p-ContextMenu");
+                    this.removeClass("p-ContextMenu");
+                }
+            });
         });
 
         menu.open(event.clientX, event.clientY);

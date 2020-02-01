@@ -35,18 +35,20 @@
     pointer-events: all;
 }
 
-
-
 .p-mod-current {
     .p-TabBar-tabConfigIcon, .p-TabBar-tabCloseIcon {
-        color: #999;
+        color: #CCC;
+        transition: color 0.2s ease-out;
+    }
+    .p-TabBar-tabConfigIcon:hover, .p-TabBar-tabCloseIcon:hover {
+        color: #1a7da1;
+        transition: color 0.2s ease-out;
     }
 }
 
 .p-BoxPanel {
     overflow: scroll !important;
 }
-
 
 .p-TabBar,
 .p-TabBar-tab {
@@ -70,11 +72,11 @@
 
 
 .divider {
-    left: 12px;
+    left: 14px;
     bottom: 0;
     position: absolute;
     // background: #ccc;
-    right: 12px;
+    right: 14px;
     display: none;
     transition: background-color 0.2s ease-out, width 0.2s ease-out;
 
@@ -181,8 +183,8 @@
         height: 1px;
         background-color: @blue800;
         margin-bottom: 0px;
-        left: 18px;
-        right: 18px;
+        left: 10px;
+        right: 10px;
     }
     &:last-child:first-child .divider {
        background: none;
@@ -225,6 +227,10 @@
 }
 
 .p-TabBar-content > .p-TabBar-tab {
+    color: #CCC;
+}
+
+.p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
     color: #666;
 }
 
@@ -234,11 +240,6 @@
 
  .p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: #666;
-}
-
- .p-TabBar-content > .p-TabBar-tab:hover {
-    color: #666;
-    transition: none;
 }
 
  .p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
@@ -294,12 +295,12 @@
     background-color: #ccc;
 }
 
-
 .p-PerspectiveWorkspace.p-ContextMenu * .p-TabBar.p-ContextFocus{
-    opacity: 1
+    opacity: 1;
 }
 
-.p-PerspectiveWorkspace.p-ContextMenu  * .p-TabBar{
-    opacity: 0.2
+.p-PerspectiveWorkspace.p-ContextMenu  * .p-TabBar {
+    opacity: 0.2;
+    transition: opacity 0.2s ease-out;
 }
 
