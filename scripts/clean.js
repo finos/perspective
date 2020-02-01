@@ -15,8 +15,14 @@ const args = process.argv.slice(2);
 const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
 function clean_screenshots() {
-    execute`lerna exec --scope="@finos/*" -- mkdirp screenshots`;
-    execute`lerna run clean:screenshots --ignore-missing --scope="@finos/${process.env.PACKAGE}"`;
+    if (args.indexOf("--all") !== -1) {
+        try {
+            execute`lerna exec --scope="@finos/${process.env.PACKAGE}" -- yarn rimraf screenshots`;
+        } catch (e) {}
+    } else {
+        execute`lerna exec --scope="@finos/*" -- mkdirp screenshots`;
+        execute`lerna run clean:screenshots --ignore-missing --scope="@finos/${process.env.PACKAGE}"`;
+    }
 }
 
 try {
