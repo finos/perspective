@@ -46,6 +46,7 @@ exports.with_server = function with_server({paths}, body) {
 };
 
 let results;
+const seen_results = new Set();
 
 const new_results = {};
 
@@ -179,10 +180,7 @@ function mkdirSyncRec(targetDir) {
 describe.page = (url, body, {reload_page = true, name, root} = {}) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
-    const dir_name = path.join(test_root, "screenshots", RESULTS_TAGNAME, _url.replace(".html", ""));
-    if (!fs.existsSync(dir_name)) {
-        mkdirSyncRec(dir_name);
-    }
+
     describe(name ? name : _url, () => {
         let old = page_url;
         let old_reload = page_reload;
@@ -243,7 +241,7 @@ expect.extend({
 test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true} = {}) {
     const _url = page_url;
     const _reload_page = page_reload;
-    test(
+    const spec = test(
         name,
         async () => {
             errors = [];
@@ -255,6 +253,15 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 });
 
             const iterations = process.env.PSP_SATURATE ? 10 : 1;
+
+            const test_name = `${name.replace(/[ \.']/g, "_")}`;
+            const path_name = `${spec.result.fullName.replace(".html", "").replace(/[ \.']/g, "_")}`;
+            let dir_name = path.join(test_root, "screenshots", RESULTS_TAGNAME, path_name);
+            dir_name = dir_name.slice(0, dir_name.length - test_name.length - 1);
+            const filename = path.join(dir_name, test_name);
+            if (!fs.existsSync(dir_name)) {
+                mkdirSyncRec(dir_name);
+            }
 
             for (let x = 0; x < iterations; x++) {
                 if (_reload_page) {
@@ -313,9 +320,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     .update(screenshot)
                     .digest("hex");
 
-                const filename = path.join(test_root, "screenshots", RESULTS_TAGNAME, `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
-
-                if (hash === results[_url + "/" + name]) {
+                if (hash === results[path_name]) {
                     fs.writeFileSync(filename + ".png", screenshot);
                 } else {
                     fs.writeFileSync(filename + ".failed.png", screenshot);
@@ -329,11 +334,11 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 }
 
                 if (process.env.WRITE_TESTS) {
-                    new_results[_url + "/" + name] = hash;
+                    new_results[path_name] = hash;
                 }
 
                 if (process.env.PSP_PAUSE_ON_FAILURE) {
-                    if (!process.env.WRITE_TESTS && (hash !== results[_url + "/" + name] || errors.length > 0)) {
+                    if (!process.env.WRITE_TESTS && (hash !== results[path_name] || errors.length > 0)) {
                         private_console.error(`Failed ${name}, pausing`);
                         await prompt(`Failed ${name}, pausing.  Press enter to continue ..`);
                     }
@@ -341,8 +346,10 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 if (fail_on_errors) {
                     expect(errors).toNotError();
                 }
-                expect(hash).toBe(results[_url + "/" + name]);
+                expect(hash).toBe(results[path_name]);
+                expect(seen_results.has(path_name)).toBeFalsy();
             }
+            seen_results.add(path_name);
         },
         timeout
     );
