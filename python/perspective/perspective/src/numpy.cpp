@@ -10,11 +10,6 @@
 #include <perspective/python/fill.h>
 #include <perspective/python/numpy.h>
 
-#ifdef WIN32
-#ifndef PERSPECTIVE_EXPORTS
-#endif
-#endif
-
 using namespace perspective;
 
 namespace perspective {
