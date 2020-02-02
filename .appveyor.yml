@@ -11,6 +11,8 @@ configuration:
 platform:
   - x64
 
+stack: python 3.7
+
 environment:
   matrix:
   - arch: Win64
@@ -37,10 +39,10 @@ before_build:
     mklink C:\Python37\python3.7 C:\Python37\python
 
 build_script:
-  - yarn build_python --ci
+  - yarn build_python
 
-# to disable automatic tests
-test: off
+test_script:
+  - yarn test_python
 
 # to disable deployment
 deploy: off
