@@ -21,6 +21,14 @@ const COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"]];
 const ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]];
 const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
 
+const COMPUTED_FUNCS = {
+    "+": (x, y) => x + y,
+    "-": (x, y) => x - y,
+    "*": (x, y) => x * y,
+    "/": (x, y) => x / y
+};
+const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"], type: "float", func: COMPUTED_FUNCS["+"]};
+
 /******************************************************************************
  *
  * Perspective.js Benchmarks
@@ -118,6 +126,29 @@ describe("View", async () => {
                 });
             }
         }
+    }
+});
+
+describe("Computed Column", async () => {
+    // Use a single source table for computed
+    let table;
+
+    afterEach(async () => {
+        await table.delete();
+    });
+
+    for (const name of Object.keys(COMPUTED_FUNCS)) {
+        describe("mixed", async () => {
+            describe("table", () => {
+                table = worker.table(data.arrow.slice());
+                benchmark(`computed: \`${name}\``, async () => {
+                    COMPUTED_CONFIG.computed_function_name = name;
+                    COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
+                    table = table.add_computed([COMPUTED_CONFIG]);
+                    await table.size();
+                });
+            });
+        });
     }
 });
 

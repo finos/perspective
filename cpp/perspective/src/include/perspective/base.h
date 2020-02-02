@@ -470,9 +470,6 @@ PERSPECTIVE_EXPORT t_dtype type_to_dtype<float>();
 template <>
 PERSPECTIVE_EXPORT t_dtype type_to_dtype<bool>();
 
-class t_date;
-class t_time;
-
 template <>
 PERSPECTIVE_EXPORT t_dtype type_to_dtype<t_time>();
 

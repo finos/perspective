@@ -119,7 +119,6 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
                  * Before datetimes are loaded into Perspective, if they are
                  * time zone aware, they must be converted into UTC.
                  */
-                std::cout << "cp: " <<  scalar.to_int64() << std::endl;
                 auto ms = std::chrono::milliseconds(scalar.to_int64());
                 auto time_point = std::chrono::time_point<std::chrono::system_clock>(ms);
                 /**

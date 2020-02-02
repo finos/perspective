@@ -39,6 +39,7 @@ const date32_arrow = load_arrow(path.join(__dirname, "..", "arrow", "date32.arro
 const date64_arrow = load_arrow(path.join(__dirname, "..", "arrow", "date64.arrow"));
 const dict_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict.arrow"));
 const dict_update_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict_update.arrow"));
+const numbers_arrow = load_arrow(path.join(__dirname, "..", "arrow", "number_types.arrow"));
 
 module.exports = {
     chunked_arrow,
@@ -52,5 +53,6 @@ module.exports = {
     date32_arrow,
     date64_arrow,
     dict_arrow,
-    dict_update_arrow
+    dict_update_arrow,
+    numbers_arrow
 };

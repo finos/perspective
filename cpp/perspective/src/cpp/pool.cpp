@@ -103,7 +103,7 @@ t_pool::unregister_gnode(t_uindex idx) {
 }
 
 void
-t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table, const std::vector<t_computed_column_def>& computed_lambdas) {
+t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table, const std::vector<t_computed_column_lambda>& computed_lambdas) {
    {
         std::lock_guard<std::mutex> lg(m_mtx);
         m_data_remaining.store(true);

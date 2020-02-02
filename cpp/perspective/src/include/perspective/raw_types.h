@@ -23,6 +23,9 @@ namespace perspective {
 
 enum t_status : std::uint8_t { STATUS_INVALID, STATUS_VALID, STATUS_CLEAR };
 
+class t_date;
+class t_time;
+
 enum t_dtype {
     DTYPE_NONE,
     DTYPE_INT64,

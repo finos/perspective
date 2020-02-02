@@ -36,10 +36,15 @@ public:
      * @param filter
      * @param sort
      */
-    t_view_config(std::vector<std::string> row_pivots, std::vector<std::string> column_pivots,
-        tsl::ordered_map<std::string, std::vector<std::string>> aggregates, std::vector<std::string> columns,
-        std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
-        std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only);
+    t_view_config(
+        const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& column_pivots,
+        const tsl::ordered_map<std::string, std::vector<std::string>>& aggregates,
+        const std::vector<std::string>& columns,
+        const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
+        const std::vector<std::vector<std::string>>& sort,
+        const std::string& filter_op,
+        bool column_only);
 
     /**
      * @brief Given a `t_schema` specifying the underlying `Table`'s columns, construct the

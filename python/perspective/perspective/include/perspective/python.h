@@ -86,7 +86,7 @@ PYBIND11_MODULE(libbinding, m)
 
     py::class_<View<t_ctx0>, std::shared_ptr<View<t_ctx0>>>(m, "View_ctx0")
         .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
-            t_view_config>())
+            std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctx0>::sides)
         .def("num_rows", &View<t_ctx0>::num_rows)
         .def("num_columns", &View<t_ctx0>::num_columns)
@@ -108,7 +108,7 @@ PYBIND11_MODULE(libbinding, m)
 
     py::class_<View<t_ctx1>, std::shared_ptr<View<t_ctx1>>>(m, "View_ctx1")
         .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>, std::string, std::string,
-            t_view_config>())
+            std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctx1>::sides)
         .def("num_rows", &View<t_ctx1>::num_rows)
         .def("num_columns", &View<t_ctx1>::num_columns)
@@ -133,7 +133,7 @@ PYBIND11_MODULE(libbinding, m)
 
     py::class_<View<t_ctx2>, std::shared_ptr<View<t_ctx2>>>(m, "View_ctx2")
         .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>, std::string, std::string,
-            t_view_config>())
+            std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctx2>::sides)
         .def("num_rows", &View<t_ctx2>::num_rows)
         .def("num_columns", &View<t_ctx2>::num_columns)
@@ -161,7 +161,7 @@ PYBIND11_MODULE(libbinding, m)
      *
      * t_view_config
      */
-    py::class_<t_view_config>(m, "t_view_config")
+    py::class_<t_view_config, std::shared_ptr<t_view_config>>(m, "t_view_config")
         .def(py::init<std::vector<std::string>, std::vector<std::string>,
             tsl::ordered_map<std::string, std::vector<std::string>>, std::vector<std::string>,
             std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>,

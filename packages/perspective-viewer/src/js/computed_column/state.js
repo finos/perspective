@@ -17,7 +17,7 @@ export default class State {
         this.input_columns = [];
         this.swap_target = false;
         this.name_edited = false;
-        this.func_name = "";
+        this.computed_function_name = "";
     }
 
     is_valid() {

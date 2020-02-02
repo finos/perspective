@@ -218,7 +218,7 @@ t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
 }
 
 void
-t_gnode::_send(t_uindex portid, const t_data_table& fragments, const std::vector<t_computed_column_def>& computed_lambdas) { 
+t_gnode::_send(t_uindex portid, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas) { 
     _send(portid, fragments);
     append_computed_lambdas(computed_lambdas);
 }
@@ -358,6 +358,7 @@ t_gnode::_process_table() {
         t_tscalar pkey = pkey_col->get_scalar(idx);
         lkup[idx] = cstate.lookup(pkey);
     }
+
     recompute_columns(get_table_sptr(), flattened, lkup);
 
     if (m_state->mapping_size() == 0) {
@@ -1298,11 +1299,11 @@ t_gnode::recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<
 }
 
 void 
-t_gnode::append_computed_lambdas(std::vector<t_computed_column_def> new_lambdas) {
+t_gnode::append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas) {
     m_computed_lambdas.insert(m_computed_lambdas.end(), new_lambdas.begin(), new_lambdas.end());
 }
 
-std::vector<t_computed_column_def> 
+std::vector<t_computed_column_lambda> 
 t_gnode::get_computed_lambdas() const {
     return m_computed_lambdas;
 }

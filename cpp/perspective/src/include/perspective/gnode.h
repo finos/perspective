@@ -28,7 +28,7 @@
 
 namespace perspective {
 
-typedef std::function<void(std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>, const std::vector<t_rlookup>&)> t_computed_column_def;
+typedef std::function<void(std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>, const std::vector<t_rlookup>&)> t_computed_column_lambda;
 
 PERSPECTIVE_EXPORT t_tscalar calc_delta(
     t_value_transition trans, t_tscalar oval, t_tscalar nval);
@@ -79,7 +79,7 @@ public:
     // send data to input port with at index idx
     // schema should match port schema
     void _send(t_uindex idx, const t_data_table& fragments);
-    void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_def>& computed_lambdas);
+    void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
     void _process_self();
@@ -149,11 +149,11 @@ public:
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
 
-    std::vector<t_computed_column_def> get_computed_lambdas() const;
+    std::vector<t_computed_column_lambda> get_computed_lambdas() const;
 
 protected:
     void recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs);
-    void append_computed_lambdas(std::vector<t_computed_column_def> new_lambdas);
+    void append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas);
 
     bool have_context(const std::string& name) const;
     void notify_contexts(const t_data_table& flattened);
@@ -191,7 +191,7 @@ private:
 
     std::shared_ptr<t_data_table> _process_table();
     
-    std::vector<t_computed_column_def> m_computed_lambdas;
+    std::vector<t_computed_column_lambda> m_computed_lambdas;
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
     t_schema m_tblschema;

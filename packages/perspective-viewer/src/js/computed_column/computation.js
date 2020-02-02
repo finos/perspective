@@ -9,6 +9,8 @@
 
 export const FORMATTER = Symbol("formatter");
 
+// TODO: need to change this to method and method name
+
 export class Computation {
     constructor(name, formatter, input_type, return_type, func, category, num_params = 1) {
         this.category = category;

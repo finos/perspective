@@ -13,17 +13,20 @@
 static perspective::t_uindex GLOBAL_TABLE_ID = 0;
 
 namespace perspective {
-Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
-    std::vector<t_dtype> data_types, std::uint32_t limit,
-    std::string index)
+Table::Table(
+        std::shared_ptr<t_pool> pool,
+        const std::vector<std::string>& column_names,
+        const std::vector<t_dtype>& data_types,
+        std::uint32_t limit,
+        const std::string& index)
     : m_init(false)
     , m_id(GLOBAL_TABLE_ID++)
     , m_pool(pool)
-    , m_column_names(std::move(column_names))
-    , m_data_types(std::move(data_types))
+    , m_column_names(column_names)
+    , m_data_types(data_types)
     , m_offset(0)
     , m_limit(limit)
-    , m_index(std::move(index))
+    , m_index(index)
     , m_gnode_set(false) {
         validate_columns(m_column_names);
     }
@@ -64,7 +67,9 @@ Table::get_schema() const {
 }
 
 void
-Table::add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_def> computed_lambdas) {
+Table::add_computed_columns(
+    std::shared_ptr<t_data_table> data_table,
+    std::vector<t_computed_column_lambda> computed_lambdas) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex prev_gnode_id = m_gnode->get_id();
     

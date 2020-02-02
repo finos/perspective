@@ -95,7 +95,7 @@ export const COMPUTATIONS = {
     month_of_year: new Computation("Month of Year", x => `month_of_year(${x})`, "datetime", "string", month_of_year, ["Time"]),
     second_bucket: new Computation("Bucket (s)", x => `second_bucket(${x})`, "datetime", "datetime", second_bucket, ["Time"]),
     minute_bucket: new Computation("Bucket (m)", x => `minute_bucket(${x})`, "datetime", "datetime", minute_bucket, ["Time"]),
-    hour_bucket: new Computation("Bueckt (h)", x => `hour_bucket(${x})`, "datetime", "datetime", hour_bucket, ["Time"]),
+    hour_bucket: new Computation("Bucket (h)", x => `hour_bucket(${x})`, "datetime", "datetime", hour_bucket, ["Time"]),
     day_bucket: new Computation("Bucket (D)", x => `day_bucket(${x})`, "datetime", "date", day_bucket, ["Time"]),
     week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", week_bucket, ["Time"]),
     month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", month_bucket, ["Time"]),
@@ -474,7 +474,7 @@ class ComputedColumn extends HTMLElement {
 
     // When state changes are made manually, apply them to the UI
     _apply_state(columns, computation, name) {
-        this._update_computation(null, this.state.func_name);
+        this._update_computation(null, this.state.computed_function_name);
         this.state["input_columns"] = columns;
         const inputs = this._input_columns.children;
 
@@ -622,7 +622,7 @@ class ComputedColumn extends HTMLElement {
         this._computation_type.innerHTML = `<span class="${return_type}">${this.type_markers[return_type]}</span>`;
 
         this.state["computation"] = computation;
-        this.state.func_name = computation_name;
+        this.state.computed_function_name = computation_name;
 
         if (reset_inputs || event === null) {
             this._register_inputs();
@@ -670,7 +670,7 @@ class ComputedColumn extends HTMLElement {
                 detail: {
                     name: computed_column.column_name,
                     inputs: computed_column.input_columns.map(x => x.name),
-                    func: computed_column.func_name
+                    func: computed_column.computed_function_name
                 }
             });
             this.dispatchEvent(event);

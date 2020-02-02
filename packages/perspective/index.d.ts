@@ -35,7 +35,6 @@ declare module '@finos/perspective' {
         HIGH = 'high',
         LOW = 'low',
         MEAN = 'mean',
-        MEAN_COUNT = 'mean by count',
         MEDIAN = 'median',
         PCT_SUM_PARENT = 'pct sum parent',
         PCT_SUM_TOTAL = 'pct sum grand total',
@@ -53,7 +52,6 @@ declare module '@finos/perspective' {
         DOMINANT = 'dominant',
         FIRST = 'first',
         LAST = 'last',
-        MEAN_COUNT = 'mean by count',
         UNIQUE = 'unique'
     }
 
@@ -66,7 +64,6 @@ declare module '@finos/perspective' {
         DOMINANT = 'dominant',
         FIRST = 'first',
         LAST = 'last',
-        MEAN_COUNT = 'mean by count',
         OR ='or',
         UNIQUE = 'unique'
     }
