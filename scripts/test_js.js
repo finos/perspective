@@ -106,6 +106,7 @@ try {
                 -- 
                 yarn test:run
                 --silent
+                --noStackTrace
                 ${getarg("--interactive") && "--runInBand"}
                 --testNamePattern="${get_regex()}"`;
         } else {

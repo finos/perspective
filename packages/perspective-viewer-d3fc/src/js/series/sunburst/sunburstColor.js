@@ -11,7 +11,7 @@ import {flattenExtent} from "../../axis/flatten";
 import {seriesColorRange} from "../seriesRange";
 
 export function treeColor(settings, extents) {
-    if (settings.mainValues.length > 1) {
+    if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
         return seriesColorRange(settings, null, null, flattenExtent(extents));
     }
 }

@@ -1,0 +1,46 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+ 
+:host {
+    @import "~@phosphor/widgets/style/index.css";
+    @import "./tabbar.less";
+    @import "./dockpanel.less";
+    @import "./widget.less";
+
+    background-color: var(--workspace--background-color, #eee);
+
+    width: 100%;
+    height: 100%;
+
+    .workspace{
+        width: 100%;
+        height: 100%;
+    }
+    .p-SplitPanel{
+        height: 100%;
+        width: 100%;
+    }
+    
+    div.p-SplitPanel-handle {
+      background-color: var(--master-divider--background-color);
+    }
+
+    .p-MasterPanel {
+        background-color: rgb(47, 49, 54);
+    }
+
+    .p-PerspectiveWorkspace.p-ContextMenu * .p-SplitPanel-handle{
+        opacity: 0.2;
+    }
+
+    .p-PerspectiveWorkspace.p-ContextMenu > .p-SplitPanel-handle{
+        opacity: 0.2;
+    }
+  
+}

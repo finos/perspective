@@ -17,5 +17,5 @@ module.exports = {
         ]
     ],
     sourceType: "unambiguous",
-    plugins: ["lodash", ["@babel/plugin-proposal-decorators", {legacy: true}], "transform-custom-element-classes"]
+    plugins: ["lodash", ["@babel/plugin-proposal-decorators", {legacy: true}], "transform-custom-element-classes", "@babel/plugin-proposal-optional-chaining"]
 };

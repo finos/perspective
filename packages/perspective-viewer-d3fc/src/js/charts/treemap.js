@@ -69,7 +69,8 @@ treemap.plugin = {
     max_columns: 50,
     initial: {
         type: "number",
-        count: 2
+        count: 1,
+        names: ["Size", "Color", "Tooltip"]
     }
 };
 export default treemap;

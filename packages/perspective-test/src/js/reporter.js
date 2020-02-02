@@ -46,15 +46,23 @@ module.exports = class ImageViewerReporter {
     onTestResult(testRunConfig, testResults) {
         for (const test of testResults.testResults) {
             if (test.status === "failed") {
-                const ancestors = test.ancestorTitles.filter(x => x.indexOf(".html") > -1).map(x => x.replace(".html", "").replace(/ /g, "_"));
-                const desc = ancestors.join("/");
-                const name = test.title.replace(/ /g, "_").replace(/[\.']/g, "");
-                const filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.diff.png`;
-                const alt_filename = `screenshots/${desc}/${name}.diff.png`;
-                if (filename) {
-                    this.write_img(test.title, ancestors, filename);
-                } else if (fs.existsSync(alt_filename)) {
-                    this.write_img(test.title, ancestors, alt_filename);
+                const name = test.title.replace(/[ \.']/g, "_");
+                let desc = test.fullName.replace(".html", "").replace(/ /g, "_");
+                desc = desc.slice(0, desc.length - name.length - 1);
+                const candidates = [
+                    `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.diff.png`,
+                    `screenshots/${desc}/${name}.diff.png`,
+                    `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.failed.png`,
+                    `screenshots/${desc}/${name}.failed.png`,
+                    `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.png`,
+                    `screenshots/${desc}/${name}.png`
+                ];
+
+                for (const filename of candidates) {
+                    if (fs.existsSync(filename)) {
+                        this.write_img(test.title, test.ancestorTitles, filename);
+                        break;
+                    }
                 }
             }
         }

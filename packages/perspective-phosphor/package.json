@@ -17,17 +17,12 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build": "npm-run-all build:esm build:cjs build:styles build:umd",
+        "build": "npm-run-all build:esm build:cjs build:umd",
         "build:esm": "tsc --p ./config --outDir dist/esm",
         "build:cjs": "webpack --color --config config/webpack.config.js",
-        "build:styles": "webpack --color --config config/webpack.theme.config.js",
         "build:umd": "webpack --color --config config/webpack.umd.config.js",
         "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
-        "test": "yarn test:run",
-        "test:run": "npm-run-all test:unit test:integration",
-        "test:unit": "jest  --color --silent --config=./config/jest.unit.config.js 2>&1",
-        "test:integration": "jest --color --silent --noStackTrace --config=./config/jest.integration.config.js 2>&1"
+        "test": "echo \"No Tests\""
     },
     "dependencies": {
         "@finos/perspective": "^0.4.1",

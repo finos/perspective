@@ -1,0 +1,38 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@border-color: 1px solid #eaeaea;
+
+.p-Master{
+    --settings-button--content: var(--open-settings-button--content, "\1F527");
+ }
+
+.p-Master[settings] {
+    --settings-button--content: var(--close-settings-button--content, "\1F527");
+}
+ 
+.p-Detail{
+    min-width: 300px;
+    min-height: 200px;
+    --settings-button--content: "";
+ }
+
+.p-DockPanel-widget{
+    border: @border-color;
+    border-width: 0px !important;
+    min-width: 300px;
+    min-height: 200px;
+}
+
+.p-Detail{
+    min-width: 300px;
+    min-height: 200px;
+    --settings-button--content: "";
+    --plugin--border: 1px solid #eaeaea;
+}

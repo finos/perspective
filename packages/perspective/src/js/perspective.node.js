@@ -64,7 +64,8 @@ const DEFAULT_ASSETS = [
     "@finos/perspective-viewer/dist/umd",
     "@finos/perspective-viewer-highcharts/dist/umd",
     "@finos/perspective-viewer-hypergrid/dist/umd",
-    "@finos/perspective-viewer-d3fc/dist/umd"
+    "@finos/perspective-viewer-d3fc/dist/umd",
+    "@finos/perspective-workspace/dist/umd"
 ];
 
 const CONTENT_TYPES = {

@@ -9,12 +9,3 @@
 
 export * from "./widget";
 export * from "./utils";
-export * from "./dockpanel";
-export * from "./workspace";
-
-import {PerspectiveWorkspace} from "./workspace";
-import {PerspectiveDockPanel} from "./dockpanel";
-import {PerspectiveWidget} from "./widget";
-
-// default export for umd build
-export default {PerspectiveWorkspace, PerspectiveDockPanel, PerspectiveWidget};

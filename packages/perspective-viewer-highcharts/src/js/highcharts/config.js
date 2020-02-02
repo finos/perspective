@@ -118,7 +118,7 @@ export function default_config(aggregates, mode) {
         type = "sunburst";
     } else if (mode === "scatter") {
         hover_type = "xy";
-        if (aggregates.length <= 3) {
+        if (aggregates.length <= 3 || aggregates[3] === null) {
             type = "scatter";
         } else {
             type = "bubble";
@@ -142,8 +142,6 @@ export function default_config(aggregates, mode) {
 
     const that = this;
     const config = this._config;
-
-    const axis_titles = get_axis_titles(config.aggregates);
     const pivot_titles = get_pivot_titles(config.row_pivots, config.column_pivots);
 
     const is_empty = str => str.replace(/\s/g, "") == "";
@@ -250,7 +248,7 @@ export function default_config(aggregates, mode) {
                             const end_row = start_row + 1;
                             let column_names = [];
                             if ((type === "bubble" && mode === "scatter") || (type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
-                                column_names = axis_titles;
+                                column_names = aggregates;
                             } else {
                                 const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
                                 const column_name = column_pivot_values[column_pivot_values.length - 1];
@@ -285,7 +283,7 @@ export function default_config(aggregates, mode) {
                 that._view
                     .schema(false)
                     .then(schema => {
-                        let tooltip_text = tooltip.format_tooltip(this, hover_type, schema, axis_titles, pivot_titles);
+                        let tooltip_text = tooltip.format_tooltip(this, hover_type, schema, aggregates, pivot_titles);
                         highcharts_tooltip.label.attr({
                             text: tooltip_text
                         });
@@ -317,10 +315,6 @@ export function default_config(aggregates, mode) {
             }
         }
     };
-}
-
-function get_axis_titles(aggs) {
-    return Object.keys(aggs);
 }
 
 function get_pivot_titles(row_pivots, column_pivots) {

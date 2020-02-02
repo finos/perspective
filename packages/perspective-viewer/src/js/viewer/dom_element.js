@@ -117,8 +117,14 @@ export class DomElement extends PerspectiveElement {
             .filter(x => x.getAttribute("type") === "integer" || x.getAttribute("type") === "float")
             .map(x => x.getAttribute("name"));
         row.set_weights(weights);
-        row.setAttribute("type", type);
-        row.setAttribute("name", name);
+
+        if (name === null) {
+            row.classList.add("null-column");
+        } else {
+            row.setAttribute("type", type);
+            row.setAttribute("name", name);
+        }
+
         row.setAttribute("aggregate", Array.isArray(aggregate) ? JSON.stringify(aggregate) : aggregate);
 
         row.addEventListener("visibility-clicked", this._column_visibility_clicked.bind(this));
@@ -153,17 +159,23 @@ export class DomElement extends PerspectiveElement {
 
     _update_column_view(columns, reset = false) {
         if (!columns) {
-            columns = this._get_view_columns();
+            columns = this._get_view_active_column_names();
+        }
+        if (this._plugin.initial && this._plugin.initial.names) {
+            while (columns.length < this._plugin.initial.names.length) {
+                columns.push(null);
+            }
         }
         this.setAttribute("columns", JSON.stringify(columns));
+        const pop_cols = columns.filter(x => typeof x !== "undefined" && x !== null);
         const lis = this._get_view_dom_columns("#inactive_columns perspective-row");
-        if (columns.length === lis.length) {
+        if (pop_cols.length === lis.length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
             this._inactive_columns.parentElement.classList.remove("collapse");
         }
         lis.forEach(x => {
-            const index = columns.indexOf(x.getAttribute("name"));
+            const index = pop_cols.indexOf(x.getAttribute("name"));
             if (index === -1) {
                 x.classList.remove("active");
             } else {
@@ -172,9 +184,13 @@ export class DomElement extends PerspectiveElement {
         });
         if (reset) {
             this._update_column_list(columns, this._active_columns, name => {
-                const ref = lis.find(x => x.getAttribute("name") === name);
-                if (ref) {
-                    return this._new_row(ref.getAttribute("name"), ref.getAttribute("type"));
+                if (name === null) {
+                    return this._new_row(null);
+                } else {
+                    const ref = lis.find(x => x.getAttribute("name") === name);
+                    if (ref) {
+                        return this._new_row(ref.getAttribute("name"), ref.getAttribute("type"));
+                    }
                 }
             });
         }
@@ -197,7 +213,12 @@ export class DomElement extends PerspectiveElement {
             } else if (accessor(name, col)) {
                 this._set_row_type(col);
             } else {
-                if (next_col && accessor(name, next_col)) {
+                if (col.classList.contains("null-column")) {
+                    const node = callback(name);
+                    if (node) {
+                        container.replaceChild(node, col);
+                    }
+                } else if (next_col && accessor(name, next_col)) {
                     container.removeChild(col);
                     i++;
                     //  j--;
@@ -232,36 +253,38 @@ export class DomElement extends PerspectiveElement {
         this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
     }
 
-    // set viewer state
+    _remove_null_columns(since_index = 0) {
+        const elems = this._get_view_active_columns();
+        while (++since_index < elems.length) {
+            const elem = elems[since_index];
+            if (elem.classList.contains("null-column")) {
+                this.shadowRoot.querySelector("#active_columns").removeChild(elem);
+            }
+        }
+    }
+
     _set_column_defaults() {
-        let cols = this._get_view_dom_columns("#inactive_columns perspective-row");
-        let active_cols = this._get_view_dom_columns();
+        const cols = this._get_view_all_columns();
+        const active_cols = this._get_view_active_valid_columns();
+        const valid_active_cols = this._get_view_active_valid_column_names();
         if (cols.length > 0) {
             if (this._plugin.initial) {
                 let pref = [];
                 let count = this._plugin.initial.count || 2;
-                if (active_cols.length === count) {
-                    pref = active_cols.map(x => x.getAttribute("name"));
-                } else if (active_cols.length < count) {
-                    pref = active_cols.map(x => x.getAttribute("name"));
-                    this._fill_numeric(cols, pref);
-                    if (pref.length < count) {
-                        this._fill_numeric(cols, pref, true);
-                    }
-                } else {
-                    if (this._plugin.initial.type === "number") {
-                        this._fill_numeric(active_cols, pref);
-                        if (pref.length < count) {
-                            this._fill_numeric(cols, pref);
-                        }
-                        if (pref.length < count) {
-                            this._fill_numeric(cols, pref, true);
-                        }
-                    }
+                this._fill_numeric(active_cols, pref);
+                this._fill_numeric(cols, pref);
+                this._fill_numeric(cols, pref, true);
+                pref = pref.slice(0, count);
+                const labels = this._plugin.initial.names;
+                while (labels && pref.length < labels.length) {
+                    pref.push(null);
                 }
-                this.setAttribute("columns", JSON.stringify(pref.slice(0, count)));
+                this.setAttribute("columns", JSON.stringify(pref));
             } else if (this._plugin.selectMode === "select") {
                 this.setAttribute("columns", JSON.stringify([cols[0].getAttribute("name")]));
+            } else {
+                this.setAttribute("columns", JSON.stringify(valid_active_cols));
+                this._remove_null_columns();
             }
         }
     }

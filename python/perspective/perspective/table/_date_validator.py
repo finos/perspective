@@ -29,7 +29,7 @@ def _normalize_timestamp(obj):
     '''
     try:
         datetime.fromtimestamp(obj)
-        return int(obj * 1000) 
+        return int(obj * 1000)
     except (ValueError, OverflowError, OSError):
         return int(obj)
 

@@ -101,6 +101,17 @@ export const mainValues = [
     }
 ];
 
+export const realValues = [
+    {
+        name: "Sales",
+        type: "float"
+    },
+    {
+        name: "Quantity",
+        type: "integer"
+    }
+];
+
 export const crossValues = [
     {
         name: "Region",

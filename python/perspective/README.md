@@ -12,6 +12,10 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 ### Dependencies
 
+`PyArrow==0.15.1` and `Numpy` are required build-time dependencies, and can both be installed via `pip`.
+
+`pip install pyarrow==0.15.1`
+
 It is recommended to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
 
 On MacOs:
@@ -32,8 +36,6 @@ On Windows:
 
 Or install from source.
 
-`PyArrow` and `Numpy` are required build-time dependencies, and can both be installed via `pip`.
-
 All other dependencies will be vendored if missing as part of Perspective's CMake build, but you can install them yourself and CMake will detect them via the usual mechanisms. 
 
 ### Installation
@@ -48,9 +50,12 @@ To install the JupyterLab extension:
 
 ## Getting Started
 
-[Example Notebooks](https://github.com/finos/perspective/tree/master/python/perspective/examples)
+[Python User Guide](https://perspective.finos.org/docs/md/python.html)
+[Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
+[Examples](https://github.com/finos/perspective/tree/master/python/perspective/examples)
 
 ## Developing
+
 To build `perspective-python` from source, you'll need the following C++ dependencies:
 
 - Python 3.7
