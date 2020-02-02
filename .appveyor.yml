@@ -28,15 +28,18 @@ init:
   - echo %arch%
   - echo %APPVEYOR_BUILD_WORKER_IMAGE%
 
+install:
+  - set PATH=C:\Python37-x64;%PATH%
+  - which python
+  - python --version
+  - mklink C:\Python37-x64\python3.7 C:\Python37-x64\python
+
 before_build:
 - cmd: |-
     cmake --version
     set BOOST_ROOT=C:\Libraries\boost_1_67_0
     set Boost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
     yarn
-    which python
-    python --version
-    mklink C:\Python37\python3.7 C:\Python37\python
 
 build_script:
   - yarn build_python
