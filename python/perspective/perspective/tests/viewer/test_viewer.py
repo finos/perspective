@@ -244,3 +244,25 @@ class TestViewer:
         assert viewer.table_name is not None
         assert viewer.table is not None
         assert viewer.filters == []
+
+    def test_save_restore(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table)
+
+        # Save config
+        config = viewer.save()
+        assert viewer.filters == [["a", "==", 2]]
+        assert config["filters"] == [["a", "==", 2]]
+        assert viewer.plugin == "x_bar"
+        assert config["plugin"] == "x_bar"
+
+        # reset configuration
+        viewer.reset()
+        assert viewer.plugin == "hypergrid"
+        assert viewer.filters == []
+
+        # restore configuration
+        viewer.restore(**config)
+        assert viewer.filters == [["a", "==", 2]]
+        assert viewer.plugin == "x_bar"
