@@ -40,7 +40,7 @@ install:
   - yarn
 
 build_script:
-  - yarn build_python
+  - yarn build_python --ci
 
 test_script:
   - yarn test_python
