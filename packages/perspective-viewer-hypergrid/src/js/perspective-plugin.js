@@ -373,7 +373,7 @@ export const install = function(grid) {
 
     // Corrects for deselection behavior on keyiup due to shadow-dom
     grid.canvas.hasFocus = function() {
-        if (!grid.div.isConnected) {
+        if (!grid.div?.isConnected) {
             return;
         }
         const grid_element = grid.div.parentNode.parentNode.host;
