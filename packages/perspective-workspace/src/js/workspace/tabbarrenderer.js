@@ -10,14 +10,21 @@
 import {h} from "@phosphor/virtualdom";
 import {TabBar} from "@phosphor/widgets";
 
-export const TabBarActions = {
-    Config: "config"
+export const TabBarItems = {
+    Config: "config",
+    Label: "label"
 };
+
+export const DEFAULT_TITLE = "[untitled]";
 
 export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     constructor(maximized) {
         super();
         this.maximized = maximized;
+    }
+
+    renderLabel(data) {
+        return h.input({className: "p-TabBar-tabLabel", readonly: true, id: TabBarItems.Label, value: data.title.label || DEFAULT_TITLE});
     }
 
     renderTab(data) {
@@ -38,6 +45,6 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     }
 
     renderConfigIcon() {
-        return h.div({className: "p-TabBar-tabConfigIcon", id: TabBarActions.Config});
+        return h.div({className: "p-TabBar-tabConfigIcon", id: TabBarItems.Config});
     }
 }

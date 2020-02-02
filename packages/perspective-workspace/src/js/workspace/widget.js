@@ -69,6 +69,7 @@ export class PerspectiveViewerWidget extends Widget {
     save() {
         return {
             ...this.viewer.save(),
+            name: this.title.label,
             master: this.master,
             table: this.tableName
         };
