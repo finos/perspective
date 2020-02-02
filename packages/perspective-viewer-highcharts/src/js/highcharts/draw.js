@@ -51,6 +51,7 @@ export const draw = (mode, set_config, restyle) =>
         const row_pivots = config.row_pivots;
         const col_pivots = config.column_pivots;
         const columns = config.columns;
+        const real_columns = JSON.parse(this.getAttribute("columns"));
 
         const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false, false)]);
         let element;
@@ -78,21 +79,24 @@ export const draw = (mode, set_config, restyle) =>
                 } else {
                     cols = await view.to_columns();
                 }
-                const config = (configs[0] = default_config.call(this, columns, mode));
-                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, columns, row_pivots, col_pivots);
+                const config = (configs[0] = default_config.call(this, real_columns, mode));
+                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, real_columns, row_pivots, col_pivots);
 
                 config.legend.floating = series.length <= 20;
                 config.legend.enabled = col_pivots.length > 0;
                 config.series = series;
                 config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
                 if (colorRange[0] !== Infinity) {
-                    if (columns.length <= 3) {
+                    if (real_columns.length <= 3 || real_columns[3] === null) {
                         config.chart.type = "coloredScatter";
                     } else {
                         config.chart.type = "coloredBubble";
                     }
                     color_axis.call(this, config, colorRange, restyle);
+                } else if (real_columns.length > 3 && real_columns[3] !== null) {
+                    config.chart.type = "bubble";
                 }
+
                 if (num_aggregates < 3) {
                     set_boost(config, xaxis_type, yaxis_type);
                 }

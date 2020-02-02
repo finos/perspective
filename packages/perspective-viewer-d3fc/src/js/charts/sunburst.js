@@ -78,8 +78,8 @@ sunburst.plugin = {
     max_columns: 50,
     initial: {
         type: "number",
-        count: 2,
-        names: ["Size", "Color"]
+        count: 1,
+        names: ["Size", "Color", "Tooltip"]
     }
 };
 

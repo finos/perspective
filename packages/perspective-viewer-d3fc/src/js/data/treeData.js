@@ -11,6 +11,7 @@ import * as d3 from "d3";
 
 export function treeData(settings) {
     const sets = {};
+    const real_aggs = settings.realValues.map(x => (x === null ? null : settings.mainValues.find(y => y.name === x)));
     settings.data.forEach(d => {
         const groups = d.__ROW_PATH__;
         const splits = getSplitNames(d);
@@ -26,9 +27,15 @@ export function treeData(settings) {
                     element = {name: group, children: []};
                     currentLevel.push(element);
                 }
-                if (settings.mainValues.length > 1) {
+                if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
                     const colorValue = getDataValue(d, settings.mainValues[1], split);
                     element.color = element.color ? element.color + colorValue : colorValue;
+                }
+                if (settings.realValues.length > 2 && settings.realValues[2] !== null) {
+                    element.tooltip = [];
+                    for (let i = 2; i < settings.realValues.length; ++i) {
+                        element.tooltip.push(getDataValue(d, real_aggs[i], split));
+                    }
                 }
                 if (i === groups.length - 1) {
                     element.name = groups.slice(-1)[0];
@@ -48,7 +55,10 @@ export function treeData(settings) {
         const chartData = d3.partition().size([2 * Math.PI, root.height + 1])(root);
         chartData.each(d => {
             d.current = d;
-            d.mainValues = settings.mainValues.length === 1 ? d.value : [d.value, d.data.color];
+            d.mainValues =
+                settings.realValues.length === 1 || (settings.realValues[1] === null && settings.realValues[2] === null)
+                    ? d.value
+                    : [d.value, d.data.color].concat(d.data.tooltip || []).filter(x => x !== null);
             d.crossValue = d
                 .ancestors()
                 .slice(0, -1)
@@ -67,7 +77,7 @@ export function treeData(settings) {
 export const getDataValue = (d, aggregate, split) => (split.length ? d[`${split}|${aggregate.name}`] : d[aggregate.name]);
 
 function getExtents(settings, [split, data]) {
-    if (settings.mainValues.length > 1) {
+    if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
         const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
         const max = Math.max(...data.map(d => d.color));
         return [min, max];

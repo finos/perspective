@@ -45,7 +45,7 @@
     width: var(--column_selector--width, 20px);
     min-width: var(--column_selector--width, 20px);
     height: var(--is_visible--height, auto);
-    cursor: pointer;
+    cursor: var(--is_visible--cursor, pointer);
     font-size: var(--column_selector--font-size, 14px);
     margin-top: -2px;
     display: var(--is_visible-display, none);
@@ -240,6 +240,20 @@
 
     ul {
         transition: background-color 0.2s, border-color 0.2s;
+    }
+}
+
+:host(.null-column) {
+    .is_visible {
+        opacity: 0 !important;
+    }
+    .row_draggable {
+        background-color: var(
+            --null--background,
+            transparent
+        ) !important;
+        border-color: @border-color !important;
+        border-width: 0 0 1px 0 !important;
     }
 }
 

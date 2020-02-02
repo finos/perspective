@@ -231,6 +231,28 @@ export function throttlePromise(target, property, descriptor) {
     return descriptor;
 }
 
+/**
+ * Swap 2 HTMLElements in a container.
+ * @param {HTMLElement} container
+ * @param {HTMLElement} elem1
+ * @param {HTMLElement} elem2
+ */
+export function swap(container, ...elems) {
+    if (elems[0] === elems[1]) return;
+    if (elems.every(x => x.classList.contains("null-column"))) return;
+    let [i, j] = elems.map(x => Array.prototype.slice.call(container.children).indexOf(x));
+    if (j < i) {
+        [i, j] = [j, i];
+        elems = elems.reverse();
+    }
+    container.insertBefore(elems[1], elems[0]);
+    if (j + 1 === container.children.length) {
+        container.appendChild(elems[0]);
+    } else {
+        container.insertBefore(elems[0], container.children[j + 1]);
+    }
+}
+
 export const json_attribute = _attribute(() => ({}));
 export const array_attribute = _attribute(() => []);
 

@@ -24,7 +24,7 @@ import nearbyTip from "../tooltip/nearbyTip";
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
-    const useGroupColors = settings.mainValues.length <= 2;
+    const useGroupColors = settings.realValues.length <= 2 || settings.realValues[2] === null;
     let color = null;
     let legend = null;
 
@@ -40,7 +40,7 @@ function xyScatter(container, settings) {
         legend = colorRangeLegend().scale(color);
     }
 
-    const size = settings.mainValues.length > 3 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
+    const size = settings.realValues[3] ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
 
     const series = fc
         .seriesCanvasMulti()
@@ -100,7 +100,7 @@ xyScatter.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size"]
+        names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"]
     },
     selectMode: "toggle"
 };

@@ -42,6 +42,7 @@ export function register(...plugins) {
 function drawChart(chart) {
     return async function(el, view, task, end_col, end_row) {
         let jsonp;
+        const realValues = JSON.parse(this.getAttribute("columns"));
 
         if (end_col && end_row) {
             jsonp = view.to_json({end_row, end_col, leaves_only: true});
@@ -65,6 +66,7 @@ function drawChart(chart) {
         const mapped = filtered.map(dataMap);
 
         let settings = {
+            realValues,
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
             mainValues: columns.map(a => ({name: a, type: schema[a]})),
             splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),

@@ -118,10 +118,11 @@ export class ActionElement extends DomElement {
     }
 
     _column_visibility_clicked(ev) {
-        let parent = ev.currentTarget;
-        let is_active = parent.parentElement.getAttribute("id") === "active_columns";
+        const parent = ev.currentTarget;
+        const is_active = parent.parentElement.getAttribute("id") === "active_columns";
         if (is_active) {
-            if (this._get_visible_column_count() === 1) {
+            const min_columns = this._plugin.initial?.count || 1;
+            if (this._get_view_active_valid_column_count() === min_columns) {
                 return;
             }
             if (ev.detail.shiftKey) {
@@ -131,11 +132,17 @@ export class ActionElement extends DomElement {
                     }
                 }
             } else {
+                const index = Array.prototype.slice.call(this._active_columns.children).indexOf(parent);
+                if (index < this._plugin.initial?.count) {
+                    return;
+                } else if (index < this._plugin.initial?.names?.length - 1) {
+                    this._active_columns.insertBefore(this._new_row(null), parent);
+                }
                 this._active_columns.removeChild(parent);
             }
         } else {
             // check if we're manipulating computed column input
-            if (ev.path && ev.path[1].classList.contains("psp-cc-computation__input-column")) {
+            if (ev.path[1]?.classList.contains("psp-cc-computation__input-column")) {
                 //  this._computed_column._register_inputs();
                 this._computed_column.deselect_column(ev.currentTarget.getAttribute("name"));
                 this._update_column_view();
@@ -147,11 +154,20 @@ export class ActionElement extends DomElement {
                 }
             }
             let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"));
-            this._active_columns.appendChild(row);
+            const cols = this._get_view_active_columns();
+            let i = cols.length - 1;
+            if (!cols[i] || !cols[i]?.classList.contains("null-column")) {
+                this._active_columns.appendChild(row);
+            } else
+                while (i-- > 0) {
+                    if (!cols[i].classList.contains("null-column")) {
+                        this._active_columns.replaceChild(row, cols[i + 1]);
+                        break;
+                    }
+                }
         }
         this._check_responsive_layout();
-        let cols = this._get_view_columns();
-        this._update_column_view(cols);
+        this._update_column_view();
     }
 
     _column_aggregate_clicked() {
@@ -248,6 +264,11 @@ export class ActionElement extends DomElement {
     _vis_selector_changed() {
         this._plugin_information.classList.add("hidden");
         this.setAttribute("plugin", this._vis_selector.value);
+        this._active_columns.classList.remove("one_lock", "two_lock");
+        const classname = ["one_lock", "two_lock"][this._plugin.initial?.count - 1];
+        if (classname) {
+            this._active_columns.classList.add(classname);
+        }
         this._debounce_update();
     }
 

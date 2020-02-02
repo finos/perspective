@@ -21,8 +21,8 @@ function seriesToPoints(settings, data) {
         mainValues: settings.mainValues.map(v => col[v.name]),
         x: col[settings.mainValues[0].name],
         y: col[settings.mainValues[1].name],
-        colorValue: settings.mainValues.length > 2 ? col[settings.mainValues[2].name] : undefined,
-        size: settings.mainValues.length > 3 ? col[settings.mainValues[3].name] : undefined,
+        colorValue: settings.realValues[2] ? col[settings.realValues[2]] : undefined,
+        size: settings.realValues[3] ? col[settings.realValues[3]] : undefined,
         key: data.key,
         row: col
     }));
