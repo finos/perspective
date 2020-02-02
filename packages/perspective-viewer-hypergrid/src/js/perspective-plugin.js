@@ -324,7 +324,23 @@ export const install = function(grid) {
         }
 
         const filters = config.filter.concat(row_filters).concat(column_filters);
-        const action = this.grid.properties.rowSelection && this.grid.getSelectedRows().indexOf(y) === -1 ? "deselected" : "selected";
+
+        // this only works for single row select (which is all we support right now)
+        if (this.grid.properties.rowSelection) {
+            const selected = this.grid.getSelectedRows()[0] === y;
+            this.grid.canvas.dispatchEvent(
+                new CustomEvent("perspective-select", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        selected,
+                        config: {filters: selected ? filters : []},
+                        column_names,
+                        row: r[0]
+                    }
+                })
+            );
+        }
 
         this.grid.canvas.dispatchEvent(
             new CustomEvent("perspective-click", {
@@ -333,8 +349,7 @@ export const install = function(grid) {
                 detail: {
                     config: {filters},
                     column_names,
-                    row: r[0],
-                    action
+                    row: r[0]
                 }
             })
         );
