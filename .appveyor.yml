@@ -33,13 +33,11 @@ install:
   - which python
   - python --version
   - ln -s C:\Python37-x64\python C:\Python37-x64\python3.7
-
-before_build:
-- cmd: |-
-    cmake --version
-    set BOOST_ROOT=C:\Libraries\boost_1_67_0
-    set Boost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
-    yarn
+  - python -m pip install numpy pyarrow==0.15.1
+  - cmake --version
+  - set BOOST_ROOT=C:\Libraries\boost_1_67_0
+  - set Boost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
+  - yarn
 
 build_script:
   - yarn build_python
