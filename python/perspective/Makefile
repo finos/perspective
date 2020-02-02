@@ -1,3 +1,18 @@
+################################################################################
+#
+# Copyright (c) 2020, the Perspective Authors.
+#
+# This file is part of the Perspective library, distributed under the terms of
+# the Apache License 2.0.  The full license can be found in the LICENSE file.
+#
+
+
+# NOTE: This is an internal tool used by the Perspective core developers.
+# It is not intended (nor expected) to work outside of their development
+# environment. For build/install/development documentation, please refer
+# to the official documentation or the python folder's README.md.
+#                            ~ Perspective Maintainers
+
 build: ## build the package
 	python3 setup.py build
 
