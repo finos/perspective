@@ -27,13 +27,13 @@ init:
   - echo %APPVEYOR_BUILD_WORKER_IMAGE%
 
 before_build:
-- cmd: 
-    - cmake --version
-    - set BOOST_ROOT=C:\Libraries\boost_1_67_0
-    - set Boost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
+- cmd: |-
+    cmake --version
+    set BOOST_ROOT=C:\Libraries\boost_1_67_0
+    set Boost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
+    yarn
 
 build_script:
-  - yarn
   - yarn build_python --ci
 
 # to disable automatic tests
