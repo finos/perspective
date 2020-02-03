@@ -99,9 +99,7 @@ public:
      */
     static void apply_computation(
         const std::vector<std::shared_ptr<t_column>>& table_columns,
-        const std::vector<std::shared_ptr<t_column>>& flattened_columns,
         std::shared_ptr<t_column> output_column,
-        const std::vector<t_rlookup>& row_indices,
         t_computation computation);
 
     /**

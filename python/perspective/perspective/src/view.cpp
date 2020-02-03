@@ -111,7 +111,7 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
 
 template <>
 std::shared_ptr<t_view_config>
-make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
+make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
     auto row_pivots = config.attr("get_row_pivots")().cast<std::vector<std::string>>();
     auto column_pivots = config.attr("get_column_pivots")().cast<std::vector<std::string>>();
     auto columns = config.attr("get_columns")().cast<std::vector<std::string>>();
@@ -151,7 +151,7 @@ make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
         // parse filter details
         std::string column_name = f[0].cast<std::string>();
         std::string filter_op_str = f[1].cast<std::string>();
-        t_dtype column_type = schema.get_dtype(column_name);
+        t_dtype column_type = schema->get_dtype(column_name);
         t_filter_op filter_operator = str_to_filter_op(filter_op_str);
 
         // validate the filter before it goes into the core engine

@@ -855,6 +855,7 @@ export default function(Module) {
         this.columns = config.columns;
         this.filter = config.filter || [];
         this.sort = config.sort || [];
+        this.computed_columns = config.computed_columns || [];
         this.filter_op = config.filter_op || "and";
         this.row_pivot_depth = config.row_pivot_depth;
         this.column_pivot_depth = config.column_pivot_depth;
@@ -898,6 +899,19 @@ export default function(Module) {
             let sort_vector = __MODULE__.make_string_vector();
             let filled = fill_vector(sort_vector, sort);
             vector.push_back(filled);
+        }
+        return vector;
+    };
+
+    view_config.prototype.get_computed_columns = function() {
+        let vector = __MODULE__.make_2d_val_vector();
+        for (let computed of this.computed_columns) {
+            let computed_vector = __MODULE__.make_val_vector();
+            computed_vector.push_back(computed.column);
+            computed_vector.push_back(computed.computed_function_name);
+            // make this input_columns
+            computed_vector.push_back(computed.inputs);
+            vector.push_back(computed_vector);
         }
         return vector;
     };
@@ -1204,6 +1218,7 @@ export default function(Module) {
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
+        config.computed_columns = config.computed_columns || [];
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns

@@ -63,7 +63,7 @@ t_ctx0::step_end() {
     auto stbl = m_gstate->get_table();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ncols), 1,
+    tbb::parallel_for(0, int(ncols), 1,
         [&rval, &stbl, pkeys, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
@@ -550,10 +550,52 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
     const t_column* pkey_col = flattened.get_const_column("psp_pkey").get();
 
     t_uindex ncols = m_config.get_num_columns();
+    const auto& column_names = m_config.get_column_names();
+    //std::cout << column_names << std::endl;
 
+    /*
+    std::cout << "flattened:";
+    flattened.pprint();
+    std::cout << "transitions:";
+    transitions.pprint();
+    std::cout << "prev:";
+    prev.pprint();
+    std::cout << "curr:";
+    curr.pprint();    */
+
+    for (const auto& name : column_names) {
+        auto cidx = m_config.get_colidx(name);
+        //std::cout << "step delta for col " << cidx << "'" << name << "'" <<std::endl;
+        const t_column* tcol = transitions.get_const_column(name).get();
+        const t_column* pcol = prev.get_const_column(name).get();
+        const t_column* ccol = curr.get_const_column(name).get();
+
+        for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
+            const std::uint8_t* trans_ = tcol->get_nth<std::uint8_t>(ridx);
+            std::uint8_t trans = *trans_;
+            t_value_transition tr = static_cast<t_value_transition>(trans);
+
+            switch (tr) {
+                case VALUE_TRANSITION_NVEQ_FT:
+                case VALUE_TRANSITION_NEQ_FT:
+                case VALUE_TRANSITION_NEQ_TDT: {
+                    m_deltas->insert(t_zcdelta(get_interned_tscalar(pkey_col->get_scalar(ridx)),
+                        cidx, mknone(), get_interned_tscalar(ccol->get_scalar(ridx))));
+                } break;
+                case VALUE_TRANSITION_NEQ_TT: {
+                    m_deltas->insert(t_zcdelta(get_interned_tscalar(pkey_col->get_scalar(ridx)),
+                        cidx, get_interned_tscalar(pcol->get_scalar(ridx)),
+                        get_interned_tscalar(ccol->get_scalar(ridx))));
+                } break;
+                default: {}
+            }
+        }
+    }
+
+/*
     for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
         std::string col = m_config.col_at(cidx);
-
+        std::cout << "step delta for col: " << col << std::endl;
         const t_column* tcol = transitions.get_const_column(col).get();
         const t_column* pcol = prev.get_const_column(col).get();
         const t_column* ccol = curr.get_const_column(col).get();
@@ -578,7 +620,7 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
                 default: {}
             }
         }
-    }
+    }*/
 }
 
 /**

@@ -228,7 +228,8 @@ View<CTX_T>::column_paths() const {
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
-    auto schema = m_table->get_schema();
+    // TODO: should revert to m_table
+    auto schema = m_ctx->get_schema();
     auto _types = schema.types();
     auto names = schema.columns();
 
@@ -257,7 +258,7 @@ View<CTX_T>::schema() const {
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() const {
-    t_schema schema = m_table->get_schema();
+    t_schema schema = m_ctx->get_schema();
     std::vector<t_dtype> _types = schema.types();
     std::vector<std::string> names = schema.columns();
 

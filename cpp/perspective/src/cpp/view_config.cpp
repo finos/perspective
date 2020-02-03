@@ -18,6 +18,7 @@ t_view_config::t_view_config(
         const std::vector<std::string>& columns,
         const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
+        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
         const std::string& filter_op,
         bool column_only)
     : m_init(false)
@@ -27,13 +28,14 @@ t_view_config::t_view_config(
     , m_columns(columns)
     , m_filter(filter)
     , m_sort(sort)
+    , m_computed_columns(computed_columns)
     , m_row_pivot_depth(-1)
     , m_column_pivot_depth(-1)
     , m_filter_op(filter_op)
     , m_column_only(column_only) {}
 
 void
-t_view_config::init(const t_schema& schema) {
+t_view_config::init(std::shared_ptr<t_schema> schema) {
     fill_aggspecs(schema);
     fill_fterm();
     fill_sortspec();
@@ -102,6 +104,12 @@ t_view_config::get_col_sortspec() const {
     return m_col_sortspec;
 }
 
+std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>
+t_view_config::get_computed_columns() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    return m_computed_columns;
+}
+
 t_filter_op
 t_view_config::get_filter_op() const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -128,16 +136,18 @@ t_view_config::get_column_pivot_depth() const {
 
 // PRIVATE
 void
-t_view_config::fill_aggspecs(const t_schema& schema) {
-    /**
-     * Provide aggregates for columns that are shown but NOT specified in `m_aggregates`.
+t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
+    /*
+     * Provide aggregates for columns that are shown but NOT specified in 
+     * `m_aggregates`, including computed columns that are in the `columns`
+     * array but not the `aggregates` map.
      */
     for (const std::string& column : m_columns) {
         if (m_aggregates.count(column) != 0) {
             continue;
         }
 
-        t_dtype dtype = schema.get_dtype(column);
+        t_dtype dtype = schema->get_dtype(column);
         std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
         t_aggtype agg_type
             = t_aggtype::AGGTYPE_ANY; // use aggtype here since we are not parsing aggs
@@ -151,7 +161,9 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
         m_aggregate_names.push_back(column);
     }
 
-    // Construct aggregates from config object
+    /**
+     * Construct aggspecs for aggregates explicitly specified in `m_aggregates`. 
+     */
     for (auto const& iter : m_aggregates) {
         auto column = iter.first;
         auto aggregate = iter.second;
@@ -214,7 +226,7 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
                     agg_type = str_to_aggtype(col.at(0));
                 }
             } else {
-                t_dtype dtype = schema.get_dtype(column);
+                t_dtype dtype = schema->get_dtype(column);
                 agg_type = _get_default_aggregate(dtype);
             }
 
