@@ -253,7 +253,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     makeDetail(widget) {
         widget.master = false;
 
-        this.dockpanel.addWidget(widget, {mode: "split-right"});
+        this.dockpanel.addWidget(widget, {mode: `split-${this._side}`});
 
         if (this.masterPanel.widgets.length === 0) {
             this.detailPanel.close();
@@ -302,18 +302,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this._menu_opened = true;
 
         menu.aboutToClose.connect(() => {
+            this.element.classList.remove("p-ContextMenu");
+            this.removeClass("p-ContextMenu");
             widget.removeClass("p-ContextFocus");
-            tabbar && tabbar.node.classList.remove("p-ContextFocus");
-
-            // Delay to absorb opacity "bounce" due to animation technically
-            // being reset, when right click is made twice in succession.
-            this._menu_opened = false;
-            setTimeout(() => {
-                if (!this._menu_opened) {
-                    this.element.classList.remove("p-ContextMenu");
-                    this.removeClass("p-ContextMenu");
-                }
-            });
+            tabbar?.node?.classList.remove("p-ContextFocus");
         });
 
         menu.open(event.clientX, event.clientY);
