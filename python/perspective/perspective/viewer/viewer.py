@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import six
 from random import random
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
@@ -183,6 +184,26 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         '''
         if self.table is not None:
             self.table.replace(data)
+
+    def save(self):
+        '''Get the viewer's attribute as a dictionary, symmetric with `restore` so that a
+           viewer's configuration can be reproduced.'''
+        return {
+            'row_pivots': self.row_pivots,
+            'column_pivots': self.column_pivots,
+            'filters': self.filters,
+            'sort': self.sort,
+            'aggregates': self.aggregates,
+            'columns': self.columns,
+            'plugin': self.plugin,
+        }
+
+    def restore(self, **kwargs):
+        '''Restore a given set of attributes, passed as kwargs (e.g. dictionary). Symmetric with `save` so that
+        a given viewer's configuration can be reproduced'''
+        for k, v in six.iteritems(kwargs):
+            if k in ('row_pivots', 'column_pivots', 'filters', 'sort', 'aggregates', 'columns', 'plugin'):
+                setattr(self, k, v)
 
     def reset(self):
         '''Resets the viewer's attributes and state, but does not delete or
