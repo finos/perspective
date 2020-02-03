@@ -175,6 +175,22 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
         }
     },
 
+    getSelectedRowID() {
+        if (this._grid.selectionModel.hasRowSelections()) {
+            const row_data = this.data[this._grid.getSelectedRows()[0]];
+            if (row_data) {
+                return row_data.__ID__;
+            }
+        }
+    },
+
+    setSelectedRowID(index) {
+        if (this._grid.properties.rowSelection) {
+            this._selected_row_index = index;
+            this._update_selection();
+        }
+    },
+
     pspFetch: async function(rect) {
         const selection_enabled = this._grid.properties.rowSelection || this._viewer.hasAttribute("editable");
         const range = pad_data_window(rect, this._config.row_pivots, selection_enabled);
