@@ -27,31 +27,67 @@ export class ActionElement extends DomElement {
         if (!event || event.button !== 2) {
             this._show_config = !this._show_config;
             this._hide_context_menu();
-
+            const panel = this.shadowRoot.querySelector("#pivot_chart_container");
             if (!this._show_config) {
-                const panel = this.shadowRoot.querySelector("#pivot_chart_container");
-                this._datavis.style.width = `${panel.clientWidth + this._side_panel.clientWidth}px`;
-                this._datavis.style.height = `${panel.clientHeight + this._top_panel.clientHeight}px`;
-                try {
-                    await this._plugin.resize.call(this);
-                } finally {
-                    this._side_panel.style.display = "none";
-                    this._top_panel.style.display = "none";
-                    this._datavis.style.width = "100%";
-                    this._datavis.style.height = "100%";
-                    this.removeAttribute("settings");
-                    this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
-                }
+                await this._pre_resize(
+                    panel.clientWidth + this._side_panel.clientWidth,
+                    panel.clientHeight + this._top_panel.clientHeight,
+                    () => {
+                        this._side_panel.style.display = "none";
+                        this._top_panel.style.display = "none";
+                        this.toggleAttribute("settings", true);
+                    },
+                    () => this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}))
+                );
             } else {
-                this._side_panel.style.display = "flex";
-                this._top_panel.style.display = "flex";
-                this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
-                try {
-                    await this._plugin.resize.call(this);
-                } finally {
-                    this.toggleAttribute("settings", true);
-                }
+                await this._post_resize(
+                    () => {
+                        this._side_panel.style.display = "flex";
+                        this._top_panel.style.display = "flex";
+                        this.toggleAttribute("settings", true);
+                    },
+                    () => this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}))
+                );
             }
+        }
+    }
+
+    /**
+     * Given a targe `width` and `height`, pre-size the plugin before modifying
+     * the HTML to reduce visual tearing.
+     *
+     * @private
+     * @param {*} width
+     * @param {*} height
+     * @param {*} post Function to run once action is complete
+     * @param {*} [pre=undefined] Function to run once visual effects have been
+     * applied.  This may be before `post`, as pre-sizing will be delayed when
+     * the target size is a sub-window of the current view.
+     * @memberof ActionElement
+     */
+    async _pre_resize(width, height, post, pre = undefined) {
+        this._datavis.style.width = `${width}px`;
+        this._datavis.style.height = `${height}px`;
+        try {
+            if (!document.hidden && this.offsetParent) {
+                await this._plugin.resize.call(this);
+            }
+        } finally {
+            pre?.();
+            this._datavis.style.width = "100%";
+            this._datavis.style.height = "100%";
+            post();
+        }
+    }
+
+    async _post_resize(post, pre) {
+        pre?.();
+        try {
+            if (!document.hidden && this.offsetParent) {
+                await this._plugin.resize.call(this);
+            }
+        } finally {
+            post();
         }
     }
 

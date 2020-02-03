@@ -545,8 +545,8 @@ class PerspectiveViewer extends ActionElement {
      */
     @throttlePromise
     async notifyResize(immediate) {
-        this._check_responsive_layout();
-        if (!document.hidden && this.offsetParent) {
+        const resized = await this._check_responsive_layout();
+        if (!resized && !document.hidden && this.offsetParent) {
             await this._plugin.resize.call(this, immediate);
         }
     }
