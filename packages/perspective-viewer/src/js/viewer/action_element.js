@@ -35,18 +35,20 @@ export class ActionElement extends DomElement {
                     () => {
                         this._side_panel.style.display = "none";
                         this._top_panel.style.display = "none";
-                        this.toggleAttribute("settings", true);
+                        this.removeAttribute("settings");
                     },
                     () => this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}))
                 );
             } else {
                 await this._post_resize(
                     () => {
-                        this._side_panel.style.display = "flex";
-                        this._top_panel.style.display = "flex";
                         this.toggleAttribute("settings", true);
                     },
-                    () => this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}))
+                    () => {
+                        this._side_panel.style.display = "flex";
+                        this._top_panel.style.display = "flex";
+                        this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
+                    }
                 );
             }
         }
