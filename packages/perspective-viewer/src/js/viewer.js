@@ -485,6 +485,7 @@ class PerspectiveViewer extends ActionElement {
      * Load data. If `load` or `update` have already been called on this
      * element, its internal `perspective.table` will also be deleted.
      *
+     * @async
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
      * @returns {Promise<void>} A promise which resolves once the data is loaded
@@ -499,20 +500,28 @@ class PerspectiveViewer extends ActionElement {
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
+     * @example <caption>Load Promise<perspective.table></caption>
+     * const my_viewer = document.getElementById('#my_viewer');
+     * const tbl = async () => perspective.table("x,y\n1,a\n2,b");
+     * my_viewer.load(tbl);
      */
-    load(data, options) {
-        try {
-            data = data.trim();
-        } catch (e) {}
+    async load(data, options) {
         let table;
-        if (data.hasOwnProperty("_name") && data.type === "table") {
-            table = data;
+        if (data instanceof Promise) {
+            table = await data;
         } else {
-            table = this.worker.table(data, options);
-            table._owner_viewer = this;
+            try {
+                data = data.trim();
+            } catch (e) {}
+            if (data.type === "table") {
+                table = data;
+            } else {
+                table = this.worker.table(data, options);
+                table._owner_viewer = this;
+            }
         }
         if (this.isConnected) {
-            return this._load_table(table);
+            await this._load_table(table);
         } else {
             this._table = table;
         }
