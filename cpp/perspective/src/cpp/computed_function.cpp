@@ -526,17 +526,18 @@ t_tscalar week_bucket<DTYPE_DATE>(t_tscalar x) {
     // Convert to a `sys_days` representing no. of days since epoch
     date::sys_days days_since_epoch = ymd;
 
-    // Construct a `date::year_month_weekday` from `date::sys_days` since epoch
-    auto weekday = date::year_month_weekday(ymd).weekday_indexed().weekday();
-    
-    // Get the day of the week as an int from 0 to 6
-    auto day_of_week = (weekday - date::Sunday).count();
+    // Subtract Sunday from the ymd to get the beginning of the last day
+    ymd = days_since_epoch - (date::weekday{days_since_epoch} - date::Monday);
 
-    // Set the day to the beginning of the week
-    auto diff = static_cast<std::uint32_t>(val.day()) - day_of_week + (day_of_week == 0 ? - 6 : 1);
+    // Get the day of month and day of the week
+    std::int32_t year_int = static_cast<std::int32_t>(ymd.year());
+
+    // date::month is [1-12], whereas `t_date.month()` is [0-11]
+    std::uint32_t month_int = static_cast<std::uint32_t>(ymd.month()) - 1;
+    std::uint32_t day_int = static_cast<std::uint32_t>(ymd.day());
 
     // Return the new `t_date`
-    t_date new_date = t_date(val.year(), val.month(), diff);
+    t_date new_date = t_date(year_int, month_int, day_int);
     rval.set(new_date);
     return rval;
 }
