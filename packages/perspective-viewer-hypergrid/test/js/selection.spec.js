@@ -42,6 +42,26 @@ utils.with_server({}, () => {
                         }, viewer);
                         await page.waitForSelector("perspective-viewer:not([updating])");
                     });
+                    test.capture("selection state can be set from restore api", async page => {
+                        await page.waitForSelector("perspective-viewer:not([updating])");
+                        await page.$("perspective-viewer");
+                        await page.focus("perspective-viewer");
+                        await page.mouse.click(80, 60);
+
+                        await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
+
+                        let config = await page.evaluate(() => document.querySelector("perspective-viewer").save());
+                        expect(config.plugin_config.selected).toBe("Marge");
+
+                        await page.evaluate(async () => {
+                            const viewer = document.querySelector("perspective-viewer");
+                            await viewer.restore({plugin_config: {selected: "Homer"}});
+                            await viewer.notifyResize();
+                        });
+
+                        config = await page.evaluate(() => document.querySelector("perspective-viewer").save());
+                        expect(config.plugin_config.selected).toBe("Homer");
+                    });
                 });
             });
             describe("row pivots", () => {
@@ -56,6 +76,10 @@ utils.with_server({}, () => {
                         await page.focus("perspective-viewer");
                         await page.mouse.click(80, 60);
                         await page.mouse.move(80, 40);
+
+                        let config = await page.evaluate(() => document.querySelector("perspective-viewer").save());
+                        expect(config.plugin_config.selected).toBe("Homer");
+
                         await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
                     });
 
@@ -73,6 +97,26 @@ utils.with_server({}, () => {
                             element.update([{name: "Homer", number: 300}]);
                         }, viewer);
                         await page.waitForSelector("perspective-viewer:not([updating])");
+                    });
+
+                    test.capture("selection state can be set from restore api", async page => {
+                        await page.waitForSelector("perspective-viewer:not([updating])");
+                        await page.$("perspective-viewer");
+                        await page.focus("perspective-viewer");
+                        await page.mouse.click(80, 60);
+                        await page.evaluate(async () => await document.querySelector("perspective-viewer").notifyResize());
+
+                        let config = await page.evaluate(() => document.querySelector("perspective-viewer").save());
+                        expect(config.plugin_config.selected).toBe("Marge");
+
+                        await page.evaluate(async () => {
+                            const viewer = document.querySelector("perspective-viewer");
+                            await viewer.restore({plugin_config: {selected: "Homer"}});
+                            await viewer.notifyResize();
+                        });
+
+                        config = await page.evaluate(() => document.querySelector("perspective-viewer").save());
+                        expect(config.plugin_config.selected).toBe("Homer");
                     });
                 });
             });
