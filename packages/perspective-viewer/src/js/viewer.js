@@ -675,14 +675,14 @@ class PerspectiveViewer extends ActionElement {
      * Clears the rows in the current {@link table}.
      */
     clear() {
-        this._table.clear();
+        this._table?.clear();
     }
 
     /**
      * Replaces all rows in the current {@link table}.
      */
     replace(data) {
-        this._table.replace(data);
+        this._table ? this._table.replace(data) : this._load(data);
     }
 
     /**
