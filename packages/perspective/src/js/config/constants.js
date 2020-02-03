@@ -20,7 +20,7 @@ export const CONFIG_ALIASES = {
     sorts: "sort"
 };
 
-export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "row_pivot_depth", "filter_op"];
+export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "computed_columns", "row_pivot_depth", "filter_op"];
 
 const NUMBER_AGGREGATES = [
     "any",

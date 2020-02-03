@@ -34,21 +34,31 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
 };
 
 // t_ctx0
-t_config::t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms)
+t_config::t_config(
+    const std::vector<std::string>& detail_columns,
+    const std::vector<t_fterm>& fterms,
+    const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
+    t_filter_op combiner)
     : m_detail_columns(detail_columns)
-    , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_fmode(FMODE_SIMPLE_CLAUSES) {}
+    , m_computed_columns(computed_columns)
+    , m_combiner(combiner)
+    , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    setup(m_detail_columns);
+}
 
 // t_ctx1
-t_config::t_config(const std::vector<std::string>& row_pivots,
-    const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms)
+t_config::t_config(
+    const std::vector<std::string>& row_pivots,
+    const std::vector<t_aggspec>& aggregates,
+    const std::vector<t_fterm>& fterms,
+    const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
+    t_filter_op combiner)
     : m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
-    , m_combiner(combiner)
     , m_fterms(fterms)
+    , m_computed_columns(computed_columns)
+    , m_combiner(combiner)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -57,15 +67,21 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
 }
 
 // t_ctx2
-t_config::t_config(const std::vector<std::string>& row_pivots,
-    const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-    const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
+t_config::t_config(
+    const std::vector<std::string>& row_pivots,
+    const std::vector<std::string>& col_pivots,
+    const std::vector<t_aggspec>& aggregates,
+    const t_totals totals,
+    const std::vector<t_fterm>& fterms,
+    const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
+    t_filter_op combiner,
     bool column_only)
     : m_column_only(column_only)
     , m_aggregates(aggregates)
     , m_totals(totals)
-    , m_combiner(combiner)
     , m_fterms(fterms)
+    , m_computed_columns(computed_columns)
+    , m_combiner(combiner)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -134,9 +150,19 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
 }
 
 t_config::t_config(const std::vector<std::string>& detail_columns)
-    : t_config(detail_columns, FILTER_OP_AND, {}) {}
+    : t_config(detail_columns, {}, {}, FILTER_OP_AND) {}
 
 t_config::t_config() {}
+
+void
+t_config::setup(const std::vector<std::string>& detail_columns) {
+    t_index count = 0;
+    for (std::vector<std::string>::const_iterator iter = detail_columns.begin();
+         iter != detail_columns.end(); ++iter) {
+        m_detail_colmap[*iter] = count;
+        count++;
+    }
+}
 
 void
 t_config::setup(const std::vector<std::string>& detail_columns,
@@ -348,6 +374,11 @@ t_config::has_filters() const {
 const std::vector<t_fterm>&
 t_config::get_fterms() const {
     return m_fterms;
+}
+
+std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>
+t_config::get_computed_columns() const {
+    return m_computed_columns;
 }
 
 t_filter_op

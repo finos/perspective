@@ -928,14 +928,8 @@ namespace binding {
     template <>
     void
     add_computed_column(
-        std::shared_ptr<t_data_table> table, 
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& row_indices,
-        t_val computed_def) {
-        std::uint32_t end = row_indices.size();
-        if (end == 0) {
-            end = flattened->size();
-        }
+        std::shared_ptr<t_data_table> table, t_val computed_def) {
+        std::uint32_t end = table->size();
 
         t_val input_names = computed_def["inputs"];
         std::vector<std::string> input_column_names = 
@@ -948,14 +942,11 @@ namespace binding {
             computed_def["computed_function_name"].as<std::string>());
 
         std::vector<t_dtype> input_types;
-        std::vector<std::shared_ptr<t_column>> table_columns;
-        std::vector<std::shared_ptr<t_column>> flattened_columns;
+        std::vector<std::shared_ptr<t_column>> input_columns;
         for (const auto& column_name : input_column_names) {
-            auto table_column = table->get_column(column_name);
-            table_columns.push_back(table_column);
-            input_types.push_back(table_column->get_dtype());
-            flattened_columns.push_back(
-                flattened->get_column(column_name));
+            auto input_column = table->get_column(column_name);
+            input_columns.push_back(input_column);
+            input_types.push_back(input_column->get_dtype());
         }
 
         // This uses the `t_computed_function` enum, not string name
@@ -964,21 +955,19 @@ namespace binding {
         t_dtype output_column_type = computation.m_return_type;
 
         // don't double create output column
-        auto schema = flattened->get_schema();
+        auto schema = table->get_schema();
         std::shared_ptr<t_column> output_column;
         if (schema.has_column(output_column_name)) {
-            output_column = flattened->get_column(output_column_name);
+            output_column = table->get_column(output_column_name);
         } else {
-            output_column = flattened->add_column_sptr(
+            output_column = table->add_column_sptr(
                 output_column_name, output_column_type, true);
-            output_column->reserve(table_columns[0]->size());
+            output_column->reserve(input_columns[0]->size());
         }
 
         t_computed_column::apply_computation(
-            table_columns,
-            flattened_columns,
+            input_columns,
             output_column,
-            row_indices,
             computation);
         return;
     }
@@ -989,8 +978,8 @@ namespace binding {
         std::vector<t_computed_column_lambda> converted;
         for (const auto& j_computed_def : computed) {
             converted.push_back(
-                [j_computed_def](std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices) {
-                    add_computed_column(table, flattened, row_indices, j_computed_def); 
+                [j_computed_def](std::shared_ptr<t_data_table> table) {
+                    add_computed_column(table, j_computed_def); 
                 }
             );
         }
@@ -1237,7 +1226,7 @@ namespace binding {
         auto computed_defs = vecFromArray<t_val, t_val>(computed);
         auto computed_lambdas = make_computed_lambdas(computed_defs);
         for (const auto lambda : computed_lambdas) {
-            lambda(pkeyed_table, pkeyed_table, {});
+            lambda(pkeyed_table);
         }
         table->add_computed_columns(pkeyed_table, computed_lambdas);
         return table;
@@ -1315,7 +1304,7 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_view_config>
-    make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
+    make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
         // extract vectors from JS, where they were created
         auto row_pivots = config.call<std::vector<std::string>>("get_row_pivots");
         auto column_pivots = config.call<std::vector<std::string>>("get_column_pivots");
@@ -1349,6 +1338,41 @@ namespace binding {
             column_only = true;
         }
 
+        // Fill the computed columns vector with tuples
+        auto js_computed_columns = config.call<std::vector<std::vector<t_val>>>("get_computed_columns");
+        std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+
+        for (auto c : js_computed_columns) {
+            std::string computed_column_name = c.at(0).as<std::string>();
+            t_computed_function_name computed_function_name = 
+                str_to_computed_function_name(c.at(1).as<std::string>());
+            std::vector<std::string> input_columns = 
+                vecFromArray<t_val, std::string>(c.at(2));
+
+            /**
+             * Mutate the schema to add computed columns - the distinction 
+             * between `natural` and `computed` columns must be erased here
+             * as all lookups into `schema` must be valid for all computed
+             * columns on the View.
+             */
+            std::vector<t_dtype> input_types;
+            for (const auto& input_column : input_columns) {
+                input_types.push_back(schema->get_dtype(input_column));
+            }
+
+            t_computation computation = t_computed_column::get_computation(
+                computed_function_name, input_types);
+            t_dtype output_column_type = computation.m_return_type;
+
+            // Add the column to the schema.
+            schema->add_column(computed_column_name, output_column_type);
+
+            // Add the computed column to the config.
+            auto tp = std::make_tuple(
+                computed_column_name, computed_function_name, input_columns);
+            computed_columns.push_back(tp);
+        }
+
         // construct filters with filter terms, and fill the vector of tuples
         auto js_filter = config.call<std::vector<std::vector<t_val>>>("get_filter");
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
@@ -1357,7 +1381,7 @@ namespace binding {
             // parse filter details
             std::string column_name = f.at(0).as<std::string>();
             std::string filter_op_str = f.at(1).as<std::string>();
-            t_dtype column_type = schema.get_dtype(column_name);
+            t_dtype column_type = schema->get_dtype(column_name);
             t_filter_op filter_operator = str_to_filter_op(filter_op_str);
 
             // validate the filter before it goes into the core engine
@@ -1374,8 +1398,15 @@ namespace binding {
 
         // create the `t_view_config`
         auto view_config = std::make_shared<t_view_config>(
-            row_pivots, column_pivots, aggregates, columns, filter, sort,
-            filter_op, column_only);
+            row_pivots,
+            column_pivots,
+            aggregates,
+            columns,
+            filter,
+            sort,
+            computed_columns,
+            filter_op,
+            column_only);
 
         // transform primitive values into abstractions that the engine can use
         view_config->init(schema);
@@ -1396,7 +1427,7 @@ namespace binding {
     std::shared_ptr<View<CTX_T>>
     make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
         t_val view_config, t_val date_parser) {
-        auto schema = table->get_schema();
+        std::shared_ptr<t_schema> schema = std::make_shared<t_schema>(table->get_schema());
         std::shared_ptr<t_view_config> config = make_view_config<t_val>(schema, date_parser, view_config);
 
         auto ctx = make_context<CTX_T>(table, schema, config, name);
@@ -1413,15 +1444,17 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_ctx0>
-    make_context(std::shared_ptr<Table> table, const t_schema& schema,
+    make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
         std::shared_ptr<t_view_config> view_config, const std::string& name) {
+        std::cout << "creating context" << std::endl;
         auto columns = view_config->get_columns();
         auto filter_op = view_config->get_filter_op();
         auto fterm = view_config->get_fterm();
         auto sortspec = view_config->get_sortspec();
+        auto computed_columns = view_config->get_computed_columns();
 
-        auto cfg = t_config(columns, filter_op, fterm);
-        auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
+        auto cfg = t_config(columns, fterm, computed_columns, filter_op);
+        auto ctx0 = std::make_shared<t_ctx0>(*(schema.get()), cfg);
         ctx0->init();
         ctx0->sort_by(sortspec);
 
@@ -1435,7 +1468,7 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_ctx1>
-    make_context(std::shared_ptr<Table> table, const t_schema& schema,
+    make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
        std::shared_ptr<t_view_config> view_config, const std::string& name) {
         auto row_pivots = view_config->get_row_pivots();
         auto aggspecs = view_config->get_aggspecs();
@@ -1443,9 +1476,11 @@ namespace binding {
         auto fterm = view_config->get_fterm();
         auto sortspec = view_config->get_sortspec();
         auto row_pivot_depth = view_config->get_row_pivot_depth();
+        auto computed_columns = view_config->get_computed_columns();
 
-        auto cfg = t_config(row_pivots, aggspecs, filter_op, fterm);
-        auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
+        auto cfg = t_config(
+            row_pivots, aggspecs, fterm, computed_columns, filter_op);
+        auto ctx1 = std::make_shared<t_ctx1>(*(schema.get()), cfg);
 
         ctx1->init();
         ctx1->sort_by(sortspec);
@@ -1466,7 +1501,7 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_ctx2>
-    make_context(std::shared_ptr<Table> table, const t_schema& schema,
+    make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
         std::shared_ptr<t_view_config> view_config, const std::string& name) {
         bool column_only = view_config->is_column_only();
         auto row_pivots = view_config->get_row_pivots();
@@ -1478,12 +1513,13 @@ namespace binding {
         auto col_sortspec = view_config->get_col_sortspec();
         auto row_pivot_depth = view_config->get_row_pivot_depth();
         auto column_pivot_depth = view_config->get_column_pivot_depth();
+        auto computed_columns = view_config->get_computed_columns();
 
         t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
         auto cfg = t_config(
-            row_pivots, column_pivots, aggspecs, total, filter_op, fterm, column_only);
-        auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
+            row_pivots, column_pivots, aggspecs, total, fterm, computed_columns, filter_op, column_only);
+        auto ctx2 = std::make_shared<t_ctx2>(*(schema.get()), cfg);
 
         ctx2->init();
 
@@ -1711,6 +1747,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             const std::vector<std::string>&,
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
+            const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>&,
             const std::string,
             bool>()
         .smart_ptr<std::shared_ptr<t_view_config>>("shared_ptr<t_view_config>")

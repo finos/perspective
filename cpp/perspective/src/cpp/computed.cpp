@@ -205,18 +205,12 @@ t_computed_column::get_computed_function_string_2(t_computation computation) {
 void
 t_computed_column::apply_computation(
     const std::vector<std::shared_ptr<t_column>>& table_columns,
-    const std::vector<std::shared_ptr<t_column>>& flattened_columns,
     std::shared_ptr<t_column> output_column,
-    const std::vector<t_rlookup>& row_indices,
     t_computation computation) {
-    std::uint32_t end = row_indices.size();
-    if (end == 0) {
-        end = flattened_columns[0]->size();
-    }
-
-    output_column->reserve(end);
-
+    std::uint32_t end = table_columns[0]->size();
     auto arity = table_columns.size();
+
+    //std::cout << "num_rows: " << end << ", arity: " << arity << std::endl;
 
     std::function<t_tscalar(t_tscalar)> function_1;
     std::function<t_tscalar(t_tscalar, t_tscalar)> function_2;
@@ -252,21 +246,12 @@ t_computed_column::apply_computation(
     }
 
     for (t_uindex idx = 0; idx < end; ++idx) {
-        // iterate through row indices OR through all rows
-        t_uindex ridx = idx;
-        if (row_indices.size() > 0) {
-            ridx = row_indices[idx].m_idx;
-        }
-
         // create args
         std::vector<t_tscalar> args;
         for (t_uindex x = 0; x < arity; ++x) {
-            t_tscalar t = flattened_columns[x]->get_scalar(idx);
+            t_tscalar t = table_columns[x]->get_scalar(idx);
             if (!t.is_valid()) {
-                t = table_columns[x]->get_scalar(ridx);
-                if (!t.is_valid()) {
-                    break;
-                }
+                break;
             }
 
             args.push_back(t);
@@ -306,6 +291,8 @@ t_computed_column::apply_computation(
             }
         }
     }
+
+    //output_column->pprint();
 }
 
 std::vector<t_computation> t_computed_column::computations = {};

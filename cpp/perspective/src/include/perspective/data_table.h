@@ -74,6 +74,7 @@ public:
     t_dtype get_dtype(const std::string& colname) const;
 
     std::shared_ptr<t_column> get_column(const std::string& colname);
+    std::shared_ptr<t_column> get_column(const std::string& colname) const;
     std::shared_ptr<const t_column> get_const_column(const std::string& colname) const;
 
     std::shared_ptr<const t_column> get_const_column(t_uindex idx) const;
@@ -107,6 +108,15 @@ public:
     t_data_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone() const;
+
+    /**
+     * @brief Create a new `t_data_table` from the specified schema. For each
+     * column in the schema, retrieve a shared pointer to the current instance's
+     * column, and set it in the new `t_data_table` to be returned.
+     * 
+     * @return std::shared_ptr<t_data_table> 
+     */
+    std::shared_ptr<t_data_table> borrow(const std::vector<std::string>& columns) const;
 
     t_column* clone_column(const std::string& existing_col, const std::string& new_colname);
 
@@ -347,7 +357,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     t_uindex ndata_cols = d_columns.size();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ndata_cols), 1,
+    tbb::parallel_forallel_for(0, int(ndata_cols), 1,
         [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ndata_cols; ++colidx)
@@ -407,7 +417,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
 #endif
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(m_schema.get_num_columns()),
+    tbb::parallel_for(0, int(m_schema.get_num_columns()),
         [&flattened, this](int colidx)
 #else
     for (t_uindex colidx = 0, loop_end = m_schema.get_num_columns(); colidx < loop_end;

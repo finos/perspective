@@ -642,7 +642,7 @@ t_ctx_grouped_pkey::rebuild() {
     }
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(naggs), 1,
+    tbb::parallel_for(0, int(naggs), 1,
         [&aggtable, &aggindices, &aggspecs, &tbl](int aggnum)
 #else
     for (t_uindex aggnum = 0; aggnum < naggs; ++aggnum)
