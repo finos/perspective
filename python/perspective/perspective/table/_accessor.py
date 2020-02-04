@@ -113,6 +113,7 @@ class _PerspectiveAccessor(object):
                     raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
 
                 dtype = array.dtype
+
                 if name == "index" and isinstance(data_or_schema.index, pandas.DatetimeIndex):
                     # use the index of the original, unflattened dataframe
                     dtype = _parse_datetime_index(data_or_schema.index)

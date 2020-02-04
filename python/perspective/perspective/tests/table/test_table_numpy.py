@@ -28,6 +28,26 @@ class TestTableNumpy(object):
             "b": [4, 5, 6]
         }
 
+    def test_table_int_lots_of_columns(self):
+        data = {
+            "a": np.array([1, 2, 3]),
+            "b": np.array([4, 5, 6]),
+            "c": np.array([4, 5, 6]),
+            "d": np.array([4, 5, 6]),
+            "e": np.array([4, 5, 6]),
+            "f": np.array([4, 5, 6]),
+        }
+        tbl = Table(data)
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "a": [1, 2, 3],
+            "b": [4, 5, 6],
+            "c": [4, 5, 6],
+            "d": [4, 5, 6],
+            "e": [4, 5, 6],
+            "f": [4, 5, 6]
+        }
+
     def test_table_int_with_None(self):
         data = {"a": np.array([1, 2, 3, None, None]), "b": np.array([4, 5, 6, None, None])}
         tbl = Table(data)
@@ -737,6 +757,36 @@ class TestTableNumpy(object):
         })
         table.update(df)
         assert table.view().to_dict()["a"] == data
+
+    # partial update
+
+    def test_table_numpy_partial_update(self):
+        data = ["a", None, "b", None, "c"]
+        df = {"a": np.array([1, 2, 3, 4, 5]), "b": np.array(data), "c": np.array(data)}
+        table = Table(df, index="a")
+        table.update({
+            "a": np.array([2, 4, 5]),
+            "b": np.array(["x", "y", "z"])
+        })
+        assert table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5],
+            "b": ["a", "x", "b", "y", "z"],
+            "c": ["a", None, "b", None, "c"]
+        }
+
+    def test_table_numpy_partial_update_implicit(self):
+        data = ["a", None, "b", None, "c"]
+        df = {"a": np.array([1, 2, 3, 4, 5]), "b": np.array(data), "c": np.array(data)}
+        table = Table(df)
+        table.update({
+            "__INDEX__": np.array([1, 3, 4]),
+            "b": np.array(["x", "y", "z"])
+        })
+        assert table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5],
+            "b": ["a", "x", "b", "y", "z"],
+            "c": ["a", None, "b", None, "c"]
+        }
 
     # structured array
 
