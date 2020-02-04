@@ -325,7 +325,8 @@ export const install = function(grid) {
 
         const filters = config.filter.concat(row_filters).concat(column_filters);
 
-        // this only works for single row select (which is all we support right now)
+        // this only works for single row select (which is all we support
+        // right now)
         if (this.grid.properties.rowSelection) {
             const selected = this.grid.getSelectedRows()[0] === y;
             this.grid.canvas.dispatchEvent(

@@ -1187,6 +1187,39 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Bucket (W), date shouldn't ever overflow at beginning of year", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (W)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2015, 0, 3, 15), new Date(2015, 0, 4)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => week_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Bucket (M), date", async function() {
                 const table = perspective.table({
                     a: "date"
@@ -1502,6 +1535,39 @@ module.exports = perspective => {
 
                 table2.update({
                     a: [new Date(2020, 0, 12), new Date(2020, 0, 15), new Date(2020, 0, 17), new Date(2020, 0, 18), new Date(2020, 0, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => week_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (W), datetime shouldn't ever overflow at beginning of year", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (W)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2015, 0, 3, 15), new Date(2015, 0, 4)]
                 });
 
                 let result = await view.to_columns();
