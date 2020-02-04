@@ -135,7 +135,6 @@ export class ActionElement extends DomElement {
         const cols = await this._table.columns();
         // edit overwrites last column, otherwise avoid name collision
         if (cols.includes(computed_column_name)) {
-            console.log(computed_column_name);
             computed_column_name += ` ${Math.round(Math.random() * 100)}`;
         }
 

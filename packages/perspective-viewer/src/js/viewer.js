@@ -186,20 +186,27 @@ class PerspectiveViewer extends ActionElement {
             computed_columns = [];
         }
         const resolve = this._set_updating();
-        this._computed_column._close_computed_column();
+
         (async () => {
             if (this._table) {
+                const computed_schema = await this._table.computed_schema();
+                this._computed_column._close_computed_column();
                 for (let col of computed_columns) {
-                    await this._create_computed_column({
-                        detail: {
-                            column_name: col.name,
-                            input_columns: col.inputs.map(x => ({name: x})),
-                            computation: COMPUTATIONS[col.func]
-                        }
-                    });
+                    if (!computed_schema[col.name]) {
+                        await this._create_computed_column({
+                            detail: {
+                                column_name: col.name,
+                                input_columns: col.inputs.map(x => ({name: x})),
+                                computation: COMPUTATIONS[col.func]
+                            }
+                        });
+                    }
                 }
+
                 await this._debounce_update();
                 resolve();
+            } else {
+                this._computed_column._close_computed_column();
             }
             this.dispatchEvent(new Event("perspective-config-update"));
             this.dispatchEvent(new Event("perspective-computed-column-update"));
