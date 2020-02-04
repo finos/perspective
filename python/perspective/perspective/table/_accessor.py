@@ -43,20 +43,22 @@ def _type_to_format(data_or_schema):
                 - 0: records (:obj:`list` of :obj:`dict`)
                 - 1: columns (:obj:`dict` of :obj:`str` to :obj:`list`)
                 - 2: schema (dist[str]/dict[type])
+        :obj:`list`: column names
         ():obj:`list`/:obj:`dict`): processed data
     '''
     if isinstance(data_or_schema, list):
         # records
-        return False, 0, data_or_schema
+        names = list(data_or_schema[0].keys()) if len(data_or_schema) > 0 else []
+        return False, 0, names, data_or_schema
     elif isinstance(data_or_schema, dict):
         # schema or columns
         for v in data_or_schema.values():
             if isinstance(v, type) or isinstance(v, str):
                 # schema maps name -> type
-                return False, 2, data_or_schema
+                return False, 2, list(data_or_schema.keys()), data_or_schema
             elif isinstance(v, list):
                 # a dict of iterables = type 1
-                return False, 1, data_or_schema
+                return False, 1, list(data_or_schema.keys()), data_or_schema
             else:
                 # See if iterable
                 try:
@@ -64,12 +66,13 @@ def _type_to_format(data_or_schema):
                 except TypeError:
                     raise NotImplementedError("Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
                 else:
-                    return isinstance(v, numpy.ndarray), 1, data_or_schema
+                    return isinstance(v, numpy.ndarray), 1, list(data_or_schema.keys()), data_or_schema
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
             raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
-        return True, 1, _flatten_structure(data_or_schema)
+        flattened = _flatten_structure(data_or_schema)
+        return True, 1, list(flattened.keys()), flattened
     else:
         if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
@@ -77,7 +80,7 @@ def _type_to_format(data_or_schema):
         else:
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
-            return True, 1, {c: df[c].values for c in df.columns}
+            return True, 1, df.columns.tolist(), {c: df[c].values for c in df.columns}
 
 
 class _PerspectiveAccessor(object):
@@ -88,17 +91,12 @@ class _PerspectiveAccessor(object):
     INTEGER_TYPES = six.integer_types + (numpy.integer,)
 
     def __init__(self, data_or_schema):
-        self._is_numpy, self._format, self._data_or_schema = _type_to_format(data_or_schema)
+        self._is_numpy, self._format, self._names, self._data_or_schema = _type_to_format(data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
         self._row_count = \
             len(self._data_or_schema) if self._format == 0 else \
             len(max(self._data_or_schema.values(), key=len)) if self._format == 1 else \
             0
-
-        if isinstance(self._data_or_schema, list):
-            self._names = list(self._data_or_schema[0].keys()) if len(self._data_or_schema) > 0 else []
-        elif isinstance(self._data_or_schema, dict):
-            self._names = list(self._data_or_schema.keys())
 
         self._types = []
 

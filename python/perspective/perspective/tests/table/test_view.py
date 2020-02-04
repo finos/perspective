@@ -6,17 +6,17 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import pandas as pd
 import numpy as np
-from pytest import raises
 from perspective.table import Table
 from datetime import date, datetime
-
 
 
 def compare_delta(received, expected):
     """Compare an arrow-serialized row delta by constructing a Table."""
     tbl = Table(received)
     assert tbl.view().to_dict() == expected
+
 
 class TestView(object):
     def test_view_zero(self):
@@ -248,6 +248,19 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(columns=["b", "a"])
         assert view.to_records() == [{"b": 2, "a": 1}, {"b": 4, "a": 3}]
+
+    def test_view_dataframe_column_order(self):
+        table = Table(pd.DataFrame({
+            "0.1": [5, 6, 7, 8],
+            "-0.05": [5, 6, 7, 8],
+            "0.0": [1, 2, 3, 4],
+            "-0.1": [1, 2, 3, 4],
+            "str": ["a", "b", "c", "d"]
+        }))
+        view = table.view(
+            columns=["-0.1", "-0.05", "0.0", "0.1"], row_pivots=["str"])
+        assert view.column_paths() == [
+            "__ROW_PATH__", "-0.1", "-0.05", "0.0", "0.1"]
 
     def test_view_aggregate_order(self):
         '''In Python 3.7 and above, a dict's insertion order is guaranteed. We use this guarantee to ensure that
