@@ -273,7 +273,7 @@
     }
     #sort perspective-row {
         --sort_order-display: inline;
-        --sort_order-padding: 0 0 0 10px;
+        --sort_order-padding: 0 0 0 4px;
         &[sort-order="asc"] {
             --row-sort-order--before: var(--sort-order-asc--before, "\2191");
         }
@@ -320,10 +320,17 @@
             );
         }
     }
-    #top_panel perspective-row + perspective-row:before {
-        content: ",";
+    #top_panel perspective-row {
         padding: 0px 10px 0px 0px;
     }
+    #top_panel perspective-row::after {
+        content: ",";
+    }
+    #top_panel perspective-row:last-child::after {
+        display: none;
+        content: "" !important;
+    }
+
     label {
         white-space: nowrap;
         display: inline-block;

@@ -56,7 +56,7 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     toggleConfig() {
-        this.viewer.toggleConfig();
+        return this.viewer.toggleConfig();
     }
 
     restore(config) {

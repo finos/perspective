@@ -224,7 +224,8 @@
         height: var(--row_draggable-height, 21px);
         min-height: var(--row_draggable-height, 21px);
         display: var(--row_draggable-display, flex);
-        flex-direction: column;
+        align-items: var(--row-draggable--align-items);
+        flex-direction: var(--row-draggable--flex-direction, column);
         justify-content: var(--row_draggable--justify-content, center);
         margin: var(--row_draggable--margin, 0);
         transition: var(--row_draggable--transition, none);

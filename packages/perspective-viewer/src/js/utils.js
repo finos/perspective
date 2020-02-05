@@ -59,7 +59,7 @@ export function registerElement(templateString, styleString, proto) {
             if (value === null) {
                 value = "null";
             }
-            if (name[0] !== "_" && old != value) {
+            if (name[0] !== "_" && old != value && !!Object.getOwnPropertyDescriptor(proto.prototype, name).set) {
                 this[name] = value;
             }
         }
@@ -69,14 +69,6 @@ export function registerElement(templateString, styleString, proto) {
                 return;
             }
             this._initializing = true;
-            this._old_children = [];
-            while (this.hasChildNodes()) {
-                if (this.lastChild.nodeType === 1) {
-                    this._old_children.push(this.lastChild);
-                }
-                this.removeChild(this.lastChild);
-            }
-            this._old_children = this._old_children.reverse();
             var node = document.importNode(template.content, true);
             this.attachShadow({mode: "open"});
             this.shadowRoot.appendChild(node);
@@ -88,7 +80,9 @@ export function registerElement(templateString, styleString, proto) {
             // Call all attributes bound to setters on the proto
             for (let key of Object.getOwnPropertyNames(proto.prototype)) {
                 if (key !== "connectedCallback") {
-                    if (this.hasAttribute(key) && key[0] !== "_") this[key] = this.getAttribute(key);
+                    if (this.hasAttribute(key) && key[0] !== "_" && !!Object.getOwnPropertyDescriptor(proto.prototype, key).set) {
+                        this[key] = this.getAttribute(key);
+                    }
                 }
             }
             this._initializing = false;

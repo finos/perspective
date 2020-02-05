@@ -12,19 +12,19 @@
    --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
 }
 
-.p-Detail.p-Maximize[settings]{
+.p-Detail.p-Maximize[settings] {
    --settings-button--content: var(--close-settings-button--content, "\1F527") !important;
 }
 
 
-.p-DockPanel-widget{
+.p-DockPanel-widget {
    border: @border-color;
    border-width: 0px !important;
    min-width: 300px;
    min-height: 200px;
 }
 
-.p-Detail{
+.p-Detail {
    min-width: 300px;
    min-height: 200px;
    --settings-button--content: "" !important;
@@ -35,8 +35,9 @@ perspective-viewer.p-Blur{
    opacity: 0.5;
 }
 
-.p-ContextMenu > perspective-viewer.p-ContextFocus{
+.p-ContextMenu > perspective-viewer.p-ContextFocus {
    opacity: 1;
+
 }
 
 .p-ContextMenu > perspective-viewer {
@@ -44,17 +45,17 @@ perspective-viewer.p-Blur{
 }
 
 perspective-viewer {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      position: absolute;
-      top: 0;
-      left: 0px;
-      right: 0px;
-      bottom: 0px;
-      overflow: visible !important;
-      font-family: "Open Sans", Arial, sans-serif;
-      transition: opacity 0.2s ease-out;
-    }
+   flex: 1;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   flex-direction: column;
+   position: absolute;
+   top: 0;
+   left: 0px;
+   right: 0px;
+   bottom: 0px;
+   overflow: visible !important;
+   font-family: "Open Sans", Arial, sans-serif;
+   transition: opacity 0.2s ease-out;
+}

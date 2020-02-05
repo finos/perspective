@@ -186,20 +186,27 @@ class PerspectiveViewer extends ActionElement {
             computed_columns = [];
         }
         const resolve = this._set_updating();
-        this._computed_column._close_computed_column();
+
         (async () => {
             if (this._table) {
+                const computed_schema = await this._table.computed_schema();
+                this._computed_column._close_computed_column();
                 for (let col of computed_columns) {
-                    await this._create_computed_column({
-                        detail: {
-                            column_name: col.name,
-                            input_columns: col.inputs.map(x => ({name: x})),
-                            computation: COMPUTATIONS[col.func]
-                        }
-                    });
+                    if (!computed_schema[col.name]) {
+                        await this._create_computed_column({
+                            detail: {
+                                column_name: col.name,
+                                input_columns: col.inputs.map(x => ({name: x})),
+                                computation: COMPUTATIONS[col.func]
+                            }
+                        });
+                    }
                 }
+
                 await this._debounce_update();
                 resolve();
+            } else {
+                this._computed_column._close_computed_column();
             }
             this.dispatchEvent(new Event("perspective-config-update"));
             this.dispatchEvent(new Event("perspective-computed-column-update"));
@@ -485,6 +492,7 @@ class PerspectiveViewer extends ActionElement {
      * Load data. If `load` or `update` have already been called on this
      * element, its internal `perspective.table` will also be deleted.
      *
+     * @async
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
      * @returns {Promise<void>} A promise which resolves once the data is loaded
@@ -499,20 +507,28 @@ class PerspectiveViewer extends ActionElement {
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
+     * @example <caption>Load Promise<perspective.table></caption>
+     * const my_viewer = document.getElementById('#my_viewer');
+     * const tbl = async () => perspective.table("x,y\n1,a\n2,b");
+     * my_viewer.load(tbl);
      */
-    load(data, options) {
-        try {
-            data = data.trim();
-        } catch (e) {}
+    async load(data, options) {
         let table;
-        if (data.hasOwnProperty("_name") && data.type === "table") {
-            table = data;
+        if (data instanceof Promise) {
+            table = await data;
         } else {
-            table = this.worker.table(data, options);
-            table._owner_viewer = this;
+            try {
+                data = data.trim();
+            } catch (e) {}
+            if (data.type === "table") {
+                table = data;
+            } else {
+                table = this.worker.table(data, options);
+                table._owner_viewer = this;
+            }
         }
         if (this.isConnected) {
-            return this._load_table(table);
+            await this._load_table(table);
         } else {
             this._table = table;
         }
@@ -545,8 +561,8 @@ class PerspectiveViewer extends ActionElement {
      */
     @throttlePromise
     async notifyResize(immediate) {
-        this._check_responsive_layout();
-        if (!document.hidden && this.offsetParent) {
+        const resized = await this._check_responsive_layout();
+        if (!resized && !document.hidden && this.offsetParent) {
             await this._plugin.resize.call(this, immediate);
         }
     }
@@ -675,14 +691,14 @@ class PerspectiveViewer extends ActionElement {
      * Clears the rows in the current {@link table}.
      */
     clear() {
-        this._table.clear();
+        this._table?.clear();
     }
 
     /**
      * Replaces all rows in the current {@link table}.
      */
     replace(data) {
-        this._table.replace(data);
+        this._table ? this._table.replace(data) : this._load(data);
     }
 
     /**

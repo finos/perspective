@@ -179,7 +179,9 @@
     }
 
     #top_panel perspective-row {
-        --row_draggable-display: inline-block;
+        --row_draggable-display: inline-flex;
+        --row-draggable--flex-direction: row;
+        --row-draggable--align-items: center;
     }
 
     #columns_container {
@@ -343,7 +345,7 @@
     }
 
     #filters perspective-row {
-        margin: 0 24px 0 0;
+        margin: 0 0px 0 0;
         --filter_operator-display: inline-block;
         --filter_operand-display: inline-block;
     }

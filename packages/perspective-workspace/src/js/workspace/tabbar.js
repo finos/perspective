@@ -26,6 +26,15 @@ export class PerspectiveTabBar extends TabBar {
         // prevent collection from the weakmap.
         this.__content_node__ = this.contentNode;
         super.onUpdateRequest(msg);
+        this._check_shade();
+    }
+
+    _check_shade() {
+        if (Array.from(this.contentNode.children).filter(x => x.classList.contains("settings_open") && x.classList.contains("p-mod-current")).length > 0) {
+            this.contentNode.classList.add("inactive-blur");
+        } else {
+            this.contentNode.classList.remove("inactive-blur");
+        }
     }
 
     handleEvent(event) {
@@ -58,6 +67,7 @@ export class PerspectiveTabBar extends TabBar {
 
                     const title = this.titles[index];
                     title.owner.toggleConfig();
+                    return;
                 }
                 break;
         }

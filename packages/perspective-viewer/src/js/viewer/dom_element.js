@@ -299,14 +299,33 @@ export class DomElement extends PerspectiveElement {
         }
     }
 
-    _check_responsive_layout() {
+    async _check_responsive_layout() {
         if (this.shadowRoot) {
+            const app = this.shadowRoot.querySelector("#app");
             if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
-                this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
-            } else {
-                this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
+                if (!app.classList.contains("columns_horizontal")) {
+                    const old = this._persisted_side_panel_width;
+                    this._persisted_side_panel_width = this._side_panel.style.width;
+                    this._side_panel.style.width = old || "";
+                    app.classList.add("columns_horizontal");
+                    return true;
+                }
+                return false;
+            } else if (app.classList.contains("columns_horizontal")) {
+                const panel = this.shadowRoot.querySelector("#pivot_chart_container");
+                panel.clientWidth + this._side_panel.clientWidth;
+                const width = this._persisted_side_panel_width || panel.clientWidth + this._side_panel.clientWidth / 2;
+                const height = panel.clientHeight + 50;
+                await this._pre_resize(width, height, () => {
+                    const old = this._persisted_side_panel_width;
+                    this._persisted_side_panel_width = this._side_panel.style.width;
+                    this._side_panel.style.width = old || "";
+                    app.classList.remove("columns_horizontal");
+                });
+                return true;
             }
         }
+        return false;
     }
 
     // setup functions
