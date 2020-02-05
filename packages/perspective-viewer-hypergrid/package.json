@@ -35,10 +35,10 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@babel/runtime": "^7.3.4",
+        "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^0.4.1",
         "@finos/perspective-viewer": "^0.4.1",
-        "core-js": "^2.6.9",
+        "core-js": "^3.6.4",
         "datasaur-local": "3.0.0",
         "faux-hypergrid": "3.2.4",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",

@@ -12,7 +12,7 @@ module.exports = {
                 },
                 modules: false,
                 useBuiltIns: "usage",
-                corejs: 2
+                corejs: 3
             }
         ]
     ],
