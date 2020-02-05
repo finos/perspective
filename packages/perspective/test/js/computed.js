@@ -115,6 +115,25 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Square root of int, nulls", async function() {
+                const table = perspective
+                    .table({
+                        a: [4, 9, null, undefined, 16]
+                    })
+                    .add_computed([
+                        {
+                            column: "sqrt",
+                            computed_function_name: "sqrt",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view({columns: ["sqrt"]});
+                let result = await view.to_columns();
+                expect(result.sqrt).toEqual([2, 3, null, null, 4]);
+                view.delete();
+                table.delete();
+            });
+
             it("Square root of float", async function() {
                 var table = perspective.table({
                     a: [4.5, 9.5, 16.5, 20.5, 81.5, 1000.5]
@@ -130,6 +149,26 @@ module.exports = perspective => {
                 let view = table2.view({columns: ["sqrt"]});
                 let result = await view.to_columns();
                 expect(result.sqrt).toEqual([2.1213203435596424, 3.082207001484488, 4.06201920231798, 4.527692569068709, 9.027735042633894, 31.63068130786942]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Square root of float, null", async function() {
+                var table = perspective.table({
+                    a: [4.5, 9.5, null, undefined, 16.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "sqrt",
+                        computed_function_name: "sqrt",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["sqrt"]});
+                let result = await view.to_columns();
+                expect(result.sqrt).toEqual([2.1213203435596424, 3.082207001484488, null, null, 4.06201920231798]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -155,6 +194,26 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Pow^2 of int, nulls", async function() {
+                var table = perspective.table({
+                    a: [2, 4, null, undefined, 10]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "pow2",
+                        computed_function_name: "x^2",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["pow2"]});
+                let result = await view.to_columns();
+                expect(result.pow2).toEqual([4, 16, null, null, 100]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Pow^2 of float", async function() {
                 var table = perspective.table({
                     a: [2.5, 4.5, 6.5, 8.5, 10.5]
@@ -170,6 +229,26 @@ module.exports = perspective => {
                 let view = table2.view({columns: ["pow2"]});
                 let result = await view.to_columns();
                 expect(result.pow2).toEqual([6.25, 20.25, 42.25, 72.25, 110.25]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Pow^2 of float, nulls", async function() {
+                var table = perspective.table({
+                    a: [2.5, 4.5, null, undefined, 10.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "pow2",
+                        computed_function_name: "x^2",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["pow2"]});
+                let result = await view.to_columns();
+                expect(result.pow2).toEqual([6.25, 20.25, null, null, 110.25]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -195,6 +274,26 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Invert int, nulls", async function() {
+                var table = perspective.table({
+                    a: [2, 4, null, undefined, 10]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "invert",
+                        computed_function_name: "1/x",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["invert"]});
+                let result = await view.to_columns();
+                expect(result.invert).toEqual([0.5, 0.25, null, null, 0.1]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Invert float", async function() {
                 var table = perspective.table({
                     a: [2.5, 4.5, 6.5, 8.5, 10.5]
@@ -210,6 +309,26 @@ module.exports = perspective => {
                 let view = table2.view({columns: ["invert"]});
                 let result = await view.to_columns();
                 expect(result.invert).toEqual([0.4, 0.2222222222222222, 0.15384615384615385, 0.11764705882352941, 0.09523809523809523]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Invert float, nulls", async function() {
+                var table = perspective.table({
+                    a: [2.5, 4.5, null, undefined, 10.5]
+                });
+
+                let table2 = table.add_computed([
+                    {
+                        column: "invert",
+                        computed_function_name: "1/x",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view({columns: ["invert"]});
+                let result = await view.to_columns();
+                expect(result.invert).toEqual([0.4, 0.2222222222222222, null, null, 0.09523809523809523]);
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -299,7 +418,7 @@ module.exports = perspective => {
             it("Computed column of arity 2, add with null", async function() {
                 var table = perspective.table({
                     a: [1, 2, null, 3, 4],
-                    b: [1.5, null, 2.5, 3.5, 4.5]
+                    b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
                 let table2 = table.add_computed([
@@ -381,7 +500,7 @@ module.exports = perspective => {
             it("Computed column of arity 2, subtract with null", async function() {
                 var table = perspective.table({
                     a: [1, 2, null, 3, 4],
-                    b: [1.5, null, 2.5, 3.5, 4.5]
+                    b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
                 let table2 = table.add_computed([
@@ -460,7 +579,7 @@ module.exports = perspective => {
             it("Computed column of arity 2, multiply with null", async function() {
                 var table = perspective.table({
                     a: [1, 2, null, 3, 4],
-                    b: [1.5, null, 2.5, 3.5, 4.5]
+                    b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
                 let table2 = table.add_computed([
@@ -539,7 +658,7 @@ module.exports = perspective => {
             it("Computed column of arity 2, divide with null", async function() {
                 var table = perspective.table({
                     a: [1, 2, null, 3, 4],
-                    b: [1.5, null, 2.5, 3.5, 4.5]
+                    b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
                 let table2 = table.add_computed([
@@ -622,7 +741,7 @@ module.exports = perspective => {
                 const table = perspective
                     .table({
                         a: [100, null, 50, 25, 10, 1],
-                        b: [100, 100, 100, 100, null, 100]
+                        b: [100, 100, 100, 100, undefined, 100]
                     })
                     .add_computed([
                         {
@@ -756,6 +875,25 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Length with null", async function() {
+                const table = perspective
+                    .table({
+                        a: ["abc", "deeeeef", null, undefined, "abcdefghijk"]
+                    })
+                    .add_computed([
+                        {
+                            column: "length",
+                            computed_function_name: "length",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.length).toEqual(result.a.map(x => (x ? x.length : null)));
+                view.delete();
+                table.delete();
+            });
+
             it("Uppercase", async function() {
                 const table = perspective
                     .table({
@@ -775,6 +913,25 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Uppercase with null", async function() {
+                const table = perspective
+                    .table({
+                        a: ["abc", "deeeeef", null, undefined, "abcdefghijk"]
+                    })
+                    .add_computed([
+                        {
+                            column: "upper",
+                            computed_function_name: "Uppercase",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.upper).toEqual(result.a.map(x => (x ? x.toUpperCase() : null)));
+                view.delete();
+                table.delete();
+            });
+
             it("Lowercase", async function() {
                 const table = perspective
                     .table({
@@ -782,14 +939,33 @@ module.exports = perspective => {
                     })
                     .add_computed([
                         {
-                            column: "length",
+                            column: "lower",
                             computed_function_name: "Lowercase",
                             inputs: ["a"]
                         }
                     ]);
                 let view = table.view();
                 let result = await view.to_columns();
-                expect(result.length).toEqual(result.a.map(x => x.toLowerCase()));
+                expect(result.lower).toEqual(result.a.map(x => x.toLowerCase()));
+                view.delete();
+                table.delete();
+            });
+
+            it("Lowercase with null", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC", "DEF", null, undefined, "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "lower",
+                            computed_function_name: "Lowercase",
+                            inputs: ["a"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.lower).toEqual(result.a.map(x => (x ? x.toLowerCase() : null)));
                 view.delete();
                 table.delete();
             });
@@ -840,7 +1016,7 @@ module.exports = perspective => {
                 const table = perspective
                     .table({
                         a: ["ABC", "DEF", null, "HIjK", "lMNoP"],
-                        b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
+                        b: ["ABC", undefined, "EfG", "HIjK", "lMNoP"]
                     })
                     .add_computed([
                         {
@@ -862,7 +1038,7 @@ module.exports = perspective => {
             it("Concats with comma, nulls", async function() {
                 const table = perspective
                     .table({
-                        a: ["ABC", "DEF", null, "HIjK", "lMNoP"],
+                        a: ["ABC", "DEF", undefined, "HIjK", "lMNoP"],
                         b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
                     })
                     .add_computed([
@@ -886,7 +1062,7 @@ module.exports = perspective => {
                 const table = perspective
                     .table({
                         a: ["ABC".repeat(10), "DEF".repeat(10), null, "HIjK".repeat(10), "lMNoP".repeat(10)],
-                        b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
+                        b: ["ABC", undefined, "EfG", "HIjK", "lMNoP"]
                     })
                     .add_computed([
                         {
@@ -908,7 +1084,7 @@ module.exports = perspective => {
             it("Concats with comma, extra long", async function() {
                 const table = perspective
                     .table({
-                        a: ["ABC".repeat(10), "DEF".repeat(10), null, "HIjK".repeat(10), "lMNoP".repeat(10)],
+                        a: ["ABC".repeat(10), "DEF".repeat(10), undefined, "HIjK".repeat(10), "lMNoP".repeat(10)],
                         b: ["ABC", null, "EfG", "HIjK", "lMNoP"]
                     })
                     .add_computed([
@@ -962,6 +1138,38 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Hour of day, date with null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "hour",
+                        computed_function_name: "Hour of Day",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    hour: "integer"
+                });
+
+                table2.update({
+                    a: [new Date(), null, undefined, new Date()]
+                });
+
+                let result = await view.to_columns();
+                expect(result.hour).toEqual([0, null, null, 0]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Day of week, date", async function() {
                 const table = perspective.table({
                     a: "date"
@@ -990,6 +1198,39 @@ module.exports = perspective => {
                 let result = await view.to_columns();
                 console.error(result);
                 expect(result.day).toEqual(result.a.map(x => days_of_week[new Date(x).getDay()]));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Day of week, date with null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "day",
+                        computed_function_name: "Day of Week",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    day: "string"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 26), null, undefined, new Date(2020, 0, 29), new Date(2020, 0, 30)]
+                });
+
+                let result = await view.to_columns();
+                console.error(result);
+                expect(result.day).toEqual(result.a.map(x => (x ? days_of_week[new Date(x).getDay()] : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1027,6 +1268,38 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Month of year, date with null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "month",
+                        computed_function_name: "Month of Year",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    month: "string"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15), null, undefined, new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.month).toEqual(result.a.map(x => (x ? months_of_year[new Date(x).getMonth()] : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Bucket (s), date", async function() {
                 const table = perspective.table({
                     a: "date"
@@ -1059,7 +1332,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Bucket (m), date", async function() {
+            it("Bucket (s), date", async function() {
                 const table = perspective.table({
                     a: "date"
                 });
@@ -1067,7 +1340,7 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
-                        computed_function_name: "Bucket (m)",
+                        computed_function_name: "Bucket (s)",
                         inputs: ["a"]
                     }
                 ]);
@@ -1081,107 +1354,11 @@ module.exports = perspective => {
                 });
 
                 table2.update({
-                    a: [new Date(2020, 0, 15), new Date(2020, 1, 27), new Date(2020, 2, 28), new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                    a: [new Date(2020, 0, 15), null, undefined, new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
                 });
 
                 let result = await view.to_columns();
-                expect(result.bucket).toEqual(result.a);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
-            it("Bucket (h), date", async function() {
-                const table = perspective.table({
-                    a: "date"
-                });
-
-                const table2 = table.add_computed([
-                    {
-                        column: "bucket",
-                        computed_function_name: "Bucket (h)",
-                        inputs: ["a"]
-                    }
-                ]);
-
-                let view = table2.view();
-
-                const schema = await table2.schema();
-                expect(schema).toEqual({
-                    a: "date",
-                    bucket: "date"
-                });
-                table2.update({
-                    a: [new Date(2020, 0, 15), new Date(2020, 1, 27), new Date(2020, 2, 28), new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
-                });
-
-                let result = await view.to_columns();
-                expect(result.bucket).toEqual(result.a);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
-            it("Bucket (D), date", async function() {
-                const table = perspective.table({
-                    a: "date"
-                });
-
-                const table2 = table.add_computed([
-                    {
-                        column: "bucket",
-                        computed_function_name: "Bucket (D)",
-                        inputs: ["a"]
-                    }
-                ]);
-
-                let view = table2.view();
-
-                const schema = await table2.schema();
-                expect(schema).toEqual({
-                    a: "date",
-                    bucket: "date"
-                });
-
-                table2.update({
-                    a: [new Date(2020, 0, 15), new Date(2020, 1, 27), new Date(2020, 2, 28), new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
-                });
-
-                let result = await view.to_columns();
-                expect(result.bucket).toEqual(result.a);
-                view.delete();
-                table2.delete();
-                table.delete();
-            });
-
-            it("Bucket (W), date", async function() {
-                const table = perspective.table({
-                    a: "date"
-                });
-
-                const table2 = table.add_computed([
-                    {
-                        column: "bucket",
-                        computed_function_name: "Bucket (W)",
-                        inputs: ["a"]
-                    }
-                ]);
-
-                let view = table2.view();
-
-                const schema = await table2.schema();
-                expect(schema).toEqual({
-                    a: "date",
-                    bucket: "date"
-                });
-
-                table2.update({
-                    a: [new Date(2020, 0, 12), new Date(2020, 0, 15), new Date(2020, 0, 17), new Date(2020, 0, 18), new Date(2020, 0, 29)]
-                });
-
-                let result = await view.to_columns();
-
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => week_bucket(x)));
+                expect(result.bucket).toEqual(result.a.map(x => (x ? x : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1228,6 +1405,262 @@ module.exports = perspective => {
                 const table2 = table.add_computed([
                     {
                         column: "bucket",
+                        computed_function_name: "Bucket (m)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15), new Date(2020, 1, 27), new Date(2020, 2, 28), new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (m), date with nulls", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (m)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15), null, undefined, new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a.map(x => (x ? x : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (h), date", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (h)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+                table2.update({
+                    a: [new Date(2020, 0, 15), new Date(2020, 1, 27), new Date(2020, 2, 28), new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (h), date with nulls", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (h)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+                table2.update({
+                    a: [new Date(2020, 0, 15), null, undefined, new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a.map(x => (x ? x : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (D), date", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (D)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15), new Date(2020, 1, 27), new Date(2020, 2, 28), new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (D), date null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (D)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15), null, undefined, new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a.map(x => (x ? x : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (W), date", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (W)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), new Date(2020, 0, 15), new Date(2020, 0, 17), new Date(2020, 0, 18), new Date(2020, 0, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => week_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (W), date with null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (W)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), new Date(2020, 0, 15), new Date(2020, 0, 17), new Date(2020, 0, 18), new Date(2020, 0, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? week_bucket(x) : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (M), date", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
                         computed_function_name: "Bucket (M)",
                         inputs: ["a"]
                     }
@@ -1247,7 +1680,40 @@ module.exports = perspective => {
 
                 let result = await view.to_columns();
 
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => month_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => month_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (M), date with null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (M)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), null, undefined, new Date(2020, 2, 18), new Date(2020, 2, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? month_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1280,7 +1746,40 @@ module.exports = perspective => {
 
                 let result = await view.to_columns();
 
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => year_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => year_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (Y), date with null", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (Y)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), null, undefined, new Date(2019, 2, 18), new Date(2019, 2, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? year_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1319,6 +1818,37 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Hour of day, datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "hour",
+                        computed_function_name: "Hour of Day",
+                        inputs: ["a"]
+                    }
+                ]);
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    hour: "integer"
+                });
+
+                table2.update({
+                    a: [new Date(), null, undefined, new Date()]
+                });
+
+                let result = await view.to_columns();
+                expect(result.hour).toEqual(result.a.map(x => (x ? new Date(x).getUTCHours() : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Day of week, datetime", async function() {
                 const table = perspective.table({
                     a: "datetime"
@@ -1347,6 +1877,39 @@ module.exports = perspective => {
                 let result = await view.to_columns();
                 console.error(result);
                 expect(result.day).toEqual(result.a.map(x => days_of_week[new Date(x).getUTCDay()]));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Day of week, datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "day",
+                        computed_function_name: "Day of Week",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    day: "string"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 26, 1), null, undefined, new Date(2020, 0, 29, 4), new Date(2020, 0, 30, 5)]
+                });
+
+                let result = await view.to_columns();
+                console.error(result);
+                expect(result.day).toEqual(result.a.map(x => (x ? days_of_week[new Date(x).getUTCDay()] : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1384,6 +1947,38 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Month of year, datetime", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "month",
+                        computed_function_name: "Month of Year",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    month: "string"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15), null, undefined, new Date(2020, 3, 29), new Date(2020, 4, 30), new Date(2020, 5, 31), new Date(2020, 6, 1)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.month).toEqual(result.a.map(x => (x ? months_of_year[new Date(x).getUTCMonth()] : null)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Bucket (s), datetime", async function() {
                 const table = perspective.table({
                     a: "datetime"
@@ -1410,7 +2005,39 @@ module.exports = perspective => {
                 });
 
                 let result = await view.to_columns();
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => second_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => second_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (s), datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (s)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), null, undefined, new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "datetime"
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? second_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1442,7 +2069,39 @@ module.exports = perspective => {
                 });
 
                 let result = await view.to_columns();
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => minute_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => minute_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (m), datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (m)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "datetime"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), null, undefined, new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? minute_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1474,7 +2133,39 @@ module.exports = perspective => {
                 });
 
                 let result = await view.to_columns();
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => hour_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => hour_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (h), datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (h)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "datetime"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), null, undefined, new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? hour_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1506,7 +2197,39 @@ module.exports = perspective => {
                 });
 
                 let result = await view.to_columns();
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => day_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => day_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (D), datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (D)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), null, undefined, new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? day_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1539,7 +2262,40 @@ module.exports = perspective => {
 
                 let result = await view.to_columns();
 
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => week_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => week_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (W), datetime with null", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (W)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), null, undefined, new Date(2020, 0, 18), new Date(2020, 0, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? week_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1605,7 +2361,40 @@ module.exports = perspective => {
 
                 let result = await view.to_columns();
 
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => month_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => month_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (M), datetime with nulls", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (M)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), null, undefined, new Date(2020, 2, 18), new Date(2020, 2, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? month_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();
@@ -1638,7 +2427,40 @@ module.exports = perspective => {
 
                 let result = await view.to_columns();
 
-                expect(result.bucket.map(x => new Date(x))).toEqual(result.a.map(x => year_bucket(x)));
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => year_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (Y), datetime with nulls", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (Y)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 12), null, undefined, new Date(2019, 2, 18), new Date(2019, 2, 29)]
+                });
+
+                let result = await view.to_columns();
+
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? year_bucket(x) : null)));
                 view.delete();
                 table2.delete();
                 table.delete();

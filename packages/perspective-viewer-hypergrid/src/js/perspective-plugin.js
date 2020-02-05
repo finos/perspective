@@ -23,7 +23,7 @@ var Borders = cellRenderersRegistry.BaseClass.extend("Borders", {
         var color;
 
         gc.save();
-        gc.translate(-0.5, 0.5); // paint "sharp" lines on pixels instead of "blury" lines between pixels
+        gc.translate(-0.5, 0.5); // paint "sharp" lines on pixels instead of "blurry" lines between pixels
         gc.cache.lineWidth = 1;
 
         color = config.borderTop;
