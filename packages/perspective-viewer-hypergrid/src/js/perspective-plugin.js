@@ -278,6 +278,41 @@ const right_click_handler = e => {
     e.target.parentElement.parentElement.parentElement.dispatchEvent(new_event);
 };
 
+async function getCellConfig(row_idx, col_idx) {
+    const config = this.dataModel.getConfig();
+    const row_pivots = config.row_pivots;
+    const column_pivots = config.column_pivots;
+    const start_row = row_idx >= 0 ? row_idx : 0;
+    const end_row = start_row + 1;
+    const r = await this.dataModel._view.to_json({start_row, end_row});
+    const row_paths = r.map(x => x.__ROW_PATH__);
+    const row_pivots_values = row_paths[0] || [];
+    const row_filters = row_pivots
+        .map((pivot, index) => {
+            const pivot_value = row_pivots_values[index];
+            return pivot_value ? [pivot, "==", pivot_value] : undefined;
+        })
+        .filter(x => x);
+    const column_index = row_pivots.length > 0 ? col_idx + 1 : col_idx;
+    const column_paths = Object.keys(r[0])[column_index];
+    const result = {row: r[0]};
+    let column_filters = [];
+    if (column_paths) {
+        const column_pivot_values = column_paths.split("|");
+        result.column_names = [column_pivot_values[column_pivot_values.length - 1]];
+        column_filters = column_pivots
+            .map((pivot, index) => {
+                const pivot_value = column_pivot_values[index];
+                return pivot_value ? [pivot, "==", pivot_value] : undefined;
+            })
+            .filter(x => x)
+            .filter(([, , value]) => value !== "__ROW_PATH__");
+    }
+
+    const filters = config.filter.concat(row_filters).concat(column_filters);
+    result.config = {filters};
+    return result;
+}
 // `install` makes this a Hypergrid plug-in
 export const install = function(grid) {
     addSortChars(grid.behavior.charMap);
@@ -289,6 +324,21 @@ export const install = function(grid) {
     grid.addEventListener("fin-column-sort", sortColumn.bind(grid));
 
     grid.addEventListener("fin-canvas-context-menu", right_click_handler);
+    grid.addEventListener("fin-row-selection-changed", async function(event) {
+        const rows = event.detail.rows;
+
+        const selected = rows.length > 0;
+        const detail = selected ? await getCellConfig.call(event.detail.grid.behavior, rows[0]) : {config: {filters: []}};
+
+        event.detail.grid.canvas.dispatchEvent(
+            new CustomEvent("perspective-select", {
+                bubbles: true,
+                composed: true,
+                detail: {selected, ...detail}
+            })
+        );
+    });
+
     Object.getPrototypeOf(grid.behavior).cellClicked = async function(event) {
         event.primitiveEvent.preventDefault();
         event.handled = true;
@@ -347,11 +397,7 @@ export const install = function(grid) {
             new CustomEvent("perspective-click", {
                 bubbles: true,
                 composed: true,
-                detail: {
-                    config: {filters},
-                    column_names,
-                    row: r[0]
-                }
+                detail: await getCellConfig.call(this, y, x)
             })
         );
 

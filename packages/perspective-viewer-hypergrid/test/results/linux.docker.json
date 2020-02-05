@@ -26,7 +26,7 @@
     "superstore_memoized_column_meta_should_reinterpret_metadata_when_only_row_pivots_are_changed": "ec6807a695b5693a2ed592d5aed583db",
     "superstore_resets_viewable_area_when_the_logical_size_expands_": "82f08a672fd31199031673b79bf8625d",
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "13d3164f406bf6a7d053c21dd506a0d5",
-    "__GIT_COMMIT__": "b8015e9c9c7a640bf056656b7f577debe7e4a5e5",
+    "__GIT_COMMIT__": "ca2998551b927061466faea6c73459807a5349ae",
     "empty_perspective-click_is_fired_when_an_empty_dataset_is_loaded_first": "7e5b653226145e1ab9f82e2417d89d7b",
     "hypergrid_clicking_on_a_cell_in_the_grid_when_no_filters_are_present_perspective_dispatches_perspective-click_event_with_correct_properties_": "13d3164f406bf6a7d053c21dd506a0d5",
     "hypergrid_clicking_on_a_cell_in_the_grid_when_a_filter_is_present_perspective_dispatches_perspective-click_event_with_one_filter_": "b66684328af5084134b0d3ed8d095eaf",
@@ -46,5 +46,7 @@
     "regressions_Updates_should_not_render_an_extra_row_for_column_only_views": "f2c61f5fa18572dc7d36a8f918ad61ed",
     "regressions_Updates_regular_updates": "c519987a2a2179eb5b50fbcd99c87a95",
     "regressions_Updates_saving_a_computed_column_does_not_interrupt_update_rendering": "5b94b47e26123842e366c31c0dd2ae43",
-    "superstore_replaces_all_rows_": "9cd0751b14f8ba6c857bf9b92f1d366b"
+    "superstore_replaces_all_rows_": "9cd0751b14f8ba6c857bf9b92f1d366b",
+    "selectable_no_pivots_selecting_a_row_selection_state_can_be_set_from_restore_api": "99cf0f58de9825f07b4004cb94351ab0",
+    "selectable_row_pivots_selecting_a_row_selection_state_can_be_set_from_restore_api": "99cf0f58de9825f07b4004cb94351ab0"
 }

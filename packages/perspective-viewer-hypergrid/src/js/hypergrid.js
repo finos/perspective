@@ -218,6 +218,11 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
         await hypergrid.behavior.dataModel._outstanding.req;
     }
 
+    if (this._plugin_config) {
+        suppress_paint(hypergrid, () => dataModel.setSelectedRowID(this._plugin_config.selected));
+        delete this._plugin_config;
+    }
+
     await hypergrid.canvas.resize(true);
     hypergrid.allowEvents(true);
 }
@@ -229,6 +234,15 @@ const plugin = {
     update: grid_update,
     deselectMode: "pivots",
     styleElement: style_element,
+    save: function() {
+        const hypergrid = get_hypergrid.call(this);
+        if (hypergrid && hypergrid.selectionModel.hasRowSelections()) {
+            return {selected: hypergrid.behavior.dataModel.getSelectedRowID()};
+        }
+    },
+    restore: function(config) {
+        this._plugin_config = config;
+    },
     resize: async function() {
         const hypergrid = get_hypergrid.call(this);
         if (hypergrid) {
