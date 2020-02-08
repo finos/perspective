@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.7.2)
-project (psp)
+project(psp)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -197,6 +196,10 @@ message(WARNING "${BUILD_MESSAGE}")
 #######################
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 
+if(NOT WIN32)
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+	set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+endif()
 
 if (PSP_WASM_BUILD)
 	####################
@@ -264,16 +267,31 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	#####################
 	# VANILLA CPP BUILD #
 	#####################
-	if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
-		set(OPT_FLAGS " \
-			-O0 \
-			-g3 \
-			")
+	if(WIN32)
+		if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
+			set(OPT_FLAGS " \
+				/DEBUG \
+				/Z7 \
+				/Zi
+				")
+		else()
+			set(OPT_FLAGS " \
+				/NDEBUG \
+				/O2 \
+				")
+		endif()
 	else()
-		set(OPT_FLAGS " \
-			-O3 \
-			-g0 \
-			")
+		if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
+			set(OPT_FLAGS " \
+				-O0 \
+				-g3 \
+				")
+		else()
+			set(OPT_FLAGS " \
+				-O3 \
+				-g0 \
+				")
+		endif()
 	endif()
 	set(SYNC_MODE_FLAGS "")
 	set(ASYNC_MODE_FLAGS "")
@@ -377,9 +395,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
 			message(WARNING "${Cyan}PyArrow found: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
-            if (NOT WIN32)
-                message(WARNING "${Cyan}Using pre-built ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY} from: ${PYTHON_PYARROW_LIBRARY_DIR}${ColorReset}")
-			endif()
+			message(WARNING "${Cyan}Using pre-built ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY} from: ${PYTHON_PYARROW_LIBRARY_DIR}${ColorReset}")
 		endif()
 		include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
         link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
@@ -392,7 +408,7 @@ psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
 # For all non-MacOS and non-linux builds, or if building WASM/CPP, build minimal arrow from source
-if (WIN32 OR NOT PSP_PYTHON_BUILD)
+if (NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
@@ -518,7 +534,7 @@ set (PYTHON_SOURCE_FILES
 	)
 
 if (WIN32)
-	set(CMAKE_CXX_FLAGS " /EHsc")
+	set(CMAKE_CXX_FLAGS " /EHsc /MP")
 else()
 	set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 endif()
@@ -550,7 +566,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set(module_install_rpath "@loader_path/")
 	    else()
             set(module_install_rpath "\$ORIGIN")
-	    endif()
+		endif()
+	else()
+		set(CMAKE_SHARED_LIBRARY_PREFIX lib)
     endif()
 
 	if(PSP_PYTHON_BUILD)
@@ -564,28 +582,45 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
-		target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 
-        # Link against libarrow 0.15.1 in pyarrow directory for windows
         if (WIN32)
-			target_link_libraries(psp arrow)
-			target_link_libraries(binding arrow)
+			target_compile_definitions(binding PRIVATE WIN32=1)
+			target_compile_definitions(binding PRIVATE _WIN32=1)
+
 			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 			target_link_libraries(binding ${Boost_FILESYSTEM_LIBRARY})
+
+			# .dll not importable
+			set_property(TARGET binding PROPERTY SUFFIX .pyd)
 		else()
-            target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
-            target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
+			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_install_rpath}  ${PYTHON_PYARROW_LIBRARY_DIR})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_install_rpath}  ${PYTHON_PYARROW_LIBRARY_DIR})
-        endif()
+		endif()
+
+		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
+		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
 
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		target_link_libraries(binding ${PYTHON_LIBRARIES})
-		target_link_libraries(binding psp)
+
+		target_link_libraries(psp tbb)
 		target_link_libraries(binding tbb)
+
+		target_link_libraries(binding psp)
 
 		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
 		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
+
+		if(WIN32)
+			# inline arrow dlls
+			file(GLOB ARROW_DLLS "${PYTHON_PYARROW_LIBRARY_DIR}/*.dll")
+
+			add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${ARROW_DLLS} ${PSP_PYTHON_SRC}/table/)
+			if(NOT TBB_FOUND)
+				add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tbb> ${PSP_PYTHON_SRC}/table/)
+			endif()
+		endif()
 		########################
 	else()
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
@@ -602,10 +637,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	elseif(WIN32)
 		target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
 		target_compile_definitions(psp PRIVATE WIN32=1)
+		target_compile_definitions(psp PRIVATE _WIN32=1)
 	endif()
 
 	target_link_libraries(psp tbb)
-	set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${TBB_LIBRARY})
 endif()
 
 

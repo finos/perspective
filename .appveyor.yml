@@ -1,8 +1,8 @@
 max_jobs: 8
 
 image:
-  - Visual Studio 2015
-  # - Visual Studio 2017
+  # - Visual Studio 2015
+  - Visual Studio 2017
 
 configuration:
   - Release
@@ -10,6 +10,8 @@ configuration:
 
 platform:
   - x64
+
+stack: python 3.7
 
 environment:
   matrix:
@@ -25,25 +27,23 @@ init:
   - if "%arch%"=="Win64" ( set arch= Win64)
   - echo %arch%
   - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
 
-before_build:
-- cmd: |-
-    cd cpp\perspective
-    mkdir build
-    cd build
-    cmake --version
-    cmake .. -G %generator% -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1 -DPSP_CPP_BUILD_STRICT=1 -DBOOST_ROOT=C:\Libraries\boost_1_67_0 -DBoost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
+install:
+  - set PATH=C:\Python37-x64;%PATH%
+  - which python
+  - python --version
+  - ln -s C:\Python37-x64\python C:\Python37-x64\python3.7
+  - python -m pip install numpy pyarrow==0.15.1
+  - cmake --version
+  - set BOOST_ROOT=C:\Libraries\boost_1_67_0
+  - set Boost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
+  - yarn
 
 build_script:
-  - msbuild psp.sln /p:Platform=x64 /m /p:Configuration=%CONFIGURATION%
-  - cp %CONFIGURATION%\psp.dll test\%CONFIGURATION%
-  - cp tbb-build\%CONFIGURATION%\tbb.dll test\%CONFIGURATION%
-  - .\test\%CONFIGURATION%\psp_test.exe
+  - yarn build_python --ci
 
-# to disable automatic tests
-test: off
+test_script:
+  - yarn test_python
 
 # to disable deployment
 deploy: off
