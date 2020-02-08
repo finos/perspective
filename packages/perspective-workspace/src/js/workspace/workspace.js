@@ -16,6 +16,7 @@ import {createCommands} from "./commands";
 
 import {PerspectiveViewerWidget} from "./widget";
 import uniqBy from "lodash/uniqBy";
+import debounce from "lodash/debounce";
 import cloneDeep from "lodash/cloneDeep";
 import {DiscreteSplitPanel} from "./discrete";
 
@@ -30,14 +31,18 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     constructor(element, options = {}) {
         super({orientation: "horizontal"});
 
-        this.addClass("p-PerspectiveWorkspace");
+        this.addClass("perspective-workspace");
         this.dockpanel = new PerspectiveDockPanel("main", {enableContextMenu: false});
         this.detailPanel = new Panel();
         this.detailPanel.layout.fitPolicy = "set-no-constraint";
-        this.detailPanel.addClass("p-PerspectiveScrollPanel");
+        this.detailPanel.addClass("perspective-scroll-panel");
         this.detailPanel.addWidget(this.dockpanel);
         this.masterPanel = new DiscreteSplitPanel({orientation: "vertical"});
-        this.masterPanel.addClass("p-MasterPanel");
+        this.masterPanel.addClass("master-panel");
+
+        this.dockpanel.layoutModified.connect(() => this.workspaceUpdated());
+        this.masterPanel.layoutModified.connect(() => this.workspaceUpdated());
+        this.layoutModified.connect(() => this.workspaceUpdated());
 
         this.addWidget(this.detailPanel);
 
@@ -48,6 +53,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.tables = new Map();
         this.commands = createCommands(this);
         this.menuRenderer = new MenuRenderer(this.element);
+
+        this.customCommands = [];
     }
 
     /*********************************************************************
@@ -57,7 +64,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.tables.set(name, table);
         this.getAllWidgets().forEach(widget => {
             if (widget.tableName === name) {
-                widget.table = table;
+                widget.loadTable(table);
             }
         });
     }
@@ -135,11 +142,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
 
         if (layout.master) {
             layout.master.widgets.forEach(widgetConfig => {
-                const widget = this._createWidget({
-                    title: widgetConfig.name,
-                    table: this.getTable(widgetConfig.table),
-                    config: {master: true, ...widgetConfig}
-                });
+                const widget = this._createWidget({master: true, ...widgetConfig});
                 widget.viewer.addEventListener("perspective-select", this.onPerspectiveSelect);
                 widget.viewer.addEventListener("perspective-click", this.onPerspectiveSelect);
                 this.masterPanel.addWidget(widget);
@@ -149,11 +152,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
 
         if (layout.detail) {
             const detailLayout = PerspectiveDockPanel.mapWidgets(widgetConfig => {
-                const widget = this._createWidget({
-                    title: widgetConfig.name,
-                    table: this.getTable(widgetConfig.table),
-                    config: {master: false, ...widgetConfig}
-                });
+                const widget = this._createWidget({master: false, ...widgetConfig});
                 return widget;
             }, layout.detail);
             this.dockpanel.restoreLayout(detailLayout);
@@ -167,7 +166,9 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         if (this.dockpanel.mode === "single-document") {
             this.toggleSingleDocument(widget);
         }
-        const duplicate = this._createWidget({title: "duplicate", table: widget.table, config: widget.save()});
+        const config = widget.save();
+        const title = config.title ? `${config.title} (duplicate)` : "";
+        const duplicate = this._createWidget({...config, title});
         if (widget.master) {
             const index = this.masterPanel.widgets.indexOf(widget) + 1;
             this.masterPanel.insertWidget(index, duplicate);
@@ -177,27 +178,47 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     toggleMasterDetail(widget) {
-        if (widget.parent === this.dockpanel) {
+        const isGlobalFilter = widget.parent !== this.dockpanel;
+
+        this.element.dispatchEvent(
+            new CustomEvent("workspace-toggle-global-filter", {
+                detail: {
+                    widget,
+                    isGlobalFilter: !isGlobalFilter
+                }
+            })
+        );
+
+        if (isGlobalFilter) {
+            this.makeDetail(widget);
+        } else {
             if (this.dockpanel.mode === "single-document") {
                 this.toggleSingleDocument(widget);
             }
             this.makeMaster(widget);
-        } else {
-            this.makeDetail(widget);
         }
+    }
+
+    _maximize(widget) {
+        widget.viewer.classList.add("widget-maximize");
+        this._minimizedLayout = this.dockpanel.saveLayout();
+        this._maximizedWidget = widget;
+        this.dockpanel.mode = "single-document";
+        this.dockpanel.activateWidget(widget);
+        widget.notifyResize();
+    }
+
+    _unmaximize() {
+        this._maximizedWidget.viewer.classList.remove("widget-maximize");
+        this.dockpanel.mode = "multiple-document";
+        this.dockpanel.restoreLayout(this._minimizedLayout);
     }
 
     toggleSingleDocument(widget) {
         if (this.dockpanel.mode !== "single-document") {
-            widget.viewer.classList.add("p-Maximize");
-            this.single_document_prev_layout = this.dockpanel.saveLayout();
-            this.dockpanel.mode = "single-document";
-            this.dockpanel.activateWidget(widget);
-            widget.notifyResize();
+            this._maximize(widget);
         } else {
-            widget.viewer.classList.remove("p-Maximize");
-            this.dockpanel.mode = "multiple-document";
-            this.dockpanel.restoreLayout(this.single_document_prev_layout);
+            this._unmaximize();
         }
     }
 
@@ -233,8 +254,12 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
      * Master/Detail methods
      */
 
-    makeMaster(widget) {
+    async makeMaster(widget) {
         widget.master = true;
+
+        if (widget.viewer.hasAttribute("settings")) {
+            await widget.toggleConfig();
+        }
 
         if (!this.masterPanel.isAttached) {
             this.detailPanel.close();
@@ -283,6 +308,13 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         contextMenu.addItem({command: "workspace:export", args: {widget}});
         contextMenu.addItem({command: "workspace:copy", args: {widget}});
         contextMenu.addItem({command: "workspace:reset", args: {widget}});
+
+        if (this.customCommands.length > 0) {
+            contextMenu.addItem({type: "separator"});
+            this.customCommands.forEach(command => {
+                contextMenu.addItem({command, args: {widget}});
+            });
+        }
         return contextMenu;
     }
 
@@ -290,27 +322,39 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         const menu = this.createContextMenu(widget);
         const tabbar = find(this.dockpanel.tabBars(), bar => bar.currentTitle.owner === widget);
 
-        widget.addClass("p-ContextFocus");
-        tabbar && tabbar.node.classList.add("p-ContextFocus");
-        this.element.classList.add("p-ContextMenu");
-        this.addClass("p-ContextMenu");
-        if (widget.viewer.classList.contains("p-Master")) {
-            menu.node.classList.add("p-Master");
+        widget.addClass("context-focus");
+        widget.viewer.classList.add("context-focus");
+        tabbar && tabbar.node.classList.add("context-focus");
+        this.element.classList.add("context-menu");
+        this.addClass("context-menu");
+
+        if (widget.viewer.classList.contains("workspace-master-widget")) {
+            menu.node.classList.add("workspace-master-menu");
         } else {
-            menu.node.classList.remove("p-Master");
+            menu.node.classList.remove("workspace-master-menu");
         }
         this._menu_opened = true;
 
         menu.aboutToClose.connect(() => {
-            this.element.classList.remove("p-ContextMenu");
-            this.removeClass("p-ContextMenu");
-            widget.removeClass("p-ContextFocus");
-            tabbar?.node?.classList.remove("p-ContextFocus");
+            this.element.classList.remove("context-menu");
+            this.removeClass("context-menu");
+            widget.removeClass("context-focus");
+            tabbar?.node?.classList.remove("context-focus");
         });
 
         menu.open(event.clientX, event.clientY);
         event.preventDefault();
         event.stopPropagation();
+    }
+
+    _addContextMenuItem(item) {
+        this.customCommands.push(item.id);
+        this.commands.addCommand(item.id, {
+            execute: args => item.execute({widget: args.widget}),
+            label: item.label,
+            isVisible: args => item.isVisible({widget: args.widget}),
+            mnemonic: 0
+        });
     }
 
     /*********************************************************************
@@ -343,11 +387,39 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
      * Widget helper methods
      */
 
-    _createWidget({title, table, config}) {
-        const widget = new PerspectiveViewerWidget({title, table});
+    addViewer(config) {
+        const widget = this._createWidget(config);
+        if (this.dockpanel.mode === "single-document") {
+            this.toggleSingleDocument();
+        }
+        if (config.master) {
+            if (!this.masterPanel.isAttached) {
+                this.setupMasterPanel(DEFAULT_WORKSPACE_SIZE);
+            }
+            this.masterPanel.addWidget(widget);
+        } else {
+            if (!this.detailPanel.isAttached) {
+                this.addWidget(this.detailPanel);
+            }
+            this.dockpanel.addWidget(widget, {mode: "split-right"});
+        }
+        this.update();
+    }
+
+    _createWidget(config) {
+        const widget = new PerspectiveViewerWidget();
+        this.element.dispatchEvent(
+            new CustomEvent("workspace-new-view", {
+                detail: {
+                    config,
+                    widget
+                }
+            })
+        );
         widget.title.closable = true;
         this.element.appendChild(widget.viewer);
         this._addWidgetEventListeners(widget);
+        widget.loadTable(this.getTable(config.table));
         widget.restore(config);
         return widget;
     }
@@ -357,19 +429,50 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             this.listeners.get(widget)();
         }
         const settings = event => {
-            widget.title.className = event.detail && "settings_open";
+            if (event.detail) {
+                widget.title.className += " settings_open";
+            } else {
+                widget.title.className = widget.title.className.replace(/settings_open/g, "");
+            }
         };
         const contextMenu = event => this.showContextMenu(widget, event);
-        widget.viewer.addEventListener("contextmenu", contextMenu);
+        const updated = () => this.workspaceUpdated();
+
+        widget.node.addEventListener("contextmenu", contextMenu);
         widget.viewer.addEventListener("perspective-toggle-settings", settings);
+        widget.viewer.addEventListener("perspective-config-update", updated);
+        widget.title.changed.connect(updated);
 
         this.listeners.set(widget, () => {
-            widget.viewer.removeEventListener("contextmenu", contextMenu);
+            widget.node.removeEventListener("contextmenu", contextMenu);
             widget.viewer.removeEventListener("perspective-toggle-settings", settings);
+            widget.viewer.removeEventListener("perspective-config-update", updated);
+            widget.title.changed.disconnect(updated);
         });
     }
 
     getAllWidgets() {
         return [...this.masterPanel.widgets, ...toArray(this.dockpanel.widgets())];
+    }
+
+    /*********************************************************************
+     * Workspace updated event
+     */
+    _fireUpdateEvent() {
+        const layout = this.save();
+        if (layout) {
+            const tables = {};
+            this.tables.forEach((value, key) => {
+                tables[key] = value;
+            });
+            this.element.dispatchEvent(new CustomEvent("workspace-layout-update", {detail: {tables, layout}}));
+        }
+    }
+
+    workspaceUpdated() {
+        if (!this._save) {
+            this._save = debounce(() => this.dockpanel.mode !== "single-document" && this._fireUpdateEvent(), 500);
+        }
+        this._save();
     }
 }

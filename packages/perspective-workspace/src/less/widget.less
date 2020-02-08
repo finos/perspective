@@ -9,30 +9,17 @@
 
 @border-color: 1px solid #eaeaea;
 
-.p-Master{
-    --settings-button--content: var(--open-settings-button--content, "\1F527");
- }
-
-.p-Master[settings] {
-    --settings-button--content: var(--close-settings-button--content, "\1F527");
+.viewer-container{
+     flex: 1;
+     height: 100%;
+     overflow: hidden;
 }
  
-.p-Detail{
-    min-width: 300px;
-    min-height: 200px;
-    --settings-button--content: "";
- }
-
-.p-DockPanel-widget{
+.workspace-widget{
+    display: flex;
+    flex-direction: column;
     border: @border-color;
     border-width: 0px !important;
     min-width: 300px;
     min-height: 200px;
-}
-
-.p-Detail{
-    min-width: 300px;
-    min-height: 200px;
-    --settings-button--content: "";
-    --plugin--border: 1px solid #eaeaea;
 }

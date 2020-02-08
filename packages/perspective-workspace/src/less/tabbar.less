@@ -16,13 +16,15 @@
     cursor: pointer;
 }
 
+
+.p-TabBar-tabLabel[value='[untitled]']{
+    color: #ddd !important
+}
+
 .p-TabBar-tabLabel:focus{
     outline: none;
     color: #666 !important;
     cursor: text;
-}
-.p-TabBar-tabLabel[value='[untitled]']{
-    color: #ddd
 }
 
 .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
@@ -314,11 +316,12 @@
     background-color: #ccc;
 }
 
-.p-PerspectiveWorkspace.p-ContextMenu * .p-TabBar.p-ContextFocus{
+
+.perspective-workspace.context-menu * .p-TabBar.context-focus{
     opacity: 1;
 }
 
-.p-PerspectiveWorkspace.p-ContextMenu  * .p-TabBar {
+.perspective-workspace.context-menu  * .p-TabBar{
     opacity: 0.2;
     transition: opacity 0.2s ease-out;
 }

@@ -1,18 +1,18 @@
 @border-color: 1px solid #eaeaea;
 
-.p-Master{
+.workspace-master-widget{
    --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
 }
 
-.p-Master[settings] {
+.workspace-master-widget[settings] {
    --settings-button--content: var(--close-settings-button--content, "\1F527") !important;;
 }
 
-.p-Detail.p-Maximize{
+.workspace-detail-widget.widget-maximize{
    --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
 }
 
-.p-Detail.p-Maximize[settings] {
+.workspace-detail-widget.widget-maximize[settings]{
    --settings-button--content: var(--close-settings-button--content, "\1F527") !important;
 }
 
@@ -24,38 +24,34 @@
    min-height: 200px;
 }
 
-.p-Detail {
-   min-width: 300px;
-   min-height: 200px;
+.workspace-detail-widget{
    --settings-button--content: "" !important;
    --plugin--border: 1px solid #eaeaea;
 }
 
-perspective-viewer.p-Blur{
+perspective-viewer.widget-blur{
    opacity: 0.5;
 }
 
-.p-ContextMenu > perspective-viewer.p-ContextFocus {
+.context-menu > perspective-viewer.context-focus{
    opacity: 1;
 
 }
 
-.p-ContextMenu > perspective-viewer {
+.context-menu > perspective-viewer {
    opacity: 0.2;
 }
 
 perspective-viewer {
    flex: 1;
-   display: flex;
+   position: relative;
+   display: block;
    align-items: center;
    justify-content: center;
    flex-direction: column;
-   position: absolute;
-   top: 0;
-   left: 0px;
-   right: 0px;
-   bottom: 0px;
+   width: 100%;
+   height: 100%;
    overflow: visible !important;
    font-family: "Open Sans", Arial, sans-serif;
    transition: opacity 0.2s ease-out;
-}
+ }

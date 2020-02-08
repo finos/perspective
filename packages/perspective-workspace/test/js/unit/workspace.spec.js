@@ -12,7 +12,7 @@ import {toArray} from "@phosphor/algorithm";
 
 describe("workspace", () => {
     test("restores detail to dockpanel", () => {
-        const widget = {table: "superstore", name: "One"};
+        const widget = {table: "superstore", title: "One"};
         const config = {
             detail: {
                 main: {
@@ -28,13 +28,13 @@ describe("workspace", () => {
 
         const widgets = toArray(workspace.dockpanel.widgets());
 
-        const expected = {table: "superstore", name: "One", master: false};
+        const expected = {table: "superstore", title: "One", master: false};
         expect(widgets.length).toBe(1);
         expect(widgets[0].save()).toStrictEqual(expected);
     });
 
     test("restores master to masterpanel", () => {
-        const widget = {table: "superstore", name: "One"};
+        const widget = {table: "superstore", title: "One"};
         const config = {
             master: {
                 widgets: [widget]
@@ -46,7 +46,7 @@ describe("workspace", () => {
 
         const widgets = workspace.masterPanel.widgets;
 
-        const expected = {table: "superstore", name: "One", master: true};
+        const expected = {table: "superstore", title: "One", master: true};
         expect(widgets.length).toBe(1);
         expect(widgets[0].save()).toStrictEqual(expected);
     });
@@ -54,13 +54,13 @@ describe("workspace", () => {
     test("restores master to masterpanel and detail to dockpanel", () => {
         const config = {
             master: {
-                widgets: [{table: "superstore", name: "One"}]
+                widgets: [{table: "superstore", title: "One"}]
             },
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: [{table: "superstore", name: "Two"}]
+                    widgets: [{table: "superstore", title: "Two"}]
                 }
             }
         };
@@ -71,8 +71,8 @@ describe("workspace", () => {
         const masterWidgets = workspace.masterPanel.widgets;
         const detailWidgets = toArray(workspace.dockpanel.widgets());
 
-        const master = {table: "superstore", name: "One", master: true};
-        const detail = {table: "superstore", name: "Two", master: false};
+        const master = {table: "superstore", title: "One", master: true};
+        const detail = {table: "superstore", title: "Two", master: false};
 
         expect(masterWidgets.length).toBe(1);
         expect(masterWidgets[0].save()).toStrictEqual(master);
