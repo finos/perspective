@@ -11,6 +11,9 @@
             "internal": "Internal"
         }
     },
+    "engines" : {
+        "node" : ">=8.12.0"
+    },
     "workspaces": [
         "packages/*",
         "examples/*",
