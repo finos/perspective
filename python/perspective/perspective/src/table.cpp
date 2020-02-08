@@ -113,8 +113,14 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
          * not created from a DataFrame, the "index" column would not exist.
          */
         if (is_numpy) {
+            // `numpy_loader`s `m_names` and `m_types` variable contains only
+            // the column names and data types present in the update dataset,
+            // not the names/types of the entire `Table`.
             numpy_loader.init();
         }
+
+        // `column_names` and `data_types` contain every single column in the 
+        // dataset, as well as `__INDEX__` if it exists.
         column_names = accessor.attr("names")().cast<std::vector<std::string>>();
         data_types = accessor.attr("types")().cast<std::vector<t_dtype>>();
     } else if (is_numpy) {
@@ -123,9 +129,15 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
          * Perspective. Using `get_data_types` allows us to know the type of an array with `dtype=object`.
          */
         numpy_loader.init();
+
+        // This will contain every single column in the dataset, as the
+        // first-time data load path does not mutate the `names` property of
+        // `accessor`.
         column_names = numpy_loader.names();
 
-        // composite array and inferred `data_types` for the Table
+        // Infer data type for each column, and then use a composite of numpy
+        // dtype, inferred `t_dtype`, and stringified numpy dtype to get the
+        // final, canonical data type mapping.
         std::vector<t_dtype> inferred_types = get_data_types(accessor.attr("data")(), 1, column_names, accessor.attr("date_validator")().cast<t_val>());
         data_types = numpy_loader.reconcile_dtypes(inferred_types);
     }  else {

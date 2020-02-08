@@ -35,6 +35,20 @@ class TestTablePandas(object):
             {"a": 3, "b": 4, "index": 1}
         ]
 
+    def test_table_dataframe_column_order(self):
+        d = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        data = pd.DataFrame(d, columns=["b", "c", "a", "d"])
+        tbl = Table(data)
+        assert tbl.size() == 2
+        assert tbl.columns() == ["index", "b", "c", "a", "d"]
+
+    def test_table_dataframe_selective_column_order(self):
+        d = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        data = pd.DataFrame(d, columns=["b", "c", "a"])
+        tbl = Table(data)
+        assert tbl.size() == 2
+        assert tbl.columns() == ["index", "b", "c", "a"]
+
     def test_table_dataframe_does_not_mutate(self):
         # make sure we don't mutate the dataframe that a user passes in
         data = pd.DataFrame({

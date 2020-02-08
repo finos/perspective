@@ -600,17 +600,32 @@ namespace numpy {
      */
     std::vector<std::string>
     NumpyLoader::make_names() {
-        auto names = py::list(m_accessor.attr("data")().attr("keys")());
-        return names.cast<std::vector<std::string>>();
+        auto data = m_accessor.attr("data")();
+        auto py_names = m_accessor.attr("names")().cast<std::vector<std::string>>();
+
+        // Match names to dataset - only keep names that are present in dataset.
+        // The `m_names` variable is used internally to access the numpy arrays
+        // containing each column. On first-time load, `m_names` contains
+        // every name in the dataset. On update, `m_names` is recalculated to
+        // only include columns that are present in the update dataset.
+        std::vector<std::string> names;
+        for (const auto& name : py_names) {
+            if (data.contains(py::str(name))) {
+                names.push_back(name);
+            }
+        }
+
+        return names;
     }
 
     std::vector<t_dtype>
     NumpyLoader::make_types() {
         std::vector<t_dtype> rval;
         
-        py::list arrays = m_accessor.attr("data")().attr("values")();
-        for (const auto& a : arrays) {
-            py::array array = py::array::ensure(a);
+        auto data = m_accessor.attr("data")();
+        for (const auto& name : m_names) {
+            // Access each array by name to guarantee ordered access.
+            py::array array = py::array::ensure(data[py::str(name)]);
 
             if (!array) {
                 PSP_COMPLAIN_AND_ABORT("Perspective does not support the mixing of ndarrays and lists.");
