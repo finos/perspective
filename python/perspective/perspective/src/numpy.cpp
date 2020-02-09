@@ -244,7 +244,7 @@ namespace numpy {
                 col = tbl.get_column(name);
                 type = DTYPE_FLOAT64;
                 col->set_nth(i, fval);
-            } else if (isnan(fval)) {
+            } else if (std::isnan(fval)) {
                 binding::WARN("Promoting column `%s` to string from int32", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -275,7 +275,7 @@ namespace numpy {
             }
 
             double fval = item.cast<double>();
-            if (isnan(fval)) {
+            if (std::isnan(fval)) {
                 binding::WARN("Promoting column `%s` to string from int64", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -475,7 +475,7 @@ namespace numpy {
 
         // Iterate through the C++ array and try to cast. Array is guaranteed to be of the correct dtype and consistent in its values.
         for (auto i = 0; i < nrows; ++i) {
-            if (isnan(((double*) ptr)[i]) || npy_isnan(((double*) ptr)[i])) {
+            if (std::isnan(((double*) ptr)[i]) || npy_isnan(((double*) ptr)[i])) {
                 if (is_update) {
                     col->unset(i);
                 } else {
