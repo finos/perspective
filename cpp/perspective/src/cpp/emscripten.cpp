@@ -1446,7 +1446,6 @@ namespace binding {
     std::shared_ptr<t_ctx0>
     make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
         std::shared_ptr<t_view_config> view_config, const std::string& name) {
-        std::cout << "creating context" << std::endl;
         auto columns = view_config->get_columns();
         auto filter_op = view_config->get_filter_op();
         auto fterm = view_config->get_fterm();

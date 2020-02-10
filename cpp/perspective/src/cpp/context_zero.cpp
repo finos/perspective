@@ -565,7 +565,6 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
 
     for (const auto& name : column_names) {
         auto cidx = m_config.get_colidx(name);
-        //std::cout << "step delta for col " << cidx << "'" << name << "'" <<std::endl;
         const t_column* tcol = transitions.get_const_column(name).get();
         const t_column* pcol = prev.get_const_column(name).get();
         const t_column* ccol = curr.get_const_column(name).get();

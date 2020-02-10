@@ -563,7 +563,7 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
     const t_data_table* tbl = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_forallel_for(0, int(o_ncols), 1,
+    tbb::parallel_for(0, int(o_ncols), 1,
         [&sch_cols, rval, tbl, &mask](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < o_ncols; ++colidx)

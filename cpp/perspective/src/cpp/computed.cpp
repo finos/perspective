@@ -210,8 +210,6 @@ t_computed_column::apply_computation(
     std::uint32_t end = table_columns[0]->size();
     auto arity = table_columns.size();
 
-    //std::cout << "num_rows: " << end << ", arity: " << arity << std::endl;
-
     std::function<t_tscalar(t_tscalar)> function_1;
     std::function<t_tscalar(t_tscalar, t_tscalar)> function_2;
     std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_1;
@@ -291,8 +289,123 @@ t_computed_column::apply_computation(
             }
         }
     }
+}
 
-    //output_column->pprint();
+void
+t_computed_column::reapply_computation(
+    const std::vector<std::shared_ptr<t_column>>& table_columns,
+    const std::vector<std::shared_ptr<t_column>>& flattened_columns,
+    const std::vector<t_rlookup>& changed_rows,
+    std::shared_ptr<t_column> output_column,
+    t_computation computation) {
+    std::uint32_t end = changed_rows.size();
+    if (end == 0) {
+        end = table_columns[0]->size();
+    }
+    auto arity = table_columns.size();
+
+    std::function<t_tscalar(t_tscalar)> function_1;
+    std::function<t_tscalar(t_tscalar, t_tscalar)> function_2;
+    std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_1;
+    std::function<void(t_tscalar, t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_2;
+
+    switch (arity) {
+        case 1: {
+            // Functions that generate strings need to have access to vocab so
+            // that strings can be stored.
+            switch (computation.m_return_type) {
+                case DTYPE_STR: {
+                    string_function_1 = t_computed_column::get_computed_function_string_1(computation);
+                } break;  
+                default: {
+                    function_1 = t_computed_column::get_computed_function_1(computation);
+                } break;
+            } 
+        } break;
+        case 2: {
+            switch (computation.m_return_type) {
+                case DTYPE_STR: {
+                    string_function_2 = t_computed_column::get_computed_function_string_2(computation);
+                } break;  
+                default: {
+                    function_2 = t_computed_column::get_computed_function_2(computation);
+                } break;
+            }   
+        } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+        }
+    }
+
+    for (t_uindex idx = 0; idx < end; ++idx) {
+        t_uindex ridx = idx;
+
+        // Look up the changed row index
+        if (changed_rows.size() > 0) {
+            ridx = changed_rows[idx].m_idx;
+        }
+
+        // Create args
+        std::vector<t_tscalar> args;
+
+        // Required to break out of this loop if any args are invalid
+        bool skip_row = false;
+        for (t_uindex cidx = 0; cidx < arity; ++cidx) {
+            t_tscalar arg = flattened_columns[cidx]->get_scalar(idx);
+            std::cout << "t: " << table_columns[cidx]->get_scalar(ridx) << ", f:" << arg << std::endl;
+
+            if (!arg.is_valid()) {
+                arg = table_columns[cidx]->get_scalar(ridx);
+                if (arg.is_valid() && flattened_columns[cidx]->is_cleared(idx)) {
+                    // Update in `flattened` is a clear, so clear the computed
+                    // output column.
+                    output_column->unset(idx);
+                    skip_row = true;
+                    break;  
+                }
+            }
+
+            args.push_back(arg);
+        }
+
+        if (skip_row) {
+            continue;
+        }
+        
+        t_tscalar rval = mknone();
+
+        if (computation.m_return_type == DTYPE_STR) {
+            switch (arity) {
+                case 1: {
+                    string_function_1(args[0], idx, output_column);
+                } break;
+                case 2: {
+                    string_function_2(args[0], args[1], idx, output_column); 
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+                }
+            }
+        } else {
+            switch (arity) {
+                case 1: {
+                    rval = function_1(args[0]);
+                } break;
+                case 2: {
+                    rval = function_2(args[0], args[1]); 
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+                }
+            }
+
+            if (!rval.is_valid() || rval.is_none()) {
+                output_column->clear(idx);
+            } else {
+                output_column->set_scalar(idx, rval);
+            }
+        }
+    }
 }
 
 std::vector<t_computation> t_computed_column::computations = {};

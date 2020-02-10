@@ -579,6 +579,19 @@ t_data_table::add_column(const std::string& name, t_dtype dtype, bool status_ena
 }
 
 void
+t_data_table::drop_column(const std::string& name) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+
+    if (m_schema.has_column(name)) {
+        auto idx = m_schema.get_colidx(name);
+        auto col = m_columns[idx];
+        // FIXME: make sure that we can erase columns from m_schema eventually.
+        m_columns[idx]->clear();
+    }
+}
+
+void
 t_data_table::promote_column(
     const std::string& name, t_dtype new_dtype, std::int32_t iter_limit, bool fill) {
     PSP_TRACE_SENTINEL();

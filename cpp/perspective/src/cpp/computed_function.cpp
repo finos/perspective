@@ -436,8 +436,7 @@ t_tscalar is(t_tscalar x, t_tscalar y) {
 
 void uppercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if (x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
@@ -448,8 +447,7 @@ void uppercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_c
 
 void lowercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if (x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
@@ -461,8 +459,7 @@ void lowercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_c
 void concat_space(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if ((x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR)
         || (y.is_none() || !y.is_valid() || y.get_dtype() != DTYPE_STR)) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
     std::string val = x.to_string() + " " + y.to_string();
@@ -472,8 +469,7 @@ void concat_space(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_
 void concat_comma(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if ((x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR)
         || (y.is_none() || !y.is_valid() || y.get_dtype() != DTYPE_STR)) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
@@ -772,8 +768,7 @@ template <>
 void day_of_week<DTYPE_DATE>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if (x.is_none() || !x.is_valid()) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
@@ -803,8 +798,7 @@ template <>
 void day_of_week<DTYPE_TIME>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if (x.is_none() || !x.is_valid()) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
@@ -828,8 +822,7 @@ template <>
 void month_of_year<DTYPE_DATE>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if (x.is_none() || !x.is_valid()) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
@@ -845,8 +838,7 @@ template <>
 void month_of_year<DTYPE_TIME>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
     if (x.is_none() || !x.is_valid()) {
-        output_column->set_scalar(idx, mknone());
-        output_column->set_valid(idx, false);
+        output_column->clear(idx);
         return;
     }
 
