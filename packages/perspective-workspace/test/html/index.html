@@ -23,12 +23,12 @@
         <script>
 
             const xhr = new XMLHttpRequest();
-            const worker = perspective.worker();
+            window.__WORKER__ = perspective.worker();
             xhr.open('GET', 'superstore.csv', true);
             xhr.onload = function () { 
                 window.__CSV__ = xhr.response;
-                const table = worker.table(xhr.response);
-                document.getElementById('workspace').addTable("superstore", table);
+                window.__TABLE__ = window.__WORKER__.table(xhr.response);
+                document.getElementById('workspace').tables.set("superstore", window.__TABLE__);
             }
             xhr.send(null);
 
