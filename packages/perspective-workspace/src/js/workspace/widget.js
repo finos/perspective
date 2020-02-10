@@ -41,7 +41,7 @@ export class PerspectiveViewerWidget extends Widget {
 
     async loadTable(value) {
         if (value) {
-                await this.viewer.load(value);
+            await this.viewer.load(value);
         }
     }
 
