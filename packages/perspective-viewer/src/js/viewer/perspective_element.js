@@ -214,8 +214,13 @@ export class PerspectiveElement extends StateElement {
         if (this.hasAttribute("filters")) {
             this.filters = this.getAttribute("filters");
         }
-
-        await this._debounce_update({force_update: true});
+        try {
+            await this._debounce_update({force_update: true});
+        } catch (e) {
+            console.warn("Initial view failed, resetting UI state");
+            await this.reset();
+            throw e;
+        }
         resolve();
     }
 
