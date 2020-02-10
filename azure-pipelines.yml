@@ -77,46 +77,46 @@ jobs:
         PSP_DOCKER: 1
 
 
-- job: 'Windows'
-  pool:
-    vmImage: 'vs2017-win2016'
+# - job: 'Windows'
+#   pool:
+#     vmImage: 'vs2017-win2016'
 
-  strategy:
-    matrix:
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
+#   strategy:
+#     matrix:
+#       Python37:
+#         python.version: '3.7'
+#         python_flag: ''
 
-  steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
+#   steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#         architecture: 'x64'
 
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: '12.x'
 
-    - script: |
-        which python > python.txt
-        set /p PYTHON=<python.txt
-        ln -s %PYTHON% %PYTHON%$(python.version)
-        python --version
-        which python$(python.version)
-      displayName: "Which python"
+#     - script: |
+#         which python > python.txt
+#         set /p PYTHON=<python.txt
+#         ln -s %PYTHON% %PYTHON%$(python.version)
+#         python --version
+#         which python$(python.version)
+#       displayName: "Which python"
 
-    - script: |
-        python -m pip install numpy pyarrow==0.15.1
-      displayName: "Python deps"
+#     - script: |
+#         python -m pip install numpy pyarrow==0.15.1
+#       displayName: "Python deps"
 
-    - script: npm install -g yarn
-      displayName: "Install Yarn"
+#     - script: npm install -g yarn
+#       displayName: "Install Yarn"
 
-    - script: yarn
-      displayName: 'Install Deps'
+#     - script: yarn
+#       displayName: 'Install Deps'
 
-    - script: yarn build_python  --ci $(python_flag)
-      displayName: 'build'
+#     - script: yarn build_python  --ci $(python_flag)
+#       displayName: 'build'
 
 
 - job: 'Mac'
