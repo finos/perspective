@@ -23,31 +23,31 @@ const datasource = async () => {
     return worker.table(buffer);
 };
 
-window.addEventListener("load", async () => {
-    const workspace = document.createElement("perspective-workspace");
-    document.body.append(workspace);
-    workspace.addTable("superstore", await datasource());
+document.body.innerHTML = `
+<perspective-workspace id="workspace">
+    <perspective-viewer slot="One" name="Test Widget One" table="superstore"></perspective-viewer>
+    <perspective-viewer slot="Two" name="Test Widget Two" table="superstore"></perspective-viewer>
+    <perspective-viewer slot="Three" name="Test Widget Three" table="superstore"></perspective-viewer>
+</perspective-workspace>
+`;
 
-    const config = {
+window.addEventListener("load", () => {
+    window.workspace.tables.set("superstore", datasource());
+
+    window.workspace.restore({
         master: {
-            widgets: [
-                {table: "superstore", title: "Three", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
-                {table: "superstore", title: "Four", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
-            ]
+            widgets: ["Four", "Three"]
         },
         detail: {
             main: {
                 currentIndex: 0,
                 type: "tab-area",
-                widgets: [
-                    {table: "superstore", title: "One"},
-                    {table: "superstore", title: "Two"}
-                ]
+                widgets: ["One", "Two"]
             }
+        },
+        viewers: {
+            Three: {table: "superstore", name: "Test Widget III (modified)", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
+            Four: {table: "superstore", name: "Test Widget IV (modified)", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
         }
-    };
-
-    workspace.addEventListener("workspace-layout-update", console.log);
-    workspace.restore(config);
-    window.workspace = workspace;
+    });
 });

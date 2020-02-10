@@ -10,12 +10,11 @@
 import "@finos/perspective-viewer";
 import {Widget} from "@phosphor/widgets";
 
-let ID_COUNTER = 0;
-
 export class PerspectiveViewerWidget extends Widget {
-    constructor() {
-        const {viewer, node} = createNode();
+    constructor({name, viewer, node}) {
         super({node});
+        viewer.setAttribute("name", name);
+        this.title.label = name;
         this.viewer = viewer;
         this.master = false;
     }
@@ -25,11 +24,14 @@ export class PerspectiveViewerWidget extends Widget {
             if (value) {
                 this.viewer.classList.add("workspace-master-widget");
                 this.viewer.classList.remove("workspace-detail-widget");
-                this.viewer.selectable = true;
+
+                // TODO jsdom lacks `toggleAttribute` until 12.2.0
+                // https://github.com/jsdom/jsdom/blob/master/Changelog.md#1220
+                this.viewer.toggleAttribute?.("selectable", true);
             } else {
                 this.viewer.classList.add("workspace-detail-widget");
                 this.viewer.classList.remove("workspace-master-widget");
-                this.viewer.selectable = null;
+                this.viewer.removeAttribute("selectable");
             }
             this._master = value;
         }
@@ -37,12 +39,6 @@ export class PerspectiveViewerWidget extends Widget {
 
     get master() {
         return this._master;
-    }
-
-    async loadTable(value) {
-        if (value) {
-            await this.viewer.load(value);
-        }
     }
 
     get table() {
@@ -54,23 +50,24 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     restore(config) {
-        const {master, table, title, ...viewerConfig} = config;
-        if (table !== undefined) {
-            this.tableName = table;
-        }
-        if (title !== undefined) {
-            this.title.label = title;
-        }
+        const {master, table, name, ...viewerConfig} = config;
         this.master = master;
+        if (table) {
+            this.viewer.setAttribute("table", table);
+        }
+        if (name) {
+            this.viewer.setAttribute("name", name);
+            this.title.label = name;
+        }
         this.viewer.restore({...viewerConfig});
     }
 
     save() {
         return {
             ...this.viewer.save(),
-            title: this.title.label,
             master: this.master,
-            table: this.tableName
+            name: this.viewer.getAttribute("name"),
+            table: this.viewer.getAttribute("table")
         };
     }
 
@@ -81,8 +78,10 @@ export class PerspectiveViewerWidget extends Widget {
 
     async onCloseRequest(msg) {
         super.onCloseRequest(msg);
+        if (this.viewer.parentElement) {
+            this.viewer.parentElement.removeChild(this.viewer);
+        }
         await this.viewer.delete();
-        this.viewer.parentElement.removeChild(this.viewer);
     }
 
     onResize(msg) {
@@ -96,21 +95,3 @@ export class PerspectiveViewerWidget extends Widget {
         }
     }
 }
-
-const createNode = () => {
-    const div = document.createElement("div");
-    const slot = document.createElement("slot");
-    const name = `AUTO_ID_${ID_COUNTER++}`;
-    slot.setAttribute("name", name);
-    div.classList.add("viewer-container");
-    div.appendChild(slot);
-
-    const node = document.createElement("div");
-    node.classList.add("workspace-widget");
-    node.appendChild(div);
-
-    const viewer = document.createElement("perspective-viewer");
-    viewer.setAttribute("slot", name);
-
-    return {node: node, viewer: viewer};
-};
