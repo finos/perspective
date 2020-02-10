@@ -53,10 +53,14 @@
     min-width: 300px;
 }
 
-.p-DockPanel.resizing perspective-viewer, .p-SplitPanel.resizing perspective-viewer {
+.p-DockPanel.resizing ::slotted(perspective-viewer), .p-SplitPanel.resizing ::slotted(perspective-viewer) {
     pointer-events: none;
 }
 
+.widget-blur ::slotted(perspective-viewer) {
+    opacity: 0.5;
+}
+ 
 .p-DockPanel-handle.resizing {
     background-color: rgba(0,0,0,0.05);
 }
