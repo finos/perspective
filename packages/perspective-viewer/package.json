@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective-viewer.js",
     "module": "dist/cjs/perspective-viewer.js",
@@ -54,7 +54,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.8.4",
-        "@finos/perspective": "^0.4.1",
+        "@finos/perspective": "^0.4.2",
         "@types/react": "^16.9.17",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
@@ -67,7 +67,7 @@
         "mobile-drag-drop": "^2.3.0-rc.2"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.4.1",
+        "@finos/perspective-test": "^0.4.2",
         "@finos/perspective-webpack-plugin": "^0.4.1"
     }
 }

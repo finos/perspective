@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.4.2] (2020-02-10)
+
+#### Added
+  * [#874](https://github.com/finos/perspective/pull/874) Add new package `@finos/perspective-workspace` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#881](https://github.com/finos/perspective/pull/881) Allow missing columns ([@texodus](https://github.com/texodus))
+  * [#896](https://github.com/finos/perspective/pull/896) Implement save/restore on viewer configuration ([@timkpaine](https://github.com/timkpaine))
+  * [#891](https://github.com/finos/perspective/pull/891) Make `@finos/perspective-workspace` widget title editable by doubleclick ([@zemeolotu](https://github.com/zemeolotu))
+  * [#903](https://github.com/finos/perspective/pull/903) Make `perspective-viewer-hypergrid` selection state save/restore compatible ([@zemeolotu](https://github.com/zemeolotu))
+  * [#894](https://github.com/finos/perspective/pull/894) Add 'perspective-select' event to `@finos/perspective-viewer-hypergrid` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#912](https://github.com/finos/perspective/pull/912) Remove `perspective.node` Python module. ([@texodus](https://github.com/texodus))
+  * [#914](https://github.com/finos/perspective/pull/914) `perspective-viewer-hypergrid` Tree column toggle buttons.
+
+#### Fixed
+  * [#907](https://github.com/finos/perspective/pull/907) Fix column ordering in Python, null handling for computed columns ([@sc1f](https://github.com/sc1f))
+  * [#899](https://github.com/finos/perspective/pull/899) Closes [#898](https://github.com/finos/perspective/issues/898) - week bucket overflows ([@sc1f](https://github.com/sc1f))
+  * [#890](https://github.com/finos/perspective/pull/890) Style fixes for `perspective-workspace` ([@texodus](https://github.com/texodus))
+  * [#886](https://github.com/finos/perspective/pull/886) Fixed React types. ([@texodus](https://github.com/texodus))
+  * [#889](https://github.com/finos/perspective/pull/889) Fix selection styling on `@finos/perspective-viewer-hypergrid` ([@zemeolotu](https://github.com/zemeolotu))
+
+#### Internal
+  * [#902](https://github.com/finos/perspective/pull/902) Add 'workspace-layout-update' event and css class selector names cleanup  ([@zemeolotu](https://github.com/zemeolotu))
+  * [#907](https://github.com/finos/perspective/pull/907) Fix column ordering in Python, null handling for computed columns ([@sc1f](https://github.com/sc1f))
+  * [#884](https://github.com/finos/perspective/pull/884) Updates and fixes for windows build ([@timkpaine](https://github.com/timkpaine))
+  * [#908](https://github.com/finos/perspective/pull/908) Remove yarn dependency duplication. ([@texodus](https://github.com/texodus))
+  * [#906](https://github.com/finos/perspective/pull/906) Bump core-js to v3.6.4 and Babel to 7.8.4 ([@sebinsua](https://github.com/sebinsua))
+  * [#892](https://github.com/finos/perspective/pull/892) Implement computed column functions in C++ ([@sc1f](https://github.com/sc1f))
+  * [#901](https://github.com/finos/perspective/pull/901) Custom Element API for `<perspective-workspace>`
+
 ## [0.4.1] (2020-01-27)
 
 #### Fixed

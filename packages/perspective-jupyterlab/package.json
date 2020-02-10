@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-jupyterlab",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "Perspective.js",
     "files": [
         "dist/*.d.ts",
@@ -30,7 +30,7 @@
         "version": "yarn build"
     },
     "dependencies": {
-        "@finos/perspective-phosphor": "^0.4.1",
+        "@finos/perspective-phosphor": "^0.4.2",
         "@jupyter-widgets/base": "^2.0.2",
         "@jupyterlab/application": "^1.2.1",
         "@phosphor/application": "^1.7.3",

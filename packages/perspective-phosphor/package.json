@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-phosphor",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "Perspective.js",
     "files": [
         "dist/**/*",
@@ -25,8 +25,8 @@
         "test": "echo \"No Tests\""
     },
     "dependencies": {
-        "@finos/perspective": "^0.4.1",
-        "@finos/perspective-viewer": "^0.4.1",
+        "@finos/perspective": "^0.4.2",
+        "@finos/perspective-viewer": "^0.4.2",
         "@phosphor/application": "^1.7.3",
         "@phosphor/default-theme": "0.1.8",
         "@phosphor/widgets": "^1.9.3",

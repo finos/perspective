@@ -17,7 +17,7 @@ VersionInfo = namedtuple('VersionInfo', [
 ])
 
 # DO NOT EDIT THIS DIRECTLY!  It is managed by bumpversion
-version_info = VersionInfo(0, 4, 1, 'final', 0)
+version_info = VersionInfo(0, 4, 2, 'final', 0)
 
 _specifier_ = {'alpha': 'alpha', 'beta': 'beta', 'rc': 'rc', 'final': ''}
 

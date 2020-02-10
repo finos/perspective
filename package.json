@@ -6,13 +6,13 @@
     },
     "changelog": {
         "labels": {
-            "feature": "Added",
+            "enhancement": "Added",
             "bug": "Fixed",
             "internal": "Internal"
         }
     },
-    "engines" : {
-        "node" : ">=8.12.0"
+    "engines": {
+        "node": ">=8.12.0"
     },
     "workspaces": [
         "packages/*",
