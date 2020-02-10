@@ -583,16 +583,9 @@ export const install = function(grid) {
                     // until it is ready.
                     await new Promise(setTimeout);
                 }
-
-                update_bounds.call(this);
+                grid.renderer.computeCellsBounds(true);
                 render = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
             }
-        }
-
-        this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
-        this.component.setBounds(this.bounds);
-        if (dataModel._view) {
-            this.resizeNotification();
         }
 
         this.buffer.width = this.canvas.width = this.width * ratio;
@@ -604,6 +597,9 @@ export const install = function(grid) {
         this.bc.scale(ratio, ratio);
         if (isHIDPI && !this.component.properties.useBitBlit) {
             this.gc.scale(ratio, ratio);
+        }
+        if (dataModel._view) {
+            this.resizeNotification();
         }
         this.component.grid.renderer.needsComputeCellsBounds = false;
         grid.canvas.paintNow();
