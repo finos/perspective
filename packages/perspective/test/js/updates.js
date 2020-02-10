@@ -1068,7 +1068,7 @@ module.exports = perspective => {
         });
     });
 
-    describe("computed updates", function() {
+    describe.skip("computed updates", function() {
         it("partial update on column from schema", async function() {
             let table = perspective.table({x: "integer", y: "integer"});
             let table2 = table.add_computed([

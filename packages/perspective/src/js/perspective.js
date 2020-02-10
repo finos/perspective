@@ -1223,6 +1223,11 @@ export default function(Module) {
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
             config.columns = this.columns(true);
+            if (config.computed_columns.length > 0) {
+                for (let col of config.computed_columns) {
+                    config.columns.push(col.column);
+                }
+            }
         }
 
         let name = Math.random() + "";

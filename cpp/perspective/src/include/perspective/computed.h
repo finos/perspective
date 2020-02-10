@@ -103,6 +103,29 @@ public:
         t_computation computation);
 
     /**
+     * @brief Re-applies a computation on the output column, using two sets of
+     * input columns: `table_columns`, which refers to the table of `t_gstate`,
+     * and `flattened_columns`, which refers to the table that is produced as
+     * part of calling `Table.update`. Using `changed_rows`, this method
+     * reapplies the computation only on rows that have been changed.
+     * 
+     * This method should be called in `t_gnode::_process_table` in order to
+     * properly apply computed columns involving partial updates.
+     * 
+     * @param table_columns 
+     * @param flattened_columns 
+     * @param output_column 
+     * @param row_indices 
+     * @param method 
+     */
+    static void reapply_computation(
+        const std::vector<std::shared_ptr<t_column>>& table_columns,
+        const std::vector<std::shared_ptr<t_column>>& flattened_columns,
+        const std::vector<t_rlookup>& changed_rows,
+        std::shared_ptr<t_column> output_column,
+        t_computation computation);
+
+    /**
      * @brief Pregenerate all combinations of `t_computation` structs for
      * each `t_dtype` and `t_computed_function_name`. This method should be run
      * once at initialization of the Perspective C++ module.

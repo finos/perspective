@@ -250,14 +250,10 @@ t_gnode::_process_table() {
         row_lookup[idx] = m_gstate->lookup(pkey);
     }
 
-    // For each context, compute columns so they end up on flattened.
-    _compute_context_columns(get_table_sptr());
-    _compute_context_columns(flattened);
-
     if (m_gstate->mapping_size() == 0) {
-        // Updates have already been processed - break early.
-        m_gstate->update_master_table(flattened.get());
+        // Update context from state first - computes columns during update
         _update_contexts_from_state(*flattened);
+        m_gstate->update_master_table(flattened.get());
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
         release_outputs();
@@ -276,7 +272,6 @@ t_gnode::_process_table() {
     // Use `t_process_state` to manage intermediate structures
     t_process_state _process_state;
 
-
     _process_state.m_state_data_table = get_table_sptr();
     _process_state.m_flattened_data_table = flattened;
     _process_state.m_lookup = row_lookup;
@@ -287,6 +282,15 @@ t_gnode::_process_table() {
     _process_state.m_current_data_table = m_oports[PSP_PORT_CURRENT]->get_table();
     _process_state.m_transitions_data_table = m_oports[PSP_PORT_TRANSITIONS]->get_table();
     _process_state.m_existed_data_table = m_oports[PSP_PORT_EXISTED]->get_table();
+
+    _process_computed_columns(
+        get_table_sptr(),
+        _process_state.m_flattened_data_table,
+        _process_state.m_delta_data_table,
+        _process_state.m_prev_data_table,
+        _process_state.m_current_data_table,
+        _process_state.m_transitions_data_table,
+        _process_state.m_lookup);
 
     // ALL transitional tables are cleared on each call
     _process_state.clear_transitional_data_tables();
@@ -501,28 +505,52 @@ t_gnode::set_ctx_state(void* ptr) {
 }
 
 void
-t_gnode::_compute_context_columns(std::shared_ptr<t_data_table> tbl) {
-    // TODO: need to compute post transition, i.e. get_table_sptr() and
-    // flattened
-    std::cout << "computing FOR ALL CONTEXTS" << std::endl;
+t_gnode::_process_computed_columns(
+    std::shared_ptr<t_data_table> tbl,
+    std::shared_ptr<t_data_table> flattened,
+    std::shared_ptr<t_data_table> delta,
+    std::shared_ptr<t_data_table> prev,
+    std::shared_ptr<t_data_table> current,
+    std::shared_ptr<t_data_table> transitions,
+    const std::vector<t_rlookup>& changed_rows
+    ) {
     for (auto& kv : m_contexts) {
         auto& ctxh = kv.second;
         switch (ctxh.m_ctx_type) {
             case TWO_SIDED_CONTEXT: {
                 auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                _compute_columns_sptr<t_ctx2>(ctx, tbl);
+                // Recompute using `m_state` table and flattened
+                _recompute_columns<t_ctx2>(ctx, tbl, flattened, changed_rows);
+                // compute for intermediate tables
+                _compute_columns_sptr<t_ctx2>(ctx, delta);
+                _compute_columns_sptr<t_ctx2>(ctx, prev);
+                _compute_columns_sptr<t_ctx2>(ctx, current);
+                // add the column to transitions
+                _add_computed_column_sptr<t_ctx2>(ctx, transitions, DTYPE_UINT8);
             } break;
             case ONE_SIDED_CONTEXT: {
                 auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                _compute_columns_sptr<t_ctx1>(ctx, tbl);
+                _recompute_columns<t_ctx1>(ctx, tbl, flattened, changed_rows);
+                _compute_columns_sptr<t_ctx1>(ctx, delta);
+                _compute_columns_sptr<t_ctx1>(ctx, prev);
+                _compute_columns_sptr<t_ctx1>(ctx, current);
+                _add_computed_column_sptr<t_ctx1>(ctx, transitions, DTYPE_UINT8);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                _compute_columns_sptr<t_ctx0>(ctx, tbl);
+                _recompute_columns<t_ctx0>(ctx, tbl, flattened, changed_rows);
+                _compute_columns_sptr<t_ctx0>(ctx, delta);
+                _compute_columns_sptr<t_ctx0>(ctx, prev);
+                _compute_columns_sptr<t_ctx0>(ctx, current);
+                _add_computed_column_sptr<t_ctx0>(ctx, transitions, DTYPE_UINT8);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, tbl);
+                _recompute_columns<t_ctx_grouped_pkey>(ctx, tbl, flattened, changed_rows);
+                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, delta);
+                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, prev);
+                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, current);
+                _add_computed_column_sptr<t_ctx_grouped_pkey>(ctx, transitions, DTYPE_UINT8);
             } break;
             default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
         }
@@ -607,6 +635,7 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
 
     bool should_update = m_gstate->mapping_size() > 0;
 
+    // TODO: shift columns forward in cleanup, translate dead indices
     std::shared_ptr<t_data_table> flattened;
 
     // TODO: need to make sure that cases of `should_update == false` are
@@ -619,56 +648,28 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
         case TWO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx2>(ptr_);
             t_ctx2* ctx = static_cast<t_ctx2*>(ptr_);
-            if (t_env::log_progress()) {
-                std::cout << repr() << " << gnode.register_context: "
-                          << " name => " << name << " type => " << type << " ctx => "
-                          << ctx->repr() << std::endl;
-            }
-
             ctx->reset();
-
             if (should_update)
                 update_context_from_state<t_ctx2>(ctx, *flattened);
         } break;
         case ONE_SIDED_CONTEXT: {
             set_ctx_state<t_ctx1>(ptr_);
             t_ctx1* ctx = static_cast<t_ctx1*>(ptr_);
-            if (t_env::log_progress()) {
-                std::cout << repr() << " << gnode.register_context: "
-                          << " name => " << name << " type => " << type << " ctx => "
-                          << ctx->repr() << std::endl;
-            }
-
             ctx->reset();
-
             if (should_update)
                 update_context_from_state<t_ctx1>(ctx, *flattened);
         } break;
         case ZERO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
             t_ctx0* ctx = static_cast<t_ctx0*>(ptr_);
-            if (t_env::log_progress()) {
-                std::cout << repr() << " << gnode.register_context: "
-                          << " name => " << name << " type => " << type << " ctx => "
-                          << ctx->repr() << std::endl;
-            }
-
             ctx->reset();
-
             if (should_update)
                 update_context_from_state<t_ctx0>(ctx, *flattened);
         } break;
         case GROUPED_PKEY_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
             auto ctx = static_cast<t_ctx_grouped_pkey*>(ptr_);
-            if (t_env::log_progress()) {
-                std::cout << repr() << " << gnode.register_context: "
-                          << " name => " << name << " type => " << type << " ctx => "
-                          << ctx->repr() << std::endl;
-            }
-
             ctx->reset();
-
             if (should_update)
                 update_context_from_state<t_ctx_grouped_pkey>(ctx, *flattened);
         } break;
@@ -682,7 +683,6 @@ t_gnode::_unregister_context(const std::string& name) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if ((m_contexts.find(name) == m_contexts.end()))
         return;
-
     PSP_VERBOSE_ASSERT(m_contexts.find(name) != m_contexts.end(), "Context not found.");
     m_contexts.erase(name);
 }
@@ -1073,13 +1073,6 @@ t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx) 
 void
 t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx) {
     _register_context(name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
-}
-
-void 
-t_gnode::recompute_columns(std::shared_ptr<t_data_table> table) {
-    for (auto l : m_computed_lambdas) {
-        l(table);
-    }
 }
 
 void 
