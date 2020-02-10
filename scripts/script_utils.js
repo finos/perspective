@@ -219,16 +219,20 @@ exports.docker = function docker(image = "puppeteer") {
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
     const PACKAGE = process.env.PACKAGE;
     const CWD = process.cwd();
+    const IS_CI = getarg("--ci");
     const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
     const IMAGE = `perspective/${image}`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
         -ePACKAGE="${PACKAGE}"`;
+    let flags = IS_CI ? bash`--rm`: bash`--rm -it`;
+
     if (IS_MANYLINUX) {
         console.log(`-- Using manylinux build`);
-        env_vars += bash`-ePSP_MANYLINUX=1`;
+        env_vars += bash` -ePSP_MANYLINUX=1 `;
     }
 
-    let ret = bash`docker run -it --rm \
+    let ret = bash`docker run \
+        ${flags} \
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \

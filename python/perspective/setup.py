@@ -185,7 +185,7 @@ class PSPBuild(build_ext):
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                     cfg.upper(),
                     extdir).replace('\\', '/'),
-                '-G', 'Visual Studio 14 2015'])
+                '-G', 'Visual Studio 15 2017'])
             if sys.maxsize > 2**32:
                 # build 64 bit to match python
                 cmake_args += ['-A', 'x64']
