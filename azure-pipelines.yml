@@ -27,6 +27,12 @@ jobs:
       env:
         PSP_DOCKER: 1
 
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testRunner: JUnit
+        testResultsFiles: 'junit.xml'
+
 
 - job: 'Linux'
   pool:
@@ -76,6 +82,16 @@ jobs:
       env:
         PSP_DOCKER: 1
 
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: 'python/perspective/python_junit.xml'
+        testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
+
+    - task: PublishCodeCoverageResults@1
+      inputs: 
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
 # - job: 'Windows'
 #   pool:
@@ -163,5 +179,16 @@ jobs:
     - script: yarn
       displayName: 'Install Deps'
 
-    - script: yarn build_python  --ci $(python_flag)
+    - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: 'python/perspective/python_junit.xml'
+        testRunTitle: 'Publish test results for Python $(python.version)'
+
+    - task: PublishCodeCoverageResults@1
+      inputs: 
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
