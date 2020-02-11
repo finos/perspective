@@ -12,9 +12,9 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 ### Dependencies
 
-`PyArrow==0.15.1` and `Numpy` are required build-time dependencies, and can both be installed via `pip`.
+`PyArrow==0.16.0` and `Numpy` are required build-time dependencies, and can both be installed via `pip`.
 
-`pip install pyarrow==0.15.1`
+`pip install pyarrow==0.16.0`
 
 It is recommended to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
 
