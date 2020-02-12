@@ -14,7 +14,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@finos/perspective": "^0.4.2",
-        "@finos/perspective-phosphor": "^0.4.2",
+        "@finos/perspective-workspace": "^0.4.2",
         "@finos/perspective-viewer": "^0.4.2",
         "@finos/perspective-viewer-d3fc": "^0.4.2",
         "@finos/perspective-viewer-hypergrid": "^0.4.2"

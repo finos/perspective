@@ -38,4 +38,3 @@ export const PerspectiveJupyterPlugin: IPlugin<Application<Widget>, void> = {
     },
     autoStart: true
 };
-

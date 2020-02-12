@@ -8,7 +8,7 @@
  */
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
-import {PerspectiveWidget} from "@finos/perspective-phosphor";
+
 import {PerspectiveJupyterWidget} from "./widget";
 import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
 
@@ -17,7 +17,7 @@ import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
  * the DOM.
  */
 export class PerspectiveView extends DOMWidgetView {
-    pWidget: PerspectiveWidget;  // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
+    pWidget: PerspectiveJupyterWidget; // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
     _createElement(tagName: string) {
@@ -32,8 +32,10 @@ export class PerspectiveView extends DOMWidgetView {
             plugin_config: this.model.get("plugin_config"),
             computed_columns: [],
             client: this.model.get("client"),
-            dark: this.model.get("dark") === null ? // only set if its a bool, otherwise inherit
-                document.body.getAttribute("data-jp-theme-light") === "false": this.model.get("dark"),
+            dark:
+                this.model.get("dark") === null // only set if its a bool, otherwise inherit
+                    ? document.body.getAttribute("data-jp-theme-light") === "false"
+                    : this.model.get("dark"),
             editable: this.model.get("editable"),
             bindto: this.el,
             view: this

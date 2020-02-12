@@ -13,7 +13,7 @@ const webpack = require("webpack");
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
     entry: {
-        index: "./src/ts/index.ts"
+        index: "./src/ts/psp_widget.ts"
     },
     resolve: {
         extensions: [".ts", ".js"]
@@ -23,7 +23,6 @@ module.exports = {
         maxEntrypointSize: 512000,
         maxAssetSize: 512000
     },
-    externals: /\@jupyterlab|\@phosphor|\@jupyter-widgets/,
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
     module: {
@@ -41,8 +40,9 @@ module.exports = {
         ]
     },
     output: {
-        filename: "[name].js",
+        filename: "phosphor.js",
         libraryTarget: "umd",
-        path: path.resolve(__dirname, "../../dist")
+        library: "PerspectivePhosphor",
+        path: path.resolve(__dirname, "../../dist/umd")
     }
 };

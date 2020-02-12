@@ -8,9 +8,9 @@
  */
 
 import perspective from "@finos/perspective";
-import {PerspectiveWorkspace, PerspectiveWidget} from "@finos/perspective-phosphor";
+import {PerspectiveWorkspace, PerspectiveWidget} from "@finos/perspective-workspace";
 import {Widget} from "@phosphor/widgets";
-import "@finos/perspective-phosphor/src/theme/material/index.less";
+import "@finos/perspective-workspace/src/theme/material/index.less";
 
 import "@finos/perspective-viewer-hypergrid";
 import "@finos/perspective-viewer-d3fc";

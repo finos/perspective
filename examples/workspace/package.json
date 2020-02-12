@@ -2,7 +2,7 @@
     "name": "workspace",
     "private": true,
     "version": "0.4.2",
-    "description": "An example app built using `@finos/perspective-phosphor`.",
+    "description": "An example app built using `@finos/perspective-workspace`.",
     "scripts": {
         "start": "webpack-dev-server --open",
         "webpack": "webpack --colour"
@@ -11,7 +11,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@finos/perspective": "^0.4.2",
-        "@finos/perspective-phosphor": "^0.4.2",
+        "@finos/perspective-workspace": "^0.4.2",
         "@finos/perspective-viewer": "^0.4.2",
         "@finos/perspective-viewer-d3fc": "^0.4.2",
         "@finos/perspective-viewer-hypergrid": "^0.4.2"
