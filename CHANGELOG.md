@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.3] (2020-02-12)
+
+#### Fixed
+  * [#919](https://github.com/finos/perspective/pull/919) Remove `@finos/perspective-phosphor` and Closes [#825](https://github.com/finos/perspective/issues/825) regression. ([@texodus](https://github.com/texodus))
+
+#### Internal
+  * [#916](https://github.com/finos/perspective/pull/916) Added Azure compatible reporting for tests ([@texodus](https://github.com/texodus))
+  * [#915](https://github.com/finos/perspective/pull/915) Set up CI with Azure Pipelines ([@timkpaine](https://github.com/timkpaine))
+  * [#918](https://github.com/finos/perspective/pull/918) adding sdist check so we don't deploy broken sdists accidentally ([@timkpaine](https://github.com/timkpaine))
+
 ## [0.4.2] (2020-02-10)
 
 #### Added

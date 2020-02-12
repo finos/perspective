@@ -1483,14 +1483,6 @@
   resolved "https://registry.yarnpkg.com/@phosphor/coreutils/-/coreutils-1.3.1.tgz#441e34f42340f7faa742a88b2a181947a88d7226"
   integrity sha512-9OHCn8LYRcPU/sbHm5v7viCA16Uev3gbdkwqoQqlV+EiauDHl70jmeL7XVDXdigl66Dz0LI11C99XOxp+s3zOA==
 
-"@phosphor/default-theme@0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@phosphor/default-theme/-/default-theme-0.1.8.tgz#218b3dc4d70d606257e57aa349e75c68e338cc3d"
-  integrity sha512-OcIRyGkZs/7vPTcA3/8h3vQt8m+pZdG9e1S7W26ZGmwwQYKvxX8XoRWCQ5zkGYX1XFwlNMvtJUFTdGjDM8CZOw==
-  dependencies:
-    "@phosphor/dragdrop" "^1.4.1"
-    "@phosphor/widgets" "^1.9.3"
-
 "@phosphor/disposable@^1.3.0", "@phosphor/disposable@^1.3.1":
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/@phosphor/disposable/-/disposable-1.3.1.tgz#be98fe12bd8c9a4600741cb83b0a305df28628f3"
@@ -14519,6 +14511,11 @@ webpack-dev-server@3.9.0, webpack-dev-server@^3.8.0:
     webpack-log "^2.0.0"
     ws "^6.2.1"
     yargs "12.0.5"
+
+webpack-fix-style-only-entries@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/webpack-fix-style-only-entries/-/webpack-fix-style-only-entries-0.4.0.tgz#a027ceb960447b29eed2c56d9ddc003e52d60fb5"
+  integrity sha512-6TDa56V/xSOw6CBVlhFm6J+xXY2oJzx7CEgH0dmex2Xe1rwb95KkLl3rXvSNpO4wyahwD3YnYqffDNR0LH1BNQ==
 
 webpack-log@^1.1.2:
   version "1.2.0"

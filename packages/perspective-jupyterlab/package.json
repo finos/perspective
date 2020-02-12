@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-jupyterlab",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "description": "Perspective.js",
     "files": [
         "dist/*.d.ts",
@@ -27,7 +27,7 @@
         "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd",
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --color --verbose",
         "test:webpack": "webpack --color --config src/config/webpack.config.js",
-        "test": "npm-run-all test:build test:run",  
+        "test": "npm-run-all test:build test:run",
         "build": "npm-run-all -p build:*",
         "build:jupyterlab": "webpack --color --config src/config/plugin.config.js",
         "build:phosphor": "webpack --color --config src/config/webpack.config.js",
@@ -35,17 +35,17 @@
         "version": "yarn build"
     },
     "dependencies": {
-        "@finos/perspective-viewer": "^0.4.2",
-        "@finos/perspective-viewer-hypergrid": "^0.4.2",
-        "@finos/perspective-viewer-highcharts": "^0.4.2",
-        "@finos/perspective-viewer-d3fc": "^0.4.2",
+        "@finos/perspective-viewer": "^0.4.3",
+        "@finos/perspective-viewer-d3fc": "^0.4.3",
+        "@finos/perspective-viewer-highcharts": "^0.4.3",
+        "@finos/perspective-viewer-hypergrid": "^0.4.3",
         "@jupyter-widgets/base": "^2.0.2",
         "@jupyterlab/application": "^1.2.1",
         "@phosphor/application": "^1.7.3",
         "@phosphor/widgets": "^1.9.3"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.4.2",
+        "@finos/perspective-test": "^0.4.3",
         "@finos/perspective-webpack-plugin": "^0.4.1",
         "@types/jest": "^23.3.9",
         "@types/node": "^11.11.0",

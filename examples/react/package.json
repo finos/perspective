@@ -1,7 +1,7 @@
 {
     "name": "react",
     "private": true,
-    "version": "0.4.2",
+    "version": "0.4.3",
     "description": "An example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "start": "webpack-dev-server --open",
@@ -11,9 +11,9 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@finos/perspective": "^0.4.2",
-        "@finos/perspective-viewer": "^0.4.2",
-        "@finos/perspective-viewer-d3fc": "^0.4.2",
-        "@finos/perspective-viewer-hypergrid": "^0.4.2",
+        "@finos/perspective-viewer": "^0.4.3",
+        "@finos/perspective-viewer-d3fc": "^0.4.3",
+        "@finos/perspective-viewer-hypergrid": "^0.4.3",
         "react": "16.8.6",
         "react-dom": "16.8.6"
     },
