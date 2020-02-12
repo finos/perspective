@@ -609,6 +609,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
         const table = this.tables.get(viewer.getAttribute("table") || config.table);
         const widget = new PerspectiveViewerWidget({name, table, node, viewer});
+        const event = new CustomEvent("workspace-new-view", {
+            detail: {config, widget}
+        });
+        this.element.dispatchEvent(event);
         widget.title.closable = true;
         this.element.appendChild(widget.viewer);
         this._addWidgetEventListeners(widget);
@@ -650,9 +654,12 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         return [...this.masterPanel.widgets, ...toArray(this.dockpanel.widgets())];
     }
 
-    /*********************************************************************
-     * Workspace updated event
+    /***************************************************************************
+     *
+     * `workspace-layout-update` event
+     *
      */
+
     _fireUpdateEvent() {
         const layout = this.save();
         if (layout) {
