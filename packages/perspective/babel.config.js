@@ -10,7 +10,7 @@ module.exports = {
                     safari: "12",
                     edge: "44"
                 },
-                modules: false,
+                modules: process.env.BABEL_MODULE || false,
                 useBuiltIns: "usage",
                 corejs: 3
             }

@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 const {Client} = require("./api/client.js");
 const {Server} = require("./api/server.js");
 
@@ -21,13 +22,9 @@ const path = require("path");
 const load_perspective = require("./psp.async.js").default;
 
 // eslint-disable-next-line no-undef
-const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__.resolve : module.require.resolve;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-
-const wasm = require("./psp.async.wasm.js");
-
-const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
+const buffer = require("./psp.async.wasm.js").default;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
@@ -117,9 +114,9 @@ function create_http_server(assets, host_psp) {
             if (host_psp || typeof host_psp === "undefined") {
                 for (let rootDir of DEFAULT_ASSETS) {
                     try {
-                        let paths = RESOLVER.paths(rootDir + url);
+                        let paths = require.resolve.paths(rootDir + url);
                         paths = [...paths, ...assets.map(x => path.join(x, "node_modules")), LOCAL_PATH];
-                        let filePath = RESOLVER(rootDir + url, {paths});
+                        let filePath = require.resolve(rootDir + url, {paths});
                         let content = await read_promise(filePath);
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
