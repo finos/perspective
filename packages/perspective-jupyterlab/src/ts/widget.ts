@@ -10,7 +10,7 @@ import {Message} from "@phosphor/messaging";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 
 import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
-import {PerspectiveWidget, PerspectiveWidgetOptions} from "@finos/perspective-phosphor";
+import {PerspectiveWidget, PerspectiveWidgetOptions} from "./psp_widget";
 
 export type PerspectiveJupyterWidgetOptions = {
     view: DOMWidgetView;

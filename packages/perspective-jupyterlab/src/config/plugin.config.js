@@ -15,11 +15,6 @@ module.exports = {
     entry: {
         index: "./src/ts/index.ts"
     },
-    resolveLoader: {
-        alias: {
-            "file-worker-loader": "@finos/perspective-webpack-plugin/src/js/psp-worker-loader.js"
-        }
-    },
     resolve: {
         extensions: [".ts", ".js"]
     },
@@ -37,14 +32,6 @@ module.exports = {
                 test: /\.css$/,
                 exclude: /node_modules/,
                 use: [{loader: "css-loader"}]
-            },
-            {
-                test: /\.(wasm)$/,
-                type: "javascript/auto",
-                use: {
-                    loader: "arraybuffer-loader",
-                    options: {}
-                }
             },
             {
                 test: /\.ts$/,
