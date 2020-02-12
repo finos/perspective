@@ -8,6 +8,7 @@
 from __future__ import print_function
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
+from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
 from distutils import sysconfig
 from codecs import open
@@ -205,6 +206,18 @@ class PSPBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 
+class PSPCheckSDist(sdist):
+    def run(self):
+        self.run_check()
+        super(PSPCheckSDist, self).run()
+
+    def run_check(self):
+        for file in ('CMakeLists.txt', 'cmake', 'src', 'test'):
+            path = os.path.abspath(os.path.join(here, 'dist', file))
+            if not os.path.exists(path):
+                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
+
+
 setup(
     name='perspective-python',
     version=version,
@@ -234,5 +247,5 @@ setup(
         'dev': requires_dev,
     },
     ext_modules=[PSPExtension('perspective')],
-    cmdclass=dict(build_ext=PSPBuild),
+    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )
