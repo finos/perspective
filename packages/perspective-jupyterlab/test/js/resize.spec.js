@@ -24,6 +24,23 @@ utils.with_server({}, () => {
             );
 
             test.capture(
+                "Resize the container causes the widget to resize",
+                async page => {
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => {
+                        document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:300px;height:300px";
+                        await document.querySelector("perspective-viewer").notifyResize();
+                    });
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(async () => {
+                        document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:800px;height:600px";
+                    });
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                },
+                {wait_for_update: false}
+            );
+
+            test.capture(
                 "row_pivots traitlet works",
                 async page => {
                     await page.shadow_click("perspective-viewer", "#config_button");
