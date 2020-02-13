@@ -21,6 +21,7 @@ import re
 import platform
 import sys
 import subprocess
+from perspective.core._version import __version__
 from shutil import rmtree
 try:
     from shutil import which
@@ -77,20 +78,7 @@ requires_dev = [
     'sphinx-markdown-builder>=0.5.2',
 ] + requires
 
-
-def get_version(file):
-    """Get the version of the package from the package.json file managed by
-    Lerna, synchronizing versions across the Javascript and Python libraries.
-    """
-    path = os.path.realpath(file)
-    version = None
-    with io.open(path, encoding="utf8") as f:
-        meta = load(f)
-        version = meta["version"]
-    return version
-
-
-version = get_version(os.path.join(here, 'package.json'))
+version = __version__
 
 ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
 Run `yarn add zerorpc` to fix."""

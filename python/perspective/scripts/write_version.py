@@ -10,6 +10,8 @@ import os
 import json
 import logging
 
+logging.basicConfig(level=logging.INFO)
+
 
 def write_version():
     """Retrieves the version string from `package.json` managed by Lerna,
@@ -31,7 +33,7 @@ def write_version():
     version_py_path = os.path.join(here, "..", "perspective", "core", "_version.py")
 
     with open(os.path.realpath(version_py_path), "w") as f:
-        f.write("__version__ = {}".format(version))
+        f.write('__version__ = "{}"\n'.format(version))
 
     logging.info("`perspective-python` updated to version `{}`".format(version))
 
