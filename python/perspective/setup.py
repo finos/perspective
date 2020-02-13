@@ -12,6 +12,7 @@ from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
 from distutils import sysconfig
 from codecs import open
+from json import load
 import io
 import logging
 import os
@@ -77,18 +78,19 @@ requires_dev = [
 ] + requires
 
 
-def get_version(file, name='__version__'):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
+def get_version(file):
+    """Get the version of the package from the package.json file managed by
+    Lerna, synchronizing versions across the Javascript and Python libraries.
     """
     path = os.path.realpath(file)
-    version_ns = {}
+    version = None
     with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
+        meta = load(f)
+        version = meta["version"]
+    return version
 
 
-version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
+version = get_version(os.path.join(here, 'package.json'))
 
 ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
 Run `yarn add zerorpc` to fix."""

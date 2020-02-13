@@ -24,12 +24,8 @@ prune docs/build
 prune docs/gh-pages
 prune docs/dist
 
-# Webapp files
+# Use package.json for versioning
 include package.json
-include webpack.config.js
-graft dist/src
-graft style
-graft js
 
 # C++ build
 graft dist/cmake
