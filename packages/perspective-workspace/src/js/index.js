@@ -202,7 +202,9 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         this._register_light_dom_listener();
 
         // TODO: check we only insert one of these
-        this._injectStyle = injectStyles("workspace-injected-stylesheet", injectedStyles);
+        this._injectStyle = document.createElement("style");
+        this._injectStyle.innerHTML = injectedStyles;
+        document.head.appendChild(this._injectStyle);
 
         MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
         container.insertBefore(this.workspace.node, null);
@@ -217,11 +219,3 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         document.head.removeChild(this._injectStyle);
     }
 }
-
-const injectStyles = (name, style) => {
-    const node = document.createElement("style");
-    node.id = name;
-    node.innerHTML = style;
-    document.head.appendChild(node);
-    return node;
-};
