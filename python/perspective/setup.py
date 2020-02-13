@@ -12,7 +12,6 @@ from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
 from distutils import sysconfig
 from codecs import open
-from json import load
 import io
 import logging
 import os
@@ -21,7 +20,6 @@ import re
 import platform
 import sys
 import subprocess
-from perspective.core._version import __version__
 from shutil import rmtree
 try:
     from shutil import which
@@ -78,7 +76,19 @@ requires_dev = [
     'sphinx-markdown-builder>=0.5.2',
 ] + requires
 
-version = __version__
+
+def get_version(file, name='__version__'):
+    """Get the version of the package from the given file by
+    executing it and extracting the given `name`.
+    """
+    path = os.path.realpath(file)
+    version_ns = {}
+    with io.open(path, encoding="utf8") as f:
+        exec(f.read(), {}, version_ns)
+    return version_ns[name]
+
+
+version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
 ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
 Run `yarn add zerorpc` to fix."""
