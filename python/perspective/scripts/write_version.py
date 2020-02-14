@@ -13,6 +13,12 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
+def truncate_patch_version(version):
+    """Return just the major and minor versions from `version`."""
+    split_version = version.split(".")
+    return "{}.{}".format(split_version[0], split_version[1])
+
+
 def write_version():
     """Retrieves the version string from `package.json` managed by Lerna,
     and writes it into `_version.py`. This script is run as part of Lerna's
@@ -32,10 +38,15 @@ def write_version():
 
     version_py_path = os.path.join(here, "..", "perspective", "core", "_version.py")
 
+    # PerspectiveWidget uses the major and minor versions for semver only.
+    truncated = truncate_patch_version(version)
+
     with open(os.path.realpath(version_py_path), "w") as f:
         f.write('__version__ = "{}"\n'.format(version))
+        f.write('major_minor_version = "{}"\n'.format(truncated))
 
     logging.info("`perspective-python` updated to version `{}`".format(version))
+    logging.info("`PerspectiveWidget` now requires `perspective-jupyterlab` version `~{}`".format(truncated))
 
 
 if __name__ == "__main__":
