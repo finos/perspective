@@ -575,7 +575,11 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     _gen_id() {
-        return `PERSPECTIVE_GENERATED_ID_${ID_COUNTER++}`;
+        let genId = `PERSPECTIVE_GENERATED_ID_${ID_COUNTER++}`;
+        if (this.element.querySelector(`[slot=${genId}]`)) {
+            genId = this._gen_id();
+        }
+        return genId;
     }
 
     _createNode(slotname) {

@@ -2,7 +2,7 @@
     "index_restore_workspace_with_detail_only": "1168e9bee0eec492dfd5f50b2e087d84",
     "index_restore_workspace_with_master_only": "13ff739449bf9745d43f9af8bfc67c7c",
     "index_restore_workspace_with_master_and_detail": "aafccad40bfe1a921c220da2a0e07a30",
-    "__GIT_COMMIT__": "362140e29c4b9ef392e3e3550dab1d09d2e7cc57",
+    "__GIT_COMMIT__": "ed38f93b69ace120dd6be13d68905b2b3c6bfa4f",
     "index_HTML_Create_One": "9db49888a923c083fec35c90723fbf0f",
     "index_HTML_Create_Multiple": "9bf849cb0f3d724baa79df4ccfedb913",
     "index_HTML_Create_multiple_with_names": "0bed0974e891d51eb400070f99f78189",
@@ -10,5 +10,6 @@
     "index_appendChild_Create_One": "9db49888a923c083fec35c90723fbf0f",
     "index_appendChild_Create_multiple": "418ec5fe318631be277300adbc0f958c",
     "index_appendChild_With_name": "1168e9bee0eec492dfd5f50b2e087d84",
-    "index_appendChild_Without_slot": "9db49888a923c083fec35c90723fbf0f"
+    "index_appendChild_Without_slot": "9db49888a923c083fec35c90723fbf0f",
+    "index_restore_workspace_with_viewers_with_generated_slotids": "995ca0415729b7396b9c6c481a2e2218"
 }
