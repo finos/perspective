@@ -110,7 +110,7 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
 }
 
 void
-t_gstate::update_history(const t_data_table* tbl) {
+t_gstate::update_master_table(const t_data_table* tbl) {
     const t_schema& fschema = tbl->get_schema();
     const t_schema& sschema = m_table->get_schema();
 

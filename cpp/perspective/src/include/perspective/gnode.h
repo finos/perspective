@@ -89,8 +89,6 @@ public:
     void begin_step();
     void end_step();
 
-    void update_history(const t_data_table* tbl);
-
     t_data_table* _get_otable(t_uindex portidx);
     t_data_table* _get_itable(t_uindex portidx);
     t_data_table* get_table();

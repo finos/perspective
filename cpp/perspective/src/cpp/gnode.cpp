@@ -362,7 +362,7 @@ t_gnode::_process_table() {
     recompute_columns(get_table_sptr(), flattened, lkup);
 
     if (m_state->mapping_size() == 0) {
-        m_state->update_history(flattened.get());
+        m_state->update_master_table(flattened.get());
         _update_contexts_from_state(*flattened);
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
@@ -593,7 +593,7 @@ t_gnode::_process_table() {
         PSP_GNODE_VERIFY_TABLE(updated_table);
     }
 #endif
-    m_state->update_history(flattened_masked.get());
+    m_state->update_master_table(flattened_masked.get());
 #ifdef PSP_GNODE_VERIFY
     {
         auto updated_table = get_table();
@@ -1068,16 +1068,6 @@ t_gnode::get_contexts_last_updated() const {
 std::vector<t_tscalar>
 t_gnode::get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const {
     return m_state->get_row_data_pkeys(pkeys);
-}
-
-std::vector<t_tscalar>
-t_gnode::has_pkeys(const std::vector<t_tscalar>& pkeys) const {
-    return m_state->has_pkeys(pkeys);
-}
-
-std::vector<t_tscalar>
-t_gnode::get_pkeys() const {
-    return m_state->get_pkeys();
 }
 
 void
