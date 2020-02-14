@@ -14,6 +14,10 @@ module.exports = {
         ".js$": "@finos/perspective-test/src/js/transform.js",
         ".html$": "html-loader-jest"
     },
+    collectCoverage: true,
+    collectCoverageFrom: ["packages/perspective/dist/cjs/**"],
+    coverageProvider: "v8",
+    coverageReporters: ["cobertura", "text"],
     transformIgnorePatterns: ["/node_modules/(?!lit-html).+$"],
     automock: false,
     setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"],

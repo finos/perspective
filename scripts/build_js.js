@@ -52,7 +52,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
     const OUTPUT_DIRECTORY = getOuputDir(packageName);
     const BUILD_DIRECTORY = getBuildDir(packageName);
 
-    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "obj"));
+    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "obj"));
     mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "umd"));
 
     if (inputWasmFile) {
@@ -77,7 +77,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
         });
     }
 
-    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, "obj", inputFile), source);
+    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, "dist", "obj", inputFile), source);
 }
 
 function docker(image = "emsdk") {

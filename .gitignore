@@ -161,3 +161,6 @@ docs/static/js/logo.js.map
 python/perspective/pip-wheel-metadata
 darwin.json
 darwin.interactive.json
+junit.xml
+python/perspective/python_junit.xml
+python/perspective/coverage.xml
