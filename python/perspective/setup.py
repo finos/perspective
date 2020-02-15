@@ -135,15 +135,22 @@ class PSPBuild(build_ext):
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
+            import distutils.msvccompiler as dm
+            msvc = {'12': 'Visual Studio 12 2013',
+                    '14': 'Visual Studio 14 2015',
+                    '14.1': 'Visual Studio 15 2017'}.get(dm.get_build_version(), 'Visual Studio 15 2017')
+
             cmake_args.extend([
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                     cfg.upper(),
                     extdir).replace('\\', '/'),
-                '-G', os.environ.get('PSP_GENERATOR', 'Visual Studio 15 2017')])
+                '-G', os.environ.get('PSP_GENERATOR', msvc)])
+
             if sys.maxsize > 2**32:
                 # build 64 bit to match python
                 cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m', '/p:Configuration={}'.format(cfg)]
+
+            build_args += ['--', '/m:{}'.format(CPU_COUNT), '/p:Configuration={}'.format(cfg)]
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(CPU_COUNT)]
