@@ -39,21 +39,6 @@ PERSPECTIVE_EXPORT t_tscalar calc_newer(
 
 PERSPECTIVE_EXPORT t_tscalar calc_negate(t_tscalar val);
 
-struct PERSPECTIVE_EXPORT t_gnode_recipe {
-    t_gnode_recipe() {}
-    t_gnode_processing_mode m_mode;
-    t_gnode_type m_gnode_type;
-    t_schema_recipe m_tblschema;
-    std::vector<t_schema_recipe> m_ischemas;
-    std::vector<t_schema_recipe> m_oschemas;
-    t_custom_column_recipevec m_custom_columns;
-};
-
-struct PERSPECTIVE_EXPORT t_gnode_options {
-    t_gnode_type m_gnode_type;
-    t_schema m_port_schema;
-};
-
 class t_ctx0;
 class t_ctx1;
 class t_ctx2;
@@ -61,13 +46,25 @@ class t_ctx_grouped_pkey;
 
 class PERSPECTIVE_EXPORT t_gnode {
 public:
-    static std::shared_ptr<t_gnode> build(const t_gnode_options& options);
-    t_gnode(const t_gnode_recipe& recipe);
-    t_gnode(const t_gnode_options& options);
-    t_gnode(const t_schema& tblschema, const t_schema& port_schema);
-    t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
-        const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
-        const std::vector<t_custom_column>& custom_columns);
+    /**
+     * @brief Construct a new `t_gnode`. A `t_gnode` manages the accumulated
+     * internal state of a `Table` - it handles updates, calculates the
+     * transition state between each `update()` call, and manages/notifies
+     * contexts (`View`s) created from the `Table`.
+     * 
+     * A `t_gnode` is created with two `t_schema`s:
+     * 
+     * - `input_schema`: the canonical `t_schema` for the `Table`, which cannot
+     * be mutated after creation. This schema contains the `psp_pkey` and
+     * `psp_op` columns, which are used internally.
+     * 
+     * - `output_schema`: the `t_schema` that contains all columns provided
+     * by the dataset, excluding `psp_pkey` and `psp_op`.
+     * 
+     * @param input_schema 
+     * @param output_schema 
+     */
+    t_gnode(const t_schema& input_schema, const t_schema& output_schema);
     ~t_gnode();
     void init();
 
@@ -92,7 +89,8 @@ public:
 
     void pprint() const;
     std::vector<std::string> get_registered_contexts() const;
-    t_schema get_tblschema() const;
+    t_schema get_output_schema() const;
+    const t_schema& get_state_input_schema() const;
     std::vector<t_pivot> get_pivots() const;
 
     std::vector<t_stree*> get_trees();
@@ -121,10 +119,8 @@ public:
 
     std::vector<t_custom_column> get_custom_columns() const;
 
-    t_gnode_recipe get_recipe() const;
     bool has_python_dep() const;
     void set_pool_cleanup(std::function<void()> cleanup);
-    const t_schema& get_port_schema() const;
     bool was_updated() const;
     void clear_updated();
 
@@ -194,9 +190,16 @@ private:
     std::vector<t_computed_column_lambda> m_computed_lambdas;
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
-    t_schema m_tblschema;
-    std::vector<t_schema> m_ischemas;
-    std::vector<t_schema> m_oschemas;
+
+    // A `t_schema` containing all columns, including internal metadata columns.
+    t_schema m_input_schema;
+
+    // A `t_schema` containing all columns (excluding internal columns).
+    t_schema m_output_schema;
+
+    // A vector of `t_schema`s for each transitional `t_data_table`.
+    std::vector<t_schema> m_transitional_schemas;
+
     bool m_init;
     std::vector<std::shared_ptr<t_port>> m_iports;
     std::vector<std::shared_ptr<t_port>> m_oports;

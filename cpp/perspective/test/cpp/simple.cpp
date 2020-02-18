@@ -2138,6 +2138,7 @@ TEST(TYPE_TO_DTYPE, test_time)
     EXPECT_EQ(type_to_dtype<std::string>(), DTYPE_STR);
 }
 
+// FIXME: DEPRECATED API
 TEST(GNODE_TEST, get_registered_contexts)
 {
     t_schema sch{{"psp_op", "psp_pkey", "s", "i"},

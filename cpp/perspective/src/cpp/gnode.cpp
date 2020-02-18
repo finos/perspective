@@ -39,130 +39,29 @@ calc_negate(t_tscalar val) {
     return val.negate();
 }
 
-t_gnode::t_gnode(const t_gnode_recipe& recipe)
-    : m_mode(recipe.m_mode)
-    , m_tblschema(recipe.m_tblschema)
-    , m_init(false)
-    , m_id(0)
-    , m_pool_cleanup([]() {}) {
-    PSP_TRACE_SENTINEL();
-    LOG_CONSTRUCTOR("t_gnode");
-
-    PSP_VERBOSE_ASSERT(recipe.m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
-        "Only simple dataflows supported currently");
-
-    for (const auto& s : recipe.m_ischemas) {
-        m_ischemas.push_back(t_schema(s));
-    }
-
-    PSP_VERBOSE_ASSERT(m_ischemas.size() == 1, "Single input port supported currently");
-
-    for (const auto& s : recipe.m_oschemas) {
-        m_oschemas.push_back(t_schema(s));
-    }
-
-    for (const auto& cc : recipe.m_custom_columns) {
-        m_custom_columns.push_back(t_custom_column(cc));
-    }
-
-    m_epoch = std::chrono::high_resolution_clock::now();
-
-    for (const auto& ccol : m_custom_columns) {
-        for (const auto& icol : ccol.get_icols()) {
-            m_expr_icols.insert(icol);
-        }
-    }
-}
-
-t_gnode::t_gnode(const t_gnode_options& options)
+t_gnode::t_gnode(const t_schema& input_schema, const t_schema& output_schema)
     : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
-    , m_gnode_type(options.m_gnode_type)
-    , m_tblschema(options.m_port_schema.drop({"psp_op", "psp_pkey"}))
+    , m_gnode_type(GNODE_TYPE_PKEYED)
+    , m_input_schema(input_schema)
+    , m_output_schema(output_schema)
     , m_init(false)
     , m_id(0)
     , m_pool_cleanup([]() {}) {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_gnode");
 
-    std::vector<t_dtype> trans_types(m_tblschema.size());
+    std::vector<t_dtype> trans_types(m_output_schema.size());
     for (t_uindex idx = 0; idx < trans_types.size(); ++idx) {
         trans_types[idx] = DTYPE_UINT8;
     }
 
-    t_schema port_schema(options.m_port_schema);
-    if (!(port_schema.is_pkey())) {
-        PSP_COMPLAIN_AND_ABORT("gnode type specified as explicit pkey, however input "
-                                "schema is missing required columns.");
-    }
-
-    t_schema trans_schema(m_tblschema.columns(), trans_types);
+    t_schema trans_schema(m_output_schema.columns(), trans_types);
     t_schema existed_schema(
         std::vector<std::string>{"psp_existed"}, std::vector<t_dtype>{DTYPE_BOOL});
 
-    m_ischemas = std::vector<t_schema>{port_schema};
-    m_oschemas = std::vector<t_schema>{
-        port_schema, m_tblschema, m_tblschema, m_tblschema, trans_schema, existed_schema};
+    m_transitional_schemas = std::vector<t_schema>{
+        m_input_schema, m_output_schema, m_output_schema, m_output_schema, trans_schema, existed_schema};
     m_epoch = std::chrono::high_resolution_clock::now();
-}
-
-std::shared_ptr<t_gnode>
-t_gnode::build(const t_gnode_options& options) {
-    auto rv = std::make_shared<t_gnode>(options);
-    rv->init();
-    return rv;
-}
-
-t_gnode::t_gnode(const t_schema& tblschema, const t_schema& portschema)
-    : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
-    , m_gnode_type(GNODE_TYPE_PKEYED)
-    , m_tblschema(tblschema)
-    , m_ischemas(std::vector<t_schema>{portschema})
-    , m_init(false)
-    , m_id(0)
-    , m_pool_cleanup([]() {}) {
-    PSP_TRACE_SENTINEL();
-    LOG_CONSTRUCTOR("t_gnode");
-
-    std::vector<t_dtype> trans_types(m_tblschema.size());
-    for (t_uindex idx = 0; idx < trans_types.size(); ++idx) {
-        trans_types[idx] = DTYPE_UINT8;
-    }
-
-    t_schema trans_schema(m_tblschema.columns(), trans_types);
-    t_schema existed_schema(
-        std::vector<std::string>{"psp_existed"}, std::vector<t_dtype>{DTYPE_BOOL});
-
-    m_oschemas = std::vector<t_schema>{
-        portschema, m_tblschema, m_tblschema, m_tblschema, trans_schema, existed_schema};
-    m_epoch = std::chrono::high_resolution_clock::now();
-}
-
-t_gnode::t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
-    const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
-    const std::vector<t_custom_column>& custom_columns)
-    : m_mode(mode)
-    , m_gnode_type(GNODE_TYPE_PKEYED)
-    , m_tblschema(tblschema)
-    , m_ischemas(ischemas)
-    , m_oschemas(oschemas)
-    , m_init(false)
-    , m_id(0)
-    , m_custom_columns(custom_columns)
-    , m_pool_cleanup([]() {}) {
-    PSP_TRACE_SENTINEL();
-    LOG_CONSTRUCTOR("t_gnode");
-
-    PSP_VERBOSE_ASSERT(
-        mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
-
-    PSP_VERBOSE_ASSERT(m_ischemas.size() == 1, "Single input port supported currently");
-    m_epoch = std::chrono::high_resolution_clock::now();
-
-    for (const auto& ccol : custom_columns) {
-        for (const auto& icol : ccol.get_icols()) {
-            m_expr_icols.insert(icol);
-        }
-    }
 }
 
 t_gnode::~t_gnode() {
@@ -174,22 +73,20 @@ t_gnode::~t_gnode() {
 void
 t_gnode::init() {
     PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_ischemas.size() == 1, "Single input port supported currently");
 
-    m_state = std::make_shared<t_gstate>(m_tblschema, m_ischemas[0]);
+    m_state = std::make_shared<t_gstate>(m_input_schema, m_output_schema);
     m_state->init();
 
-    for (t_uindex idx = 0, loop_end = m_ischemas.size(); idx < loop_end; ++idx) {
-        std::shared_ptr<t_port> port
-            = std::make_shared<t_port>(PORT_MODE_PKEYED, m_ischemas[idx]);
-        port->init();
-        m_iports.push_back(port);
-    }
+    // Create a single input port
+    std::shared_ptr<t_port> port
+        = std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
+    port->init();
+    m_iports.push_back(port);
 
-    for (t_uindex idx = 0, loop_end = m_oschemas.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_transitional_schemas.size(); idx < loop_end; ++idx) {
         t_port_mode mode = idx == 0 ? PORT_MODE_PKEYED : PORT_MODE_RAW;
 
-        std::shared_ptr<t_port> port = std::make_shared<t_port>(mode, m_oschemas[idx]);
+        std::shared_ptr<t_port> port = std::make_shared<t_port>(mode, m_transitional_schemas[idx]);
 
         port->init();
         m_oports.push_back(port);
@@ -230,8 +127,14 @@ t_gnode::_send_and_process(const t_data_table& fragments) {
 }
 
 t_value_transition
-t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, bool prev_valid,
-    bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq) {
+t_gnode::calc_transition(
+    bool prev_existed,
+    bool row_pre_existed,
+    bool exists,
+    bool prev_valid,
+    bool cur_valid,
+    bool prev_cur_eq,
+    bool prev_pkey_eq) {
     t_value_transition trans = VALUE_TRANSITION_EQ_FF;
 
     if (!row_pre_existed && !cur_valid && !t_env::backout_invalid_neq_ft()) {
@@ -250,9 +153,7 @@ t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, b
         trans = VALUE_TRANSITION_NEQ_FT;
     } else if (prev_existed && !exists) {
         trans = VALUE_TRANSITION_NEQ_TF;
-    }
-
-    else if (prev_existed && exists && !prev_cur_eq) {
+    } else if (prev_existed && exists && !prev_cur_eq) {
         trans = VALUE_TRANSITION_NEQ_TT;
     } else if (prev_pkey_eq) {
         // prev op must have been a delete
@@ -462,7 +363,7 @@ t_gnode::_process_table() {
         populate_icols_in_flattened(_process_state.m_lookup, flattened);
     }
 
-    const t_schema& _gstate_schema = m_state->get_schema();
+    const t_schema& _gstate_schema = m_state->get_output_schema();
     t_uindex ncols = _gstate_schema.get_num_columns();
 
 #ifdef PSP_PARALLEL_FOR
@@ -626,9 +527,9 @@ t_gnode::promote_column(const std::string& name, t_dtype new_type) {
     get_table()->promote_column(name, new_type, 0, false);
     _get_otable(0)->promote_column(name, new_type, 0, false);
     _get_itable(0)->promote_column(name, new_type, 0, false);
-    m_tblschema.retype_column(name, new_type);
-    m_ischemas[0].retype_column(name, new_type);
-    m_oschemas[0].retype_column(name, new_type);
+    m_output_schema.retype_column(name, new_type);
+    m_input_schema.retype_column(name, new_type);
+    m_transitional_schemas[0].retype_column(name, new_type);
 }
 
 void
@@ -739,7 +640,7 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
         flattened = m_state->get_pkeyed_table();
     }
 
-    auto pkeyed_tblcontext = m_state->get_port_schema().get_table_context();
+    auto pkeyed_tblcontext = m_state->get_input_schema().get_table_context();
 
     auto non_pkeyed_tblcontext = m_state->get_table()->get_schema().get_table_context();
 
@@ -904,8 +805,8 @@ t_gnode::get_pivots() const {
 }
 
 t_schema
-t_gnode::get_tblschema() const {
-    return m_tblschema;
+t_gnode::get_output_schema() const {
+    return m_output_schema;
 }
 
 std::vector<t_stree*>
@@ -1166,27 +1067,6 @@ t_gnode::get_custom_columns() const {
     return m_custom_columns;
 }
 
-t_gnode_recipe
-t_gnode::get_recipe() const {
-    t_gnode_recipe rv;
-    rv.m_mode = m_mode;
-
-    rv.m_tblschema = m_tblschema.get_recipe();
-
-    for (const auto& s : m_ischemas) {
-        rv.m_ischemas.push_back(s.get_recipe());
-    }
-
-    for (const auto& s : m_oschemas) {
-        rv.m_oschemas.push_back(s.get_recipe());
-    }
-
-    for (const auto& cc : m_custom_columns) {
-        rv.m_custom_columns.push_back(cc.get_recipe());
-    }
-    return rv;
-}
-
 bool
 t_gnode::has_python_dep() const {
     return !m_custom_columns.empty();
@@ -1198,8 +1078,8 @@ t_gnode::set_pool_cleanup(std::function<void()> cleanup) {
 }
 
 const t_schema&
-t_gnode::get_port_schema() const {
-    return m_state->get_port_schema();
+t_gnode::get_state_input_schema() const {
+    return m_state->get_input_schema();
 }
 
 bool

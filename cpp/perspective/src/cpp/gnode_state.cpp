@@ -20,10 +20,10 @@
 
 namespace perspective {
 
-t_gstate::t_gstate(const t_schema& tblschema, const t_schema& pkeyed_schema)
+t_gstate::t_gstate(const t_schema& input_schema, const t_schema& output_schema)
 
-    : m_tblschema(tblschema)
-    , m_pkeyed_schema(pkeyed_schema)
+    : m_input_schema(input_schema)
+    , m_output_schema(output_schema)
     , m_init(false) {
     LOG_CONSTRUCTOR("t_gstate");
 }
@@ -33,7 +33,7 @@ t_gstate::~t_gstate() { LOG_DESTRUCTOR("t_gstate"); }
 void
 t_gstate::init() {
     m_table = std::make_shared<t_data_table>(
-        "", "", m_pkeyed_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+        "", "", m_input_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     m_table->init();
     m_pkcol = m_table->get_column("psp_pkey");
     m_opcol = m_table->get_column("psp_op");
@@ -448,8 +448,8 @@ t_gstate::apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
 }
 
 const t_schema&
-t_gstate::get_schema() const {
-    return m_tblschema;
+t_gstate::get_output_schema() const {
+    return m_output_schema;
 }
 
 t_dtype
@@ -463,7 +463,7 @@ t_gstate::get_pkey_dtype() const {
 std::shared_ptr<t_data_table>
 t_gstate::get_sorted_pkeyed_table() const {
     std::map<t_tscalar, t_uindex> ordered(m_mapping.begin(), m_mapping.end());
-    auto sch = m_pkeyed_schema.drop({"psp_op"});
+    auto sch = m_input_schema.drop({"psp_op"});
     auto rv = std::make_shared<t_data_table>(sch, 0);
     rv->init();
     rv->reserve(mapping_size());
@@ -472,7 +472,7 @@ t_gstate::get_sorted_pkeyed_table() const {
     std::vector<std::shared_ptr<t_column>> icolumns;
     std::vector<std::shared_ptr<t_column>> ocolumns;
 
-    for (const std::string& cname : m_tblschema.m_columns) {
+    for (const std::string& cname : m_output_schema.m_columns) {
         ocolumns.push_back(rv->get_column(cname));
         icolumns.push_back(m_table->get_column(cname));
     }
@@ -480,7 +480,7 @@ t_gstate::get_sorted_pkeyed_table() const {
     for (auto it = ordered.begin(); it != ordered.end(); ++it) {
         auto ridx = it->second;
         pkey_col->push_back(it->first);
-        for (t_uindex cidx = 0, loop_end = m_tblschema.size(); cidx < loop_end; ++cidx) {
+        for (t_uindex cidx = 0, loop_end = m_output_schema.size(); cidx < loop_end; ++cidx) {
             auto scalar = icolumns[cidx]->get_scalar(ridx);
             ocolumns[cidx]->push_back(scalar);
         }
@@ -498,17 +498,17 @@ std::shared_ptr<t_data_table>
 t_gstate::get_pkeyed_table() const {
     if (m_mapping.size() == m_table->size())
         return m_table;
-    return std::shared_ptr<t_data_table>(_get_pkeyed_table(m_pkeyed_schema));
+    return std::shared_ptr<t_data_table>(_get_pkeyed_table(m_input_schema));
 }
 
 t_data_table*
 t_gstate::_get_pkeyed_table() const {
-    return _get_pkeyed_table(m_pkeyed_schema);
+    return _get_pkeyed_table(m_input_schema);
 }
 
 t_data_table*
 t_gstate::_get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const {
-    return _get_pkeyed_table(m_pkeyed_schema, pkeys);
+    return _get_pkeyed_table(m_input_schema, pkeys);
 }
 
 t_data_table*
@@ -758,8 +758,8 @@ t_gstate::get_value(const t_tscalar& pkey, const std::string& colname) const {
 }
 
 const t_schema&
-t_gstate::get_port_schema() const {
-    return m_pkeyed_schema;
+t_gstate::get_input_schema() const {
+    return m_input_schema;
 }
 
 std::vector<t_uindex>

@@ -23,17 +23,41 @@ namespace perspective {
 std::pair<t_tscalar, t_tscalar> get_vec_min_max(const std::vector<t_tscalar>& vec);
 
 class PERSPECTIVE_EXPORT t_gstate {
+    /**
+     * @brief A mapping of `t_tscalar` primary keys to `t_uindex` row indices.
+     */
     typedef tsl::hopscotch_map<t_tscalar, t_uindex> t_mapping;
 
     typedef tsl::hopscotch_set<t_uindex> t_free_items;
 
 public:
-    t_gstate(const t_schema& tblschema, const t_schema& pkeyed_schema);
+    /**
+     * @brief Construct a new `t_gstate`, which manages the canonical state of
+     * the `t_gnode` and associated `Table`. 
+     * 
+     * Contexts use `t_gstate` to read out columns for serialization, 
+     * calculate aggregates, and look up primary keys - the `t_gstate` will
+     * contain the *latest* state of the dataset managed by Perspective,
+     * after updates/removes/etc. are applied.
+     * 
+     * @param input_schema 
+     * @param output_schema 
+     */
+    t_gstate(const t_schema& input_schema, const t_schema& output_schema);
 
     ~t_gstate();
 
     void init();
 
+    /**
+     * @brief Look up a primary key in the `t_gstate`'s mapping of primary
+     * keys to row numbers.
+     * 
+     * @param pkey 
+     * @return t_rlookup a struct containing row index `m_idx` and `m_exists`,
+     * whether `pkey` exists at that row index. If `pkey` is not found, 
+     * `m_idx` is 0 and `m_exists` is false.
+     */
     t_rlookup lookup(t_tscalar pkey) const;
 
     /**
@@ -160,8 +184,8 @@ public:
     t_data_table* _get_pkeyed_table(
         const t_schema& schema, const t_mask& mask) const;
 
-    const t_schema& get_schema() const;
-    const t_schema& get_port_schema() const;
+    const t_schema& get_input_schema() const;
+    const t_schema& get_output_schema() const;
 
     std::vector<t_tscalar> get_row_data_pkeys(
         const std::vector<t_tscalar>& pkeys) const;
@@ -202,8 +226,8 @@ private:
     bool apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
         t_tscalar& value) const;
 
-    t_schema m_tblschema;
-    t_schema m_pkeyed_schema;
+    t_schema m_input_schema; // pkeyed
+    t_schema m_output_schema; // tblschema
     bool m_init;
     std::shared_ptr<t_data_table> m_table;
     t_mapping m_mapping;
