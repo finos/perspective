@@ -40,6 +40,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 requires = [
     'ipywidgets>=7.5.1',
+    'future>=0.16.0',
     'numpy>=1.13.1',
     'pandas>=0.22.0',
     'pyarrow==0.15.1',
