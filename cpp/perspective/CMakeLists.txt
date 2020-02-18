@@ -491,6 +491,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/pivot.cpp
 	${PSP_CPP_SRC}/src/cpp/pool.cpp
 	${PSP_CPP_SRC}/src/cpp/port.cpp
+	${PSP_CPP_SRC}/src/cpp/process_state.cpp
 	${PSP_CPP_SRC}/src/cpp/raii.cpp
 	${PSP_CPP_SRC}/src/cpp/raii_impl_linux.cpp
 	${PSP_CPP_SRC}/src/cpp/raii_impl_osx.cpp

@@ -73,6 +73,33 @@ describe("Table", async () => {
     }
 });
 
+describe("Update", async () => {
+    // Generate update data from Perspective
+    const static_table = worker.table(data.arrow.slice());
+    const static_view = static_table.view();
+
+    let table;
+
+    afterEach(async () => {
+        await table.delete();
+    });
+
+    for (const name of Object.keys(data)) {
+        describe("mixed", async () => {
+            describe("update", () => {
+                table = worker.table(data.arrow.slice());
+                benchmark(name, async () => {
+                    let test_data = await static_view[`to_${name}`]({end_row: 500});
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+        });
+    }
+});
+
 describe("View", async () => {
     let table;
 

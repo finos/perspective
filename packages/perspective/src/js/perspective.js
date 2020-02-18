@@ -1099,6 +1099,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of accumulated rows.
      */
     table.prototype.size = function() {
+        _call_process(this.table_id);
         return this._Table.size();
     };
 

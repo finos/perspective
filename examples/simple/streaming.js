@@ -13,7 +13,7 @@ var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl
 
 function newRows() {
     var rows = [];
-    for (var x = 0; x < 5; x++) {
+    for (var x = 0; x < 1000; x++) {
         rows.push({
             name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
             client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
@@ -31,7 +31,7 @@ window.addEventListener("WebComponentsReady", function() {
     var elem = document.getElementsByTagName("perspective-viewer")[0];
     // eslint-disable-next-line no-undef
     var table = perspective.worker().table(newRows(), {
-        limit: 500
+        limit: 100000
     });
     elem.load(table);
 

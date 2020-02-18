@@ -20,6 +20,7 @@
 #include <perspective/rlookup.h>
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
+#include <perspective/process_state.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -57,12 +58,6 @@ class t_ctx0;
 class t_ctx1;
 class t_ctx2;
 class t_ctx_grouped_pkey;
-
-#ifdef PSP_GNODE_VERIFY
-#define PSP_GNODE_VERIFY_TABLE(X) (X)->verify()
-#else
-#define PSP_GNODE_VERIFY_TABLE(X)
-#endif
 
 class PERSPECTIVE_EXPORT t_gnode {
 public:
@@ -170,11 +165,18 @@ protected:
     template <typename CTX_T>
     void set_ctx_state(void* ptr);
 
+    /**
+     * @brief 
+     * 
+     * @param existed_column 
+     * @param process_state 
+     */
+    t_mask _process_mask_existed_rows(
+        t_column* existed_column, t_process_state& process_state);
+
     template <typename DATA_T>
-    void _process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
-        std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
-        std::vector<t_uindex>& added_vec);
+    void _process_column(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
+        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_process_state& process_state);
 
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
@@ -207,12 +209,6 @@ private:
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
 };
-
-template <>
-void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* scolumn,
-    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
-    const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
-    std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
 
 /**
  * @brief Given a t_data_table and a context handler, construct the t_tables relating to delta
@@ -291,23 +287,33 @@ t_gnode::update_context_from_state(CTX_T* ctx, const t_data_table& flattened) {
     ctx->step_end();
 }
 
+template <>
+void t_gnode::_process_column<std::string>(const t_column* fcolumn, const t_column* scolumn,
+    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
+    const t_process_state& process_state);
+
 template <typename DATA_T>
 void
-t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-    t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
-    std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
-    std::vector<t_uindex>& added_vec) {
+t_gnode::_process_column(
+    const t_column* fcolumn,
+    const t_column* scolumn,
+    t_column* dcolumn,
+    t_column* pcolumn,
+    t_column* ccolumn,
+    t_column* tcolumn,
+    const t_process_state& process_state) {
     for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
-        std::uint8_t op_ = op_base[idx];
+        std::uint8_t op_ = process_state.m_op_base[idx];
         t_op op = static_cast<t_op>(op_);
-        t_uindex added_count = added_vec[idx];
+        t_uindex added_count = process_state.m_added_offset[idx];
 
-        const t_rlookup& rlookup = lkup[idx];
+        const t_rlookup& rlookup = process_state.m_lookup[idx];
         bool row_pre_existed = rlookup.m_exists;
+        auto prev_pkey_eq = process_state.m_prev_pkey_eq_vec[idx];
 
         switch (op) {
             case OP_INSERT: {
-                row_pre_existed = row_pre_existed && !prev_pkey_eq_vec[idx];
+                row_pre_existed = row_pre_existed && !prev_pkey_eq;
 
                 DATA_T prev_value;
                 memset(&prev_value, 0, sizeof(DATA_T));
@@ -326,7 +332,7 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                 bool prev_cur_eq = prev_value == cur_value;
 
                 auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq_vec[idx]);
+                    cur_valid, prev_cur_eq, prev_pkey_eq);
 
                 dcolumn->set_nth<DATA_T>(
                     added_count, cur_valid ? cur_value - prev_value : DATA_T(0));
