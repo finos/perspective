@@ -42,12 +42,10 @@ requires = [
     'ipywidgets>=7.5.1',
     'numpy>=1.13.1',
     'pandas>=0.22.0',
-    'psutil>=5.4.8',
     'pyarrow==0.15.1',
     'python-dateutil>=2.8.0',
     'six>=1.11.0',
     'traitlets>=4.3.2',
-    'zerorpc>=0.6.1',
 ]
 
 if sys.version_info.major < 3:
