@@ -65,9 +65,25 @@ public:
      * `t_data_table` after an `update` has been called and fully processed
      * by `t_gnode::_process_table`.
      * 
-     * @param tbl 
+     * @param flattened 
      */
-    void update_master_table(const t_data_table* tbl);
+    void update_master_table(const t_data_table* flattened);
+
+    /**
+     * @brief Given a column in the master data table and the corresponding
+     * column in the `flattened` data table, fill the master column with data
+     * from the flattened column. 
+     * 
+     * @param master_column 
+     * @param flattened_column 
+     */
+    void
+    update_master_column(
+        t_column* master_column,
+        const t_column* flattened_column,
+        const t_column* op_column,
+        const std::vector<t_uindex>& master_table_indexes,
+        t_uindex num_rows);
 
     /**
      * @brief Read the values with the specified `pkeys` from the column at 

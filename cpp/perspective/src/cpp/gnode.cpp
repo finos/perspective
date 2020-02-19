@@ -208,9 +208,9 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     t_tscalar prev_pkey;
     prev_pkey.clear();
 
-
     t_column* existed_column = 
         process_state.m_existed_data_table->get_column("psp_existed").get();
+
     for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
         t_tscalar pkey = pkey_col->get_scalar(idx);
         std::uint8_t op_ = process_state.m_op_base[idx];
@@ -249,7 +249,6 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
 
 std::shared_ptr<t_data_table>
 t_gnode::_process_table() {
-    auto begin = std::chrono::high_resolution_clock::now();
     m_was_updated = false;
 
     std::shared_ptr<t_port>& iport = m_iports[0];
