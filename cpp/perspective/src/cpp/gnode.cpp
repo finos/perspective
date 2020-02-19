@@ -165,51 +165,6 @@ t_gnode::calc_transition(
 }
 
 void
-t_gnode::populate_icols_in_flattened(
-    const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const {
-    PSP_VERBOSE_ASSERT(lkup.size() == flat->size(), "Mismatched sizes encountered");
-
-    t_uindex nrows = lkup.size();
-    t_uindex ncols = m_expr_icols.size();
-
-    std::vector<const t_column*> icols(ncols);
-    std::vector<t_column*> ocols(ncols);
-    std::vector<std::string> cnames(ncols);
-
-    t_uindex count = 0;
-    const t_data_table* stable = get_table();
-
-    for (const auto& cname : m_expr_icols) {
-        icols[count] = stable->get_const_column(cname).get();
-        ocols[count] = flat->get_column(cname).get();
-        cnames[count] = cname;
-        ++count;
-    }
-
-#ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ncols), 1,
-        [&lkup, &icols, &ocols, nrows](int colidx)
-#else
-    for (t_uindex colidx = 0; colidx < ncols; ++colidx)
-#endif
-        {
-            auto icol = icols[colidx];
-            auto ocol = ocols[colidx];
-
-            for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
-                const auto& lk = lkup[ridx];
-                if (!ocol->is_valid(ridx) && lk.m_exists) {
-                    ocol->set_scalar(ridx, icol->get_scalar(lk.m_idx));
-                }
-            }
-        }
-
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
-}
-
-void
 t_gnode::clear_deltas() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -234,8 +189,7 @@ t_gnode::clear_deltas() {
 }
 
 t_mask
-t_gnode::_process_mask_existed_rows(
-    t_column* existed_column, t_process_state& process_state) {
+t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     // Make sure `existed_data_table` has enough space to write without resizing
     auto flattened_num_rows = process_state.m_flattened_data_table->num_rows();
     process_state.m_existed_data_table->set_size(flattened_num_rows);
@@ -254,6 +208,9 @@ t_gnode::_process_mask_existed_rows(
     t_tscalar prev_pkey;
     prev_pkey.clear();
 
+
+    t_column* existed_column = 
+        process_state.m_existed_data_table->get_column("psp_existed").get();
     for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
         t_tscalar pkey = pkey_col->get_scalar(idx);
         std::uint8_t op_ = process_state.m_op_base[idx];
@@ -351,17 +308,11 @@ t_gnode::_process_table() {
     // And re-reserved for the amount of data in `flattened`
     _process_state.reserve_transitional_data_tables(flattened_num_rows);
 
-    t_column* ecolumn = _process_state.m_existed_data_table->get_column("psp_existed").get();
-    t_mask existed_mask = _process_mask_existed_rows(ecolumn, _process_state);
+    t_mask existed_mask = _process_mask_existed_rows(_process_state);
     auto mask_count = existed_mask.count();
 
     // mask_count = flattened_num_rows - number of rows that were removed
     _process_state.set_size_transitional_data_tables(mask_count);
-
-    // Unused code path - m_expr_icols is never populated
-    if (!m_expr_icols.empty()) {
-        populate_icols_in_flattened(_process_state.m_lookup, flattened);
-    }
 
     const t_schema& _gstate_schema = m_state->get_output_schema();
     t_uindex ncols = _gstate_schema.get_num_columns();
@@ -750,23 +701,16 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
         }
     };
 
-    if (has_python_dep()) {
-        for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx) {
-            notify_context_helper(ctxidx);
-        }
-    } else {
-#ifdef PSP_PARALLEL_FOR
-        PSP_PFOR(0, int(num_ctx), 1,
-            [&notify_context_helper](int ctxidx)
-#else
-        for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx)
-#endif
-            { notify_context_helper(ctxidx); }
-
-#ifdef PSP_PARALLEL_FOR
+    #ifdef PSP_PARALLEL_FOR
+    PSP_PFOR(0, int(num_ctx), 1,
+        [&notify_context_helper](int ctxidx)
+    #else
+    for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx)
+    #endif
+        { notify_context_helper(ctxidx); }
+    #ifdef PSP_PARALLEL_FOR
         );
-#endif
-    }
+    #endif
 
     psp_log_time(repr() + "notify_contexts.exit");
 }
@@ -1065,11 +1009,6 @@ t_gnode::get_pkeyed_table_sptr() const {
 std::vector<t_custom_column>
 t_gnode::get_custom_columns() const {
     return m_custom_columns;
-}
-
-bool
-t_gnode::has_python_dep() const {
-    return !m_custom_columns.empty();
 }
 
 void

@@ -40,6 +40,7 @@ TEST(TABLE, simplest_test)
     tbl.reserve(5);
 }
 
+/* FIXME: deprecated
 TEST(GNODE, explicit_pkey)
 {
     t_gnode_options options;
@@ -47,7 +48,7 @@ TEST(GNODE, explicit_pkey)
     options.m_port_schema = t_schema{{"x"}, {DTYPE_INT64}};
     ASSERT_THROW(t_gnode::build(options), PerspectiveException);
 }
-
+*/
 
 TEST(SCALAR, scalar_literal_test)
 {
@@ -2138,7 +2139,7 @@ TEST(TYPE_TO_DTYPE, test_time)
     EXPECT_EQ(type_to_dtype<std::string>(), DTYPE_STR);
 }
 
-// FIXME: DEPRECATED API
+/* FIXME: deprecated
 TEST(GNODE_TEST, get_registered_contexts)
 {
     t_schema sch{{"psp_op", "psp_pkey", "s", "i"},
@@ -2208,3 +2209,4 @@ TEST(GNODE_TEST, get_registered_contexts)
 
     gn->reset();
 }
+*/

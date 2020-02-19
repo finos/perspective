@@ -83,7 +83,6 @@ public:
 
     t_uindex epoch() const;
     void inc_epoch();
-    bool has_python_dep() const;
     void flush();
     void flush(t_uindex gnode_id);
     std::vector<t_uindex> get_gnodes_last_updated();

@@ -119,15 +119,11 @@ public:
 
     std::vector<t_custom_column> get_custom_columns() const;
 
-    bool has_python_dep() const;
     void set_pool_cleanup(std::function<void()> cleanup);
     bool was_updated() const;
     void clear_updated();
 
     t_uindex mapping_size() const;
-
-    // helper function for tests
-    std::shared_ptr<t_data_table> tstep(std::shared_ptr<const t_data_table> input_table);
 
     // helper function for JS interface
     void promote_column(const std::string& name, t_dtype new_type);
@@ -162,13 +158,14 @@ protected:
     void set_ctx_state(void* ptr);
 
     /**
-     * @brief 
+     * @brief Given the process state, create a `t_mask` bitset set to true for
+     * all rows in `flattened`, UNLESS the row is an `OP_DELETE`.
      * 
-     * @param existed_column 
-     * @param process_state 
+     * Mutates the `t_process_state` object that is passed in.
+     * 
+     * @param process_state
      */
-    t_mask _process_mask_existed_rows(
-        t_column* existed_column, t_process_state& process_state);
+    t_mask _process_mask_existed_rows(t_process_state& process_state);
 
     template <typename DATA_T>
     void _process_column(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
@@ -208,7 +205,6 @@ private:
     t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::vector<t_custom_column> m_custom_columns;
-    std::set<std::string> m_expr_icols;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
 };

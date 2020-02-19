@@ -326,18 +326,6 @@ t_pool::inc_epoch() {
     ++m_epoch;
 }
 
-bool
-t_pool::has_python_dep() const {
-    bool rv = false;
-    for (auto& g : m_gnodes) {
-        if (!g)
-            continue;
-        if (g->has_python_dep())
-            return true;
-    }
-    return rv;
-}
-
 void
 t_pool::flush() {
     std::lock_guard<std::mutex> lg(m_mtx);
