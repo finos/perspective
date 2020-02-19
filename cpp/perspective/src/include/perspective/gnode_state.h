@@ -61,6 +61,13 @@ public:
     t_rlookup lookup(t_tscalar pkey) const;
 
     /**
+     * @brief If the master table has 0 rows, fill it using `flattened`.
+     * 
+     * @param flattened 
+     */
+    void fill_master_table(const t_data_table* flattened);
+
+    /**
      * @brief Update the master `t_data_table` with the flattened and masked
      * `t_data_table` after an `update` has been called and fully processed
      * by `t_gnode::_process_table`.

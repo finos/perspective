@@ -54,11 +54,11 @@ public:
      * 
      * A `t_gnode` is created with two `t_schema`s:
      * 
-     * - `input_schema`: the canonical `t_schema` for the `Table`, which cannot
+     * `input_schema`: the canonical `t_schema` for the `Table`, which cannot
      * be mutated after creation. This schema contains the `psp_pkey` and
      * `psp_op` columns, which are used internally.
      * 
-     * - `output_schema`: the `t_schema` that contains all columns provided
+     * `output_schema`: the `t_schema` that contains all columns provided
      * by the dataset, excluding `psp_pkey` and `psp_op`.
      * 
      * @param input_schema 
@@ -66,7 +66,9 @@ public:
      */
     t_gnode(const t_schema& input_schema, const t_schema& output_schema);
     ~t_gnode();
+
     void init();
+    void reset();
 
     // send data to input port with at index idx
     // schema should match port schema
@@ -74,25 +76,22 @@ public:
     void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
-    void _process_self();
+
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
 
-    void begin_step();
-    void end_step();
+    const t_data_table* get_table() const;
+    t_data_table* get_table();
+
+    std::shared_ptr<t_data_table> get_table_sptr();
 
     t_data_table* _get_otable(t_uindex portidx);
     t_data_table* _get_itable(t_uindex portidx);
-    t_data_table* get_table();
-    const t_data_table* get_table() const;
-    std::shared_ptr<t_data_table> get_table_sptr();
 
-    void pprint() const;
-    std::vector<std::string> get_registered_contexts() const;
     t_schema get_output_schema() const;
     const t_schema& get_state_input_schema() const;
-    std::vector<t_pivot> get_pivots() const;
 
+    std::vector<t_pivot> get_pivots() const;
     std::vector<t_stree*> get_trees();
 
     void set_id(t_uindex id);
@@ -100,10 +99,9 @@ public:
 
     void release_inputs();
     void release_outputs();
+    std::vector<std::string> get_registered_contexts() const;
     std::vector<std::string> get_contexts_last_updated() const;
 
-    void reset();
-    std::string repr() const;
     void clear_input_ports();
     void clear_output_ports();
 
@@ -136,11 +134,12 @@ public:
 
     std::vector<t_computed_column_lambda> get_computed_lambdas() const;
 
+    void pprint() const;
+    std::string repr() const;
 protected:
     void recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs);
     void append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas);
 
-    bool have_context(const std::string& name) const;
     void notify_contexts(const t_data_table& flattened);
 
     template <typename CTX_T>
@@ -151,9 +150,31 @@ protected:
         const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
         const t_data_table& existed);
 
+    /**
+     * @brief Given `tbl`, notify each registered context with `tbl`.
+     * 
+     * @param tbl 
+     */
+    void _update_contexts_from_state(const t_data_table& tbl);
+
+    /**
+     * @brief Notify a single registered `ctx` with `tbl`.
+     * 
+     * @tparam CTX_T 
+     * @param ctx 
+     * @param tbl 
+     */
     template <typename CTX_T>
     void update_context_from_state(CTX_T* ctx, const t_data_table& tbl);
 
+    /**
+     * @brief Provide the registered `t_ctx*` with a pointer to this gnode's
+     * `m_state` object. `t_ctx*` are assumed to access/mutate this state
+     * object arbitrarily at runtime.
+     * 
+     * @tparam CTX_T 
+     * @param ptr 
+     */
     template <typename CTX_T>
     void set_ctx_state(void* ptr);
 
@@ -167,21 +188,47 @@ protected:
      */
     t_mask _process_mask_existed_rows(t_process_state& process_state);
 
+    /**
+     * @brief Given a flattened column, the master column from `m_state`, and
+     * all transitional columns containing metadata, process and calculate
+     * transitional values.
+     * 
+     * @tparam DATA_T 
+     * @param fcolumn 
+     * @param scolumn 
+     * @param dcolumn 
+     * @param pcolumn 
+     * @param ccolumn 
+     * @param tcolumn 
+     * @param process_state 
+     */
     template <typename DATA_T>
     void _process_column(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
         t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_process_state& process_state);
 
+    /**
+     * @brief Calculate the transition state for a single cell, which depends
+     * on whether the cell is/was valid, existed, or is new.
+     * 
+     * @param prev_existed 
+     * @param row_pre_existed 
+     * @param exists 
+     * @param prev_valid 
+     * @param cur_valid 
+     * @param prev_cur_eq 
+     * @param prev_pkey_eq 
+     * @return t_value_transition 
+     */
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
 
-    void _update_contexts_from_state(const t_data_table& tbl);
-    void _update_contexts_from_state();
-    void clear_deltas();
-
 private:
-    void populate_icols_in_flattened(
-        const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const;
-
+    /**
+     * @brief Process the input data table by flattening it, calculating
+     * transitional values, and returning a new masked version.
+     * 
+     * @return std::shared_ptr<t_data_table> 
+     */
     std::shared_ptr<t_data_table> _process_table();
     
     std::vector<t_computed_column_lambda> m_computed_lambdas;

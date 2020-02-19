@@ -109,7 +109,10 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
 }
 
 void
-t_gstate::update_master_table(const t_data_table* flattened) {
+t_gstate::fill_master_table(const t_data_table* flattened) {
+    // insert into empty `m_table`
+    m_free.clear();
+    m_mapping.clear();
     const t_schema& flattened_schema = flattened->get_schema();
     const t_schema& master_schema = m_table->get_schema();
 
@@ -119,56 +122,67 @@ t_gstate::update_master_table(const t_data_table* flattened) {
     t_uindex ncols = m_table->num_columns();
     auto master_table = m_table.get();
 
-    // insert into new table
-    if (size() == 0) {
-        m_free.clear();
-        m_mapping.clear();
 #ifdef PSP_PARALLEL_FOR
-        PSP_PFOR(0, int(ncols), 1,
-            [&master_table, &master_schema, &flattened](int idx)
+    PSP_PFOR(0, int(ncols), 1,
+        [&master_table, &master_schema, &flattened](int idx)
 #else
-        for (t_uindex idx = 0; idx < ncols; ++idx)
+    for (t_uindex idx = 0; idx < ncols; ++idx)
 #endif
-            {
-                const std::string& column_name = master_schema.m_columns[idx];
-                master_table->set_column(
-                    idx, flattened->get_const_column(column_name)->clone());
-            }
-#ifdef PSP_PARALLEL_FOR
-        );
-#endif
-        m_pkcol = master_table->get_column("psp_pkey");
-        m_opcol = master_table->get_column("psp_op");
-
-        master_table->set_capacity(flattened->get_capacity());
-        master_table->set_size(flattened->size());
-
-        for (t_uindex idx = 0, loop_end = flattened->num_rows(); idx < loop_end; ++idx) {
-            t_tscalar pkey = flattened_pkey_col->get_scalar(idx);
-            const std::uint8_t* op_ptr = flattened_op_col->get_nth<std::uint8_t>(idx);
-            t_op op = static_cast<t_op>(*op_ptr);
-
-            switch (op) {
-                case OP_INSERT: {
-                    m_mapping[m_symtable.get_interned_tscalar(pkey)] = idx;
-                    m_opcol->set_nth<std::uint8_t>(idx, OP_INSERT);
-                    m_pkcol->set_scalar(idx, pkey);
-                } break;
-                case OP_DELETE: {
-                    _mark_deleted(idx);
-                } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
-            }
+        {
+            // Clone each column from flattened into `m_table`
+            const std::string& column_name = master_schema.m_columns[idx];
+            master_table->set_column(
+                idx, flattened->get_const_column(column_name)->clone());
         }
+#ifdef PSP_PARALLEL_FOR
+    );
+#endif
+    m_pkcol = master_table->get_column("psp_pkey");
+    m_opcol = master_table->get_column("psp_op");
+
+    master_table->set_capacity(flattened->get_capacity());
+    master_table->set_size(flattened->size());
+
+    for (t_uindex idx = 0, loop_end = flattened->num_rows(); idx < loop_end; ++idx) {
+        t_tscalar pkey = flattened_pkey_col->get_scalar(idx);
+        const std::uint8_t* op_ptr = flattened_op_col->get_nth<std::uint8_t>(idx);
+        t_op op = static_cast<t_op>(*op_ptr);
+
+        switch (op) {
+            case OP_INSERT: {
+                // Write new primary keys into `m_mapping`
+                m_mapping[m_symtable.get_interned_tscalar(pkey)] = idx;
+                m_opcol->set_nth<std::uint8_t>(idx, OP_INSERT);
+                m_pkcol->set_scalar(idx, pkey);
+            } break;
+            case OP_DELETE: {
+                _mark_deleted(idx);
+            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+        }
+    }
 
 #ifdef PSP_TABLE_VERIFY
-        master_table->verify();
+    master_table->verify();
 #endif
 
+    return;
+}
+
+void
+t_gstate::update_master_table(const t_data_table* flattened) {
+    if (size() == 0) {
+        fill_master_table(flattened);
         return;
     }
 
-    /* size is not zero */
+    // Update existing `m_table`
+    const t_column* flattened_pkey_col =
+        flattened->get_const_column("psp_pkey").get();
+    const t_column* flattened_op_col =
+        flattened->get_const_column("psp_op").get();
+
+    t_data_table* master_table = m_table.get();
     std::vector<t_uindex> master_table_indexes(flattened->num_rows());
 
     for (t_uindex idx = 0, loop_end = flattened->num_rows(); idx < loop_end; ++idx) {
@@ -178,17 +192,23 @@ t_gstate::update_master_table(const t_data_table* flattened) {
 
         switch (op) {
             case OP_INSERT: {
+                // Lookup/create the row index in `m_table` based on pkey
                 master_table_indexes[idx] = lookup_or_create(pkey);
+
+                // Write the op and pkey to `m_table`
                 m_opcol->set_nth<std::uint8_t>(master_table_indexes[idx], OP_INSERT);
                 m_pkcol->set_scalar(master_table_indexes[idx], pkey);
             } break;
             case OP_DELETE: {
+                // Actually erase the specified pkey from the master table here
                 erase(pkey);
             } break;
             default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
         }
     }
 
+    const t_schema& master_schema = m_table->get_schema();
+    t_uindex ncols = master_table->num_columns();
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(ncols), 1,
         [flattened, flattened_op_col, &master_schema, &master_table, &master_table_indexes, this](int idx)

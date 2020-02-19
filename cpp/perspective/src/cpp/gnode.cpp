@@ -164,30 +164,6 @@ t_gnode::calc_transition(
     return trans;
 }
 
-void
-t_gnode::clear_deltas() {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
-    for (auto& kv : m_contexts) {
-        switch (kv.second.m_ctx_type) {
-            case TWO_SIDED_CONTEXT: {
-                static_cast<t_ctx2*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                static_cast<t_ctx1*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                static_cast<t_ctx0*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                static_cast<t_ctx_grouped_pkey*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
-    }
-}
-
 t_mask
 t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     // Make sure `existed_data_table` has enough space to write without resizing
@@ -567,14 +543,6 @@ t_gnode::get_registered_contexts() const {
 }
 
 void
-t_gnode::_update_contexts_from_state() {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    auto flattened = m_state->get_pkeyed_table();
-    _update_contexts_from_state(*flattened);
-}
-
-void
 t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_t ptr) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -589,10 +557,6 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     if (should_update) {
         flattened = m_state->get_pkeyed_table();
     }
-
-    auto pkeyed_tblcontext = m_state->get_input_schema().get_table_context();
-
-    auto non_pkeyed_tblcontext = m_state->get_table()->get_schema().get_table_context();
 
     switch (type) {
         case TWO_SIDED_CONTEXT: {
