@@ -11,10 +11,8 @@ import "@finos/perspective-viewer";
 import {Widget} from "@phosphor/widgets";
 
 export class PerspectiveViewerWidget extends Widget {
-    constructor({name, viewer, node}) {
+    constructor({viewer, node}) {
         super({node});
-        viewer.setAttribute("name", name);
-        this.title.label = name;
         this.viewer = viewer;
         this.master = false;
     }
@@ -45,6 +43,18 @@ export class PerspectiveViewerWidget extends Widget {
         return this.viewer.table;
     }
 
+    set name(value) {
+        if (value != null) {
+            this.viewer.setAttribute("name", value);
+            this.title.label = value;
+            this._name = value;
+        }
+    }
+
+    get name() {
+        return this._name;
+    }
+
     toggleConfig() {
         return this.viewer.toggleConfig();
     }
@@ -52,12 +62,9 @@ export class PerspectiveViewerWidget extends Widget {
     restore(config) {
         const {master, table, name, ...viewerConfig} = config;
         this.master = master;
+        this.name = name;
         if (table) {
             this.viewer.setAttribute("table", table);
-        }
-        if (name) {
-            this.viewer.setAttribute("name", name);
-            this.title.label = name;
         }
         this.viewer.restore({...viewerConfig});
     }
