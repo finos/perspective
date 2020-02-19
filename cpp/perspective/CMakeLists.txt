@@ -37,9 +37,9 @@ function(string_starts_with str search)
   return(false)
 endfunction()
 
-##############################
-# helper to grab gtest et al #
-##############################
+###############################
+# Helper to grab dependencies #
+###############################
 function (psp_build_dep name cmake_file)
 	if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
 		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
@@ -88,7 +88,6 @@ find_package(Color)
 option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
 option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
 option(PSP_CPP_BUILD "Build the C++ Project" OFF)
-option(PSP_CPP_BUILD_TESTS "Build the C++ Tests" OFF)
 option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
 option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
 option(PSP_BUILD_DOCS "Build the Perspective documentation" OFF)
@@ -96,7 +95,6 @@ option(PSP_BUILD_DOCS "Build the Perspective documentation" OFF)
 if (NOT DEFINED PSP_WASM_BUILD)
 	set(PSP_WASM_BUILD ON)
 	set(PSP_CPP_BUILD OFF)
-	set(PSP_CPP_BUILD_TESTS OFF)
 	set(PSP_PYTHON_BUILD OFF)
 endif()
 
@@ -132,10 +130,6 @@ elseif(PSP_PYTHON_BUILD)
 	endif()
 endif()
 
-if (NOT DEFINED PSP_CPP_BUILD_TESTS)
-	set(PSP_CPP_BUILD_TESTS ON)
-endif()
-
 if (NOT DEFINED PSP_CPP_BUILD_STRICT)
 	set(PSP_CPP_BUILD_STRICT OFF)
 endif()
@@ -163,12 +157,6 @@ if (PSP_PYTHON_BUILD)
 	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building Python ${Red}${PSP_PYTHON_VERSION}${Cyan} binding${ColorReset}")
 else()
 	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Yellow}Skipping Python binding${ColorReset}")
-endif()
-
-if (PSP_CPP_BUILD_TESTS)
-	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building C++ tests${ColorReset}")
-else()
-	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Yellow}Skipping C++ tests${ColorReset}")
 endif()
 
 if (PSP_CPP_BUILD AND NOT PSP_CPP_BUILD_STRICT)
@@ -648,34 +636,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 	target_link_libraries(psp tbb)
 endif()
-
-
-#############
-# CPP TESTS #
-#############
-if (PSP_CPP_BUILD_TESTS)
-	if (WIN32)
-	  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-	endif()
-
-	if (NOT PSP_WASM_BUILD)
-		# don't need to build gtest as theres one in rapidjson
-		psp_build_dep("googletest" "${PSP_CMAKE_MODULE_PATH}/GTest.txt.in")
-	endif()
-
-	add_subdirectory(test)
-	add_custom_target(gcov
-		COMMAND mkdir -p ${CMAKE_BINARY_DIR}/coverage
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	)
-	add_custom_command(TARGET gcov
-		COMMAND echo "=================== GCOV ===================="
-		COMMAND gcovr -r ../ --html --html-details -o coverage/index.html
-		COMMAND xdg-open coverage/index.html
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	)
-endif()
-#############
 
 ########
 # Docs #
