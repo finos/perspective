@@ -74,8 +74,8 @@ void
 t_gnode::init() {
     PSP_TRACE_SENTINEL();
 
-    m_state = std::make_shared<t_gstate>(m_input_schema, m_output_schema);
-    m_state->init();
+    m_gstate = std::make_shared<t_gstate>(m_input_schema, m_output_schema);
+    m_gstate->init();
 
     // Create a single input port
     std::shared_ptr<t_port> port
@@ -244,14 +244,14 @@ t_gnode::_process_table() {
     for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
         // See if each primary key in flattened already exist in the dataset
         t_tscalar pkey = pkey_col->get_scalar(idx);
-        row_lookup[idx] = m_state->lookup(pkey);
+        row_lookup[idx] = m_gstate->lookup(pkey);
     }
 
     recompute_columns(get_table_sptr(), flattened, row_lookup);
 
-    if (m_state->mapping_size() == 0) {
+    if (m_gstate->mapping_size() == 0) {
         // Updates have already been processed - break early.
-        m_state->update_master_table(flattened.get());
+        m_gstate->update_master_table(flattened.get());
         _update_contexts_from_state(*flattened);
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
@@ -289,7 +289,7 @@ t_gnode::_process_table() {
     // mask_count = flattened_num_rows - number of rows that were removed
     _process_state.set_size_transitional_data_tables(mask_count);
 
-    const t_schema& _gstate_schema = m_state->get_output_schema();
+    const t_schema& _gstate_schema = m_gstate->get_output_schema();
     t_uindex ncols = _gstate_schema.get_num_columns();
 
 #ifdef PSP_PARALLEL_FOR
@@ -361,7 +361,7 @@ t_gnode::_process_table() {
     /**
      * After all columns have been processed (transitional tables written into),
      * `_process_state.m_flattened_data_table` contains the accumulated state
-     * of the dataset that updates the master table on `m_state`, including
+     * of the dataset that updates the master table on `m_gstate`, including
      * added rows, updated in-place rows, and rows to be removed.
      * 
      * `existed_mask` is a bitset marked true for `OP_INSERT`, and false for
@@ -377,7 +377,7 @@ t_gnode::_process_table() {
             _process_state.m_flattened_data_table->clone(existed_mask);
     }
 
-    m_state->update_master_table(flattened_masked.get());
+    m_gstate->update_master_table(flattened_masked.get());
 
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
     return flattened_masked;
@@ -401,7 +401,7 @@ t_gnode::_process() {
 
 t_uindex
 t_gnode::mapping_size() const {
-    return m_state->mapping_size();
+    return m_gstate->mapping_size();
 }
 
 t_data_table*
@@ -424,21 +424,21 @@ t_data_table*
 t_gnode::get_table() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_table().get();
+    return m_gstate->get_table().get();
 }
 
 const t_data_table*
 t_gnode::get_table() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_table().get();
+    return m_gstate->get_table().get();
 }
 
 std::shared_ptr<t_data_table>
 t_gnode::get_table_sptr() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_table();
+    return m_gstate->get_table();
 }
 
 /**
@@ -462,7 +462,7 @@ void
 t_gnode::pprint() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_state->pprint();
+    m_gstate->pprint();
 }
 
 template <typename CTX_T>
@@ -471,7 +471,7 @@ t_gnode::set_ctx_state(void* ptr) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     CTX_T* ctx = static_cast<CTX_T*>(ptr);
-    ctx->set_state(m_state);
+    ctx->set_state(m_gstate);
 }
 
 void
@@ -550,12 +550,12 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     t_ctx_handle ch(ptr_, type);
     m_contexts[name] = ch;
 
-    bool should_update = m_state->mapping_size() > 0;
+    bool should_update = m_gstate->mapping_size() > 0;
 
     std::shared_ptr<t_data_table> flattened;
 
     if (should_update) {
-        flattened = m_state->get_pkeyed_table();
+        flattened = m_gstate->get_pkeyed_table();
     }
 
     switch (type) {
@@ -825,7 +825,7 @@ t_gnode::get_contexts_last_updated() const {
 
 std::vector<t_tscalar>
 t_gnode::get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const {
-    return m_state->get_row_data_pkeys(pkeys);
+    return m_gstate->get_row_data_pkeys(pkeys);
 }
 
 void
@@ -855,7 +855,7 @@ t_gnode::reset() {
         }
     }
 
-    m_state->reset();
+    m_gstate->reset();
 }
 
 void
@@ -961,12 +961,12 @@ t_gnode::_process_column<std::string>(
 
 t_data_table*
 t_gnode::_get_pkeyed_table() const {
-    return m_state->_get_pkeyed_table();
+    return m_gstate->_get_pkeyed_table();
 }
 
 std::shared_ptr<t_data_table>
 t_gnode::get_pkeyed_table_sptr() const {
-    return m_state->get_pkeyed_table();
+    return m_gstate->get_pkeyed_table();
 }
 
 std::vector<t_custom_column>
@@ -981,7 +981,7 @@ t_gnode::set_pool_cleanup(std::function<void()> cleanup) {
 
 const t_schema&
 t_gnode::get_state_input_schema() const {
-    return m_state->get_input_schema();
+    return m_gstate->get_input_schema();
 }
 
 bool
@@ -996,7 +996,7 @@ t_gnode::clear_updated() {
 
 std::shared_ptr<t_data_table>
 t_gnode::get_sorted_pkeyed_table() const {
-    return m_state->get_sorted_pkeyed_table();
+    return m_gstate->get_sorted_pkeyed_table();
 }
 
 void

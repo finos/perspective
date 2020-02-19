@@ -52,7 +52,7 @@ public:
     void set_name(const std::string& name);
     std::string get_name() const;
     std::int64_t get_ptr() const;
-    void set_state(std::shared_ptr<t_gstate> state);
+    void set_state(std::shared_ptr<t_gstate> gstate);
     const t_config& get_config() const;
     t_config& get_config();
     std::vector<t_pivot> get_pivots() const;
@@ -86,7 +86,7 @@ protected:
     bool m_rows_changed;
     bool m_columns_changed;
     std::string m_name;
-    std::shared_ptr<t_gstate> m_state;
+    std::shared_ptr<t_gstate> m_gstate;
     bool m_init;
     std::vector<bool> m_features;
     std::vector<t_minmax> m_minmax;
@@ -141,8 +141,8 @@ t_ctxbase<DERIVED_T>::get_ptr() const {
 
 template <typename DERIVED_T>
 void
-t_ctxbase<DERIVED_T>::set_state(std::shared_ptr<t_gstate> state) {
-    m_state = state;
+t_ctxbase<DERIVED_T>::set_state(std::shared_ptr<t_gstate> gstate) {
+    m_gstate = gstate;
 }
 
 template <typename DERIVED_T>

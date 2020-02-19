@@ -216,8 +216,13 @@ public:
     void pprint() const;
 
 protected:
-
-    void _mark_deleted(t_uindex idx);
+    /**
+     * @brief If the pkey exists in the state, return its row index. Otherwise,
+     * add a new row to the mapping and return its index.
+     * 
+     * @param pkey 
+     * @return t_uindex 
+     */
     t_uindex lookup_or_create(const t_tscalar& pkey);
 
     /**
@@ -234,6 +239,8 @@ protected:
      * @return t_mask 
      */
     t_mask get_cpp_mask() const;
+
+    void _mark_deleted(t_uindex idx);
     bool has_pkey(t_tscalar pkey) const;
     t_dtype get_pkey_dtype() const;
 

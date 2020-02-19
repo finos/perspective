@@ -47,13 +47,13 @@ public:
 
     t_tscalar get_pkey(t_index idx) const;
 
-    void fill_sort_elem(std::shared_ptr<const t_gstate> state, const t_config& config,
+    void fill_sort_elem(std::shared_ptr<const t_gstate> gstate, const t_config& config,
         const std::vector<t_tscalar>& row, t_mselem& out_elem) const;
 
-    void fill_sort_elem(std::shared_ptr<const t_gstate> state, const t_config& config,
+    void fill_sort_elem(std::shared_ptr<const t_gstate> gstate, const t_config& config,
         t_tscalar pkey, t_mselem& out_elem);
 
-    void sort_by(std::shared_ptr<const t_gstate> state, const t_config& config,
+    void sort_by(std::shared_ptr<const t_gstate> gstate, const t_config& config,
         const std::vector<t_sortspec>& sortby);
 
     t_index size() const;
@@ -76,10 +76,10 @@ public:
 
     void step_end();
 
-    void add_row(std::shared_ptr<const t_gstate> state, const t_config& config, t_tscalar pkey);
+    void add_row(std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey);
 
     void update_row(
-        std::shared_ptr<const t_gstate> state, const t_config& config, t_tscalar pkey);
+        std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey);
 
     void delete_row(t_tscalar pkey);
 
@@ -88,7 +88,7 @@ public:
 
     void reset_step_state();
 
-    t_uindex lower_bound_row_idx(std::shared_ptr<const t_gstate> state, const t_config& config,
+    t_uindex lower_bound_row_idx(std::shared_ptr<const t_gstate> gstate, const t_config& config,
         const std::vector<t_tscalar>& row) const;
 
     t_index get_row_idx(t_tscalar pkey) const;

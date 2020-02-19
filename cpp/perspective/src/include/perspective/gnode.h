@@ -169,7 +169,7 @@ protected:
 
     /**
      * @brief Provide the registered `t_ctx*` with a pointer to this gnode's
-     * `m_state` object. `t_ctx*` are assumed to access/mutate this state
+     * `m_gstate` object. `t_ctx*` are assumed to access/mutate this state
      * object arbitrarily at runtime.
      * 
      * @tparam CTX_T 
@@ -189,7 +189,7 @@ protected:
     t_mask _process_mask_existed_rows(t_process_state& process_state);
 
     /**
-     * @brief Given a flattened column, the master column from `m_state`, and
+     * @brief Given a flattened column, the master column from `m_gstate`, and
      * all transitional columns containing metadata, process and calculate
      * transitional values.
      * 
@@ -248,7 +248,7 @@ private:
     std::vector<std::shared_ptr<t_port>> m_iports;
     std::vector<std::shared_ptr<t_port>> m_oports;
     t_sctxhmap m_contexts;
-    std::shared_ptr<t_gstate> m_state;
+    std::shared_ptr<t_gstate> m_gstate;
     t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::vector<t_custom_column> m_custom_columns;
