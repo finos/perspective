@@ -638,8 +638,6 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     // TODO: shift columns forward in cleanup, translate dead indices
     std::shared_ptr<t_data_table> flattened;
 
-    // TODO: need to make sure that cases of `should_update == false` are
-    // handled by computed column creation
     if (should_update) {
         flattened = m_gstate->get_pkeyed_table();
     }

@@ -115,6 +115,11 @@ declare module "@finos/perspective" {
         aggregates?: {[column_name: string]: string};
         sort?: Array<Array<string>>;
         filter?: Array<Array<string>>;
+        computed_columns?: Array<{
+            [column: string]: string;
+            [computed_function_name: string]: string;
+            [inputs: string]: Array<string>;
+        }>;
     };
 
     export type Table = {

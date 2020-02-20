@@ -288,7 +288,7 @@ void
 t_data_table::pprint() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    pprint(20, &std::cout);
+    pprint(size(), &std::cout);
 }
 
 void
