@@ -352,7 +352,6 @@ t_computed_column::reapply_computation(
         bool skip_row = false;
         for (t_uindex cidx = 0; cidx < arity; ++cidx) {
             t_tscalar arg = flattened_columns[cidx]->get_scalar(idx);
-            std::cout << "t: " << table_columns[cidx]->get_scalar(ridx) << ", f:" << arg << std::endl;
 
             if (!arg.is_valid()) {
                 arg = table_columns[cidx]->get_scalar(ridx);
@@ -563,6 +562,7 @@ void t_computed_column::make_computations() {
     );    
 }
 
+// TODO: add this to the Table API
 std::map<std::string, std::map<std::string, std::string>>
 t_computed_column::computed_functions = {
     {"add", {
