@@ -121,7 +121,6 @@ class PSPBuild(build_ext):
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
-            '-DPSP_CPP_BUILD_TESTS=0',
             '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
             '-DPYTHON_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
             '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX).replace('\\', '/'),

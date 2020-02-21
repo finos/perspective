@@ -86,10 +86,10 @@ describe("Update", async () => {
 
     for (const name of Object.keys(data)) {
         describe("mixed", async () => {
-            describe("update", () => {
+            describe("update", async () => {
                 table = worker.table(data.arrow.slice());
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
-                    let test_data = await static_view[`to_${name}`]({end_row: 500});
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
                         await table.size();

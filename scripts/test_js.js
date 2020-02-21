@@ -93,6 +93,7 @@ try {
             console.log("-- Running test suite in quiet mode");
             execute(silent(jest()));
         } else if (process.env.PACKAGE) {
+            const debug = getarg("--debug") ? "" : "--silent";
             console.log("-- Running test suite in individual mode");
             execute`
                 PSP_SATURATE=${!!getarg("--saturate")}
@@ -105,7 +106,7 @@ try {
                 --scope="@finos/${PACKAGE}" 
                 -- 
                 yarn test:run
-                --silent
+                ${debug}
                 --noStackTrace
                 ${getarg("--interactive") && "--runInBand"}
                 --testNamePattern="${get_regex()}"`;
