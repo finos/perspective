@@ -27,4 +27,4 @@ except ImportError:
     critical("Failed to import C++ bindings for Perspective "
              "probably as it could not be built for your architecture "
              "(check install logs for more details).\n"
-             "You can still use `PerspectiveWidget` in client mode using JupyterLab.")
+             "You can still use `PerspectiveWidget` in client mode using JupyterLab.", exc_info=True)
