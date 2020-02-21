@@ -21,12 +21,15 @@ const IS_INSTALL = getarg("--install");
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
     const cpp = resolve`${__dirname}/../cpp/perspective`;
+    const lic = resolve`${__dirname}/../LICENSE`;
     const cmake = resolve`${__dirname}/../cmake`;
     const dcmake = resolve`${dist}/cmake`;
+    const dlic = resolve`${dist}/LICENSE`;
     const obj = resolve`${dist}/obj`;
 
     fs.mkdirpSync(dist);
     fs.copySync(cpp, dist, {preserveTimestamps: true});
+    fs.copySync(lic, dlic, {preserveTimestamps: true});
     fs.copySync(cmake, dcmake, {preserveTimestamps: true});
     clean(obj);
 
