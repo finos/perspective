@@ -40,13 +40,13 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 requires = [
     'ipywidgets>=7.5.1',
+    'future>=0.16.0',
     'numpy>=1.13.1',
     'pandas>=0.22.0',
-    'psutil>=5.4.8',
+    'pyarrow==0.15.1',
     'python-dateutil>=2.8.0',
     'six>=1.11.0',
     'traitlets>=4.3.2',
-    'zerorpc>=0.6.1',
 ]
 
 if sys.version_info.major < 3:
@@ -54,14 +54,6 @@ if sys.version_info.major < 3:
 
 if sys.version_info.minor < 7:
     raise Exception("Requires Python 2.7/3.7 or later")
-
-if sys.platform == "darwin":
-    requires.append("pyarrow==0.15.1")  # Use standard pyarrow
-elif sys.platform == "linux":
-    logging.warning("Cannot use pyarrow wheel (https://github.com/pypa/manylinux/issues/118), make sure to install from source using a C++11 compatible compiler (e.g. gcc 4.9.3+)")
-else:
-    # don't add pyarrow on windows
-    pass
 
 requires_dev = [
     'Faker>=1.0.0',
@@ -90,9 +82,6 @@ def get_version(file, name='__version__'):
 
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
-ZMQ_ERROR = """`zerorpc` install failed, node module will be unavailable.
-Run `yarn add zerorpc` to fix."""
-
 
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir='dist'):
@@ -103,25 +92,6 @@ class PSPExtension(Extension):
 class PSPBuild(build_ext):
     def run(self):
         self.run_cmake()
-        self.run_node()
-
-    def run_node(self):
-        self.npm_cmd = which('yarn')
-        if not self.npm_cmd:
-            self.npm_cmd = which('npm')
-            if not self.npm_cmd:
-                raise RuntimeError(
-                    "Yarn or npm must be installed to build the following extensions: " +
-                    ", ".join(e.name for e in self.extensions))
-
-        try:
-            subprocess.check_output([self.npm_cmd, '--version'])
-        except OSError:
-            raise RuntimeError(
-                "Yarn or npm must be installed to build the following extensions: " +
-                ", ".join(e.name for e in self.extensions))
-
-        self.build_extension_node()
 
     def run_cmake(self):
         self.cmake_cmd = which('cmake')
@@ -140,24 +110,6 @@ class PSPBuild(build_ext):
 
         for ext in self.extensions:
             self.build_extension_cmake(ext)
-
-    def build_extension_node(self):
-        env = os.environ.copy()
-        if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
-        try:
-            if not os.path.exists("node_modules"):
-                install = [self.npm_cmd] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install']
-                subprocess.check_call(install, cwd=self.build_temp, env=env)
-                # if not os.path.exists(os.path.join("node_modules", "zerorpc")):
-                install = [self.npm_cmd, "add", "zerorpc"] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'install', 'zerorpc']
-                subprocess.check_call(install, cwd=self.build_temp, env=env)
-            build = [self.npm_cmd, 'webpack'] if 'yarn' in self.npm_cmd else [self.npm_cmd, 'run', 'webpack']
-            subprocess.check_call(build, cwd=self.build_temp, env=env, stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
-            print("ZeroMQ node client built successfully")
-        except (subprocess.CalledProcessError, OSError):
-            print(ZMQ_ERROR)
-        print()  # Add an empty line for cleaner output
 
     def build_extension_cmake(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
@@ -182,15 +134,22 @@ class PSPBuild(build_ext):
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
+            import distutils.msvccompiler as dm
+            msvc = {'12': 'Visual Studio 12 2013',
+                    '14': 'Visual Studio 14 2015',
+                    '14.1': 'Visual Studio 15 2017'}.get(dm.get_build_version(), 'Visual Studio 15 2017')
+
             cmake_args.extend([
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
                     cfg.upper(),
                     extdir).replace('\\', '/'),
-                '-G', 'Visual Studio 15 2017'])
+                '-G', os.environ.get('PSP_GENERATOR', msvc)])
+
             if sys.maxsize > 2**32:
                 # build 64 bit to match python
                 cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m', '/p:Configuration={}'.format(cfg)]
+
+            build_args += ['--', '/m:{}'.format(CPU_COUNT), '/p:Configuration={}'.format(cfg)]
         else:
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(CPU_COUNT)]
