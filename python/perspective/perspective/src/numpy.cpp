@@ -171,6 +171,7 @@ namespace numpy {
          /**
          * Catch common type mismatches and fill iteratively when a numpy dtype is of greater bit width than the Perspective t_dtype:
          * - when `np_dtype` is int64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_FLOAT64`
+         * - when `np_dtype` is int32 and `t_dtype` is `DTYPE_INT64` or `DTYPE_FLOAT64`, which can happen on windows where np::int_ is int32
          * - when `np_dtype` is float64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_INT64`
          * - when `type` is float64 and `np_dtype` is `DTYPE_FLOAT32` or `DTYPE_FLOAT64`
          * 
@@ -178,11 +179,13 @@ namespace numpy {
          * In these cases, the `t_dtype` of the Table supercedes the array dtype.
          */
         bool should_iter = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_INT32 && (type == DTYPE_INT64 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
 
         if (should_iter) {
             // Skip straight to numeric fill
+            std::cout << "iterating!" << std::endl;
             fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
             return;
         }
@@ -423,6 +426,7 @@ namespace numpy {
 
         // We fill by object when `np_dtype`=object, or if there are type mismatches between `np_dtype` and `type`.
         bool types_mismatched = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_INT32 && (type == DTYPE_INT64 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
 
