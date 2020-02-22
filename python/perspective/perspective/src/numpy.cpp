@@ -185,7 +185,6 @@ namespace numpy {
 
         if (should_iter) {
             // Skip straight to numeric fill
-            std::cout << "iterating!" << std::endl;
             fill_numeric_iter(array, tbl, col, name, np_dtype, type, cidx, is_update);
             return;
         }
