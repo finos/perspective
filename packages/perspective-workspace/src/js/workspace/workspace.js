@@ -40,15 +40,19 @@ class ObservableMap extends Map {
     }
 
     delete(name) {
-        this._delete_listener?.(name);
-        super.delete(name);
+        const result = this._delete_listener?.(name);
+        if (result) {
+            return super.delete(name);
+        } else {
+            return false;
+        }
     }
 
     addSetListener(listener) {
         this._set_listener = listener;
     }
 
-    addDeleteistener(listener) {
+    addDeleteListener(listener) {
         this._delete_listener = listener;
     }
 }
@@ -78,7 +82,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.listeners = new WeakMap();
         this._tables = new ObservableMap();
         this._tables.addSetListener(this._set_listener.bind(this));
-        this._tables.addDeleteistener(this._delete_listener.bind(this));
+        this._tables.addDeleteListener(this._delete_listener.bind(this));
         this.commands = createCommands(this);
         this.menuRenderer = new MenuRenderer(this.element);
 
@@ -269,12 +273,9 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         const isUsed = this.getAllWidgets().some(widget => widget.viewer.getAttribute("table") === name);
         if (isUsed) {
             console.error(`Cannot remove table: '${name}' because it's still bound to widget(s)`);
-        } else {
-            const result = this.tables.delete(name);
-            if (!result) {
-                console.warn(`Table: '${name}' does not exist`);
-            }
+            return false;
         }
+        return true;
     }
 
     update_widget_for_viewer(viewer) {
