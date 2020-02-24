@@ -25,7 +25,7 @@
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js  --color 2>&1",
         "test:unit": "jest  --color --config=./config/jest.unit.config.js 2>&1",
         "test:integration": "jest --color  --config=./config/jest.integration.config.js 2>&1",
-        "watch": "webpack --color --watch --config config/watch.config.js"
+        "watch": "PSP_DEBUG=1 webpack --color --watch --config config/watch.config.js"
     },
     "publishConfig": {
         "access": "public"

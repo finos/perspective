@@ -601,7 +601,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     _createWidget({config, node, viewer}) {
-        const name = config.name || viewer.getAttribute("name");
+        config.name = config.name || viewer.getAttribute("name");
         if (!node) {
             const slotname = viewer.getAttribute("slot");
             node = this.node.querySelector(`slot[name=${slotname}]`);
@@ -612,7 +612,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             }
         }
         const table = this.tables.get(viewer.getAttribute("table") || config.table);
-        const widget = new PerspectiveViewerWidget({name, table, node, viewer});
+        const widget = new PerspectiveViewerWidget({node, viewer});
         const event = new CustomEvent("workspace-new-view", {
             detail: {config, widget}
         });
