@@ -282,10 +282,10 @@ t_computed_column::apply_computation(
                 }
             }
 
-            output_column->set_scalar(idx, rval);
-
-            if (rval.is_none()) {
-                output_column->set_valid(idx, false);
+            if (!rval.is_valid() || rval.is_none()) {
+                output_column->clear(idx);
+            } else {
+                output_column->set_scalar(idx, rval);
             }
         }
     }
@@ -355,7 +355,7 @@ t_computed_column::reapply_computation(
 
             if (!arg.is_valid()) {
                 arg = table_columns[cidx]->get_scalar(ridx);
-                if (arg.is_valid() && flattened_columns[cidx]->is_cleared(idx)) {
+                if (flattened_columns[cidx]->is_cleared(idx)) {
                     // Update in `flattened` is a clear, so clear the computed
                     // output column.
                     output_column->unset(idx);

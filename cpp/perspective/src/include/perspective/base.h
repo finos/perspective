@@ -441,6 +441,7 @@ PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);
+PERSPECTIVE_EXPORT std::string value_transition_to_str(t_value_transition t);
 
 template <typename T>
 inline std::ostream&

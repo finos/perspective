@@ -266,6 +266,44 @@ protected:
         CTX_T* ctx, std::shared_ptr<t_data_table> tbl, t_dtype dtype);
 
     /**
+     * @brief For all registered contexts, recompute computed columns using
+     * both the `flattened` data table and the master `m_table` of `m_state`.
+     * 
+     * @param tbl 
+     * @param flattened 
+     * @param changed_rows 
+     */
+    void
+    _recompute_columns_for_all_contexts(
+        std::shared_ptr<t_data_table> tbl,
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& changed_rows);
+
+    /**
+     * @brief For each registered context, add its computed columns to `table`
+     * with the specified `dtype`. If `dtype` is not specified, it defaults to
+     * `DTYPE_UINT8` which corresponds to the dtype of the `transitions` data
+     * table.
+     * 
+     * @param table 
+     * @param dtype 
+     */
+    void _add_computed_columns_sptr_for_all_contexts(
+        std::shared_ptr<t_data_table> table,
+        t_dtype dtype);
+
+    /**
+     * @brief For each `t_data_table` passed into the variadic parameter pack
+     * `table`, add computed columns from all registered contexts.
+     * 
+     * TODO: replace vector param with parameter pack
+     * 
+     * @param table 
+     */
+    void _compute_columns_for_all_contexts(
+        std::vector<std::shared_ptr<t_data_table>> tables);
+
+    /**
      * @brief For each context registered to the gnode, compute columns.
      *
      * @param tbl
@@ -280,7 +318,7 @@ protected:
         const std::vector<t_rlookup>& changed_rows);
 
     /**
-     * @brief 
+     * @brief Apply the computed columns from `ctx` to `tbl`.
      * 
      * @tparam CTX_T 
      * @param ctx 
@@ -290,7 +328,8 @@ protected:
     void _compute_columns(CTX_T* ctx, const t_data_table& tbl);
 
     /**
-     * @brief 
+     * @brief Reapply the computed columns from `ctx` to `flattened`,
+     * using information from both `flattened` and `tbl`.
      * 
      * @tparam CTX_T 
      * @param ctx 
