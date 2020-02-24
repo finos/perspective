@@ -20,7 +20,8 @@ export class MenuRenderer extends Menu.Renderer {
         const name = data.item.command.split(":").pop();
         const content = getComputedStyle(this.workspace)
             .getPropertyValue(`--menu-${name}--content`)
-            .replace(/['"]+/g, "");
+            .replace(/['"]+/g, "")
+            .trim();
         return h.div({className, content}, data.item.iconLabel);
     }
 }

@@ -152,7 +152,7 @@ async function getOrCreateHypergrid(div) {
         div.innerHTML = "";
         div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
-        perspectiveHypergridElement.grid.canvas.resize(false, true);
+        perspectiveHypergridElement.grid.canvas.resize(false);
     }
     return perspectiveHypergridElement;
 }
@@ -246,12 +246,9 @@ const plugin = {
     resize: async function() {
         const hypergrid = get_hypergrid.call(this);
         if (hypergrid) {
-            hypergrid.canvas.checksize();
-            hypergrid.canvas.paintNow();
             let nrows = await this._view.num_rows();
             hypergrid.behavior.dataModel.setDirty(nrows);
             await hypergrid.canvas.resize(true);
-            hypergrid.canvas.paintNow();
         }
     },
     delete: function() {

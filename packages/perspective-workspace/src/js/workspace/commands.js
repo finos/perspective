@@ -14,28 +14,28 @@ export const createCommands = workspace => {
 
     commands.addCommand("workspace:export", {
         execute: args => args.widget.viewer.download(),
-        iconClass: "p-MenuItem-export",
+        iconClass: "menu-export",
         label: "Export CSV",
         mnemonic: 0
     });
 
     commands.addCommand("workspace:copy", {
         execute: args => args.widget.viewer.copy(),
-        iconClass: "p-MenuItem-copy",
+        iconClass: "menu-copy",
         label: "Copy To Clipboard",
         mnemonic: 0
     });
 
     commands.addCommand("workspace:reset", {
         execute: args => args.widget.viewer.reset(),
-        iconClass: "p-MenuItem-reset",
+        iconClass: "menu-reset",
         label: "Reset",
         mnemonic: 0
     });
 
     commands.addCommand("workspace:duplicate", {
         execute: ({widget}) => workspace.duplicate(widget),
-        iconClass: "p-MenuItem-duplicate",
+        iconClass: "menu-duplicate",
         isVisible: args => (args.widget.parent === workspace.dockpanel ? true : false),
         label: "Duplicate",
         mnemonic: 0
@@ -43,7 +43,7 @@ export const createCommands = workspace => {
 
     commands.addCommand("workspace:master", {
         execute: args => workspace.toggleMasterDetail(args.widget),
-        iconClass: args => (args.widget.parent === workspace.dockpanel ? "p-MenuItem-master" : "p-MenuItem-detail"),
+        iconClass: args => (args.widget.parent === workspace.dockpanel ? "menu-master" : "menu-detail"),
         label: args => (args.widget.parent === workspace.dockpanel ? "Create Global Filter" : "Remove Global Filter"),
         mnemonic: 0
     });
@@ -51,7 +51,7 @@ export const createCommands = workspace => {
     commands.addCommand("workspace:maximize", {
         execute: args => workspace.toggleSingleDocument(args.widget),
         isVisible: args => args.widget.parent === workspace.dockpanel && workspace.dockpanel.mode !== "single-document",
-        iconClass: "p-MenuItem-maximize",
+        iconClass: "menu-maximize",
         label: () => "Maximize",
         mnemonic: 0
     });
@@ -59,7 +59,7 @@ export const createCommands = workspace => {
     commands.addCommand("workspace:minimize", {
         execute: args => workspace.toggleSingleDocument(args.widget),
         isVisible: args => args.widget.parent === workspace.dockpanel && workspace.dockpanel.mode === "single-document",
-        iconClass: "p-MenuItem-minimize",
+        iconClass: "menu-minimize",
         label: () => "Minimize",
         mnemonic: 0
     });

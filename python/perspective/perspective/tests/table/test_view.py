@@ -6,17 +6,17 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import pandas as pd
 import numpy as np
-from pytest import raises
 from perspective.table import Table
 from datetime import date, datetime
-
 
 
 def compare_delta(received, expected):
     """Compare an arrow-serialized row delta by constructing a Table."""
     tbl = Table(received)
     assert tbl.view().to_dict() == expected
+
 
 class TestView(object):
     def test_view_zero(self):
@@ -249,40 +249,48 @@ class TestView(object):
         view = tbl.view(columns=["b", "a"])
         assert view.to_records() == [{"b": 2, "a": 1}, {"b": 4, "a": 3}]
 
-    def test_view_aggregate_order(self):
-        '''In Python 3.7 and above, a dict's insertion order is guaranteed. We use this guarantee to ensure that
-        the order of columns shown is the same as the order of keys in a schema/data passed in by the user.
+    def test_view_dataframe_column_order(self):
+        table = Table(pd.DataFrame({
+            "0.1": [5, 6, 7, 8],
+            "-0.05": [5, 6, 7, 8],
+            "0.0": [1, 2, 3, 4],
+            "-0.1": [1, 2, 3, 4],
+            "str": ["a", "b", "c", "d"]
+        }))
+        view = table.view(
+            columns=["-0.1", "-0.05", "0.0", "0.1"], row_pivots=["str"])
+        assert view.column_paths() == [
+            "__ROW_PATH__", "-0.1", "-0.05", "0.0", "0.1"]
 
-        In the Python 2 runtime, order cannot be guaranteed without the usage of OrderedMap in C++.
-        '''
-        import six
+    def test_view_aggregate_order_with_columns(self):
+        '''If `columns` is provided, order is always guaranteed.'''
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            columns=["a", "b", "c", "d"],
+            aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"}
+        )
+
+        order = ["__ROW_PATH__", "a", "b", "c", "d"]
+        assert view.column_paths() == order
+
+    def test_view_df_aggregate_order_with_columns(self):
+        '''If `columns` is provided, order is always guaranteed.'''
+        data = pd.DataFrame({
+            "a": [1, 2, 3],
+            "b": [2, 3, 4],
+            "c": [3, 4, 5],
+            "d": [4, 5, 6]
+        }, columns=["d", "a", "c", "b"])
         tbl = Table(data)
         view = tbl.view(
             row_pivots=["a"],
             aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"}
         )
 
-        order = ["__ROW_PATH__", "d", "c", "b", "a"]
-        records = view.to_records()
-
-        assert records == [
-            {"__ROW_PATH__": [], "d": 5.0, "c": 4.0, "b": 4, "a": 3},
-            {"__ROW_PATH__": ["1"], "d": 4.0, "c": 3.0, "b": 2, "a": 1},
-            {"__ROW_PATH__": ["3"], "d": 6.0, "c": 5.0, "b": 4, "a": 3}
-        ]
-
-        if six.PY2:
-            # only test for presence, not order
-            for record in records:
-                keys = list(record.keys())
-                for key in keys:
-                    assert key in order
-        else:
-            for record in records:
-                keys = list(record.keys())
-                for i in range(len(keys)):
-                    assert keys[i] == order[i]
+        order = ["__ROW_PATH__", "index", "d", "a", "c", "b"]
+        assert view.column_paths() == order
 
     def test_view_aggregates_with_no_columns(self):
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
@@ -299,8 +307,8 @@ class TestView(object):
         ]
 
     def test_view_aggregates_column_order(self):
-        '''Again, dict insertion order is not guaranteed in Python <3.7.'''
-        import six
+        '''Order of columns are entirely determined by the `columns` kwarg. If
+        it is not provided, order of columns is undefined behavior.'''
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(
@@ -309,26 +317,8 @@ class TestView(object):
             columns=["a", "c"]
         )
 
-        order = ["__ROW_PATH__", "c", "a"]
-        records = view.to_records()
-
-        assert records == [
-            {"__ROW_PATH__": [], "c": 4.0, "a": 3},
-            {"__ROW_PATH__": ["1"], "c": 3.0, "a": 1},
-            {"__ROW_PATH__": ["3"], "c": 5.0, "a": 3}
-        ]
-
-        if six.PY2:
-            # only test for presence, not order
-            for record in records:
-                keys = list(record.keys())
-                for key in keys:
-                    assert key in order
-        else:
-            for record in records:
-                keys = list(record.keys())
-                for i in range(len(keys)):
-                    assert keys[i] == order[i]
+        order = ["__ROW_PATH__", "a", "c"]
+        assert view.column_paths() == order
 
     def test_view_column_pivot_datetime_names(self):
         data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}

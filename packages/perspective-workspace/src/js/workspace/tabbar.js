@@ -89,7 +89,7 @@ export class PerspectiveTabBar extends TabBar {
         const onEnter = event => {
             if (event.keyCode === 13) {
                 removeEventListeners();
-                this.currentTitle.label = event.target.value;
+                this.currentTitle.owner.name = event.target.value;
                 event.target.value = event.target.value || DEFAULT_TITLE;
                 event.target.setAttribute("readonly", "");
                 event.target.blur();

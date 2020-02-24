@@ -312,6 +312,12 @@ const my_viewer = document.getElementById('#my_viewer');
 const tbl = perspective.table("x,y\n1,a\n2,b");
 my_viewer.load(tbl);
 ```
+**Example** *(Load Promise&lt;perspective.table&gt;)*  
+```js
+const my_viewer = document.getElementById('#my_viewer');
+const tbl = async () => perspective.table("x,y\n1,a\n2,b");
+my_viewer.load(tbl);
+```
 
 * * *
 

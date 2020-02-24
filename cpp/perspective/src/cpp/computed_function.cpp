@@ -42,6 +42,7 @@ using float64 = double;
 #define POW(T)                                                      \
     t_tscalar pow_##T(t_tscalar x) {                                \
         t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         rval.set(static_cast<float64>(                              \
             pow(static_cast<float64>(x.get<T>()), 2)                \
         ));                                                         \
@@ -51,6 +52,7 @@ using float64 = double;
 #define INVERT(T)                                                   \
     t_tscalar invert_##T(t_tscalar x) {                             \
         t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         float64 rhs = static_cast<float64>(x.get<T>());             \
         if (rhs != 0) rval.set(static_cast<float64>(1 / rhs));      \
         return rval;                                                \
@@ -59,6 +61,7 @@ using float64 = double;
 #define SQRT(T)                                                     \
     t_tscalar sqrt_##T(t_tscalar x) {                               \
         t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         float64 val = static_cast<float64>(x.get<T>());             \
          rval.set(static_cast<float64>(sqrt(val)));                 \
         return rval;                                                \
@@ -66,7 +69,8 @@ using float64 = double;
 
 #define ABS(T)                                                      \
     t_tscalar abs_##T(t_tscalar x) {                                \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         rval.set(static_cast<float64>(                              \
             std::abs(static_cast<float64>(x.get<T>()))));           \
         return rval;                                                \
@@ -74,7 +78,8 @@ using float64 = double;
 
 #define BUCKET_10(T)                                                \
     t_tscalar bucket_10_##T(t_tscalar x) {                          \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         T val = x.get<T>();                                         \
         rval.set(static_cast<float64>(                              \
             floor(static_cast<float64>(val) / 10)) * 10);           \
@@ -83,7 +88,8 @@ using float64 = double;
 
 #define BUCKET_100(T)                                               \
     t_tscalar bucket_100_##T(t_tscalar x) {                         \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         T val = x.get<T>();                                         \
         rval.set(static_cast<float64>(                              \
             floor(static_cast<float64>(val) / 100)) * 100);         \
@@ -92,7 +98,8 @@ using float64 = double;
 
 #define BUCKET_1000(T)                                              \
     t_tscalar bucket_1000_##T(t_tscalar x) {                        \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         T val = x.get<T>();                                         \
         rval.set(static_cast<float64>(                              \
             floor(static_cast<float64>(val) / 1000)) * 1000);       \
@@ -101,7 +108,8 @@ using float64 = double;
 
 #define BUCKET_0_1(T)                                               \
     t_tscalar bucket_0_1_##T(t_tscalar x) {                         \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         T val = x.get<T>();                                         \
         rval.set(static_cast<float64>(                              \
             floor(static_cast<float64>(val) / 0.1)) * 0.1);         \
@@ -110,7 +118,8 @@ using float64 = double;
 
 #define BUCKET_0_0_1(T)                                             \
     t_tscalar bucket_0_0_1_##T(t_tscalar x) {                       \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
         T val = x.get<T>();                                         \
         rval.set(static_cast<float64>(                              \
             floor(static_cast<float64>(val) / 0.01)) * 0.01);       \
@@ -119,7 +128,8 @@ using float64 = double;
 
 #define BUCKET_0_0_0_1(T)                                               \
     t_tscalar bucket_0_0_0_1_##T(t_tscalar x) {                         \
-        t_tscalar rval;                                                 \
+        t_tscalar rval = mknone();                                      \
+        if (x.is_none() || !x.is_valid()) return rval;                  \
         T val = x.get<T>();                                             \
         rval.set(static_cast<float64>(                                  \
             floor(static_cast<float64>(val) / 0.001)) * 0.001);         \
@@ -244,21 +254,27 @@ NUMERIC_FUNCTION_1(BUCKET_0_0_0_1);
 
 #define ADD(T1, T2)                                                 \
     t_tscalar add_##T1##_##T2(t_tscalar x, t_tscalar y) {           \
-        t_tscalar rval;                                             \
+        t_tscalar rval = mknone();                                  \
+        if ((x.is_none() || !x.is_valid())                          \
+            || (y.is_none() || !y.is_valid())) return rval;         \
         rval.set(static_cast<float64>(x.get<T1>() + y.get<T2>()));  \
         return rval;                                                \
     }
 
 #define SUBTRACT(T1, T2)                                                 \
     t_tscalar subtract_##T1##_##T2(t_tscalar x, t_tscalar y) {           \
-        t_tscalar rval;                                                  \
+        t_tscalar rval = mknone();                                       \
+        if ((x.is_none() || !x.is_valid())                               \
+            || (y.is_none() || !y.is_valid())) return rval;              \
         rval.set(static_cast<float64>(x.get<T1>() - y.get<T2>()));       \
         return rval;                                                     \
     }
 
 #define MULTIPLY(T1, T2)                                                \
     t_tscalar multiply_##T1##_##T2(t_tscalar x, t_tscalar y) {          \
-        t_tscalar rval;                                                 \
+        t_tscalar rval = mknone();                                      \
+        if ((x.is_none() || !x.is_valid())                              \
+            || (y.is_none() || !y.is_valid())) return rval;             \
         rval.set(static_cast<float64>(x.get<T1>() * y.get<T2>()));      \
         return rval;                                                    \
     }
@@ -266,6 +282,8 @@ NUMERIC_FUNCTION_1(BUCKET_0_0_0_1);
 #define DIVIDE(T1, T2)                                                         \
     t_tscalar divide_##T1##_##T2(t_tscalar x, t_tscalar y) {                   \
         t_tscalar rval = mknone();                                             \
+        if ((x.is_none() || !x.is_valid())                                     \
+            || (y.is_none() || !y.is_valid())) return rval;                    \
         float64 lhs = static_cast<float64>(x.get<T1>());                       \
         float64 rhs = static_cast<float64>(y.get<T2>());                       \
         if (rhs != 0) rval.set(static_cast<float64>(lhs / rhs));               \
@@ -275,6 +293,8 @@ NUMERIC_FUNCTION_1(BUCKET_0_0_0_1);
 #define PERCENT_OF(T1, T2)                                                     \
     t_tscalar percent_of_##T1##_##T2(t_tscalar x, t_tscalar y) {               \
         t_tscalar rval = mknone();                                             \
+        if ((x.is_none() || !x.is_valid())                                     \
+            || (y.is_none() || !y.is_valid())) return rval;                    \
         float64 lhs = static_cast<float64>(x.get<T1>());                       \
         float64 rhs = static_cast<float64>(y.get<T2>());                       \
         if (rhs != 0) rval.set(static_cast<float64>(lhs / rhs) * 100);         \
@@ -336,7 +356,7 @@ NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(percent_of);
 t_tscalar length(t_tscalar x) {
     t_tscalar rval = mknone();
 
-    if (x.get_dtype() != DTYPE_STR) {
+    if (x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR) {
         return rval;
     }
 
@@ -346,7 +366,7 @@ t_tscalar length(t_tscalar x) {
 }
 
 void uppercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
-    if (x.get_dtype() != DTYPE_STR) {
+    if (x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR) {
         output_column->set_scalar(idx, mknone());
         output_column->set_valid(idx, false);
         return;
@@ -358,7 +378,7 @@ void uppercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_c
 }
 
 void lowercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
-    if (x.get_dtype() != DTYPE_STR) {
+    if (x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR) {
         output_column->set_scalar(idx, mknone());
         output_column->set_valid(idx, false);
         return;
@@ -370,7 +390,8 @@ void lowercase(t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_c
 }
 
 void concat_space(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_column> output_column) {
-    if (x.get_dtype() != DTYPE_STR || y.get_dtype() != DTYPE_STR) {
+    if ((x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR)
+        || (y.is_none() || !y.is_valid() || y.get_dtype() != DTYPE_STR)) {
         output_column->set_scalar(idx, mknone());
         output_column->set_valid(idx, false);
         return;
@@ -380,7 +401,8 @@ void concat_space(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_
 }
 
 void concat_comma(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_column> output_column) {
-    if (x.get_dtype() != DTYPE_STR || y.get_dtype() != DTYPE_STR) {
+    if ((x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR)
+        || (y.is_none() || !y.is_valid() || y.get_dtype() != DTYPE_STR)) {
         output_column->set_scalar(idx, mknone());
         output_column->set_valid(idx, false);
         return;
@@ -393,7 +415,8 @@ void concat_comma(t_tscalar x, t_tscalar y, std::int32_t idx, std::shared_ptr<t_
 // Date/Datetime functions
 template<>
 t_tscalar hour_of_day<DTYPE_DATE>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
     // Hour of day for a date is always midnight, i.e. 0
     rval.set(static_cast<std::int64_t>(0));
     return rval;
@@ -401,7 +424,8 @@ t_tscalar hour_of_day<DTYPE_DATE>(t_tscalar x) {
 
 template<>
 t_tscalar hour_of_day<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds timestamp(x.to_int64());
@@ -422,13 +446,15 @@ t_tscalar hour_of_day<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar second_bucket<DTYPE_DATE>(t_tscalar x) {
+    if (x.is_none() || !x.is_valid()) return mknone();
     return x;
 }
 
 template<>
 t_tscalar second_bucket<DTYPE_TIME>(t_tscalar x) {
     // Retrieve the timestamp as an integer and bucket it
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
     auto int_ts = x.to_int64();
     std::int64_t bucketed_ts = (static_cast<double>(int_ts) / 1000) * 1000;
     rval.set(t_time(bucketed_ts));
@@ -437,12 +463,14 @@ t_tscalar second_bucket<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar minute_bucket<DTYPE_DATE>(t_tscalar x) {
+    if (x.is_none() || !x.is_valid()) return mknone();
     return x;
 }
 
 template<>
 t_tscalar minute_bucket<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds ms_timestamp(x.to_int64());
@@ -458,12 +486,14 @@ t_tscalar minute_bucket<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar hour_bucket<DTYPE_DATE>(t_tscalar x) {
+    if (x.is_none() || !x.is_valid()) return mknone();
     return x;
 }
 
 template<>
 t_tscalar hour_bucket<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a millisecond duration timestamp
     std::chrono::milliseconds ms_timestamp(x.to_int64());
@@ -479,12 +509,14 @@ t_tscalar hour_bucket<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar day_bucket<DTYPE_DATE>(t_tscalar x) {
+    if (x.is_none() || !x.is_valid()) return mknone();
     return x;
 }
 
 template<>
 t_tscalar day_bucket<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds ms_timestamp(x.to_int64());
@@ -510,7 +542,8 @@ t_tscalar day_bucket<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar week_bucket<DTYPE_DATE>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Retrieve the `t_date` struct from the scalar
     t_date val = x.get<t_date>();
@@ -544,7 +577,8 @@ t_tscalar week_bucket<DTYPE_DATE>(t_tscalar x) {
 
 template<>
 t_tscalar week_bucket<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds timestamp(x.to_int64());
@@ -573,7 +607,8 @@ t_tscalar week_bucket<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar month_bucket<DTYPE_DATE>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
     t_date val = x.get<t_date>();
     rval.set(t_date(val.year(), val.month(), 1));
     return rval;
@@ -581,7 +616,8 @@ t_tscalar month_bucket<DTYPE_DATE>(t_tscalar x) {
 
 template<>
 t_tscalar month_bucket<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds timestamp(x.to_int64());
@@ -608,16 +644,17 @@ t_tscalar month_bucket<DTYPE_TIME>(t_tscalar x) {
 
 template<>
 t_tscalar year_bucket<DTYPE_DATE>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
     t_date val = x.get<t_date>();
     rval.set(t_date(val.year(), 0, 1));
-    std::cout << rval << std::endl;
     return rval;
 }
 
 template<>
 t_tscalar year_bucket<DTYPE_TIME>(t_tscalar x) {
-    t_tscalar rval;
+    t_tscalar rval = mknone();
+    if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds timestamp(x.to_int64());
@@ -666,6 +703,12 @@ const std::string months_of_year[12] = {
 template <>
 void day_of_week<DTYPE_DATE>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    if (x.is_none() || !x.is_valid()) {
+        output_column->set_scalar(idx, mknone());
+        output_column->set_valid(idx, false);
+        return;
+    }
+
     // Retrieve the `t_date` struct from the scalar
     t_date val = x.get<t_date>();
 
@@ -691,6 +734,12 @@ void day_of_week<DTYPE_DATE>(
 template <>
 void day_of_week<DTYPE_TIME>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    if (x.is_none() || !x.is_valid()) {
+        output_column->set_scalar(idx, mknone());
+        output_column->set_valid(idx, false);
+        return;
+    }
+
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds timestamp(x.to_int64());
 
@@ -710,6 +759,12 @@ void day_of_week<DTYPE_TIME>(
 template <>
 void month_of_year<DTYPE_DATE>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    if (x.is_none() || !x.is_valid()) {
+        output_column->set_scalar(idx, mknone());
+        output_column->set_valid(idx, false);
+        return;
+    }
+
     t_date val = x.get<t_date>();
 
     // `t_date.month()` is [0-11]
@@ -721,6 +776,12 @@ void month_of_year<DTYPE_DATE>(
 template <>
 void month_of_year<DTYPE_TIME>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    if (x.is_none() || !x.is_valid()) {
+        output_column->set_scalar(idx, mknone());
+        output_column->set_valid(idx, false);
+        return;
+    }
+
     // Convert the int64 to a milliseconds duration timestamp
     std::chrono::milliseconds timestamp(x.to_int64());
 

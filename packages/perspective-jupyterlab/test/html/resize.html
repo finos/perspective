@@ -1,0 +1,41 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+        <script src="phosphor.js" preload></script>
+        <script src="perspective-viewer-hypergrid.js" preload></script>
+
+        <link rel='stylesheet' href="demo.css">
+
+    </head>
+    <body>
+
+        <div id="container"></div>
+
+        <script>
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'superstore.csv', true);
+            xhr.onload = function () { 
+                window.__CSV__ = xhr.response;
+                window.__WIDGET__ = new PerspectivePhosphor.PerspectiveWidget();
+                container.appendChild(window.__WIDGET__.node);
+                window.__WIDGET__.load(xhr.response);
+                window.__WIDGET__.plugin = "hypergrid";
+            }
+            xhr.send(null);
+
+        </script>
+
+    </body>
+</html>

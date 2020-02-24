@@ -12,13 +12,14 @@ import {toArray} from "@phosphor/algorithm";
 
 describe("workspace", () => {
     test("restores detail to dockpanel", () => {
-        const widget = {table: "superstore", name: "One"};
+        const viewers = {One: {table: "superstore", name: "One"}};
         const config = {
+            viewers,
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: [widget]
+                    widgets: ["One"]
                 }
             }
         };
@@ -34,10 +35,11 @@ describe("workspace", () => {
     });
 
     test("restores master to masterpanel", () => {
-        const widget = {table: "superstore", name: "One"};
+        const viewers = {One: {table: "superstore", name: "One"}};
         const config = {
+            viewers,
             master: {
-                widgets: [widget]
+                widgets: ["One"]
             }
         };
 
@@ -52,15 +54,17 @@ describe("workspace", () => {
     });
 
     test("restores master to masterpanel and detail to dockpanel", () => {
+        const viewers = {One: {table: "superstore", name: "One"}, Two: {table: "superstore", name: "Two"}};
         const config = {
+            viewers,
             master: {
-                widgets: [{table: "superstore", name: "One"}]
+                widgets: ["One"]
             },
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: [{table: "superstore", name: "Two"}]
+                    widgets: ["Two"]
                 }
             }
         };

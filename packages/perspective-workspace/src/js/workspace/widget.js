@@ -10,49 +10,49 @@
 import "@finos/perspective-viewer";
 import {Widget} from "@phosphor/widgets";
 
-let ID_COUNTER = 0;
-
 export class PerspectiveViewerWidget extends Widget {
-    constructor({title, table}) {
-        const {viewer, node} = createNode();
+    constructor({viewer, node}) {
         super({node});
         this.viewer = viewer;
-        this.table = table;
-
-        this.title.label = title;
-        this._loaded = false;
+        this.master = false;
     }
 
     set master(value) {
-        if (value) {
-            this.viewer.classList.add("p-Master");
-            this.viewer.classList.remove("p-Detail");
-            this.viewer.selectable = true;
-        } else {
-            this.viewer.classList.add("p-Detail");
-            this.viewer.classList.remove("p-Master");
-            this.viewer.selectable = null;
+        if (value !== undefined && this._master !== value) {
+            if (value) {
+                this.viewer.classList.add("workspace-master-widget");
+                this.viewer.classList.remove("workspace-detail-widget");
+
+                // TODO jsdom lacks `toggleAttribute` until 12.2.0
+                // https://github.com/jsdom/jsdom/blob/master/Changelog.md#1220
+                this.viewer.toggleAttribute?.("selectable", true);
+            } else {
+                this.viewer.classList.add("workspace-detail-widget");
+                this.viewer.classList.remove("workspace-master-widget");
+                this.viewer.removeAttribute("selectable");
+            }
+            this._master = value;
         }
-        this._master = value;
     }
 
     get master() {
         return this._master;
     }
 
-    set table(value) {
-        if (value) {
-            if (this._loaded) {
-                this.viewer.replace(value);
-            } else {
-                this.viewer.load(value);
-            }
-            this._loaded = true;
+    get table() {
+        return this.viewer.table;
+    }
+
+    set name(value) {
+        if (value != null) {
+            this.viewer.setAttribute("name", value);
+            this.title.label = value;
+            this._name = value;
         }
     }
 
-    get table() {
-        return this.viewer.table;
+    get name() {
+        return this._name;
     }
 
     toggleConfig() {
@@ -60,24 +60,22 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     restore(config) {
-        const {master, table, ...viewerConfig} = config;
-        this.tableName = table;
+        const {master, table, name, ...viewerConfig} = config;
         this.master = master;
+        this.name = name;
+        if (table) {
+            this.viewer.setAttribute("table", table);
+        }
         this.viewer.restore({...viewerConfig});
     }
 
     save() {
         return {
             ...this.viewer.save(),
-            name: this.title.label,
             master: this.master,
-            table: this.tableName
+            name: this.viewer.getAttribute("name"),
+            table: this.viewer.getAttribute("table")
         };
-    }
-
-    addClass(name) {
-        super.addClass(name);
-        this.viewer && this.viewer.classList.add(name);
     }
 
     removeClass(name) {
@@ -87,8 +85,10 @@ export class PerspectiveViewerWidget extends Widget {
 
     async onCloseRequest(msg) {
         super.onCloseRequest(msg);
+        if (this.viewer.parentElement) {
+            this.viewer.parentElement.removeChild(this.viewer);
+        }
         await this.viewer.delete();
-        this.viewer.parentElement.removeChild(this.viewer);
     }
 
     onResize(msg) {
@@ -102,18 +102,3 @@ export class PerspectiveViewerWidget extends Widget {
         }
     }
 }
-
-const createNode = () => {
-    const slot = document.createElement("slot");
-    const name = `AUTO_ID_${ID_COUNTER++}`;
-    slot.setAttribute("name", name);
-
-    const node = document.createElement("div");
-    node.classList.add("p-Widget");
-    node.appendChild(slot);
-
-    const viewer = document.createElement("perspective-viewer");
-    viewer.setAttribute("slot", name);
-
-    return {node: node, viewer: viewer};
-};

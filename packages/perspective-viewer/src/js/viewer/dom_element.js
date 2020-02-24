@@ -308,7 +308,7 @@ export class DomElement extends PerspectiveElement {
                     this._persisted_side_panel_width = this._side_panel.style.width;
                     this._side_panel.style.width = old || "";
                     app.classList.add("columns_horizontal");
-                    return true;
+                    return false;
                 }
                 return false;
             } else if (app.classList.contains("columns_horizontal")) {

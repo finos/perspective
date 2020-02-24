@@ -28,11 +28,14 @@ utils.with_server({paths: PATHS}, () => {
 
                 async page => {
                     const config = {
+                        viewers: {
+                            One: {id: "viewer", table: "superstore", name: "One"}
+                        },
                         detail: {
                             main: {
                                 currentIndex: 0,
                                 type: "tab-area",
-                                widgets: [{id: "viewer", table: "superstore", name: "One"}]
+                                widgets: ["One"]
                             }
                         }
                     };
@@ -52,8 +55,11 @@ utils.with_server({paths: PATHS}, () => {
 
                 async page => {
                     const config = {
+                        viewers: {
+                            One: {table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}
+                        },
                         master: {
-                            widgets: [{table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}]
+                            widgets: ["One"]
                         }
                     };
 
@@ -72,14 +78,18 @@ utils.with_server({paths: PATHS}, () => {
 
                 async page => {
                     const config = {
+                        viewers: {
+                            One: {table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
+                            Two: {id: "viewer", table: "superstore", name: "One"}
+                        },
                         master: {
-                            widgets: [{table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}]
+                            widgets: ["One"]
                         },
                         detail: {
                             main: {
                                 currentIndex: 0,
                                 type: "tab-area",
-                                widgets: [{id: "viewer", table: "superstore", name: "One"}]
+                                widgets: ["Two"]
                             }
                         }
                     };
@@ -88,6 +98,41 @@ utils.with_server({paths: PATHS}, () => {
                         const workspace = document.getElementById("workspace");
                         workspace.restore(config);
                     }, config);
+
+                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                },
+                {wait_for_update: false, timeout: 30000}
+            );
+
+            test.capture(
+                "restore workspace with viewers with generated slotids",
+
+                async page => {
+                    const config = {
+                        viewers: {
+                            PERSPECTIVE_GENERATED_ID_0: {table: "superstore", name: "Test", "row-pivots": ["State"], columns: ["Sales", "Profit"]}
+                        },
+                        detail: {
+                            main: {
+                                currentIndex: 0,
+                                type: "tab-area",
+                                widgets: ["PERSPECTIVE_GENERATED_ID_0"]
+                            }
+                        }
+                    };
+
+                    await page.evaluate(config => {
+                        const workspace = document.getElementById("workspace");
+                        workspace.restore(config);
+                    }, config);
+
+                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+
+                    await page.evaluate(() => {
+                        const workspace = document.getElementById("workspace").workspace;
+                        const widget = workspace.getAllWidgets()[0];
+                        workspace.duplicate(widget);
+                    });
 
                     await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
                 },

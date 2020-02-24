@@ -23,7 +23,7 @@ var Borders = cellRenderersRegistry.BaseClass.extend("Borders", {
         var color;
 
         gc.save();
-        gc.translate(-0.5, 0.5); // paint "sharp" lines on pixels instead of "blury" lines between pixels
+        gc.translate(-0.5, 0.5); // paint "sharp" lines on pixels instead of "blurry" lines between pixels
         gc.cache.lineWidth = 1;
 
         color = config.borderTop;
@@ -339,6 +339,38 @@ export const install = function(grid) {
         );
     });
 
+    Object.getPrototypeOf(grid.behavior).getCursorAt = function(x, y, event) {
+        const rp_len = this.dataModel.data[y - 1]?.[-1]?.rowPath?.length;
+        const is_select = !!this.grid.properties.rowSelection;
+        if (is_select) {
+            if (x === -1 && rp_len <= this.dataModel._config.row_pivots.length && event?.gridPoint.x <= rp_len * 15 + 10) {
+                return "pointer";
+            }
+        } else {
+            if (x === -1 && rp_len <= this.dataModel._config.row_pivots.length) {
+                return "pointer";
+            }
+        }
+    };
+
+    function updateCursor(event) {
+        var cursor = this.behavior.getCursorAt(-1, -1);
+        var hoverCell = this.hoverCell;
+        if (hoverCell && hoverCell.x > -2 && hoverCell.y > -1) {
+            var x = hoverCell.x + this.getHScrollValue();
+            cursor = this.behavior.getCursorAt(x, hoverCell.y + this.getVScrollValue(), event);
+        }
+        this.beCursor(cursor);
+    }
+
+    Object.getPrototypeOf(grid.behavior).onMouseMove = function(grid, event) {
+        if (this.featureChain) {
+            this.featureChain.handleMouseMove(grid, event);
+            updateCursor.call(grid, event);
+            this.featureChain.setCursor(grid);
+        }
+    };
+
     Object.getPrototypeOf(grid.behavior).cellClicked = async function(event) {
         event.primitiveEvent.preventDefault();
         event.handled = true;
@@ -378,7 +410,11 @@ export const install = function(grid) {
         // this only works for single row select (which is all we support
         // right now)
         if (this.grid.properties.rowSelection) {
-            const selected = this.grid.getSelectedRows()[0] === y;
+            const selected_rows = this.grid.getSelectedRows();
+            const selected = selected_rows[0] === y;
+            if (selected_rows.length === 0) {
+                delete this.dataModel["_selected_row_index"];
+            }
             this.grid.canvas.dispatchEvent(
                 new CustomEvent("perspective-select", {
                     bubbles: true,
@@ -392,7 +428,6 @@ export const install = function(grid) {
                 })
             );
         }
-
         this.grid.canvas.dispatchEvent(
             new CustomEvent("perspective-click", {
                 bubbles: true,
@@ -401,7 +436,12 @@ export const install = function(grid) {
             })
         );
 
-        return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
+        const rp_len = this.dataModel.data[y]?.[-1]?.rowPath?.length;
+        const is_toggle = !this.grid.properties.rowSelection || event?.gridPoint.x <= rp_len * 15 + 10;
+
+        if (is_toggle) {
+            return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
+        }
     };
 
     // Prevents flashing of cell selection on scroll
@@ -583,16 +623,9 @@ export const install = function(grid) {
                     // until it is ready.
                     await new Promise(setTimeout);
                 }
-
-                update_bounds.call(this);
+                grid.renderer.computeCellsBounds(true);
                 render = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
             }
-        }
-
-        this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
-        this.component.setBounds(this.bounds);
-        if (dataModel._view) {
-            this.resizeNotification();
         }
 
         this.buffer.width = this.canvas.width = this.width * ratio;
@@ -604,6 +637,9 @@ export const install = function(grid) {
         this.bc.scale(ratio, ratio);
         if (isHIDPI && !this.component.properties.useBitBlit) {
             this.gc.scale(ratio, ratio);
+        }
+        if (dataModel._view) {
+            this.resizeNotification();
         }
         this.component.grid.renderer.needsComputeCellsBounds = false;
         grid.canvas.paintNow();

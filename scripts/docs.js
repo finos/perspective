@@ -12,12 +12,8 @@ const {execute} = require("./script_utils.js");
 try {
     execute`mkdirp docs/build docs/obj`;
     const project = process.env.PSP_PROJECT;
-    if (!project || project === "js") {
+    if (!project || project === "js" || project === "python") {
         execute`lerna run docs --silent --stream --scope=${process.env.PACKAGE}`;
-    }
-
-    if (!project || project === "python") {
-        execute`lerna run docs --silent --stream --scope=perspective-python.node`;
     }
 } catch (e) {
     console.log(e.message);

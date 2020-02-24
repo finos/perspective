@@ -15,6 +15,8 @@ const execSync = require("child_process").execSync;
 const argv = require("minimist")(process.argv.slice(2));
 const minimatch = require("minimatch");
 const os = require("os");
+const {getarg} = require("./script_utils.js");
+const IS_CI = getarg("--ci");
 
 require("dotenv").config({path: "./.perspectiverc"});
 
@@ -50,7 +52,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
     const OUTPUT_DIRECTORY = getOuputDir(packageName);
     const BUILD_DIRECTORY = getBuildDir(packageName);
 
-    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "obj"));
+    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "obj"));
     mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "umd"));
 
     if (inputWasmFile) {
@@ -75,12 +77,16 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
         });
     }
 
-    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, "obj", inputFile), source);
+    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, "dist", "obj", inputFile), source);
 }
 
 function docker(image = "emsdk") {
     console.log("-- Creating emsdk docker image");
-    let cmd = "docker run --rm -it";
+    let cmd = "docker run --rm ";
+    if (!IS_CI) {
+        cmd += "-it";
+    }
+
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }

@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import os
 import pandas
 from functools import partial, wraps
 from random import random
@@ -446,7 +447,7 @@ class View(object):
         Returns:
             :obj:`str`: A CSV-formatted string containing the serialized data.
         '''
-        return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
+        return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"), line_terminator='\r\n' if os.name == 'nt' else '\n')
 
     @wraps(to_records)
     def to_json(self, **options):

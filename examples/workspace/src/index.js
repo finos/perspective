@@ -8,10 +8,9 @@
  */
 
 import perspective from "@finos/perspective";
-import "@finos/perspective-workspace";
-
 import "@finos/perspective-viewer-hypergrid";
 import "@finos/perspective-viewer-d3fc";
+import "@finos/perspective-workspace";
 
 import "./index.less";
 
@@ -23,30 +22,23 @@ const datasource = async () => {
     return worker.table(buffer);
 };
 
-window.addEventListener("load", async () => {
-    const workspace = document.createElement("perspective-workspace");
-    document.body.append(workspace);
-    workspace.addTable("superstore", await datasource());
+window.addEventListener("load", () => {
+    window.workspace.tables.set("superstore", datasource());
 
-    const config = {
+    window.workspace.restore({
         master: {
-            widgets: [
-                {table: "superstore", name: "Three", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
-                {table: "superstore", name: "Four", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
-            ]
+            widgets: ["Four", "Three"]
         },
         detail: {
             main: {
                 currentIndex: 0,
                 type: "tab-area",
-                widgets: [
-                    {table: "superstore", name: "One"},
-                    {table: "superstore", name: "Two"}
-                ]
+                widgets: ["One", "Two"]
             }
+        },
+        viewers: {
+            Three: {table: "superstore", name: "Test Widget III (modified)", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
+            Four: {table: "superstore", name: "Test Widget IV (modified)", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
         }
-    };
-
-    workspace.restore(config);
-    window.workspace = workspace;
+    });
 });

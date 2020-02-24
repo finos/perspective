@@ -128,7 +128,7 @@ export const component = settings => {
     const axisGroups = domain => {
         const groups = [];
         domain.forEach(tick => {
-            const split = tick.split ? tick.split("|") : [tick];
+            const split = tick && tick.split ? tick.split("|") : [tick];
             split.forEach((s, i) => {
                 while (groups.length <= i) groups.push([]);
 
@@ -145,16 +145,16 @@ export const component = settings => {
 
     const getGroupTickLayout = group => {
         const width = settings.size.width;
-        const maxLength = Math.max(...group.map(g => g.text.length));
+        const maxLength = Math.max(...group.map(g => (g.text ? g.text.length : 0)));
 
         if (orient === "horizontal") {
             // x-axis may rotate labels and expand the available height
-            if (group.length * 16 > width - 100) {
+            if (group && group.length * 16 > width - 100) {
                 return {
                     size: maxLength * 5 + 10,
                     rotation: 90
                 };
-            } else if (group.length * (maxLength * 6 + 10) > width - 100) {
+            } else if (group && group.length * (maxLength * 6 + 10) > width - 100) {
                 return {
                     size: maxLength * 3 + 20,
                     rotation: 45

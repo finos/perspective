@@ -9,6 +9,7 @@
 
 import {DockPanel, SplitPanel} from "@phosphor/widgets";
 import {toArray} from "@phosphor/algorithm";
+import {Signal} from "@phosphor/signaling";
 
 const DISCRETE_STEP_SIZE = 1;
 
@@ -134,6 +135,16 @@ function extend(base, handle) {
 
 export class DiscreteDockPanel extends extend(DockPanel, "p-DockPanel-handle") {}
 export class DiscreteSplitPanel extends extend(SplitPanel, "p-SplitPanel-handle") {
+    constructor(...args) {
+        super(...args);
+        this.layoutModified = new Signal(this);
+    }
+
+    onUpdateRequest(...args) {
+        super.onUpdateRequest(...args);
+        this.layoutModified.emit();
+    }
+
     onResize(msg) {
         for (const widget of toArray(this.widgets)) {
             widget.node.style.minWidth = `300px`;

@@ -28,7 +28,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     next free iteration of the event loop.
 
     Examples:
-        >>> MANAGER = PerspectiveViewer()
+        >>> MANAGER = PerspectiveManager()
         >>> MANAGER.host_table("data_source_one", Table(
         ...     pd.read_csv("superstore.csv")))
         >>> app = tornado.web.Application([

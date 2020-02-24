@@ -171,6 +171,7 @@ namespace numpy {
          /**
          * Catch common type mismatches and fill iteratively when a numpy dtype is of greater bit width than the Perspective t_dtype:
          * - when `np_dtype` is int64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_FLOAT64`
+         * - when `np_dtype` is int32 and `t_dtype` is `DTYPE_INT64` or `DTYPE_FLOAT64`, which can happen on windows where np::int_ is int32
          * - when `np_dtype` is float64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_INT64`
          * - when `type` is float64 and `np_dtype` is `DTYPE_FLOAT32` or `DTYPE_FLOAT64`
          * 
@@ -178,6 +179,7 @@ namespace numpy {
          * In these cases, the `t_dtype` of the Table supercedes the array dtype.
          */
         bool should_iter = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_INT32 && (type == DTYPE_INT64 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
 
@@ -238,13 +240,13 @@ namespace numpy {
             }
 
             double fval = item.cast<double>();
-            if (fval > 2147483647 || fval < -2147483648) {
+            if (!is_update && (fval > 2147483647 || fval < -2147483648)) {
                 binding::WARN("Promoting column `%s` to float from int32", name);
                 tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                 col = tbl.get_column(name);
                 type = DTYPE_FLOAT64;
                 col->set_nth(i, fval);
-            } else if (isnan(fval)) {
+            } else if (!is_update && isnan(fval)) {
                 binding::WARN("Promoting column `%s` to string from int32", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -423,6 +425,7 @@ namespace numpy {
 
         // We fill by object when `np_dtype`=object, or if there are type mismatches between `np_dtype` and `type`.
         bool types_mismatched = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_INT32 && (type == DTYPE_INT64 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
 
@@ -600,17 +603,32 @@ namespace numpy {
      */
     std::vector<std::string>
     NumpyLoader::make_names() {
-        auto names = py::list(m_accessor.attr("data")().attr("keys")());
-        return names.cast<std::vector<std::string>>();
+        auto data = m_accessor.attr("data")();
+        auto py_names = m_accessor.attr("names")().cast<std::vector<std::string>>();
+
+        // Match names to dataset - only keep names that are present in dataset.
+        // The `m_names` variable is used internally to access the numpy arrays
+        // containing each column. On first-time load, `m_names` contains
+        // every name in the dataset. On update, `m_names` is recalculated to
+        // only include columns that are present in the update dataset.
+        std::vector<std::string> names;
+        for (const auto& name : py_names) {
+            if (data.contains(py::str(name))) {
+                names.push_back(name);
+            }
+        }
+
+        return names;
     }
 
     std::vector<t_dtype>
     NumpyLoader::make_types() {
         std::vector<t_dtype> rval;
         
-        py::list arrays = m_accessor.attr("data")().attr("values")();
-        for (const auto& a : arrays) {
-            py::array array = py::array::ensure(a);
+        auto data = m_accessor.attr("data")();
+        for (const auto& name : m_names) {
+            // Access each array by name to guarantee ordered access.
+            py::array array = py::array::ensure(data[py::str(name)]);
 
             if (!array) {
                 PSP_COMPLAIN_AND_ABORT("Perspective does not support the mixing of ndarrays and lists.");

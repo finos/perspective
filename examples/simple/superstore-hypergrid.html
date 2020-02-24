@@ -32,7 +32,7 @@
     </perspective-viewer>
 
     <script>
-        window.addEventListener('WebComponentsReady', function() {
+        window.addEventListener('DOMContentLoaded', async function() {
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
             const data = await fetch("superstore.arrow");
             viewer.load(await data.arrayBuffer(), {index: "Row ID"});

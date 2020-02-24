@@ -13,6 +13,7 @@ const execSync = require("child_process").execSync;
 const _path = require("path");
 const fs = require("fs");
 const rimraf = require("rimraf");
+const isWin = process.platform === "win32";
 
 /*******************************************************************************
  *
@@ -91,7 +92,7 @@ exports.path = function path(strings, ...args) {
  * console.assert(path`a/b/c` === `${process.cwd()}\\a\\b\\v`) // on Windows
  */
 const resolve = (exports.resolve = function resolve(strings, ...args) {
-    return _path.resolve(...depath(strings, ...args));
+    return _path.resolve(...depath(strings, ...args)).replace(/\\/g, '\\');
 });
 
 /**
@@ -218,16 +219,20 @@ exports.docker = function docker(image = "puppeteer") {
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
     const PACKAGE = process.env.PACKAGE;
     const CWD = process.cwd();
+    const IS_CI = getarg("--ci");
     const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
     const IMAGE = `perspective/${image}`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
         -ePACKAGE="${PACKAGE}"`;
+    let flags = IS_CI ? bash`--rm`: bash`--rm -it`;
+
     if (IS_MANYLINUX) {
         console.log(`-- Using manylinux build`);
-        env_vars += bash`-ePSP_MANYLINUX=1`;
+        env_vars += bash` -ePSP_MANYLINUX=1 `;
     }
 
-    let ret = bash`docker run -it --rm \
+    let ret = bash`docker run \
+        ${flags} \
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
@@ -274,15 +279,28 @@ function run_suite(tests) {
     }
 }
 
-run_suite([
-    [resolve`a/b/c`, `${process.cwd()}/a/b/c`],
-    [resolve`${__dirname}/../cpp/perspective`, `${process.cwd()}/cpp/perspective`],
-    [resolve`${__dirname}/../python/perspective/dist`, _path.resolve(__dirname, "..", "python", "perspective", "dist")],
-    [resolve`${__dirname}/../cpp/perspective`, _path.resolve(__dirname, "..", "cpp", "perspective")],
-    [resolve`${__dirname}/../cmake`, _path.resolve(__dirname, "..", "cmake")],
-    [resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "cmake")],
-    [resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "obj")]
-]);
+if (isWin){
+    run_suite([
+        [resolve`a/b/c`, `${process.cwd()}\\a\\b\\c`],
+        [resolve`${__dirname}/../cpp/perspective`, `${process.cwd()}\\cpp\\perspective`],
+        [resolve`${__dirname}/../python/perspective/dist`, _path.resolve(__dirname, "..", "python", "perspective", "dist")],
+        [resolve`${__dirname}/../cpp/perspective`, _path.resolve(__dirname, "..", "cpp", "perspective")],
+        [resolve`${__dirname}/../cmake`, _path.resolve(__dirname, "..", "cmake")],
+        [resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "cmake")],
+        [resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "obj")]
+    ]);
+
+} else {
+    run_suite([
+        [resolve`a/b/c`, `${process.cwd()}/a/b/c`],
+        [resolve`${__dirname}/../cpp/perspective`, `${process.cwd()}/cpp/perspective`],
+        [resolve`${__dirname}/../python/perspective/dist`, _path.resolve(__dirname, "..", "python", "perspective", "dist")],
+        [resolve`${__dirname}/../cpp/perspective`, _path.resolve(__dirname, "..", "cpp", "perspective")],
+        [resolve`${__dirname}/../cmake`, _path.resolve(__dirname, "..", "cmake")],
+        [resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "cmake")],
+        [resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "obj")]
+    ]);
+}
 
 run_suite([
     [bash`run -t${1}`, `run -t1`],

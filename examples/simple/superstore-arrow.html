@@ -28,7 +28,9 @@
 
 <body>
 
-    <perspective-viewer plugin="d3_sunburst" row-pivots='["Sub-Category","Region","Segment"]' sort='[["Profit","desc"]]' columns='["Sales", "Profit"]'>
+    <perspective-viewer plugin="hypergrid" row-pivots='["Region", "State",
+    "City"]' column-pivots='["Category", "Sub-Category"]' sort='[["Profit","desc"]]' columns='["Sales",
+    "Profit"]'>
 
     </perspective-viewer>
 
