@@ -282,19 +282,28 @@ t_gnode::_process_table() {
     _process_state.m_current_data_table = m_oports[PSP_PORT_CURRENT]->get_table();
     _process_state.m_transitions_data_table = m_oports[PSP_PORT_TRANSITIONS]->get_table();
     _process_state.m_existed_data_table = m_oports[PSP_PORT_EXISTED]->get_table();
+    
+    // Add computed columns to transitions_data_table
+    _add_computed_columns_sptr_for_all_contexts(
+        _process_state.m_transitions_data_table,
+        DTYPE_UINT8);
 
-    _process_computed_columns(
+    // Recompute values for flattened and m_state->get_table
+    _recompute_columns_for_all_contexts(
         get_table_sptr(),
         _process_state.m_flattened_data_table,
-        _process_state.m_delta_data_table,
-        _process_state.m_prev_data_table,
-        _process_state.m_current_data_table,
-        _process_state.m_transitions_data_table,
         _process_state.m_lookup);
 
-    // ALL transitional tables are cleared on each call
+    // Clear delta, prev, current, transitions, existed on EACH call.
     _process_state.clear_transitional_data_tables();
 
+    // compute values on transitional tables before reserve
+    _compute_columns_for_all_contexts(
+        {
+            _process_state.m_delta_data_table,
+            _process_state.m_prev_data_table,
+            _process_state.m_current_data_table
+        });
     // And re-reserved for the amount of data in `flattened`
     _process_state.reserve_transitional_data_tables(flattened_num_rows);
 
@@ -304,17 +313,19 @@ t_gnode::_process_table() {
     // mask_count = flattened_num_rows - number of rows that were removed
     _process_state.set_size_transitional_data_tables(mask_count);
 
-    const t_schema& _gstate_schema = m_gstate->get_output_schema();
-    t_uindex ncols = _gstate_schema.get_num_columns();
+    // Use the schema of g_state->get_table so all computed columns are included.
+    const t_schema& _gstate_table_schema = 
+        _process_state.m_state_data_table->get_schema().drop({"psp_pkey", "psp_op"});
+    t_uindex ncols = _gstate_table_schema.get_num_columns();
 
 #ifdef PSP_PARALLEL_FOR
     tbb::parallel_for(0, int(ncols), 1,
-        [&_process_state, &_gstate_schema, this](int colidx)
+        [&_process_state, &_gstate_table_schema, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
 #endif
         {
-            const std::string& cname = _gstate_schema.m_columns[colidx];
+            const std::string& cname = _gstate_table_schema.m_columns[colidx];
             auto fcolumn = _process_state.m_flattened_data_table->get_column(cname).get();
             auto scolumn = _process_state.m_state_data_table->get_column(cname).get();
             auto dcolumn = _process_state.m_delta_data_table->get_column(cname).get();
@@ -373,6 +384,14 @@ t_gnode::_process_table() {
 #ifdef PSP_PARALLEL_FOR
     );
 #endif
+    // After transitional tables are written, compute their values
+    _compute_columns_for_all_contexts(
+        {
+            _process_state.m_delta_data_table,
+            _process_state.m_prev_data_table,
+            _process_state.m_current_data_table
+        });
+
     /**
      * After all columns have been processed (transitional tables written into),
      * `_process_state.m_flattened_data_table` contains the accumulated state
@@ -502,6 +521,100 @@ t_gnode::set_ctx_state(void* ptr) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     CTX_T* ctx = static_cast<CTX_T*>(ptr);
     ctx->set_state(m_gstate);
+}
+
+void
+t_gnode::_recompute_columns_for_all_contexts(
+    std::shared_ptr<t_data_table> tbl,
+    std::shared_ptr<t_data_table> flattened,
+    const std::vector<t_rlookup>& changed_rows
+    ) {
+    for (auto& kv : m_contexts) {
+        auto& ctxh = kv.second;
+        switch (ctxh.m_ctx_type) {
+            case TWO_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
+                // Recompute using `m_state` table and flattened
+                _recompute_columns<t_ctx2>(ctx, tbl, flattened, changed_rows);
+            } break;
+            case ONE_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
+                _recompute_columns<t_ctx1>(ctx, tbl, flattened, changed_rows);
+            } break;
+            case ZERO_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
+                _recompute_columns<t_ctx0>(ctx, tbl, flattened, changed_rows);
+            } break;
+            case GROUPED_PKEY_CONTEXT: {
+                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
+                _recompute_columns<t_ctx_grouped_pkey>(ctx, tbl, flattened, changed_rows);
+            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+        }
+    }
+}
+
+void
+t_gnode::_add_computed_columns_sptr_for_all_contexts(
+    std::shared_ptr<t_data_table> table,
+    t_dtype dtype) {
+    for (auto& kv : m_contexts) {
+        auto& ctxh = kv.second;
+        switch (ctxh.m_ctx_type) {
+            case TWO_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
+                _add_computed_column_sptr<t_ctx2>(ctx, table, dtype);
+            } break;
+            case ONE_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
+                _add_computed_column_sptr<t_ctx1>(ctx, table, dtype);
+            } break;
+            case ZERO_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
+                _add_computed_column_sptr<t_ctx0>(ctx, table, dtype);
+            } break;
+            case GROUPED_PKEY_CONTEXT: {
+                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
+                _add_computed_column_sptr<t_ctx_grouped_pkey>(ctx, table, dtype);
+            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+        }
+    }
+}
+
+void
+t_gnode::_compute_columns_for_all_contexts(
+    std::vector<std::shared_ptr<t_data_table>> tables) {
+    for (auto& kv : m_contexts) {
+        auto& ctxh = kv.second;
+        switch (ctxh.m_ctx_type) {
+            case TWO_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
+                for (const auto t : tables) {
+                    _compute_columns_sptr<t_ctx2>(ctx, t);
+                }
+            } break;
+            case ONE_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
+                for (const auto t : tables) {
+                    _compute_columns_sptr<t_ctx1>(ctx, t);
+                }
+            } break;
+            case ZERO_SIDED_CONTEXT: {
+                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
+                for (const auto t : tables) {
+                    _compute_columns_sptr<t_ctx0>(ctx, t);
+                }
+            } break;
+            case GROUPED_PKEY_CONTEXT: {
+                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
+                for (const auto t : tables) {
+                    _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, t);
+                }
+            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+        }
+    }
 }
 
 void

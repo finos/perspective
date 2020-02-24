@@ -661,6 +661,24 @@ is_neq_transition(t_value_transition t) {
     return t > VALUE_TRANSITION_EQ_TT;
 }
 
+std::string
+value_transition_to_str(t_value_transition t) {
+    switch (t) {
+        case VALUE_TRANSITION_EQ_FF: return "VALUE_TRANSITION_EQ_FF";
+        case VALUE_TRANSITION_EQ_TT: return "VALUE_TRANSITION_EQ_TT";
+        case VALUE_TRANSITION_NEQ_FT: return "VALUE_TRANSITION_NEQ_FT";
+        case VALUE_TRANSITION_NEQ_TF: return "VALUE_TRANSITION_NEQ_TF";
+        case VALUE_TRANSITION_NEQ_TT: return "VALUE_TRANSITION_NEQ_TT";
+        case VALUE_TRANSITION_NEQ_TDF: return "VALUE_TRANSITION_NEQ_TDF";
+        case VALUE_TRANSITION_NEQ_TDT: return "VALUE_TRANSITION_NEQ_TDT";
+        case VALUE_TRANSITION_NVEQ_FT: return "VALUE_TRANSITION_NVEQ_FT";
+        default: break;
+    }
+
+    PSP_COMPLAIN_AND_ABORT("Unexpected value transition.");
+    return "";
+}
+
 t_uindex
 root_pidx() {
     return std::numeric_limits<t_uindex>::max();
