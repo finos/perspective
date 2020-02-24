@@ -244,15 +244,21 @@ t_computed_column::apply_computation(
     }
 
     for (t_uindex idx = 0; idx < end; ++idx) {
-        // create args
+        bool skip_row = false;
         std::vector<t_tscalar> args;
         for (t_uindex x = 0; x < arity; ++x) {
             t_tscalar t = table_columns[x]->get_scalar(idx);
             if (!t.is_valid()) {
+                output_column->clear(idx);
+                skip_row = true;
                 break;
             }
 
             args.push_back(t);
+        }
+
+        if (skip_row) {
+            continue;
         }
 
         t_tscalar rval = mknone();
@@ -338,11 +344,13 @@ t_computed_column::reapply_computation(
     }
 
     for (t_uindex idx = 0; idx < end; ++idx) {
+        bool row_already_exists = false;
         t_uindex ridx = idx;
 
-        // Look up the changed row index
+        // Look up the changed row index, and whether the row already exists
         if (changed_rows.size() > 0) {
             ridx = changed_rows[idx].m_idx;
+            row_already_exists = changed_rows[idx].m_exists;
         }
 
         // Create args
@@ -354,13 +362,29 @@ t_computed_column::reapply_computation(
             t_tscalar arg = flattened_columns[cidx]->get_scalar(idx);
 
             if (!arg.is_valid()) {
-                arg = table_columns[cidx]->get_scalar(ridx);
-                if (flattened_columns[cidx]->is_cleared(idx)) {
-                    // Update in `flattened` is a clear, so clear the computed
-                    // output column.
+                /**
+                 * If the row already exists, and the cell in `flattened` is
+                 * `STATUS_CLEAR`, do not compute the row. 
+                 * 
+                 * If the row does not exist, and the cell in `flattened` is
+                 * `STATUS_INVALID`, do not compute the row.
+                 */
+                bool should_unset = 
+                    (row_already_exists && flattened_columns[cidx]->is_cleared(idx)) ||
+                    (!row_already_exists && !flattened_columns[cidx]->is_valid(idx));
+
+                /**
+                 * Use `unset` instead of `clear`, as
+                 * `t_gstate::update_master_table` will reconcile `STATUS_CLEAR`
+                 * into `STATUS_INVALID`.
+                 */
+                if (should_unset) {
                     output_column->unset(idx);
                     skip_row = true;
                     break;  
+                } else {
+                    // Use the value in the master table to compute.
+                    arg = table_columns[cidx]->get_scalar(ridx);
                 }
             }
 

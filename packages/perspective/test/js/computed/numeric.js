@@ -34,8 +34,9 @@ module.exports = perspective => {
 
                         let results = await view.to_columns();
                         expect(results[name]).toEqual(results[x]);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, sqrt", async function() {
@@ -56,8 +57,9 @@ module.exports = perspective => {
 
                         let results = await view.to_columns();
                         expect(results[name]).toEqual(results[x].map(val => Math.sqrt(val)));
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, invert", async function() {
@@ -80,8 +82,9 @@ module.exports = perspective => {
                         let expected = results[x].map(val => 1 / val);
                         expected[0] = null;
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, pow", async function() {
@@ -103,8 +106,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.pow(val, 2));
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, bucket 10", async function() {
@@ -126,8 +130,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.floor(val / 10) * 10);
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, bucket 100", async function() {
@@ -149,8 +154,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.floor(val / 100) * 100);
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, bucket 1000", async function() {
@@ -172,8 +178,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.floor(val / 1000) * 1000);
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, bucket 1/10", async function() {
@@ -195,8 +202,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.floor(val / 0.1) * 0.1);
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, bucket 1/100", async function() {
@@ -218,8 +226,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.floor(val / 0.01) * 0.01);
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, bucket 1/1000", async function() {
@@ -240,8 +249,9 @@ module.exports = perspective => {
                         let results = await view.to_columns();
                         let expected = results[x].map(val => Math.floor(val / 0.001) * 0.001);
                         expect(results[name]).toEqual(expected);
-                        view.delete();
+                        await view.delete();
                     }
+                    await table.delete();
                 });
             });
 
@@ -261,8 +271,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.sqrt).toEqual([2, 3, 4, 4.47213595499958, 9, 31.622776601683793]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Square root of int, nulls", async function() {
@@ -281,8 +291,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.sqrt).toEqual([2, 3, null, null, 4]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Square root of float", async function() {
@@ -301,8 +311,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.sqrt).toEqual([2.1213203435596424, 3.082207001484488, 4.06201920231798, 4.527692569068709, 9.027735042633894, 31.63068130786942]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Square root of float, null", async function() {
@@ -321,8 +331,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.sqrt).toEqual([2.1213203435596424, 3.082207001484488, null, null, 4.06201920231798]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Pow^2 of int", async function() {
@@ -341,8 +351,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.pow2).toEqual([4, 16, 36, 64, 100]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Pow^2 of int, nulls", async function() {
@@ -361,8 +371,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.pow2).toEqual([4, 16, null, null, 100]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Pow^2 of float", async function() {
@@ -381,8 +391,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.pow2).toEqual([6.25, 20.25, 42.25, 72.25, 110.25]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Pow^2 of float, nulls", async function() {
@@ -401,8 +411,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.pow2).toEqual([6.25, 20.25, null, null, 110.25]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Invert int", async function() {
@@ -421,8 +431,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.invert).toEqual([0.5, 0.25, 0.16666666666666666, 0.125, 0.1]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Invert int, nulls", async function() {
@@ -441,8 +451,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.invert).toEqual([0.5, 0.25, null, null, 0.1]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Invert float", async function() {
@@ -461,8 +471,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.invert).toEqual([0.4, 0.2222222222222222, 0.15384615384615385, 0.11764705882352941, 0.09523809523809523]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Invert float, nulls", async function() {
@@ -481,8 +491,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result.invert).toEqual([0.4, 0.2222222222222222, null, null, 0.09523809523809523]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
         });
 
@@ -521,9 +531,10 @@ module.exports = perspective => {
                             }
 
                             expect(results[name]).toEqual(comparison);
-                            view.delete();
+                            await view.delete();
                         }
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, subtract", async function() {
@@ -559,9 +570,10 @@ module.exports = perspective => {
                             }
 
                             expect(results[name]).toEqual(comparison);
-                            view.delete();
+                            await view.delete();
                         }
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, multiply", async function() {
@@ -597,9 +609,10 @@ module.exports = perspective => {
                             }
 
                             expect(results[name]).toEqual(comparison);
-                            view.delete();
+                            await view.delete();
                         }
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, divide", async function() {
@@ -641,9 +654,10 @@ module.exports = perspective => {
                             }
 
                             expect(results[name]).toEqual(comparison);
-                            view.delete();
+                            await view.delete();
                         }
                     }
+                    await table.delete();
                 });
 
                 it("Should compute functions between all types, percent a of b", async function() {
@@ -678,9 +692,10 @@ module.exports = perspective => {
                                 expected = int_result;
                             }
                             expect(results[name]).toEqual(expected);
-                            view.delete();
+                            await view.delete();
                         }
                     }
+                    await table.delete();
                 });
             });
 
@@ -699,8 +714,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{sum: 2}, {sum: 4}, {sum: 6}, {sum: 8}]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, add floats", async function() {
@@ -718,8 +733,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{sum: 3}, {sum: 5}, {sum: 7}, {sum: 9}]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, add mixed", async function() {
@@ -737,8 +752,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{sum: 2.5}, {sum: 4.5}, {sum: 6.5}, {sum: 8.5}]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, add with null", async function() {
@@ -747,10 +762,12 @@ module.exports = perspective => {
                     b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
-                expect(await table.view().to_columns()).toEqual({
+                const full = table.view();
+                expect(await full.to_columns()).toEqual({
                     a: [1, 2, null, 3, 4],
                     b: [1.5, null, 2.5, 3.5, 4.5]
                 });
+                full.delete();
 
                 const view = table.view({
                     columns: ["sum"],
@@ -764,8 +781,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["sum"]).toEqual([2.5, null, null, 6.5, 8.5]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, subtract ints", async function() {
@@ -782,9 +799,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{difference: 1}, {difference: 1}, {difference: 1}, {difference: 1}]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, subtract floats", async function() {
@@ -801,8 +817,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{difference: 1}, {difference: 1}, {difference: 1}, {difference: 1}]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, subtract mixed", async function() {
@@ -819,8 +835,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{difference: 0.5}, {difference: 0.5}, {difference: 0.5}, {difference: 0.5}]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, subtract with null", async function() {
@@ -829,10 +845,12 @@ module.exports = perspective => {
                     b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
-                expect(await table.view().to_columns()).toEqual({
+                const full = await table.view();
+                expect(await full.to_columns()).toEqual({
                     a: [1, 2, null, 3, 4],
                     b: [1.5, null, 2.5, 3.5, 4.5]
                 });
+                full.delete();
 
                 const view = table.view({
                     columns: ["difference"],
@@ -846,8 +864,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["difference"]).toEqual([-0.5, null, null, -0.5, -0.5]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, multiply ints", async function() {
@@ -865,8 +883,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{multiply: 2}, {multiply: 6}, {multiply: 12}, {multiply: 20}]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, multiply floats", async function() {
@@ -884,9 +902,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{multiply: 3.75}, {multiply: 8.75}, {multiply: 15.75}, {multiply: 24.75}]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, multiply mixed", async function() {
@@ -904,9 +921,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{multiply: 1.5}, {multiply: 5}, {multiply: 10.5}, {multiply: 18}]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, multiply with null", async function() {
@@ -915,10 +931,12 @@ module.exports = perspective => {
                     b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
-                expect(await table.view().to_columns()).toEqual({
+                const full = await table.view();
+                expect(await full.to_columns()).toEqual({
                     a: [1, 2, null, 3, 4],
                     b: [1.5, null, 2.5, 3.5, 4.5]
                 });
+                full.delete();
 
                 const view = table.view({
                     columns: ["product"],
@@ -932,9 +950,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["product"]).toEqual([1.5, null, null, 10.5, 18]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, divide ints", async function() {
@@ -952,9 +969,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{divide: 2}, {divide: 1.5}, {divide: 1.3333333333333333}, {divide: 1.25}]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, divide floats", async function() {
@@ -971,9 +987,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{divide: 1.6666666666666667}, {divide: 1.4}, {divide: 1.2857142857142858}, {divide: 1.2222222222222223}]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, divide mixed", async function() {
@@ -990,9 +1005,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_json();
                 expect(result).toEqual([{divide: 1.5}, {divide: 1.25}, {divide: 1.1666666666666667}, {divide: 1.125}]);
-                view.delete();
-
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, divide with null", async function() {
@@ -1001,10 +1015,12 @@ module.exports = perspective => {
                     b: [1.5, undefined, 2.5, 3.5, 4.5]
                 });
 
-                expect(await table.view().to_columns()).toEqual({
+                const full = await table.view();
+                expect(await full.to_columns()).toEqual({
                     a: [1, 2, null, 3, 4],
                     b: [1.5, null, 2.5, 3.5, 4.5]
                 });
+                full.delete();
 
                 const view = table.view({
                     columns: ["divide"],
@@ -1018,8 +1034,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["divide"]).toEqual([0.6666666666666666, null, null, 0.8571428571428571, 0.8888888888888888]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, percent a of b, ints", async function() {
@@ -1039,8 +1055,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["%"]).toEqual([100, 75, 50, 25, 10, 1]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, percent a of b, floats", async function() {
@@ -1060,8 +1076,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["%"]).toEqual([33.33333333333333, 33.33333333333333, 33.33333333333333, 33.33333333333333, 33.33333333333333]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, percent a of b, mixed", async function() {
@@ -1081,8 +1097,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["%"]).toEqual([55.50000000000001, 65.5, 75.5, 85.5, 95.5]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
 
             it("Computed column of arity 2, percent a of b, with null", async function() {
@@ -1102,8 +1118,8 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["%"]).toEqual([100, null, 50, 25, null, 1]);
-                view.delete();
-                table.delete();
+                await view.delete();
+                await table.delete();
             });
         });
     });

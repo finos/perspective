@@ -24,7 +24,7 @@ const toformat_tests = require("./to_format.js");
 const sort_tests = require("./sort.js");
 const multiple_tests = require("./multiple.js");
 const pivot_nulls = require("./pivot_nulls.js");
-const computed = require("./computed.js");
+const computed_tests = require("./computed.js");
 const delete_tests = require("./delete.js");
 
 describe("perspective.js", function() {
@@ -41,7 +41,7 @@ describe("perspective.js", function() {
             sort_tests(RUNTIMES[mode], mode);
             multiple_tests(RUNTIMES[mode], mode);
             pivot_nulls(RUNTIMES[mode], mode);
-            computed(RUNTIMES[mode], mode);
+            computed_tests(RUNTIMES[mode], mode);
             delete_tests(RUNTIMES[mode], mode);
         });
     });
