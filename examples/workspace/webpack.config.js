@@ -19,7 +19,8 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            title: "Workspace Example"
+            title: "Workspace Example",
+            template: "./src/index.html"
         }),
         new PerspectivePlugin({})
     ],
