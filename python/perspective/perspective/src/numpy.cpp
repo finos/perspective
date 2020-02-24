@@ -171,6 +171,7 @@ namespace numpy {
          /**
          * Catch common type mismatches and fill iteratively when a numpy dtype is of greater bit width than the Perspective t_dtype:
          * - when `np_dtype` is int64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_FLOAT64`
+         * - when `np_dtype` is int32 and `t_dtype` is `DTYPE_INT64` or `DTYPE_FLOAT64`, which can happen on windows where np::int_ is int32
          * - when `np_dtype` is float64 and `t_dtype` is `DTYPE_INT32` or `DTYPE_INT64`
          * - when `type` is float64 and `np_dtype` is `DTYPE_FLOAT32` or `DTYPE_FLOAT64`
          * 
@@ -178,6 +179,7 @@ namespace numpy {
          * In these cases, the `t_dtype` of the Table supercedes the array dtype.
          */
         bool should_iter = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_INT32 && (type == DTYPE_INT64 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
 
@@ -238,13 +240,13 @@ namespace numpy {
             }
 
             double fval = item.cast<double>();
-            if (fval > 2147483647 || fval < -2147483648) {
+            if (!is_update && (fval > 2147483647 || fval < -2147483648)) {
                 binding::WARN("Promoting column `%s` to float from int32", name);
                 tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                 col = tbl.get_column(name);
                 type = DTYPE_FLOAT64;
                 col->set_nth(i, fval);
-            } else if (isnan(fval)) {
+            } else if (!is_update && isnan(fval)) {
                 binding::WARN("Promoting column `%s` to string from int32", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -423,6 +425,7 @@ namespace numpy {
 
         // We fill by object when `np_dtype`=object, or if there are type mismatches between `np_dtype` and `type`.
         bool types_mismatched = (np_dtype == DTYPE_INT64 && (type == DTYPE_INT32 || type == DTYPE_FLOAT64)) || \
+            (np_dtype == DTYPE_INT32 && (type == DTYPE_INT64 || type == DTYPE_FLOAT64)) || \
             (np_dtype == DTYPE_FLOAT64 && (type == DTYPE_INT32 || type == DTYPE_INT64)) || \
             (type == DTYPE_INT64 && (np_dtype == DTYPE_FLOAT32 || np_dtype == DTYPE_FLOAT64));
 

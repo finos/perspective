@@ -6,12 +6,14 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import six
+import os
 import numpy as np
 import pandas as pd
 import pytz
 from io import StringIO
 from datetime import date, datetime
 from perspective.table import Table
+IS_WIN = os.name == 'nt'
 
 
 class TestToFormat(object):
@@ -604,21 +606,33 @@ class TestToFormat(object):
         tbl = Table(df)
         view = tbl.view()
         if six.PY2:
-            assert view.to_csv() == ",a,b,index\n0,1,2,0\n1,3,4,1\n"
+            if IS_WIN:
+                assert view.to_csv() == ",a,b,index\r\n0,1,2,0\r\n1,3,4,1\r\n"
+            else:
+                assert view.to_csv() == ",a,b,index\n0,1,2,0\n1,3,4,1\n"
         else:
-            assert view.to_csv() == ",index,a,b\n0,0,1,2\n1,1,3,4\n"
+            if IS_WIN:
+                assert view.to_csv() == ",index,a,b\r\n0,0,1,2\r\n1,1,3,4\r\n"
+            else:
+                assert view.to_csv() == ",index,a,b\n0,0,1,2\n1,1,3,4\n"
 
     def test_to_csv_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,1,2\n1,3,4\n"
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,1,2\r\n1,3,4\r\n"
+        else:
+            assert view.to_csv() == ",a,b\n0,1,2\n1,3,4\n"
 
     def test_to_csv_float(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,1.5,2.5\n1,3.5,4.5\n"
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,1.5,2.5\r\n1,3.5,4.5\r\n"
+        else:
+            assert view.to_csv() == ",a,b\n0,1.5,2.5\n1,3.5,4.5\n"
 
     def test_to_csv_date(self):
         today = date.today()
@@ -627,7 +641,10 @@ class TestToFormat(object):
         tbl = Table(data)
         assert tbl.schema()["a"] == date
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+        else:
+            assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_date_ignore_custom_format(self):
         today = date.today()
@@ -637,7 +654,10 @@ class TestToFormat(object):
         assert tbl.schema()["a"] == date
         view = tbl.view()
         # date_format only applies to `datetime`
-        assert view.to_csv(date_format="%Y") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+        if IS_WIN:
+            assert view.to_csv(date_format="%Y") == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+        else:
+            assert view.to_csv(date_format="%Y") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_datetime(self):
         dt = datetime(2019, 3, 15, 20, 30, 59, 6000)
@@ -645,7 +665,10 @@ class TestToFormat(object):
         data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+        else:
+            assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_datetime_custom_format(self):
         dt = datetime(2019, 3, 15, 20, 30, 59, 6000)
@@ -653,43 +676,64 @@ class TestToFormat(object):
         data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv(date_format="%H:%M:%S") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+        if IS_WIN:
+            assert view.to_csv(date_format="%H:%M:%S") == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+        else:
+            assert view.to_csv(date_format="%H:%M:%S") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_bool(self):
         data = [{"a": True, "b": False}, {"a": True, "b": False}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,True,False\n1,True,False\n"
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,True,False\r\n1,True,False\r\n"
+        else:
+            assert view.to_csv() == ",a,b\n0,True,False\n1,True,False\n"
 
     def test_to_csv_string(self):
         data = [{"a": "string1", "b": "string2"}, {"a": "string3", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,string1,string2\n1,string3,string4\n"
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,string1,string2\r\n1,string3,string4\r\n"
+        else:
+            assert view.to_csv() == ",a,b\n0,string1,string2\n1,string3,string4\n"
 
     def test_to_csv_none(self):
         data = [{"a": None, "b": None}, {"a": None, "b": None}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv() == ",a,b\n0,,\n1,,\n"
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,,\r\n1,,\r\n"
+        else:
+            assert view.to_csv() == ",a,b\n0,,\n1,,\n"
 
     def test_to_csv_custom_rows(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv(start_row=1) == ",a,b\n0,3,4\n"
+        if IS_WIN:
+            assert view.to_csv(start_row=1) == ",a,b\r\n0,3,4\r\n"
+        else:
+            assert view.to_csv(start_row=1) == ",a,b\n0,3,4\n"
 
     def test_to_csv_custom_cols(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv(start_col=1) == ",b\n0,2\n1,4\n"
+        if IS_WIN:
+            assert view.to_csv(start_col=1) == ",b\r\n0,2\r\n1,4\r\n"
+        else:
+            assert view.to_csv(start_col=1) == ",b\n0,2\n1,4\n"
 
     def test_to_csv_custom_rows_cols(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.to_csv(start_row=1, start_col=1) == ",b\n0,4\n"
+        if IS_WIN:
+            assert view.to_csv(start_row=1, start_col=1) == ",b\r\n0,4\r\n"
+        else:
+            assert view.to_csv(start_row=1, start_col=1) == ",b\n0,4\n"
 
     def test_to_csv_one(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -698,9 +742,15 @@ class TestToFormat(object):
             row_pivots=["a"]
         )
         if six.PY2:
-            assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,[u'1'],2,4\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__,a,b\r\n0,[],2,4\r\n1,[u'1'],2,4\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,[u'1'],2,4\n"
         else:
-            assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,['1'],2,4\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__,a,b\r\n0,[],2,4\r\n1,['1'],2,4\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,['1'],2,4\n"
 
     def test_to_csv_two(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -710,9 +760,15 @@ class TestToFormat(object):
             column_pivots=["b"]
         )
         if six.PY2:
-            assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\n0,2,4,[]\n1,2,4,[u'1']\n"
+            if IS_WIN:
+                assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\r\n0,2,4,[]\r\n1,2,4,[u'1']\r\n"
+            else:
+                assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\n0,2,4,[]\n1,2,4,[u'1']\n"
         else:
-            assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\n0,[],2,4\n1,['1'],2,4\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\r\n0,[],2,4\r\n1,['1'],2,4\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\n0,[],2,4\n1,['1'],2,4\n"
 
     def test_to_csv_column_only(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -720,7 +776,10 @@ class TestToFormat(object):
         view = tbl.view(
             column_pivots=["b"]
         )
-        assert view.to_csv() == ",2|a,2|b\n0,1,2\n1,1,2\n"
+        if IS_WIN:
+            assert view.to_csv() == ",2|a,2|b\r\n0,1,2\r\n1,1,2\r\n"
+        else:
+            assert view.to_csv() == ",2|a,2|b\n0,1,2\n1,1,2\n"
 
     def test_to_csv_one_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -730,9 +789,15 @@ class TestToFormat(object):
             columns=[]
         )
         if six.PY2:
-            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[u'1']\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
         else:
-            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,['1']\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
 
     def test_to_csv_two_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -743,9 +808,15 @@ class TestToFormat(object):
             columns=[]
         )
         if six.PY2:
-            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[u'1']\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
         else:
-            assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
+            if IS_WIN:
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,['1']\r\n"
+            else:
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
 
     def test_to_csv_column_only_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -754,7 +825,11 @@ class TestToFormat(object):
             column_pivots=["b"],
             columns=[]
         )
-        assert view.to_csv() == '""\n'
+
+        if IS_WIN:
+            assert view.to_csv() == '""\r\n'
+        else:
+            assert view.to_csv() == '""\n'
 
     # implicit index
 
