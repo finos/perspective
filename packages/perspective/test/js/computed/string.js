@@ -89,6 +89,34 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it.skip("Uppercase, non-utf8", async function() {
+            const table = perspective.table({
+                a: ["𝕙ḗľᶅở щṏᵲɭⅾ", "𝓊⋁ẅ⤫𝛾𝓏", null],
+                b: ["𝕙ḗľᶅở щṏᵲɭⅾ", "𝑢ⱴⱳẍ𝘺𝘇ӑṣᶑᵴ", "EfG"]
+            });
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "upper1",
+                        computed_function_name: "Uppercase",
+                        inputs: ["a"]
+                    },
+                    {
+                        column: "upper2",
+                        computed_function_name: "Uppercase",
+                        inputs: ["b"]
+                    }
+                ]
+            });
+            let result = await view.to_columns();
+            let expected1 = result.upper1.map(x => (x ? x.toUpperCase() : null));
+            let expected2 = result.upper2.map(x => (x ? x.toUpperCase() : null));
+            expect(result.upper1).toEqual(expected1);
+            expect(result.upper2).toEqual(expected2);
+            view.delete();
+            table.delete();
+        });
+
         it("Lowercase", async function() {
             const table = perspective.table({
                 a: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"]
@@ -123,6 +151,34 @@ module.exports = perspective => {
             });
             let result = await view.to_columns();
             expect(result.computed).toEqual(result.a.map(x => (x ? x.toLowerCase() : null)));
+            view.delete();
+            table.delete();
+        });
+
+        it("Lowercase, non-utf8", async function() {
+            const table = perspective.table({
+                a: ["𝕙ḗľᶅở щṏᵲɭⅾ", "𝓊⋁ẅ⤫𝛾𝓏", null],
+                b: ["𝕙ḗľᶅở щṏᵲɭⅾ", "𝑢ⱴⱳẍ𝘺𝘇ӑṣᶑᵴ", "EfG"]
+            });
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "lower1",
+                        computed_function_name: "Lowercase",
+                        inputs: ["a"]
+                    },
+                    {
+                        column: "lower2",
+                        computed_function_name: "Lowercase",
+                        inputs: ["b"]
+                    }
+                ]
+            });
+            let result = await view.to_columns();
+            let expected1 = result.lower1.map(x => (x ? x.toLowerCase() : null));
+            let expected2 = result.lower2.map(x => (x ? x.toLowerCase() : null));
+            expect(result.lower1).toEqual(expected1);
+            expect(result.lower2).toEqual(expected2);
             view.delete();
             table.delete();
         });

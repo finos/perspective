@@ -82,7 +82,76 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Dependent column appends should notify computed columns, arity 2.", async function() {
+        it("Dependent column appends with missing columns should notify computed columns, arity 1", async function() {
+            const table = perspective.table({
+                x: [1, 2, 3, 4],
+                y: [1.5, 2.5, 3.5, 4.5],
+                z: ["a", "b", "c", "d"]
+            });
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "upper",
+                        computed_function_name: "Uppercase",
+                        inputs: ["z"]
+                    }
+                ]
+            });
+            const before = await view.to_columns();
+            expect(before["upper"]).toEqual(["A", "B", "C", "D"]);
+
+            // `z` is missing in the update, so it should render as null
+            table.update({x: [2, 4], y: [10.5, 12.5]});
+
+            const after = await view.to_columns();
+            expect(after).toEqual({
+                x: [1, 2, 3, 4, 2, 4],
+                y: [1.5, 2.5, 3.5, 4.5, 10.5, 12.5],
+                z: ["a", "b", "c", "d", null, null],
+                upper: ["A", "B", "C", "D", null, null]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("Dependent column update appends should notify computed columns, pivoted arity 1", async function() {
+            const table = perspective.table({
+                x: [1, 2, 3, 4],
+                y: ["A", "B", "C", "C"]
+            });
+            const view = table.view({
+                row_pivots: ["lowercase"],
+                computed_columns: [
+                    {
+                        column: "lowercase",
+                        computed_function_name: "Lowercase",
+                        inputs: ["y"]
+                    }
+                ]
+            });
+
+            const before = await view.to_columns();
+            expect(before).toEqual({
+                __ROW_PATH__: [[], ["a"], ["b"], ["c"]],
+                lowercase: [4, 1, 1, 2],
+                x: [10, 1, 2, 7],
+                y: [4, 1, 1, 2]
+            });
+
+            table.update({y: ["HELLO", "WORLD"]});
+
+            const after = await view.to_columns();
+            expect(after).toEqual({
+                __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["hello"], ["world"]],
+                lowercase: [6, 1, 1, 2, 1, 1],
+                x: [10, 1, 2, 7, 0, 0],
+                y: [6, 1, 1, 2, 1, 1]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("Dependent column appends should notify computed columns, arity 2", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
                 computed_columns: [
@@ -104,7 +173,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Dependent column updates on all column updates should notify computed columns, arity 2.", async function() {
+        it("Dependent column updates on all column updates should notify computed columns, arity 2", async function() {
             const table = perspective.table(common.int_float_data, {index: "x"});
             const view = table.view({
                 computed_columns: [
@@ -137,7 +206,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Dependent column appends should notify computed columns on different views, arity 2.", async function() {
+        it("Dependent column appends should notify computed columns on different views, arity 2", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
                 computed_columns: [
@@ -707,6 +776,8 @@ module.exports = perspective => {
                 subtract: [0, 0, 0, 0]
             });
 
+            view3.delete();
+            view2.delete();
             view.delete();
             table.delete();
         });
@@ -767,19 +838,21 @@ module.exports = perspective => {
                 y: [2, 4, 6, 8, 1, 2, 3, 4],
                 subtract: [-1, -2, -3, -4, 0, 0, 0, 0]
             });
+
+            view3.delete();
+            view2.delete();
             view.delete();
             table.delete();
         });
     });
 
-    describe.skip("Computed updates with row pivots", function() {
-        // TODO: partial updates do not work when pivoting on the computed column
+    describe("Computed updates with row pivots", function() {
         it("should update on dependent columns, add", async function() {
             const table = perspective.table(pivot_data);
             const view = table.view({
                 columns: ["computed", "int"],
                 aggregates: {
-                    computed: "avg"
+                    computed: "sum"
                 },
                 row_pivots: ["computed"],
                 computed_columns: [
@@ -791,32 +864,17 @@ module.exports = perspective => {
                 ]
             });
 
-            table.update({int: [15], __INDEX__: [2]});
+            table.update({int: [4], __INDEX__: [0]});
 
             let results = await view.to_columns({
                 index: true
             });
-            console.log(
-                await table
-                    .view({
-                        columns: ["computed", "int"],
-                        computed_columns: [
-                            {
-                                column: "computed",
-                                computed_function_name: "+",
-                                inputs: ["int", "float"]
-                            }
-                        ]
-                    })
-                    .to_columns()
-            );
-            console.log(results);
 
             expect(results).toEqual({
-                __ROW_PATH__: [[], [6.25], [7.75], [9.25], [17.25]],
-                int: [13, 4, 2, 3, 4],
+                __ROW_PATH__: [[], [5.5], [6.25], [7.75], [9.25]],
+                int: [13, 2, 4, 3, 4],
                 computed: [28.75, 5.5, 6.25, 7.75, 9.25],
-                __INDEX__: [[1, 0, 2, 3], [1], [0], [2], [3]]
+                __INDEX__: [[0, 3, 2, 1], [1], [0], [2], [3]]
             });
 
             view.delete();

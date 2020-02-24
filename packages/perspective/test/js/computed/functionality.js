@@ -234,6 +234,7 @@ module.exports = perspective => {
                 "float - int": [0.5, 0.5, 0.5, 0.5]
             });
 
+            view2.delete();
             table.delete();
         });
 

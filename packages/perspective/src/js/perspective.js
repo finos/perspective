@@ -997,7 +997,7 @@ export default function(Module) {
      */
     table.prototype.delete = function() {
         if (this.views.length > 0) {
-            throw "Table still has contexts - refusing to delete.";
+            throw `Cannot delete Table as it still has ${this.views.length} registered View(s).`;
         }
         _remove_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
