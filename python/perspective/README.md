@@ -10,45 +10,47 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 ## Install
 
+`perspective-python` can be installed from [pypi](https://pypi.python.org/pypi/perspective-python) with `pip`:
+
+```bash
+pip install -v perspective-python
+```
+
+Because `perspective-python` is a C++ library at its core, the installation process is a little more
+complex than pure-Python projects. When submitting issues on [GitHub](https://github.com/finos/perspective)
+related to installation/dependencies, please make sure to include the verbose logs from `pip install -v`.
+
+Wheels are currently distributed for:
+
+- MacOS (Python 3.7, Python 2.7)
+
+For Linux and Windows, source distributions are available from `PyPi`. For proper installation of the source distribution
+(as it requires your machine to build the C++ extension), make sure the following dependencies are installed:
+
+- [CMake](https://cmake.org/)
+- A C++ compiler (platform-dependent)
+  - On Windows, use Microsoft Visual Studio 2017 (MSVC 14.1).
+
 ### Dependencies
 
-`PyArrow==0.15.1` and `Numpy` are required build-time dependencies, and can both be installed via `pip`.
+`pyarrow==0.15.1` is a build dependency and **must be installed before installing Perspective**:
 
-`pip install pyarrow==0.15.1`
+```bash
+pip install pyarrow==0.15.1
+```
 
-It is recommended to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
+All other dependencies (Python and C++) will be installed as part of the `pip install` process.
 
-On MacOs:
+### Jupyterlab Extension
 
-`brew install tbb`
+To use `perspective-python` in JupyterLab, make sure `perspective-python` has already been
+installed successfully from `pip`.
 
-On CentOS/RHEL:
-
-`yum install tbb-devel`
-
-On Ubuntu:
-
-`apt-get install libtbb-dev`
-
-On Windows:
-
-`choco install tbb`
-
-Or install from source.
-
-All other dependencies will be vendored if missing as part of Perspective's CMake build, but you can install them yourself and CMake will detect them via the usual mechanisms. 
-
-### Installation
-
-To install the base package from pip:
-
-`pip install perspective-python`
-
-To install the JupyterLab extension:
+Afterwards, install the extension from Jupyter's extension registry:
 
 `jupyter labextension install @finos/perspective-jupyterlab`
 
-## Getting Started
+## Documentation
 
 [Python User Guide](https://perspective.finos.org/docs/md/python.html)
 [Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
@@ -56,24 +58,16 @@ To install the JupyterLab extension:
 
 ## Developing
 
-To build `perspective-python` from source, you'll need the following C++ dependencies:
+To develop `perspective-python`, additional C++ dependencies are required (on top of CMake and a C++ compiler):
 
-- Python 3.7
-- numpy
-- CMake
+- boost
 - PyBind11
 - tbb
 
 On MacOS, you should be able to install Boost, PyBind11, and tbb from brew:
 
 ```shell
-brew install pybind11 tbb
-```
-
-And then install Python dependencies using pip:
-
-```shell
-python3 -m pip install -r requirements-dev.txt
+brew install boost pybind11 tbb
 ```
 
 Then run `yarn build`, and if a `.perspectiverc` config file has not been created yet, you'll be taken through the `yarn setup` script. On the `Focus` section, type `p` for python, and continue through the script. Run `yarn build` again, and the python build should begin.
@@ -83,4 +77,5 @@ If you already have a `.perspectiverc` and want to reset your build configuratio
 Once the build successfully completes, run `yarn test_python` from the project root in order to verify operation.
 
 ### Windows
-By default, perspective attempts to build utilizing Microsoft Visual Studio 2017 (MSVC 14.1). You may change this to older versions by editing `setup.py`.
+
+By default, `perspective-python` attempts to build utilizing Microsoft Visual Studio 2017 (MSVC 14.1). You may change this to an older version by editing `setup.py`.
