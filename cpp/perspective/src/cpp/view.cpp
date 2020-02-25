@@ -82,10 +82,18 @@ View<CTX_T>::~View() {
     auto pool = m_table->get_pool();
     auto gnode = m_table->get_gnode();
     auto gnode_data_table = gnode->get_table_sptr();
+    std::vector<std::string> computed_column_names;
     for (const auto& computed : m_computed_columns) {
         // Frees underlying memory for the column and invalidates it
-        gnode_data_table->drop_column(std::get<0>(computed));
+        // FIXME: What happens when two views share a computed column?
+        std::string name = std::get<0>(computed);
+        gnode_data_table->drop_column(name);
+        computed_column_names.push_back(name);
     }
+    // FIXME: we will have to call this on intermediates, so it should be a
+    // Gnode convenience method
+    // gnode->reindex_all_tables(computed_column_names);
+    // gnode_data_table->reindex(computed_column_names);
     // TODO: add index shifting ability
     // Removes context from pool and gnode, thus removing its computed columns
     pool->unregister_context(gnode->get_id(), m_name);

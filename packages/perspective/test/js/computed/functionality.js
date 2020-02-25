@@ -271,6 +271,85 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("When computed columns are repeated between views, column indices should grow linearly.", async function() {
+            let computed = [
+                {
+                    column: "float + int",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "float - int",
+                    computed_function_name: "-",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "float * int",
+                    computed_function_name: "*",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "float / int",
+                    computed_function_name: "/",
+                    inputs: ["w", "x"]
+                }
+            ];
+            const table = perspective.table(common.int_float_data);
+            const view = table.view({computed_columns: [computed[0]]});
+            const view2 = table.view({computed_columns: [computed[0], computed[1]]});
+            const view3 = table.view({computed_columns: [computed[0], computed[1], computed[2]]});
+            const view4 = table.view({computed_columns: computed});
+
+            const schema = await view.schema();
+            const schema2 = await view2.schema();
+            const schema3 = await view3.schema();
+            const schema4 = await view4.schema();
+
+            expect(schema).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "float + int": "float"
+            });
+
+            expect(schema2).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "float + int": "float",
+                "float - int": "float"
+            });
+
+            expect(schema3).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "float + int": "float",
+                "float - int": "float",
+                "float * int": "float"
+            });
+
+            expect(schema4).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "float + int": "float",
+                "float - int": "float",
+                "float * int": "float",
+                "float / int": "float"
+            });
+
+            view4.delete();
+            view3.delete();
+            view2.delete();
+            view.delete();
+            table.delete();
+        });
+
         it.skip("Should be able to create multiple computed column in multiple `view()`s with the same name", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
