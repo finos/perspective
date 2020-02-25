@@ -236,6 +236,9 @@ t_gnode::_process_table() {
     m_was_updated = true;
     std::shared_ptr<t_data_table> flattened(iport->get_table()->flatten());
 
+    PSP_GNODE_VERIFY_TABLE(flattened);
+    PSP_GNODE_VERIFY_TABLE(get_table());
+
     t_uindex flattened_num_rows = flattened->num_rows();
 
     std::vector<t_rlookup> row_lookup(flattened_num_rows);
@@ -256,6 +259,11 @@ t_gnode::_process_table() {
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
         release_outputs();
+
+    #ifdef PSP_GNODE_VERIFY
+        auto state_table = get_table();
+        PSP_GNODE_VERIFY_TABLE(state_table);
+    #endif
         return nullptr;
     }
 
@@ -377,8 +385,23 @@ t_gnode::_process_table() {
             _process_state.m_flattened_data_table->clone(existed_mask);
     }
 
+    PSP_GNODE_VERIFY_TABLE(flattened_masked);
+
+    #ifdef PSP_GNODE_VERIFY
+    {
+        auto updated_table = get_table();
+        PSP_GNODE_VERIFY_TABLE(updated_table);
+    }
+    #endif
+
     m_gstate->update_master_table(flattened_masked.get());
 
+    #ifdef PSP_GNODE_VERIFY
+    {
+        auto updated_table = get_table();
+        PSP_GNODE_VERIFY_TABLE(updated_table);
+    }
+    #endif
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
     return flattened_masked;
 }

@@ -44,6 +44,12 @@ class t_ctx1;
 class t_ctx2;
 class t_ctx_grouped_pkey;
 
+#ifdef PSP_GNODE_VERIFY
+#define PSP_GNODE_VERIFY_TABLE(X) (X)->verify()
+#else
+#define PSP_GNODE_VERIFY_TABLE(X)
+#endif
+
 class PERSPECTIVE_EXPORT t_gnode {
 public:
     /**
