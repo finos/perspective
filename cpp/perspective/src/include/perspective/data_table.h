@@ -140,19 +140,32 @@ public:
     t_column* add_column(
         const std::string& cname, t_dtype dtype, bool status_enabled);
 
-    /**
-     * @brief Given a column name, clear the underlying column but do not
-     * mutate the `t_data_table` instance's `m_schema` and `m_columns`.
-     * 
-     * @param name 
-     */
-    void drop_column(const std::string& name);
-
     void promote_column(
         const std::string& cname, t_dtype new_dtype, std::int32_t iter_limit, bool fill);
 
     std::shared_ptr<t_column> make_column(
         const std::string& colname, t_dtype dtype, bool status_enabled);
+
+    /**
+     * @brief Given a column name, clear the underlying column but do not
+     * mutate the `t_data_table` instance's `m_schema` and `m_columns`. Use
+     * `t_data_table::reindex` with a vector of column names signifying
+     * dropped columns that can be cleared by mutating `m_schema` and
+     * `m_columns`.
+     * 
+     * @param name 
+     */
+    void drop_column(const std::string& name);
+
+    /**
+     * @brief Given a vector of column names marking dropped columns,
+     * mutate the instance's `m_schema` and `m_columns` to ensure that column
+     * indices belonging to deleted columns are dropped, and that new column
+     * indices are assigned sequentially.
+     * 
+     * @param dropped_columns 
+     */
+    void reindex(const std::vector<std::string&> dropped_columns);
 
     void verify() const;
     void set_capacity(t_uindex idx);
