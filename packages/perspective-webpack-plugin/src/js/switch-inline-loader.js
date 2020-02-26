@@ -7,12 +7,15 @@
  *
  */
 
+const path = require("path");
+
 exports.default = function pitch(request) {
     return request;
 };
 
 exports.pitch = function(request) {
-    return `module.exports = require("${request.replace("umd/perspective.inline", "esm/perspective.parallel")}");`;
+    const new_path = request.replace(/umd[/\\]perspective.inline/, path.join("esm", "perspective.parallel")).replace(/\\/g, "\\\\");
+    return `module.exports = require("${new_path}");`;
 };
 
 exports.raw = true;

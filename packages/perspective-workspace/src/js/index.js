@@ -106,7 +106,8 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * `Table`s themselves must be added to the `tables` property `Map()`
      * separately.
      *
-     * @return {Object} A configuration token, compatible with `restore(config)`.
+     * @return {Object} A configuration token, compatible with
+     * `restore(config)`.
      * @example
      * // Save this layout to local storage
      * const workspace = document.querySelector("perspective-workspace");

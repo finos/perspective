@@ -367,12 +367,13 @@ export default function(Module) {
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
         const hidden = this._num_hidden();
+        const psp_offset = this.sides() > 0 || this.column_only ? 1 : 0;
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
         const end_row = Math.min(max_rows, options.end_row !== undefined ? options.end_row : viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
+        const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col + psp_offset : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
 
         // Return the calculated values
         options.start_row = start_row;
