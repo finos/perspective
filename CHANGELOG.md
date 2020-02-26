@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.4] (2020-02-26)
+
+#### Fixed
+  * [#948](https://github.com/finos/perspective/pull/948) Fixes off-by-one error in `end_col` ([@texodus](https://github.com/texodus))
+  * [#946](https://github.com/finos/perspective/pull/946) Fix tables `delete` bug in `perspective-workspace` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#934](https://github.com/finos/perspective/pull/934) Fix widget title in `perspective-workspace` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#924](https://github.com/finos/perspective/pull/924) Fix `perspective-workspace` initialize bug ([@zemeolotu](https://github.com/zemeolotu))
+  * [#925](https://github.com/finos/perspective/pull/925) Fix `perspective-workspace` non-unique generated slotid bug ([@zemeolotu](https://github.com/zemeolotu))
+  * [#947](https://github.com/finos/perspective/pull/947) Closes [#945](https://github.com/finos/perspective/issues/945): Improve Python install docs ([@sc1f](https://github.com/sc1f))
+  * [#943](https://github.com/finos/perspective/pull/943) Deal with np.int_ on Windows, handle missing __INDEX__ ([@timkpaine](https://github.com/timkpaine))
+  * [#948](https://github.com/finos/perspective/pull/948) Fixes off-by-one error in `end_col` ([@texodus](https://github.com/texodus))
+
+#### Internal
+  * [#927](https://github.com/finos/perspective/pull/927) Remove some stale code ([@timkpaine](https://github.com/timkpaine))
+  * [#930](https://github.com/finos/perspective/pull/930) Package/dist license in python package ([@timkpaine](https://github.com/timkpaine))
+  * [#923](https://github.com/finos/perspective/pull/923) Fix for #921: unifies versioning between JS and Python libraries ([@sc1f](https://github.com/sc1f))
+  * [#920](https://github.com/finos/perspective/pull/920) Adds test coverage reporting for`@finos/perspective` ([@texodus](https://github.com/texodus))
+
 ## [0.4.3] (2020-02-12)
 
 #### Fixed
