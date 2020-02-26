@@ -218,7 +218,7 @@ t_ctx1::notify(const t_data_table& flattened, const t_data_table& delta,
     psp_log_time(repr() + " notify.enter");
     notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
         m_config.get_sortby_pairs(), m_sortby, flattened, delta, prev, current, transitions,
-        existed, m_config, *m_state);
+        existed, m_config, *m_gstate);
     psp_log_time(repr() + " notify.exit");
 }
 
@@ -526,7 +526,7 @@ t_ctx1::notify(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
-        m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_state);
+        m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_gstate);
 }
 
 void

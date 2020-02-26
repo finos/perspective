@@ -28,8 +28,6 @@ public:
 
 #include <perspective/context_common_decls.h>
 
-    // ASGGrid data interface
-
     t_index open(t_header header, t_index idx);
     t_index open(t_index idx);
     t_index close(t_index idx);

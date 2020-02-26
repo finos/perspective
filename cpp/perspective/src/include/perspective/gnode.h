@@ -20,6 +20,7 @@
 #include <perspective/rlookup.h>
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
+#include <perspective/process_state.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -38,21 +39,6 @@ PERSPECTIVE_EXPORT t_tscalar calc_newer(
 
 PERSPECTIVE_EXPORT t_tscalar calc_negate(t_tscalar val);
 
-struct PERSPECTIVE_EXPORT t_gnode_recipe {
-    t_gnode_recipe() {}
-    t_gnode_processing_mode m_mode;
-    t_gnode_type m_gnode_type;
-    t_schema_recipe m_tblschema;
-    std::vector<t_schema_recipe> m_ischemas;
-    std::vector<t_schema_recipe> m_oschemas;
-    t_custom_column_recipevec m_custom_columns;
-};
-
-struct PERSPECTIVE_EXPORT t_gnode_options {
-    t_gnode_type m_gnode_type;
-    t_schema m_port_schema;
-};
-
 class t_ctx0;
 class t_ctx1;
 class t_ctx2;
@@ -66,15 +52,29 @@ class t_ctx_grouped_pkey;
 
 class PERSPECTIVE_EXPORT t_gnode {
 public:
-    static std::shared_ptr<t_gnode> build(const t_gnode_options& options);
-    t_gnode(const t_gnode_recipe& recipe);
-    t_gnode(const t_gnode_options& options);
-    t_gnode(const t_schema& tblschema, const t_schema& port_schema);
-    t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
-        const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
-        const std::vector<t_custom_column>& custom_columns);
+    /**
+     * @brief Construct a new `t_gnode`. A `t_gnode` manages the accumulated
+     * internal state of a `Table` - it handles updates, calculates the
+     * transition state between each `update()` call, and manages/notifies
+     * contexts (`View`s) created from the `Table`.
+     * 
+     * A `t_gnode` is created with two `t_schema`s:
+     * 
+     * `input_schema`: the canonical `t_schema` for the `Table`, which cannot
+     * be mutated after creation. This schema contains the `psp_pkey` and
+     * `psp_op` columns, which are used internally.
+     * 
+     * `output_schema`: the `t_schema` that contains all columns provided
+     * by the dataset, excluding `psp_pkey` and `psp_op`.
+     * 
+     * @param input_schema 
+     * @param output_schema 
+     */
+    t_gnode(const t_schema& input_schema, const t_schema& output_schema);
     ~t_gnode();
+
     void init();
+    void reset();
 
     // send data to input port with at index idx
     // schema should match port schema
@@ -82,26 +82,22 @@ public:
     void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
-    void _process_self();
+
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
 
-    void begin_step();
-    void end_step();
+    const t_data_table* get_table() const;
+    t_data_table* get_table();
 
-    void update_history(const t_data_table* tbl);
+    std::shared_ptr<t_data_table> get_table_sptr();
 
     t_data_table* _get_otable(t_uindex portidx);
     t_data_table* _get_itable(t_uindex portidx);
-    t_data_table* get_table();
-    const t_data_table* get_table() const;
-    std::shared_ptr<t_data_table> get_table_sptr();
 
-    void pprint() const;
-    std::vector<std::string> get_registered_contexts() const;
-    t_schema get_tblschema() const;
+    t_schema get_output_schema() const;
+    const t_schema& get_state_input_schema() const;
+
     std::vector<t_pivot> get_pivots() const;
-
     std::vector<t_stree*> get_trees();
 
     void set_id(t_uindex id);
@@ -109,10 +105,9 @@ public:
 
     void release_inputs();
     void release_outputs();
+    std::vector<std::string> get_registered_contexts() const;
     std::vector<std::string> get_contexts_last_updated() const;
 
-    void reset();
-    std::string repr() const;
     void clear_input_ports();
     void clear_output_ports();
 
@@ -128,17 +123,11 @@ public:
 
     std::vector<t_custom_column> get_custom_columns() const;
 
-    t_gnode_recipe get_recipe() const;
-    bool has_python_dep() const;
     void set_pool_cleanup(std::function<void()> cleanup);
-    const t_schema& get_port_schema() const;
     bool was_updated() const;
     void clear_updated();
 
     t_uindex mapping_size() const;
-
-    // helper function for tests
-    std::shared_ptr<t_data_table> tstep(std::shared_ptr<const t_data_table> input_table);
 
     // helper function for JS interface
     void promote_column(const std::string& name, t_dtype new_type);
@@ -151,11 +140,12 @@ public:
 
     std::vector<t_computed_column_lambda> get_computed_lambdas() const;
 
+    void pprint() const;
+    std::string repr() const;
 protected:
     void recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs);
     void append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas);
 
-    bool have_context(const std::string& name) const;
     void notify_contexts(const t_data_table& flattened);
 
     template <typename CTX_T>
@@ -166,55 +156,111 @@ protected:
         const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
         const t_data_table& existed);
 
+    /**
+     * @brief Given `tbl`, notify each registered context with `tbl`.
+     * 
+     * @param tbl 
+     */
+    void _update_contexts_from_state(const t_data_table& tbl);
+
+    /**
+     * @brief Notify a single registered `ctx` with `tbl`.
+     * 
+     * @tparam CTX_T 
+     * @param ctx 
+     * @param tbl 
+     */
     template <typename CTX_T>
     void update_context_from_state(CTX_T* ctx, const t_data_table& tbl);
 
+    /**
+     * @brief Provide the registered `t_ctx*` with a pointer to this gnode's
+     * `m_gstate` object. `t_ctx*` are assumed to access/mutate this state
+     * object arbitrarily at runtime.
+     * 
+     * @tparam CTX_T 
+     * @param ptr 
+     */
     template <typename CTX_T>
     void set_ctx_state(void* ptr);
 
-    template <typename DATA_T>
-    void _process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
-        std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
-        std::vector<t_uindex>& added_vec);
+    /**
+     * @brief Given the process state, create a `t_mask` bitset set to true for
+     * all rows in `flattened`, UNLESS the row is an `OP_DELETE`.
+     * 
+     * Mutates the `t_process_state` object that is passed in.
+     * 
+     * @param process_state
+     */
+    t_mask _process_mask_existed_rows(t_process_state& process_state);
 
+    /**
+     * @brief Given a flattened column, the master column from `m_gstate`, and
+     * all transitional columns containing metadata, process and calculate
+     * transitional values.
+     * 
+     * @tparam DATA_T 
+     * @param fcolumn 
+     * @param scolumn 
+     * @param dcolumn 
+     * @param pcolumn 
+     * @param ccolumn 
+     * @param tcolumn 
+     * @param process_state 
+     */
+    template <typename DATA_T>
+    void _process_column(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
+        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_process_state& process_state);
+
+    /**
+     * @brief Calculate the transition state for a single cell, which depends
+     * on whether the cell is/was valid, existed, or is new.
+     * 
+     * @param prev_existed 
+     * @param row_pre_existed 
+     * @param exists 
+     * @param prev_valid 
+     * @param cur_valid 
+     * @param prev_cur_eq 
+     * @param prev_pkey_eq 
+     * @return t_value_transition 
+     */
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
 
-    void _update_contexts_from_state(const t_data_table& tbl);
-    void _update_contexts_from_state();
-    void clear_deltas();
-
 private:
-    void populate_icols_in_flattened(
-        const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const;
-
+    /**
+     * @brief Process the input data table by flattening it, calculating
+     * transitional values, and returning a new masked version.
+     * 
+     * @return std::shared_ptr<t_data_table> 
+     */
     std::shared_ptr<t_data_table> _process_table();
     
     std::vector<t_computed_column_lambda> m_computed_lambdas;
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
-    t_schema m_tblschema;
-    std::vector<t_schema> m_ischemas;
-    std::vector<t_schema> m_oschemas;
+
+    // A `t_schema` containing all columns, including internal metadata columns.
+    t_schema m_input_schema;
+
+    // A `t_schema` containing all columns (excluding internal columns).
+    t_schema m_output_schema;
+
+    // A vector of `t_schema`s for each transitional `t_data_table`.
+    std::vector<t_schema> m_transitional_schemas;
+
     bool m_init;
     std::vector<std::shared_ptr<t_port>> m_iports;
     std::vector<std::shared_ptr<t_port>> m_oports;
     t_sctxhmap m_contexts;
-    std::shared_ptr<t_gstate> m_state;
+    std::shared_ptr<t_gstate> m_gstate;
     t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::vector<t_custom_column> m_custom_columns;
-    std::set<std::string> m_expr_icols;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
 };
-
-template <>
-void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* scolumn,
-    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
-    const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
-    std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
 
 /**
  * @brief Given a t_data_table and a context handler, construct the t_tables relating to delta
@@ -293,23 +339,33 @@ t_gnode::update_context_from_state(CTX_T* ctx, const t_data_table& flattened) {
     ctx->step_end();
 }
 
+template <>
+void t_gnode::_process_column<std::string>(const t_column* fcolumn, const t_column* scolumn,
+    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
+    const t_process_state& process_state);
+
 template <typename DATA_T>
 void
-t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-    t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
-    std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
-    std::vector<t_uindex>& added_vec) {
+t_gnode::_process_column(
+    const t_column* fcolumn,
+    const t_column* scolumn,
+    t_column* dcolumn,
+    t_column* pcolumn,
+    t_column* ccolumn,
+    t_column* tcolumn,
+    const t_process_state& process_state) {
     for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
-        std::uint8_t op_ = op_base[idx];
+        std::uint8_t op_ = process_state.m_op_base[idx];
         t_op op = static_cast<t_op>(op_);
-        t_uindex added_count = added_vec[idx];
+        t_uindex added_count = process_state.m_added_offset[idx];
 
-        const t_rlookup& rlookup = lkup[idx];
+        const t_rlookup& rlookup = process_state.m_lookup[idx];
         bool row_pre_existed = rlookup.m_exists;
+        auto prev_pkey_eq = process_state.m_prev_pkey_eq_vec[idx];
 
         switch (op) {
             case OP_INSERT: {
-                row_pre_existed = row_pre_existed && !prev_pkey_eq_vec[idx];
+                row_pre_existed = row_pre_existed && !prev_pkey_eq;
 
                 DATA_T prev_value;
                 memset(&prev_value, 0, sizeof(DATA_T));
@@ -328,7 +384,7 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                 bool prev_cur_eq = prev_value == cur_value;
 
                 auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq_vec[idx]);
+                    cur_valid, prev_cur_eq, prev_pkey_eq);
 
                 dcolumn->set_nth<DATA_T>(
                     added_count, cur_valid ? cur_value - prev_value : DATA_T(0));

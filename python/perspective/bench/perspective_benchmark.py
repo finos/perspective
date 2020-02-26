@@ -8,8 +8,9 @@
 
 import os
 import sys
+import subprocess
 from functools import partial
-from bench import Benchmark, Suite, Runner
+from bench import Benchmark, Suite, Runner, VirtualEnvHandler
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table  # noqa: E402
 from perspective.tests.common import superstore  # noqa: E402
@@ -23,12 +24,13 @@ SUPERSTORE_ARROW = os.path.join(
     "simple",
     "superstore.arrow")
 
+VERSIONS = ["master", "0.4.1", "0.4.0rc6"]
+
 
 def make_meta(group, name):
     return {
         "group": group,
-        "name": name,
-        "version": "master"
+        "name": name
     }
 
 
@@ -41,8 +43,6 @@ class PerspectiveBenchmark(Suite):
     ]
     COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"], ["Category", "Sub-Category"]]
     ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]]
-
-    VERSION = "master"
 
     def __init__(self):
         """Create a benchmark suite for `perspective-python`."""
@@ -130,7 +130,7 @@ class PerspectiveBenchmark(Suite):
     def benchmark_to_format_zero(self):
         """Benchmark each `to_format` method."""
         for name in ("numpy", "dict", "records", "df", "arrow"):
-            test_meta = make_meta("to_format", name)
+            test_meta = make_meta("to_format", "to_{}".format(name))
             func = Benchmark(
                 lambda: getattr(self._view, "to_{0}".format(name))(), meta=test_meta)
             setattr(self, "to_format_{0}".format(name), func)
@@ -142,7 +142,7 @@ class PerspectiveBenchmark(Suite):
                 if len(pivot) == 0:
                     continue
                 test_meta = make_meta(
-                    "to_format", "{0}_{1}".format(name, len(pivot)))
+                    "to_format", "to_{0}_r{1}".format(name, len(pivot)))
                 view = self._table.view(row_pivots=pivot)
                 func = Benchmark(
                     lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
@@ -157,7 +157,7 @@ class PerspectiveBenchmark(Suite):
                 if len(RP) == 0 and len(CP) == 0:
                     continue
                 test_meta = make_meta(
-                    "to_format", "{0}_{1}x{2}".format(name, len(RP), len(CP)))
+                    "to_format", "to_{0}_r{1}_c{2}".format(name, len(RP), len(CP)))
                 view = self._table.view(row_pivots=RP, column_pivots=CP)
                 func = Benchmark(
                     lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
@@ -171,7 +171,7 @@ class PerspectiveBenchmark(Suite):
                 if len(pivot) == 0:
                     continue
                 test_meta = make_meta(
-                    "to_format", "{0}_{1}_column".format(name, len(pivot)))
+                    "to_format", "to_{0}_c_{1}".format(name, len(pivot)))
                 view = self._table.view(column_pivots=pivot)
                 func = Benchmark(
                     lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
@@ -179,7 +179,12 @@ class PerspectiveBenchmark(Suite):
 
 
 if __name__ == "__main__":
+    VERSION = sys.argv[1]
+
     # Initialize a suite and runner, then call `.run()`
     suite = PerspectiveBenchmark()
     runner = Runner(suite)
-    runner.run()
+
+    print("Benchmarking perspective-python=={}".format(VERSION))
+    runner.run(VERSION)
+    runner.write_results()

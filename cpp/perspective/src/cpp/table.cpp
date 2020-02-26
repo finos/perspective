@@ -63,7 +63,7 @@ Table::size() const {
 t_schema
 Table::get_schema() const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_gnode->get_tblschema();
+    return m_gnode->get_output_schema();
 }
 
 void
@@ -92,7 +92,7 @@ Table::add_computed_columns(
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
     t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"}); 
-    auto gnode = std::make_shared<t_gnode>(out_schema, in_schema);
+    auto gnode = std::make_shared<t_gnode>(in_schema, out_schema);
     gnode->init();
     return gnode;
 }

@@ -371,16 +371,16 @@ t_ctx2::notify(const t_data_table& flattened, const t_data_table& delta,
         if (is_rtree_idx(tree_idx)) {
             notify_sparse_tree(rtree(), m_rtraversal, true, m_config.get_aggregates(),
                 m_config.get_sortby_pairs(), m_sortby, flattened, delta, prev, current,
-                transitions, existed, m_config, *m_state);
+                transitions, existed, m_config, *m_gstate);
         } else if (is_ctree_idx(tree_idx)) {
             notify_sparse_tree(ctree(), m_ctraversal, true, m_config.get_aggregates(),
                 m_config.get_sortby_pairs(), m_column_sortby, flattened, delta, prev, current,
-                transitions, existed, m_config, *m_state);
+                transitions, existed, m_config, *m_gstate);
         } else {
             notify_sparse_tree(m_trees[tree_idx], std::shared_ptr<t_traversal>(0), false,
                 m_config.get_aggregates(), m_config.get_sortby_pairs(),
                 std::vector<t_sortspec>(), flattened, delta, prev, current, transitions,
-                existed, m_config, *m_state);
+                existed, m_config, *m_gstate);
         }
     }
 
@@ -882,14 +882,14 @@ t_ctx2::notify(const t_data_table& flattened) {
     for (t_uindex tree_idx = 0, loop_end = m_trees.size(); tree_idx < loop_end; ++tree_idx) {
         if (is_rtree_idx(tree_idx)) {
             notify_sparse_tree(rtree(), m_rtraversal, true, m_config.get_aggregates(),
-                m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_state);
+                m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_gstate);
         } else if (is_ctree_idx(tree_idx)) {
             notify_sparse_tree(ctree(), m_ctraversal, true, m_config.get_aggregates(),
-                m_config.get_sortby_pairs(), m_column_sortby, flattened, m_config, *m_state);
+                m_config.get_sortby_pairs(), m_column_sortby, flattened, m_config, *m_gstate);
         } else {
             notify_sparse_tree(m_trees[tree_idx], std::shared_ptr<t_traversal>(0), false,
                 m_config.get_aggregates(), m_config.get_sortby_pairs(),
-                std::vector<t_sortspec>(), flattened, m_config, *m_state);
+                std::vector<t_sortspec>(), flattened, m_config, *m_gstate);
         }
     }
      if (!m_sortby.empty()) {

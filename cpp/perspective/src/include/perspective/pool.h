@@ -76,9 +76,6 @@ public:
     std::vector<t_stree*> get_trees();
 
     bool get_data_remaining() const;
-
-    std::vector<t_tscalar> get_row_data_pkeys(
-        t_uindex gnode_id, const std::vector<t_tscalar>& pkeys);
     std::vector<t_updctx> get_contexts_last_updated();
     std::string repr() const;
 
@@ -86,13 +83,17 @@ public:
 
     t_uindex epoch() const;
     void inc_epoch();
-    bool has_python_dep() const;
     void flush();
     void flush(t_uindex gnode_id);
     std::vector<t_uindex> get_gnodes_last_updated();
     t_gnode* get_gnode(t_uindex gnode_id);
 
 protected:
+
+    // Unused methods
+    std::vector<t_tscalar> get_row_data_pkeys(
+        t_uindex gnode_id, const std::vector<t_tscalar>& pkeys);
+
     // Following three functions
     // use the python api
     bool validate_gnode_id(t_uindex gnode_id) const;

@@ -151,7 +151,7 @@ t_ctx_grouped_pkey::get_data(
         if (m_has_label && ridx > 0) {
             // Get pkey
             auto iters = m_tree->get_pkeys_for_leaf(nidx);
-            tree_value.set(m_state->get_value(iters.first->m_pkey, grouping_label_col));
+            tree_value.set(m_gstate->get_value(iters.first->m_pkey, grouping_label_col));
         }
 
         tmpvalues[(ridx - ext.m_srow) * ncols] = tree_value;
@@ -485,7 +485,7 @@ rebuild_helper(t_column*) {}
 
 void
 t_ctx_grouped_pkey::rebuild() {
-    auto tbl = m_state->get_pkeyed_table();
+    auto tbl = m_gstate->get_pkeyed_table();
 
     if (m_config.has_filters()) {
         auto mask = filter_table_for_config(*tbl, m_config);

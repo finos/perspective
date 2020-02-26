@@ -62,7 +62,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
 
         // Always use the `Table` column names and data types on update.
         if (table_initialized && is_update) {
-            auto schema = gnode->get_tblschema();
+            auto schema = gnode->get_output_schema();
             column_names = schema.columns();
             data_types = schema.types();
 
@@ -97,7 +97,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
                 }
             }
             // Make sure promoted types are used to construct data table
-            auto new_schema = gnode->get_tblschema();
+            auto new_schema = gnode->get_output_schema();
             data_types = new_schema.types();
         } else {
             column_names = arrow_loader.names();

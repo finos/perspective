@@ -9,12 +9,55 @@ import logging
 import os
 import sys
 import signal
+import subprocess
+import venv
 import tornado
 from timeit import timeit
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler  # noqa: E402
 
 logging.basicConfig(level=logging.INFO)
+
+
+class VirtualEnvHandler(object):
+    """Creates and manages a virtualenv for benchmarking, which allows for
+    clean dependency management and benchmarking of multiple versions without
+    contaminating the system's `site-packages` folder."""
+
+    def __init__(self, virtualenv_path):
+        self._virtualenv_path = virtualenv_path
+        self._is_activated = False
+
+    def virtualenv_exists(self):
+        """Returns whether the directory specified by `VIRTUALENV_PATH`
+        exists."""
+        return os.path.exists(self._virtualenv_path)
+
+    def activate_virtualenv(self):
+        """Activates the virtualenv at `VIRTUALENV_PATH`."""
+        logging.info(
+            "Activating virtualenv at: `{}`".format(self._virtualenv_path))
+        subprocess.check_output(
+            "source {}/bin/activate".format(self._virtualenv_path),
+            shell=True)
+        self._is_activated = True
+
+    def create_virtualenv(self):
+        """Clears the folder and creates a new virtualenv at
+        `self._virtualenv_path`."""
+        if self.virtualenv_exists():
+            logging.ERROR("Virtualenv already exists at: `{0}`".format(self._virtualenv_path))
+            return
+        logging.info("Creating virtualenv at: `{}`".format(self._virtualenv_path))
+        venv.create(self._virtualenv_path, clear=True, with_pip=True)
+
+    def deactivate_virtualenv(self):
+        if self.virtualenv_exists() and self._is_activated:
+            subprocess.check_output(
+                "deactivate",
+                shell=True)
+            logging.info("Virtualenv deactivated!")
+            self._is_activated = False
 
 
 class BenchmarkTornadoHandler(tornado.web.RequestHandler):
@@ -26,7 +69,7 @@ class BenchmarkTornadoHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self):
-        self.render("benchmark.html")
+        self.render("benchmark_hosted.html")
 
 
 class Benchmark(object):
@@ -184,17 +227,33 @@ class Runner(object):
         overall_result["__TIME__"] = result
         return overall_result
 
-    def run(self):
+    def print_result(self, result):
+        print("{}::{} ({}):{:30}{:>30}".format(
+            result["group"],
+            result["name"],
+            result["version"],
+            "",
+            result["__TIME__"],
+        ))
+
+    def run(self, version):
         """Runs each benchmark function from the suite for n `ITERATIONS`,
         timing each function and writing the results to a `perspective.Table`.
         """
         logging.info("Running benchmark suite...")
         for benchmark in self._benchmarks:
             result = self.run_method(benchmark)
-            print(result)
+            result["version"] = version
+            self.print_result(result)
             if self._table is None:
-                self._table = Table([result])
+                arrow_path = os.path.join(os.path.dirname(__file__), "benchmark.arrow")
+                if os.path.exists(arrow_path):
+                    # if arrow exists, append to it
+                    with open(arrow_path, "rb") as arr:
+                        print("Reading table from pre-existing benchmark.arrow")
+                        self._table = Table(arr.read())
+                else:
+                    print("Creating new table")
+                    self._table = Table([result])
             else:
                 self._table.update([result])
-        self.write_results()
-        self.host_results()

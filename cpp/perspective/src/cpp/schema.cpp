@@ -12,12 +12,7 @@
 
 namespace perspective {
 
-t_schema_recipe::t_schema_recipe() {}
-
 t_schema::t_schema() {}
-
-t_schema::t_schema(const t_schema_recipe& recipe)
-    : t_schema(recipe.m_columns, recipe.m_types) {}
 
 t_schema::t_schema(const std::vector<std::string>& columns, const std::vector<t_dtype>& types)
     : m_columns(columns)
@@ -134,14 +129,6 @@ t_schema::retype_column(const std::string& colname, t_dtype dtype) {
     m_coldt_map[colname] = dtype;
 }
 
-t_schema_recipe
-t_schema::get_recipe() const {
-    t_schema_recipe rval;
-    rval.m_columns = m_columns;
-    rval.m_types = m_types;
-    return rval;
-}
-
 bool
 t_schema::has_column(const std::string& colname) const {
     auto iter = m_colidx_map.find(colname);
@@ -156,18 +143,6 @@ t_schema::columns() const {
 const std::vector<t_dtype>
 t_schema::types() const {
     return m_types;
-}
-
-t_table_static_ctx
-t_schema::get_table_context() const {
-    t_table_static_ctx rv;
-    for (size_t idx = 0, loop_end = m_columns.size(); idx < loop_end; ++idx) {
-        t_column_static_ctx v;
-        v.m_colname = m_columns[idx];
-        v.m_dtype = m_types[idx];
-        rv.m_columns.push_back(v);
-    }
-    return rv;
 }
 
 std::string

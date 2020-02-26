@@ -39,130 +39,29 @@ calc_negate(t_tscalar val) {
     return val.negate();
 }
 
-t_gnode::t_gnode(const t_gnode_recipe& recipe)
-    : m_mode(recipe.m_mode)
-    , m_tblschema(recipe.m_tblschema)
-    , m_init(false)
-    , m_id(0)
-    , m_pool_cleanup([]() {}) {
-    PSP_TRACE_SENTINEL();
-    LOG_CONSTRUCTOR("t_gnode");
-
-    PSP_VERBOSE_ASSERT(recipe.m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
-        "Only simple dataflows supported currently");
-
-    for (const auto& s : recipe.m_ischemas) {
-        m_ischemas.push_back(t_schema(s));
-    }
-
-    PSP_VERBOSE_ASSERT(m_ischemas.size() == 1, "Single input port supported currently");
-
-    for (const auto& s : recipe.m_oschemas) {
-        m_oschemas.push_back(t_schema(s));
-    }
-
-    for (const auto& cc : recipe.m_custom_columns) {
-        m_custom_columns.push_back(t_custom_column(cc));
-    }
-
-    m_epoch = std::chrono::high_resolution_clock::now();
-
-    for (const auto& ccol : m_custom_columns) {
-        for (const auto& icol : ccol.get_icols()) {
-            m_expr_icols.insert(icol);
-        }
-    }
-}
-
-t_gnode::t_gnode(const t_gnode_options& options)
+t_gnode::t_gnode(const t_schema& input_schema, const t_schema& output_schema)
     : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
-    , m_gnode_type(options.m_gnode_type)
-    , m_tblschema(options.m_port_schema.drop({"psp_op", "psp_pkey"}))
+    , m_gnode_type(GNODE_TYPE_PKEYED)
+    , m_input_schema(input_schema)
+    , m_output_schema(output_schema)
     , m_init(false)
     , m_id(0)
     , m_pool_cleanup([]() {}) {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_gnode");
 
-    std::vector<t_dtype> trans_types(m_tblschema.size());
+    std::vector<t_dtype> trans_types(m_output_schema.size());
     for (t_uindex idx = 0; idx < trans_types.size(); ++idx) {
         trans_types[idx] = DTYPE_UINT8;
     }
 
-    t_schema port_schema(options.m_port_schema);
-    if (!(port_schema.is_pkey())) {
-        PSP_COMPLAIN_AND_ABORT("gnode type specified as explicit pkey, however input "
-                                "schema is missing required columns.");
-    }
-
-    t_schema trans_schema(m_tblschema.columns(), trans_types);
+    t_schema trans_schema(m_output_schema.columns(), trans_types);
     t_schema existed_schema(
         std::vector<std::string>{"psp_existed"}, std::vector<t_dtype>{DTYPE_BOOL});
 
-    m_ischemas = std::vector<t_schema>{port_schema};
-    m_oschemas = std::vector<t_schema>{
-        port_schema, m_tblschema, m_tblschema, m_tblschema, trans_schema, existed_schema};
+    m_transitional_schemas = std::vector<t_schema>{
+        m_input_schema, m_output_schema, m_output_schema, m_output_schema, trans_schema, existed_schema};
     m_epoch = std::chrono::high_resolution_clock::now();
-}
-
-std::shared_ptr<t_gnode>
-t_gnode::build(const t_gnode_options& options) {
-    auto rv = std::make_shared<t_gnode>(options);
-    rv->init();
-    return rv;
-}
-
-t_gnode::t_gnode(const t_schema& tblschema, const t_schema& portschema)
-    : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
-    , m_gnode_type(GNODE_TYPE_PKEYED)
-    , m_tblschema(tblschema)
-    , m_ischemas(std::vector<t_schema>{portschema})
-    , m_init(false)
-    , m_id(0)
-    , m_pool_cleanup([]() {}) {
-    PSP_TRACE_SENTINEL();
-    LOG_CONSTRUCTOR("t_gnode");
-
-    std::vector<t_dtype> trans_types(m_tblschema.size());
-    for (t_uindex idx = 0; idx < trans_types.size(); ++idx) {
-        trans_types[idx] = DTYPE_UINT8;
-    }
-
-    t_schema trans_schema(m_tblschema.columns(), trans_types);
-    t_schema existed_schema(
-        std::vector<std::string>{"psp_existed"}, std::vector<t_dtype>{DTYPE_BOOL});
-
-    m_oschemas = std::vector<t_schema>{
-        portschema, m_tblschema, m_tblschema, m_tblschema, trans_schema, existed_schema};
-    m_epoch = std::chrono::high_resolution_clock::now();
-}
-
-t_gnode::t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
-    const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
-    const std::vector<t_custom_column>& custom_columns)
-    : m_mode(mode)
-    , m_gnode_type(GNODE_TYPE_PKEYED)
-    , m_tblschema(tblschema)
-    , m_ischemas(ischemas)
-    , m_oschemas(oschemas)
-    , m_init(false)
-    , m_id(0)
-    , m_custom_columns(custom_columns)
-    , m_pool_cleanup([]() {}) {
-    PSP_TRACE_SENTINEL();
-    LOG_CONSTRUCTOR("t_gnode");
-
-    PSP_VERBOSE_ASSERT(
-        mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
-
-    PSP_VERBOSE_ASSERT(m_ischemas.size() == 1, "Single input port supported currently");
-    m_epoch = std::chrono::high_resolution_clock::now();
-
-    for (const auto& ccol : custom_columns) {
-        for (const auto& icol : ccol.get_icols()) {
-            m_expr_icols.insert(icol);
-        }
-    }
 }
 
 t_gnode::~t_gnode() {
@@ -174,22 +73,20 @@ t_gnode::~t_gnode() {
 void
 t_gnode::init() {
     PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_ischemas.size() == 1, "Single input port supported currently");
 
-    m_state = std::make_shared<t_gstate>(m_tblschema, m_ischemas[0]);
-    m_state->init();
+    m_gstate = std::make_shared<t_gstate>(m_input_schema, m_output_schema);
+    m_gstate->init();
 
-    for (t_uindex idx = 0, loop_end = m_ischemas.size(); idx < loop_end; ++idx) {
-        std::shared_ptr<t_port> port
-            = std::make_shared<t_port>(PORT_MODE_PKEYED, m_ischemas[idx]);
-        port->init();
-        m_iports.push_back(port);
-    }
+    // Create a single input port
+    std::shared_ptr<t_port> port
+        = std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
+    port->init();
+    m_iports.push_back(port);
 
-    for (t_uindex idx = 0, loop_end = m_oschemas.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_transitional_schemas.size(); idx < loop_end; ++idx) {
         t_port_mode mode = idx == 0 ? PORT_MODE_PKEYED : PORT_MODE_RAW;
 
-        std::shared_ptr<t_port> port = std::make_shared<t_port>(mode, m_oschemas[idx]);
+        std::shared_ptr<t_port> port = std::make_shared<t_port>(mode, m_transitional_schemas[idx]);
 
         port->init();
         m_oports.push_back(port);
@@ -230,8 +127,14 @@ t_gnode::_send_and_process(const t_data_table& fragments) {
 }
 
 t_value_transition
-t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, bool prev_valid,
-    bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq) {
+t_gnode::calc_transition(
+    bool prev_existed,
+    bool row_pre_existed,
+    bool exists,
+    bool prev_valid,
+    bool cur_valid,
+    bool prev_cur_eq,
+    bool prev_pkey_eq) {
     t_value_transition trans = VALUE_TRANSITION_EQ_FF;
 
     if (!row_pre_existed && !cur_valid && !t_env::backout_invalid_neq_ft()) {
@@ -250,9 +153,7 @@ t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, b
         trans = VALUE_TRANSITION_NEQ_FT;
     } else if (prev_existed && !exists) {
         trans = VALUE_TRANSITION_NEQ_TF;
-    }
-
-    else if (prev_existed && exists && !prev_cur_eq) {
+    } else if (prev_existed && exists && !prev_cur_eq) {
         trans = VALUE_TRANSITION_NEQ_TT;
     } else if (prev_pkey_eq) {
         // prev op must have been a delete
@@ -263,73 +164,63 @@ t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, b
     return trans;
 }
 
-void
-t_gnode::populate_icols_in_flattened(
-    const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const {
-    PSP_VERBOSE_ASSERT(lkup.size() == flat->size(), "Mismatched sizes encountered");
+t_mask
+t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
+    // Make sure `existed_data_table` has enough space to write without resizing
+    auto flattened_num_rows = process_state.m_flattened_data_table->num_rows();
+    process_state.m_existed_data_table->set_size(flattened_num_rows);
 
-    t_uindex nrows = lkup.size();
-    t_uindex ncols = m_expr_icols.size();
+    std::shared_ptr<t_column> op_col = 
+        process_state.m_flattened_data_table->get_column("psp_op");
+    process_state.m_op_base = op_col->get_nth<std::uint8_t>(0);
+    t_column* pkey_col = 
+        process_state.m_flattened_data_table->get_column("psp_pkey").get();
+    
+    process_state.m_added_offset.reserve(flattened_num_rows);
+    process_state.m_prev_pkey_eq_vec.reserve(flattened_num_rows);
 
-    std::vector<const t_column*> icols(ncols);
-    std::vector<t_column*> ocols(ncols);
-    std::vector<std::string> cnames(ncols);
+    t_mask mask(flattened_num_rows);
+    t_uindex added_count = 0;
+    t_tscalar prev_pkey;
+    prev_pkey.clear();
 
-    t_uindex count = 0;
-    const t_data_table* stable = get_table();
+    t_column* existed_column = 
+        process_state.m_existed_data_table->get_column("psp_existed").get();
 
-    for (const auto& cname : m_expr_icols) {
-        icols[count] = stable->get_const_column(cname).get();
-        ocols[count] = flat->get_column(cname).get();
-        cnames[count] = cname;
-        ++count;
-    }
+    for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
+        t_tscalar pkey = pkey_col->get_scalar(idx);
+        std::uint8_t op_ = process_state.m_op_base[idx];
+        t_op op = static_cast<t_op>(op_);
 
-#ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ncols), 1,
-        [&lkup, &icols, &ocols, nrows](int colidx)
-#else
-    for (t_uindex colidx = 0; colidx < ncols; ++colidx)
-#endif
-        {
-            auto icol = icols[colidx];
-            auto ocol = ocols[colidx];
+        bool row_pre_existed = process_state.m_lookup[idx].m_exists;
+        process_state.m_prev_pkey_eq_vec[idx] = pkey == prev_pkey;
 
-            for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
-                const auto& lk = lkup[ridx];
-                if (!ocol->is_valid(ridx) && lk.m_exists) {
-                    ocol->set_scalar(ridx, icol->get_scalar(lk.m_idx));
+        process_state.m_added_offset[idx] = added_count;
+
+        switch (op) {
+            case OP_INSERT: {
+                row_pre_existed = row_pre_existed && !process_state.m_prev_pkey_eq_vec[idx];
+                mask.set(idx, true);
+                existed_column->set_nth(added_count, row_pre_existed);
+                ++added_count;
+            } break;
+            case OP_DELETE: {
+                if (row_pre_existed) {
+                    mask.set(idx, true);
+                    existed_column->set_nth(added_count, row_pre_existed);
+                    ++added_count;
+                } else {
+                    mask.set(idx, false);
                 }
-            }
+            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
         }
 
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
-}
-
-void
-t_gnode::clear_deltas() {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
-    for (auto& kv : m_contexts) {
-        switch (kv.second.m_ctx_type) {
-            case TWO_SIDED_CONTEXT: {
-                static_cast<t_ctx2*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                static_cast<t_ctx1*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                static_cast<t_ctx0*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                static_cast<t_ctx_grouped_pkey*>(kv.second.m_ctx)->clear_deltas();
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
+        prev_pkey = pkey;
     }
+
+    PSP_VERBOSE_ASSERT(mask.count() == added_count, "Expected equality");
+    return mask;
 }
 
 std::shared_ptr<t_data_table>
@@ -348,31 +239,31 @@ t_gnode::_process_table() {
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());
 
-    const t_gstate& cstate = *(m_state.get());
-    t_uindex fnrows = flattened->num_rows();
+    t_uindex flattened_num_rows = flattened->num_rows();
 
-    std::vector<t_rlookup> lkup(fnrows);
+    std::vector<t_rlookup> row_lookup(flattened_num_rows);
     t_column* pkey_col = flattened->get_column("psp_pkey").get();
     
-    for (t_uindex idx = 0; idx < fnrows; ++idx) {
+    for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
+        // See if each primary key in flattened already exist in the dataset
         t_tscalar pkey = pkey_col->get_scalar(idx);
-        lkup[idx] = cstate.lookup(pkey);
+        row_lookup[idx] = m_gstate->lookup(pkey);
     }
 
-    recompute_columns(get_table_sptr(), flattened, lkup);
+    recompute_columns(get_table_sptr(), flattened, row_lookup);
 
-    if (m_state->mapping_size() == 0) {
-        m_state->update_history(flattened.get());
+    if (m_gstate->mapping_size() == 0) {
+        // Updates have already been processed - break early.
+        m_gstate->update_master_table(flattened.get());
         _update_contexts_from_state(*flattened);
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
         release_outputs();
-        
-#ifdef PSP_GNODE_VERIFY
-        auto stable = get_table();
-        PSP_GNODE_VERIFY_TABLE(stable);
-#endif
 
+    #ifdef PSP_GNODE_VERIFY
+        auto state_table = get_table();
+        PSP_GNODE_VERIFY_TABLE(state_table);
+    #endif
         return nullptr;
     }
 
@@ -380,203 +271,94 @@ t_gnode::_process_table() {
         m_iports[idx]->release_or_clear();
     }
 
-    std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
-    delta->clear();
-    delta->reserve(fnrows);
+    // Use `t_process_state` to manage intermediate structures
+    t_process_state _process_state;
 
-    std::shared_ptr<t_data_table> prev = m_oports[PSP_PORT_PREV]->get_table();
-    prev->clear();
-    prev->reserve(fnrows);
+    _process_state.m_state_data_table = get_table_sptr();
+    _process_state.m_flattened_data_table = flattened;
+    _process_state.m_lookup = row_lookup;
 
-    std::shared_ptr<t_data_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
-    current->clear();
-    current->reserve(fnrows);
+    // Get data tables for process state
+    _process_state.m_delta_data_table = m_oports[PSP_PORT_DELTA]->get_table();
+    _process_state.m_prev_data_table = m_oports[PSP_PORT_PREV]->get_table();
+    _process_state.m_current_data_table = m_oports[PSP_PORT_CURRENT]->get_table();
+    _process_state.m_transitions_data_table = m_oports[PSP_PORT_TRANSITIONS]->get_table();
+    _process_state.m_existed_data_table = m_oports[PSP_PORT_EXISTED]->get_table();
 
-    std::shared_ptr<t_data_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
-    transitions->clear();
-    transitions->reserve(fnrows);
+    // ALL transitional tables are cleared on each call
+    _process_state.clear_transitional_data_tables();
 
-    std::shared_ptr<t_data_table> existed = m_oports[PSP_PORT_EXISTED]->get_table();
-    existed->clear();
-    existed->reserve(fnrows);
-    existed->set_size(fnrows);
+    // And re-reserved for the amount of data in `flattened`
+    _process_state.reserve_transitional_data_tables(flattened_num_rows);
 
-    const t_schema& fschema = flattened->get_schema();
+    t_mask existed_mask = _process_mask_existed_rows(_process_state);
+    auto mask_count = existed_mask.count();
 
-    std::shared_ptr<t_column> op_col_sptr = flattened->get_column("psp_op");
-    t_column* op_col = op_col_sptr.get();
-    t_data_table* stable = get_table();
-    PSP_GNODE_VERIFY_TABLE(stable);
-    const t_schema& sschema = m_state->get_schema();
+    // mask_count = flattened_num_rows - number of rows that were removed
+    _process_state.set_size_transitional_data_tables(mask_count);
 
-    std::vector<const t_column*> fcolumns(flattened->num_columns());
-    t_uindex ncols = sschema.get_num_columns();
-
-    std::vector<const t_column*> scolumns(ncols);
-    std::vector<t_column*> dcolumns(ncols);
-    std::vector<t_column*> pcolumns(ncols);
-    std::vector<t_column*> ccolumns(ncols);
-    std::vector<t_column*> tcolumns(ncols);
-
-    std::vector<t_uindex> col_translation(stable->num_columns());
-    t_uindex count = 0;
-
-    std::string opname("psp_op");
-    std::string pkeyname("psp_pkey");
-
-    for (t_uindex idx = 0, loop_end = fschema.size(); idx < loop_end; ++idx) {
-        const std::string& cname = fschema.m_columns[idx];
-        if (cname != opname && cname != pkeyname) {
-            col_translation[count] = idx;
-            fcolumns[idx] = flattened->get_column(cname).get();
-            ++count;
-        }
-    }
-
-    for (t_uindex idx = 0, loop_end = sschema.size(); idx < loop_end; ++idx) {
-        const std::string& cname = sschema.m_columns[idx];
-        scolumns[idx] = stable->get_column(cname).get();
-        pcolumns[idx] = prev->get_column(cname).get();
-        ccolumns[idx] = current->get_column(cname).get();
-        dcolumns[idx] = delta->get_column(cname).get();
-        tcolumns[idx] = transitions->get_column(cname).get();
-    }
-
-    t_column* ecolumn = existed->get_column("psp_existed").get();
-
-    t_tscalar prev_pkey;
-    prev_pkey.clear();
-
-
-    std::vector<t_tscalar> existing_insert_pkeys;
-
-    t_mask mask(fnrows);
-
-    t_uindex added_count = 0;
-
-    std::uint8_t* op_base = op_col->get_nth<std::uint8_t>(0);
-    std::vector<t_uindex> added_offset(fnrows);
-    std::vector<bool> prev_pkey_eq_vec(fnrows);
-
-    for (t_uindex idx = 0; idx < fnrows; ++idx) {
-        t_tscalar pkey = pkey_col->get_scalar(idx);
-        std::uint8_t op_ = op_base[idx];
-        t_op op = static_cast<t_op>(op_);
-
-        bool row_pre_existed = lkup[idx].m_exists;
-        prev_pkey_eq_vec[idx] = pkey == prev_pkey;
-
-        added_offset[idx] = added_count;
-
-        switch (op) {
-            case OP_INSERT: {
-                row_pre_existed = row_pre_existed && !prev_pkey_eq_vec[idx];
-                mask.set(idx, true);
-                ecolumn->set_nth(added_count, row_pre_existed);
-                ++added_count;
-            } break;
-            case OP_DELETE: {
-                if (row_pre_existed) {
-                    mask.set(idx, true);
-                    ecolumn->set_nth(added_count, row_pre_existed);
-                    ++added_count;
-                } else {
-                    mask.set(idx, false);
-                }
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
-        }
-
-        prev_pkey = pkey;
-    }
-
-    auto mask_count = mask.count();
-
-    PSP_VERBOSE_ASSERT(mask_count == added_count, "Expected equality");
-
-    delta->set_size(mask_count);
-    prev->set_size(mask_count);
-    current->set_size(mask_count);
-    transitions->set_size(mask_count);
-    existed->set_size(mask_count);
-
-    if (!m_expr_icols.empty()) {
-        populate_icols_in_flattened(lkup, flattened);
-    }
+    const t_schema& _gstate_schema = m_gstate->get_output_schema();
+    t_uindex ncols = _gstate_schema.get_num_columns();
 
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(ncols), 1,
-        [&fcolumns, &scolumns, &dcolumns, &pcolumns, &ccolumns, &tcolumns, &col_translation,
-            &op_base, &lkup, &prev_pkey_eq_vec, &added_offset, this](int colidx)
+        [&_process_state, &_gstate_schema, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
 #endif
         {
-            auto fcolumn = fcolumns[col_translation[colidx]];
-            auto scolumn = scolumns[colidx];
-            auto dcolumn = dcolumns[colidx];
-            auto pcolumn = pcolumns[colidx];
-            auto ccolumn = ccolumns[colidx];
-            auto tcolumn = tcolumns[colidx];
+            const std::string& cname = _gstate_schema.m_columns[colidx];
+            auto fcolumn = _process_state.m_flattened_data_table->get_column(cname).get();
+            auto scolumn = _process_state.m_state_data_table->get_column(cname).get();
+            auto dcolumn = _process_state.m_delta_data_table->get_column(cname).get();
+            auto pcolumn = _process_state.m_prev_data_table->get_column(cname).get();
+            auto ccolumn = _process_state.m_current_data_table->get_column(cname).get();
+            auto tcolumn = _process_state.m_transitions_data_table->get_column(cname).get();
 
             t_dtype col_dtype = fcolumn->get_dtype();
 
             switch (col_dtype) {
                 case DTYPE_INT64: {
-                    _process_helper<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT32: {
-                    _process_helper<std::int32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::int32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT16: {
-                    _process_helper<std::int16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::int16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT8: {
-                    _process_helper<std::int8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::int8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT64: {
-                    _process_helper<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT32: {
-                    _process_helper<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT16: {
-                    _process_helper<std::uint16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::uint16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT8: {
-                    _process_helper<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT64: {
-                    _process_helper<double>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<double>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT32: {
-                    _process_helper<float>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn,
-                        op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<float>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_BOOL: {
-                    _process_helper<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_TIME: {
-                    _process_helper<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_DATE: {
-                    _process_helper<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_STR: {
-                    _process_helper<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
-                        tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
+                    _process_column<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
             }
@@ -584,25 +366,43 @@ t_gnode::_process_table() {
 #ifdef PSP_PARALLEL_FOR
     );
 #endif
-    std::shared_ptr<t_data_table> flattened_masked
-        = mask.count() == flattened->size() ? flattened : flattened->clone(mask);
+    /**
+     * After all columns have been processed (transitional tables written into),
+     * `_process_state.m_flattened_data_table` contains the accumulated state
+     * of the dataset that updates the master table on `m_gstate`, including
+     * added rows, updated in-place rows, and rows to be removed.
+     * 
+     * `existed_mask` is a bitset marked true for `OP_INSERT`, and false for
+     * `OP_DELETE`. If there are any `OP_DELETE`s, the next step returns a
+     * new `t_data_table` with the deleted rows masked out.
+     */
+    std::shared_ptr<t_data_table> flattened_masked;
+
+    if (existed_mask.count() == _process_state.m_flattened_data_table->size()) {
+        flattened_masked = _process_state.m_flattened_data_table;
+    } else {
+        flattened_masked = 
+            _process_state.m_flattened_data_table->clone(existed_mask);
+    }
+
     PSP_GNODE_VERIFY_TABLE(flattened_masked);
-#ifdef PSP_GNODE_VERIFY
-    {
-        auto updated_table = get_table();
-        PSP_GNODE_VERIFY_TABLE(updated_table);
-    }
-#endif
-    m_state->update_history(flattened_masked.get());
-#ifdef PSP_GNODE_VERIFY
-    {
-        auto updated_table = get_table();
-        PSP_GNODE_VERIFY_TABLE(updated_table);
-    }
-#endif
 
+    #ifdef PSP_GNODE_VERIFY
+    {
+        auto updated_table = get_table();
+        PSP_GNODE_VERIFY_TABLE(updated_table);
+    }
+    #endif
+
+    m_gstate->update_master_table(flattened_masked.get());
+
+    #ifdef PSP_GNODE_VERIFY
+    {
+        auto updated_table = get_table();
+        PSP_GNODE_VERIFY_TABLE(updated_table);
+    }
+    #endif
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
-
     return flattened_masked;
 }
 
@@ -624,7 +424,7 @@ t_gnode::_process() {
 
 t_uindex
 t_gnode::mapping_size() const {
-    return m_state->mapping_size();
+    return m_gstate->mapping_size();
 }
 
 t_data_table*
@@ -647,21 +447,21 @@ t_data_table*
 t_gnode::get_table() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_table().get();
+    return m_gstate->get_table().get();
 }
 
 const t_data_table*
 t_gnode::get_table() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_table().get();
+    return m_gstate->get_table().get();
 }
 
 std::shared_ptr<t_data_table>
 t_gnode::get_table_sptr() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_table();
+    return m_gstate->get_table();
 }
 
 /**
@@ -676,16 +476,16 @@ t_gnode::promote_column(const std::string& name, t_dtype new_type) {
     get_table()->promote_column(name, new_type, 0, false);
     _get_otable(0)->promote_column(name, new_type, 0, false);
     _get_itable(0)->promote_column(name, new_type, 0, false);
-    m_tblschema.retype_column(name, new_type);
-    m_ischemas[0].retype_column(name, new_type);
-    m_oschemas[0].retype_column(name, new_type);
+    m_output_schema.retype_column(name, new_type);
+    m_input_schema.retype_column(name, new_type);
+    m_transitional_schemas[0].retype_column(name, new_type);
 }
 
 void
 t_gnode::pprint() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_state->pprint();
+    m_gstate->pprint();
 }
 
 template <typename CTX_T>
@@ -694,7 +494,7 @@ t_gnode::set_ctx_state(void* ptr) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     CTX_T* ctx = static_cast<CTX_T*>(ptr);
-    ctx->set_state(m_state);
+    ctx->set_state(m_gstate);
 }
 
 void
@@ -766,14 +566,6 @@ t_gnode::get_registered_contexts() const {
 }
 
 void
-t_gnode::_update_contexts_from_state() {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    auto flattened = m_state->get_pkeyed_table();
-    _update_contexts_from_state(*flattened);
-}
-
-void
 t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_t ptr) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -781,17 +573,13 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     t_ctx_handle ch(ptr_, type);
     m_contexts[name] = ch;
 
-    bool should_update = m_state->mapping_size() > 0;
+    bool should_update = m_gstate->mapping_size() > 0;
 
     std::shared_ptr<t_data_table> flattened;
 
     if (should_update) {
-        flattened = m_state->get_pkeyed_table();
+        flattened = m_gstate->get_pkeyed_table();
     }
-
-    auto pkeyed_tblcontext = m_state->get_port_schema().get_table_context();
-
-    auto non_pkeyed_tblcontext = m_state->get_table()->get_schema().get_table_context();
 
     switch (type) {
         case TWO_SIDED_CONTEXT: {
@@ -899,23 +687,16 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
         }
     };
 
-    if (has_python_dep()) {
-        for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx) {
-            notify_context_helper(ctxidx);
-        }
-    } else {
-#ifdef PSP_PARALLEL_FOR
-        PSP_PFOR(0, int(num_ctx), 1,
-            [&notify_context_helper](int ctxidx)
-#else
-        for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx)
-#endif
-            { notify_context_helper(ctxidx); }
-
-#ifdef PSP_PARALLEL_FOR
+    #ifdef PSP_PARALLEL_FOR
+    PSP_PFOR(0, int(num_ctx), 1,
+        [&notify_context_helper](int ctxidx)
+    #else
+    for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx)
+    #endif
+        { notify_context_helper(ctxidx); }
+    #ifdef PSP_PARALLEL_FOR
         );
-#endif
-    }
+    #endif
 
     psp_log_time(repr() + "notify_contexts.exit");
 }
@@ -954,8 +735,8 @@ t_gnode::get_pivots() const {
 }
 
 t_schema
-t_gnode::get_tblschema() const {
-    return m_tblschema;
+t_gnode::get_output_schema() const {
+    return m_output_schema;
 }
 
 std::vector<t_stree*>
@@ -1067,17 +848,7 @@ t_gnode::get_contexts_last_updated() const {
 
 std::vector<t_tscalar>
 t_gnode::get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const {
-    return m_state->get_row_data_pkeys(pkeys);
-}
-
-std::vector<t_tscalar>
-t_gnode::has_pkeys(const std::vector<t_tscalar>& pkeys) const {
-    return m_state->has_pkeys(pkeys);
-}
-
-std::vector<t_tscalar>
-t_gnode::get_pkeys() const {
-    return m_state->get_pkeys();
+    return m_gstate->get_row_data_pkeys(pkeys);
 }
 
 void
@@ -1107,7 +878,7 @@ t_gnode::reset() {
         }
     }
 
-    m_state->reset();
+    m_gstate->reset();
 }
 
 void
@@ -1126,23 +897,28 @@ t_gnode::clear_output_ports() {
 
 template <>
 void
-t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* scolumn,
-    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
-    const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
-    std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec) {
+t_gnode::_process_column<std::string>(
+    const t_column* fcolumn,
+    const t_column* scolumn,
+    t_column* dcolumn,
+    t_column* pcolumn,
+    t_column* ccolumn,
+    t_column* tcolumn,
+    const t_process_state& process_state) {
     pcolumn->borrow_vocabulary(*scolumn);
 
     for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
-        std::uint8_t op_ = op_base[idx];
+        std::uint8_t op_ = process_state.m_op_base[idx];
         t_op op = static_cast<t_op>(op_);
-        t_uindex added_count = added_vec[idx];
+        t_uindex added_count = process_state.m_added_offset[idx];
 
-        const t_rlookup& rlookup = lkup[idx];
+        const t_rlookup& rlookup = process_state.m_lookup[idx];
         bool row_pre_existed = rlookup.m_exists;
+        auto prev_pkey_eq = process_state.m_prev_pkey_eq_vec[idx];
 
         switch (op) {
             case OP_INSERT: {
-                row_pre_existed = row_pre_existed && !prev_pkey_eq_vec[idx];
+                row_pre_existed = row_pre_existed && !prev_pkey_eq;
 
                 const char* prev_value = 0;
                 bool prev_valid = false;
@@ -1163,7 +939,7 @@ t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* s
                     = prev_value && cur_value && strcmp(prev_value, cur_value) == 0;
 
                 auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq_vec[idx]);
+                    cur_valid, prev_cur_eq, prev_pkey_eq);
 
                 if (prev_valid) {
                     pcolumn->set_nth<t_uindex>(
@@ -1208,43 +984,17 @@ t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* s
 
 t_data_table*
 t_gnode::_get_pkeyed_table() const {
-    return m_state->_get_pkeyed_table();
+    return m_gstate->_get_pkeyed_table();
 }
 
 std::shared_ptr<t_data_table>
 t_gnode::get_pkeyed_table_sptr() const {
-    return m_state->get_pkeyed_table();
+    return m_gstate->get_pkeyed_table();
 }
 
 std::vector<t_custom_column>
 t_gnode::get_custom_columns() const {
     return m_custom_columns;
-}
-
-t_gnode_recipe
-t_gnode::get_recipe() const {
-    t_gnode_recipe rv;
-    rv.m_mode = m_mode;
-
-    rv.m_tblschema = m_tblschema.get_recipe();
-
-    for (const auto& s : m_ischemas) {
-        rv.m_ischemas.push_back(s.get_recipe());
-    }
-
-    for (const auto& s : m_oschemas) {
-        rv.m_oschemas.push_back(s.get_recipe());
-    }
-
-    for (const auto& cc : m_custom_columns) {
-        rv.m_custom_columns.push_back(cc.get_recipe());
-    }
-    return rv;
-}
-
-bool
-t_gnode::has_python_dep() const {
-    return !m_custom_columns.empty();
 }
 
 void
@@ -1253,8 +1003,8 @@ t_gnode::set_pool_cleanup(std::function<void()> cleanup) {
 }
 
 const t_schema&
-t_gnode::get_port_schema() const {
-    return m_state->get_port_schema();
+t_gnode::get_state_input_schema() const {
+    return m_gstate->get_input_schema();
 }
 
 bool
@@ -1269,7 +1019,7 @@ t_gnode::clear_updated() {
 
 std::shared_ptr<t_data_table>
 t_gnode::get_sorted_pkeyed_table() const {
-    return m_state->get_sorted_pkeyed_table();
+    return m_gstate->get_sorted_pkeyed_table();
 }
 
 void

@@ -60,7 +60,7 @@ t_ctx0::step_end() {
     std::vector<t_minmax> rval(ncols);
 
     auto pkeys = m_traversal->get_pkeys();
-    auto stbl = m_state->get_table();
+    auto stbl = m_gstate->get_table();
 
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(ncols), 1,
@@ -72,7 +72,7 @@ t_ctx0::step_end() {
             auto colname = m_config.col_at(colidx);
 
             if (stbl->get_dtype(colname) != DTYPE_STR) {
-                auto v = m_state->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
+                auto v = m_gstate->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
                     const std::vector<t_tscalar>&)>>(pkeys, colname, get_vec_min_max);
 
                 rval[colidx].m_min = v.first;
@@ -87,7 +87,6 @@ t_ctx0::step_end() {
 #endif
 }
 
-// ASGGrid data interface
 t_index
 t_ctx0::get_row_count() const {
     return m_traversal->size();
@@ -124,7 +123,7 @@ t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
 
     for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
         std::vector<t_tscalar> out_data(pkeys.size());
-        m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
+        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
 
         for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
             auto v = out_data[ridx - ext.m_srow];
@@ -156,7 +155,7 @@ t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
     auto none = mknone();
     for (t_uindex cidx = 0; cidx < stride; ++cidx) {
         std::vector<t_tscalar> out_data(rows.size());
-        m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
+        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
 
         for (t_uindex ridx = 0; ridx < rows.size(); ++ridx) {
             auto v = out_data[ridx];
@@ -180,12 +179,12 @@ void
 t_ctx0::sort_by(const std::vector<t_sortspec>& sortby) {
     if (sortby.empty())
         return;
-    m_traversal->sort_by(m_state, m_config, sortby);
+    m_traversal->sort_by(m_gstate, m_config, sortby);
 }
 
 void
 t_ctx0::reset_sortby() {
-    m_traversal->sort_by(m_state, m_config, std::vector<t_sortspec>());
+    m_traversal->sort_by(m_gstate, m_config, std::vector<t_sortspec>());
 }
 
 t_tscalar
@@ -246,7 +245,7 @@ t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
 
     for (t_index idx = 0, loop_end = pkeys.size(); idx < loop_end; ++idx) {
         std::string colname = m_config.col_at(cells[idx].second);
-        out_data.push_back(m_state->get(pkeys[idx], colname));
+        out_data.push_back(m_gstate->get(pkeys[idx], colname));
     }
 
     return out_data;
@@ -425,13 +424,13 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
                     if (filter_prev) {
                         if (filter_curr) {
-                            m_traversal->update_row(m_state, m_config, pkey);
+                            m_traversal->update_row(m_gstate, m_config, pkey);
                         } else {
                             m_traversal->delete_row(pkey);
                         }
                     } else {
                         if (filter_curr) {
-                            m_traversal->add_row(m_state, m_config, pkey);
+                            m_traversal->add_row(m_gstate, m_config, pkey);
                         }
                     }
                 } break;
@@ -465,9 +464,9 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         switch (op) {
             case OP_INSERT: {
                 if (existed) {
-                    m_traversal->update_row(m_state, m_config, pkey);
+                    m_traversal->update_row(m_gstate, m_config, pkey);
                 } else {
-                    m_traversal->add_row(m_state, m_config, pkey);
+                    m_traversal->add_row(m_gstate, m_config, pkey);
                 }
             } break;
             case OP_DELETE: {
@@ -516,7 +515,7 @@ t_ctx0::notify(const t_data_table& flattened) {
             switch (op) {
                 case OP_INSERT: {
                     if (msk.get(idx)) {
-                        m_traversal->add_row(m_state, m_config, pkey);
+                        m_traversal->add_row(m_gstate, m_config, pkey);
                     }
                 } break;
                 default: {
@@ -534,7 +533,7 @@ t_ctx0::notify(const t_data_table& flattened) {
 
         switch (op) {
             case OP_INSERT: {
-                m_traversal->add_row(m_state, m_config, pkey);
+                m_traversal->add_row(m_gstate, m_config, pkey);
             } break;
             default: { } break; }
     }

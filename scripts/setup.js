@@ -162,7 +162,7 @@ async function choose_project() {
         {
             type: "expand",
             name: "PSP_PROJECT",
-            message: "Focus (J)avascript, (P)ython, (C)++, (A)ll?",
+            message: "Focus (J)avascript, (P)ython, (A)ll?",
             default: CONFIG["PSP_PROJECT"] || "js",
             choices: [
                 {
@@ -175,12 +175,6 @@ async function choose_project() {
                     name: "python",
                     value: "python"
                 },
-                {
-                    key: "c",
-                    name: "C++",
-                    value: "cpp"
-                },
-
                 {
                     key: "a",
                     name: "(all)",
