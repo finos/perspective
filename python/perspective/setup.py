@@ -116,7 +116,7 @@ class PSPBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join('perspective', 'table')).replace('\\', '/'),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join(extdir, 'perspective', 'table')).replace('\\', '/'),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
@@ -155,6 +155,7 @@ class PSPBuild(build_ext):
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
+        env['OSX_DEPLOYMENT_TARGET'] = '10.9'
         env["PYTHONPATH"] = os.path.sep.join((os.environ.get('PYTHONPATH', ''), os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))))
 
         if not os.path.exists(self.build_temp):

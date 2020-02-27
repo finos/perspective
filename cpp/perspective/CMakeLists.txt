@@ -603,6 +603,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 		target_link_libraries(binding psp)
 
+		# The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the
+		# setup.py file, we designate this to be in the build/lib.<platform> directory. However,
+		# since we want to be able to test perspective in-source, we also copy the libraries into
+		# the source folder. These two commands do that.
 		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
 		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 
