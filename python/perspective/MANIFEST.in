@@ -24,6 +24,10 @@ prune docs/build
 prune docs/gh-pages
 prune docs/dist
 
+# don't ship benchmark
+prune bench
+
+
 # Use package.json for versioning
 include package.json
 
