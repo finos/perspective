@@ -786,7 +786,9 @@ namespace binding {
 
             double fval = item.as<double>();
             if (!is_update && isnan(fval)) {
-                std::cout << "Promoting to string" << std::endl;
+                std::cout << "Promoting column `" 
+                    << name << "` from int64 to string because `" 
+                    << fval << "` is nan" << std::endl;
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 _fill_col_string(
@@ -837,7 +839,9 @@ namespace binding {
                         type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
                     } else if (!is_update && isnan(fval)) {
-                        std::cout << "Promoting to string" << std::endl;
+                        std::cout << "Promoting column `" 
+                            << name << "` from int32 to string because `" 
+                            << fval << "` is nan" << std::endl;
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
                         _fill_col_string(
