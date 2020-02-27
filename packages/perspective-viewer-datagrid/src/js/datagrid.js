@@ -7,12 +7,16 @@
  *
  */
 
-import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
+import {throttlePromise, registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
+import CONTAINER_STYLE from "../less/container.less";
+import MATERIAL_STYLE from "../less/material.less";
 
 const DEBUG = true;
 
-const DOUBLE_BUFFER = true;
+const DOUBLE_BUFFER_COLUMN = false;
+
+const DOUBLE_BUFFER_ROW = false;
 
 // The largest size virtual <div> in (px) that Chrome can support without
 // glitching.
@@ -20,122 +24,11 @@ const CHROME_FUCKUP_LIMIT = 10000000;
 
 const PRIVATE = Symbol("Private Datagrid");
 
-const CONTAINER_STYLE = `
-div.pd-scroll-container {
-    position:absolute;
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    overflow:auto;
-}
-div.pd-virtual-panel {
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    pointer-events:none;
-}
-div.pd-scroll-table-clip {
-    position:absolute;
-    overflow:hidden;
-    width:100%;
-    height:100%
-}
-slot {
-    position:absolute;
-    overflow:hidden;
-}`.replace(/\s+?/, " ");
-
-const TYPE_STYLE = `
-th {
-    text-align: center;
-}
-thead tr:last-child th.float, tbody td.float {
-    text-align: right;
-}
-thead tr:last-child th.integer, tbody td.integer {
-    text-align: right;
-    color: #1a7da1;
-}
-thead tr:last-child th.string, tbody td.string {
-    text-align: left;
-}`.replace(/\s+?/, " ");
-
-const TABLE_STYLE = `
-.pd-group-header {
-    border-right: 1px solid #aaa;
-}
-td {
-    white-space: nowrap;
-    font-size: 12px;
-    padding-right: 8px;
-}
-tr:last-child th {
-    border-bottom: 1px solid #aaa;
-}
-th { 
-    white-space: nowrap;
-    font-size: 12px;
-    padding-right: 8px;
-}
-tr:not(:last-child) th {
-    border-right: 1px solid #aaa;
-}
-tr:hover{
-    background-color:#eee;
-    transition:none
-}
-tr{
-    transition:background-color 0.2s ease-in;
-}
-table * {
-    box-sizing: border-box;
-}
-table {
-    position:absolute;
-    overflow:hidden;
-}`.replace(/\s+?/, " ");
-
 /******************************************************************************
  *
  * Utilities
  *
  */
-
-/**
- * Debounce class async method deocator locks and conflates methods calls.
- *
- */
-function debounce(_target, _property, descriptor) {
-    const func = descriptor.value;
-    descriptor.value = new_func;
-    return descriptor;
-
-    async function new_func(...args) {
-        if (this.lock) {
-            try {
-                await this.lock;
-            } catch (e) {
-                // TODO handle `task`
-                console.error(e);
-            }
-        }
-        if (this.lock) {
-            return;
-        }
-        try {
-            this.lock = func.call(this, ...args);
-            await this.lock;
-            this.lock = undefined;
-        } catch (e) {
-            // TODO handle `task`
-            console.error(e);
-        } finally {
-            this.lock = undefined;
-        }
-    }
-}
 
 /**
  * A class method decorate for memoizing method results.  Only works on one
@@ -164,13 +57,18 @@ function _log_fps() {
     this._log = [];
 }
 
-function _tree_header(td, path) {
+function _tree_header(td, path, is_leaf, is_open) {
+    let name;
     if (path.length > 0) {
-        const name = path[path.length - 1];
-        //const len = Math.max(0, path.length) * 24;
-        td.innerHTML = `${name}`;
+        name = path[path.length - 1];
     } else {
-        td.innerHTML = "TOTAL";
+        name = "TOTAL";
+    }
+    if (is_leaf) {
+        td.innerHTML = `<span style="margin-left:${path.length * 22 + 12}px">${name}</span>`;
+    } else {
+        const icon = is_open ? "remove" : "add";
+        td.innerHTML = `<div style="display:flex;align-items:center"><span style="padding-left:${path.length * 22}px" class="pd-row-header-icon">${icon}</span><span style="">${name}</span></div>`;
     }
     td.classList.add("pd-group-header");
 }
@@ -270,13 +168,14 @@ class DatagridHeaderViewModel extends ViewModel {
         this.pinned_widths = pinned_widths;
     }
 
-    pin_cell_widths() {
+    pin_cell_widths(max = 1000) {
         let {tr} = this._get_row(this.rows.length - 1);
         for (let i = 0; i < tr.children.length; i++) {
             const th = tr.children[i];
             const name = th.column_name;
-            const new_width = Math.min(1000, th.offsetWidth) + "px";
-            this.pinned_widths[name] = new_width;
+            const type = th.column_type;
+            const new_width = Math.min(max, th.offsetWidth) + "px";
+            this.pinned_widths[`${name}|${type}`] = new_width;
         }
     }
 
@@ -305,9 +204,11 @@ class DatagridHeaderViewModel extends ViewModel {
     _draw_th(column, column_name, type, th) {
         th.column_path = column;
         th.column_name = column_name;
-        //th.classList.add(type);
-        if (this.pinned_widths[column_name]) {
-            th.style.minWidth = this.pinned_widths[column_name];
+        th.column_type = type;
+        const pin_width = this.pinned_widths[`${column_name}|${type}`];
+        th.classList.add(type);
+        if (pin_width) {
+            th.style.minWidth = pin_width;
         } else {
             th.style.minWidth = "";
         }
@@ -362,20 +263,22 @@ function column_path_2_type(schema, column) {
  * @class DatagridBodyViewModel
  */
 class DatagridBodyViewModel extends ViewModel {
-    _draw_td(ridx, cidx, val, type) {
+    _draw_td(ridx, cidx, val, type, depth, is_open) {
         const {tr, row_container} = this._get_row(ridx);
         const td = this._get_cell("td", row_container, cidx, tr);
         td.className = type;
         if (val === undefined || val === null) {
             td.textContent = "-";
+            td.value = null;
         } else {
             const formatter = this._format(type);
             if (formatter) {
-                formatter.format(td, val);
+                formatter.format(td, val, val.length === depth, is_open);
 
                 // TODO hack
                 td.value = Array.isArray(val) ? val[val.length - 1] : val;
                 td.row_path = val;
+                td.ridx = ridx;
             } else {
                 td.textContent = val;
                 td.value = val;
@@ -385,12 +288,13 @@ class DatagridBodyViewModel extends ViewModel {
         return td;
     }
 
-    draw(container_height, cidx, column_data, type) {
+    draw(container_height, cidx, column_data, type, depth) {
         let ridx = 0;
         let td;
 
         for (const val of column_data) {
-            td = this._draw_td(ridx++, cidx, val, type);
+            const next = column_data[ridx + 1];
+            td = this._draw_td(ridx++, cidx, val, type, depth, next?.length > val?.length);
 
             // TODO slice rows external
             if (ridx * 19 > container_height) {
@@ -432,14 +336,14 @@ class DatagridTableViewModel {
     }
 
     set_offscreen() {
-        this._old = this.table.style.left;
+        //this._old = this.table.style.left;
         this.table.style.left = "-100000px";
         this.table.style.display = "";
     }
 
     set_active() {
         this.table.style.display = "";
-        this.table.style.left = this._old;
+        this.table.style.left = "";
     }
 
     set_inactive() {
@@ -455,7 +359,7 @@ class DatagridTableViewModel {
         return this.table.offsetWidth;
     }
 
-    async draw(container_width, container_height, view, header_levels, column_paths, schemap, viewport) {
+    async draw(container_width, container_height, view, header_levels, row_levels, column_paths, schemap, viewport) {
         const column_datap = view.to_columns(viewport);
 
         // TODO use start index instead
@@ -469,40 +373,40 @@ class DatagridTableViewModel {
 
         if (column_paths[0] === "__ROW_PATH__") {
             cont_head = this.header.draw(header_levels, "");
-            cont_body = this.body.draw(container_height, cidx, columns_data["__ROW_PATH__"]);
+            cont_body = this.body.draw(container_height, cidx, columns_data["__ROW_PATH__"], undefined, row_levels);
             width += cont_body.offsetWidth;
             cidx++;
         }
 
-        while (cidx < visible_columns.length) {
-            const column_name = visible_columns[cidx];
-            if (!columns_data[column_name]) {
-                let missing_cidx = Math.max(viewport.end_col, 0);
-                viewport.start_col = missing_cidx;
-                viewport.end_col = missing_cidx + 1;
-                const new_col = await view.to_columns(viewport);
-                if (!(column_name in new_col)) {
-                    throw new Error(`Missing column ${column_name}; contains ${Object.keys(new_col).join(", ")}`);
+        try {
+            while (cidx < visible_columns.length) {
+                const column_name = visible_columns[cidx];
+                if (!columns_data[column_name]) {
+                    let missing_cidx = Math.max(viewport.end_col, 0);
+                    viewport.start_col = missing_cidx;
+                    viewport.end_col = missing_cidx + 1;
+                    const new_col = await view.to_columns(viewport);
+                    if (!(column_name in new_col)) {
+                        throw new Error(`Missing column ${column_name}; contains ${Object.keys(new_col).join(", ")}`);
+                    }
+                    columns_data[column_name] = new_col[column_name];
                 }
-                columns_data[column_name] = new_col[column_name];
-            }
-            const column_data = columns_data[column_name];
-            const type = column_path_2_type(schema, column_name);
+                const column_data = columns_data[column_name];
+                const type = column_path_2_type(schema, column_name);
 
-            cont_head = this.header.draw(header_levels, column_name, type, cont_head);
-            cont_body = this.body.draw(container_height, cidx, column_data, type);
-            width += cont_body.offsetWidth;
-            cidx++;
+                cont_head = this.header.draw(header_levels, column_name, type, cont_head);
+                cont_body = this.body.draw(container_height, cidx, column_data, type);
+                width += cont_body.offsetWidth;
+                cidx++;
 
-            if (width > container_width) {
-                break;
+                if (width > container_width) {
+                    break;
+                }
             }
+        } finally {
+            this.body.clean({ridx: cont_body?.ridx || 0, cidx});
+            this.header.clean(cont_head);
         }
-
-        this.body.clean({ridx: cont_body.ridx, cidx});
-        this.header.clean(cont_head);
-
-        this.header.pin_cell_widths();
     }
 }
 
@@ -565,8 +469,8 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         container.classList.add("pd-scroll-container");
         container.appendChild(virtual_panel);
         container.appendChild(table_clip);
-        container.addEventListener("scroll", this._on_scroll.bind(this));
-        container.addEventListener("mousewheel", this._on_mousewheel.bind(this));
+        container.addEventListener("scroll", this._on_scroll.bind(this), {passive: false});
+        container.addEventListener("mousewheel", this._on_mousewheel.bind(this), {passive: false});
 
         const slot = document.createElement("slot");
         table_clip.appendChild(slot);
@@ -608,8 +512,8 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         return {invalid_column, invalid_row};
     }
 
-    _swap_in(invalid_column) {
-        if (DOUBLE_BUFFER && invalid_column) {
+    _swap_in(force_redraw, invalid_row, invalid_column) {
+        if ((DOUBLE_BUFFER_COLUMN && (invalid_column || force_redraw)) || (DOUBLE_BUFFER_ROW && (invalid_row || force_redraw))) {
             const old = this.table_model;
             this.table_model = this.table_model2;
             this.table_model2 = old;
@@ -619,9 +523,9 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         this.elem.dispatchEvent(new CustomEvent("perspective-datagrid-before-update"));
     }
 
-    _swap_out(invalid_column) {
+    _swap_out(force_redraw, invalid_row, invalid_column) {
         this.elem.dispatchEvent(new CustomEvent("perspective-datagrid-after-update"));
-        if (DOUBLE_BUFFER && invalid_column) {
+        if ((DOUBLE_BUFFER_COLUMN && (invalid_column || force_redraw)) || (DOUBLE_BUFFER_ROW && (invalid_row || force_redraw))) {
             this.table_model2.set_inactive();
             this.detach();
             this.table_model.set_active();
@@ -637,27 +541,15 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     /**
-     * When `pd-scroll-container` scrolls, we need to move the `table`
-     * immediately to match the viewport, then call `_on_scroll` to override
-     * the Browser's default scrolling render.
-     *
      * @returns
      * @memberof DatagridViewModel
      */
-    async _on_scroll() {
-        const {virtual_panel, _container, table_clip} = this;
-        const total_scroll_height = Math.max(1, virtual_panel.offsetHeight - _container.offsetHeight);
-        const new_top = Math.min(total_scroll_height, _container.scrollTop) + "px";
-
-        const total_scroll_width = Math.max(1, virtual_panel.offsetWidth - _container.offsetWidth);
-        const new_left = Math.min(total_scroll_width, _container.scrollLeft) + "px";
-
-        if (table_clip.top !== new_top || table_clip.left !== new_left) {
-            table_clip.style.top = new_top;
-            table_clip.style.left = new_left;
-            await this.draw(this.view);
-            this.elem.dispatchEvent(new CustomEvent("perspective-datagrid-scroll"));
-        }
+    async _on_scroll(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.returnValue = false;
+        await this.draw(this.view);
+        this.elem.dispatchEvent(new CustomEvent("perspective-datagrid-scroll"));
     }
 
     /**
@@ -669,11 +561,12 @@ class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _on_mousewheel(event) {
         event.preventDefault();
+        event.returnValue = false;
         const total_scroll_height = Math.max(1, this.virtual_panel.offsetHeight - this._container.offsetHeight);
         const total_scroll_width = Math.max(1, this.virtual_panel.offsetWidth - this._container.offsetWidth);
         this._container.scrollTop = Math.min(total_scroll_height, this._container.scrollTop + event.deltaY);
         this._container.scrollLeft = Math.min(total_scroll_width, this._container.scrollLeft + event.deltaX);
-        this._on_scroll();
+        this._on_scroll(event);
     }
 
     resize() {
@@ -682,11 +575,12 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     reset_scroll() {
+        this.table_model.header.pinned_widths["|undefined"] = undefined;
         this._container.scrollTop = 0;
         this._container.scrollLeft = 0;
     }
 
-    @debounce
+    @throttlePromise
     async draw(view, force_redraw = false) {
         let start;
         if (DEBUG) {
@@ -699,9 +593,9 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const container_width = (this._container_width = this._container_width || this._container.offsetWidth);
         const container_height = (this._container_height = this._container_height || this._container.offsetHeight);
 
-        const nrowsp = view.num_rows();
-        const column_pathsp = view.column_paths();
-        const schemap = view.schema();
+        const nrowsp = view.num_rows().catch(() => {});
+        const column_pathsp = view.column_paths().catch(() => {});
+        const schemap = view.schema().catch(() => {});
         const nrows = await nrowsp;
         const {start_row, end_row} = this._calculate_row_range(container_height, nrows);
         const virtual_panel_px_size = Math.min(CHROME_FUCKUP_LIMIT, (nrows + this.table_model.header.cells.length) * 19);
@@ -713,11 +607,12 @@ class DatagridVirtualTableViewModel extends HTMLElement {
             const viewport = {start_col, end_col, start_row, end_row};
             let {invalid_row, invalid_column} = this._validate_viewport(viewport);
             if (force_redraw || invalid_row || invalid_column) {
-                this._swap_in(invalid_column);
+                this._swap_in(force_redraw, invalid_row, invalid_column);
                 const header_levels = this.config.column_pivots.length + 1;
-                await this.table_model.draw(container_width, container_height, view, header_levels, column_paths, schemap, viewport);
-
-                this._swap_out(invalid_column);
+                const row_levels = this.config.row_pivots.length;
+                await this.table_model.draw(container_width, container_height, view, header_levels, row_levels, column_paths, schemap, viewport);
+                this._swap_out(force_redraw, invalid_row, invalid_column);
+                this.table_model.header.pin_cell_widths();
                 this._update_virtual_panel_width(container_width, force_redraw, column_paths);
             }
         }
@@ -740,17 +635,40 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     detach() {
-        this.shadowRoot.appendChild(this.table_model2.table);
+        this.table_model2.table.parentElement?.removeChild(this.table_model2.table);
+    }
+
+    async _on_click(event) {
+        if (event.target.tagName === "SPAN") {
+            const td = event.target.parentElement.parentElement;
+            if (event.target.textContent === "remove") {
+                if (event.shiftKey) {
+                    await this.view.set_depth(td.row_path.length - 1);
+                } else {
+                    await this.view.collapse(td.ridx);
+                }
+                this.draw(this.view, true);
+            } else if (event.target.textContent === "add") {
+                if (event.shiftKey) {
+                    await this.view.set_depth(td.row_path.length);
+                } else {
+                    await this.view.expand(td.ridx);
+                }
+                this.draw(this.view, true);
+            }
+        }
     }
 
     connectedCallback() {
         const pinned_widths = {};
         this.table_model = new DatagridTableViewModel(this.table_clip, pinned_widths);
         this.table_model.set_active();
+        this.table_model.table.addEventListener("mousedown", this._on_click.bind(this));
         this.attach();
 
-        if (DOUBLE_BUFFER) {
+        if (DOUBLE_BUFFER_COLUMN) {
             this.table_model2 = new DatagridTableViewModel(this.table_clip, pinned_widths);
+            this.table_model2.table.addEventListener("click", this._on_click.bind(this));
             this.detach();
         }
     }
@@ -783,13 +701,17 @@ class DatagridPlugin {
     }
 
     async update(div, view) {
-        await DatagridPlugin.prototype.create(div, view);
+        try {
+            await div[PRIVATE].draw(view, true);
+        } catch (e) {
+            return;
+        }
     }
 
     async create(div, view) {
         if (!div.hasOwnProperty(PRIVATE)) {
             const style = document.createElement("style");
-            style.textContent = [TABLE_STYLE, TYPE_STYLE].join("");
+            style.textContent = MATERIAL_STYLE;
             document.head.appendChild(style);
             div[PRIVATE] = document.createElement("perspective-datagrid");
             div[PRIVATE].set_element(this);
@@ -801,27 +723,15 @@ class DatagridPlugin {
 
         // TODO only on schema change
         div[PRIVATE].reset_scroll();
-        try {
-            await div[PRIVATE].draw(view, true);
-            div[PRIVATE]._failed = false;
-        } catch (e) {
-            return;
-        }
+
+        await div[PRIVATE].draw(view, true);
     }
 
     async resize() {
-        if (this._datavis[PRIVATE]?._failed) {
-            console.warn("Attempting to render during failure, ignoring");
-            return;
+        if (this.view && this._datavis[PRIVATE]) {
+            this._datavis[PRIVATE].resize();
+            await this._datavis[PRIVATE].draw(this.view);
         }
-        if (this.view)
-            try {
-                this._datavis[PRIVATE].resize();
-                await this._datavis[PRIVATE].draw(this.view);
-            } catch (e) {
-                this._datavis[PRIVATE]._failed = true;
-                return;
-            }
     }
 }
 

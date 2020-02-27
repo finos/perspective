@@ -18,7 +18,9 @@
     <script src="perspective-viewer-datagrid.js"></script>
 
     <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material-dense.css" is="custom-style">
+    <link rel='stylesheet' href="material-dense.dark.css" is="custom-style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron">
+  
 
 </head>
 
@@ -31,8 +33,9 @@
 
     <script>
 
+
         function hue(value, min, max) {
-            const norm = "0" + Math.abs(Math.round(255 * Math.min(Math.max(value, min), max))).toString(16);
+            const norm = "0" + Math.abs(Math.round(255 * (Math.min(Math.max(value, min), max) / (max - min)))).toString(16);
             return norm.slice(norm.length - 2, norm.length);
         }
 
@@ -44,6 +47,11 @@
             viewer.toggleConfig();
 
             const CACHE = {}
+            let max = -Infinity;
+
+            viewer.addEventListener("perspective-config-update", () => {
+                max = -Infinity;
+            });
 
             viewer.addEventListener("perspective-datagrid-after-update", () => {
 
@@ -51,44 +59,58 @@
                     obj[key] = CACHE[key].slice();
                     return obj;
                 }, {});
-    
+
+                
                 for (const td of document.querySelectorAll("perspective-viewer td")) {
+                    
                     const clean_name = td.value && td.value.trim && td.value.trim();
                     if (td.classList.contains("float")) {
                         if (td.value < 0) {
-                            td.style.color = "#fff";
-                            td.style.backgroundColor = `#${hue(td.value, -100, 0)}0000`;
+                            const fg = hue(Math.min(td.value, -50), -100, 0);
+                            td.style.color = `#${fg}${fg}${fg}`;
+                            td.style.background = `radial-gradient(#${hue(Math.min(td.value, -20), -100, 0)}3136, #243136`;;
+                            td.style.border = `1px solid #${hue(Math.min(td.value / 3, -20), -100, 0)}3136`;;
                         } else if (td.value > 0) {
-                            td.style.color = "#fff";
-                            td.style.backgroundColor = `#00${hue(td.value, 0, 100)}00`;
+                            const fg = hue(Math.max(td.value, 50), 0, 100);
+                            td.style.color = `#${fg}${fg}${fg}`;
+                            td.style.background =  `radial-gradient(#24${hue(Math.max(20, td.value), 0, 100)}36, #243136`
+                            td.style.border = `1px solid #24${hue(Math.max(td.value / 3, 20), 0, 100)}36`;;
                         } else {
                             td.style.color = "#000";
-                            td.style.backgroundColor = "";
+                            td.style.background = "";
+                            td.style.border = ``;;
                         }
                     } else if (td.classList.contains("integer")) {
-                        td.style.backgroundColor = "";
+                        td.style.background = "";
+                        td.style.border = ``;;
                         if (!td.value) {
                         } else {
-                            td.innerHTML = `<div style="height:15px;width:${td.value || 0}px;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
+                            max = Math.max(max, td.value || 0);
+                            console.log(max)
+                            let v = (td.value || 0) / max
+                            td.innerHTML = `<div style="height:15px;width:${v * 100}%;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
                         }
                     } else if (states[clean_name]) {
-                        td.style.backgroundColor = "";
+                        td.style.background = "";
+                        td.style.border = ``;;
                         if (cache[clean_name] && cache[clean_name].length > 0) {
                             const name = td.value;
-                            td.innerHTML = "";
+                            td.textContent = "";
                             td.appendChild(cache[name].pop());
                         } else {
                             const name = td.value;
                             img = document.createElement("img");
-                            img.setAttribute("src", `https://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
+                            img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
                             img.setAttribute("height", "15");
+                            td.textContent = "";
                             td.appendChild(img);
                             CACHE[name] = CACHE[name] || [];
                             CACHE[name].push(img);                           
                         }
                         
                     } else {
-                        td.style.backgroundColor = "";
+                        td.style.border = ``;;
+                        td.style.background = "";
                         td.style.color = "";                
                     }
                 }
@@ -102,6 +124,7 @@
                 "California": "CA",
                 "Colorado": "CO",
                 "Connecticut": "CT",
+                "District of Columbia": "DC",
                 "Delaware": "DE",
                 "Florida": "FL",
                 "Georgia": "GA",
@@ -150,6 +173,49 @@
         });
     </script>
 
+    <style>
+        td {       
+            height: 24px;           
+        }
+        tr td.pd-group-header, tr th.pd-group-header {
+            border-right: 1px solid #666 !important;
+        }
+        tbody:hover tr {
+            opacity: 0.5;
+            transition: opacity 0.2s ease-in;
+        }
+        tbody:hover tr:hover td div {
+            transform: scaleX(1.3);
+            transform-origin:0;
+            transition: transform 0.2s ease-in;
+        }
+        tbody:hover tr:hover { 
+            box-shadow: 0px 0px 20px rgba(0,0,0,0.4);
+            opacity: 1;
+            transition: none;
+        } 
+        tr:last-child th {
+            border-bottom: 1px solid #666;
+        }
+        tr th {
+            border-right: 1px solid #666;
+        }
+        tbody:hover tr:hover td { 
+            background: none;
+            opacity: 1;
+        }
+        tbody:hover tr:nth-child(even):hover td, tbody tr:nth-child(even) td {
+            background: rgba(0,0,0,0.1);
+        }
+        td.float {
+            text-align: center !important;
+            font-family: Orbitron;
+        }
+        th.integer, td.integer {
+            width: 100px;
+        }
+        
+    </style>
 </body>
 
 </html>
