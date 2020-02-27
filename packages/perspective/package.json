@@ -52,6 +52,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.8.4",
+        "chevrotain": "^6.5.0",
         "core-js": "^3.6.4",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",

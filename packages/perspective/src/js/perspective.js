@@ -18,6 +18,8 @@ import {Server} from "./api/server.js";
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
+import {expression_to_computed_column_config} from "./computed_columns/visitor";
+
 // IE fix - chrono::steady_clock depends on performance.now() which does not
 // exist in IE workers
 if (global.performance === undefined) {
@@ -1218,7 +1220,15 @@ export default function(Module) {
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
-        config.computed_columns = config.computed_columns || [];
+
+        if (typeof config.computed_columns === "string") {
+            const parsed = expression_to_computed_column_config(config.computed_columns);
+            config.computed_columns = parsed;
+        } else {
+            config.computed_columns = config.computed_columns || [];
+        }
+
+        console.log(config.computed_columns);
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
