@@ -14,6 +14,7 @@ const datetime = require("./computed/datetime");
 const updates = require("./computed/updates");
 const deltas = require("./computed/deltas");
 const invariant = require("./computed/invariant");
+const expressions = require("./computed/expressions");
 
 module.exports = perspective => {
     functionality(perspective);
@@ -23,4 +24,5 @@ module.exports = perspective => {
     updates(perspective);
     deltas(perspective);
     invariant(perspective);
+    expressions(perspective);
 };
