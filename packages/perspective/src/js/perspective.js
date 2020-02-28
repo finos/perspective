@@ -67,12 +67,22 @@ export default function(Module) {
                 return __MODULE__.t_computed_function_name.ABS;
             case "%":
                 return __MODULE__.t_computed_function_name.PERCENT_A_OF_B;
+            case "==":
+                return __MODULE__.t_computed_function_name.EQUALS;
+            case "!=":
+                return __MODULE__.t_computed_function_name.NOT_EQUALS;
+            case ">":
+                return __MODULE__.t_computed_function_name.GREATER_THAN;
+            case "<":
+                return __MODULE__.t_computed_function_name.LESS_THAN;
             case "Uppercase":
                 return __MODULE__.t_computed_function_name.UPPERCASE;
             case "Lowercase":
                 return __MODULE__.t_computed_function_name.LOWERCASE;
             case "length":
                 return __MODULE__.t_computed_function_name.LENGTH;
+            case "is":
+                return __MODULE__.t_computed_function_name.IS;
             case "concat_space":
                 return __MODULE__.t_computed_function_name.CONCAT_SPACE;
             case "concat_comma":

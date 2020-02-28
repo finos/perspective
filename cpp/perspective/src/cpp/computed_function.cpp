@@ -301,11 +301,62 @@ NUMERIC_FUNCTION_1(BUCKET_0_0_0_1);
         return rval;                                                           \
     }
 
+#define EQUALS(T1, T2)                                                  \
+    t_tscalar equals_##T1##_##T2(t_tscalar x, t_tscalar y) {            \
+        t_tscalar rval;                                                 \
+        rval.set(false);                                                \
+        if ((x.is_none() || !x.is_valid())                              \
+            && (y.is_none() || !y.is_valid())) {                        \
+            rval.set(true);                                             \
+            return rval;                                                \
+        } else if ((x.is_none() || !x.is_valid())                       \
+            || (y.is_none() || !y.is_valid())) {                        \
+            rval.set(false);                                            \
+            return rval;                                                \
+        }                                                               \
+        rval.set(static_cast<bool>(x.get<T1>() == y.get<T2>()));        \
+        return rval;                                                    \
+    }
+
+#define NOT_EQUALS(T1, T2)                                              \
+    t_tscalar not_equals_##T1##_##T2(t_tscalar x, t_tscalar y) {        \
+        t_tscalar rval;                                                 \
+        rval.set(false);                                                \
+        if ((x.is_none() || !x.is_valid())                              \
+            || (y.is_none() || !y.is_valid())) return rval;             \
+        rval.set(static_cast<bool>(x.get<T1>() != y.get<T2>()));        \
+        return rval;                                                    \
+    }
+
+#define GREATER_THAN(T1, T2)                                            \
+    t_tscalar greater_than_##T1##_##T2(t_tscalar x, t_tscalar y) {      \
+        t_tscalar rval;                                                 \
+        rval.set(false);                                                \
+        if ((x.is_none() || !x.is_valid())                              \
+            || (y.is_none() || !y.is_valid())) return rval;             \
+        rval.set(static_cast<bool>(x.get<T1>() > y.get<T2>()));         \
+        return rval;                                                    \
+    }
+
+#define LESS_THAN(T1, T2)                                               \
+    t_tscalar less_than_##T1##_##T2(t_tscalar x, t_tscalar y) {         \
+        t_tscalar rval;                                                 \
+        rval.set(false);                                                \
+        if ((x.is_none() || !x.is_valid())                              \
+            || (y.is_none() || !y.is_valid())) return rval;             \
+        rval.set(static_cast<bool>(x.get<T1>() < y.get<T2>()));         \
+        return rval;                                                    \
+    }
+
 NUMERIC_FUNCTION_2(ADD);
 NUMERIC_FUNCTION_2(SUBTRACT);
 NUMERIC_FUNCTION_2(MULTIPLY);
 NUMERIC_FUNCTION_2(DIVIDE);
 NUMERIC_FUNCTION_2(PERCENT_OF);
+NUMERIC_FUNCTION_2(EQUALS);
+NUMERIC_FUNCTION_2(NOT_EQUALS);
+NUMERIC_FUNCTION_2(GREATER_THAN);
+NUMERIC_FUNCTION_2(LESS_THAN);
 
 /**
  * @brief Generate dispatch functions that call the correct computation method
@@ -351,6 +402,10 @@ NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(subtract);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(multiply);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(divide);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(percent_of);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(equals);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(not_equals);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(greater_than);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(less_than);
 
 // String functions
 t_tscalar length(t_tscalar x) {
@@ -362,6 +417,21 @@ t_tscalar length(t_tscalar x) {
 
     std::string val = x.to_string();
     rval.set(static_cast<std::int64_t>(val.size()));
+    return rval;
+}
+
+t_tscalar is(t_tscalar x, t_tscalar y) {
+    t_tscalar rval;
+    rval.set(false);
+
+    if ((x.is_none() || !x.is_valid() || x.get_dtype() != DTYPE_STR)
+        || (y.is_none() || !y.is_valid() || y.get_dtype() != DTYPE_STR)) {
+        return rval;
+    }
+
+    std::string x_str = x.to_string();
+    std::string y_str = y.to_string();
+    rval.set(x_str == y_str);
     return rval;
 }
 
