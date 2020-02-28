@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.5] (2020-02-28)
+
+#### Fixed
+  * [#956](https://github.com/finos/perspective/pull/956) Emit source maps for WebWorker. ([@texodus](https://github.com/texodus))
+  * [#953](https://github.com/finos/perspective/pull/953) Bugfix sdist ([@timkpaine](https://github.com/timkpaine))
+
+#### Internal
+  * [#939](https://github.com/finos/perspective/pull/939) Refactor `gnode` and `gnode_state`, remove C++ test suite ([@sc1f](https://github.com/sc1f))
+
 ## [0.4.4] (2020-02-26)
 
 #### Fixed
