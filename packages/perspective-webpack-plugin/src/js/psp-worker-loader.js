@@ -51,12 +51,11 @@ exports.default = function loader(content) {
             .replace(path.join("dist", "esm"), path.join("dist", "umd"));
         content = fs.readFileSync(inputPath).toString();
         if (!options.inline) {
+            this.emitFile(emitPath, "" + content);
             const map_file = `${inputPath}.map`;
             if (fs.existsSync(map_file)) {
                 const map_content = fs.readFileSync(map_file).toString();
-                this.emitFile(emitPath, "" + content, map_content);
-            } else {
-                this.emitFile(emitPath, "" + content);
+                this.emitFile(`${emitPath}.map`, map_content, undefined, {development: true});
             }
         }
     }
