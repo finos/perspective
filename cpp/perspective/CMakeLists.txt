@@ -243,7 +243,6 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
-			-s WASM_OBJECT_FILES=0 \
 			--llvm-lto 3 \
 			--closure 1 \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
