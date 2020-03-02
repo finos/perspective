@@ -65,12 +65,12 @@ vec_to_set(const std::vector<DATA_T>& v, std::set<DATA_T>& out_s) {
 inline void
 ltrim_inplace(std::string& s) {
     s.erase(s.begin(),
-        std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+        std::find_if(s.begin(), s.end(), [](int c) {return !std::isspace(c);}));
 }
 
 inline void
 rtrim_inplace(std::string& s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace)))
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int c) {return !std::isspace(c);})
                 .base(),
         s.end());
 }
