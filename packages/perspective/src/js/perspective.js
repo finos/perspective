@@ -1100,7 +1100,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of accumulated rows.
      */
     table.prototype.size = function() {
-        _call_process(this.table_id);
+        _call_process(this._Table.get_id());
         return this._Table.size();
     };
 
@@ -1240,7 +1240,7 @@ export default function(Module) {
      * supplied configuration, bound to this table
      */
     table.prototype.view = function(_config = {}) {
-        _call_process(this.get_id());
+        _call_process(this._Table.get_id());
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
@@ -1454,6 +1454,7 @@ export default function(Module) {
         }
 
         try {
+            _call_process(this._Table.get_id());
             _Table = __MODULE__.make_computed_table(this._Table, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);

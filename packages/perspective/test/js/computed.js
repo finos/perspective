@@ -817,6 +817,78 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("Bucket (m), date with updates", async function() {
+                const table = perspective.table({
+                    a: "date"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (m)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "date",
+                    bucket: "date"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket).toEqual(result.a);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
+            it("Bucket (m), datetime with updates", async function() {
+                const table = perspective.table({
+                    a: "datetime"
+                });
+
+                const table2 = table.add_computed([
+                    {
+                        column: "bucket",
+                        computed_function_name: "Bucket (m)",
+                        inputs: ["a"]
+                    }
+                ]);
+
+                let view = table2.view();
+
+                const schema = await table2.schema();
+                expect(schema).toEqual({
+                    a: "datetime",
+                    bucket: "datetime"
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                table2.update({
+                    a: [new Date(2020, 0, 15, 1, 30, 15), new Date(2020, 1, 27, 1, 30, 30), new Date(2020, 2, 28, 1, 30, 45), new Date(2020, 3, 29, 1, 30, 0), new Date(2020, 4, 30, 1, 30, 15)]
+                });
+
+                let result = await view.to_columns();
+                expect(result.bucket.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => minute_bucket(x)));
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
+
             it("Computed schema returns names and metadata", async function() {
                 const func = (x, y) => x - y;
                 const computation = {

@@ -963,16 +963,9 @@ namespace binding {
                 method_name, input_types);
             t_dtype output_column_type = computation.m_return_type;
 
-            // don't double create output column
-            auto schema = flattened->get_schema();
-            std::shared_ptr<t_column> output_column;
-            if (schema.has_column(output_column_name)) {
-                output_column = flattened->get_column(output_column_name);
-            } else {
-                output_column = flattened->add_column_sptr(
+            std::shared_ptr<t_column> output_column = 
+                flattened->add_column_sptr(
                     output_column_name, output_column_type, true);
-                output_column->reserve(table_columns[0]->size());
-            }
 
             t_computed_column::apply_computation(
                 table_columns,
