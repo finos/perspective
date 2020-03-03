@@ -39,7 +39,7 @@
             return norm.slice(norm.length - 2, norm.length);
         }
 
-        window.addEventListener('WebComponentsReady', async function() {
+        window.addEventListener('DOMContentLoaded', async function() {
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
             const data = await fetch("superstore.arrow");
             const arr = await data.arrayBuffer();
@@ -86,7 +86,6 @@
                         if (!td.value) {
                         } else {
                             max = Math.max(max, td.value || 0);
-                            console.log(max)
                             let v = (td.value || 0) / max
                             td.innerHTML = `<div style="height:15px;width:${v * 100}%;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
                         }
@@ -99,11 +98,12 @@
                             td.appendChild(cache[name].pop());
                         } else {
                             const name = td.value;
+                            const span = document.createElement("span")
                             img = document.createElement("img");
                             img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
-                            img.setAttribute("height", "15");
                             td.textContent = "";
-                            td.appendChild(img);
+                            span.appendChild(img)
+                            td.appendChild(span);
                             CACHE[name] = CACHE[name] || [];
                             CACHE[name].push(img);                           
                         }

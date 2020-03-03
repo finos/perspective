@@ -23,7 +23,6 @@
     <link rel='stylesheet' href="index.css">
     <link rel='stylesheet' href="material-dense.css" is="custom-style">
     
-
 </head>
 
 <body>
@@ -33,7 +32,7 @@
     </perspective-viewer>
 
     <script>
-        window.addEventListener('WebComponentsReady', async function() {
+        window.addEventListener('DOMContentLoaded', async function() {
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
             const data = await fetch("superstore.arrow");
             viewer.load(await data.arrayBuffer());
