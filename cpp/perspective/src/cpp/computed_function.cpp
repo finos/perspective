@@ -429,9 +429,8 @@ t_tscalar is(t_tscalar x, t_tscalar y) {
         return rval;
     }
 
-    std::string x_str = x.to_string();
-    std::string y_str = y.to_string();
-    rval.set(x_str == y_str);
+    bool eq = strcmp(x.get_char_ptr(), y.get_char_ptr()) == 0;
+    rval.set(eq);
     return rval;
 }
 

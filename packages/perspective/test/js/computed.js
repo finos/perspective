@@ -1477,11 +1477,101 @@ module.exports = perspective => {
                             inputs: ["a", "b"]
                         }
                     ]);
-                console.log(await table.size());
                 let view = table.view();
                 let result = await view.to_columns();
-                console.log(result);
                 expect(result.result).toEqual([true, true, false, false, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("is, short", async function() {
+                const table = perspective
+                    .table({
+                        a: ["A", "E", null, "h", "l"],
+                        b: ["a", "E", undefined, "h", "l"]
+                    })
+                    .add_computed([
+                        {
+                            column: "result",
+                            computed_function_name: "is",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.result).toEqual([false, true, false, true, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("is, mixed length", async function() {
+                const table = perspective
+                    .table({
+                        a: ["ABC".repeat(100), "DEF".repeat(10), null, "hijk".repeat(10), "lm"],
+                        b: ["arc".repeat(50), "DEf".repeat(10), undefined, "HIjK", "lMNoP"]
+                    })
+                    .add_computed([
+                        {
+                            column: "result",
+                            computed_function_name: "is",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.result).toEqual([false, false, false, false, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("is, UTF-8", async function() {
+                const table = perspective
+                    .table({
+                        a: [
+                            ">ﺐ{׆Meڱ㒕宾ⷭ̽쉱L𞔚Ո拏۴ګPظǭ�PۋV|팺㺞㷾墁鴦򒲹|ۿ򧊊䭪񪩛𬦢񺣠񦋳򵾳蛲񖑐iM񊪝񆷯",
+                            "灙𬡍瀳։󷿙񅈕ǐ-kʂiJ!�P񙺍󵝳̃੝w𬾐򕕉耨󉋦o򰵏詂3򒤹J<ꑭ񃕱Ӏ𛤦4u򉠚UPf􂢳P#�#Q񪂈",
+                            "ĈᔞZ񇌖Qఋ?x?#$12ボլ㕢ﺧ𷛘󽙮[񲸧I񟭝򋨰魏ճ�כ󽺴ۏ󫨫䆐'㓔ǃ[ְ੬䎕寽𤩚ߨ袧򲕊򓰷|%",
+                            "ęԛ򓍯󍩁𨞟㰢󇂣õ􌁇΍Ԥ⥯۷˝㿙צּ񬆩򤿭顂ݦۍ式+=�ԋ帋񃴕譋ⴏ0l􅏎߳cί򇈊iȞڈU򆐹񍖮򷡦̥𩮏Ǳ",
+                            "0ой3֝󻙋򑨮꾪߫0󏜬󆑝w󊭟񑓫򾷄𶳿o󏉃纊ʫ􅋶聍𾋊ô򓨼쀨ˆ퍨׽ȿKOŕ􅽾󙸹Ѩ󶭆j񽪌򸢐p򊘏׷򿣂dｇD쩖"
+                        ],
+                        b: [
+                            ">ﺐ{׆Meڱ㒕宾ⷭ̽쉱L𞔚Ո拏۴ګPظǭ�PۋV|팺㺞㷾墁鴦򒲹|ۿ򧊊䭪񪩛𬦢񺣠񦋳򵾳蛲񖑐iM񊪝񆷯",
+                            "灙𬡍瀳։󷿙񅈕ǐ-kʂiJ!�P񙺍󵝳̃੝w𬾐򕕉耨󉋦o򰵏詂3򒤹J<ꑭ񃕱Ӏ𛤦4u򉠚UPf􂢳P#�#Q񪂈",
+                            "ĈᔞZ񇌖Qఋ?x?#$12ボլ㕢ﺧ𷛘󽙮[񲸧I񟭝򋨰魏ճ�כ󽺴ۏ󫨫䆐'㓔ǃ[ְ੬䎕寽𤩚ߨ袧򲕊򓰷|%",
+                            "ęԛ򓍯󍩁𨞟㰢󇂣õ􌁇΍Ԥ⥯۷˝㿙צּ񬆩򤿭顂ݦۍ式+=�ԋ帋񃴕譋ⴏ0l􅏎߳cί򇈊iȞڈU򆐹񍖮򷡦̥𩮏Ǳ",
+                            "0ой3֝󻙋򑨮꾪߫0󏜬󆑝w󊭟񑓫򾷄𶳿o󏉃纊ʫ􅋶聍𾋊ô򓨼쀨ˆ퍨׽ȿKOŕ􅽾󙸹Ѩ󶭆j񽪌򸢐p򊘏׷򿣂dｇD쩖2"
+                        ]
+                    })
+                    .add_computed([
+                        {
+                            column: "result",
+                            computed_function_name: "is",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.result).toEqual([true, true, true, true, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("is, UTF-8 converted to Unicode", async function() {
+                const table = perspective
+                    .table({
+                        a: [">{MeLPPV||iM", "-kiJ!Pwo3J<4uUPfP##Q", "ZQ?x?#$12[I'[|%", "ܦf+=0lciU", "030wo􎼨KOjpdD"],
+                        b: [">{MeLPPV||iM", "-kiJ!Pwo3J<4uUPfP##Q", "ZQ?x?#$12[I'[|%", "ܦf+=0lciU", "030wo􎼨KOjpdD2"]
+                    })
+                    .add_computed([
+                        {
+                            column: "result",
+                            computed_function_name: "is",
+                            inputs: ["a", "b"]
+                        }
+                    ]);
+                let view = table.view();
+                let result = await view.to_columns();
+                expect(result.result).toEqual([true, true, true, true, false]);
                 view.delete();
                 table.delete();
             });
