@@ -203,6 +203,9 @@ t_computed_column::apply_computation(
     if (end == 0) {
         end = flattened_columns[0]->size();
     }
+
+    output_column->reserve(end);
+
     auto arity = table_columns.size();
 
     std::function<t_tscalar(t_tscalar)> function_1;
