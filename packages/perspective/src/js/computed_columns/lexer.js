@@ -10,8 +10,28 @@ import {Lexer, createToken} from "chevrotain";
 
 export const vocabulary = {};
 
+/**
+ * Create token types to categorize computations:
+ * - OperatorTokenType: operators that require left and right-hand side operands
+ * - FunctionTokenType: operators that have 1...n comma separated parameters.
+ */
+const OperatorTokenType = createToken({
+    name: "OperatorTokenType",
+    pattern: Lexer.NA
+});
+
+const FunctionTokenType = createToken({
+    name: "FunctionTokenType",
+    pattern: Lexer.NA
+});
+
+const UpperLowerCaseTokenType = createToken({
+    name: "UpperLowerTokenType",
+    pattern: /(uppercase|lowercase)/
+});
+
 // Create tokens for column names and computed function names
-const column_name_regex_pattern = /(["'])(?<column_name>[\s\d\w]*?[^\\])\1/y;
+const column_name_regex_pattern = /(["'])(?<column_name>.*?[^\\])\1/y;
 
 /**
  * Given a string from which to extract a column name, extract the column name
@@ -44,65 +64,190 @@ export const ColumnName = createToken({
 // Allow users to specify custom names using `AS`
 export const As = createToken({
     name: "as",
-    pattern: /(AS|As|as)/
+    pattern: /(AS|As|as)/,
+    longer_alt: UpperLowerCaseTokenType
 });
 
 // Mathematical operators, in the format "x" + "y"
 
 export const Add = createToken({
     name: "add",
-    pattern: /\+/
+    pattern: /\+/,
+    categories: [OperatorTokenType]
 });
 
 export const Subtract = createToken({
     name: "subtract",
-    pattern: /-/
+    pattern: /-/,
+    categories: [OperatorTokenType]
 });
 
 export const Multiply = createToken({
     name: "multiply",
-    pattern: /\*/
+    pattern: /\*/,
+    categories: [OperatorTokenType]
 });
 
 export const Divide = createToken({
     name: "divide",
-    pattern: /\//
+    pattern: /\//,
+    categories: [OperatorTokenType]
+});
+
+export const PercentOf = createToken({
+    name: "percent_of",
+    pattern: /\%/,
+    categories: [OperatorTokenType]
 });
 
 // Function operators, in the format func("x")
 export const Sqrt = createToken({
     name: "sqrt",
-    pattern: /sqrt/
+    pattern: /sqrt/,
+    categories: [FunctionTokenType]
 });
 
 export const Pow2 = createToken({
     name: "pow2",
-    pattern: /pow2/
+    pattern: /pow2/,
+    categories: [FunctionTokenType]
 });
 
 export const Abs = createToken({
     name: "abs",
-    pattern: /abs/
+    pattern: /abs/,
+    categories: [FunctionTokenType]
 });
+
+export const Invert = createToken({
+    name: "invert",
+    pattern: /invert/,
+    categories: [FunctionTokenType]
+});
+
+// Bucketing functions
+
+export const Bin10 = createToken({
+    name: "bin10",
+    pattern: /bin10/,
+    categories: [FunctionTokenType]
+});
+
+export const Bin100 = createToken({
+    name: "bin100",
+    pattern: /bin100/,
+    categories: [FunctionTokenType]
+});
+
+export const Bin1000 = createToken({
+    name: "bin1000",
+    pattern: /bin1000/,
+    categories: [FunctionTokenType]
+});
+
+export const Bin10th = createToken({
+    name: "bin10th",
+    pattern: /bin10th/,
+    categories: [FunctionTokenType]
+});
+
+export const Bin100th = createToken({
+    name: "bin100th",
+    pattern: /bin100th/,
+    categories: [FunctionTokenType]
+});
+
+export const Bin1000th = createToken({
+    name: "bin1000th",
+    pattern: /bin1000th/,
+    categories: [FunctionTokenType]
+});
+
+// String functions
 
 export const Lowercase = createToken({
     name: "lowercase",
-    pattern: /Lowercase/
+    pattern: /lowercase/,
+    categories: [FunctionTokenType]
 });
 
 export const Uppercase = createToken({
     name: "uppercase",
-    pattern: /Uppercase/
+    pattern: /uppercase/,
+    categories: [FunctionTokenType]
 });
 
 export const ConcatComma = createToken({
-    name: "concatComma",
-    pattern: /concat_comma/
+    name: "concat_comma",
+    pattern: /concat_comma/,
+    categories: [FunctionTokenType]
 });
 
 export const ConcatSpace = createToken({
-    name: "concatSpace",
-    pattern: /concat_space/
+    name: "concat_space",
+    pattern: /concat_space/,
+    categories: [FunctionTokenType]
+});
+
+// Date functions
+
+export const HourOfDay = createToken({
+    name: "hour_of_day",
+    pattern: /hour_of_day/,
+    categories: [FunctionTokenType]
+});
+
+export const DayOfWeek = createToken({
+    name: "day_of_week",
+    pattern: /day_of_week/,
+    categories: [FunctionTokenType]
+});
+
+export const MonthOfYear = createToken({
+    name: "month_of_year",
+    pattern: /month_of_year/,
+    categories: [FunctionTokenType]
+});
+
+export const SecondBucket = createToken({
+    name: "second_bucket",
+    pattern: /second_bucket/,
+    categories: [FunctionTokenType]
+});
+
+export const MinuteBucket = createToken({
+    name: "minute_bucket",
+    pattern: /minute_bucket/,
+    categories: [FunctionTokenType]
+});
+
+export const HourBucket = createToken({
+    name: "hour_bucket",
+    pattern: /hour_bucket/
+});
+
+export const DayBucket = createToken({
+    name: "day_bucket",
+    pattern: /day_bucket/,
+    categories: [FunctionTokenType]
+});
+
+export const WeekBucket = createToken({
+    name: "week_bucket",
+    pattern: /week_bucket/,
+    categories: [FunctionTokenType]
+});
+
+export const MonthBucket = createToken({
+    name: "month_bucket",
+    pattern: /month_bucket/,
+    categories: [FunctionTokenType]
+});
+
+export const YearBucket = createToken({
+    name: "year_bucket",
+    pattern: /year_bucket/,
+    categories: [FunctionTokenType]
 });
 
 // Parenthesis
@@ -130,7 +275,43 @@ export const Whitespace = createToken({
 });
 
 // Order of tokens is important
-const tokens = [Whitespace, Comma, As, ColumnName, LeftParen, RightParen, Add, Subtract, Multiply, Divide, Sqrt, Pow2, Abs, Uppercase, Lowercase];
+const tokens = [
+    Whitespace,
+    Comma,
+    As,
+    ColumnName,
+    LeftParen,
+    RightParen,
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    PercentOf,
+    Sqrt,
+    Pow2,
+    Abs,
+    Bin1000th,
+    Bin1000,
+    Bin100th,
+    Bin100,
+    Bin10th,
+    Bin10,
+    ConcatComma,
+    ConcatSpace,
+    Uppercase,
+    Lowercase,
+    HourOfDay,
+    DayOfWeek,
+    MonthOfYear,
+    SecondBucket,
+    MinuteBucket,
+    HourBucket,
+    DayBucket,
+    WeekBucket,
+    MonthBucket,
+    YearBucket,
+    UpperLowerCaseTokenType
+];
 
 // Add each token to the vocabulary exported for the Parser
 tokens.forEach(t => {
