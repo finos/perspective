@@ -313,7 +313,7 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::DIVIDE;
     } else if (name == "1/x" || name == "invert") {
         return t_computed_function_name::INVERT;
-    } else if (name == "x^2" || name == "pow") {
+    } else if (name == "x^2" || name == "pow2") {
         return t_computed_function_name::POW;
     } else if (name == "sqrt") {
         return t_computed_function_name::SQRT;
@@ -321,9 +321,9 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::ABS;
     } else if (name == "%" || name == "percent_a_of_b") {
         return t_computed_function_name::PERCENT_A_OF_B;
-    } else if (name == "Uppercase") {
+    } else if (name == "Uppercase" || name == "uppercase") {
         return t_computed_function_name::UPPERCASE;
-    } else if (name == "Lowercase") {
+    } else if (name == "Lowercase" || name == "lowercase") {
         return t_computed_function_name::LOWERCASE;
     } else if (name == "length") {
         return t_computed_function_name::LENGTH;
@@ -331,37 +331,37 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::CONCAT_SPACE;
     } else if (name == "concat_comma") {
         return t_computed_function_name::CONCAT_COMMA;
-    } else if (name == "Bucket (10)") {
+    } else if (name == "Bucket (10)" || name == "bin10") {
         return t_computed_function_name::BUCKET_10;
-    } else if (name == "Bucket (100)") {
+    } else if (name == "Bucket (100)" || name == "bin100") {
         return t_computed_function_name::BUCKET_100;
-    } else if (name == "Bucket (1000)") {
+    } else if (name == "Bucket (1000)" || name == "bin1000") {
         return t_computed_function_name::BUCKET_1000;
-    } else if (name == "Bucket (1/10)") {
+    } else if (name == "Bucket (1/10)" || name == "bin10th") {
         return t_computed_function_name::BUCKET_0_1;
-    } else if (name == "Bucket (1/100)") {
+    } else if (name == "Bucket (1/100)" || name == "bin100th") {
         return t_computed_function_name::BUCKET_0_0_1;
-    } else if (name == "Bucket (1/1000)") {
+    } else if (name == "Bucket (1/1000)" || name == "bin100th") {
         return t_computed_function_name::BUCKET_0_0_0_1;
-    } else if (name == "Hour of Day") {
+    } else if (name == "Hour of Day" || name == "hour_of_day") {
         return t_computed_function_name::HOUR_OF_DAY;
-    } else if (name == "Day of Week") {
+    } else if (name == "Day of Week" || name == "day_of_week") {
         return t_computed_function_name::DAY_OF_WEEK;
-    } else if (name == "Month of Year") {
+    } else if (name == "Month of Year" || name == "month_of_year") {
         return t_computed_function_name::MONTH_OF_YEAR;
-    } else if (name == "Bucket (s)") {
+    } else if (name == "Bucket (s)" || name == "second_bucket") {
         return t_computed_function_name::SECOND_BUCKET;
-    } else if (name == "Bucket (m)") {
+    } else if (name == "Bucket (m)" || name == "minute_bucket") {
         return t_computed_function_name::MINUTE_BUCKET;
-    } else if (name == "Bucket (h)") {
+    } else if (name == "Bucket (h)" || name == "hour_bucket") {
         return t_computed_function_name::HOUR_BUCKET;
-    } else if (name == "Bucket (D)") {
+    } else if (name == "Bucket (D)" || name == "day_bucket") {
         return t_computed_function_name::DAY_BUCKET;
-    } else if (name == "Bucket (W)") {
+    } else if (name == "Bucket (W)" || name == "week_bucket") {
         return t_computed_function_name::WEEK_BUCKET;
-    } else if (name == "Bucket (M)") {
+    } else if (name == "Bucket (M)" || name == "month_bucket") {
         return t_computed_function_name::MONTH_BUCKET;
-    } else if (name == "Bucket (Y)") {
+    } else if (name == "Bucket (Y)" || name == "year_bucket") {
         return t_computed_function_name::YEAR_BUCKET;
     } else {
         PSP_COMPLAIN_AND_ABORT(
@@ -378,32 +378,32 @@ computed_function_name_to_string(t_computed_function_name name) {
         case SUBTRACT: return "-";
         case MULTIPLY: return "*";
         case DIVIDE: return "/";
-        case INVERT: return "1/x";
-        case POW: return "x^2";
+        case INVERT: return "invert";
+        case POW: return "pow2";
         case SQRT: return "sqrt";
         case ABS: return "abs";
         case PERCENT_A_OF_B: return "%";
-        case UPPERCASE: return "Uppercase";
-        case LOWERCASE: return "Lowercase";
+        case UPPERCASE: return "uppercase";
+        case LOWERCASE: return "lowercase";
         case LENGTH: return "length";
         case CONCAT_SPACE: return "concat_space";
         case CONCAT_COMMA: return "concat_comma";
-        case BUCKET_10: return "Bucket (10)";
-        case BUCKET_100: return "Bucket (100)";
-        case BUCKET_1000: return "Bucket (1000)";
-        case BUCKET_0_1: return "Bucket (1/10)";
-        case BUCKET_0_0_1: return "Bucket (1/100)";
-        case BUCKET_0_0_0_1: return "Bucket (1/1000)";
-        case HOUR_OF_DAY: return "Hour of Day";
-        case DAY_OF_WEEK: return "Day of Week";
-        case MONTH_OF_YEAR: return "Month of Year";
-        case SECOND_BUCKET: return "Bucket (s)";
-        case MINUTE_BUCKET: return "Bucket (m)";
-        case HOUR_BUCKET: return "Bucket (h)";
-        case DAY_BUCKET: return "Bucket (D)";
-        case WEEK_BUCKET: return "Bucket (W)";
-        case MONTH_BUCKET: return "Bucket (M)";
-        case YEAR_BUCKET: return "Bucket (Y)";
+        case BUCKET_10: return "bin10";
+        case BUCKET_100: return "bin100";
+        case BUCKET_1000: return "bin1000";
+        case BUCKET_0_1: return "bin10th";
+        case BUCKET_0_0_1: return "bin100th";
+        case BUCKET_0_0_0_1: return "bin1000th";
+        case HOUR_OF_DAY: return "hour_of_day";
+        case DAY_OF_WEEK: return "day_of_week";
+        case MONTH_OF_YEAR: return "month_of_year";
+        case SECOND_BUCKET: return "second_bucket";
+        case MINUTE_BUCKET: return "minute_bucket";
+        case HOUR_BUCKET: return "hour_bucket";
+        case DAY_BUCKET: return "day_bucket";
+        case WEEK_BUCKET: return "week_bucket";
+        case MONTH_BUCKET: return "month_bucket";
+        case YEAR_BUCKET: return "year_bucket";
         default: break;
     }
     

@@ -1220,12 +1220,14 @@ export default function(Module) {
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
+        config.computed_columns = config.computed_columns || [];
 
-        if (typeof config.computed_columns === "string") {
-            const parsed = expression_to_computed_column_config(config.computed_columns);
-            config.computed_columns = parsed;
-        } else {
-            config.computed_columns = config.computed_columns || [];
+        if (config.computed_columns.length > 0 && typeof config.computed_columns[0] === "string") {
+            let parsed_computed = [];
+            for (const computed of config.computed_columns) {
+                parsed_computed = parsed_computed.concat(expression_to_computed_column_config(computed));
+            }
+            config.computed_columns = parsed_computed;
         }
 
         console.log(config.computed_columns);
