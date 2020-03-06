@@ -1,0 +1,24 @@
+<!--
+
+Copyright (c) 2017, the Perspective Authors.
+
+This file is part of the Perspective library, distributed under the terms of
+the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<template id="perspective-computed-expression-editor">
+    <div id="psp-expression__body">
+        <div class="psp-expression__container">
+            <span id="psp-expression-close" aria-label="Close Expression Editor">&times;</span>
+            <textarea placeholder="Write an expression" autocomplete="off" id="psp-expression-input"></textarea>
+            <div class="psp-expression__content psp-expression__content--nomargin">
+                <span class="psp-expression__label psp-expression__error" id="psp-expression-error"></span>
+            </div>
+        </div>
+        <div id="psp-expression-actions">
+            <button id="psp-expression-button-remove" class="psp-expression__button" disabled>Remove All</button>
+            <button id="psp-expression-button-save" class="psp-expression__button" disabled>Save</button>
+        </div>
+    </div>
+</template>

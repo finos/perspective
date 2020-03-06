@@ -14,7 +14,6 @@ import {html, render} from "lit-html";
 import perspective from "@finos/perspective";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
-import {COMPUTATIONS} from "../computed_column.js";
 
 import {StateElement} from "./state_element.js";
 
@@ -113,24 +112,6 @@ const _warning = (strings, ...args) => strings.flatMap((str, idx) => [_nowrap_te
  */
 
 export class PerspectiveElement extends StateElement {
-    async _check_recreate_computed_columns() {
-        const computed_columns = JSON.parse(this.getAttribute("computed-columns"));
-        if (computed_columns.length > 0) {
-            for (const col of computed_columns) {
-                await this._create_computed_column({
-                    detail: {
-                        column_name: col.name,
-                        input_columns: col.inputs.map(x => ({name: x})),
-                        computation: COMPUTATIONS[col.computed_function_name]
-                    }
-                });
-            }
-            this._debounce_update({ignore_size_check: false});
-            return true;
-        }
-        return false;
-    }
-
     async _load_table(table, computed = false) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
         const resolve = this._set_updating();
@@ -142,13 +123,7 @@ export class PerspectiveElement extends StateElement {
         this._clear_state();
         this._table = table;
 
-        if (this.hasAttribute("computed-columns") && !computed) {
-            if (await this._check_recreate_computed_columns()) {
-                return;
-            }
-        }
-
-        const [cols, schema, computed_schema] = await Promise.all([table.columns(), table.schema(true), table.computed_schema()]);
+        const [cols, schema] = await Promise.all([table.columns(), table.schema(true)]);
 
         this._clear_columns();
 
@@ -161,27 +136,18 @@ export class PerspectiveElement extends StateElement {
 
         // Update aggregates
         const aggregate_attribute = this.get_aggregate_attribute();
-
-        Object.entries(computed_schema).forEach(([column, op]) => {
-            const already_configured = aggregate_attribute.find(agg => agg.column === column);
-            if (!already_configured) {
-                aggregate_attribute.push({column, op});
-            }
-        });
-
-        const all_cols = cols.concat(Object.keys(computed_schema));
-        const aggregates = get_aggregates_with_defaults(aggregate_attribute, schema, all_cols);
+        const aggregates = get_aggregates_with_defaults(aggregate_attribute, schema, cols);
 
         let shown = JSON.parse(this.getAttribute("columns")); //.filter(x => all_cols.indexOf(x) > -1);
-        if (shown.filter(x => all_cols.indexOf(x) > -1).length === 0) {
+        if (shown.filter(x => cols.indexOf(x) > -1).length === 0) {
             shown = this._initial_col_order;
         }
 
-        this._aggregate_defaults = get_aggregate_defaults(schema, all_cols);
+        this._aggregate_defaults = get_aggregate_defaults(schema, cols);
 
-        for (const name of all_cols) {
+        for (const name of cols) {
             const aggregate = aggregates.find(a => a.column === name).op;
-            const row = this._new_row(name, schema[name], aggregate, null, null, computed_schema[name]);
+            const row = this._new_row(name, schema[name], aggregate, null, null, null);
             this._inactive_columns.appendChild(row);
             if (shown.includes(name)) {
                 row.classList.add("active");
@@ -197,7 +163,7 @@ export class PerspectiveElement extends StateElement {
             this._active_columns.appendChild(active_row);
         }
 
-        if (all_cols.length === shown.filter(x => all_cols.indexOf(x) > -1).length) {
+        if (cols.length === shown.filter(x => cols.indexOf(x) > -1).length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
             this._inactive_columns.parentElement.classList.remove("collapse");
@@ -221,6 +187,11 @@ export class PerspectiveElement extends StateElement {
             await this.reset();
             throw e;
         }
+
+        if (this.hasAttribute("computed-columns")) {
+            await this._update_computed_column_view();
+        }
+
         resolve();
     }
 
@@ -389,13 +360,16 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
+        const computed_columns = this._get_view_computed_columns();
+
         const config = {
             filter: filters,
             row_pivots: row_pivots,
             column_pivots: column_pivots,
             aggregates: aggregates,
             columns: columns,
-            sort: sort
+            sort: sort,
+            computed_columns: computed_columns
         };
 
         if (this._view) {

@@ -12,8 +12,8 @@ import "./polyfill.js";
 
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
-import {COMPUTATIONS} from "./computed_column.js";
 import "./row.js";
+import "./computed_expression_editor.js";
 
 import template from "../html/viewer.html";
 
@@ -179,37 +179,25 @@ class PerspectiveViewer extends ActionElement {
      */
     @array_attribute
     "computed-columns"(computed_columns) {
-        if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
-            if (this.hasAttribute("computed-columns")) {
-                this.removeAttribute("computed-columns");
-            }
-            computed_columns = [];
-        }
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._table) {
-                const computed_schema = await this._table.computed_schema();
-                this._computed_column._close_computed_column();
-                for (let col of computed_columns) {
-                    if (!computed_schema[col.name]) {
-                        await this._create_computed_column({
-                            detail: {
-                                column_name: col.name,
-                                input_columns: col.inputs.map(x => ({name: x})),
-                                computation: COMPUTATIONS[col.computed_function_name]
-                            }
-                        });
-                    }
+            this._computed_expression_editor._close_expression_editor();
+            if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
+                // Remove computed columns from the DOM
+                if (this.hasAttribute("computed-columns")) {
+                    this.removeAttribute("computed-columns");
+                    this._reset_computed_column_view();
+                    resolve();
+                    return;
                 }
-
-                await this._debounce_update();
-                resolve();
-            } else {
-                this._computed_column._close_computed_column();
+                computed_columns = [];
             }
+
+            await this._debounce_update();
+            await this._update_computed_column_view();
+            resolve();
             this.dispatchEvent(new Event("perspective-config-update"));
-            this.dispatchEvent(new Event("perspective-computed-column-update"));
         })();
     }
 
