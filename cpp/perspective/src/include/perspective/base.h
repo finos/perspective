@@ -135,13 +135,19 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #else
 #define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
     {                                                                                          \
-        if (!(COND))                                                                           \
-            psp_abort("Assertion failed!");                                                    \
+        if (!(COND)) {                                                                         \
+            std::stringstream ss;                                                              \
+            ss << MSG;                                                                         \
+            psp_abort(ss.str());                                                               \
+        }                                                                                      \
     }
 #define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG)                                                   \
     {                                                                                          \
-        if (!(EXPR COND))                                                                      \
-            psp_abort("Assertion failed!");                                                    \
+        if (!(EXPR COND)) {                                                                    \
+            std::stringstream ss;                                                              \
+            ss << MSG;                                                                         \
+            psp_abort(ss.str());                                                               \
+        }                                                                                      \
     }
 #define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X);
 #define PSP_ASSERT_SIMPLE_TYPE(X)

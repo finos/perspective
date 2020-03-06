@@ -229,6 +229,42 @@ export const COMPUTATIONS = {
         ["Math"],
         2
     ),
+    equals: new Computation(
+        "==",
+        (x, y) => `(${x} == ${y})`,
+        "float",
+        "float",
+        (a, b) => a === b,
+        ["Math"],
+        2
+    ),
+    not_equals: new Computation(
+        "!=",
+        (x, y) => `(${x} != ${y})`,
+        "float",
+        "boolean",
+        (a, b) => a !== b,
+        ["Math"],
+        2
+    ),
+    greater_than: new Computation(
+        ">",
+        (x, y) => `(${x} > ${y})`,
+        "float",
+        "boolean",
+        (a, b) => a > b,
+        ["Math"],
+        2
+    ),
+    less_than: new Computation(
+        "<",
+        (x, y) => `(${x} < ${y})`,
+        "float",
+        "boolean",
+        (a, b) => a < b,
+        ["Math"],
+        2
+    ),
     uppercase: new Computation(
         "Uppercase",
         x => `uppercase(${x})`,
@@ -252,6 +288,15 @@ export const COMPUTATIONS = {
         "integer",
         x => x.length,
         ["Text"]
+    ),
+    is: new Computation(
+        "is",
+        (x, y) => `(${x} is ${y})`,
+        "string",
+        "boolean",
+        (x, y) => x === y,
+        ["Text"],
+        2
     ),
     concat_space: new Computation(
         "concat_space",

@@ -116,6 +116,10 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         case MULTIPLY: return computed_function::multiply<DTYPE>;              \
         case DIVIDE: return computed_function::divide<DTYPE>;                  \
         case PERCENT_A_OF_B: return computed_function::percent_of<DTYPE>;      \
+        case EQUALS: return computed_function::equals<DTYPE>;                  \
+        case NOT_EQUALS: return computed_function::not_equals<DTYPE>;          \
+        case GREATER_THAN: return computed_function::greater_than<DTYPE>;      \
+        case LESS_THAN: return computed_function::less_than<DTYPE>;            \
         default: break;                                                        \
     }
 
@@ -152,6 +156,12 @@ t_computed_column::get_computed_function_2(t_computation computation) {
         case DTYPE_FLOAT64: {
             GET_COMPUTED_FUNCTION_2(DTYPE_FLOAT64);
         } break;
+        case DTYPE_STR: {
+            switch (computation.m_name) {
+                case IS: return computed_function::is;
+                default: break;
+            }
+        }
         default: break;
     }
 
@@ -305,6 +315,7 @@ void t_computed_column::make_computations() {
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
     std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
     std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, PERCENT_A_OF_B};
+    std::vector<t_computed_function_name> numeric_comparison_2 = {EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN};
     
     for (const auto f : numeric_function_1) {
         for (auto i = 0; i < dtypes.size(); ++i) {
@@ -326,6 +337,20 @@ void t_computed_column::make_computations() {
                         f, 
                         std::vector<t_dtype>{dtypes[i], dtypes[j]},
                         DTYPE_FLOAT64
+                    }
+                );
+            }
+        }
+    }
+
+    for (const auto f : numeric_comparison_2) {
+        for (auto i = 0; i < dtypes.size(); ++i) {
+            for (auto j = 0; j < dtypes.size(); ++j) {
+                t_computed_column::computations.push_back(
+                    t_computation{
+                        f, 
+                        std::vector<t_dtype>{dtypes[i], dtypes[j]},
+                        DTYPE_BOOL
                     }
                 );
             }
@@ -359,6 +384,11 @@ void t_computed_column::make_computations() {
     // Length takes a string and returns an int
     t_computed_column::computations.push_back(
         t_computation{LENGTH, std::vector<t_dtype>{DTYPE_STR}, DTYPE_INT64}
+    );
+
+    // IS takes 2 strings and returns a bool
+    t_computed_column::computations.push_back(
+        t_computation{IS, std::vector<t_dtype>{DTYPE_STR, DTYPE_STR}, DTYPE_BOOL}
     );
 
     // Generate date/datetime functions
