@@ -1,0 +1,19 @@
+{
+    "name": "remote-express",
+    "private": true,
+    "version": "0.4.5",
+    "description": "An example of 2 Perspectives, one client and one server, streaming via Apache Arrow.",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "^0.4.5",
+        "@finos/perspective-viewer": "^0.4.5",
+        "@finos/perspective-viewer-d3fc": "^0.4.5",
+        "@finos/perspective-viewer-hypergrid": "^0.4.5",
+        "express": "^4.17.1",
+        "express-ws": "^4.0.0"
+    }
+}
