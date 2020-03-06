@@ -93,6 +93,56 @@ export class ActionElement extends DomElement {
         }
     }
 
+    // TODO: add expression validation here
+
+    /**
+     * Display the computed expressions panel.
+     *
+     * @param {*} event
+     */
+    _open_computed_expression_editor(event) {
+        event.stopImmediatePropagation();
+        if (this._computed_expression_editor.expressions.length == 0) {
+            this._computed_expression_editor._disable_remove_button();
+        } else {
+            this._computed_expression_editor._enable_remove_button();
+        }
+        this._computed_expression_editor.style.display = "flex";
+        this._side_panel_actions.style.display = "none";
+    }
+
+    /**
+     * Given an expression (in the `detail` property of the
+     * `perspective-computed-expression-save` event), retrieve the viewer's
+     * `computed-columns` array and append the new expression to be parsed.
+     *
+     * @param {*} event
+     */
+    _validate_computed_expression(event) {
+        const expression = event.detail.expression;
+
+        // TODO: need to keep naming REALLY consistent
+        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
+        if (computed_columns === null) {
+            computed_columns = [];
+        }
+
+        computed_columns.push(expression);
+
+        this.setAttribute("computed-columns", JSON.stringify(computed_columns));
+    }
+
+    /**
+     * Remove all computed expressions from the DOM.
+     */
+    _clear_all_computed_expressions() {
+        this.setAttribute("computed-columns", JSON.stringify([]));
+    }
+
+    _set_computed_expression(event) {
+        return event;
+    }
+
     // UI action
     _open_computed_column(event) {
         //const data = event.detail;
@@ -336,13 +386,10 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_column.addEventListener("click", this._open_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
-        // this._side_panel.addEventListener('
-        //     perspective-computed-column-edit',
-        //     this._open_computed_column.bind(this)
-        // );
+        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_editor.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._validate_computed_expression.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
         this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
         this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));

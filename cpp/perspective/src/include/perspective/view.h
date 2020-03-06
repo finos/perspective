@@ -82,6 +82,17 @@ public:
     std::map<std::string, std::string> schema() const;
 
     /**
+     * @brief The computed schema of this View. A computed schema is an 
+     * std::map, the keys ofwhich are the columns of this View, and the values 
+     * are their string type names. If this View is aggregated, theses will be 
+     * the aggregated types; otherwise these types will be the same as the
+     * columns in the underlying Table.
+     *
+     * @return std::map<std::string, std::string>
+     */
+    std::map<std::string, std::string> computed_schema() const;
+
+    /**
      * @brief The column names of this View. If the View is aggregated, the
      * individual column names will be joined with a separator character
      * specified by the user, or defaulting to "|".

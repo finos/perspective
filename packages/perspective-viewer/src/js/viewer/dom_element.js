@@ -157,6 +157,53 @@ export class DomElement extends PerspectiveElement {
         return row;
     }
 
+    /**
+     * Using the view's schema and config, add all computed columns to the
+     * inactive columns panel unless they are specified as shown.
+     */
+    async _update_computed_column_view() {
+        // FIXME: bad bad not good
+        if (!this._view) return;
+        const [computed_schema, config] = await Promise.all([this._view.computed_schema(), this._view.get_config()]);
+        console.log(computed_schema, config);
+        const computed_columns = config.computed_columns;
+        const columns = this._get_view_all_column_names();
+
+        for (const cc of computed_columns) {
+            const column_name = cc.column;
+            if (columns.includes(column_name)) continue;
+            const row = this._new_row(column_name, computed_schema[column_name], null, null, null, column_name);
+            // FIXME: this needs to follow the paradigm for adding columns to
+            // the sidebar elsewhere, as it iscurrently broken if one `reset`s
+            // the viewer and tries to pivot on the column.
+            this._inactive_columns.appendChild(row);
+        }
+    }
+
+    /**
+     * When the `computed-columns` attribute is set to [], null, or undefined,
+     * clear all previously created columns from the UI.
+     */
+    _reset_computed_column_view() {
+        const rows = this._inactive_columns.getElementsByClassName("computed");
+        const names = [];
+
+        for (const row of rows) {
+            names.push(row.getAttribute("name"));
+            this._inactive_columns.removeChild(row);
+        }
+
+        const active = this._get_view_active_column_names();
+        const new_active = active.filter(x => !names.includes(x));
+
+        if (new_active.length > 0) {
+            this._update_column_view(new_active, true);
+        } else {
+            // FIXME: how do we reset to default state without using this
+            this.reset();
+        }
+    }
+
     _update_column_view(columns, reset = false) {
         if (!columns) {
             columns = this._get_view_active_column_names();
@@ -339,9 +386,8 @@ export class DomElement extends PerspectiveElement {
         this._active_columns = this.shadowRoot.querySelector("#active_columns");
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
-        this._add_computed_column = this.shadowRoot.querySelector("#add-computed-column");
-        this._computed_column = this.shadowRoot.querySelector("perspective-computed-column");
-        this._computed_column_inputs = this._computed_column.querySelector("#psp-cc-computation-inputs");
+        this._add_computed_expression_button = this.shadowRoot.querySelector("#add-computed-expression");
+        this._computed_expression_editor = this.shadowRoot.querySelector("perspective-computed-expression-editor");
         this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
         this._drop_target = this.shadowRoot.querySelector("#drop_target");
         this._config_button = this.shadowRoot.querySelector("#config_button");

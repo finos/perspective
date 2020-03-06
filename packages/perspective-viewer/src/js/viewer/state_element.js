@@ -121,6 +121,10 @@ export class StateElement extends HTMLElement {
         });
     }
 
+    _get_view_computed_columns() {
+        return JSON.parse(this.getAttribute("computed-columns"));
+    }
+
     _get_visible_column_count() {
         return this._get_view_dom_columns().length;
     }

@@ -1,0 +1,136 @@
+/******************************************************************************
+*
+* Copyright (c) 2017, the Perspective Authors.
+*
+* This file is part of the Perspective library, distributed under the terms of
+* the Apache License 2.0.  The full license can be found in the LICENSE file.
+*
+*/
+
+@import "variables";
+
+:host {
+    display: none;
+    //font-family: var(--interface--font-family, @sans-serif-fonts);
+    flex-direction: column;
+    max-height: 15%;
+    margin-top: 34px;
+    margin-bottom: 24px;
+
+    flex: 0 0 auto !important;
+
+    * {
+        box-sizing: border-box;
+    }
+    
+    #psp-expression__body,
+    .psp-expression__container {
+        display: flex;
+        flex-direction: column;
+
+        &.row {
+            align-items: center;
+            flex-direction: row;
+        }
+    }
+
+    .psp-expression__container {
+        &:first-of-type {
+            margin-bottom: 0;
+        }
+    }
+
+    .psp-expression__content {
+        align-items: center;
+        display: flex;
+        margin-top: 5px;
+
+        &.psp-expression__content--nomargin {
+            margin-top: 0;
+        }
+    }
+
+    #psp-expression-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-left: 20px;
+        margin-top: 12px;
+    }
+
+    span#psp-expression-close {
+        color: @darkgray;
+        padding-left: 3px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    textarea#psp-expression-input {
+        background: var(--background-color, none);
+        color: var(--color, #666666);
+        font-size: 12px;
+        font-family: var(--interface-monospace--font-family, monospace);
+        height: 75px;
+        margin-top: 5px;
+        padding-left: 5px;
+        width: 100%;
+    }
+
+    .psp-expression__label {
+        color: var(--color, darkgray);
+        font-size: 10px;
+        margin-top: 5px;
+
+        &.psp-expression__error {
+            color: #cb4549 !important;
+            display: none;
+        }
+    }
+
+    .psp-expression__button {
+        border-radius: 0;
+        border-bottom: 1px solid @border-color;
+        border-left: 0;
+        border-right: 0;
+        border-top: 0;
+        font-size: 12px;
+        margin-left: 6px;
+        padding: 2px 5px;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &[disabled] {
+            background: @darkgray !important;
+            color: @lightgray !important;
+            cursor: not-allowed;
+            border-bottom-color: #000 !important;
+            opacity: 0.5;
+        }
+
+        &#psp-expression-button-remove {
+            background: #e76056;
+            border-bottom-color: #bf4d45;
+            color: #fff;
+
+            &:active {
+                background: #bf4d45;
+                border-bottom-color: #9d3f39;
+            }
+        }
+
+        &#psp-expression-button-save {
+            background: #0171d2;
+            border-bottom-color: #0160b1;
+            color: #fff;
+            height: 22px;
+
+            &:active {
+                background: #0160b1;
+                border-bottom-color: #014986;
+            }
+        }
+    }
+}

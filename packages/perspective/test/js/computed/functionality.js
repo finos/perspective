@@ -792,5 +792,142 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        describe("Computed Schema", function() {
+            it("Column types in computed schema on 0-sided view.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const view = table.view({
+                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                });
+                const schema = await view.computed_schema();
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c)": "string",
+                    wb: "date",
+                    def: "float",
+                    upper: "string"
+                });
+                view.delete();
+                table.delete();
+            });
+
+            it("Should show ALL columns in computed schema regardless of custom columns.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const view = table.view({
+                    columns: ["wb"],
+                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                });
+                const schema = await view.computed_schema();
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c)": "string",
+                    wb: "date",
+                    def: "float",
+                    upper: "string"
+                });
+                view.delete();
+                table.delete();
+            });
+
+            it("Aggregated types in computed schema on 1-sided view.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const view = table.view({
+                    row_pivots: ["def"],
+                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                });
+                const schema = await view.computed_schema();
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c)": "integer",
+                    wb: "integer",
+                    def: "float",
+                    upper: "integer"
+                });
+                view.delete();
+                table.delete();
+            });
+
+            it("Aggregated types in computed schema on 1-sided view with custom aggregates.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const view = table.view({
+                    aggregates: {
+                        upper: "any"
+                    },
+                    row_pivots: ["upper"],
+                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                });
+                const schema = await view.computed_schema();
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c)": "integer",
+                    wb: "integer",
+                    def: "float",
+                    upper: "string"
+                });
+                view.delete();
+                table.delete();
+            });
+
+            it("Aggregated types in computed schema on 2-sided view.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const view = table.view({
+                    row_pivots: ["def"],
+                    column_pivots: ["wb"],
+                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                });
+                const schema = await view.computed_schema();
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c)": "integer",
+                    wb: "integer",
+                    def: "float",
+                    upper: "integer"
+                });
+                view.delete();
+                table.delete();
+            });
+
+            it("Aggregated types in computed schema on 2-sided column-only view.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const view = table.view({
+                    column_pivots: ["def"],
+                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                });
+                const schema = await view.computed_schema();
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c)": "string",
+                    wb: "date",
+                    def: "float",
+                    upper: "string"
+                });
+                view.delete();
+                table.delete();
+            });
+        });
     });
 };

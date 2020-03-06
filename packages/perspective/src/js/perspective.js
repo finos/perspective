@@ -262,6 +262,34 @@ export default function(Module) {
         return schema;
     };
 
+    /**
+     * The computed column schema of this {@link module:perspective~view},
+     * containing only user-created computed columns. A schema is an Object, the
+     * keys of which are the columns of this {@link module:perspective~view},
+     * and the values are their string type names. If this
+     * {@link module:perspective~view} is aggregated, theses will be the
+     * aggregated types; otherwise these types will be the same as the columns
+     * in the underlying {@link module:perspective~table}
+     *
+     * @async
+     *
+     * @returns {Promise<Object>} A Promise of this
+     * {@link module:perspective~view}'s computed column schema.
+     */
+    view.prototype.computed_schema = function(override = true) {
+        const schema = extract_map(this._View.computed_schema());
+        if (override) {
+            for (const key of Object.keys(schema)) {
+                let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
+                colname = colname[colname.length - 1];
+                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                    schema[key] = this.overridden_types[colname];
+                }
+            }
+        }
+        return schema;
+    };
+
     view.prototype._column_names = function(skip = false, depth = 0) {
         return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
