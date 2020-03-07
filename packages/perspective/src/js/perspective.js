@@ -1258,8 +1258,6 @@ export default function(Module) {
             config.computed_columns = parsed_computed;
         }
 
-        console.log(config.computed_columns);
-
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
             config.columns = this.columns(true);

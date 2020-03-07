@@ -42,6 +42,9 @@ class ComputedExpressionEditor extends HTMLElement {
         }
     }
 
+    /**
+     * DEPRECATED: Clears all expressions from the viewer.
+     */
     _remove_all_expressions() {
         const event = new CustomEvent("perspective-computed-expression-remove");
         this.dispatchEvent(event);
@@ -121,7 +124,6 @@ class ComputedExpressionEditor extends HTMLElement {
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_expression_editor.bind(this));
         this._expression_input.addEventListener("keyup", this._validate_expression.bind(this));
-        this._remove_button.addEventListener("click", this._remove_all_expressions.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }
