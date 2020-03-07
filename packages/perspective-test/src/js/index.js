@@ -85,6 +85,36 @@ async function get_new_page() {
         }, path);
     };
 
+    page.shadow_type = async function(content, ...path) {
+        await this.evaluate(
+            (content, path) => {
+                let elem = document;
+                while (path.length > 0) {
+                    if (elem.shadowRoot) {
+                        elem = elem.shadowRoot;
+                    }
+                    elem = elem.querySelector(path.shift());
+                }
+
+                elem.focus();
+
+                function triggerKeyEvent(node, eventType) {
+                    const keyEvent = document.createEvent("KeyboardEvent");
+                    keyEvent.initEvent(eventType, true, true);
+                    node.dispatchEvent(keyEvent);
+                }
+
+                // Set the value on the element
+                elem.value = content;
+
+                triggerKeyEvent(elem, "keydown");
+                triggerKeyEvent(elem, "keyup");
+            },
+            content,
+            path
+        );
+    };
+
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
