@@ -13,18 +13,29 @@ import CONTAINER_STYLE from "../less/container.less";
 import MATERIAL_STYLE from "../less/material.less";
 
 // Output runtime debug info like FPS.
-const DEBUG = false;
+const DEBUG = true;
 
 // Double buffer when the viewport scrolls columns, rows or when the
 // view is recreated.  Reduces render draw-in on some browsers, at the
 // expense of performance.
-const DOUBLE_BUFFER_COLUMN = true;
+const DOUBLE_BUFFER_COLUMN = false;
 const DOUBLE_BUFFER_ROW = false;
 const DOUBLE_BUFFER_RECREATE = true;
 
 // The largest size virtual <div> in (px) that Chrome can support without
 // glitching.
 const BROWSER_MAX_HEIGHT = 10000000;
+
+const ICON_MAP = {
+    asc: "arrow_upward",
+    desc: "arrow_downward",
+    "asc abs": "\u21E7",
+    "desc abs": "\u21E9",
+    "col asc": "arrow_back",
+    "col desc": "arrow_forward",
+    "col asc abs": "\u21E8",
+    "col desc abs": "\u21E6"
+};
 
 /******************************************************************************
  *
@@ -121,8 +132,18 @@ class ViewModel {
         return this.cells.length;
     }
 
+    _get_or_create_metadata(td) {
+        if (METADATA_MAP.has(td)) {
+            return METADATA_MAP.get(td);
+        } else {
+            const metadata = {};
+            METADATA_MAP.set(td, metadata);
+            return metadata;
+        }
+    }
+
     @memoize
-    format(type) {
+    _format(type) {
         const config = get_type_config(type);
         const format_function = {
             float: Intl.NumberFormat,
@@ -195,13 +216,18 @@ class ViewModel {
  * @class DatagridHeaderViewModel
  */
 class DatagridHeaderViewModel extends ViewModel {
-    _draw_group_th(offset_cache, d, column_name) {
+    _draw_group_th(offset_cache, d, column_name, sort_dir) {
         const {tr, row_container} = this._get_row(d);
         const th = this._get_cell("th", row_container, offset_cache[d], tr);
         offset_cache[d] += 1;
         th.className = "";
         th.removeAttribute("colspan");
-        th.textContent = column_name;
+        if (sort_dir?.length === 0) {
+            th.textContent = column_name;
+        } else {
+            const sort_txt = sort_dir?.map(x => ICON_MAP[x]);
+            th.innerHTML = `<span>${column_name}</span><span class="pd-column-header-icon">${sort_txt}</span>`;
+        }
         return th;
     }
 
@@ -218,9 +244,13 @@ class DatagridHeaderViewModel extends ViewModel {
     }
 
     _draw_th(column, column_name, type, th) {
-        th.column_path = column;
-        th.column_name = column_name;
-        th.column_type = type;
+        // th.column_path = column;
+        // th.column_name = column_name;
+        // th.column_type = type;
+        const metadata = this._get_or_create_metadata(th);
+        metadata.column_path = column;
+        metadata.column_name = column_name;
+        metadata.column_type = type;
         const pin_width = this.pinned_widths[`${column}|${type}`];
         th.classList.add(type);
         if (pin_width) {
@@ -230,7 +260,7 @@ class DatagridHeaderViewModel extends ViewModel {
         }
     }
 
-    draw(header_levels, column, type, {group_header_cache = [], offset_cache = []} = {}) {
+    draw(header_levels, column, type, sort, {group_header_cache = [], offset_cache = []} = {}) {
         let parts = column.split("|");
         let th,
             column_name,
@@ -244,7 +274,7 @@ class DatagridHeaderViewModel extends ViewModel {
                     th = group_header_cache[d][1];
                     th.setAttribute("colspan", (parseInt(th.getAttribute("colspan")) || 1) + 1);
                 } else {
-                    th = this._draw_group_th(offset_cache, d, column_name);
+                    th = this._draw_group_th(offset_cache, d, column_name, []);
                     group_header_cache[d] = [column_name, th];
                     is_new_group = true;
                 }
@@ -252,7 +282,8 @@ class DatagridHeaderViewModel extends ViewModel {
                 if (is_new_group) {
                     this._redraw_previous(offset_cache, d);
                 }
-                th = this._draw_group_th(offset_cache, d, column_name);
+                const sort_dir = sort?.filter(x => x[0] === column_name).map(x => x[1]);
+                th = this._draw_group_th(offset_cache, d, column_name, sort_dir);
             }
         }
         this._draw_th(column, column_name, type, th);
@@ -279,16 +310,6 @@ function column_path_2_type(schema, column) {
  * @class DatagridBodyViewModel
  */
 class DatagridBodyViewModel extends ViewModel {
-    _get_or_create_metadata(td) {
-        if (METADATA_MAP.has(td)) {
-            return METADATA_MAP.get(td);
-        } else {
-            const metadata = {};
-            METADATA_MAP.set(td, metadata);
-            return metadata;
-        }
-    }
-
     _draw_td(ridx, cidx, val, type, depth, is_open, ridx_offset) {
         const {tr, row_container} = this._get_row(ridx);
         const td = this._get_cell("td", row_container, cidx, tr);
@@ -296,7 +317,7 @@ class DatagridBodyViewModel extends ViewModel {
 
         if (metadata.value !== val) {
             td.className = type;
-            const formatter = this.format(type);
+            const formatter = this._format(type);
             if (val === undefined || val === null) {
                 td.textContent = "-";
                 metadata.value = null;
@@ -369,11 +390,10 @@ class DatagridTableViewModel {
         return this.header._get_row(Math.max(0, this.header.rows.length - 1)).row_container.length;
     }
 
-    async draw(container_width, container_height, view, header_levels, row_levels, column_paths, schemap, viewport) {
-        const column_datap = view.to_columns(viewport);
+    async draw(view, container_width, container_height, header_levels, row_levels, column_paths, sort, schema, viewport) {
         const visible_columns = column_paths.slice(viewport.start_col);
-        const schema = await schemap;
-        const columns_data = await column_datap;
+
+        const columns_data = await view.to_columns(viewport);
         let cont_body,
             cont_head,
             cidx = 0,
@@ -402,7 +422,7 @@ class DatagridTableViewModel {
                 const column_data = columns_data[column_name];
                 const type = column_path_2_type(schema, column_name);
 
-                cont_head = this.header.draw(header_levels, column_name, type, cont_head);
+                cont_head = this.header.draw(header_levels, column_name, type, sort, cont_head);
                 cont_body = this.body.draw(container_height, column_name, cidx, column_data, type, undefined, viewport.start_row);
                 width += cont_body.offsetWidth;
                 cidx++;
@@ -442,6 +462,17 @@ class DatagridTableViewModel {
  *       |                                                  |
  *       |                                                  |
  *       +--------------------------------------------------+
+ *
+ * `overflow: auto` is applied to `.pd-scroll-container`, and `.pd-virtual-pane`
+ * is sized to match the estimated "virtual" size of the `table`;  estimated,
+ * because it's true size can't be known until all columns dimensions are known,
+ * which may be deferred in the case of auto-sized tables.
+ *
+ * Double buffering can be enabled on "column scroll", "row scroll" and/or
+ * "column schema change".  When enabled and a redraw is requested for the case,
+ * the existing table is cloned with `cloneNode()` and swapped with the real
+ * `table`, which is then updated offscreen and swapped back in.  While this is
+ * much slower to render, it prevents draw-in.
  *
  * @class DatagridVirtualTableViewModel
  */
@@ -659,7 +690,8 @@ class DatagridVirtualTableViewModel extends HTMLElement {
                 this._swap_in(force_redraw, invalid_row, invalid_column);
                 const header_levels = this.config.column_pivots.length + 1;
                 const row_levels = this.config.row_pivots.length;
-                await this.table_model.draw(container_width, container_height, view, header_levels, row_levels, column_paths, schemap, viewport);
+                const schema = await schemap;
+                await this.table_model.draw(view, container_width, container_height, header_levels, row_levels, column_paths, this.config.sort, schema, viewport);
                 this._swap_out(force_redraw, invalid_row, invalid_column);
                 this._update_virtual_panel_width(container_width, force_redraw, column_paths);
             }
@@ -689,7 +721,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
 
     async _on_click(event) {
         let element = event.target;
-        while (element.tagName !== "TD" && event.tagName !== "TH") {
+        while (element.tagName !== "TD" && element.tagName !== "TH") {
             element = element.parentElement;
             if (!this.wrapper.contains(element)) {
                 return;
@@ -698,21 +730,48 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const is_button = event.target.classList.contains("pd-row-header-icon");
         const metadata = METADATA_MAP.get(element);
         if (is_button) {
-            if (metadata.is_open) {
-                if (event.shiftKey) {
-                    await this.view.set_depth(metadata.row_path.length - 1);
-                } else {
-                    await this.view.collapse(metadata.ridx);
-                }
-            } else if (metadata.is_open === false) {
-                if (event.shiftKey) {
-                    await this.view.set_depth(metadata.row_path.length);
-                } else {
-                    await this.view.expand(metadata.ridx);
-                }
-            }
-            await this.draw(this.view, true, true);
+            await this._on_toggle(event, metadata);
+        } else if (metadata?.column_name) {
+            await this._on_sort(event, metadata);
         }
+    }
+
+    async _on_toggle(event, metadata) {
+        if (metadata.is_open) {
+            if (event.shiftKey) {
+                await this.view.set_depth(metadata.row_path.length - 1);
+            } else {
+                await this.view.collapse(metadata.ridx);
+            }
+        } else if (metadata.is_open === false) {
+            if (event.shiftKey) {
+                await this.view.set_depth(metadata.row_path.length);
+            } else {
+                await this.view.expand(metadata.ridx);
+            }
+        }
+        await this.draw(this.view, true, true);
+    }
+
+    async _on_sort(event, metadata) {
+        // `element` is a `<th>`
+        let {sort} = await this.elem.view.get_config();
+        const current_idx = sort.findIndex(x => x[0] === metadata.column_name);
+
+        if (current_idx > -1) {
+            // Already sorted by `metadata.column_name`, so increment
+            const [name, direction] = sort[current_idx];
+            const new_sort = this.elem._increment_sort(direction, false, event.altKey);
+            sort[current_idx] = [name, new_sort];
+        } else {
+            // Not sorted, append
+            if (event.shiftKey) {
+                sort.push([metadata.column_name, event.altKey ? "asc abs" : "asc"]);
+            } else {
+                sort = [[metadata.column_name, event.altKey ? "asc abs" : "asc"]];
+            }
+        }
+        this.elem.setAttribute("sort", JSON.stringify(sort));
     }
 
     connectedCallback() {
