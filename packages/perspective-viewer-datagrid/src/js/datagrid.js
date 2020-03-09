@@ -20,7 +20,7 @@ const DOUBLE_BUFFER_ROW = false;
 
 // The largest size virtual <div> in (px) that Chrome can support without
 // glitching.
-const CHROME_FUCKUP_LIMIT = 10000000;
+const BROWSER_MAX_HEIGHT = 10000000;
 
 const PRIVATE = Symbol("Private Datagrid");
 
@@ -102,7 +102,6 @@ class ViewModel {
     }
 
     constructor(container, table) {
-        //    super();
         this._container = container;
         this.table = table;
         this.cells = [];
@@ -598,7 +597,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const schemap = view.schema().catch(() => {});
         const nrows = await nrowsp;
         const {start_row, end_row} = this._calculate_row_range(container_height, nrows);
-        const virtual_panel_px_size = Math.min(CHROME_FUCKUP_LIMIT, (nrows + this.table_model.header.cells.length) * 19);
+        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, (nrows + this.table_model.header.cells.length) * 19);
         this.virtual_panel.style.height = `${virtual_panel_px_size}px`;
 
         if (nrows > 0) {
