@@ -231,8 +231,11 @@ class PerspectiveManager(object):
                 elif msg["method"] != "delete":
                     # otherwise parse args as list
                     result = getattr(table_or_view, msg["method"])(*args)
-                if type(result) == bytes:
-                    # return result to the client without JSON serialization
+                if isinstance(result, bytes) and msg["method"] != "to_csv":
+                    # return a binary to the client without JSON serialization,
+                    # i.e. when we return an Arrow. If a method is added that
+                    # returns a string, this condition needs to be updated as
+                    # an Arrow binary is both `str` and `bytes` in Python 2.
                     self._process_bytes(result, msg, post_callback)
                 else:
                     # return the result to the client
