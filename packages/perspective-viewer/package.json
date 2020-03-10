@@ -59,6 +59,7 @@
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
+        "chevrotain": "^6.5.0",
         "core-js": "^3.6.4",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",

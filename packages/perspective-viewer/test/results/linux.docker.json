@@ -14,6 +14,7 @@
     "Computed_Expressions_sorts_by_computed_expression_column_": "cec2e0b952a45ca97d2e803707a41de3",
     "Computed_Expressions_filters_by_computed_expression_column_": "088ba33536056aa33ea8ff4b85c8e4eb",
     "Computed_Expressions_pivots_by_computed_expression_column_": "c7f2c66760c29c852b43a2ec7b4cf244",
+    "Computed_Expressions_On_restore,_computed_expressions_in_classic_syntax_are_parsed_correctly_": "563f8c45e0ec32bc4b07d30ed5f0086e",
     "superstore_adds_computed_column_via_attribute": "f2fa526d6f0c168a47ab272bb7ae5771",
     "superstore_user_defined_aggregates_maintained_on_computed_columns": "c7aa2902feb512ceb1e1487de80878ff",
     "__GIT_COMMIT__": "410648f3426fe2358cdf2a9a89424ed6cbe6122a",

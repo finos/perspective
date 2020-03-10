@@ -98,17 +98,25 @@ async function get_new_page() {
 
                 elem.focus();
 
-                function triggerKeyEvent(node, eventType) {
-                    const keyEvent = document.createEvent("KeyboardEvent");
-                    keyEvent.initEvent(eventType, true, true);
-                    node.dispatchEvent(keyEvent);
+                function triggerKeyEvent(key, eventType) {
+                    const keyEvent = new KeyboardEvent(eventType, {
+                        bubbles: true,
+                        cancelable: true,
+                        key: key
+                    });
+                    document.dispatchEvent(keyEvent);
                 }
 
-                // Set the value on the element
-                elem.value = content;
+                for (let i = 0; i < content.length; i++) {
+                    const char = content[i];
+                    triggerKeyEvent(char, "keydown");
+                    triggerKeyEvent(char, "keyUp");
+                    elem.value += char;
+                }
 
-                triggerKeyEvent(elem, "keydown");
-                triggerKeyEvent(elem, "keyup");
+                if (elem.value !== content) {
+                    elem.value = content;
+                }
             },
             content,
             path

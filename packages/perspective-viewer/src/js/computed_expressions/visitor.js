@@ -7,13 +7,13 @@
  *
  */
 import {lex} from "./lexer";
-import {ComputedColumnParser} from "./parser";
+import {ComputedExpressionColumnParser} from "./parser";
 import {COMPUTED_FUNCTION_FORMATTERS} from "./formatter";
 
-const parser = new ComputedColumnParser([]);
+const parser = new ComputedExpressionColumnParser([]);
 const base_visitor = parser.getBaseCstVisitorConstructor();
 
-export class ComputedColumnVisitor extends base_visitor {
+export class ComputedExpressionColumnVisitor extends base_visitor {
     constructor() {
         super();
         this.validateVisitor();
@@ -241,7 +241,7 @@ export class ComputedColumnVisitor extends base_visitor {
 }
 
 // We only need one visitor instance - state is reset using `parser.input`.
-const visitor = new ComputedColumnVisitor();
+const visitor = new ComputedExpressionColumnVisitor();
 
 /**
  * Given a string expression of the form '"column" +, -, *, / "column",
@@ -258,7 +258,8 @@ export const expression_to_computed_column_config = function(expression) {
     const cst = parser.SuperExpression();
 
     if (parser.errors.length > 0) {
-        throw new Error(parser.errors);
+        let message = parser.errors.map(e => e.message);
+        throw new Error(`${message.join("\n")}`);
     }
 
     return visitor.visit(cst);

@@ -165,14 +165,20 @@ export class DomElement extends PerspectiveElement {
         // FIXME: bad bad not good
         if (!this._view) return;
         const [computed_schema, config] = await Promise.all([this._view.computed_schema(), this._view.get_config()]);
-        console.log(computed_schema, config);
         const computed_columns = config.computed_columns;
         const columns = this._get_view_all_column_names();
+        const active = this._get_view_active_column_names();
+        const rp = this._get_view_row_pivots();
+        const cp = this._get_view_column_pivots();
+        const sort = this._get_view_sorts().map(x => x[0]);
+        const filter = this._get_view_filters().map(x => x[0]);
 
         for (const cc of computed_columns) {
-            const column_name = cc.column;
-            if (columns.includes(column_name)) continue;
-            const row = this._new_row(column_name, computed_schema[column_name], null, null, null, column_name);
+            const name = cc.column;
+            // FIXME: so bad, so terrible
+            const should_add = !columns.includes(name) && !active.includes(name) && !rp.includes(name) && !cp.includes(name) && !sort.includes(name) && !filter.includes(name);
+            if (!should_add) continue;
+            const row = this._new_row(name, computed_schema[name], null, null, null, name);
             // FIXME: this needs to follow the paradigm for adding columns to
             // the sidebar elsewhere, as it iscurrently broken if one `reset`s
             // the viewer and tries to pivot on the column.
@@ -185,6 +191,7 @@ export class DomElement extends PerspectiveElement {
      * clear all previously created columns from the UI.
      */
     _reset_computed_column_view() {
+        // FIXME: this needs to work properly
         const rows = this._inactive_columns.getElementsByClassName("computed");
         const names = [];
 

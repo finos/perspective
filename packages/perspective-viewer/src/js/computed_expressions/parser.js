@@ -43,33 +43,41 @@ import {
     MonthBucket,
     YearBucket
 } from "./lexer";
+import {PerspectiveParserErrorMessage} from "./error";
 
-export class ComputedColumnParser extends CstParser {
+export class ComputedExpressionColumnParser extends CstParser {
     constructor() {
-        super(vocabulary);
+        super(vocabulary, {
+            errorMessageProvider: PerspectiveParserErrorMessage
+        });
 
         this.RULE("SuperExpression", () => {
             this.SUBRULE(this.Expression);
         });
 
         this.RULE("Expression", () => {
-            this.OR([
-                {
-                    ALT: () => {
-                        this.SUBRULE(this.OperatorComputedColumn);
+            this.OR(
+                [
+                    {
+                        ALT: () => {
+                            this.SUBRULE(this.OperatorComputedColumn);
+                        }
+                    },
+                    {
+                        ALT: () => {
+                            this.SUBRULE(this.FunctionComputedColumn);
+                        }
                     }
-                },
+                ],
                 {
-                    ALT: () => {
-                        this.SUBRULE(this.FunctionComputedColumn);
-                    }
+                    ERR_MSG: "Expected an expression of the form `x + y` or `func(x)`."
                 }
-            ]);
+            );
         });
 
         this.RULE("OperatorComputedColumn", () => {
             this.SUBRULE(this.ColumnName, {LABEL: "left"});
-            this.MANY(() => {
+            this.AT_LEAST_ONE(() => {
                 this.SUBRULE(this.Operator);
                 this.SUBRULE2(this.ColumnName, {LABEL: "right"});
             });
@@ -94,7 +102,9 @@ export class ComputedColumnParser extends CstParser {
         });
 
         this.RULE("ColumnName", () => {
-            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.CONSUME(ColumnName)}]);
+            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.CONSUME(ColumnName)}], {
+                ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
+            });
         });
 
         this.RULE("TerminalColumnName", () => {

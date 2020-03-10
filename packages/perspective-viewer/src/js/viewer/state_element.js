@@ -125,6 +125,10 @@ export class StateElement extends HTMLElement {
         return JSON.parse(this.getAttribute("computed-columns"));
     }
 
+    _get_view_parsed_computed_columns() {
+        return JSON.parse(this.getAttribute("parsed-computed-columns"));
+    }
+
     _get_visible_column_count() {
         return this._get_view_dom_columns().length;
     }
