@@ -99,16 +99,16 @@ function _tree_header(td, path, is_leaf, is_open) {
     if (is_leaf) {
         let html = "";
         for (let i = 0; i < path.length; i++) {
-            html += `<span style="margin-left:5px;margin-right:15px;border-left:1px solid #eee;height:19px"></span>`;
+            html += `<span class="pd-tree-group"></span>`;
         }
-        td.innerHTML = `<div style="display:flex;align-items:center">${html}<span style="margin-left:20px">${name}</span></div>`;
+        td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-group-name" style="margin-left:12px">${name}</span></div>`;
     } else {
         const icon = is_open ? "remove" : "add";
         let html = "";
         for (let i = 0; i < path.length; i++) {
             html += `<span style="margin-left:5px;margin-right:15px;border-left:1px solid #eee;height:19px"></span>`;
         }
-        td.innerHTML = `<div style="display:flex;align-items:center">${html}<span class="pd-row-header-icon">${icon}</span><span>${name}</span></div>`;
+        td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-row-header-icon">${icon}</span><span class="pd-group-name">${name}</span></div>`;
     }
     td.classList.add("pd-group-header");
 }
@@ -222,6 +222,7 @@ class DatagridHeaderViewModel extends ViewModel {
         offset_cache[d] += 1;
         th.className = "";
         th.removeAttribute("colspan");
+        th.style.minWidth = "";
         if (sort_dir?.length === 0) {
             th.textContent = column_name;
         } else {
@@ -253,9 +254,6 @@ class DatagridHeaderViewModel extends ViewModel {
     }
 
     _draw_th(column, column_name, type, th) {
-        // th.column_path = column;
-        // th.column_name = column_name;
-        // th.column_type = type;
         const metadata = this._get_or_create_metadata(th);
         metadata.column_path = column;
         metadata.column_name = column_name;
@@ -265,8 +263,6 @@ class DatagridHeaderViewModel extends ViewModel {
         th.classList.add(type);
         if (pin_width) {
             th.style.minWidth = pin_width;
-        } else {
-            th.style.minWidth = "";
         }
     }
 
@@ -302,13 +298,12 @@ class DatagridHeaderViewModel extends ViewModel {
         if (header_levels === 1 && type === undefined) {
             th.classList.add("pd-group-header");
         }
-
+        this._clean_rows(offset_cache.length);
         return {group_header_cache, offset_cache};
     }
 
     clean({offset_cache}) {
         this._clean_columns(offset_cache);
-        this._clean_rows(offset_cache.length);
     }
 }
 
@@ -363,13 +358,13 @@ class DatagridBodyViewModel extends ViewModel {
             }
         }
         const offsetWidth = td.offsetWidth;
+        this._clean_rows(ridx);
         this.pinned_widths[`${column_name}|${type}`] = offsetWidth + "px";
         return {offsetWidth: offsetWidth, cidx, ridx};
     }
 
-    clean({ridx, cidx}) {
+    clean({cidx}) {
         this._clean_columns(cidx);
-        this._clean_rows(ridx);
     }
 }
 
@@ -663,19 +658,24 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         this._on_scroll(event);
     }
 
+    _reset_viewport() {
+        this._start_row = undefined;
+        this._end_row = undefined;
+        this._start_col = undefined;
+        this._end_col = undefined;
+    }
+
     resize() {
         this._container_width = undefined;
         this._container_height = undefined;
         this._nrows = undefined;
+        this._reset_viewport();
     }
 
     reset_scroll() {
         this._scroll_container.scrollTop = 0;
         this._scroll_container.scrollLeft = 0;
-        this._start_row = undefined;
-        this._end_row = undefined;
-        this._start_col = undefined;
-        this._end_col = undefined;
+        this._reset_viewport();
     }
 
     @throttlePromise
