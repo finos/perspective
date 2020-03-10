@@ -357,6 +357,22 @@ namespace binding {
         const std::string& name);
 
     /**
+     * @brief Given a table and a vector of computed column definitions,
+     * get a `t_schema` containing the return types of computed columns
+     * without constructing/calculating the computed column.
+     * 
+     * @tparam T 
+     * @param table 
+     * @param j_computed_columns 
+     * @return t_schema 
+     */
+    template <typename T>
+    t_schema
+    get_table_computed_schema(
+        std::shared_ptr<Table> table,
+        std::vector<std::vector<T>> j_computed_columns);
+
+    /**
      * @brief Get a slice of data for a single column, serialized to t_val.
      *
      * @tparam

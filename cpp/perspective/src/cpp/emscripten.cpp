@@ -1556,6 +1556,40 @@ namespace binding {
 
     /******************************************************************************
      *
+     * Computed Column Metadata
+     */
+    template <>
+    t_schema
+    get_table_computed_schema(
+        std::shared_ptr<Table> table,
+        std::vector<std::vector<t_val>> j_computed_columns) {
+        // Convert into vector of tuples
+        std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+
+        // FIXME: do we need this on the actual table or can we do
+        // table->state->schema
+        for (auto c : j_computed_columns) {
+            std::string computed_column_name = c.at(0).as<std::string>();
+            t_computed_function_name computed_function_name = 
+                str_to_computed_function_name(c.at(1).as<std::string>());
+            std::vector<std::string> input_columns = 
+                vecFromArray<t_val, std::string>(c.at(2));
+
+            std::cout << computed_column_name << std::endl << input_columns << std::endl;
+
+            // Add the computed column to the config.
+            auto tp = std::make_tuple(
+                computed_column_name, computed_function_name, input_columns);
+            computed_columns.push_back(tp);
+        }
+        
+        t_schema computed_schema = table->get_computed_schema(computed_columns);
+        return computed_schema;
+    }
+
+
+    /******************************************************************************
+     *
      * Data serialization
      */
 
@@ -1639,6 +1673,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
         .function("size", &Table::size)
         .function("get_schema", &Table::get_schema)
+        .function("get_computed_schema", &Table::get_computed_schema)
         .function("unregister_gnode", &Table::unregister_gnode)
         .function("reset_gnode", &Table::reset_gnode)
         .function("get_id", &Table::get_id)
@@ -2021,4 +2056,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_row_delta_two", &get_row_delta<t_ctx2>);
     function("scalar_to_val", &scalar_to_val);
     function("get_computed_functions", &get_computed_functions);
+    function("get_table_computed_schema", &get_table_computed_schema<t_val>);
 }

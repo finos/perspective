@@ -161,16 +161,14 @@ utils.with_server({}, () => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("row-pivots", '["Computed"]'), viewer);
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City", "Computed"])), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed"])), viewer);
                 await page.evaluate(element => {
-                    const aggs = JSON.parse(element.getAttribute("aggregates")) || {};
-                    aggs["Computed"] = "any";
-                    element.setAttribute("aggregates", JSON.stringify(aggs));
+                    element.setAttribute("aggregates", JSON.stringify({Computed: "any"}));
                 }, viewer);
             });
 
-            test.capture("pivots by computed expression column.", async page => {
+            test.capture("row pivots by computed expression column.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
@@ -178,12 +176,30 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
             });
 
+            test.capture("column pivots by computed expression column.", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.setAttribute("column-pivots", '["Computed"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
+            });
+
+            test.capture("row and column pivots by computed expression column.", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
+                await add_computed_expression(page, 'uppercase("City") as "Computed2"');
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["Computed"]'), viewer);
+                await page.evaluate(element => element.setAttribute("column-pivots", '["Computed2"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
+            });
+
             test.capture("sorts by computed expression column.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'pow2("Sales") as "p2"');
+                await add_computed_expression(page, 'pow2("Sales") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["p2", "Sales"])), viewer);
-                await page.evaluate(element => element.setAttribute("sort", '[["p2", "desc"]]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales"])), viewer);
+                await page.evaluate(element => element.setAttribute("sort", JSON.stringify([["Computed", "desc"]])), viewer);
             });
 
             test.capture("filters by computed expression column.", async page => {
@@ -205,11 +221,13 @@ utils.with_server({}, () => {
             });
 
             // Attributes
-            test.skip("adds computed expression via attribute", async page => {
-                const computed = ['"Sales" + "Profit" as "First"', 'sqrt((pow2("Row ID"))) as "Second"'];
+            test.capture("adds computed expression via attribute", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("computed-columns", JSON.stringify(computed)), viewer);
+                await page.evaluate(element => {
+                    const computed = ['"Sales" + "Profit" as "First"', 'sqrt((pow2("Row ID"))) as "Second"'];
+                    element.setAttribute("computed-columns", JSON.stringify(computed));
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["First"])), viewer);
             });
@@ -225,21 +243,16 @@ utils.with_server({}, () => {
                             inputs: ["Sales", "Profit"]
                         },
                         {
-                            column: "pow2(Row ID)",
+                            column: "Second",
                             computed_function_name: "pow2",
                             inputs: ["Row ID"]
-                        },
-                        {
-                            column: "Second",
-                            computed_function_name: "sqrt",
-                            inputs: ["pow2(Row ID)"]
                         }
                     ];
 
                     element.setAttribute("computed-columns", JSON.stringify(computed));
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["First", "Second"])), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["First", "Second"])), viewer);
             });
 
             // Save and restore
@@ -261,135 +274,118 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Computed2"])), viewer);
             });
 
-            test.capture("Computed expressions are restored without changes", async page => {
+            test.skip("Computed expressions are restored without changes", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
-                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const config = {
                         columns: ["Order Date", "Ship Date"],
-                        computed_columns: ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
+                        "computed-columns": ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("On restore, computed expressions in the active columns list are not double created in inactive columns.", async page => {
+            test.skip("On restore, computed expressions in the active columns list are restored correctly.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
-                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const config = {
                         columns: ["Computed", "Computed2"],
-                        computed_columns: ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
+                        "computed-columns": ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("On restore, computed expressions in pivots are not double created in inactive columns.", async page => {
+            test.skip("On restore, computed expressions in pivots are restored correctly.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
-                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const config = {
                         "row-pivots": ["Computed"],
                         "column-pivots": ["Computed2"],
                         columns: ["Order Date", "Ship Date"],
-                        computed_columns: ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
+                        "computed-columns": ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("On restore, computed expressions in filter are not double created in inactive columns.", async page => {
+            test.skip("On restore, computed expressions in filter are restored correctly.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
-                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const config = {
                         filters: [["Computed", "==", "5 Thursday"]],
                         columns: ["Order Date", "Ship Date"],
-                        computed_columns: ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
+                        "computed-columns": ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("On restore, computed expressions in sort are not double created in inactive columns.", async page => {
+            test.skip("On restore, computed expressions in sort are restored correctly.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
-                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const config = {
                         sort: [["Computed", "desc"]],
                         columns: ["Order Date", "Ship Date"],
-                        computed_columns: ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
+                        "computed-columns": ['day_of_week("Order Date") as "Computed"', 'month_of_year("Ship Date") as "Computed2"']
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("On restore, computed expressions in classic syntax are parsed correctly.", async page => {
+            test.skip("On restore, computed expressions in classic syntax are parsed correctly.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
-                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const computed = [
                         {
-                            column: "First",
+                            column: "Computed",
                             computed_function_name: "+",
                             inputs: ["Sales", "Profit"]
                         },
                         {
-                            column: "pow2(Row ID)",
+                            column: "Computed3",
                             computed_function_name: "pow2",
                             inputs: ["Row ID"]
-                        },
-                        {
-                            column: "Second",
-                            computed_function_name: "sqrt",
-                            inputs: ["pow2(Row ID)"]
                         }
                     ];
                     const config = {
                         columns: ["Computed", "Computed2"],
-                        computed_columns: computed
+                        "computed-columns": computed
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("On restore, user defined aggregates are maintained on computed expression columns", async page => {
+            test.skip("On restore, user defined aggregates are maintained on computed expression columns", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await page.evaluate(async () => {
-                    const viewer = await document.querySelector("perspective-viewer");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async element => {
                     const config = {
                         aggregates: {Computed: "mean"},
                         "computed-columns": ['sqrt("Sales") as "Computed"'],
                         columns: ["Computed"],
                         "row-pivots": ["Category"]
                     };
-                    await viewer.restore(config);
-                });
+                    await element.restore(config);
+                }, viewer);
                 await page.$("perspective-viewer:not([updating])");
             });
         },

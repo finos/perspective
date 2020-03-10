@@ -211,14 +211,30 @@ class PerspectiveViewer extends ActionElement {
                 }
             }
 
-            // Make sure we keep track of parsed columns over multiple calls to
-            // the UI or the attribute API
-            let current_parsed = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
-            current_parsed = current_parsed.concat(parsed_computed_columns);
+            // Attempt to validate the parsed computed columns against the Table
+            if (this._table) {
+                const computed_schema = await this._table.computed_schema(parsed_computed_columns);
+                const validated = await this._validate_parsed_computed_columns(parsed_computed_columns, computed_schema);
+                if (validated.length !== parsed_computed_columns.length) {
+                    // Generate a diff error message with the invalid columns
+                    const diff = [];
+                    for (let i = 0; i < parsed_computed_columns.length; i++) {
+                        if (i > validated.length - 1) {
+                            diff.push(parsed_computed_columns[i]);
+                        } else {
+                            if (parsed_computed_columns[i].column !== validated[i].column) {
+                                diff.push(parsed_computed_columns[i]);
+                            }
+                        }
+                    }
+                    console.log("Could not apply these computed columns:", JSON.stringify(diff));
+                }
+                parsed_computed_columns = validated;
+            }
 
             // Always store a copy of the parsed computed columns for
             // validation of column names, etc.
-            this.setAttribute("parsed-computed-columns", JSON.stringify(current_parsed));
+            this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
 
             await this._debounce_update();
             await this._update_computed_column_view();

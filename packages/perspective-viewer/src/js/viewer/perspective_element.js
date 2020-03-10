@@ -17,8 +17,6 @@ import {CancelTask} from "./cancel_task.js";
 
 import {StateElement} from "./state_element.js";
 
-import {expression_to_computed_column_config} from "../computed_expressions/visitor";
-
 /******************************************************************************
  *
  *  Helpers
@@ -43,19 +41,26 @@ const column_sorter = schema => (a, b) => {
     return r;
 };
 
-function get_aggregate_defaults(schema, cols) {
+function get_aggregate_defaults(columns, schema, computed_schema) {
     const aggregates = {};
-    for (const col of cols) {
-        aggregates[col] = get_type_config(schema[col]).aggregate;
+    for (const col of columns) {
+        let type = schema[col];
+        if (!type) {
+            type = computed_schema[col];
+        }
+        aggregates[col] = get_type_config(type).aggregate;
     }
     return aggregates;
 }
 
-function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
+function get_aggregates_with_defaults(aggregate_attribute, columns, schema, computed_schema) {
     const found = new Set();
     const aggregates = [];
     for (const col of aggregate_attribute) {
-        const type = schema[col.column];
+        let type = schema[col.column];
+        if (!type) {
+            type = computed_schema[col.column];
+        }
         const type_config = get_type_config(type);
         found.add(col.column);
         if (type_config.type || type) {
@@ -69,11 +74,15 @@ function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
     }
 
     // Add columns detected from dataset.
-    for (const col of cols) {
+    for (const col of columns) {
         if (!found.has(col)) {
+            let type = schema[col];
+            if (!type) {
+                type = computed_schema[col.column];
+            }
             aggregates.push({
                 column: col,
-                op: get_type_config(schema[col]).aggregate
+                op: get_type_config(type).aggregate
             });
         }
     }
@@ -114,6 +123,33 @@ const _warning = (strings, ...args) => strings.flatMap((str, idx) => [_nowrap_te
  */
 
 export class PerspectiveElement extends StateElement {
+    /**
+     * Given an array of computed column definitions, check the table's
+     * computed schema and make sure all types and column names are valid.
+     * If any column names are invalid, they are removed from the output
+     * array of computed column definitions.
+     *
+     * @async
+     * @param {Array{Object}} computed_columns an Array of computed column
+     * definitions
+     * @param {Object{String}} computed_schema a computed column schema
+     * generated from the table
+     *
+     * @returns {Array{Object}} a validated Array of computed column definitions
+     */
+    async _validate_parsed_computed_columns(computed_columns, computed_schema) {
+        if (!computed_columns || computed_columns.length === 0) return [];
+        const validated = [];
+
+        for (const computed of computed_columns) {
+            if (computed_schema[computed.column]) {
+                validated.push(computed);
+            }
+        }
+
+        return validated;
+    }
+
     async _load_table(table, computed = false) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
         const resolve = this._set_updating();
@@ -132,30 +168,12 @@ export class PerspectiveElement extends StateElement {
         // Initial col order never contains computed columns
         this._initial_col_order = cols.slice();
 
-        // If `computed-columns` and `parsed-computed-columns` are set on the
-        // viewer, we need to make sure they contain valid columns that belong
-        // to this table before applying them to the view.
+        // Already validated through the attribute API
         const parsed_computed_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
-        const parsed_computed_names = parsed_computed_columns.map(x => x.column);
-        const valid_parsed_computed = [];
+        const computed_column_names = parsed_computed_columns.map(x => x.column);
+        const computed_schema = await table.computed_schema(parsed_computed_columns);
 
-        // Make sure all computed columns are derived from valid columns.
-        for (const computed of parsed_computed_columns) {
-            let valid = true;
-            for (const input of computed.inputs) {
-                if (!cols.includes(input) && !parsed_computed_names.includes(input)) {
-                    // A name is invalid, so don't include it
-                    // TODO: this means we are no longer 1:1 with attribute API
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid) {
-                valid_parsed_computed.push(computed.column);
-            }
-        }
-
-        cols = cols.concat(valid_parsed_computed);
+        cols = cols.concat(computed_column_names);
 
         if (!this.hasAttribute("columns")) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));
@@ -165,7 +183,7 @@ export class PerspectiveElement extends StateElement {
 
         // Update aggregates
         const aggregate_attribute = this.get_aggregate_attribute();
-        const aggregates = get_aggregates_with_defaults(aggregate_attribute, schema, cols);
+        const aggregates = get_aggregates_with_defaults(aggregate_attribute, cols, schema, computed_schema);
 
         let shown = JSON.parse(this.getAttribute("columns")); //.filter(x => all_cols.indexOf(x) > -1);
 
@@ -178,17 +196,16 @@ export class PerspectiveElement extends StateElement {
             shown = this._initial_col_order;
         }
 
-        this._aggregate_defaults = get_aggregate_defaults(schema, cols);
+        this._aggregate_defaults = get_aggregate_defaults(cols, schema, computed_schema);
 
         for (const name of cols) {
             let aggregate = aggregates.find(a => a.column === name).op;
-            const computed = parsed_computed_names.includes(name) ? name : undefined;
-
-            if (computed && !aggregate) {
-                // FIXME: this is spinning out of control
-                aggregate = "count";
+            const computed = computed_column_names.includes(name) ? name : undefined;
+            let type = schema[name];
+            if (!type) {
+                type = computed_schema[name];
             }
-            const row = this._new_row(name, schema[name], aggregate, null, null, null, computed);
+            const row = this._new_row(name, type, aggregate, null, null, null, computed);
             this._inactive_columns.appendChild(row);
             if (shown.includes(name)) {
                 row.classList.add("active");
@@ -199,18 +216,13 @@ export class PerspectiveElement extends StateElement {
             shown.push(null);
         }
 
-        // FIXME: maybe we need to break up this method - there's too many
-        // links here that are fragile.
         for (const x of shown) {
-            const computed = parsed_computed_names.includes(x) ? x : undefined;
-            // Default to count again here
-            const aggregate = computed ? "count" : undefined;
-
-            // FIXME: there is no type here for computed columns in table
-            // schema, nor is there sort order, aggregate, or anything else.
-            // We need a new paradigm for this to work otherwise it'll
-            // be broken in various places with hard-to-trace side effects.
-            const active_row = this._new_row(x, schema[x], aggregate, undefined, undefined, computed);
+            const computed = computed_column_names.includes(x) ? x : undefined;
+            let type = schema[name];
+            if (!type) {
+                type = computed_schema[name];
+            }
+            const active_row = this._new_row(x, type, undefined, undefined, undefined, computed);
             this._active_columns.appendChild(active_row);
         }
 
@@ -407,24 +419,9 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        const computed_columns = this._get_view_computed_columns() || [];
-        let parsed_computed_columns = [];
-
-        if (computed_columns.length > 0) {
-            // For each computed column, parse the expression if it is a string.
-            for (const expr of computed_columns) {
-                if (typeof expr === "string") {
-                    try {
-                        parsed_computed_columns = parsed_computed_columns.concat(expression_to_computed_column_config(expr));
-                    } catch (e) {
-                        console.warn(`Could not parse computed expression ${expr}:`, e.message);
-                        continue;
-                    }
-                } else {
-                    parsed_computed_columns.push(expr);
-                }
-            }
-        }
+        // Computed Columns will have been parsed by this point in the
+        // setAttribute callback.
+        const computed_columns = this._get_view_parsed_computed_columns() || [];
 
         const config = {
             filter: filters,
@@ -433,7 +430,7 @@ export class PerspectiveElement extends StateElement {
             aggregates: aggregates,
             columns: columns,
             sort: sort,
-            computed_columns: parsed_computed_columns
+            computed_columns: computed_columns
         };
 
         if (this._view) {
