@@ -13,6 +13,10 @@ import template from "../html/computed_expression_editor.html";
 
 import style from "../less/computed_expression_editor.less";
 
+import {expression_to_computed_column_config} from "./computed_expressions/visitor";
+
+import {debounce} from "underscore";
+
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
 @bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
@@ -20,8 +24,8 @@ class ComputedExpressionEditor extends HTMLElement {
     constructor() {
         super();
 
+        this._parsed_expression = undefined;
         this.expressions = [];
-        this.column_names = [];
     }
 
     connectedCallback() {
@@ -33,13 +37,28 @@ class ComputedExpressionEditor extends HTMLElement {
     // Expression actions
     _validate_expression() {
         const expression = this._expression_input.value;
-        if (!this.expressions.includes(expression)) {
+
+        if (expression.length === 0) {
             this._clear_error_messages();
             this._enable_save_button();
-        } else {
-            this._disable_save_button();
-            this._set_error_message("Expression already exists", this._error);
+            return;
         }
+
+        try {
+            // Use this just for validation. On anything short of a massive
+            // expression, this should have no performance impact as we
+            // share an instance of the parser throughout the viewer.
+            this._parsed_expression = expression_to_computed_column_config(expression);
+        } catch (e) {
+            const message = e.message ? e.message : JSON.stringify(e);
+            this._disable_save_button();
+            this._set_error_message(message, this._error);
+            return;
+        }
+
+        this._clear_error_messages();
+        this._enable_save_button();
+        return;
     }
 
     /**
@@ -53,10 +72,15 @@ class ComputedExpressionEditor extends HTMLElement {
 
     _save_expression() {
         const expression = this._expression_input.value;
+        const parsed_expression = this._parsed_expression || [];
 
         const event = new CustomEvent("perspective-computed-expression-save", {
-            detail: {expression: expression}
+            detail: {
+                expression: expression,
+                parsed_expression: parsed_expression
+            }
         });
+
         this.dispatchEvent(event);
 
         this.expressions.push(expression);
@@ -123,7 +147,8 @@ class ComputedExpressionEditor extends HTMLElement {
      */
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_expression_editor.bind(this));
-        this._expression_input.addEventListener("keyup", this._validate_expression.bind(this));
+        // Wait 750ms before validating user input
+        this._expression_input.addEventListener("keyup", debounce(this._validate_expression.bind(this), 750));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }

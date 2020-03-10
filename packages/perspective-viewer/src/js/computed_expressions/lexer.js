@@ -7,6 +7,7 @@
  *
  */
 import {Lexer, createToken} from "chevrotain";
+import {PerspectiveLexerErrorMessage} from "./error";
 
 export const vocabulary = {};
 
@@ -318,13 +319,16 @@ tokens.forEach(t => {
     vocabulary[t.name] = t;
 });
 
-const lexer = new Lexer(tokens);
+const lexer = new Lexer(tokens, {
+    errorMessageProvider: PerspectiveLexerErrorMessage
+});
 
 export const lex = function(input) {
     const result = lexer.tokenize(input);
 
     if (result.errors.length > 0) {
-        console.error(result.errors);
+        let message = result.errors.map(e => e.message);
+        throw new Error(`${message.join("\n")}`);
     }
 
     return result;

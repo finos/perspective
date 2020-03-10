@@ -21,6 +21,7 @@ import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
 import {ActionElement} from "./viewer/action_element.js";
+import {expression_to_computed_column_config} from "./computed_expressions/visitor.js";
 
 /**
  * Module for the `<perspective-viewer>` custom element.
@@ -182,17 +183,42 @@ class PerspectiveViewer extends ActionElement {
         const resolve = this._set_updating();
 
         (async () => {
-            this._computed_expression_editor._close_expression_editor();
+            if (this._computed_expression_editor.style.display !== "none") {
+                this._computed_expression_editor._close_expression_editor();
+            }
             if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
                 // Remove computed columns from the DOM
                 if (this.hasAttribute("computed-columns")) {
                     this.removeAttribute("computed-columns");
+                    this.removeAttribute("parsed-computed-columns");
                     this._reset_computed_column_view();
                     resolve();
                     return;
                 }
                 computed_columns = [];
             }
+
+            let parsed_computed_columns = [];
+
+            for (const column of computed_columns) {
+                if (typeof column === "string") {
+                    // Either validated through the UI, or will be validated
+                    // here. TODO: rearchitect so we don't triple parse each
+                    // expression.
+                    parsed_computed_columns = parsed_computed_columns.concat(expression_to_computed_column_config(column));
+                } else {
+                    parsed_computed_columns.push(column);
+                }
+            }
+
+            // Make sure we keep track of parsed columns over multiple calls to
+            // the UI or the attribute API
+            let current_parsed = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+            current_parsed = current_parsed.concat(parsed_computed_columns);
+
+            // Always store a copy of the parsed computed columns for
+            // validation of column names, etc.
+            this.setAttribute("parsed-computed-columns", JSON.stringify(current_parsed));
 
             await this._debounce_update();
             await this._update_computed_column_view();
@@ -644,6 +670,7 @@ class PerspectiveViewer extends ActionElement {
         for (const key of PERSISTENT_ATTRIBUTES) {
             if (config.hasOwnProperty(key)) {
                 let val = config[key];
+                console.log(key, val);
                 if (val === true) {
                     this.toggleAttribute(key, true);
                 } else if (val !== undefined && val !== null && val !== false) {

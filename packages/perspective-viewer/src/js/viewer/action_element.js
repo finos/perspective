@@ -123,6 +123,7 @@ export class ActionElement extends DomElement {
 
         // TODO: need to keep naming REALLY consistent
         let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
+
         if (computed_columns === null) {
             computed_columns = [];
         }
