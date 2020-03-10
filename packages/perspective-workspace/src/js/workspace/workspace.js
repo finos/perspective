@@ -175,8 +175,6 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         const {sizes, master, detail, viewers: viewer_configs = [], mode = MODE.GLOBAL_FILTERS} = cloneDeep(value);
         this.mode = mode;
 
-        this.clearLayout();
-
         if (this.mode === MODE.GLOBAL_FILTERS && master && master.widgets.length > 0) {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
