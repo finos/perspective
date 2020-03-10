@@ -145,17 +145,25 @@ class ViewModel {
     @memoize
     _format(type) {
         const config = get_type_config(type);
+        const real_type = config.type || type;
         const format_function = {
             float: Intl.NumberFormat,
             integer: Intl.NumberFormat,
             datetime: Intl.DateTimeFormat,
             date: Intl.DateTimeFormat
-        }[config.type || type];
+        }[real_type];
         if (format_function) {
             const func = new format_function("en-us", config.format);
             return {
                 format(td, path) {
                     td.textContent = func.format(path);
+                    if (real_type === "integer" || real_type === "float") {
+                        if (path > 0) {
+                            td.classList.add("pd-positive");
+                        } else if (path < 0) {
+                            td.classList.add("pd-negative");
+                        }
+                    }
                 }
             };
         } else if (type === undefined) {

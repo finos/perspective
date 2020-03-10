@@ -21,12 +21,21 @@ tbody td.integer {
     text-align: right;
 }
 
-tbody td.integer {
-    color: #1a7da1;
+
+td.pd-positive {
+    color: #1078d1;
+}
+
+td.pd-negative {
+    color: #de3838;
 }
 
 thead tr:last-child th.string,
-tbody td.string {
+tbody td.string,
+thead tr:last-child th.date,
+tbody td.date,
+thead tr:last-child th.datetime,
+tbody td.datetime  {
     text-align: left;
 }
 
@@ -105,3 +114,24 @@ span.pd-row-header-icon:hover {
     color: #1a7da1;
     text-shadow: 0px 0px 3px #1a7da1;
 }
+
+
+// OPTIONAL zebra striping
+
+@zebra-stripe-color: rgb(238,238,238);
+
+// tbody tr:nth-child(even) td:not(.pd-group-header) {
+//     background: @zebra-stripe-color;
+// }
+
+// tbody tr:nth-child(even) span.pd-group-name {
+//     background: @zebra-stripe-color;
+//     margin-right: -5px;
+// }
+
+// span.pd-group-name {
+//     flex: 1;
+//     padding-left: 8px;
+// }
+
+// Number heat
