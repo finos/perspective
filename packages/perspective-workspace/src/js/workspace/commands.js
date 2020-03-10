@@ -8,6 +8,7 @@
  */
 
 import {CommandRegistry} from "@phosphor/commands";
+import {MODE} from "./workspace";
 
 export const createCommands = workspace => {
     const commands = new CommandRegistry();
@@ -43,8 +44,17 @@ export const createCommands = workspace => {
 
     commands.addCommand("workspace:master", {
         execute: args => workspace.toggleMasterDetail(args.widget),
+        isVisible: () => workspace.mode === MODE.GLOBAL_FILTERS,
         iconClass: args => (args.widget.parent === workspace.dockpanel ? "menu-master" : "menu-detail"),
         label: args => (args.widget.parent === workspace.dockpanel ? "Create Global Filter" : "Remove Global Filter"),
+        mnemonic: 0
+    });
+
+    commands.addCommand("workspace:link", {
+        execute: args => workspace.toggleLink(args.widget),
+        isVisible: () => workspace.mode === MODE.LINKED,
+        iconClass: args => (workspace.isLinked(args.widget) ? "menu-unlink" : "menu-link"),
+        label: args => (workspace.isLinked(args.widget) ? "Unlink" : "Link"),
         mnemonic: 0
     });
 
@@ -63,5 +73,6 @@ export const createCommands = workspace => {
         label: () => "Minimize",
         mnemonic: 0
     });
+
     return commands;
 };
