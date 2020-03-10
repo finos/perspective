@@ -13,7 +13,7 @@ import CONTAINER_STYLE from "../less/container.less";
 import MATERIAL_STYLE from "../less/material.less";
 
 // Output runtime debug info like FPS.
-const DEBUG = true;
+const DEBUG = false;
 
 // Double buffer when the viewport scrolls columns, rows or when the
 // view is recreated.  Reduces render draw-in on some browsers, at the
@@ -243,6 +243,15 @@ class DatagridHeaderViewModel extends ViewModel {
         return th;
     }
 
+    _draw_group(column, column_name, type, th) {
+        const metadata = this._get_or_create_metadata(th);
+        metadata.column_path = column;
+        metadata.column_name = column_name;
+        metadata.column_type = type;
+        metadata.is_column_header = false;
+        th.className = "";
+    }
+
     _draw_th(column, column_name, type, th) {
         // th.column_path = column;
         // th.column_name = column_name;
@@ -251,6 +260,7 @@ class DatagridHeaderViewModel extends ViewModel {
         metadata.column_path = column;
         metadata.column_name = column_name;
         metadata.column_type = type;
+        metadata.is_column_header = true;
         const pin_width = this.pinned_widths[`${column}|${type}`];
         th.classList.add(type);
         if (pin_width) {
@@ -260,8 +270,8 @@ class DatagridHeaderViewModel extends ViewModel {
         }
     }
 
-    draw(header_levels, column, type, sort, {group_header_cache = [], offset_cache = []} = {}) {
-        let parts = column.split("|");
+    draw(header_levels, alias, column, type, sort, {group_header_cache = [], offset_cache = []} = {}) {
+        let parts = column.split?.("|");
         let th,
             column_name,
             is_new_group = false;
@@ -275,6 +285,7 @@ class DatagridHeaderViewModel extends ViewModel {
                     th.setAttribute("colspan", (parseInt(th.getAttribute("colspan")) || 1) + 1);
                 } else {
                     th = this._draw_group_th(offset_cache, d, column_name, []);
+                    this._draw_group(column, column_name, type, th);
                     group_header_cache[d] = [column_name, th];
                     is_new_group = true;
                 }
@@ -284,12 +295,14 @@ class DatagridHeaderViewModel extends ViewModel {
                 }
                 const sort_dir = sort?.filter(x => x[0] === column_name).map(x => x[1]);
                 th = this._draw_group_th(offset_cache, d, column_name, sort_dir);
+                this._draw_th(alias || column, column_name, type, th);
             }
         }
-        this._draw_th(column, column_name, type, th);
+
         if (header_levels === 1 && type === undefined) {
             th.classList.add("pd-group-header");
         }
+
         return {group_header_cache, offset_cache};
     }
 
@@ -390,7 +403,7 @@ class DatagridTableViewModel {
         return this.header._get_row(Math.max(0, this.header.rows.length - 1)).row_container.length;
     }
 
-    async draw(view, container_width, container_height, header_levels, row_levels, column_paths, sort, schema, viewport) {
+    async draw(view, container_width, container_height, header_levels, row_levels, column_paths, row_paths, sort, schema, viewport) {
         const visible_columns = column_paths.slice(viewport.start_col);
 
         const columns_data = await view.to_columns(viewport);
@@ -400,8 +413,8 @@ class DatagridTableViewModel {
             width = 0;
 
         if (column_paths[0] === "__ROW_PATH__") {
-            cont_head = this.header.draw(header_levels, "");
-            cont_body = this.body.draw(container_height, "", cidx, columns_data["__ROW_PATH__"], undefined, row_levels, viewport.start_row);
+            cont_head = this.header.draw(header_levels, row_paths.join(","), "");
+            cont_body = this.body.draw(container_height, row_paths.join(","), cidx, columns_data["__ROW_PATH__"], undefined, row_levels, viewport.start_row);
             width += cont_body.offsetWidth;
             cidx++;
         }
@@ -422,7 +435,7 @@ class DatagridTableViewModel {
                 const column_data = columns_data[column_name];
                 const type = column_path_2_type(schema, column_name);
 
-                cont_head = this.header.draw(header_levels, column_name, type, sort, cont_head);
+                cont_head = this.header.draw(header_levels, undefined, column_name, type, sort, cont_head);
                 cont_body = this.body.draw(container_height, column_name, cidx, column_data, type, undefined, viewport.start_row);
                 width += cont_body.offsetWidth;
                 cidx++;
@@ -479,7 +492,7 @@ class DatagridTableViewModel {
 class DatagridVirtualTableViewModel extends HTMLElement {
     constructor() {
         super();
-        this._create_dom_model();
+        this._create_shadow_dom();
         _start_profiling_loop();
     }
 
@@ -499,8 +512,11 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         return this.table_model.body.cells.flat(1);
     }
 
-    _create_dom_model() {
-        // TODO singleton
+    clear() {
+        this._sticky_container.innerHTML = "<table></table>";
+    }
+
+    _create_shadow_dom() {
         this.attachShadow({mode: "open"});
         const style = document.createElement("style");
         style.textContent = CONTAINER_STYLE + MATERIAL_STYLE;
@@ -512,36 +528,36 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const table_clip = document.createElement("div");
         table_clip.classList.add("pd-scroll-table-clip");
 
-        const container = document.createElement("div");
-        container.classList.add("pd-scroll-container");
-        container.appendChild(virtual_panel);
-        container.appendChild(table_clip);
-        container.addEventListener("scroll", this._on_scroll.bind(this), {passive: false});
-        container.addEventListener("mousewheel", this._on_mousewheel.bind(this), {passive: false});
+        const scroll_container = document.createElement("div");
+        scroll_container.classList.add("pd-scroll-container");
+        scroll_container.appendChild(virtual_panel);
+        scroll_container.appendChild(table_clip);
+        scroll_container.addEventListener("scroll", this._on_scroll.bind(this), {passive: false});
+        scroll_container.addEventListener("mousewheel", this._on_mousewheel.bind(this), {passive: false});
 
         const slot = document.createElement("slot");
         table_clip.appendChild(slot);
 
-        this.shadowRoot.appendChild(container);
+        this.shadowRoot.appendChild(scroll_container);
 
-        const staging = document.createElement("div");
-        staging.style.position = "absolute";
-        staging.style.visibility = "hidden";
-        container.appendChild(staging);
+        const table_staging = document.createElement("div");
+        table_staging.style.position = "absolute";
+        table_staging.style.visibility = "hidden";
+        scroll_container.appendChild(table_staging);
 
-        const wrapper = document.createElement("div");
-        wrapper.addEventListener("mousedown", this._on_click.bind(this));
+        const sticky_container = document.createElement("div");
+        sticky_container.addEventListener("mousedown", this._on_click.bind(this));
 
-        this.wrapper = wrapper;
-        this.table_clip = table_clip;
-        this.staging = staging;
-        this._container = container;
-        this.virtual_panel = virtual_panel;
+        this._sticky_container = sticky_container;
+        this._table_clip = table_clip;
+        this._table_staging = table_staging;
+        this._scroll_container = scroll_container;
+        this._virtual_panel = virtual_panel;
     }
 
     _calculate_row_range(container_height, nrows, preserve_scroll_position) {
-        const total_scroll_height = Math.max(1, this.virtual_panel.offsetHeight - container_height);
-        const percent_scroll = this._container.scrollTop / total_scroll_height;
+        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - container_height);
+        const percent_scroll = this._scroll_container.scrollTop / total_scroll_height;
         const virtual_panel_row_height = Math.floor(container_height / 19);
         const relative_nrows = preserve_scroll_position ? this._nrows : nrows;
         let start_row = Math.floor(Math.max(0, relative_nrows + this.table_model.header.cells.length - virtual_panel_row_height) * percent_scroll);
@@ -560,8 +576,8 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     _calculate_column_range(container_width, column_paths) {
-        const total_scroll_width = Math.max(1, this.virtual_panel.offsetWidth - container_width);
-        const percent_left = this._container.scrollLeft / total_scroll_width;
+        const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - container_width);
+        const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
 
         // TODO estimate is wrong - calc in chunks
         let start_col = Math.floor((column_paths.length - 1) * percent_left);
@@ -586,13 +602,13 @@ class DatagridVirtualTableViewModel extends HTMLElement {
 
     _swap_in(...args) {
         if (this._needs_swap(...args)) {
-            if (this.staging !== this.table_model.table.parentElement) {
-                this.wrapper.replaceChild(this.table_model.table.cloneNode(true), this.table_model.table);
-                this.staging.appendChild(this.table_model.table);
+            if (this._table_staging !== this.table_model.table.parentElement) {
+                this._sticky_container.replaceChild(this.table_model.table.cloneNode(true), this.table_model.table);
+                this._table_staging.appendChild(this.table_model.table);
             }
         } else {
-            if (this.wrapper !== this.table_model.table.parentElement) {
-                this.wrapper.replaceChild(this.table_model.table, this.wrapper.children[0]);
+            if (this._sticky_container !== this.table_model.table.parentElement) {
+                this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
             }
         }
         this.elem.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {detail: this}));
@@ -600,23 +616,22 @@ class DatagridVirtualTableViewModel extends HTMLElement {
 
     _swap_out(...args) {
         if (this._needs_swap(...args)) {
-            this.wrapper.replaceChild(this.table_model.table, this.wrapper.children[0]);
+            this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
         }
-
         this.elem.dispatchEvent(new CustomEvent("perspective-datagrid-after-update", {detail: this}));
     }
 
     _update_virtual_panel_width(container_width, force_redraw, column_paths) {
-        if (force_redraw || this.virtual_panel.style.width === "") {
+        if (force_redraw || this._virtual_panel.style.width === "") {
             const px_per_column = container_width / this.table_model.num_columns();
             const virtual_width = px_per_column * column_paths.length;
-            this.virtual_panel.style.width = Math.max(this.table_model.table.offsetWidth, virtual_width) + "px";
+            this._virtual_panel.style.width = Math.max(this.table_model.table.offsetWidth, virtual_width) + "px";
         }
     }
 
     _update_virtual_panel_height(nrows) {
         const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, (nrows + this.table_model.header.cells.length) * 19);
-        this.virtual_panel.style.height = `${virtual_panel_px_size}px`;
+        this._virtual_panel.style.height = `${virtual_panel_px_size}px`;
     }
 
     /**
@@ -641,10 +656,10 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     _on_mousewheel(event) {
         event.preventDefault();
         event.returnValue = false;
-        const total_scroll_height = Math.max(1, this.virtual_panel.offsetHeight - this._container.offsetHeight);
-        const total_scroll_width = Math.max(1, this.virtual_panel.offsetWidth - this._container.offsetWidth);
-        this._container.scrollTop = Math.min(total_scroll_height, this._container.scrollTop + event.deltaY);
-        this._container.scrollLeft = Math.min(total_scroll_width, this._container.scrollLeft + event.deltaX);
+        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this._scroll_container.offsetHeight);
+        const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._scroll_container.offsetWidth);
+        this._scroll_container.scrollTop = Math.min(total_scroll_height, this._scroll_container.scrollTop + event.deltaY);
+        this._scroll_container.scrollLeft = Math.min(total_scroll_width, this._scroll_container.scrollLeft + event.deltaX);
         this._on_scroll(event);
     }
 
@@ -655,9 +670,12 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     reset_scroll() {
-        this.table_model.header.pinned_widths["|undefined"] = undefined;
-        this._container.scrollTop = 0;
-        this._container.scrollLeft = 0;
+        this._scroll_container.scrollTop = 0;
+        this._scroll_container.scrollLeft = 0;
+        this._start_row = undefined;
+        this._end_row = undefined;
+        this._start_col = undefined;
+        this._end_col = undefined;
     }
 
     @throttlePromise
@@ -669,8 +687,8 @@ class DatagridVirtualTableViewModel extends HTMLElement {
 
         this.config = await view.get_config();
 
-        const container_width = (this._container_width = this._container_width || this._container.offsetWidth);
-        const container_height = (this._container_height = this._container_height || this._container.offsetHeight);
+        const container_width = (this._container_width = this._container_width || this._scroll_container.offsetWidth);
+        const container_height = (this._container_height = this._container_height || this._scroll_container.offsetHeight);
 
         const nrowsp = view.num_rows().catch(() => {});
         const column_pathsp = view.column_paths().catch(() => {});
@@ -691,7 +709,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
                 const header_levels = this.config.column_pivots.length + 1;
                 const row_levels = this.config.row_pivots.length;
                 const schema = await schemap;
-                await this.table_model.draw(view, container_width, container_height, header_levels, row_levels, column_paths, this.config.sort, schema, viewport);
+                await this.table_model.draw(view, container_width, container_height, header_levels, row_levels, column_paths, this.config.row_pivots, this.config.sort, schema, viewport);
                 this._swap_out(force_redraw, invalid_row, invalid_column);
                 this._update_virtual_panel_width(container_width, force_redraw, column_paths);
             }
@@ -703,13 +721,16 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     attach(render_element) {
+        const pinned_widths = {};
+        this.table_model = new DatagridTableViewModel(this._table_clip, pinned_widths);
+        this._sticky_container.appendChild(this.table_model.table);
         if (render_element) {
             this.render_element = render_element;
         }
         if (!this.table_model) return;
         if (this.render_element) {
             if (this.render_element !== this.table_model.table.parentElement) {
-                this.render_element.appendChild(this.wrapper);
+                this.render_element.appendChild(this._sticky_container);
             } else {
             }
         } else {
@@ -717,13 +738,11 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         }
     }
 
-    detach() {}
-
     async _on_click(event) {
         let element = event.target;
         while (element.tagName !== "TD" && element.tagName !== "TH") {
             element = element.parentElement;
-            if (!this.wrapper.contains(element)) {
+            if (!this._sticky_container.contains(element)) {
                 return;
             }
         }
@@ -731,7 +750,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const metadata = METADATA_MAP.get(element);
         if (is_button) {
             await this._on_toggle(event, metadata);
-        } else if (metadata?.column_name) {
+        } else if (metadata?.is_column_header) {
             await this._on_sort(event, metadata);
         }
     }
@@ -772,13 +791,6 @@ class DatagridVirtualTableViewModel extends HTMLElement {
             }
         }
         this.elem.setAttribute("sort", JSON.stringify(sort));
-    }
-
-    connectedCallback() {
-        const pinned_widths = {};
-        this.table_model = new DatagridTableViewModel(this.table_clip, pinned_widths);
-        this.wrapper.appendChild(this.table_model.table);
-        this.attach();
     }
 }
 
@@ -825,13 +837,23 @@ class DatagridPlugin {
             div[PRIVATE].set_element(this);
             div[PRIVATE].appendChild(document.createElement("slot"));
             div[PRIVATE].attach(this);
+            div.innerHTML = "";
+            div.appendChild(div[PRIVATE]);
+        }
+
+        let force = true;
+
+        if (!div[PRIVATE].isConnected) {
+            div.innerHTML = "";
+            div[PRIVATE].clear();
+            force = false;
             div.appendChild(div[PRIVATE]);
         }
 
         // TODO only on schema change
         div[PRIVATE].reset_scroll();
         div[PRIVATE].view = view;
-        await div[PRIVATE].draw(view, true);
+        await div[PRIVATE].draw(view, force);
     }
 
     async resize() {
