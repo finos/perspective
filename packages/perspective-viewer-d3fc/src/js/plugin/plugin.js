@@ -54,7 +54,7 @@ function drawChart(chart) {
             jsonp = view.to_json({leaves_only: true});
         }
 
-        let [tschema, schema, json, config] = await Promise.all([this._table.schema(false, false), view.schema(false), jsonp, view.get_config()]);
+        let [tschema, schema, json, config] = await Promise.all([this._table.schema(false), view.schema(false), jsonp, view.get_config()]);
 
         if (task.cancelled) {
             return;

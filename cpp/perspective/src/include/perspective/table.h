@@ -76,6 +76,19 @@ public:
     t_schema get_schema() const;
 
     /**
+     * @brief Given a vector of computed column definitions, look up the
+     * computed function and its return types to create a computed schema
+     * without actually constructing/calculating the computed columns. Required
+     * so that computed column types/aggregates can be correctly identified
+     * without unnecessary recalculation.
+     * 
+     * @param computed_columns 
+     * @return t_schema 
+     */
+    t_schema get_computed_schema(
+        std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns) const;
+
+    /**
      * @brief Add computed columns to the `Table` by replacing `m_gnode` and the `t_data_table` that it tracks.
      * 
      * Given the new `computed_lambdas` property, which is a vector of lambdas that contain computed column functions
@@ -88,7 +101,8 @@ public:
      * @param data_table
      * @param computed_lambdas
      */
-    void add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_lambda> computed_lambdas);
+    void add_computed_columns(
+        std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_lambda> computed_lambdas);
 
     /**
      * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.

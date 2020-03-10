@@ -128,6 +128,11 @@ export class ActionElement extends DomElement {
             computed_columns = [];
         }
 
+        if (computed_columns.includes(expression)) {
+            console.warn(`"${expression}" was not applied because it already exists.`);
+            return;
+        }
+
         computed_columns.push(expression);
 
         this.setAttribute("computed-columns", JSON.stringify(computed_columns));

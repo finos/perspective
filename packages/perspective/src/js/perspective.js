@@ -1085,15 +1085,14 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this
      * {@link module:perspective~table}'s schema.
      */
-    table.prototype.schema = function(computed = false, override = true) {
+    table.prototype.schema = function(override = true) {
         let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
         let new_schema = {};
-        const computed_schema = this.computed_schema();
         for (let key = 0; key < columns.size(); key++) {
             const name = columns.get(key);
-            if (name === "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
+            if (name === "psp_okey") {
                 continue;
             }
             if (override && this.overridden_types[name]) {
@@ -1109,41 +1108,53 @@ export default function(Module) {
     };
 
     /**
-     * The computed schema of this {@link module:perspective~table}. Returns a
-     * schema of only computed columns added by the user, the keys of which are
-     * computed columns and the values an Object containing the associated
-     * column_name, column_type, and computation.
+     * Given an array of computed column definitions, perform type lookups to
+     * create a schema for the computed column without calculating or
+     * constructing any new columns.
      *
      * @async
+     * @param {Array<Object>} computed_columns an array of computed column
+     * definitions.
      *
-     * @returns {Promise<Object>} A Promise of this
-     * {@link module:perspective~table}'s computed schema.
+     * @returns {Promise<Object>} A Promise that resolves to a computed schema
+     * based on the computed column definitions provided.
      */
-    table.prototype.computed_schema = function() {
-        if (this.computed.length < 0) return {};
+    table.prototype.computed_schema = function(computed_columns, override = true) {
+        const new_schema = {};
 
-        const computed_schema = {};
+        if (!computed_columns || computed_columns.length === 0) return new_schema;
 
-        for (let i = 0; i < this.computed.length; i++) {
-            const column = {};
+        // Before passing into C++, transform array of objects into vector of
+        // Tuples expected by the Emscripten binding function.
+        let vector = __MODULE__.make_2d_val_vector();
 
-            column.input_columns = this.computed[i].inputs;
-            column.computed_function_name = this.computed[i].computed_function_name;
-
-            if (this.computed[i].computation) {
-                // A computation object will *always* be passed in via the UI,
-                // but is optional if programatically creating computed columns.
-                column.computation = this.computed[i].computation;
-
-                // Do not rename to `return_type` - the UI depends on `type`
-                column.type = column.computation.return_type;
-                column.input_type = column.computation.input_type;
-            }
-
-            computed_schema[this.computed[i].column] = column;
+        for (let computed of computed_columns) {
+            let computed_vector = __MODULE__.make_val_vector();
+            computed_vector.push_back(computed.column);
+            computed_vector.push_back(computed.computed_function_name);
+            computed_vector.push_back(computed.inputs);
+            vector.push_back(computed_vector);
         }
 
-        return computed_schema;
+        let computed_schema = __MODULE__.get_table_computed_schema(this._Table, vector);
+        let columns = computed_schema.columns();
+        let types = computed_schema.types();
+
+        for (let key = 0; key < columns.size(); key++) {
+            const name = columns.get(key);
+            const type = types.get(key);
+            if (override && this.overridden_types[name]) {
+                new_schema[name] = this.overridden_types[name];
+            } else {
+                new_schema[name] = get_column_type(type.value);
+            }
+        }
+
+        computed_schema.delete();
+        columns.delete();
+        types.delete();
+
+        return new_schema;
     };
 
     /**
