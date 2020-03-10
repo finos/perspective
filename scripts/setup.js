@@ -95,6 +95,12 @@ async function focus_package() {
                     value: "perspective-viewer"
                 },
                 {
+                    key: "e",
+                    name: "perspective-viewer-datagrid",
+                    value: "perspective-viewer-datagrid"
+                },
+
+                {
                     key: "g",
                     name: "perspective-viewer-hypergrid",
                     value: "perspective-viewer-hypergrid"

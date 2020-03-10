@@ -1,0 +1,23 @@
+{
+    "superstore_replaces_all_rows_": "ffb7fec4ffa939f278c2c7c15c2257df",
+    "__GIT_COMMIT__": "36434e88ea9c7c4f570654a2fe457ee43127446e",
+    "empty_empty_grids_do_not_explode": "60ce5c22e081a04931c0195cc9e64711",
+    "regressions_Updates_should_not_render_an_extra_row_for_column_only_views": "ee7eef07f3247f2cff4ff75913a7de9e",
+    "regressions_Updates_regular_updates": "f62c471693baf08c7b23b83ca4d4cd63",
+    "regressions_Updates_saving_a_computed_column_does_not_interrupt_update_rendering": "2cec35f255a0a3821e78fabaa99ed817",
+    "superstore_shows_a_grid_without_any_settings_applied_": "eacd904147824c5bbe95accf5b0d07d0",
+    "superstore_pivots_by_a_row_": "47502fb9cacc43874772f9c8feb1efa0",
+    "superstore_pivots_by_two_rows_": "103ba34b43641e71717d63671e21efee",
+    "superstore_pivots_by_a_column_": "02cb04843ac3b19d8165ac6f7770ec98",
+    "superstore_pivots_by_a_row_and_a_column_": "9a78e0927362d92a92508087bbfdbe75",
+    "superstore_pivots_by_two_rows_and_two_columns_": "2d6418ec7e45fedccb39c0a727bd7fe6",
+    "superstore_sorts_by_a_hidden_column_": "84b3bf336668df2df8b39dcb077c82f5",
+    "superstore_sorts_by_a_numeric_column_": "857a9483d027646f83764c0688ca9537",
+    "superstore_filters_by_a_numeric_column_": "2c2cd5830800bde397c3ed17466a2958",
+    "superstore_filters_by_a_datetime_column_": "7668c52a802b791b0395b7cf634b505d",
+    "superstore_highlights_invalid_filter_": "d151db1dd2681d14edfb569d45b831b2",
+    "superstore_sorts_by_an_alpha_column_": "68a825e08e84895663f3928ecc17f241",
+    "superstore_displays_visible_columns_": "a2ca996abd6be31412a8384797b083f3",
+    "superstore_resets_viewable_area_when_the_logical_size_expands_": "bbfd9a5f0b89e96c4c1c5dd7f9a7326b",
+    "superstore_resets_viewable_area_when_the_physical_size_expands_": "eacd904147824c5bbe95accf5b0d07d0"
+}
