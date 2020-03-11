@@ -7,15 +7,13 @@
  *
  */
 
-import {bindTemplate} from "./utils.js";
+import {bindTemplate, throttlePromise} from "./utils.js";
 
 import template from "../html/computed_expression_editor.html";
 
 import style from "../less/computed_expression_editor.less";
 
 import {expression_to_computed_column_config} from "./computed_expressions/visitor";
-
-import {debounce} from "underscore";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -31,11 +29,54 @@ class ComputedExpressionEditor extends HTMLElement {
     connectedCallback() {
         this._register_ids();
         this._register_callbacks();
-        //this._register_inputs();
+        this._textarea_observer = new MutationObserver(this._resize_textarea.bind(this));
+    }
+
+    /**
+     * Observe the textarea when the editor is opened.
+     */
+    _observe_textarea() {
+        this._textarea_observer.observe(this._expression_input, {
+            attributes: true,
+            attributeFilter: ["style"]
+        });
+    }
+
+    /**
+     * Dispatch an event on textarea resize to notify the side panel, and
+     * disconnect the observer.
+     */
+    _resize_textarea() {
+        const event = new CustomEvent("perspective-computed-expression-resize");
+        this.dispatchEvent(event);
+        this._textarea_observer.disconnect();
+    }
+
+    /**
+     * When a column/text is dragged and dropped into the textbox, read it
+     * properly.
+     *
+     * @param {*} event
+     */
+    _capture_drop_data(event) {
+        const data = event.dataTransfer.getData("text");
+        if (data !== "") {
+            try {
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed) && parsed.length > 4) {
+                    this._expression_input.value += `"${parsed[0]}"`;
+                }
+            } catch (e) {
+                // regular text, don't do anything as browser will handle
+            } finally {
+                this._validate_expression();
+            }
+        }
     }
 
     // Expression actions
-    _validate_expression() {
+    @throttlePromise
+    async _validate_expression() {
         const expression = this._expression_input.value;
 
         if (expression.length === 0) {
@@ -43,6 +84,8 @@ class ComputedExpressionEditor extends HTMLElement {
             this._enable_save_button();
             return;
         }
+
+        // FIXME: make the error UI an overlay like the render warning.
 
         try {
             // Use this just for validation. On anything short of a massive
@@ -68,16 +111,22 @@ class ComputedExpressionEditor extends HTMLElement {
         return;
     }
 
-    _type_check_expression(computed_schema) {
+    @throttlePromise
+    async _type_check_expression(computed_schema, expected_types) {
         const parsed = this._parsed_expression || [];
         const invalid = [];
+
         for (const column of parsed) {
             if (!computed_schema[column.column]) {
                 invalid.push(column.column);
             }
         }
+
         if (invalid.length > 0) {
-            const message = `Type checker failed for columns:\n${invalid.map(x => `- "${x}"`).join("\n")}`;
+            let message = "TypeError:\n";
+            for (const col of invalid) {
+                message += `- \`${col}\` expected input column types ${expected_types[col].join("/")}\n`;
+            }
             this._disable_save_button();
             this._set_error_message(message, this._error);
         } else {
@@ -122,6 +171,8 @@ class ComputedExpressionEditor extends HTMLElement {
         this._side_panel_actions.style.display = "flex";
         this._clear_error_messages();
         this._clear_expression_input();
+        // Disconnect the observer.
+        this._textarea_observer.disconnect();
     }
 
     // error message handlers
@@ -172,8 +223,8 @@ class ComputedExpressionEditor extends HTMLElement {
      */
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_expression_editor.bind(this));
-        // Wait 750ms before validating user input
-        this._expression_input.addEventListener("keyup", debounce(this._validate_expression.bind(this), 750));
+        this._expression_input.addEventListener("keyup", this._validate_expression.bind(this));
+        this._expression_input.addEventListener("drop", this._capture_drop_data.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }

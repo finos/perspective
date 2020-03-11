@@ -923,6 +923,44 @@ module.exports = perspective => {
             });
         });
 
+        describe("Table Computed Function Input Types", function() {
+            it("Should return correct types for numeric functions", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const expected = ["integer", "float"];
+                expect(table.get_computation_input_types("pow2")).toEqual(expected);
+                expect(table.get_computation_input_types("+")).toEqual(expected);
+                expect(table.get_computation_input_types("percent_a_of_b")).toEqual(expected);
+            });
+
+            it("Should return correct types for string functions", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const expected = ["string"];
+                expect(table.get_computation_input_types("concat_comma")).toEqual(expected);
+                expect(table.get_computation_input_types("uppercase")).toEqual(expected);
+                expect(table.get_computation_input_types("length")).toEqual(expected);
+            });
+
+            it("Should return correct types for date/time functions", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const expected = ["datetime", "date"];
+                expect(table.get_computation_input_types("week_bucket")).toEqual(expected);
+                expect(table.get_computation_input_types("day_of_week")).toEqual(expected);
+                expect(table.get_computation_input_types("month_of_year")).toEqual(expected);
+            });
+        });
+
         describe("View Computed Schema", function() {
             it("Column types in view computed schema on 0-sided view.", async function() {
                 const table = perspective.table({

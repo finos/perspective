@@ -107,6 +107,7 @@ export class ActionElement extends DomElement {
         }
         this._computed_expression_editor.style.display = "flex";
         this._side_panel_actions.style.display = "none";
+        this._computed_expression_editor._observe_textarea();
     }
 
     /**
@@ -136,14 +137,26 @@ export class ActionElement extends DomElement {
         this.setAttribute("computed-columns", JSON.stringify(computed_columns));
     }
 
-    _type_check_computed_expression(event) {
+    async _type_check_computed_expression(event) {
         const parsed = event.detail.parsed_expression || [];
         if (parsed.length === 0) {
-            return {};
+            this._computed_expression_editor._type_check_expression({});
+            return;
         }
-        this._table.computed_schema(parsed).then(schema => {
-            this._computed_expression_editor._type_check_expression(schema);
-        });
+        const functions = {};
+        for (const col of parsed) {
+            functions[col.column] = col.computed_function_name;
+        }
+        const schema = await this._table.computed_schema(parsed);
+        // Look at the failing values, and get their expected types
+        const expected_types = {};
+        for (const key in functions) {
+            if (!schema[key]) {
+                expected_types[key] = await this._table.get_computation_input_types(functions[key]);
+            }
+        }
+
+        this._computed_expression_editor._type_check_expression(schema, expected_types);
     }
 
     /**
@@ -341,6 +354,7 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_editor.bind(this));
         this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
         this._computed_expression_editor.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
         this._computed_expression_editor.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
         this._computed_expression_editor.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));

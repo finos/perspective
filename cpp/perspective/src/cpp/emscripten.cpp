@@ -1499,6 +1499,7 @@ namespace binding {
      *
      * Computed Column Metadata
      */
+
     template <>
     t_schema
     get_table_computed_schema(
@@ -1507,8 +1508,6 @@ namespace binding {
         // Convert into vector of tuples
         std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
 
-        // FIXME: do we need this on the actual table or can we do
-        // table->state->schema
         for (auto c : j_computed_columns) {
             std::string computed_column_name = c.at(0).as<std::string>();
             t_computed_function_name computed_function_name = 
@@ -1526,6 +1525,11 @@ namespace binding {
         return computed_schema;
     }
 
+    std::vector<t_dtype>
+    get_computation_input_types(const std::string& computed_function_name) {
+        t_computed_function_name function = str_to_computed_function_name(computed_function_name);
+        return t_computed_column::get_computation_input_types(function);
+    }
 
     /******************************************************************************
      *
@@ -1995,4 +1999,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_to_val", &scalar_to_val);
     function("get_computed_functions", &get_computed_functions);
     function("get_table_computed_schema", &get_table_computed_schema<t_val>);
+    function("get_computation_input_types", &get_computation_input_types);
 }

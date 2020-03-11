@@ -45,6 +45,51 @@ t_computed_column::get_computation(
     return invalid;
 };
 
+
+std::vector<t_dtype>
+t_computed_column::get_computation_input_types(
+    t_computed_function_name name) {
+        switch (name) {
+            case INVALID_COMPUTED_FUNCTION: return {};
+            case ADD:
+            case SUBTRACT:
+            case MULTIPLY:
+            case DIVIDE:
+            case INVERT:
+            case POW:
+            case SQRT:
+            case ABS:
+            case PERCENT_A_OF_B:
+            case BUCKET_10:
+            case BUCKET_100:
+            case BUCKET_1000:
+            case BUCKET_0_1:
+            case BUCKET_0_0_1:
+            case BUCKET_0_0_0_1: {
+                return {DTYPE_INT64, DTYPE_FLOAT64};
+            } break;
+            case UPPERCASE:
+            case LOWERCASE:
+            case LENGTH:
+            case CONCAT_SPACE:
+            case CONCAT_COMMA: {
+                return {DTYPE_STR};
+            };
+            case HOUR_OF_DAY:
+            case DAY_OF_WEEK:
+            case MONTH_OF_YEAR:
+            case SECOND_BUCKET:
+            case MINUTE_BUCKET:
+            case HOUR_BUCKET:
+            case DAY_BUCKET:
+            case WEEK_BUCKET:
+            case MONTH_BUCKET:
+            case YEAR_BUCKET: {
+                return {DTYPE_TIME, DTYPE_DATE};
+            }
+        }
+    }
+
 #define GET_NUMERIC_COMPUTED_FUNCTION_1(TYPE)                                  \
     switch (computation.m_name) {                                              \
         case POW: return computed_function::pow_##TYPE;                        \
