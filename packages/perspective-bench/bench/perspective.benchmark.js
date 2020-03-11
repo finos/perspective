@@ -159,20 +159,36 @@ describe("View", async () => {
 describe("Computed Column", async () => {
     // Use a single source table for computed
     let table;
+    let view;
 
     afterEach(async () => {
         await table.delete();
+        if (view) {
+            await view.delete();
+        }
     });
 
     for (const name of Object.keys(COMPUTED_FUNCS)) {
         describe("mixed", async () => {
             describe("table", () => {
                 table = worker.table(data.arrow.slice());
+                let add_computed_method;
+                if (table.add_computed) {
+                    add_computed_method = table.add_computed;
+                }
                 benchmark(`computed: \`${name}\``, async () => {
                     COMPUTED_CONFIG.computed_function_name = name;
                     COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
-                    table = table.add_computed([COMPUTED_CONFIG]);
-                    await table.size();
+
+                    if (add_computed_method) {
+                        table = table.add_computed([COMPUTED_CONFIG]);
+                        await table.size();
+                    } else {
+                        view = table.view({
+                            computed_columns: [COMPUTED_CONFIG]
+                        });
+                        await view.num_rows();
+                    }
                 });
             });
         });

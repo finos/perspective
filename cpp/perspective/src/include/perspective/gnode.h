@@ -31,8 +31,6 @@
 
 namespace perspective {
 
-typedef std::function<void(std::shared_ptr<t_data_table>)> t_computed_column_lambda;
-
 PERSPECTIVE_EXPORT t_tscalar calc_delta(
     t_value_transition trans, t_tscalar oval, t_tscalar nval);
 
@@ -81,7 +79,6 @@ public:
     // send data to input port with at index idx
     // schema should match port schema
     void _send(t_uindex idx, const t_data_table& fragments);
-    void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
 
@@ -139,8 +136,6 @@ public:
     void register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
-
-    std::vector<t_computed_column_lambda> get_computed_lambdas() const;
 
     /**
      * @brief Add computed columns from `ctx` to `tbl`.
@@ -246,13 +241,6 @@ protected:
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
 
     /**
-     * @brief 
-     * 
-     * @param new_lambdas 
-     */
-    void append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas);
-
-    /**
      * @brief Add the computed columns typed as `dtype` from `ctx` to `tbl',
      * but don't apply any computations. Used when computed columns are
      * required to be present on a table but not actually read.
@@ -349,8 +337,7 @@ private:
      * @return std::shared_ptr<t_data_table> 
      */
     std::shared_ptr<t_data_table> _process_table();
-    
-    std::vector<t_computed_column_lambda> m_computed_lambdas;
+
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
 
@@ -484,6 +471,14 @@ t_gnode::_compute_columns(CTX_T* ctx, const t_data_table& tbl) {
 
         t_computation computation = t_computed_column::get_computation(
             computed_function_name, input_types);
+        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+            std::cerr 
+                << "Cannot compute column `"
+                << computed_column_name
+                << "` in gnode."
+                << std::endl;
+                continue;
+        }
         t_dtype output_column_type = computation.m_return_type;
 
         auto output_column = flattened.add_column_sptr(
@@ -518,6 +513,14 @@ t_gnode::_compute_columns_sptr(CTX_T* ctx, std::shared_ptr<t_data_table> tbl) {
 
         t_computation computation = t_computed_column::get_computation(
             computed_function_name, input_types);
+        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+            std::cerr 
+                << "Cannot re-compute column `"
+                << computed_column_name
+                << "` in gnode."
+                << std::endl;
+                continue;
+        }
         t_dtype output_column_type = computation.m_return_type;
 
         auto output_column = tbl->add_column_sptr(

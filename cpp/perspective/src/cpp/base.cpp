@@ -364,8 +364,9 @@ str_to_computed_function_name(const std::string& name) {
     } else if (name == "Bucket (Y)" || name == "year_bucket") {
         return t_computed_function_name::YEAR_BUCKET;
     } else {
-        PSP_COMPLAIN_AND_ABORT(
-            "Could not find computed function for `" + name + "`");
+        std::cerr 
+            << "Could not find computed function for `" 
+            << name << "`" << std::endl;
         return t_computed_function_name::INVALID_COMPUTED_FUNCTION;
     }
 }
@@ -407,9 +408,9 @@ computed_function_name_to_string(t_computed_function_name name) {
         default: break;
     }
     
-    PSP_COMPLAIN_AND_ABORT(
-        "Could not convert computed function name to string.");
-    return "";
+    std::cerr 
+        << "Could not convert computed function name to string." << std::endl;
+    return "INVALID_COMPUTED_FUNCTION";
 }
 
 std::string

@@ -43,7 +43,7 @@ utils.with_server({}, () => {
                     await page.waitFor("perspective-viewer:not([updating])");
                 });
 
-                test.capture("saving a computed column does not interrupt update rendering", async page => {
+                test.skip("saving a computed column does not interrupt update rendering", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);

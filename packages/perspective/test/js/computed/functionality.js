@@ -793,20 +793,176 @@ module.exports = perspective => {
             table.delete();
         });
 
-        describe("Computed Schema", function() {
-            it("Column types in computed schema on 0-sided view.", async function() {
+        describe("Table Computed Schema", function() {
+            it("Should show computed column types in table computed schema.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"]
+                });
+                const computed = [
+                    {
+                        column: "(a ^ 2)",
+                        computed_function_name: "pow2",
+                        inputs: ["a"]
+                    },
+                    {
+                        column: "def",
+                        computed_function_name: "sqrt",
+                        inputs: ["(a ^ 2)"]
+                    },
+                    {
+                        column: "concat_comma(c, c)",
+                        computed_function_name: "concat_comma",
+                        inputs: ["c", "c"]
+                    },
+                    {
+                        column: "upper",
+                        computed_function_name: "uppercase",
+                        inputs: ["concat_comma(c, c)"]
+                    },
+                    {
+                        column: "wb",
+                        computed_function_name: "week_bucket",
+                        inputs: ["b"]
+                    }
+                ];
+                const schema = await table.computed_schema(computed);
+                expect(schema).toEqual({
+                    "(a ^ 2)": "float",
+                    "concat_comma(c, c)": "string",
+                    wb: "date",
+                    def: "float",
+                    upper: "string"
+                });
+                table.delete();
+            });
+
+            it("Should skip a invalid column due to type error, as well as all columns that depend on the invalid column.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"],
+                    d: [1.5, 2.5, 3.5, 4.5]
+                });
+                const computed = [
+                    {
+                        column: "first", // invalid
+                        computed_function_name: "concat_comma",
+                        inputs: ["a", "c"]
+                    },
+                    {
+                        column: "second", // valid
+                        computed_function_name: "sqrt",
+                        inputs: ["d"]
+                    },
+                    {
+                        column: "third", // depends on invalid
+                        computed_function_name: "uppercase",
+                        inputs: ["first"]
+                    },
+                    {
+                        column: "fourth", // depends on invalid of invalid
+                        computed_function_name: "lowercase",
+                        inputs: ["third"]
+                    },
+                    {
+                        column: "fifth", // valid
+                        computed_function_name: "week_bucket",
+                        inputs: ["b"]
+                    }
+                ];
+                const schema = await table.computed_schema(computed);
+                expect(schema).toEqual({
+                    second: "float",
+                    fifth: "date"
+                });
+                table.delete();
+            });
+
+            it("Should skip a invalid column due to invalid column name, as well as all columns that depend on the invalid column.", async function() {
+                const table = perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"],
+                    d: [1.5, 2.5, 3.5, 4.5]
+                });
+                const computed = [
+                    {
+                        column: "first", // valid
+                        computed_function_name: "concat_comma",
+                        inputs: ["c", "c"]
+                    },
+                    {
+                        column: "second", // invalid
+                        computed_function_name: "sqrt",
+                        inputs: ["does not exist"]
+                    },
+                    {
+                        column: "third", // depends on invalid
+                        computed_function_name: "pow2",
+                        inputs: ["second"]
+                    },
+                    {
+                        column: "fourth", // depends on invalid of invalid
+                        computed_function_name: "abs",
+                        inputs: ["third"]
+                    },
+                    {
+                        column: "fifth", // valid
+                        computed_function_name: "week_bucket",
+                        inputs: ["b"]
+                    }
+                ];
+                const schema = await table.computed_schema(computed);
+                expect(schema).toEqual({
+                    first: "string",
+                    fifth: "date"
+                });
+                table.delete();
+            });
+        });
+
+        describe("View Computed Schema", function() {
+            it("Column types in view computed schema on 0-sided view.", async function() {
                 const table = perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
                 const view = table.view({
-                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                    computed_columns: [
+                        {
+                            column: "(a ^ 2)",
+                            computed_function_name: "pow2",
+                            inputs: ["a"]
+                        },
+                        {
+                            column: "def",
+                            computed_function_name: "sqrt",
+                            inputs: ["(a ^ 2)"]
+                        },
+                        {
+                            column: "concat_comma(c, c)",
+                            computed_function_name: "concat_comma",
+                            inputs: ["c", "c"]
+                        },
+                        {
+                            column: "upper",
+                            computed_function_name: "uppercase",
+                            inputs: ["concat_comma(c, c)"]
+                        },
+                        {
+                            column: "wb",
+                            computed_function_name: "week_bucket",
+                            inputs: ["b"]
+                        }
+                    ]
                 });
                 const schema = await view.computed_schema();
                 expect(schema).toEqual({
                     "(a ^ 2)": "float",
-                    "concat_comma(c)": "string",
+                    "concat_comma(c, c)": "string",
                     wb: "date",
                     def: "float",
                     upper: "string"
@@ -815,7 +971,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Should show ALL columns in computed schema regardless of custom columns.", async function() {
+            it("Should show ALL columns in view computed schema regardless of custom columns.", async function() {
                 const table = perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
@@ -823,12 +979,38 @@ module.exports = perspective => {
                 });
                 const view = table.view({
                     columns: ["wb"],
-                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                    computed_columns: [
+                        {
+                            column: "(a ^ 2)",
+                            computed_function_name: "pow2",
+                            inputs: ["a"]
+                        },
+                        {
+                            column: "def",
+                            computed_function_name: "sqrt",
+                            inputs: ["(a ^ 2)"]
+                        },
+                        {
+                            column: "concat_comma(c, c)",
+                            computed_function_name: "concat_comma",
+                            inputs: ["c", "c"]
+                        },
+                        {
+                            column: "upper",
+                            computed_function_name: "uppercase",
+                            inputs: ["concat_comma(c, c)"]
+                        },
+                        {
+                            column: "wb",
+                            computed_function_name: "week_bucket",
+                            inputs: ["b"]
+                        }
+                    ]
                 });
                 const schema = await view.computed_schema();
                 expect(schema).toEqual({
                     "(a ^ 2)": "float",
-                    "concat_comma(c)": "string",
+                    "concat_comma(c, c)": "string",
                     wb: "date",
                     def: "float",
                     upper: "string"
@@ -837,7 +1019,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Aggregated types in computed schema on 1-sided view.", async function() {
+            it("Aggregated types in view computed schema on 1-sided view.", async function() {
                 const table = perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
@@ -845,12 +1027,38 @@ module.exports = perspective => {
                 });
                 const view = table.view({
                     row_pivots: ["def"],
-                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                    computed_columns: [
+                        {
+                            column: "(a ^ 2)",
+                            computed_function_name: "pow2",
+                            inputs: ["a"]
+                        },
+                        {
+                            column: "def",
+                            computed_function_name: "sqrt",
+                            inputs: ["(a ^ 2)"]
+                        },
+                        {
+                            column: "concat_comma(c, c)",
+                            computed_function_name: "concat_comma",
+                            inputs: ["c", "c"]
+                        },
+                        {
+                            column: "upper",
+                            computed_function_name: "uppercase",
+                            inputs: ["concat_comma(c, c)"]
+                        },
+                        {
+                            column: "wb",
+                            computed_function_name: "week_bucket",
+                            inputs: ["b"]
+                        }
+                    ]
                 });
                 const schema = await view.computed_schema();
                 expect(schema).toEqual({
                     "(a ^ 2)": "float",
-                    "concat_comma(c)": "integer",
+                    "concat_comma(c, c)": "integer",
                     wb: "integer",
                     def: "float",
                     upper: "integer"
@@ -859,7 +1067,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Aggregated types in computed schema on 1-sided view with custom aggregates.", async function() {
+            it("Aggregated types in view computed schema on 1-sided view with custom aggregates.", async function() {
                 const table = perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
@@ -870,12 +1078,38 @@ module.exports = perspective => {
                         upper: "any"
                     },
                     row_pivots: ["upper"],
-                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                    computed_columns: [
+                        {
+                            column: "(a ^ 2)",
+                            computed_function_name: "pow2",
+                            inputs: ["a"]
+                        },
+                        {
+                            column: "def",
+                            computed_function_name: "sqrt",
+                            inputs: ["(a ^ 2)"]
+                        },
+                        {
+                            column: "concat_comma(c, c)",
+                            computed_function_name: "concat_comma",
+                            inputs: ["c", "c"]
+                        },
+                        {
+                            column: "upper",
+                            computed_function_name: "uppercase",
+                            inputs: ["concat_comma(c, c)"]
+                        },
+                        {
+                            column: "wb",
+                            computed_function_name: "week_bucket",
+                            inputs: ["b"]
+                        }
+                    ]
                 });
                 const schema = await view.computed_schema();
                 expect(schema).toEqual({
                     "(a ^ 2)": "float",
-                    "concat_comma(c)": "integer",
+                    "concat_comma(c, c)": "integer",
                     wb: "integer",
                     def: "float",
                     upper: "string"
@@ -884,7 +1118,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Aggregated types in computed schema on 2-sided view.", async function() {
+            it("Aggregated types in view computed schema on 2-sided view.", async function() {
                 const table = perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
@@ -893,12 +1127,38 @@ module.exports = perspective => {
                 const view = table.view({
                     row_pivots: ["def"],
                     column_pivots: ["wb"],
-                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                    computed_columns: [
+                        {
+                            column: "(a ^ 2)",
+                            computed_function_name: "pow2",
+                            inputs: ["a"]
+                        },
+                        {
+                            column: "def",
+                            computed_function_name: "sqrt",
+                            inputs: ["(a ^ 2)"]
+                        },
+                        {
+                            column: "concat_comma(c, c)",
+                            computed_function_name: "concat_comma",
+                            inputs: ["c", "c"]
+                        },
+                        {
+                            column: "upper",
+                            computed_function_name: "uppercase",
+                            inputs: ["concat_comma(c, c)"]
+                        },
+                        {
+                            column: "wb",
+                            computed_function_name: "week_bucket",
+                            inputs: ["b"]
+                        }
+                    ]
                 });
                 const schema = await view.computed_schema();
                 expect(schema).toEqual({
                     "(a ^ 2)": "float",
-                    "concat_comma(c)": "integer",
+                    "concat_comma(c, c)": "integer",
                     wb: "integer",
                     def: "float",
                     upper: "integer"
@@ -907,7 +1167,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Aggregated types in computed schema on 2-sided column-only view.", async function() {
+            it("Aggregated types in view computed schema on 2-sided column-only view.", async function() {
                 const table = perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
@@ -915,12 +1175,38 @@ module.exports = perspective => {
                 });
                 const view = table.view({
                     column_pivots: ["def"],
-                    computed_columns: ['sqrt((pow2("a"))) as "def"', 'uppercase((concat_comma("c", "c"))) as "upper"', 'week_bucket("b") as "wb"']
+                    computed_columns: [
+                        {
+                            column: "(a ^ 2)",
+                            computed_function_name: "pow2",
+                            inputs: ["a"]
+                        },
+                        {
+                            column: "def",
+                            computed_function_name: "sqrt",
+                            inputs: ["(a ^ 2)"]
+                        },
+                        {
+                            column: "concat_comma(c, c)",
+                            computed_function_name: "concat_comma",
+                            inputs: ["c", "c"]
+                        },
+                        {
+                            column: "upper",
+                            computed_function_name: "uppercase",
+                            inputs: ["concat_comma(c, c)"]
+                        },
+                        {
+                            column: "wb",
+                            computed_function_name: "week_bucket",
+                            inputs: ["b"]
+                        }
+                    ]
                 });
                 const schema = await view.computed_schema();
                 expect(schema).toEqual({
                     "(a ^ 2)": "float",
-                    "concat_comma(c)": "string",
+                    "concat_comma(c, c)": "string",
                     wb: "date",
                     def: "float",
                     upper: "string"

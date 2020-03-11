@@ -113,6 +113,11 @@ Table::get_computed_schema(
                     // as completely invalid. This also means that columns
                     // on its right, which may or may not depend on this column,
                     // are also invalidated.
+                    std::cerr 
+                        << "Input column `"
+                        << input_column
+                        << "` does not exist."
+                        << std::endl;
                     skip = true;
                     break;
                 } else {
@@ -126,14 +131,35 @@ Table::get_computed_schema(
             input_types.push_back(type);
         }
 
-        if (skip) {
-            // this column and all columns to the right are invalid - process
-            // what valid columns we have and move on
-            break;
-        }
-
         t_computation computation = t_computed_column::get_computation(
             computed_function_name, input_types);
+
+        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+            // Build error message and set skip to true
+            std::stringstream ss;
+            ss
+                << "Error: `"
+                << name
+                << "`"
+                << " failed type checking, as these input types: [";
+            for (t_dtype dtype : input_types) {
+                ss << "`" << get_dtype_descr(dtype) << "` ";
+            }
+            ss << "] do not resolve to a valid computation for function `";
+            ss 
+                << computed_function_name_to_string(computed_function_name)
+                << "'."
+                << std::endl;
+            std::cerr << ss.str();
+            skip = true;
+        }
+
+        if (skip) {
+            // this column depends on a column that does not exist, or has
+            // an invalid type, so don't write into the
+            continue;
+        }
+
         t_dtype output_column_type = computation.m_return_type;
 
         computed_column_names.push_back(name);
@@ -143,29 +169,6 @@ Table::get_computed_schema(
     t_schema computed_schema(computed_column_names, computed_column_types);
 
     return computed_schema;
-}
-
-void
-Table::add_computed_columns(
-    std::shared_ptr<t_data_table> data_table,
-    std::vector<t_computed_column_lambda> computed_lambdas) {
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_uindex prev_gnode_id = m_gnode->get_id();
-    
-    // transfer computed lambdas across to the new gnode and recalculate
-    auto lambdas = m_gnode->get_computed_lambdas();
-    lambdas.insert(lambdas.end(), computed_lambdas.begin(), computed_lambdas.end());
-
-    auto new_gnode = make_gnode(data_table->get_schema());
-    set_gnode(new_gnode);
-
-    m_pool->register_gnode(m_gnode.get());
-    m_pool->send(m_gnode->get_id(), 0, *data_table, lambdas);
-    m_pool->_process();
-
-    unregister_gnode(prev_gnode_id);
-
-    // need to unregister contexts linked back to table
 }
 
 std::shared_ptr<t_gnode>

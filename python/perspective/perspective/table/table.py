@@ -47,7 +47,7 @@ class Table(object):
 
         self._limit = limit or 4294967295
         self._index = index or ""
-        self._table = make_table(None, self._accessor, None, self._limit,
+        self._table = make_table(None, self._accessor, self._limit,
                                  self._index, t_op.OP_INSERT, False,
                                  self._is_arrow)
         self._gnode_id = self._table.get_gnode().get_id()
@@ -196,7 +196,7 @@ class Table(object):
 
         if (_is_arrow):
             self._accessor = data
-            self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, True)
+            self._table = make_table(self._table, self._accessor, self._limit, self._index, t_op.OP_INSERT, True, True)
             self._state_manager.set_process(
                 self._table.get_pool(), self._table.get_id())
             return
@@ -216,7 +216,7 @@ class Table(object):
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, self._accessor, None, self._limit,
+        self._table = make_table(self._table, self._accessor, self._limit,
                                  self._index, t_op.OP_INSERT, True, False)
         self._state_manager.set_process(
             self._table.get_pool(), self._table.get_id())
@@ -244,7 +244,7 @@ class Table(object):
         self._accessor = _PerspectiveAccessor(pkeys)
         self._accessor._names = [self._index]
         self._accessor._types = types
-        t = make_table(self._table, self._accessor, None, self._limit,
+        t = make_table(self._table, self._accessor, self._limit,
                        self._index, t_op.OP_DELETE, True, False)
         self._state_manager.set_process(t.get_pool(), t.get_id())
 

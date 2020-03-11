@@ -56,26 +56,6 @@ export function table(worker, data, options) {
 table.prototype.type = "table";
 
 /**
- * Create a new computed table.
- *
- * @param {*} worker
- * @param {*} computed
- * @param {*} name
- */
-function computed_table(worker, computed, name) {
-    this._worker = worker;
-    this._name = Math.random() + "";
-    const original = name;
-    const msg = {
-        cmd: "add_computed",
-        original: original,
-        name: this._name,
-        computed: computed
-    };
-    this._worker.post(msg);
-}
-
-/**
  * Create a reference to a Perspective table at `worker` for use by remote
  * clients.
  *
@@ -87,14 +67,9 @@ export function proxy_table(worker, name) {
     this._name = name;
 }
 
-computed_table.prototype = table.prototype;
 proxy_table.prototype = table.prototype;
 
 // Dispatch table methods that create new objects to the worker
-table.prototype.add_computed = function(computed) {
-    return new computed_table(this._worker, computed, this._name);
-};
-
 table.prototype.view = function(config) {
     return new view(this._worker, this._name, config);
 };

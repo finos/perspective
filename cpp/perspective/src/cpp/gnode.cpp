@@ -115,12 +115,6 @@ t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
 }
 
 void
-t_gnode::_send(t_uindex portid, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas) { 
-    _send(portid, fragments);
-    append_computed_lambdas(computed_lambdas);
-}
-
-void
 t_gnode::_send_and_process(const t_data_table& fragments) {
     _send(0, fragments);
     _process();
@@ -1184,16 +1178,6 @@ t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx) 
 void
 t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx) {
     _register_context(name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
-}
-
-void 
-t_gnode::append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas) {
-    m_computed_lambdas.insert(m_computed_lambdas.end(), new_lambdas.begin(), new_lambdas.end());
-}
-
-std::vector<t_computed_column_lambda> 
-t_gnode::get_computed_lambdas() const {
-    return m_computed_lambdas;
 }
 
 } // end namespace perspective

@@ -929,67 +929,6 @@ namespace binding {
         }
     }
 
-    template <>
-    void
-    add_computed_column(
-        std::shared_ptr<t_data_table> table, t_val computed_def) {
-        std::uint32_t end = table->size();
-
-        t_val input_names = computed_def["inputs"];
-        std::vector<std::string> input_column_names = 
-            vecFromArray<t_val, std::string>(input_names);
-        std::string output_column_name = 
-            computed_def["column"].as<std::string>();
-        t_val type = computed_def["type"];
-
-        t_computed_function_name method_name = str_to_computed_function_name(
-            computed_def["computed_function_name"].as<std::string>());
-
-        std::vector<t_dtype> input_types;
-        std::vector<std::shared_ptr<t_column>> input_columns;
-        for (const auto& column_name : input_column_names) {
-            auto input_column = table->get_column(column_name);
-            input_columns.push_back(input_column);
-            input_types.push_back(input_column->get_dtype());
-        }
-
-        // This uses the `t_computed_function` enum, not string name
-        t_computation computation = t_computed_column::get_computation(
-            method_name, input_types);
-        t_dtype output_column_type = computation.m_return_type;
-
-        // don't double create output column
-        auto schema = table->get_schema();
-        std::shared_ptr<t_column> output_column;
-        if (schema.has_column(output_column_name)) {
-            output_column = table->get_column(output_column_name);
-        } else {
-            output_column = table->add_column_sptr(
-                output_column_name, output_column_type, true);
-            output_column->reserve(input_columns[0]->size());
-        }
-
-        t_computed_column::apply_computation(
-            input_columns,
-            output_column,
-            computation);
-        return;
-    }
-
-    template <>
-    std::vector<t_computed_column_lambda>
-    make_computed_lambdas(std::vector<t_val> computed) {
-        std::vector<t_computed_column_lambda> converted;
-        for (const auto& j_computed_def : computed) {
-            converted.push_back(
-                [j_computed_def](std::shared_ptr<t_data_table> table) {
-                    add_computed_column(table, j_computed_def); 
-                }
-            );
-        }
-        return converted; 
-    }
-
     std::map<std::string, std::map<std::string, std::string>>
     get_computed_functions() {
         return t_computed_column::computed_functions;
@@ -1075,8 +1014,14 @@ namespace binding {
 
     template <>
     std::shared_ptr<Table>
-    make_table(t_val table, t_data_accessor accessor, t_val computed,
-        std::uint32_t limit, const std::string& index, t_op op, bool is_update, bool is_arrow) {
+    make_table(
+        t_val table,
+        t_data_accessor accessor,
+        std::uint32_t limit,
+        const std::string& index,
+        t_op op,
+        bool is_update,
+        bool is_arrow) {
         bool table_initialized = has_value(table);
         std::shared_ptr<t_pool> pool;
         std::shared_ptr<Table> tbl;
@@ -1222,20 +1167,6 @@ namespace binding {
         return tbl;
     }
 
-    template <>
-    std::shared_ptr<Table>
-    make_computed_table(std::shared_ptr<Table> table, t_val computed) {
-        auto gnode = table->get_gnode();
-        auto pkeyed_table = gnode->get_pkeyed_table_sptr();
-        auto computed_defs = vecFromArray<t_val, t_val>(computed);
-        auto computed_lambdas = make_computed_lambdas(computed_defs);
-        for (const auto lambda : computed_lambdas) {
-            lambda(pkeyed_table);
-        }
-        table->add_computed_columns(pkeyed_table, computed_lambdas);
-        return table;
-    }
-
     /******************************************************************************
      *
      * View API
@@ -1366,6 +1297,16 @@ namespace binding {
 
             t_computation computation = t_computed_column::get_computation(
                 computed_function_name, input_types);
+            
+            if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+                std::cerr 
+                    << "Could not build computed column definition for `" 
+                    << computed_column_name 
+                    << "`" 
+                    << std::endl;
+                continue;
+            }
+
             t_dtype output_column_type = computation.m_return_type;
 
             // Add the column to the schema.
@@ -2035,7 +1976,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * Perspective functions
      */
     function("make_table", &make_table<t_val>);
-    function("make_computed_table", &make_computed_table<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
     function("make_view_zero", &make_view<t_ctx0>);
     function("make_view_one", &make_view<t_ctx1>);

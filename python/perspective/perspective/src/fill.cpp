@@ -287,18 +287,6 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
     }
 }
 
-/*
-void
-add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, t_val computed_def) {
-    // TODO: implement
-}
-
-void
-make_computed_lambdas(std::vector<t_val> computed) {
-    // TODO: implement
-}
-*/
-
 void
 _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
     std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type, bool is_update) {
