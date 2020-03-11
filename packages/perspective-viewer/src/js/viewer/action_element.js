@@ -93,8 +93,6 @@ export class ActionElement extends DomElement {
         }
     }
 
-    // TODO: add expression validation here
-
     /**
      * Display the computed expressions panel.
      *
@@ -118,7 +116,7 @@ export class ActionElement extends DomElement {
      *
      * @param {*} event
      */
-    _validate_computed_expression(event) {
+    _save_computed_expression(event) {
         const expression = event.detail.expression;
 
         // `computed-columns` stores the raw expression typed by the user.
@@ -136,6 +134,16 @@ export class ActionElement extends DomElement {
         computed_columns.push(expression);
 
         this.setAttribute("computed-columns", JSON.stringify(computed_columns));
+    }
+
+    _type_check_computed_expression(event) {
+        const parsed = event.detail.parsed_expression || [];
+        if (parsed.length === 0) {
+            return {};
+        }
+        this._table.computed_schema(parsed).then(schema => {
+            this._computed_expression_editor._type_check_expression(schema);
+        });
     }
 
     /**
@@ -332,7 +340,8 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_editor.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._validate_computed_expression.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
         this._computed_expression_editor.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
         this._computed_expression_editor.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
         this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));

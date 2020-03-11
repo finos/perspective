@@ -56,9 +56,34 @@ class ComputedExpressionEditor extends HTMLElement {
             return;
         }
 
-        this._clear_error_messages();
-        this._enable_save_button();
+        // Take the parsed expression and type check it on the viewer,
+        // which will call `_type_check_expression()` with a computed_schema.
+        const event = new CustomEvent("perspective-computed-expression-type-check", {
+            detail: {
+                parsed_expression: this._parsed_expression
+            }
+        });
+
+        this.dispatchEvent(event);
         return;
+    }
+
+    _type_check_expression(computed_schema) {
+        const parsed = this._parsed_expression || [];
+        const invalid = [];
+        for (const column of parsed) {
+            if (!computed_schema[column.column]) {
+                invalid.push(column.column);
+            }
+        }
+        if (invalid.length > 0) {
+            const message = `Type checker failed for columns:\n${invalid.map(x => `- "${x}"`).join("\n")}`;
+            this._disable_save_button();
+            this._set_error_message(message, this._error);
+        } else {
+            this._clear_error_messages();
+            this._enable_save_button();
+        }
     }
 
     /**
