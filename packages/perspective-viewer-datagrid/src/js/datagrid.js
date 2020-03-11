@@ -461,13 +461,14 @@ class DatagridTableViewModel {
     }
 
     num_columns() {
-        return this.header._get_row(Math.max(0, this.header.rows.length - 1)).row_container.length;
+        return this.header._get_row(Math.max(0, this.header.rows?.length - 1 || 0)).row_container.length;
     }
 
     async draw(view, container_width, container_height, header_levels, row_levels, column_paths, row_paths, sort, schema, selected_id, viewport) {
         const visible_columns = column_paths.slice(viewport.start_col);
 
         const columns_data = await view.to_columns(viewport);
+        const {start_col: sidx} = viewport;
         let cont_body,
             cont_head,
             cidx = 0,
@@ -513,6 +514,7 @@ class DatagridTableViewModel {
                 this.header.clean(cont_head);
             }
         }
+        return {width, cidx: sidx + cidx, sidx};
     }
 }
 
@@ -645,9 +647,11 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
 
         // TODO estimate is wrong - calc in chunks
-        let start_col = Math.floor((column_paths.length - 1) * percent_left);
-        let end_col = start_col + (this.table_model.num_columns() || 1);
-
+        let start_col = Math.floor((column_paths?.length - 1 || 0) * percent_left);
+        let end_col = start_col + (this.table_model.num_columns() || 1) + 1;
+        if (start_col > this._max_sidx) {
+            start_col = this._max_sidx;
+        }
         return {start_col, end_col};
     }
 
@@ -689,7 +693,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     _update_virtual_panel_width(container_width, force_redraw, column_paths) {
         if (force_redraw || this._virtual_panel.style.width === "") {
             const px_per_column = container_width / this.table_model.num_columns();
-            const virtual_width = px_per_column * column_paths.length;
+            const virtual_width = px_per_column * (this._max_sidx || column_paths.length);
             this._virtual_panel.style.width = Math.max(this.table_model.table.offsetWidth, virtual_width) + "px";
         }
     }
@@ -739,12 +743,14 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         this._container_width = undefined;
         this._container_height = undefined;
         this._nrows = undefined;
+        this._max_sidx = undefined;
         this._reset_viewport();
     }
 
     reset_scroll() {
         this._scroll_container.scrollTop = 0;
         this._scroll_container.scrollLeft = 0;
+        this._max_sidx = undefined;
         this._reset_viewport();
     }
 
@@ -770,6 +776,9 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         this._update_virtual_panel_height(nrows);
 
         const column_paths = await column_pathsp;
+        if (column_paths === undefined) {
+            return;
+        }
         let {start_col, end_col} = this._calculate_column_range(container_width, column_paths);
         const id = this.config.row_pivots.length > 0;
         const viewport = {start_col, end_col, start_row, end_row, id};
@@ -779,7 +788,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
             const header_levels = this.config.column_pivots.length + 1;
             const row_levels = this.config.row_pivots.length;
             const schema = await schemap;
-            await this.table_model.draw(
+            const {width, cidx, sidx} = await this.table_model.draw(
                 view,
                 container_width,
                 container_height,
@@ -792,6 +801,13 @@ class DatagridVirtualTableViewModel extends HTMLElement {
                 this._selected_id,
                 viewport
             );
+            if (cidx === column_paths.length) {
+                if (width < container_width) {
+                    this._max_sidx = sidx;
+                } else {
+                    this._max_sidx = sidx + 1;
+                }
+            }
             this._swap_out(force_redraw, invalid_row, invalid_column);
             this._update_virtual_panel_width(container_width, force_redraw, column_paths);
         }
