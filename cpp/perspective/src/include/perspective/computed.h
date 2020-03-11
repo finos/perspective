@@ -62,6 +62,18 @@ public:
      */
     static t_computation get_computation(
         t_computed_function_name name, const std::vector<t_dtype>& input_types);
+
+    /**
+     * @brief Given a computation, return the input dtypes it expects. For
+     * integer and float types, the type of the highest bit width is returned,
+     * and it should be assumed that the function accepts all integer/float
+     * types of lower bit widths.
+     * 
+     * @param name 
+     * @return std::vector<t_dtype> 
+     */
+    static std::vector<t_dtype> get_computation_input_types(
+        t_computed_function_name name);
         
     /**
      * @brief Given a `t_computation`, return the std::function that should be

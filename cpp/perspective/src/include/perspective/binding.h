@@ -348,6 +348,16 @@ namespace binding {
         std::vector<std::vector<T>> j_computed_columns);
 
     /**
+     * @brief Given a string that resolves to a valid computed function name,
+     * return a vector of its accepted input column types.
+     * 
+     * @param computed_function_name 
+     * @return std::vector<t_dtype> 
+     */
+    std::vector<t_dtype>
+    get_computation_input_types(const std::string& computed_function_name);
+
+    /**
      * @brief Get a slice of data for a single column, serialized to t_val.
      *
      * @tparam

@@ -1158,6 +1158,27 @@ export default function(Module) {
     };
 
     /**
+     * Given a computed function name, return an array of strings containing
+     * the expected input column types for the computed function.
+     *
+     * @private
+     * @async
+     * @param {String} computed_function_name
+     * @returns {Promise<Array<String>>}
+     */
+    table.prototype.get_computation_input_types = function(computed_function_name) {
+        const types = __MODULE__.get_computation_input_types(computed_function_name);
+        const new_types = [];
+
+        for (let i = 0; i < types.size(); i++) {
+            const type = types.get(i);
+            new_types.push(get_column_type(type.value));
+        }
+
+        return new_types;
+    };
+
+    /**
      * Validates a filter configuration, i.e. that the value to filter by is not
      * null or undefined.
      *

@@ -16,6 +16,7 @@
     max-height: 35%;
     margin-top: 34px;
     margin-bottom: 24px;
+    width: 100%;
 
     flex: 0 0 auto !important;
 
@@ -45,8 +46,13 @@
         display: flex;
         margin-top: 5px;
 
+        &.psp_expression__content--absolute {
+            position: absolute;
+        }
+
         &.psp-expression__content--nomargin {
             margin-top: 0;
+            position: relative;
         }
     }
 
@@ -68,12 +74,15 @@
 
     textarea#psp-expression-input {
         background: var(--background-color, none);
+        border-color: var(--inactive-color, #ccc);
         color: var(--color, #666666);
         font-size: 12px;
         font-family: var(--interface-monospace--font-family, monospace);
         height: 75px;
         margin-top: 5px;
         padding-left: 5px;
+        resize: auto;
+        overflow: auto;
         width: 100%;
     }
 
@@ -81,10 +90,20 @@
         color: var(--color, darkgray);
         font-size: 10px;
         margin-top: 5px;
+        max-width: 100%;
 
         &.psp-expression__error {
-            color: #cb4549 !important;
+            background-color: #cb4549;
+            box-sizing: border-box;
+            color: #fff !important;
             display: none;
+            position: absolute;
+            z-index: 10000;
+            max-height: 50px;
+            padding: 10px;
+            overflow: scroll;
+            top: 100%;
+            width: 100%;
         }
     }
 

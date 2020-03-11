@@ -136,20 +136,23 @@ Table::get_computed_schema(
 
         if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
             // Build error message and set skip to true
+            std::vector<t_dtype> expected_dtypes = 
+                t_computed_column::get_computation_input_types(computed_function_name);
+
             std::stringstream ss;
             ss
                 << "Error: `"
-                << name
+                << computed_function_name_to_string(computed_function_name)
                 << "`"
-                << " failed type checking, as these input types: [";
+                << " expected input column types: [ ";
+            for (t_dtype dtype : expected_dtypes) {
+                ss << "`" << get_dtype_descr(dtype) << "` ";
+            }
+            ss << "], but received: [ ";
             for (t_dtype dtype : input_types) {
                 ss << "`" << get_dtype_descr(dtype) << "` ";
             }
-            ss << "] do not resolve to a valid computation for function `";
-            ss 
-                << computed_function_name_to_string(computed_function_name)
-                << "'."
-                << std::endl;
+            ss << "]." << std::endl;
             std::cerr << ss.str();
             skip = true;
         }

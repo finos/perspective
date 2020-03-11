@@ -9,8 +9,6 @@
 
 import {PerspectiveElement} from "../../../src/js/viewer/perspective_element";
 
-jest.mock("../../../src/less/computed_column.less", () => jest.fn());
-
 describe(PerspectiveElement, () => {
     describe(".get_maxes", () => {
         let max_cells, max_columns, num_columns, num_columns_fn, perspective_element, schema, schema_fn;
