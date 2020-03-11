@@ -9,7 +9,7 @@
 
 import perspective from "@finos/perspective";
 import {PerspectiveWorkspace, PerspectiveWidget} from "@finos/perspective-workspace";
-import {Widget} from "@phosphor/widgets";
+import {Widget} from "@lumino/widgets";
 import "@finos/perspective-workspace/src/theme/material/index.less";
 
 import "@finos/perspective-viewer-hypergrid";

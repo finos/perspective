@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {Message} from "@phosphor/messaging";
+import {Message} from "@lumino/messaging";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 
 import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
@@ -28,9 +28,9 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
     }
 
     /**
-     * Process the phosphor message.
+     * Process the lumino message.
      *
-     * Any custom phosphor widget used inside a Jupyter widget should override
+     * Any custom lumino widget used inside a Jupyter widget should override
      * the processMessage function like this.
      */
     processMessage(msg: Message) {

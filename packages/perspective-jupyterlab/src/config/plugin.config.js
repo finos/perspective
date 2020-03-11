@@ -23,7 +23,7 @@ module.exports = {
         maxEntrypointSize: 512000,
         maxAssetSize: 512000
     },
-    externals: /\@jupyterlab|\@phosphor|\@jupyter-widgets/,
+    externals: /\@jupyterlab|\@lumino|\@jupyter-widgets/,
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
     module: {

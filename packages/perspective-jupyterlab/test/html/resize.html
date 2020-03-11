@@ -12,7 +12,7 @@
     <head>
         
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-        <script src="phosphor.js" preload></script>
+        <script src="lumino.js" preload></script>
         <script src="perspective-viewer-hypergrid.js" preload></script>
 
         <link rel='stylesheet' href="demo.css">
@@ -28,7 +28,7 @@
             xhr.open('GET', 'superstore.csv', true);
             xhr.onload = function () { 
                 window.__CSV__ = xhr.response;
-                window.__WIDGET__ = new PerspectivePhosphor.PerspectiveWidget();
+                window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
                 container.appendChild(window.__WIDGET__.node);
                 window.__WIDGET__.load(xhr.response);
                 window.__WIDGET__.plugin = "hypergrid";

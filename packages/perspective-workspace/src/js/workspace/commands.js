@@ -7,7 +7,7 @@
  *
  */
 
-import {CommandRegistry} from "@phosphor/commands";
+import {CommandRegistry} from "@lumino/commands";
 import {MODE} from "./workspace";
 
 export const createCommands = workspace => {

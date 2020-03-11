@@ -12,8 +12,8 @@
 import "@finos/perspective-viewer";
 
 import {Table, TableData, TableOptions} from "@finos/perspective";
-import {Message} from "@phosphor/messaging";
-import {Widget} from "@phosphor/widgets";
+import {Message} from "@lumino/messaging";
+import {Widget} from "@lumino/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
 
 import {HTMLPerspectiveViewerElement, Pivots, Aggregates, Sort, ComputedColumns, PerspectiveViewerOptions, Filters, Columns} from "@finos/perspective-viewer";
@@ -35,7 +35,7 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
 }
 
 /**
- * Class for perspective phosphor widget.
+ * Class for perspective lumino widget.
  *
  * @class PerspectiveWidget (name) TODO: document
  */
@@ -92,11 +92,11 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**********************/
-    /* Phosphor Overrides */
+    /* Lumino Overrides */
     /**********************/
 
     /**
-     * Phosphor: after visible
+     * Lumino: after visible
      *
      */
     onAfterShow(msg: Message): void {
@@ -105,7 +105,7 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
-     * Phosphor: widget resize
+     * Lumino: widget resize
      *
      */
     onResize(msg: Widget.ResizeMessage): void {
