@@ -1575,8 +1575,6 @@ namespace binding {
             std::vector<std::string> input_columns = 
                 vecFromArray<t_val, std::string>(c.at(2));
 
-            std::cout << computed_column_name << std::endl << input_columns << std::endl;
-
             // Add the computed column to the config.
             auto tp = std::make_tuple(
                 computed_column_name, computed_function_name, input_columns);

@@ -121,7 +121,7 @@ export class ActionElement extends DomElement {
     _validate_computed_expression(event) {
         const expression = event.detail.expression;
 
-        // TODO: need to keep naming REALLY consistent
+        // `computed-columns` stores the raw expression typed by the user.
         let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
 
         if (computed_columns === null) {

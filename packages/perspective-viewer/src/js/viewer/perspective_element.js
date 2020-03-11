@@ -205,7 +205,7 @@ export class PerspectiveElement extends StateElement {
             if (!type) {
                 type = computed_schema[name];
             }
-            const row = this._new_row(name, type, aggregate, null, null, null, computed);
+            const row = this._new_row(name, type, aggregate, null, null, computed);
             this._inactive_columns.appendChild(row);
             if (shown.includes(name)) {
                 row.classList.add("active");

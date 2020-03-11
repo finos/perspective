@@ -158,31 +158,31 @@ export class DomElement extends PerspectiveElement {
     }
 
     /**
-     * Using the view's schema and config, add all computed columns to the
-     * inactive columns panel unless they are specified as shown.
+     * Using the view's schema, add computed columns to the inactive columns
+     * area if they're not specified to be inserted anywhere else in the UI.
      */
     async _update_computed_column_view() {
-        // FIXME: bad bad not good
         if (!this._view) return;
-        const [computed_schema, config] = await Promise.all([this._view.computed_schema(), this._view.get_config()]);
-        const computed_columns = config.computed_columns;
+        const computed_schema = await this._view.computed_schema();
+        const computed_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
         const columns = this._get_view_all_column_names();
         const active = this._get_view_active_column_names();
         const rp = this._get_view_row_pivots();
         const cp = this._get_view_column_pivots();
-        const sort = this._get_view_sorts().map(x => x[0]);
-        const filter = this._get_view_filters().map(x => x[0]);
 
+        let added_count = 0;
         for (const cc of computed_columns) {
             const name = cc.column;
-            // FIXME: so bad, so terrible
-            const should_add = !columns.includes(name) && !active.includes(name) && !rp.includes(name) && !cp.includes(name) && !sort.includes(name) && !filter.includes(name);
+            const should_add = !columns.includes(name) && !active.includes(name) && !rp.includes(name) && !cp.includes(name);
             if (!should_add) continue;
             const row = this._new_row(name, computed_schema[name], null, null, null, name);
-            // FIXME: this needs to follow the paradigm for adding columns to
-            // the sidebar elsewhere, as it iscurrently broken if one `reset`s
-            // the viewer and tries to pivot on the column.
             this._inactive_columns.appendChild(row);
+            added_count++;
+        }
+
+        // Remove collapse so that new inactive columns show up
+        if (added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
+            this._inactive_columns.parentElement.classList.remove("collapse");
         }
     }
 
@@ -190,24 +190,41 @@ export class DomElement extends PerspectiveElement {
      * When the `computed-columns` attribute is set to [], null, or undefined,
      * clear all previously created columns from the UI.
      */
-    _reset_computed_column_view() {
-        // FIXME: this needs to work properly
-        const rows = this._inactive_columns.getElementsByClassName("computed");
-        const names = [];
+    _reset_computed_column_view(computed_columns) {
+        const computed_names = computed_columns.map(x => x.column);
 
-        for (const row of rows) {
-            names.push(row.getAttribute("name"));
-            this._inactive_columns.removeChild(row);
+        // Remove computed columns from all
+        const filtered_active = this._get_view_active_column_names().filter(x => !computed_names.includes(x));
+
+        const aggregates = this._get_view_aggregates().filter(x => !computed_names.includes(x.column));
+        const rp = this._get_view_row_pivots().filter(x => !computed_names.includes(x));
+        const cp = this._get_view_column_pivots().filter(x => !computed_names.includes(x));
+        const sort = this._get_view_sorts().filter(x => !computed_names.includes(x[0]));
+        const filters = this._get_view_filters().filter(x => !computed_names.includes(x[0]));
+
+        // Aggregates as an array is from the attribute API
+        this.set_aggregate_attribute(aggregates);
+
+        this.setAttribute("columns", JSON.stringify(filtered_active));
+        this.setAttribute("row-pivots", JSON.stringify(rp));
+        this.setAttribute("column-pivots", JSON.stringify(cp));
+        this.setAttribute("sort", JSON.stringify(sort));
+        this.setAttribute("filters", JSON.stringify(filters));
+
+        // Remove inactive computed columns
+        const inactive_computed = this._get_view_all_columns().filter(x => x.classList.contains("computed"));
+
+        for (const col of inactive_computed) {
+            this._inactive_columns.removeChild(col);
         }
 
-        const active = this._get_view_active_column_names();
-        const new_active = active.filter(x => !names.includes(x));
-
-        if (new_active.length > 0) {
-            this._update_column_view(new_active, true);
+        // Re-check on whether to collapse inactive columns
+        const pop_cols = this._get_view_active_columns().filter(x => typeof x !== "undefined" && x !== null);
+        const lis = this._get_view_dom_columns("#inactive_columns perspective-row");
+        if (pop_cols.length === lis.length) {
+            this._inactive_columns.parentElement.classList.add("collapse");
         } else {
-            // FIXME: how do we reset to default state without using this
-            this.reset();
+            this._inactive_columns.parentElement.classList.remove("collapse");
         }
     }
 
@@ -237,13 +254,18 @@ export class DomElement extends PerspectiveElement {
             }
         });
         if (reset) {
-            this._update_column_list(columns, this._active_columns, name => {
+            this._update_column_list(columns, this._active_columns, (name, computed_names) => {
                 if (name === null) {
                     return this._new_row(null);
                 } else {
                     const ref = lis.find(x => x.getAttribute("name") === name);
                     if (ref) {
-                        return this._new_row(ref.getAttribute("name"), ref.getAttribute("type"));
+                        const name = ref.getAttribute("name");
+                        let computed;
+                        if (computed_names.includes(name)) {
+                            computed = name;
+                        }
+                        return this._new_row(name, ref.getAttribute("type"), undefined, undefined, undefined, computed);
                     }
                 }
             });
@@ -253,12 +275,16 @@ export class DomElement extends PerspectiveElement {
     _update_column_list(columns, container, callback, accessor) {
         accessor = accessor || ((x, y) => y.getAttribute("name") === x);
         const active_columns = Array.prototype.slice.call(container.children);
+
+        // Make sure that the `computed` attribute is set on computed columns
+        const computed_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+        const computed_names = computed_columns.map(x => x.column);
         for (let i = 0, j = 0; i < active_columns.length || j < columns.length; i++, j++) {
             const name = columns[j];
             const col = active_columns[i];
             const next_col = active_columns[i + 1];
             if (!col) {
-                const node = callback(name);
+                const node = callback(name, computed_names);
                 if (node) {
                     container.appendChild(node);
                 }
@@ -268,7 +294,7 @@ export class DomElement extends PerspectiveElement {
                 this._set_row_type(col);
             } else {
                 if (col.classList.contains("null-column")) {
-                    const node = callback(name);
+                    const node = callback(name, computed_names);
                     if (node) {
                         container.replaceChild(node, col);
                     }
@@ -277,7 +303,7 @@ export class DomElement extends PerspectiveElement {
                     i++;
                     //  j--;
                 } else {
-                    const node = callback(name);
+                    const node = callback(name, computed_names);
                     if (node) {
                         container.insertBefore(node, col);
                         i--;
