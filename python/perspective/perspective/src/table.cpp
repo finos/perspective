@@ -26,7 +26,7 @@ namespace binding {
  * Table API
  */
 
-std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_val computed,
+std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow) {
     bool table_initialized = !table.is_none();
     std::shared_ptr<t_pool> pool;
@@ -186,23 +186,11 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
     }
 
-     if (!computed.is_none()) {
-        // TODO
-        // re-add computed columns after update, delete, etc.
-        // table_add_computed_column(data_table, computed);
-     }
-
     // calculate offset, limit, and set the gnode
     tbl->init(data_table, row_count, op);
 
     //pool->_process();
     return tbl;
-}
-
-std::shared_ptr<Table>
-make_computed_table_py(std::shared_ptr<Table> table, t_val computed) {
-    // TODO
-    return table;
 }
 
 } //namespace binding

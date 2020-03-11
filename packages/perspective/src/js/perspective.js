@@ -89,8 +89,8 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, computed, index, limit, op, is_update, is_arrow) {
-        _Table = __MODULE__.make_table(_Table, accessor, computed, limit || 4294967295, index, op, is_update, is_arrow);
+    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow) {
+        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -1261,7 +1261,7 @@ export default function(Module) {
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
-            config.columns = this.columns(true);
+            config.columns = this.columns();
             if (config.computed_columns.length > 0) {
                 for (let col of config.computed_columns) {
                     config.columns.push(col.column);
@@ -1380,7 +1380,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.computed, this.index || "", this.limit, op, true, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1420,7 +1420,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, undefined, this.index || "", this.limit, op, false, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1455,30 +1455,6 @@ export default function(Module) {
     };
 
     /**
-     * Create a new table with the addition of new computed columns (defined as
-     * javascript functions)
-     *
-     * @param {Computation} computed A computation specification object
-     */
-    table.prototype.add_computed = function(computed) {
-        let _Table;
-
-        try {
-            _call_process(this._Table.get_id());
-            _Table = __MODULE__.make_computed_table(this._Table, computed);
-            if (this.computed.length > 0) {
-                computed = this.computed.concat(computed);
-            }
-            return new table(_Table, this.index, computed, this.limit, this.overridden_types);
-        } catch (e) {
-            if (_Table) {
-                _Table.delete();
-            }
-            throw e;
-        }
-    };
-
-    /**
      * The column names of this table.
      *
      * @async
@@ -1487,14 +1463,13 @@ export default function(Module) {
      * @returns {Promise<Array<string>>} An array of column names for this
      * table.
      */
-    table.prototype.columns = function(computed = false) {
+    table.prototype.columns = function() {
         let schema = this._Table.get_schema();
-        let computed_schema = this.computed_schema();
         let cols = schema.columns();
         let names = [];
         for (let cidx = 0; cidx < cols.size(); cidx++) {
             let name = cols.get(cidx);
-            if (name !== "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
+            if (name !== "psp_okey") {
                 names.push(name);
             }
         }
@@ -1589,7 +1564,7 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                _Table = make_table(data_accessor, undefined, undefined, options.index, options.limit, op, false, is_arrow);
+                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow);
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {

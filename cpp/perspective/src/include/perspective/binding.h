@@ -164,30 +164,6 @@ namespace binding {
     void set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, T value);
 
     /**
-     * @brief Create a computed column.
-     * 
-     * @tparam T 
-     * @param table 
-     * @param row_indices 
-     * @param computed_def 
-     */
-    template <typename T>
-    void add_computed_column(std::shared_ptr<t_data_table> table, T computed_def);
-
-    /**
-     * @brief Given a list of computed column declarations in the binding 
-     * language, convert them to C++ lambdas that allow access from deeper 
-     * inside the engine without importing the semantics of t_val. 
-     * 
-     * @tparam T 
-     * @param computed 
-     * @return std::vector<t_computed_column_lambda> 
-     */
-    template <typename T>
-    std::vector<t_computed_column_lambda>
-    make_computed_lambdas(std::vector<T> computed);
-
-    /**
      * @brief Return a map of computed function metadata for use in the binding
      * language. Keys are strings that map to maps containing strings of
      * the following metadata:
@@ -230,7 +206,14 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_data_table& tbl, T accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_update);
+    void _fill_data(
+        t_data_table& tbl,
+        T accessor,
+        const t_schema& input_schema,
+        const std::string& index,
+        std::uint32_t offset,
+        std::uint32_t limit,
+        bool is_update);
 
     /**
      * @brief Create and populate a table.
@@ -239,7 +222,6 @@ namespace binding {
      * @param pool
      * @param gnode
      * @param accessor
-     * @param computed
      * @param limit
      * @param index
      * @param is_update
@@ -247,21 +229,14 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> make_table(T table, T accessor, T computed,
-        std::uint32_t limit, const std::string& index, t_op op, bool is_update, bool is_arrow);
-
-    /**
-     * @brief Given an array-like container with new computed columns, add them to the
-     * already-existing `Table`.
-     *
-     * @tparam T
-     * @param pool
-     * @param gnode
-     * @param computed
-     * @return std::shared_ptr<t_gnode>
-     */
-    template <typename T>
-    std::shared_ptr<Table> make_computed_table(std::shared_ptr<Table> table, T computed);
+    std::shared_ptr<Table> make_table(
+        T table,
+        T accessor,
+        std::uint32_t limit,
+        const std::string& index,
+        t_op op,
+        bool is_update,
+        bool is_arrow);
 
     /******************************************************************************
      *

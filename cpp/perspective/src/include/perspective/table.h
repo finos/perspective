@@ -89,22 +89,6 @@ public:
         std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns) const;
 
     /**
-     * @brief Add computed columns to the `Table` by replacing `m_gnode` and the `t_data_table` that it tracks.
-     * 
-     * Given the new `computed_lambdas` property, which is a vector of lambdas that contain computed column functions
-     * to execute, append the new computed lambdas to the ones from the old `m_gnode` so as to maintain multiple
-     * computed columns.
-     *
-     * Used during construction of computed columns, as we don't need to create a new `Table`
-     * object each time.
-     *
-     * @param data_table
-     * @param computed_lambdas
-     */
-    void add_computed_columns(
-        std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_lambda> computed_lambdas);
-
-    /**
      * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.
      *
      * A `t_gnode` and `t_pool` must be created and registered in order for the core engine to

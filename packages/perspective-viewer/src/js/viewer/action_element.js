@@ -149,67 +149,6 @@ export class ActionElement extends DomElement {
         return event;
     }
 
-    // UI action
-    _open_computed_column(event) {
-        //const data = event.detail;
-        event.stopImmediatePropagation();
-        /*if (event.type === 'perspective-computed-column-edit') {
-            this._computed_column._edit_computed_column(data);
-        }*/
-        this._computed_column.style.display = "flex";
-        this._side_panel_actions.style.display = "none";
-    }
-
-    // edits state
-    _set_computed_column_input(event) {
-        event.detail.target.appendChild(this._new_row(event.detail.column.name, event.detail.column.type));
-        this._update_column_view();
-    }
-
-    // edits state
-    _validate_computed_column(event) {
-        const new_column = event.detail;
-        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
-        if (computed_columns === null) {
-            computed_columns = [];
-        }
-        // names cannot be duplicates
-        for (let col of computed_columns) {
-            if (new_column.name === col.name) {
-                return;
-            }
-        }
-        computed_columns.push(new_column);
-        this.setAttribute("computed-columns", JSON.stringify(computed_columns));
-    }
-
-    // edits state, calls reload
-    async _create_computed_column(event) {
-        const data = event.detail;
-        let computed_column_name = data.column_name;
-
-        const cols = await this._table.columns();
-        // edit overwrites last column, otherwise avoid name collision
-        if (cols.includes(computed_column_name)) {
-            computed_column_name += ` ${Math.round(Math.random() * 100)}`;
-        }
-
-        const params = [
-            {
-                computation: data.computation,
-                column: computed_column_name,
-                computed_function_name: data.computation.computed_function_name,
-                inputs: data.input_columns.map(col => col.name),
-                input_type: data.computation.input_type,
-                type: data.computation.return_type
-            }
-        ];
-
-        const table = this._table.add_computed(params);
-        await this._load_table(table, true);
-        this._update_column_view();
-    }
-
     _column_visibility_clicked(ev) {
         const parent = ev.currentTarget;
         const is_active = parent.parentElement.getAttribute("id") === "active_columns";

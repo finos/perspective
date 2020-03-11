@@ -18,6 +18,7 @@
 #include <perspective/scalar.h>
 #include <perspective/rlookup.h>
 #include <perspective/computed_function.h>
+#include <perspective/exception.h>
 
 namespace perspective {
 
@@ -48,7 +49,12 @@ public:
 
     /**
      * @brief Returns a `t_computation` object corresponding to the provided
-     * name and input types. Aborts if a method cannot be found.
+     * name and input types. 
+     * 
+     * If a valid computation cannot be found, a `t_computation` object with 
+     * `m_name` set to `INVALID_COMPUTED_FUNCTION` and `m_return_type` set to 
+     * `DTYPE_NONE`. This allows for error checking without invalidating the
+     * View or Table.
      * 
      * @param name 
      * @param input_types 

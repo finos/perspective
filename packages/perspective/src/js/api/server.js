@@ -99,11 +99,6 @@ export class Server {
                     }
                 }
                 break;
-            case "add_computed":
-                let table = this._tables[msg.original];
-                let computed = msg.computed;
-                this._tables[msg.name] = table.add_computed(computed);
-                break;
             case "table_generate":
                 let g;
                 eval("g = " + msg.args);
