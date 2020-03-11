@@ -79,8 +79,46 @@ utils.with_server({}, () => {
                 }, viewer);
             });
 
+            // Remove
+            test.capture("Removing computed columns should reset active columns, pivots, sort, and filter.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'sqrt("Profit") as "first"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'sqrt("Sales") as "second"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'sqrt(("Sales" * "Profit")) as "third"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["State"])), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["first", "second", "Sales"])), viewer);
+                await page.evaluate(element => element.setAttribute("column-pivots", JSON.stringify(["third"])), viewer);
+                await page.evaluate(
+                    element =>
+                        element.setAttribute(
+                            "sort",
+                            JSON.stringify([
+                                ["first", "desc"],
+                                ["State", "desc"]
+                            ])
+                        ),
+                    viewer
+                );
+                await page.evaluate(
+                    element =>
+                        element.setAttribute(
+                            "filters",
+                            JSON.stringify([
+                                ["second", ">", 0],
+                                ["State", "==", "Texas"]
+                            ])
+                        ),
+                    viewer
+                );
+                await page.evaluate(element => element.removeAttribute("computed-columns"), viewer);
+            });
+
             // reset
-            test.capture("Resetting the viewer with computed columns should place computed columns in the inactive columns list.", async page => {
+            test.capture("Resetting the viewer with computed columns should remove computed columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'sqrt("Profit")');
@@ -90,18 +128,6 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.reset(), viewer);
-                await page.evaluate(element => {
-                    const inactive = element.shadowRoot.querySelector("#inactive_columns");
-                    let computed_count = 0;
-                    for (const column of inactive.children) {
-                        if (column.classList.contains("computed")) {
-                            computed_count++;
-                        }
-                    }
-                    if (computed_count !== 4) {
-                        throw new Error(`Expected 4 computed columns, received ${computed_count}. ${inactive.innerHTML}`);
-                    }
-                }, viewer);
             });
 
             // save
@@ -184,14 +210,18 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
             });
 
-            test.capture("row and column pivots by computed expression column.", async page => {
+            test.skip("row and column pivots by computed expression column.", async page => {
+                // FIXME: flaky
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'uppercase("City") as "Computed2"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Computed"]'), viewer);
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Computed2"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             test.capture("sorts by computed expression column.", async page => {
@@ -253,6 +283,7 @@ utils.with_server({}, () => {
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["First", "Second"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             // Save and restore

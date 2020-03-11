@@ -116,13 +116,17 @@ class PerspectiveViewer extends ActionElement {
         this._update_column_list(
             sort,
             inner,
-            s => {
+            (s, computed_names) => {
                 let dir = "asc";
                 if (Array.isArray(s)) {
                     dir = s[1];
                     s = s[0];
                 }
-                return this._new_row(s, false, false, false, dir);
+                let computed = undefined;
+                if (computed_names.includes(s)) {
+                    computed = s;
+                }
+                return this._new_row(s, false, false, false, dir, computed);
             },
             (sort, node) => {
                 if (Array.isArray(sort)) {
@@ -187,11 +191,13 @@ class PerspectiveViewer extends ActionElement {
                 this._computed_expression_editor._close_expression_editor();
             }
             if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
-                // Remove computed columns from the DOM
+                // Remove computed columns from the DOM, and reset the config
+                // to exclude all computed columns.
                 if (this.hasAttribute("computed-columns")) {
                     this.removeAttribute("computed-columns");
+                    const parsed = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+                    this._reset_computed_column_view(parsed);
                     this.removeAttribute("parsed-computed-columns");
-                    this._reset_computed_column_view();
                     resolve();
                     return;
                 }
@@ -316,12 +322,17 @@ class PerspectiveViewer extends ActionElement {
             this._update_column_list(
                 filters,
                 inner,
-                filter => {
+                (filter, computed_names) => {
                     const fterms = JSON.stringify({
                         operator: filter[1],
                         operand: filter[2]
                     });
-                    return this._new_row(filter[0], undefined, undefined, fterms);
+                    const name = filter[0];
+                    let computed = undefined;
+                    if (computed_names.includes(name)) {
+                        computed = name;
+                    }
+                    return this._new_row(name, undefined, undefined, fterms, undefined, computed);
                 },
                 (filter, node) =>
                     node.getAttribute("name") === filter[0] &&
@@ -392,6 +403,7 @@ class PerspectiveViewer extends ActionElement {
         }
 
         var inner = this._column_pivots.querySelector("ul");
+        // TODO: does this need computed attr
         this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
@@ -686,7 +698,6 @@ class PerspectiveViewer extends ActionElement {
         for (const key of PERSISTENT_ATTRIBUTES) {
             if (config.hasOwnProperty(key)) {
                 let val = config[key];
-                console.log(key, val);
                 if (val === true) {
                     this.toggleAttribute(key, true);
                 } else if (val !== undefined && val !== null && val !== false) {
@@ -748,6 +759,7 @@ class PerspectiveViewer extends ActionElement {
         } else {
             this.removeAttribute("columns");
         }
+        this.removeAttribute("computed-columns");
         this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
         this._hide_context_menu();
