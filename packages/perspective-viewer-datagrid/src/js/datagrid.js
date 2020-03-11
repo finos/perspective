@@ -106,11 +106,46 @@ function _tree_header(td, path, is_leaf, is_open) {
         const icon = is_open ? "remove" : "add";
         let html = "";
         for (let i = 0; i < path.length; i++) {
-            html += `<span style="margin-left:5px;margin-right:15px;border-left:1px solid #eee;height:19px"></span>`;
+            html += `<span class="pd-tree-group"></span>`;
         }
         td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-row-header-icon">${icon}</span><span class="pd-group-name">${name}</span></div>`;
     }
     td.classList.add("pd-group-header");
+}
+
+async function getCellConfig(view, config, row_idx, col_idx) {
+    const row_pivots = config.row_pivots;
+    const column_pivots = config.column_pivots;
+    const start_row = row_idx >= 0 ? row_idx : 0;
+    const end_row = start_row + 1;
+    const r = await view.to_json({start_row, end_row});
+    const row_paths = r.map(x => x.__ROW_PATH__);
+    const row_pivots_values = row_paths[0] || [];
+    const row_filters = row_pivots
+        .map((pivot, index) => {
+            const pivot_value = row_pivots_values[index];
+            return pivot_value ? [pivot, "==", pivot_value] : undefined;
+        })
+        .filter(x => x);
+    const column_index = row_pivots.length > 0 ? col_idx + 1 : col_idx;
+    const column_paths = Object.keys(r[0])[column_index];
+    const result = {row: r[0]};
+    let column_filters = [];
+    if (column_paths) {
+        const column_pivot_values = column_paths.split("|");
+        result.column_names = [column_pivot_values[column_pivot_values.length - 1]];
+        column_filters = column_pivots
+            .map((pivot, index) => {
+                const pivot_value = column_pivot_values[index];
+                return pivot_value ? [pivot, "==", pivot_value] : undefined;
+            })
+            .filter(x => x)
+            .filter(([, , value]) => value !== "__ROW_PATH__");
+    }
+
+    const filters = config.filter.concat(row_filters).concat(column_filters);
+    result.config = {filters};
+    return result;
 }
 
 /******************************************************************************
@@ -307,7 +342,7 @@ class DatagridHeaderViewModel extends ViewModel {
             th.classList.add("pd-group-header");
         }
         this._clean_rows(offset_cache.length);
-        return {group_header_cache, offset_cache};
+        return {group_header_cache, offset_cache, th};
     }
 
     clean({offset_cache}) {
@@ -320,19 +355,38 @@ function column_path_2_type(schema, column) {
     return schema[parts[parts.length - 1]];
 }
 
+function _is_equals_id(id, selected_id) {
+    if (Array.isArray(id) && Array.isArray(selected_id) && id.length === selected_id.length) {
+        for (let i = 0; i < id.length; i++) {
+            if (id[i] !== selected_id[i]) {
+                return false;
+            }
+        }
+        return true;
+    } else {
+        return id === selected_id && id !== undefined;
+    }
+}
+
 /**
  * <tbody> view model.
  *
  * @class DatagridBodyViewModel
  */
 class DatagridBodyViewModel extends ViewModel {
-    _draw_td(ridx, cidx, val, type, depth, is_open, ridx_offset) {
+    _draw_td(ridx, cidx, val, id, is_selected, type, depth, is_open, ridx_offset) {
         const {tr, row_container} = this._get_row(ridx);
         const td = this._get_cell("td", row_container, cidx, tr);
         const metadata = this._get_or_create_metadata(td);
-
+        metadata.id = id;
         if (metadata.value !== val) {
+            metadata;
             td.className = type;
+            if (is_selected) {
+                tr.classList.add("pd-selected");
+            } else {
+                tr.classList.remove("pd-selected");
+            }
             const formatter = this._format(type);
             if (val === undefined || val === null) {
                 td.textContent = "-";
@@ -355,23 +409,27 @@ class DatagridBodyViewModel extends ViewModel {
         return td;
     }
 
-    draw(container_height, column_name, cidx, column_data, type, depth, ridx_offset) {
+    draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, depth, ridx_offset) {
         let ridx = 0;
         let td;
         for (const val of column_data) {
             const next = column_data[ridx + 1];
-            td = this._draw_td(ridx++, cidx, val, type, depth, next?.length > val?.length, ridx_offset);
+            const id = id_column?.[ridx];
+            td = this._draw_td(ridx++, cidx, val, id, _is_equals_id(id, selected_id), type, depth, next?.length > val?.length, ridx_offset);
             if (ridx * 19 > container_height) {
                 break;
             }
         }
-        const offsetWidth = td.offsetWidth;
         this._clean_rows(ridx);
-        this.pinned_widths[`${column_name}|${type}`] = offsetWidth + "px";
+        const offsetWidth = td?.offsetWidth;
+        if (offsetWidth) {
+            this.pinned_widths[`${column_name}|${type}`] = offsetWidth + "px";
+        }
         return {offsetWidth: offsetWidth, cidx, ridx};
     }
 
-    clean({cidx}) {
+    clean({ridx, cidx}) {
+        this._clean_rows(ridx);
         this._clean_columns(cidx);
     }
 }
@@ -406,7 +464,7 @@ class DatagridTableViewModel {
         return this.header._get_row(Math.max(0, this.header.rows.length - 1)).row_container.length;
     }
 
-    async draw(view, container_width, container_height, header_levels, row_levels, column_paths, row_paths, sort, schema, viewport) {
+    async draw(view, container_width, container_height, header_levels, row_levels, column_paths, row_paths, sort, schema, selected_id, viewport) {
         const visible_columns = column_paths.slice(viewport.start_col);
 
         const columns_data = await view.to_columns(viewport);
@@ -414,10 +472,11 @@ class DatagridTableViewModel {
             cont_head,
             cidx = 0,
             width = 0;
+        const id_column = columns_data["__ID__"];
 
         if (column_paths[0] === "__ROW_PATH__") {
             cont_head = this.header.draw(header_levels, row_paths.join(","), "");
-            cont_body = this.body.draw(container_height, row_paths.join(","), cidx, columns_data["__ROW_PATH__"], undefined, row_levels, viewport.start_row);
+            cont_body = this.body.draw(container_height, row_paths.join(","), cidx, columns_data["__ROW_PATH__"], id_column, selected_id, undefined, row_levels, viewport.start_row);
             width += cont_body.offsetWidth;
             cidx++;
         }
@@ -431,7 +490,8 @@ class DatagridTableViewModel {
                     viewport.end_col = missing_cidx + 1;
                     const new_col = await view.to_columns(viewport);
                     if (!(column_name in new_col)) {
-                        throw new Error(`Missing column ${column_name}; contains ${Object.keys(new_col).join(", ")}`);
+                        new_col[column_name] = [];
+                        console.warn(`Missing column ${column_name}; contains ${Object.keys(new_col).join(", ")}`);
                     }
                     columns_data[column_name] = new_col[column_name];
                 }
@@ -439,8 +499,8 @@ class DatagridTableViewModel {
                 const type = column_path_2_type(schema, column_name);
 
                 cont_head = this.header.draw(header_levels, undefined, column_name, type, sort, cont_head);
-                cont_body = this.body.draw(container_height, column_name, cidx, column_data, type, undefined, viewport.start_row);
-                width += cont_body.offsetWidth;
+                cont_body = this.body.draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, undefined, viewport.start_row);
+                width += cont_body.offsetWidth || cont_head.th.offsetWidth;
                 cidx++;
 
                 if (width > container_width) {
@@ -449,7 +509,9 @@ class DatagridTableViewModel {
             }
         } finally {
             this.body.clean({ridx: cont_body?.ridx || 0, cidx});
-            this.header.clean(cont_head);
+            if (cont_head) {
+                this.header.clean(cont_head);
+            }
         }
     }
 }
@@ -562,7 +624,7 @@ class DatagridVirtualTableViewModel extends HTMLElement {
         const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - container_height);
         const percent_scroll = this._scroll_container.scrollTop / total_scroll_height;
         const virtual_panel_row_height = Math.floor(container_height / 19);
-        const relative_nrows = preserve_scroll_position ? this._nrows : nrows;
+        const relative_nrows = preserve_scroll_position ? this._nrows || 0 : nrows;
         let start_row = Math.floor(Math.max(0, relative_nrows + this.table_model.header.cells.length - virtual_panel_row_height) * percent_scroll);
         let end_row = start_row + virtual_panel_row_height;
         if (end_row - 1 > nrows) {
@@ -707,20 +769,31 @@ class DatagridVirtualTableViewModel extends HTMLElement {
 
         this._update_virtual_panel_height(nrows);
 
-        if (nrows > 0) {
-            const column_paths = await column_pathsp;
-            let {start_col, end_col} = this._calculate_column_range(container_width, column_paths);
-            const viewport = {start_col, end_col, start_row, end_row};
-            let {invalid_row, invalid_column} = this._validate_viewport(viewport);
-            if (force_redraw || invalid_row || invalid_column) {
-                this._swap_in(force_redraw, invalid_row, invalid_column);
-                const header_levels = this.config.column_pivots.length + 1;
-                const row_levels = this.config.row_pivots.length;
-                const schema = await schemap;
-                await this.table_model.draw(view, container_width, container_height, header_levels, row_levels, column_paths, this.config.row_pivots, this.config.sort, schema, viewport);
-                this._swap_out(force_redraw, invalid_row, invalid_column);
-                this._update_virtual_panel_width(container_width, force_redraw, column_paths);
-            }
+        const column_paths = await column_pathsp;
+        let {start_col, end_col} = this._calculate_column_range(container_width, column_paths);
+        const id = this.config.row_pivots.length > 0;
+        const viewport = {start_col, end_col, start_row, end_row, id};
+        let {invalid_row, invalid_column} = this._validate_viewport(viewport);
+        if (force_redraw || invalid_row || invalid_column) {
+            this._swap_in(force_redraw, invalid_row, invalid_column);
+            const header_levels = this.config.column_pivots.length + 1;
+            const row_levels = this.config.row_pivots.length;
+            const schema = await schemap;
+            await this.table_model.draw(
+                view,
+                container_width,
+                container_height,
+                header_levels,
+                row_levels,
+                column_paths,
+                this.config.row_pivots,
+                this.config.sort,
+                schema,
+                this._selected_id,
+                viewport
+            );
+            this._swap_out(force_redraw, invalid_row, invalid_column);
+            this._update_virtual_panel_width(container_width, force_redraw, column_paths);
         }
 
         if (DEBUG) {
@@ -760,7 +833,33 @@ class DatagridVirtualTableViewModel extends HTMLElement {
             await this._on_toggle(event, metadata);
         } else if (metadata?.is_column_header) {
             await this._on_sort(event, metadata);
+        } else {
+            await this._on_select(metadata);
         }
+    }
+
+    async _on_select(metadata) {
+        const cell_config = await getCellConfig(this.view, this.config, metadata.ridx, metadata.cidx);
+        if (_is_equals_id(metadata.id, this._selected_id)) {
+            this._selected_id = undefined;
+            this.elem.dispatchEvent(
+                new CustomEvent("perspective-select", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {selected: false, config: {filters: []}}
+                })
+            );
+        } else {
+            this._selected_id = metadata.id;
+            this.elem.dispatchEvent(
+                new CustomEvent("perspective-select", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {selected: true, ...cell_config}
+                })
+            );
+        }
+        await this.draw(this.view, true, true);
     }
 
     async _on_toggle(event, metadata) {
