@@ -320,7 +320,16 @@ t_gnode::_process_table() {
 #endif
         {
             const std::string& cname = _gstate_table_schema.m_columns[colidx];
-            auto fcolumn = _process_state.m_flattened_data_table->get_column(cname).get();
+            auto fcolumn = _process_state.m_flattened_data_table->get_column_safe(cname);
+            if (!fcolumn) {
+            // column is invalid, i.e. a computed column belonging to a
+            // deleted view
+            #ifdef PSP_PARALLEL_FOR
+                return;
+            #else
+                continue;
+            #endif
+            }
             auto scolumn = _process_state.m_state_data_table->get_column(cname).get();
             auto dcolumn = _process_state.m_delta_data_table->get_column(cname).get();
             auto pcolumn = _process_state.m_prev_data_table->get_column(cname).get();
@@ -331,46 +340,46 @@ t_gnode::_process_table() {
 
             switch (col_dtype) {
                 case DTYPE_INT64: {
-                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int64_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT32: {
-                    _process_column<std::int32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int32_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT16: {
-                    _process_column<std::int16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int16_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT8: {
-                    _process_column<std::int8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int8_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT64: {
-                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint64_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT32: {
-                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint32_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT16: {
-                    _process_column<std::uint16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint16_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT8: {
-                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint8_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT64: {
-                    _process_column<double>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<double>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT32: {
-                    _process_column<float>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<float>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_BOOL: {
-                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint8_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_TIME: {
-                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int64_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_DATE: {
-                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint32_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_STR: {
-                    _process_column<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::string>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
             }
@@ -528,7 +537,7 @@ t_gnode::_recompute_columns_for_all_contexts(
         switch (ctxh.m_ctx_type) {
             case TWO_SIDED_CONTEXT: {
                 auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                // Recompute using `m_state` table and flattened
+                // Recompute using `m_gstate` table and flattened
                 _recompute_columns<t_ctx2>(ctx, tbl, flattened, changed_rows);
             } break;
             case ONE_SIDED_CONTEXT: {
@@ -626,7 +635,7 @@ t_gnode::_process_computed_columns(
         switch (ctxh.m_ctx_type) {
             case TWO_SIDED_CONTEXT: {
                 auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                // Recompute using `m_state` table and flattened
+                // Recompute using `m_gstate` table and flattened
                 _recompute_columns<t_ctx2>(ctx, tbl, flattened, changed_rows);
                 // compute for intermediate tables
                 _compute_columns_sptr<t_ctx2>(ctx, delta);
@@ -798,10 +807,10 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + "notify_contexts.enter");
     t_index num_ctx = m_contexts.size();
-    t_sctxhvec ctxhvec(num_ctx);
+    std::vector<t_ctx_handle> ctxhvec(num_ctx);
 
     t_index ctxh_count = 0;
-    for (t_sctxhmap::const_iterator iter = m_contexts.begin(); iter != m_contexts.end();
+    for (std::map<std::string, t_ctx_handle>::const_iterator iter = m_contexts.begin(); iter != m_contexts.end();
          ++iter) {
         ctxhvec[ctxh_count] = iter->second;
         ctxh_count++;
@@ -847,7 +856,7 @@ t_gnode::get_pivots() const {
 
     std::vector<t_pivot> rval;
 
-    for (t_sctxhmap::const_iterator iter = m_contexts.begin(); iter != m_contexts.end();
+    for (std::map<std::string, t_ctx_handle>::const_iterator iter = m_contexts.begin(); iter != m_contexts.end();
          ++iter) {
         auto ctxh = iter->second;
 

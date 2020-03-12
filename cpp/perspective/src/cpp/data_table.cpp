@@ -159,6 +159,18 @@ t_data_table::get_dtype(const std::string& colname) const {
 }
 
 std::shared_ptr<t_column>
+t_data_table::get_column_safe(const std::string& colname) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx_safe(colname);
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
+}
+
+std::shared_ptr<t_column>
 t_data_table::get_column(const std::string& colname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -174,6 +186,18 @@ t_data_table::get_column(const std::string& colname) const {
     return m_columns[idx];
 }
 
+std::shared_ptr<t_column>
+t_data_table::get_column_safe(const std::string& colname) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx_safe(colname);
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
+}
+
 std::shared_ptr<const t_column>
 t_data_table::get_const_column(const std::string& colname) const {
     PSP_TRACE_SENTINEL();
@@ -183,10 +207,33 @@ t_data_table::get_const_column(const std::string& colname) const {
 }
 
 std::shared_ptr<const t_column>
+t_data_table::get_const_column_safe(const std::string& colname) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx_safe(colname);
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
+}
+
+std::shared_ptr<const t_column>
 t_data_table::get_const_column(t_uindex idx) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns[idx];
+}
+
+std::shared_ptr<const t_column>
+t_data_table::get_const_column_safe(t_uindex idx) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
 }
 
 std::vector<t_column*>

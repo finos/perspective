@@ -1397,7 +1397,7 @@ namespace binding {
         auto sortspec = view_config->get_sortspec();
         auto computed_columns = view_config->get_computed_columns();
 
-        auto cfg = t_config(columns, fterm, computed_columns, filter_op);
+        auto cfg = t_config(columns, fterm, filter_op, computed_columns);
         auto ctx0 = std::make_shared<t_ctx0>(*(schema.get()), cfg);
         ctx0->init();
         ctx0->sort_by(sortspec);
@@ -1423,7 +1423,7 @@ namespace binding {
         auto computed_columns = view_config->get_computed_columns();
 
         auto cfg = t_config(
-            row_pivots, aggspecs, fterm, computed_columns, filter_op);
+            row_pivots, aggspecs, fterm, filter_op, computed_columns);
         auto ctx1 = std::make_shared<t_ctx1>(*(schema.get()), cfg);
 
         ctx1->init();
@@ -1462,7 +1462,7 @@ namespace binding {
         t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
         auto cfg = t_config(
-            row_pivots, column_pivots, aggspecs, total, fterm, computed_columns, filter_op, column_only);
+            row_pivots, column_pivots, aggspecs, total, fterm, filter_op, computed_columns,column_only);
         auto ctx2 = std::make_shared<t_ctx2>(*(schema.get()), cfg);
 
         ctx2->init();

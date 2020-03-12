@@ -143,6 +143,51 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         column_only = true;
     }
 
+    // this needs to be a py_dict
+    auto p_computed_columns = config.attr("get_computed_columns")().cast<std::vector<t_val>>();
+    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+
+    for (auto c : p_computed_columns) {
+        py::dict computed_column = c.cast<py::dict>();
+        std::string computed_column_name = c["column"].cast<std::string>();
+        t_computed_function_name computed_function_name = 
+            str_to_computed_function_name(c["computed_function_name"].cast<std::string>());
+        std::vector<std::string> input_columns = c["inputs"].cast<std::vector<std::string>>();
+
+        /**
+         * Mutate the schema to add computed columns - the distinction 
+         * between `natural` and `computed` columns must be erased here
+         * as all lookups into `schema` must be valid for all computed
+         * columns on the View.
+         */
+        std::vector<t_dtype> input_types;
+        for (const auto& input_column : input_columns) {
+            input_types.push_back(schema->get_dtype(input_column));
+        }
+
+        t_computation computation = t_computed_column::get_computation(
+            computed_function_name, input_types);
+        
+        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+            std::cerr 
+                << "Could not build computed column definition for `" 
+                << computed_column_name 
+                << "`" 
+                << std::endl;
+            continue;
+        }
+
+        t_dtype output_column_type = computation.m_return_type;
+
+        // Add the column to the schema.
+        schema->add_column(computed_column_name, output_column_type);
+
+        // Add the computed column to the config.
+        auto tp = std::make_tuple(
+            computed_column_name, computed_function_name, input_columns);
+        computed_columns.push_back(tp);
+    }
+
     // construct filters with filter terms, and fill the vector of tuples
     auto p_filter = config.attr("get_filter")().cast<std::vector<std::vector<t_val>>>();
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
@@ -167,8 +212,16 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
     }
 
     // create the `t_view_config`
-    auto view_config = std::make_shared<t_view_config>(row_pivots, column_pivots, aggregates, columns, filter, sort,
-        filter_op, column_only);
+    auto view_config = std::make_shared<t_view_config>(
+        row_pivots,
+        column_pivots,
+        aggregates,
+        columns,
+        filter,
+        sort,
+        computed_columns,
+        filter_op,
+        column_only);
 
     // transform primitive values into abstractions that the engine can use
     view_config->init(schema);
@@ -189,7 +242,7 @@ template <typename CTX_T>
 std::shared_ptr<View<CTX_T>>
 make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
     t_val view_config, t_val date_parser) {
-    auto schema = table->get_schema();
+    std::shared_ptr<t_schema> schema = std::make_shared<t_schema>(table->get_schema());
     std::shared_ptr<t_view_config> config = 
         make_view_config<t_val>(schema, date_parser, view_config);
     auto ctx = make_context<CTX_T>(table, schema, config, name);

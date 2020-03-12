@@ -117,5 +117,28 @@ def validate_filters(filters):
         raise PerspectiveError('Cannot parse filters type: {}'.format(str(type(filters))))
 
 
+def validate_computed_columns(computed_columns):
+    if computed_columns is None:
+        return []
+
+    elif isinstance(computed_columns, list) and len(computed_columns) > 0 and (not isinstance(computed_columns[0], dict) and not isinstance(computed_columns[0], str)):
+        # wrap
+        computed_columns = [computed_columns]
+
+    if isinstance(computed_columns, list):
+        for c in computed_columns:
+            if not isinstance(c, dict) and not isinstance(c, str):
+                raise PerspectiveError('`computed_columns` kwarg must be a list of dicts or strings!')
+            if isinstance(c, dict):
+                keys = c.keys()
+                valid = ("column" in keys) and ("computed_function_name" in keys) and ("inputs" in keys)
+
+                if not valid:
+                    raise PerspectiveError("`computed_columns` kwarg must contain `columns`, `computed_function_name`, and `inputs`!")
+        return computed_columns
+    else:
+        raise PerspectiveError("Cannot parse computed columns of type: {}".format(str(type(computed_columns))))
+
+
 def validate_plugin_config(plugin_config):
     return plugin_config

@@ -32,7 +32,7 @@ t_computed_column::get_computation(
     ss
         << "Error: Could not find computation for function `" 
         << computed_function_name_to_string(name)
-        << "` with input types: [";
+        << "` with input types: [ ";
     for (t_dtype dtype : input_types) {
         ss << "`" << get_dtype_descr(dtype) << "` ";
     }

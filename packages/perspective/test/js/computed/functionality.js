@@ -271,6 +271,31 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("A view without computed columns should break when serializing after another view with a computed column is deleted.", async function() {
+            const table = perspective.table(common.int_float_data);
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "int + float",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+
+            const result = await view.to_columns();
+            expect(result["int + float"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            view.delete();
+
+            const view2 = table.view();
+
+            const result2 = await view2.to_json();
+            expect(result2).toEqual(common.int_float_data);
+
+            view2.delete();
+            table.delete();
+        });
+
         it("When computed columns are repeated between views, column indices should grow linearly.", async function() {
             let computed = [
                 {
@@ -931,9 +956,9 @@ module.exports = perspective => {
                     c: ["a", "b", "c", "d"]
                 });
                 const expected = ["integer", "float"];
-                expect(table.get_computation_input_types("pow2")).toEqual(expected);
-                expect(table.get_computation_input_types("+")).toEqual(expected);
-                expect(table.get_computation_input_types("percent_a_of_b")).toEqual(expected);
+                expect(await table.get_computation_input_types("pow2")).toEqual(expected);
+                expect(await table.get_computation_input_types("+")).toEqual(expected);
+                expect(await table.get_computation_input_types("percent_a_of_b")).toEqual(expected);
             });
 
             it("Should return correct types for string functions", async function() {
@@ -943,9 +968,9 @@ module.exports = perspective => {
                     c: ["a", "b", "c", "d"]
                 });
                 const expected = ["string"];
-                expect(table.get_computation_input_types("concat_comma")).toEqual(expected);
-                expect(table.get_computation_input_types("uppercase")).toEqual(expected);
-                expect(table.get_computation_input_types("length")).toEqual(expected);
+                expect(await table.get_computation_input_types("concat_comma")).toEqual(expected);
+                expect(await table.get_computation_input_types("uppercase")).toEqual(expected);
+                expect(await table.get_computation_input_types("length")).toEqual(expected);
             });
 
             it("Should return correct types for date/time functions", async function() {
@@ -955,9 +980,9 @@ module.exports = perspective => {
                     c: ["a", "b", "c", "d"]
                 });
                 const expected = ["datetime", "date"];
-                expect(table.get_computation_input_types("week_bucket")).toEqual(expected);
-                expect(table.get_computation_input_types("day_of_week")).toEqual(expected);
-                expect(table.get_computation_input_types("month_of_year")).toEqual(expected);
+                expect(await table.get_computation_input_types("week_bucket")).toEqual(expected);
+                expect(await table.get_computation_input_types("day_of_week")).toEqual(expected);
+                expect(await table.get_computation_input_types("month_of_year")).toEqual(expected);
             });
         });
 

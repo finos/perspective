@@ -69,20 +69,34 @@ public:
         t_uindex init_cap, t_backing_store backing_store);
     ~t_data_table();
 
-    const std::string& name() const;
     void init();
+
+    const std::string& name() const;
+
     t_uindex num_columns() const;
     t_uindex num_rows() const;
+
     const t_schema& get_schema() const;
+
     t_uindex size() const;
     t_uindex get_capacity() const;
     t_dtype get_dtype(const std::string& colname) const;
 
     std::shared_ptr<t_column> get_column(const std::string& colname);
+
+    std::shared_ptr<t_column> get_column_safe(const std::string& colname);
+
     std::shared_ptr<t_column> get_column(const std::string& colname) const;
+
+    std::shared_ptr<t_column> get_column_safe(const std::string& colname) const;
+
     std::shared_ptr<const t_column> get_const_column(const std::string& colname) const;
 
+    std::shared_ptr<const t_column> get_const_column_safe(const std::string& colname) const;
+
     std::shared_ptr<const t_column> get_const_column(t_uindex idx) const;
+
+    std::shared_ptr<const t_column> get_const_column_safe(t_uindex idx) const;
 
     // Only increment capacity
     void reserve(t_uindex nelems);

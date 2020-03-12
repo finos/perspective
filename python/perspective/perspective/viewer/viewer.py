@@ -8,8 +8,10 @@
 
 import six
 from random import random
-from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
-    validate_aggregates, validate_sort, validate_filters, validate_plugin_config
+from .validate import validate_plugin, validate_columns, validate_row_pivots, \
+    validate_column_pivots, validate_aggregates, validate_sort, \
+    validate_filters, validate_computed_columns, \
+    validate_plugin_config
 from .viewer_traitlets import PerspectiveTraitlets
 from ..libpsp import is_libpsp
 
@@ -38,6 +40,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                  aggregates=None,
                  sort=None,
                  filters=None,
+                 computed_columns=None,
                  plugin_config=None,
                  dark=None,
                  editable=False):
@@ -59,9 +62,13 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 each list containing a column name and a sort direction
                 (``asc``, ``desc``, ``asc abs``, ``desc abs``, ``col asc``,
                 ``col desc``, ``col asc abs``, ``col desc abs``).
-            filter (:obj:`list` of :obj:`list` of :obj:`str`):  A list of lists,
+            filter (:obj:`list` of :obj:`list` of :obj:`str`): A list of lists,
                 each list containing a column name, a filter comparator, and a
                 value to filter by.
+            computed_columns (:obj:`list` of :obj:`dict`): A list of dicts,
+                each dict containing ``column``, a new computed column name,
+                ``computed_function_name``, a string computed function name,
+                and ``inputs``, a list of input column names.
             plugin (`str`/`perspective.Plugin`): Which plugin to select by
                 default.
             plugin_config (`dict`): Custom config for all plugins by name.
@@ -72,7 +79,12 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             ...     aggregates={"a": "avg"},
             ...     row_pivots=["a"],
             ...     sort=[["b", "desc"]],
-            ...     filter=[["a", ">", 1]]
+            ...     filter=[["a", ">", 1]],
+            ...     computed_columns=[{
+            ...         "column": "(Sales * Profit)",
+            ...         "computed_function_name": "*",
+            ...         "inputs": ["Sales", "Profit"]
+            ...     }]
             ... )
         '''
 
@@ -91,6 +103,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.aggregates = validate_aggregates(aggregates) or {}
         self.sort = validate_sort(sort) or []
         self.filters = validate_filters(filters) or []
+        self.computed_columns = validate_computed_columns(computed_columns) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.dark = dark
         self.editable = editable
@@ -192,6 +205,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             'row_pivots': self.row_pivots,
             'column_pivots': self.column_pivots,
             'filters': self.filters,
+            'computed_columns': self.computed_columns,
             'sort': self.sort,
             'aggregates': self.aggregates,
             'columns': self.columns,
@@ -202,7 +216,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         '''Restore a given set of attributes, passed as kwargs (e.g. dictionary). Symmetric with `save` so that
         a given viewer's configuration can be reproduced'''
         for k, v in six.iteritems(kwargs):
-            if k in ('row_pivots', 'column_pivots', 'filters', 'sort', 'aggregates', 'columns', 'plugin'):
+            if k in ('row_pivots', 'column_pivots', 'filters', 'sort', 'aggregates', 'columns', 'computed_columns', 'plugin'):
                 setattr(self, k, v)
 
     def reset(self):
@@ -213,6 +227,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.column_pivots = []
         self.filters = []
         self.sort = []
+        self.computed_columns = []
         self.aggregates = {}
         self.columns = []
         self.plugin = "hypergrid"
@@ -258,7 +273,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             columns=self.columns,
             aggregates=self.aggregates,
             sort=self.sort,
-            filter=self.filters
+            filter=self.filters,
+            computed_columns=self.computed_columns
         )
 
         self.manager.host_view(name, view)
