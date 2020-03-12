@@ -235,7 +235,7 @@ class PerspectiveManager(object):
                     msg, table_or_view, post_callback, client_id)
             else:
                 args = {}
-                if msg["method"] == "schema":
+                if msg["method"] in ("schema", "computed_schema", "get_computation_input_types"):
                     # make sure schema returns string types
                     args["as_string"] = True
                 elif msg["method"].startswith("to_"):
@@ -254,6 +254,9 @@ class PerspectiveManager(object):
                 if msg["method"].startswith("to_"):
                     # to_format takes dictionary of options
                     result = getattr(table_or_view, msg["method"])(**args)
+                elif msg["method"] in ("computed_schema", "get_computation_input_types"):
+                    # these methods take args and kwargs
+                    result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **args)
                 elif msg["method"] != "delete":
                     # otherwise parse args as list
                     result = getattr(table_or_view, msg["method"])(*args)

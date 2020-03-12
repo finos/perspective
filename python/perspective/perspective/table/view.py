@@ -183,6 +183,12 @@ class View(object):
 
         return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
 
+    def computed_schema(self, as_string=False):
+        if as_string:
+            return {item[0]: item[1] for item in self._view.computed_schema().items()}
+
+        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.computed_schema().items()}
+
     def on_update(self, callback, mode=None):
         '''Add a callback to be fired when :func:`perspective.Table.update()` is
         called on the parent :class:`~perspective.Table`.

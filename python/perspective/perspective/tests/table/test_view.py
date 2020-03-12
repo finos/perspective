@@ -189,7 +189,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.schema(True) == {
+        assert view.schema(as_string=True) == {
             "a": "integer",
             "b": "integer"
         }

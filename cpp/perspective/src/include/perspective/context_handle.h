@@ -34,7 +34,4 @@ struct t_ctx_handle {
     t_ctx_type m_ctx_type;
     void* m_ctx;
 };
-
-typedef std::vector<t_ctx_handle> t_sctxhvec;
-typedef std::map<std::string, t_ctx_handle> t_sctxhmap;
 } // end namespace perspective

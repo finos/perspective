@@ -57,8 +57,8 @@ public:
     t_config(
         const std::vector<std::string>& detail_columns,
         const std::vector<t_fterm>& fterms,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
-        t_filter_op combiner);
+        t_filter_op combiner,
+        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns);
 
     /**
      * @brief Construct a new config for a `t_ctx1` object, which has 1 or more `row_pivot`s
@@ -72,8 +72,8 @@ public:
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates,
         const std::vector<t_fterm>& fterms,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
-        t_filter_op combiner);
+        t_filter_op combiner,
+        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns);
 
     /**
      * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
@@ -93,8 +93,8 @@ public:
         const std::vector<t_aggspec>& aggregates,
         const t_totals totals,
         const std::vector<t_fterm>& fterms,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
         t_filter_op combiner,
+        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
         bool column_only);
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
@@ -205,8 +205,8 @@ private:
     // t_uindex m_row_expand_depth;
     // t_uindex m_col_expand_depth;
     std::vector<t_fterm> m_fterms;
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> m_computed_columns;
     t_filter_op m_combiner;
+    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> m_computed_columns;
     std::string m_parent_pkey_column;
     std::string m_child_pkey_column;
     std::string m_grouping_label_column;

@@ -238,6 +238,12 @@ class PerspectiveViewer extends ActionElement {
                 parsed_computed_columns = validated;
             }
 
+            // Need to refresh the UI so that previous computed columns used in
+            // pivots, columns, etc. get cleared
+            const old_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+            const to_remove = this._diff_computed_column_view(old_columns, parsed_computed_columns);
+            this._reset_computed_column_view(to_remove);
+
             // Always store a copy of the parsed computed columns for
             // validation of column names, etc.
             this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));

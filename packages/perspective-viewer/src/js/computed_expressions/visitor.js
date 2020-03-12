@@ -174,6 +174,8 @@ export class ComputedExpressionColumnVisitor extends base_visitor {
             return ctx.pow2[0].image;
         } else if (ctx.abs) {
             return ctx.abs[0].image;
+        } else if (ctx.length) {
+            return ctx.length[0].image;
         } else if (ctx.uppercase) {
             return ctx.uppercase[0].image;
         } else if (ctx.lowercase) {
@@ -181,7 +183,7 @@ export class ComputedExpressionColumnVisitor extends base_visitor {
         } else if (ctx.concat_comma) {
             return ctx.concat_comma[0].image;
         } else if (ctx.concat_space) {
-            return ctx.lowercase[0].image;
+            return ctx.concat_space[0].image;
         } else if (ctx.bin10) {
             return ctx.bin10[0].image;
         } else if (ctx.bin100) {

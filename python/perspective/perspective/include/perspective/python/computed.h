@@ -16,11 +16,25 @@
 namespace perspective {
 namespace binding {
 
-/******************************************************************************
- *
- * Table API
+/**
+ * @brief Seed the computations metadata vector. Must be called at module
+ * initialization time for computed columns to work.
  */
-std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow);
+void make_computations();
+
+/**
+ * @brief Given a table and a vector of computed column definitions,
+ * get a `t_schema` containing the return types of computed columns
+ * without constructing/calculating the computed column.
+ * 
+ * @param table 
+ * @param p_computed_columns 
+ * @return t_schema 
+ */
+t_schema
+get_table_computed_schema_py(
+    std::shared_ptr<Table> table,
+    t_val p_computed_columns);
 
 } //namespace binding
 } //namespace perspective

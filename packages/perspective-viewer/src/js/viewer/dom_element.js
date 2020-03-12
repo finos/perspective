@@ -187,10 +187,33 @@ export class DomElement extends PerspectiveElement {
     }
 
     /**
+     * Given two sets of computed columns, remove columns that are present in
+     * `old_computed_columns` but not `new_computed_columns`, and return a
+     * list of computed column definitions to remove.
+     *
+     * @param {*} old_computed_columns
+     * @param {*} new_computed_columns
+     */
+    _diff_computed_column_view(old_computed_columns, new_computed_columns) {
+        const to_remove = [];
+        const new_names = new_computed_columns.map(x => x.column);
+        for (const column of old_computed_columns) {
+            if (!new_names.includes(column.column)) {
+                to_remove.push(column);
+            }
+        }
+        return to_remove;
+    }
+
+    /**
      * When the `computed-columns` attribute is set to [], null, or undefined,
      * clear all previously created columns from the UI.
      */
     _reset_computed_column_view(computed_columns) {
+        if (!computed_columns || computed_columns.length === 0) {
+            return;
+        }
+
         const computed_names = computed_columns.map(x => x.column);
 
         // Remove computed columns from all

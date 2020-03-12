@@ -166,6 +166,12 @@ export const Bin1000th = createToken({
 
 // String functions
 
+export const Length = createToken({
+    name: "length",
+    pattern: /length/,
+    categories: [FunctionTokenType]
+});
+
 export const Lowercase = createToken({
     name: "lowercase",
     pattern: /lowercase/,

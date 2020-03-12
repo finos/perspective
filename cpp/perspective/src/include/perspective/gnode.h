@@ -353,7 +353,7 @@ private:
     bool m_init;
     std::vector<std::shared_ptr<t_port>> m_iports;
     std::vector<std::shared_ptr<t_port>> m_oports;
-    t_sctxhmap m_contexts;
+    std::map<std::string, t_ctx_handle> m_contexts;
     std::shared_ptr<t_gstate> m_gstate;
     t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
@@ -497,7 +497,7 @@ void
 t_gnode::_compute_columns_sptr(CTX_T* ctx, std::shared_ptr<t_data_table> tbl) {
     auto computed_columns = ctx->get_config().get_computed_columns();
 
-    for (auto c : computed_columns) {
+    for (const auto& c : computed_columns) {
         std::vector<t_dtype> input_types;
         std::vector<std::shared_ptr<t_column>> input_columns;
 
@@ -544,7 +544,7 @@ t_gnode::_recompute_columns(
     const std::vector<t_rlookup>& changed_rows) {
     auto computed_columns = ctx->get_config().get_computed_columns();
 
-    for (auto c : computed_columns) {
+    for (const auto& c : computed_columns) {
         std::vector<t_dtype> input_types;
         std::vector<std::shared_ptr<t_column>> table_columns;
         std::vector<std::shared_ptr<t_column>> flattened_columns;
@@ -584,7 +584,7 @@ t_gnode::_add_computed_column_sptr(
     CTX_T* ctx, std::shared_ptr<t_data_table> tbl, t_dtype dtype) {
     auto computed_columns = ctx->get_config().get_computed_columns();
 
-    for (auto c : computed_columns) {
+    for (const auto& c : computed_columns) {
         std::string computed_column_name = std::get<0>(c);
         auto output_column = tbl->add_column_sptr(
             computed_column_name, dtype, true);

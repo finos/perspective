@@ -26,6 +26,8 @@ struct PERSPECTIVE_EXPORT t_schema {
     t_uindex get_colidx(const std::string& colname) const;
     t_dtype get_dtype(const std::string& colname) const;
 
+    t_uindex get_colidx_safe(const std::string& colname) const;
+
     void add_column(const std::string& colname, t_dtype dtype);
     void retype_column(const std::string& colname, t_dtype dtype);
     t_schema drop(const std::set<std::string>& columns) const;
