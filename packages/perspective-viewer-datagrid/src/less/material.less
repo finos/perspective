@@ -41,7 +41,7 @@ tbody td.datetime  {
 
 tr td.pd-group-header,
 tr th.pd-group-header {
-    border-right: 1px solid #ddd !important;
+    border-right: 1px solid #ddd;
 }
 
 tr td span.pd-tree-group {
@@ -113,12 +113,12 @@ span.pd-row-header-icon:hover {
 }
 
 .pd-selected td {
-    background-color: #eee !important;
+    background-color: #eee;
 }
 
 // OPTIONAL zebra striping
 
-@zebra-stripe-color: rgb(238,238,238);
+// @zebra-stripe-color: rgb(238,238,238);
 
 // tbody tr:nth-child(even) td:not(.pd-group-header) {
 //     background: @zebra-stripe-color;
@@ -126,12 +126,14 @@ span.pd-row-header-icon:hover {
 
 // tbody tr:nth-child(even) span.pd-group-name {
 //     background: @zebra-stripe-color;
-//     margin-right: -5px;
 // }
 
-// span.pd-group-name {
-//     flex: 1;
-//     padding-left: 8px;
-// }
+tbody tr span.pd-group-name {
+    margin-right: -5px;
+    padding-right: 5px;
+}
 
-// Number heat
+span.pd-group-name {
+    flex: 1;
+    padding-left: 8px;
+}

@@ -356,15 +356,16 @@ function column_path_2_type(schema, column) {
 }
 
 function _is_equals_id(id, selected_id) {
-    if (Array.isArray(id) && Array.isArray(selected_id) && id.length === selected_id.length) {
-        for (let i = 0; i < id.length; i++) {
+    if (Array.isArray(id) && Array.isArray(selected_id)) {
+        let i;
+        for (i = 0; i < selected_id.length; i++) {
             if (id[i] !== selected_id[i]) {
-                return false;
+                return 0;
             }
         }
-        return true;
+        return id.length === selected_id.length ? 2 : 1;
     } else {
-        return id === selected_id && id !== undefined;
+        return id === selected_id && id !== undefined ? 2 : 0;
     }
 }
 
@@ -374,7 +375,7 @@ function _is_equals_id(id, selected_id) {
  * @class DatagridBodyViewModel
  */
 class DatagridBodyViewModel extends ViewModel {
-    _draw_td(ridx, cidx, val, id, is_selected, type, depth, is_open, ridx_offset) {
+    _draw_td(ridx, cidx, val, id, is_selected, is_sub_selected, type, depth, is_open, ridx_offset) {
         const {tr, row_container} = this._get_row(ridx);
         const td = this._get_cell("td", row_container, cidx, tr);
         const metadata = this._get_or_create_metadata(td);
@@ -386,6 +387,11 @@ class DatagridBodyViewModel extends ViewModel {
                 tr.classList.add("pd-selected");
             } else {
                 tr.classList.remove("pd-selected");
+            }
+            if (is_sub_selected) {
+                tr.classList.add("pd-sub-selected");
+            } else {
+                tr.classList.remove("pd-sub-selected");
             }
             const formatter = this._format(type);
             if (val === undefined || val === null) {
@@ -412,10 +418,17 @@ class DatagridBodyViewModel extends ViewModel {
     draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, depth, ridx_offset) {
         let ridx = 0;
         let td;
+        let select_depth;
         for (const val of column_data) {
             const next = column_data[ridx + 1];
             const id = id_column?.[ridx];
-            td = this._draw_td(ridx++, cidx, val, id, _is_equals_id(id, selected_id), type, depth, next?.length > val?.length, ridx_offset);
+            const is_selected = _is_equals_id(id, selected_id);
+            if (is_selected && select_depth === undefined) {
+                select_depth = id?.length;
+            } else if (id?.length <= select_depth) {
+                select_depth = undefined;
+            }
+            td = this._draw_td(ridx++, cidx, val, id, is_selected === 2, is_selected === 1, type, depth, next?.length > val?.length, ridx_offset);
             if (ridx * 19 > container_height) {
                 break;
             }
@@ -492,7 +505,7 @@ class DatagridTableViewModel {
                     const new_col = await view.to_columns(viewport);
                     if (!(column_name in new_col)) {
                         new_col[column_name] = [];
-                        console.warn(`Missing column ${column_name}; contains ${Object.keys(new_col).join(", ")}`);
+                        // console.warn(`Missing column ${column_name}; contains ${Object.keys(new_col).join(", ")}`);
                     }
                     columns_data[column_name] = new_col[column_name];
                 }
@@ -855,8 +868,11 @@ class DatagridVirtualTableViewModel extends HTMLElement {
     }
 
     async _on_select(metadata) {
+        if (!this.elem.hasAttribute("selectable")) {
+            return;
+        }
         const cell_config = await getCellConfig(this.view, this.config, metadata.ridx, metadata.cidx);
-        if (_is_equals_id(metadata.id, this._selected_id)) {
+        if (_is_equals_id(metadata.id, this._selected_id) === 2) {
             this._selected_id = undefined;
             this.elem.dispatchEvent(
                 new CustomEvent("perspective-select", {

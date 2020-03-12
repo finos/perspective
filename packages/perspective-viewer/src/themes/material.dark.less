@@ -12,7 +12,7 @@
 @import (reference) "material";
 
 
-perspective-viewer, .perspective-viewer-material-dark{
+perspective-viewer, .perspective-viewer-material-dark {
     .perspective-viewer-material-base();
     background-color: @coolgrey800;
     color: #cfd8dc;
@@ -39,6 +39,53 @@ perspective-viewer, .perspective-viewer-material-dark{
     --hypergrid-positive--color: @lightblue600;
     --hypergrid-negative--color: rgb(255, 136, 136);
 
+    tr td span.pd-tree-group {
+        border-left: 1px solid #444;
+    }
+
+    tr td.pd-group-header,
+    tr th.pd-group-header {
+        border-right: 1px solid #999;
+    }
+
+    tr:last-child th {
+        border-bottom: 1px solid #999;
+    }
+
+    .pd-selected td {
+        background-color: rgba(0,0,0,0);
+    }
+
+    tr.pd-selected:hover td div {
+        background-color: #444;
+    }
+
+    td.pd-negative {
+        color: rgb(255,136,136);
+    }
+
+    td.pd-positive {
+        color: @lightblue600;
+    }
+
+    .pd-selected td:not(.pd-group-header), .pd-selected td span.pd-group-name {
+        background: #EA7319 !important;
+      
+    }
+
+    .pd-selected td {
+        color: #000;
+        background-color: rgba(0,0,0,0);
+    }
+
+    .pd-sub-selected td:not(.pd-group-header), .pd-sub-selected td span.pd-group-name {
+        background: rgba(234,115,25, 0.2) !important;
+    }
+
+    tbody:hover tr:hover td, tbody:hover tr:hover td span {
+        background: #444;
+    }
+    
     --hypergrid-row-hover--background: #555;
     --hypergrid-row-hover--color: #eee;
     --hypergrid-cell-hover--background: #444;
