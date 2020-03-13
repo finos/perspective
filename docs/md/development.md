@@ -57,21 +57,7 @@ To build Perspective using Docker, select the option in `yarn setup`.
 ### System Dependencies
 
 Perspective requires some system dependencies to be installed before it can be
-built from source. If building on MacOS, these dependencies can be easily
-installed via [Homebrew](https://docs.brew.sh/).
-
-- [CMake](https://cmake.org/) - Version 3.15 or higher
-- [TBB](https://github.com/intel/tbb)
-- [Flatbuffers](https://google.github.io/flatbuffers/) - the `flatc` compiler is
-  required
-
-To install these dependencies via Homebrew, run:
-
-```bash
-brew install cmake
-brew install tbb
-brew install flatc
-```
+built from source.
 
 ### `Perspective.js`
 
