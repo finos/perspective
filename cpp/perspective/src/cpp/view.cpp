@@ -518,6 +518,10 @@ View<CTX_T>::data_slice_to_arrow(
                 fields.push_back(::arrow::field(name, ::arrow::dictionary(::arrow::int32(), ::arrow::utf8())));
                 arr = arrow::string_col_to_dictionary_array(slice, cidx, stride, extents);
             } break;
+            case DTYPE_OBJECT: {
+                fields.push_back(::arrow::field(name, ::arrow::uint64()));
+                arr = arrow::numeric_col_to_array<::arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+            } break;
             default: {
                 std::stringstream ss;
                 ss << "Cannot serialize column `" 

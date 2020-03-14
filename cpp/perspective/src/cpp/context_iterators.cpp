@@ -9,7 +9,6 @@
 
 #include <perspective/first.h>
 #include <perspective/sort_specification.h>
-#include <perspective/context_iterators.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>

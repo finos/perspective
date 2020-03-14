@@ -116,8 +116,8 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
 
     const t_schema& master_table_schema = m_table->get_schema();
 
-    auto flattened_pkey_col = flattened->get_const_column("psp_pkey").get();
-    auto flattened_op_col = flattened->get_const_column("psp_op").get();
+    const t_column* flattened_pkey_col = flattened->get_const_column("psp_pkey").get();
+    const t_column* flattened_op_col = flattened->get_const_column("psp_op").get();
 
     t_uindex ncols = m_table->num_columns();
     auto master_table = m_table.get();
@@ -318,8 +318,14 @@ t_gstate::update_master_column(
                     master_table_idx, *(flattened_column->get_nth<std::uint32_t>(idx)));
             } break;
             case DTYPE_STR: {
-                const char* s = flattened_column->get_nth<const char>(idx);
-                master_column->set_nth<const char*>(master_table_idx, s);
+                master_column->set_nth<const char*>(
+                    master_table_idx, flattened_column->get_nth<const char>(idx));
+            } break;
+            case DTYPE_OBJECT: {
+                // inform new column its being copied
+                master_column->set_nth<std::uint64_t>(
+                    master_table_idx, *(flattened_column->get_nth<std::uint64_t>(idx)));
+
             } break;
             default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
         }
@@ -764,7 +770,7 @@ t_gstate::mapping_size() const {
 
 void
 t_gstate::reset() {
-    m_table->clear();
+    m_table->reset();
     m_mapping.clear();
     m_free.clear();
 }

@@ -536,7 +536,11 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/vocab.cpp
 	)
 
-set (PYTHON_SOURCE_FILES
+set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
+	${PSP_PYTHON_SRC}/src/column.cpp
+	)
+
+set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
 	${PSP_PYTHON_SRC}/src/computed.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
@@ -592,8 +596,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 		# Python extra targets #
 		########################
-		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
-		add_library(binding SHARED ${PYTHON_SOURCE_FILES})
+		add_library(psp SHARED ${PYTHON_SOURCE_FILES})
+		add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
 
 		include_directories(${PSP_PYTHON_SRC}/include)
 
@@ -653,7 +657,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		########################
 	else()
-		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
+		add_library(psp SHARED ${SOURCE_FILES})
 		target_link_libraries(psp arrow)
 		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 	endif()

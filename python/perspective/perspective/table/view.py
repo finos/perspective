@@ -43,11 +43,7 @@ class View(object):
         self._config = ViewConfig(**kwargs)
         self._sides = self.sides()
 
-        date_validator = None
-        if hasattr(self._table._accessor, "_data_validator"):
-            date_validator = self._table._accessor._date_validator
-        else:
-            date_validator = _PerspectiveDateValidator()
+        date_validator = _PerspectiveDateValidator()
 
         if self._sides == 0:
             self._view = make_view_zero(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)

@@ -193,7 +193,8 @@ Table::unregister_gnode(t_uindex id) {
 void
 Table::reset_gnode(t_uindex id) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_pool->get_gnode(id)->reset();
+    t_gnode* gnode = m_pool->get_gnode(id);
+    gnode->reset();
 }
 
 void

@@ -7,12 +7,6 @@
  *
  */
 
-#ifndef PSP_ENABLE_WASM
-#ifndef PSP_PARALLEL_FOR
-#define PSP_PARALLEL_FOR
-#endif
-#endif
-
 #if !defined(__linux__) && !defined(__APPLE__) && !defined(WIN32)
 // default to linux
 #define __linux__
@@ -62,5 +56,12 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 namespace py = pybind11;
+
+// Define object serialization type
+#define PSP_OBJECT_TYPE PyObject*
+
+#else
+// TODO javascript
+#define PSP_OBJECT_TYPE std::uint64_t
 #endif
 

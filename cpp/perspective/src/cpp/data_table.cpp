@@ -309,7 +309,6 @@ t_data_table::flatten() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
-
     std::shared_ptr<t_data_table> flattened = std::make_shared<t_data_table>(
         "", "", m_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     flattened->init();
@@ -745,6 +744,12 @@ t_data_table::verify() const {
 
 void
 t_data_table::reset() {
+    for (t_uindex idx = 0, loop_end = m_columns.size(); idx < loop_end; ++idx) {
+        if (m_columns[idx]->get_dtype() == DTYPE_OBJECT){
+            m_columns[idx]->clear_objects();
+        }
+        m_columns[idx]->clear();
+    }
     m_size = 0;
     m_capacity = DEFAULT_EMPTY_CAPACITY;
     init();

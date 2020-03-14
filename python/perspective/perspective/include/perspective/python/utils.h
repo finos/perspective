@@ -29,11 +29,11 @@ static void WARN(Args&&... args) { py::module::import("logging").attr("warning")
 template <typename... Args>
 static void CRITICAL(Args&&... args) { py::module::import("logging").attr("critical")(args...);};
 
-static bool IS_BOOL(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("bool")); };
-static bool IS_INT(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("int")); };
-static bool IS_FLOAT(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("float")); };
-static bool IS_STR(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("str")); };
-static bool IS_BYTES(py::object&& type_instance) { return type_instance.is(py::module::import("builtins").attr("bytes")); };
+static bool IS_BOOL(t_val&& type_instance) { return type_instance.is(py::module::import("builtins").attr("bool")); };
+static bool IS_INT(t_val&& type_instance) { return type_instance.is(py::module::import("builtins").attr("int")); };
+static bool IS_FLOAT(t_val&& type_instance) { return type_instance.is(py::module::import("builtins").attr("float")); };
+static bool IS_STR(t_val&& type_instance) { return type_instance.is(py::module::import("builtins").attr("str")); };
+static bool IS_BYTES(t_val&& type_instance) { return type_instance.is(py::module::import("builtins").attr("bytes")); };
 
 /******************************************************************************
  *

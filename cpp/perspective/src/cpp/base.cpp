@@ -81,7 +81,6 @@ bool
 is_deterministic_sized(t_dtype dtype) {
     switch (dtype) {
         case DTYPE_OBJECT:
-        case DTYPE_PTR:
         case DTYPE_INT64:
         case DTYPE_UINT64:
         case DTYPE_INT32:
@@ -109,8 +108,7 @@ is_deterministic_sized(t_dtype dtype) {
 t_uindex
 get_dtype_size(t_dtype dtype) {
     switch (dtype) {
-        case DTYPE_OBJECT:
-        case DTYPE_PTR: {
+        case DTYPE_OBJECT: {
             return sizeof(void*);
         }
         case DTYPE_INT64:
@@ -802,6 +800,12 @@ template <>
 t_dtype
 type_to_dtype<std::string>() {
     return DTYPE_STR;
+}
+
+template <>
+t_dtype
+type_to_dtype<void *>() {
+    return DTYPE_OBJECT;
 }
 
 } // end namespace perspective

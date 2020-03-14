@@ -234,7 +234,21 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                 // This handles cases where a long sequence of e.g. 0 precedes a clearly
                 // float value in an inferred column. Would not be needed if the type
                 // inference checked the entire column/we could reset parsing.
-                double fval = item.cast<double>();
+
+                // First we need to see if we can cast to double
+                double fval;
+                if (!py::hasattr(item, "__float__")) {
+                    if (py::hasattr(item, "__int__")) {
+                        // promote from int
+                        fval = static_cast<double>(item.cast<int>());
+                    } else {
+                        // not __float__ and no __int__ defined, set to NaN
+                        fval = std::nan("");
+                    }
+                } else {
+                    fval = item.cast<double>();
+                }
+
                 if (!is_update && (fval > 2147483647 || fval < -2147483648)) {
                     WARN("Promoting column `%s` to float from int32", name);
                     tbl.promote_column(name, DTYPE_FLOAT64, i, true);
@@ -253,7 +267,20 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                 }
             } break;
             case DTYPE_INT64: {
-                double fval = item.cast<double>();
+                // First we need to see if we can cast to double
+                double fval;
+                if (!py::hasattr(item, "__float__")) {
+                    if (py::hasattr(item, "__int__")) {
+                        // promote from int
+                        fval = static_cast<double>(item.cast<int>());
+                    } else {
+                        // not __float__ and no __int__ defined, set to NaN
+                        fval = std::nan("");
+                    }
+                } else {
+                    fval = item.cast<double>();
+                }
+
                 if (!is_update && isnan(fval)) {
                     WARN("Promoting column `%s` to string from int64", name);
                     tbl.promote_column(name, DTYPE_STR, i, false);
@@ -269,8 +296,13 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                 col->set_nth(i, item.cast<float>());
             } break;
             case DTYPE_FLOAT64: {
-                bool is_float = py::isinstance<py::float_>(item);
-                bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
+                bool is_float = py::isinstance<py::float_>(item) || py::hasattr(item, "__float__") || py::hasattr(item, "__int__");
+
+                bool is_numpy_nan = false;
+                if (py::isinstance<py::float_>(item) || py::hasattr(item, "__float__")) {
+                    is_numpy_nan = npy_isnan(item.cast<double>());
+                }
+
                 if (!is_update && (!is_float || is_numpy_nan)) {
                     WARN("Promoting column `%s` to string from float64", name);
                     tbl.promote_column(name, DTYPE_STR, i, false);
@@ -279,7 +311,25 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                         accessor, col, name, cidx, DTYPE_STR, is_update);
                     return;
                 }
-                col->set_nth(i, item.cast<double>());
+
+                // If not a float directly and doesn't have __float__, must promote with __int__
+                if (!py::isinstance<py::float_>(item) && !py::hasattr(item, "__float__")) {
+                    col->set_nth(i, static_cast<double>(item.cast<std::int64_t>()));
+                } else {
+                    col->set_nth(i, item.cast<double>());
+                }
+            } break;
+            case DTYPE_OBJECT: {
+                // Store pointer as uint64 (in 32-bit will promote to 64bits, should be ok)
+                std::uint64_t store = item.is_none() ? 0: reinterpret_cast<std::uintptr_t>(item.ptr());
+
+                // Increment the reference count to account for internal storage of the raw pointer
+                // (don't actually do this as _process_column will handle it)
+                item.inc_ref(); // don't uncomment
+
+                // Store the pointer a uint64
+                col->set_nth(i, store);
+                col->set_valid(i, store!=0);
             } break;
             default:
                 break;
