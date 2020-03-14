@@ -7,6 +7,8 @@
  *
  */
 
+@row-height: 19px;
+
 th {
     text-align: center;
 }
@@ -30,48 +32,56 @@ td.pd-negative {
     color: #de3838;
 }
 
-thead tr:last-child th.string,
+thead th.string,
 tbody td.string,
-thead tr:last-child th.date,
+thead th.date,
 tbody td.date,
-thead tr:last-child th.datetime,
+thead th.datetime,
 tbody td.datetime  {
     text-align: left;
 }
 
+// frozen rows
+
 tr td.pd-group-header,
-tr th.pd-group-header {
+tr th {
     border-right: 1px solid #ddd;
 }
 
-tr td span.pd-tree-group {
-    margin-left: 5px;
-    margin-right: 15px;
-    border-left: 1px solid #eee;
-    height: 19px;
 
+tr:last-child th:not(.pd-group-header),
+tr th:last-child {
+    border-right: none;
 }
 
-td,
-th {
-    white-space: nowrap;
-    font-size: 12px;
-    padding-right: 5px;
-    padding-left: 5px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    height: 19px;
-}
 
 tr:last-child th {
     border-bottom: 1px solid #ddd;
 }
 
 
-tr:last-child th,
-tr th:last-child {
-    border-right: none;
+
+th {
+   position: relative;
 }
+
+tr td span.pd-tree-group {
+    margin-left: 5px;
+    margin-right: 15px;
+    border-left: 1px solid #eee;
+    height: @row-height;
+}
+
+td, th {
+    white-space: nowrap;
+    font-size: 12px;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: @row-height;
+}
+
 
 tbody {
     transition: opacity 0.2s ease-in;
@@ -116,6 +126,11 @@ span.pd-row-header-icon:hover {
     background-color: #eee;
 }
 
+.pd-cell-clip {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 // OPTIONAL zebra striping
 
 // @zebra-stripe-color: rgb(238,238,238);
@@ -128,12 +143,22 @@ span.pd-row-header-icon:hover {
 //     background: @zebra-stripe-color;
 // }
 
-tbody tr span.pd-group-name {
+td span.pd-group-name, th span.pd-group-name {
     margin-right: -5px;
     padding-right: 5px;
+    padding-left: 8px;
+    flex: 1;
 }
 
-span.pd-group-name {
-    flex: 1;
-    padding-left: 8px;
+td span.pd-group-leaf {
+    margin-left: 12px;
+}
+
+.pd-column-resize {
+    height: 100%;
+    width: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: col-resize;
 }
