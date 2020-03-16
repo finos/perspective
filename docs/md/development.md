@@ -57,7 +57,12 @@ To build Perspective using Docker, select the option in `yarn setup`.
 ### System Dependencies
 
 Perspective requires some system dependencies to be installed before it can be
-built from source.
+built from source:
+
+- Boost (version 1.67)
+- CMake (version 3.15.4 or higher)
+- TBB
+- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
 
 ### `Perspective.js`
 
@@ -110,7 +115,9 @@ To build the Python 2 version of the library, use the `--python2` flag:
 yarn build --python2
 ```
 
-#### MacOS/OSX specific instructions
+## System-Specific Instructions
+
+### MacOS/OSX specific instructions
 
 Installing and activating the latest
 [Emscripten SDK](https://github.com/kripken/emscripten):
@@ -120,10 +127,12 @@ Installing and activating the latest
 ./emsdk activate latest
 ```
 
-You'll also need TBB, FlatBuffers and CMake, which can be installed from
-Homebrew:
+You'll also need the system dependencies noted earlier - installing them through
+Homebrew is the easiest way, especially as flatbuffers can be installed through
+`brew` without building from source:
 
 ```bash
+brew install boost@1.67
 brew install tbb
 brew install cmake
 brew install flatbuffers
@@ -137,7 +146,7 @@ earlier version that ships with MacOS. To install Python 2 using Homebrew:
 brew install python2
 ```
 
-#### Windows 10 specific instructions
+### Windows 10 specific instructions
 
 You need to use bash in order to build Perspective packages. To successfully
 build on Windows 10, enable
@@ -151,7 +160,7 @@ favorite editors on Windows and build via Linux.
 Follow the Linux specific instructions to install Emscripten and all
 prerequisite tools.
 
-#### Ubuntu/Debian
+### Ubuntu/Debian
 
 When installing Emscripten, make sure to follow
 [Linux specific instructions](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux).
