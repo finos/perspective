@@ -23,6 +23,16 @@
 namespace perspective {
 
 /**
+ * @brief A `t_computed_column_definition` is a tuple with three values:
+ * 
+ * - a string representing the name of the computed column
+ * - a `t_computed_function_name` that maps to the computation function
+ * - a vector of strings containing the names of input columns
+ *
+ */
+typedef std::tuple<std::string, t_computed_function_name, std::vector<std::string>> t_computed_column_definition;
+
+/**
  * @brief Stores metadata for a single computation method.
  * 
  */

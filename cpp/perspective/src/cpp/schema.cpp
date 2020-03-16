@@ -72,8 +72,6 @@ t_uindex
 t_schema::get_colidx_safe(const std::string& colname) const {
     auto iter = m_colidx_map.find(colname);
     if (iter == m_colidx_map.end()) {
-        std::cout << "Could not find " << colname;
-        std::cout << " in " << m_columns << std::endl;
         return -1;
     }
     return iter->second;

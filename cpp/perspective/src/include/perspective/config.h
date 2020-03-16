@@ -12,10 +12,10 @@
 #include <perspective/base.h>
 #include <perspective/exports.h>
 #include <perspective/aggspec.h>
-#include <perspective/schema.h>
-#include <perspective/config.h>
-#include <perspective/pivot.h>
+#include <perspective/computed.h>
 #include <perspective/filter.h>
+#include <perspective/pivot.h>
+#include <perspective/schema.h>
 #include <perspective/sort_specification.h>
 
 namespace perspective {
@@ -58,7 +58,7 @@ public:
         const std::vector<std::string>& detail_columns,
         const std::vector<t_fterm>& fterms,
         t_filter_op combiner,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns);
+        const std::vector<t_computed_column_definition>& computed_columns);
 
     /**
      * @brief Construct a new config for a `t_ctx1` object, which has 1 or more `row_pivot`s
@@ -73,7 +73,7 @@ public:
         const std::vector<t_aggspec>& aggregates,
         const std::vector<t_fterm>& fterms,
         t_filter_op combiner,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns);
+        const std::vector<t_computed_column_definition>& computed_columns);
 
     /**
      * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
@@ -94,7 +94,7 @@ public:
         const t_totals totals,
         const std::vector<t_fterm>& fterms,
         t_filter_op combiner,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
+        const std::vector<t_computed_column_definition>& computed_columns,
         bool column_only);
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
@@ -165,7 +165,7 @@ public:
     const std::vector<t_fterm>& get_fterms() const;
 
     // TOOD: const vec&?
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>
+    std::vector<t_computed_column_definition>
     get_computed_columns() const;
 
     t_totals get_totals() const;
@@ -206,7 +206,7 @@ private:
     // t_uindex m_col_expand_depth;
     std::vector<t_fterm> m_fterms;
     t_filter_op m_combiner;
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> m_computed_columns;
+    std::vector<t_computed_column_definition> m_computed_columns;
     std::string m_parent_pkey_column;
     std::string m_child_pkey_column;
     std::string m_grouping_label_column;

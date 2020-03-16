@@ -1014,7 +1014,7 @@ export default function(Module) {
         _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
         this.update(data);
-        _call_process(this._Table.get_id());
+        _call_process(this.get_id());
     };
 
     /**

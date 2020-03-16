@@ -25,7 +25,7 @@ get_table_computed_schema_py(
     t_val p_computed_columns) {
     // cast into vector of py::dicts
     std::vector<t_val> py_computed = p_computed_columns.cast<std::vector<t_val>>();
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+    std::vector<t_computed_column_definition> computed_columns;
 
     for (auto c : py_computed) {
         py::dict computed_column = c.cast<py::dict>();

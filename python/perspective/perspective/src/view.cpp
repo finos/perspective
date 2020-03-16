@@ -145,7 +145,7 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
 
     // this needs to be a py_dict
     auto p_computed_columns = config.attr("get_computed_columns")().cast<std::vector<t_val>>();
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+    std::vector<t_computed_column_definition> computed_columns;
 
     for (auto c : p_computed_columns) {
         py::dict computed_column = c.cast<py::dict>();

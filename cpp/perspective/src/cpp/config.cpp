@@ -38,7 +38,7 @@ t_config::t_config(
     const std::vector<std::string>& detail_columns,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns)
+    const std::vector<t_computed_column_definition>& computed_columns)
     : m_detail_columns(detail_columns)
     , m_fterms(fterms)
     , m_combiner(combiner)
@@ -53,7 +53,7 @@ t_config::t_config(
     const std::vector<t_aggspec>& aggregates,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns)
+    const std::vector<t_computed_column_definition>& computed_columns)
     : m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
     , m_fterms(fterms)
@@ -74,7 +74,7 @@ t_config::t_config(
     const t_totals totals,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
+    const std::vector<t_computed_column_definition>& computed_columns,
     bool column_only)
     : m_column_only(column_only)
     , m_aggregates(aggregates)
@@ -376,7 +376,7 @@ t_config::get_fterms() const {
     return m_fterms;
 }
 
-std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>
+std::vector<t_computed_column_definition>
 t_config::get_computed_columns() const {
     return m_computed_columns;
 }

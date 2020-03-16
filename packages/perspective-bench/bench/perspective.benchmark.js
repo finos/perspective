@@ -27,7 +27,7 @@ const COMPUTED_FUNCS = {
     "*": (x, y) => x * y,
     "/": (x, y) => x / y
 };
-const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"], type: "float", func: COMPUTED_FUNCS["+"]};
+const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"]};
 
 /******************************************************************************
  *
@@ -178,17 +178,20 @@ describe("Computed Column", async () => {
                 }
                 benchmark(`computed: \`${name}\``, async () => {
                     COMPUTED_CONFIG.computed_function_name = name;
-                    COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
 
                     if (add_computed_method) {
+                        COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
+                        COMPUTED_CONFIG.type = "float";
+
                         table = table.add_computed([COMPUTED_CONFIG]);
-                        await table.size();
                     } else {
                         view = table.view({
                             computed_columns: [COMPUTED_CONFIG]
                         });
-                        await view.num_rows();
                     }
+
+                    // must process update
+                    await table.size();
                 });
             });
         });

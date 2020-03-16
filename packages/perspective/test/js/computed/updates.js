@@ -561,6 +561,33 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Partial update without a new value shouldn't change computed output", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "multiply",
+                        computed_function_name: "*",
+                        inputs: ["x", "y"]
+                    }
+                ]
+            });
+
+            const json = await view.to_json();
+            expect(json).toEqual([
+                {x: 1, y: 2, multiply: 2},
+                {x: 2, y: 4, multiply: 8},
+                {x: 3, y: 6, multiply: 18},
+                {x: 4, y: 8, multiply: 32}
+            ]);
+
+            table.update([{__INDEX__: 0, x: 1}]);
+            const json2 = await view.to_json();
+            expect(json2).toEqual(json);
+            view.delete();
+            table.delete();
+        });
+
         it("partial update on single computed source column", async function() {
             const table = perspective.table(data);
             const view = table.view({
