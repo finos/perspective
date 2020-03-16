@@ -8,7 +8,6 @@
 import numpy as np
 from datetime import date, datetime
 from perspective.table import Table
-from pytest import mark
 
 
 class TestViewComputed(object):
@@ -268,7 +267,6 @@ class TestViewComputed(object):
             "computed": [3, 4]
         }
 
-    @mark.skip
     def test_view_day_of_week_date(self):
         table = Table({
             "a": [date(2020, 3, i) for i in range(9, 14)]
@@ -311,4 +309,203 @@ class TestViewComputed(object):
         assert view.to_columns() == {
             "a": [datetime(2020, 3, i, 12, 30) for i in range(9, 14)],
             "bucket": ["2 Monday", "3 Tuesday", "4 Wednesday", "5 Thursday", "6 Friday"]
+        }
+
+    def test_view_month_of_year_date(self):
+        table = Table({
+            "a": [date(2020, i, 15) for i in range(1, 13)]
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "month_of_year",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": date,
+            "bucket": str
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, i, 15) for i in range(1, 13)],
+            "bucket": ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"]
+        }
+
+    def test_view_month_of_year_datetime(self):
+        table = Table({
+            "a": [datetime(2020, i, 15) for i in range(1, 13)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "month_of_year",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": datetime,
+            "bucket": str
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, i, 15) for i in range(1, 13)],
+            "bucket": ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"]
+        }
+
+    # bucketing
+    def test_view_day_bucket_date(self):
+        table = Table({
+            "a": [date(2020, 1, 1), date(2020, 1, 1), date(2020, 2, 29), date(2020, 3, 1)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "day_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": date,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1), datetime(2020, 1, 1), datetime(2020, 2, 29), datetime(2020, 3, 1)],
+            "bucket": [datetime(2020, 1, 1), datetime(2020, 1, 1), datetime(2020, 2, 29), datetime(2020, 3, 1)]
+        }
+
+    def test_view_day_bucket_date_with_null(self):
+        table = Table({
+            "a": [date(2020, 1, 1), None, date(2020, 2, 29), date(2020, 3, 15)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "day_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": date,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1), None, datetime(2020, 2, 29), datetime(2020, 3, 15)],
+            "bucket": [datetime(2020, 1, 1), None, datetime(2020, 2, 29), datetime(2020, 3, 15)]
+        }
+
+    def test_view_day_bucket_datetime(self):
+        table = Table({
+            "a": [datetime(2020, 1, 1, 5), datetime(2020, 1, 1, 23), datetime(2020, 2, 29, 1), datetime(2020, 3, 1, 0)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "day_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": datetime,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1, 5), datetime(2020, 1, 1, 23), datetime(2020, 2, 29, 1), datetime(2020, 3, 1, 0)],
+            "bucket": [datetime(2020, 1, 1), datetime(2020, 1, 1), datetime(2020, 2, 29), datetime(2020, 3, 1)]
+        }
+
+    def test_view_month_bucket_date(self):
+        table = Table({
+            "a": [date(2020, 1, 1), date(2020, 1, 28), date(2020, 2, 29), date(2020, 3, 15)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "month_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": date,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1), datetime(2020, 1, 28), datetime(2020, 2, 29), datetime(2020, 3, 15)],
+            "bucket": [datetime(2020, 1, 1), datetime(2020, 1, 1), datetime(2020, 2, 1), datetime(2020, 3, 1)]
+        }
+
+    def test_view_month_bucket_date_with_null(self):
+        table = Table({
+            "a": [date(2020, 1, 1), None, date(2020, 2, 29), date(2020, 3, 15)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "month_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": date,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1), None, datetime(2020, 2, 29), datetime(2020, 3, 15)],
+            "bucket": [datetime(2020, 1, 1), None, datetime(2020, 2, 1), datetime(2020, 3, 1)]
+        }
+
+    def test_view_month_bucket_datetime(self):
+        table = Table({
+            "a": [datetime(2020, 1, 1), datetime(2020, 1, 28), datetime(2020, 2, 29), datetime(2020, 3, 15)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "month_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": datetime,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1), datetime(2020, 1, 28), datetime(2020, 2, 29), datetime(2020, 3, 15)],
+            "bucket": [datetime(2020, 1, 1), datetime(2020, 1, 1), datetime(2020, 2, 1), datetime(2020, 3, 1)]
+        }
+
+    def test_view_month_bucket_datetime_with_null(self):
+        table = Table({
+            "a": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 15)],
+        })
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "bucket",
+                    "computed_function_name": "month_bucket",
+                    "inputs": ["a"]
+                }
+            ]
+        )
+        assert view.schema() == {
+            "a": datetime,
+            "bucket": date
+        }
+        assert view.to_columns() == {
+            "a": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 15)],
+            "bucket": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 1)]
         }

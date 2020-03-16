@@ -41,6 +41,8 @@ namespace binding {
 
     t_date
     jsdate_to_t_date(t_val date) {
+        // Javascript stores month as [0-11], so we don't need to do any
+        // conversion for compatibility with `t_date`
         return t_date(date.call<t_val>("getFullYear").as<std::int32_t>(),
             date.call<t_val>("getMonth").as<std::int32_t>(),
             date.call<t_val>("getDate").as<std::int32_t>());
