@@ -203,6 +203,16 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("`update()` should increment `table.size()` without a view created", async function() {
+            const table = perspective.table(data);
+            expect(await table.size()).toEqual(4);
+            table.update(data);
+            expect(await table.size()).toEqual(8);
+            table.update(data);
+            expect(await table.size()).toEqual(12);
+            table.delete();
+        });
+
         it("`update()` unbound to table", async function() {
             var table = perspective.table(meta);
             var updater = table.update;

@@ -238,6 +238,90 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Multiple views inheriting the same computed columns with the same names should not conflict", async function() {
+            const table = perspective.table(common.int_float_data);
+
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "computed",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+
+            expect(await view.schema()).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                computed: "float"
+            });
+
+            const view2 = table.view({
+                computed_columns: [
+                    {
+                        column: "computed",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    },
+                    {
+                        column: "computed2",
+                        computed_function_name: "-",
+                        inputs: ["computed", "w"]
+                    }
+                ]
+            });
+
+            expect(await view2.schema()).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                computed: "float",
+                computed2: "float"
+            });
+
+            const view3 = table.view({
+                computed_columns: [
+                    {
+                        column: "computed",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    },
+                    {
+                        column: "computed2",
+                        computed_function_name: "-",
+                        inputs: ["computed", "w"]
+                    },
+                    {
+                        column: "result",
+                        computed_function_name: "-",
+                        inputs: ["computed2", "x"]
+                    }
+                ]
+            });
+
+            expect(await view3.schema()).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                computed: "float",
+                computed2: "float",
+                result: "float"
+            });
+
+            const result = await view3.to_columns();
+            expect(result["result"]).toEqual(Array(result["w"].length).fill(0));
+
+            view3.delete();
+            view2.delete();
+            view.delete();
+            table.delete();
+        });
+
         it("A view should be able to create a computed column with the same name as another deleted view's computed columns.", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({

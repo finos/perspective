@@ -44,7 +44,7 @@ public:
         const std::vector<std::string>& columns,
         const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
-        const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>& computed_columns,
+        const std::vector<t_computed_column_definition>& computed_columns,
         const std::string& filter_op,
         bool column_only);
 
@@ -86,8 +86,7 @@ public:
 
     std::vector<t_sortspec> get_col_sortspec() const;
 
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>
-    get_computed_columns() const;
+    std::vector<t_computed_column_definition> get_computed_columns() const;
 
     t_filter_op get_filter_op() const;
 
@@ -153,7 +152,7 @@ private:
     std::vector<std::string> m_columns;
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> m_filter;
     std::vector<std::vector<std::string>> m_sort;
-    std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> m_computed_columns;
+    std::vector<t_computed_column_definition> m_computed_columns;
 
     /**
      * @brief The ordered list of aggregate columns:

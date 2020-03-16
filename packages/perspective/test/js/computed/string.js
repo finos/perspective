@@ -12,7 +12,7 @@
  * environments and parameters - different types, nulls, undefined, etc.
  */
 module.exports = perspective => {
-    describe("String, arity 1", function() {
+    describe("String, arity 1 computed", function() {
         it("Length", async function() {
             const table = perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"]
@@ -184,7 +184,7 @@ module.exports = perspective => {
         });
     });
 
-    describe("String, arity 2", function() {
+    describe("String, arity 2 computed", function() {
         it("Concat with space", async function() {
             const table = perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],

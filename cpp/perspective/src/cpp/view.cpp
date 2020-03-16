@@ -70,10 +70,6 @@ View<CTX_T>::View(
     // TODO: make sure is 0 for column only - right now get_data returns row path for everything
     sides() > 0 ? m_col_offset = 1 : m_col_offset = 0;
 
-    // Compute columns for this context on the master table for `t_gstate`
-    auto gnode = m_table->get_gnode();
-    auto gnode_data_table = gnode->get_table_sptr();
-    gnode->_compute_columns_sptr(m_ctx.get(), gnode_data_table);
     // TODO: add index shifting ability
 }
 
@@ -715,7 +711,7 @@ View<CTX_T>::get_sort() const {
 }
 
 template <typename CTX_T>
-std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>
+std::vector<t_computed_column_definition>
 View<CTX_T>::get_computed_columns() const {
     return m_computed_columns;
 }

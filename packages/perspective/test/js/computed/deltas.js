@@ -193,7 +193,6 @@ module.exports = perspective => {
 
                 view.on_update(
                     async function(delta) {
-                        console.log(delta);
                         const expected = [
                             {lowercase: 6, x: 14, y: 6},
                             {x: 1, y: 1, lowercase: 1},

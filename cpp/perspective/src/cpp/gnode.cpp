@@ -246,7 +246,7 @@ t_gnode::_process_table() {
 
     if (m_gstate->mapping_size() == 0) {
         // Update context from state first - computes columns during update
-        _update_contexts_from_state(*flattened);
+        _update_contexts_from_state(flattened);
         m_gstate->update_master_table(flattened.get());
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
@@ -278,12 +278,12 @@ t_gnode::_process_table() {
     _process_state.m_existed_data_table = m_oports[PSP_PORT_EXISTED]->get_table();
     
     // Add computed columns to transitions_data_table
-    _add_computed_columns_sptr_for_all_contexts(
+    _add_all_computed_columns(
         _process_state.m_transitions_data_table,
         DTYPE_UINT8);
 
     // Recompute values for flattened and m_state->get_table
-    _recompute_columns_for_all_contexts(
+    _recompute_all_columns(
         get_table_sptr(),
         _process_state.m_flattened_data_table,
         _process_state.m_lookup);
@@ -292,12 +292,13 @@ t_gnode::_process_table() {
     _process_state.clear_transitional_data_tables();
 
     // compute values on transitional tables before reserve
-    _compute_columns_for_all_contexts(
+    _compute_all_columns(
         {
             _process_state.m_delta_data_table,
             _process_state.m_prev_data_table,
             _process_state.m_current_data_table
         });
+
     // And re-reserved for the amount of data in `flattened`
     _process_state.reserve_transitional_data_tables(flattened_num_rows);
 
@@ -307,29 +308,34 @@ t_gnode::_process_table() {
     // mask_count = flattened_num_rows - number of rows that were removed
     _process_state.set_size_transitional_data_tables(mask_count);
 
-    // Use the schema of g_state->get_table so all computed columns are included.
-    const t_schema& _gstate_table_schema = 
-        _process_state.m_state_data_table->get_schema().drop({"psp_pkey", "psp_op"});
-    t_uindex ncols = _gstate_table_schema.get_num_columns();
+    // Reconcile column names - only attempt to process valid computed columns
+    std::vector<std::string> column_names = get_output_schema().m_columns;
+    std::vector<std::string> valid_computed_columns;
+    valid_computed_columns.reserve(
+        m_computed_column_map.m_computed_columns.size());
+
+    for (const auto& computed : m_computed_column_map.m_computed_columns) {
+        valid_computed_columns.push_back(computed.first);
+    }
+    
+    // Process the `real` columns of the gnode state output schema + the
+    // computed columns registered by each context.
+    column_names.insert(
+        column_names.end(),
+        valid_computed_columns.begin(),
+        valid_computed_columns.end());
+
+    t_uindex ncols = column_names.size();
 
 #ifdef PSP_PARALLEL_FOR
     tbb::parallel_for(0, int(ncols), 1,
-        [&_process_state, &_gstate_table_schema, this](int colidx)
+        [&_process_state, &column_names, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
 #endif
         {
-            const std::string& cname = _gstate_table_schema.m_columns[colidx];
-            auto fcolumn = _process_state.m_flattened_data_table->get_column_safe(cname);
-            if (!fcolumn) {
-            // column is invalid, i.e. a computed column belonging to a
-            // deleted view
-            #ifdef PSP_PARALLEL_FOR
-                return;
-            #else
-                continue;
-            #endif
-            }
+            const std::string& cname = column_names[colidx];
+            auto fcolumn = _process_state.m_flattened_data_table->get_column(cname).get();
             auto scolumn = _process_state.m_state_data_table->get_column(cname).get();
             auto dcolumn = _process_state.m_delta_data_table->get_column(cname).get();
             auto pcolumn = _process_state.m_prev_data_table->get_column(cname).get();
@@ -340,46 +346,46 @@ t_gnode::_process_table() {
 
             switch (col_dtype) {
                 case DTYPE_INT64: {
-                    _process_column<std::int64_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT32: {
-                    _process_column<std::int32_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT16: {
-                    _process_column<std::int16_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT8: {
-                    _process_column<std::int8_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT64: {
-                    _process_column<std::uint64_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT32: {
-                    _process_column<std::uint32_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT16: {
-                    _process_column<std::uint16_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT8: {
-                    _process_column<std::uint8_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT64: {
-                    _process_column<double>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<double>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT32: {
-                    _process_column<float>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<float>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_BOOL: {
-                    _process_column<std::uint8_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_TIME: {
-                    _process_column<std::int64_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_DATE: {
-                    _process_column<std::uint32_t>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_STR: {
-                    _process_column<std::string>(fcolumn.get(), scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
             }
@@ -388,7 +394,7 @@ t_gnode::_process_table() {
     );
 #endif
     // After transitional tables are written, compute their values
-    _compute_columns_for_all_contexts(
+    _compute_all_columns(
         {
             _process_state.m_delta_data_table,
             _process_state.m_prev_data_table,
@@ -433,6 +439,93 @@ t_gnode::_process_table() {
     #endif
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
     return flattened_masked;
+}
+
+template <>
+void
+t_gnode::_process_column<std::string>(
+    const t_column* fcolumn,
+    const t_column* scolumn,
+    t_column* dcolumn,
+    t_column* pcolumn,
+    t_column* ccolumn,
+    t_column* tcolumn,
+    const t_process_state& process_state) {
+    pcolumn->borrow_vocabulary(*scolumn);
+
+    for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
+        std::uint8_t op_ = process_state.m_op_base[idx];
+        t_op op = static_cast<t_op>(op_);
+        t_uindex added_count = process_state.m_added_offset[idx];
+
+        const t_rlookup& rlookup = process_state.m_lookup[idx];
+        bool row_pre_existed = rlookup.m_exists;
+        auto prev_pkey_eq = process_state.m_prev_pkey_eq_vec[idx];
+
+        switch (op) {
+            case OP_INSERT: {
+                row_pre_existed = row_pre_existed && !prev_pkey_eq;
+
+                const char* prev_value = 0;
+                bool prev_valid = false;
+
+                auto cur_value = fcolumn->get_nth<const char>(idx);
+                std::string curs(cur_value);
+
+                bool cur_valid = fcolumn->is_valid(idx);
+
+                if (row_pre_existed) {
+                    prev_value = scolumn->get_nth<const char>(rlookup.m_idx);
+                    prev_valid = scolumn->is_valid(rlookup.m_idx);
+                }
+
+                bool exists = cur_valid;
+                bool prev_existed = row_pre_existed && prev_valid;
+                bool prev_cur_eq
+                    = prev_value && cur_value && strcmp(prev_value, cur_value) == 0;
+
+                auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
+                    cur_valid, prev_cur_eq, prev_pkey_eq);
+
+                if (prev_valid) {
+                    pcolumn->set_nth<t_uindex>(
+                        added_count, *(scolumn->get_nth<t_uindex>(rlookup.m_idx)));
+                }
+
+                pcolumn->set_valid(added_count, prev_valid);
+
+                if (cur_valid) {
+                    ccolumn->set_nth<const char*>(added_count, cur_value);
+                }
+
+                if (!cur_valid && prev_valid) {
+                    ccolumn->set_nth<const char*>(added_count, prev_value);
+                }
+
+                ccolumn->set_valid(added_count, cur_valid ? cur_valid : prev_valid);
+
+                tcolumn->set_nth<std::uint8_t>(idx, trans);
+            } break;
+            case OP_DELETE: {
+                if (row_pre_existed) {
+                    auto prev_value = scolumn->get_nth<const char>(rlookup.m_idx);
+
+                    bool prev_valid = scolumn->is_valid(rlookup.m_idx);
+
+                    pcolumn->set_nth<const char*>(added_count, prev_value);
+
+                    pcolumn->set_valid(added_count, prev_valid);
+
+                    ccolumn->set_nth<const char*>(added_count, prev_value);
+
+                    ccolumn->set_valid(added_count, prev_valid);
+
+                    tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
+                }
+            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+        }
+    }
 }
 
 void
@@ -527,154 +620,7 @@ t_gnode::set_ctx_state(void* ptr) {
 }
 
 void
-t_gnode::_recompute_columns_for_all_contexts(
-    std::shared_ptr<t_data_table> tbl,
-    std::shared_ptr<t_data_table> flattened,
-    const std::vector<t_rlookup>& changed_rows
-    ) {
-    for (auto& kv : m_contexts) {
-        auto& ctxh = kv.second;
-        switch (ctxh.m_ctx_type) {
-            case TWO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                // Recompute using `m_gstate` table and flattened
-                _recompute_columns<t_ctx2>(ctx, tbl, flattened, changed_rows);
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                _recompute_columns<t_ctx1>(ctx, tbl, flattened, changed_rows);
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                _recompute_columns<t_ctx0>(ctx, tbl, flattened, changed_rows);
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                _recompute_columns<t_ctx_grouped_pkey>(ctx, tbl, flattened, changed_rows);
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
-    }
-}
-
-void
-t_gnode::_add_computed_columns_sptr_for_all_contexts(
-    std::shared_ptr<t_data_table> table,
-    t_dtype dtype) {
-    for (auto& kv : m_contexts) {
-        auto& ctxh = kv.second;
-        switch (ctxh.m_ctx_type) {
-            case TWO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                _add_computed_column_sptr<t_ctx2>(ctx, table, dtype);
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                _add_computed_column_sptr<t_ctx1>(ctx, table, dtype);
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                _add_computed_column_sptr<t_ctx0>(ctx, table, dtype);
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                _add_computed_column_sptr<t_ctx_grouped_pkey>(ctx, table, dtype);
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
-    }
-}
-
-void
-t_gnode::_compute_columns_for_all_contexts(
-    std::vector<std::shared_ptr<t_data_table>> tables) {
-    for (auto& kv : m_contexts) {
-        auto& ctxh = kv.second;
-        switch (ctxh.m_ctx_type) {
-            case TWO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                for (const auto t : tables) {
-                    _compute_columns_sptr<t_ctx2>(ctx, t);
-                }
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                for (const auto t : tables) {
-                    _compute_columns_sptr<t_ctx1>(ctx, t);
-                }
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                for (const auto t : tables) {
-                    _compute_columns_sptr<t_ctx0>(ctx, t);
-                }
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                for (const auto t : tables) {
-                    _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, t);
-                }
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
-    }
-}
-
-void
-t_gnode::_process_computed_columns(
-    std::shared_ptr<t_data_table> tbl,
-    std::shared_ptr<t_data_table> flattened,
-    std::shared_ptr<t_data_table> delta,
-    std::shared_ptr<t_data_table> prev,
-    std::shared_ptr<t_data_table> current,
-    std::shared_ptr<t_data_table> transitions,
-    const std::vector<t_rlookup>& changed_rows
-    ) {
-    for (auto& kv : m_contexts) {
-        auto& ctxh = kv.second;
-        switch (ctxh.m_ctx_type) {
-            case TWO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                // Recompute using `m_gstate` table and flattened
-                _recompute_columns<t_ctx2>(ctx, tbl, flattened, changed_rows);
-                // compute for intermediate tables
-                _compute_columns_sptr<t_ctx2>(ctx, delta);
-                _compute_columns_sptr<t_ctx2>(ctx, prev);
-                _compute_columns_sptr<t_ctx2>(ctx, current);
-                // add the column to transitions
-                _add_computed_column_sptr<t_ctx2>(ctx, transitions, DTYPE_UINT8);
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                _recompute_columns<t_ctx1>(ctx, tbl, flattened, changed_rows);
-                _compute_columns_sptr<t_ctx1>(ctx, delta);
-                _compute_columns_sptr<t_ctx1>(ctx, prev);
-                _compute_columns_sptr<t_ctx1>(ctx, current);
-                _add_computed_column_sptr<t_ctx1>(ctx, transitions, DTYPE_UINT8);
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                auto ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                _recompute_columns<t_ctx0>(ctx, tbl, flattened, changed_rows);
-                _compute_columns_sptr<t_ctx0>(ctx, delta);
-                _compute_columns_sptr<t_ctx0>(ctx, prev);
-                _compute_columns_sptr<t_ctx0>(ctx, current);
-                _add_computed_column_sptr<t_ctx0>(ctx, transitions, DTYPE_UINT8);
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                _recompute_columns<t_ctx_grouped_pkey>(ctx, tbl, flattened, changed_rows);
-                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, delta);
-                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, prev);
-                _compute_columns_sptr<t_ctx_grouped_pkey>(ctx, current);
-                _add_computed_column_sptr<t_ctx_grouped_pkey>(ctx, transitions, DTYPE_UINT8);
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
-    }
-}
-
-void
-t_gnode::_update_contexts_from_state(const t_data_table& tbl) {
+t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -758,36 +704,54 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
         flattened = m_gstate->get_pkeyed_table();
     }
 
+    std::vector<t_computed_column_definition> computed_columns;
+
     switch (type) {
         case TWO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx2>(ptr_);
             t_ctx2* ctx = static_cast<t_ctx2*>(ptr_);
             ctx->reset();
+            computed_columns = ctx->get_config().get_computed_columns();
+            m_computed_column_map.add_computed_columns(computed_columns);
             if (should_update)
-                update_context_from_state<t_ctx2>(ctx, *flattened);
+                update_context_from_state<t_ctx2>(ctx, flattened);
         } break;
         case ONE_SIDED_CONTEXT: {
             set_ctx_state<t_ctx1>(ptr_);
             t_ctx1* ctx = static_cast<t_ctx1*>(ptr_);
             ctx->reset();
+            computed_columns = ctx->get_config().get_computed_columns();
+            m_computed_column_map.add_computed_columns(computed_columns);
             if (should_update)
-                update_context_from_state<t_ctx1>(ctx, *flattened);
+                update_context_from_state<t_ctx1>(ctx, flattened);
         } break;
         case ZERO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
             t_ctx0* ctx = static_cast<t_ctx0*>(ptr_);
             ctx->reset();
+            computed_columns = ctx->get_config().get_computed_columns();
+            m_computed_column_map.add_computed_columns(computed_columns);
             if (should_update)
-                update_context_from_state<t_ctx0>(ctx, *flattened);
+                update_context_from_state<t_ctx0>(ctx, flattened);
         } break;
         case GROUPED_PKEY_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
             auto ctx = static_cast<t_ctx_grouped_pkey*>(ptr_);
             ctx->reset();
+            computed_columns = ctx->get_config().get_computed_columns();
+            m_computed_column_map.add_computed_columns(computed_columns);
             if (should_update)
-                update_context_from_state<t_ctx_grouped_pkey>(ctx, *flattened);
+                update_context_from_state<t_ctx_grouped_pkey>(ctx, flattened);
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+    }
+
+    // When a context is registered, compute its columns on the master table
+    // so the columns will exist when updates, etc. are processed. FIXME: this
+    // is double computing...
+    std::shared_ptr<t_data_table> gstate_table = get_table_sptr();
+    for (const auto& computed : computed_columns) {
+        _compute_column(computed, gstate_table);
     }
 }
 
@@ -795,9 +759,56 @@ void
 t_gnode::_unregister_context(const std::string& name) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    if ((m_contexts.find(name) == m_contexts.end()))
-        return;
-    PSP_VERBOSE_ASSERT(m_contexts.find(name) != m_contexts.end(), "Context not found.");
+    auto it = m_contexts.find(name);
+    if (it == m_contexts.end()) return;
+
+    // remove computed columns from gnode state
+    t_ctx_handle ctxh = it->second;
+    t_ctx_type type = ctxh.get_type();
+
+    std::vector<std::string> computed_column_names;
+    switch (type) {
+        case TWO_SIDED_CONTEXT: {
+            t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
+            auto computed_columns = ctx->get_config().get_computed_columns();
+            computed_column_names.reserve(computed_columns.size());
+            for (const auto& c : computed_columns) {
+                computed_column_names.push_back(std::get<0>(c));
+            }
+            m_computed_column_map.remove_computed_columns(computed_column_names);
+        } break;
+        case ONE_SIDED_CONTEXT: {
+            t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
+            auto computed_columns = ctx->get_config().get_computed_columns();
+            computed_column_names.reserve(computed_columns.size());
+            for (const auto& c : computed_columns) {
+                computed_column_names.push_back(std::get<0>(c));
+            }
+            m_computed_column_map.remove_computed_columns(computed_column_names);
+        } break;
+        case ZERO_SIDED_CONTEXT: {
+            t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
+            auto computed_columns = ctx->get_config().get_computed_columns();
+            computed_column_names.reserve(computed_columns.size());
+            for (const auto& c : computed_columns) {
+                computed_column_names.push_back(std::get<0>(c));
+            }
+            m_computed_column_map.remove_computed_columns(computed_column_names);
+        } break;
+        case GROUPED_PKEY_CONTEXT: {
+            auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
+            auto computed_columns = ctx->get_config().get_computed_columns();
+            computed_column_names.reserve(computed_columns.size());
+            for (const auto& c : computed_columns) {
+                computed_column_names.push_back(std::get<0>(c));
+            }
+            m_computed_column_map.remove_computed_columns(computed_column_names);
+        } break;
+        default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+    }
+
+    PSP_VERBOSE_ASSERT(it != m_contexts.end(), "Context not found.");
+
     m_contexts.erase(name);
 }
 
@@ -847,6 +858,128 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
     #endif
 
     psp_log_time(repr() + "notify_contexts.exit");
+}
+
+/******************************************************************************
+ *
+ * Computed Column Operations
+ */
+
+void
+t_gnode::_recompute_all_columns(
+    std::shared_ptr<t_data_table> tbl,
+    std::shared_ptr<t_data_table> flattened,
+    const std::vector<t_rlookup>& changed_rows) {
+    const auto& computed_columns = m_computed_column_map.m_computed_columns;
+    for (const auto& computed : computed_columns) {
+        _recompute_column(computed.second, tbl, flattened, changed_rows);
+    }
+}
+
+void
+t_gnode::_compute_all_columns(
+    std::vector<std::shared_ptr<t_data_table>> tables) {
+    const auto& computed_columns = m_computed_column_map.m_computed_columns;
+    for (std::shared_ptr<t_data_table> table : tables) {
+        for (const auto& computed : computed_columns) {
+            _compute_column(computed.second, table);
+        }
+    }
+}
+
+void
+t_gnode::_add_all_computed_columns(
+    std::shared_ptr<t_data_table> table, t_dtype dtype) {
+    std::vector<std::string> computed_column_names;
+    computed_column_names.reserve(
+        m_computed_column_map.m_computed_columns.size());
+
+    for (const auto& computed : m_computed_column_map.m_computed_columns) {
+        computed_column_names.push_back(computed.first);
+    }
+
+    for (const std::string& name : computed_column_names) {
+       table->add_column(name, dtype, true);
+    }
+}
+
+void
+t_gnode::_compute_column(
+    const t_computed_column_definition& computed_column,
+    std::shared_ptr<t_data_table> tbl) {
+    std::vector<t_dtype> input_types;
+    std::vector<std::shared_ptr<t_column>> input_columns;
+
+    std::string computed_column_name = std::get<0>(computed_column);
+    t_computed_function_name computed_function_name = std::get<1>(computed_column);
+    std::vector<std::string> input_column_names = std::get<2>(computed_column);
+    
+    for (const auto& name : input_column_names) {
+        auto column = tbl->get_column(name);
+        input_columns.push_back(column);
+        input_types.push_back(column->get_dtype());
+    }
+
+    t_computation computation = t_computed_column::get_computation(
+        computed_function_name, input_types);
+
+    if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+        std::cerr 
+            << "Cannot re-compute column `"
+            << computed_column_name
+            << "` in gnode."
+            << std::endl;
+            return;
+    }
+
+    t_dtype output_column_type = computation.m_return_type;
+
+    auto output_column = tbl->add_column_sptr(
+        computed_column_name, output_column_type, true);
+    output_column->reserve(input_columns[0]->size());
+
+    t_computed_column::apply_computation(
+        input_columns,
+        output_column,
+        computation);
+}
+
+void
+t_gnode::_recompute_column(
+    const t_computed_column_definition& computed_column,
+    std::shared_ptr<t_data_table> table,
+    std::shared_ptr<t_data_table> flattened,
+    const std::vector<t_rlookup>& changed_rows) {
+    std::vector<t_dtype> input_types;
+    std::vector<std::shared_ptr<t_column>> table_columns;
+    std::vector<std::shared_ptr<t_column>> flattened_columns;
+
+    std::string computed_column_name = std::get<0>(computed_column);
+    t_computed_function_name computed_function_name = std::get<1>(computed_column);
+    std::vector<std::string> input_column_names = std::get<2>(computed_column);
+    
+    for (const auto& name : input_column_names) {
+        auto table_column = table->get_column(name);
+        auto flattened_column = flattened->get_column(name);
+        table_columns.push_back(table_column);
+        flattened_columns.push_back(flattened_column);
+        input_types.push_back(table_column->get_dtype());
+    }
+
+    t_computation computation = t_computed_column::get_computation(
+        computed_function_name, input_types);
+    t_dtype output_column_type = computation.m_return_type;
+
+    auto output_column = flattened->add_column_sptr(
+        computed_column_name, output_column_type, true);
+    output_column->reserve(table_columns[0]->size());
+
+    t_computed_column::reapply_computation(
+        table_columns,
+        flattened_columns,
+        changed_rows,
+        output_column,
+        computation);
 }
 
 std::vector<t_pivot>
@@ -1040,93 +1173,6 @@ void
 t_gnode::clear_output_ports() {
     for (t_uindex idx = 0, loop_end = m_oports.size(); idx < loop_end; ++idx) {
         m_oports[idx]->get_table()->clear();
-    }
-}
-
-template <>
-void
-t_gnode::_process_column<std::string>(
-    const t_column* fcolumn,
-    const t_column* scolumn,
-    t_column* dcolumn,
-    t_column* pcolumn,
-    t_column* ccolumn,
-    t_column* tcolumn,
-    const t_process_state& process_state) {
-    pcolumn->borrow_vocabulary(*scolumn);
-
-    for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
-        std::uint8_t op_ = process_state.m_op_base[idx];
-        t_op op = static_cast<t_op>(op_);
-        t_uindex added_count = process_state.m_added_offset[idx];
-
-        const t_rlookup& rlookup = process_state.m_lookup[idx];
-        bool row_pre_existed = rlookup.m_exists;
-        auto prev_pkey_eq = process_state.m_prev_pkey_eq_vec[idx];
-
-        switch (op) {
-            case OP_INSERT: {
-                row_pre_existed = row_pre_existed && !prev_pkey_eq;
-
-                const char* prev_value = 0;
-                bool prev_valid = false;
-
-                auto cur_value = fcolumn->get_nth<const char>(idx);
-                std::string curs(cur_value);
-
-                bool cur_valid = fcolumn->is_valid(idx);
-
-                if (row_pre_existed) {
-                    prev_value = scolumn->get_nth<const char>(rlookup.m_idx);
-                    prev_valid = scolumn->is_valid(rlookup.m_idx);
-                }
-
-                bool exists = cur_valid;
-                bool prev_existed = row_pre_existed && prev_valid;
-                bool prev_cur_eq
-                    = prev_value && cur_value && strcmp(prev_value, cur_value) == 0;
-
-                auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq);
-
-                if (prev_valid) {
-                    pcolumn->set_nth<t_uindex>(
-                        added_count, *(scolumn->get_nth<t_uindex>(rlookup.m_idx)));
-                }
-
-                pcolumn->set_valid(added_count, prev_valid);
-
-                if (cur_valid) {
-                    ccolumn->set_nth<const char*>(added_count, cur_value);
-                }
-
-                if (!cur_valid && prev_valid) {
-                    ccolumn->set_nth<const char*>(added_count, prev_value);
-                }
-
-                ccolumn->set_valid(added_count, cur_valid ? cur_valid : prev_valid);
-
-                tcolumn->set_nth<std::uint8_t>(idx, trans);
-            } break;
-            case OP_DELETE: {
-                if (row_pre_existed) {
-                    auto prev_value = scolumn->get_nth<const char>(rlookup.m_idx);
-
-                    bool prev_valid = scolumn->is_valid(rlookup.m_idx);
-
-                    pcolumn->set_nth<const char*>(added_count, prev_value);
-
-                    pcolumn->set_valid(added_count, prev_valid);
-
-                    ccolumn->set_nth<const char*>(added_count, prev_value);
-
-                    ccolumn->set_valid(added_count, prev_valid);
-
-                    tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
-                }
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
-        }
     }
 }
 

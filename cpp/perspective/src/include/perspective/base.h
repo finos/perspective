@@ -100,14 +100,6 @@ PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
         }                                                                                      \
     }
 
-#define PSP_COMPLAIN_AND_ABORT(X)                                                              \
-    {                                                                                          \
-        std::stringstream ss;                                                                  \
-        ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
-        perror(ss.str().c_str());                                                              \
-        psp_abort(X);                                                                          \
-    }
-
 #define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
 static_assert(                                               \
 std::is_pod<X>::value && std::is_standard_layout<X>::value , \
@@ -147,12 +139,13 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
             psp_abort(ss.str());                                                               \
         }                                                                                      \
     }
-#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X);
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
+
+#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X);
 
 #define PSP_VERBOSE_ASSERT(...)                                                                \
     _ID(GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(         \

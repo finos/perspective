@@ -14,7 +14,7 @@ const common = require("./common.js");
  * environments and parameters - different types, nulls, undefined, etc.
  */
 module.exports = perspective => {
-    describe("Date, Arity 1", function() {
+    describe("Date, Arity 1 computed", function() {
         it("Hour of day, date", async function() {
             const table = perspective.table({
                 a: "date"
@@ -674,7 +674,7 @@ module.exports = perspective => {
         });
     });
 
-    describe("Datetime, Arity 1", function() {
+    describe("Datetime, Arity 1 computed", function() {
         it("Hour of day, datetime", async function() {
             const table = perspective.table({
                 a: "datetime"

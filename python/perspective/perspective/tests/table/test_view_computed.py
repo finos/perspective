@@ -137,6 +137,65 @@ class TestViewComputed(object):
             "computed2": [-4, -4, -4, -4]
         }
 
+    def test_view_computed_delete_and_create_with_updates(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+
+        view = table.view(computed_columns=[{
+            "column": "computed",
+            "computed_function_name": "+",
+            "inputs": ["a", "b"]
+        }])
+
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float
+        }
+
+        table.update({
+            "a": [5, 6],
+            "b": [9, 10]
+        })
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [5, 6, 7, 8, 9, 10],
+            "computed": [6, 8, 10, 12, 14, 16]
+        }
+
+        view.delete()
+
+        view2 = table.view(computed_columns=[{
+            "column": "computed2",
+            "computed_function_name": "-",
+            "inputs": ["a", "b"]
+        }])
+
+        assert view2.schema() == {
+            "a": int,
+            "b": int,
+            "computed2": float
+        }
+
+        table.update({
+            "a": [5, 6],
+            "b": [9, 10]
+        })
+
+        table.update({
+            "a": [5, 6],
+            "b": [9, 10]
+        })
+
+        assert view2.to_columns() == {
+            "a": [1, 2, 3, 4, 5, 6, 5, 6, 5, 6],
+            "b": [5, 6, 7, 8, 9, 10, 9, 10, 9, 10],
+            "computed2": [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4]
+        }
+
     def test_view_computed_with_custom_columns(self):
         table = Table({
             "a": [1, 2, 3, 4],

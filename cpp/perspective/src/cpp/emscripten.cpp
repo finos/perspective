@@ -1277,7 +1277,7 @@ namespace binding {
 
         // Fill the computed columns vector with tuples
         auto js_computed_columns = config.call<std::vector<std::vector<t_val>>>("get_computed_columns");
-        std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+        std::vector<t_computed_column_definition> computed_columns;
 
         for (auto c : js_computed_columns) {
             std::string computed_column_name = c.at(0).as<std::string>();
@@ -1508,7 +1508,7 @@ namespace binding {
         std::shared_ptr<Table> table,
         std::vector<std::vector<t_val>> j_computed_columns) {
         // Convert into vector of tuples
-        std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns;
+        std::vector<t_computed_column_definition> computed_columns;
 
         for (auto c : j_computed_columns) {
             std::string computed_column_name = c.at(0).as<std::string>();
@@ -1733,7 +1733,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             const std::vector<std::string>&,
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
-            const std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>>&,
+            const std::vector<t_computed_column_definition>&,
             const std::string,
             bool>()
         .smart_ptr<std::shared_ptr<t_view_config>>("shared_ptr<t_view_config>")

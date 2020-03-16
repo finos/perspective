@@ -86,7 +86,7 @@ public:
      * @return t_schema 
      */
     t_schema get_computed_schema(
-        std::vector<std::tuple<std::string, t_computed_function_name, std::vector<std::string>>> computed_columns) const;
+        std::vector<t_computed_column_definition> computed_columns) const;
 
     /**
      * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.

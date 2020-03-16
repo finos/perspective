@@ -30,7 +30,7 @@ const generator = function(length = 100, has_zero = true) {
  */
 module.exports = perspective => {
     describe("Invariant testing", function() {
-        describe("Inverse operations should be invariant", function() {
+        describe("Inverse computed column operations should be invariant", function() {
             jsc.property("(x - y) + x == y", generator(), async data => {
                 const table = perspective.table(data);
 
