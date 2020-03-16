@@ -1,4 +1,6 @@
 declare module "@finos/perspective" {
+    import * as ws from "ws";
+
     /**** object types ****/
     export enum TypeNames {
         STRING = "string",
@@ -123,7 +125,7 @@ declare module "@finos/perspective" {
         schema(): Promise<Schema>;
         size(): Promise<number>;
         update(data: TableData): void;
-        view(config: ViewConfig): View;
+        view(config?: ViewConfig): View;
     };
 
     /**** perspective ****/
@@ -135,19 +137,44 @@ declare module "@finos/perspective" {
         table(data: TableData, options?: TableOptions): Table;
     };
 
-    export type Client = {
+    export class WebSocketClient {
         open_table(name: string): Table;
         open_view(name: string): View;
+        terminate(): void;
+        initialize_profile_thread(): void;
+        send(msg: any): void;
+    }
+
+    export type WebSocketServerOptions = {
+        assets?: string[];
+        host_psp?: boolean;
+        port?: number;
+        on_start?: any;
     };
+
+    export class WebSocketManager {
+        add_connection(ws: ws): void;
+        host_table(name: string, table: Table): void;
+        host_view(name: string, view: View): void;
+        eject_table(name: string): void;
+        eject_view(name: string): void;
+    }
+
+    export class WebSocketServer extends WebSocketManager {
+        constructor(config?: WebSocketServerOptions);
+        close(): void;
+    }
+
+    export function perspective_assets(assets: string[], host_psp: boolean): (request: any, response: any) => void;
 
     type perspective = {
         TYPE_AGGREGATES: ValuesByType;
         TYPE_FILTERS: ValuesByType;
         SORT_ORDERS: SortOrders;
-        table(data_or_schema: TableData | Schema, options: TableOptions): Table;
+        table(data_or_schema: TableData | Schema, options?: TableOptions): Table;
         worker(): PerspectiveWorker;
         shared_worker(): PerspectiveWorker;
-        websocket(url: string): Client;
+        websocket(url: string): WebSocketClient;
         override: (x: any) => void;
     };
 
