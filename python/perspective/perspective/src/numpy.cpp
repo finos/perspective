@@ -393,6 +393,7 @@ namespace numpy {
             }
 
             auto date_components = item.cast<std::map<std::string, std::int32_t>>();
+            // date_components["month"] should be [0-11]
             t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);
             col->set_nth(i, dt);
         }

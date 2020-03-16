@@ -298,7 +298,9 @@ namespace arrow {
                     std::int32_t year = static_cast<std::int32_t>(ymd.year());
                     std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
                     std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
-                    dest->set_nth(offset + i, t_date(year, month, day));
+                    // Decrement month by 1, as date::month is [1-12] but
+                    // t_date::month() is [0-11]
+                    dest->set_nth(offset + i, t_date(year, month - 1, day));
                 }
             } break;
             case ::arrow::Date32Type::type_id: {
@@ -315,7 +317,9 @@ namespace arrow {
                     std::int32_t year = static_cast<std::int32_t>(ymd.year());
                     std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
                     std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
-                    dest->set_nth(offset + i, t_date(year, month, day));
+                    // Decrement month by 1, as date::month is [1-12] but
+                    // t_date::month() is [0-11]
+                    dest->set_nth(offset + i, t_date(year, month - 1, day));
                 }
             } break;
             case ::arrow::FloatType::type_id: {

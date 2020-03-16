@@ -73,7 +73,7 @@ t_date::get_tm() const {
     std::tm rval;
 
     rval.tm_year = year() - 1900; // tm years are since 1900
-    rval.tm_mon = month() - 1; // tm months from 0
+    rval.tm_mon = month(); // tm months from 0, so no need to decrement
     rval.tm_mday = day();
     rval.tm_hour = 0;
     rval.tm_min = 0;

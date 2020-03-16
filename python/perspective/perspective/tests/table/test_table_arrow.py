@@ -35,23 +35,37 @@ class TestTableArrow(object):
         with open(DATE32_ARROW, mode='rb') as file:  # b is important -> binary
             tbl = Table(file.read())
             assert tbl.schema() == {
-                "a": date,
-                "b": date,
-                "c": date,
-                "d": date
+                "jan-2019": date,
+                "feb-2020": date,
+                "mar-2019": date,
+                "apr-2020": date
             }
-            assert tbl.size() == 29
+            assert tbl.size() == 31
+            view = tbl.view()
+            assert view.to_columns() == {
+                "jan-2019": [datetime(2019, 1, i) for i in range(1, 32)],
+                "feb-2020": [datetime(2020, 2, i) for i in range(1, 30)] + [None, None],
+                "mar-2019": [datetime(2019, 3, i) for i in range(1, 32)],
+                "apr-2020": [datetime(2020, 4, i) for i in range(1, 31)] + [None]
+            }
 
     def test_table_arrow_loads_date64_file(self):
         with open(DATE64_ARROW, mode='rb') as file:  # b is important -> binary
             tbl = Table(file.read())
             assert tbl.schema() == {
-                "a": date,
-                "b": date,
-                "c": date,
-                "d": date
+                "jan-2019": date,
+                "feb-2020": date,
+                "mar-2019": date,
+                "apr-2020": date
             }
-            assert tbl.size() == 29
+            assert tbl.size() == 31
+            view = tbl.view()
+            assert view.to_columns() == {
+                "jan-2019": [datetime(2019, 1, i) for i in range(1, 32)],
+                "feb-2020": [datetime(2020, 2, i) for i in range(1, 30)] + [None, None],
+                "mar-2019": [datetime(2019, 3, i) for i in range(1, 32)],
+                "apr-2020": [datetime(2020, 4, i) for i in range(1, 31)] + [None]
+            }
 
     def test_table_arrow_loads_dict_file(self):
         with open(DICT_ARROW, mode='rb') as file:  # b is important -> binary
