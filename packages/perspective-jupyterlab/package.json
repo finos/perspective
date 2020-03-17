@@ -30,7 +30,7 @@
         "test": "npm-run-all test:build test:run",
         "build": "npm-run-all -p build:*",
         "build:jupyterlab": "webpack --color --config src/config/plugin.config.js",
-        "build:phosphor": "webpack --color --config src/config/webpack.config.js",
+        "build:lumino": "webpack --color --config src/config/webpack.config.js",
         "clean": "rimraf dist",
         "version": "yarn build"
     },
@@ -39,10 +39,10 @@
         "@finos/perspective-viewer-d3fc": "^0.4.5",
         "@finos/perspective-viewer-highcharts": "^0.4.5",
         "@finos/perspective-viewer-hypergrid": "^0.4.5",
-        "@jupyter-widgets/base": "^2.0.2",
-        "@jupyterlab/application": "^1.2.1",
-        "@phosphor/application": "^1.7.3",
-        "@phosphor/widgets": "^1.9.3"
+        "@jupyter-widgets/base": "^3.0.0",
+        "@jupyterlab/application": "^2.0.0",
+        "@lumino/application": "^1.7.3",
+        "@lumino/widgets": "^1.9.3"
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.4.5",

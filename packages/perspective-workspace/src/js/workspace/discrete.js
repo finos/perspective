@@ -7,9 +7,9 @@
  *
  */
 
-import {DockPanel, SplitPanel} from "@phosphor/widgets";
-import {toArray} from "@phosphor/algorithm";
-import {Signal} from "@phosphor/signaling";
+import {DockPanel, SplitPanel} from "@lumino/widgets";
+import {toArray} from "@lumino/algorithm";
+import {Signal} from "@lumino/signaling";
 
 const DISCRETE_STEP_SIZE = 1;
 

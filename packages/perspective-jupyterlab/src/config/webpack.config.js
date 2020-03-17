@@ -40,9 +40,9 @@ module.exports = {
         ]
     },
     output: {
-        filename: "phosphor.js",
+        filename: "lumino.js",
         libraryTarget: "umd",
-        library: "PerspectivePhosphor",
+        library: "PerspectiveLumino",
         path: path.resolve(__dirname, "../../dist/umd")
     }
 };

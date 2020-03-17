@@ -7,9 +7,9 @@
  *
  */
 
-import {ArrayExt} from "@phosphor/algorithm";
-import {ElementExt} from "@phosphor/domutils";
-import {TabBar} from "@phosphor/widgets";
+import {ArrayExt} from "@lumino/algorithm";
+import {ElementExt} from "@lumino/domutils";
+import {TabBar} from "@lumino/widgets";
 import {TabBarItems, DEFAULT_TITLE} from "./tabbarrenderer";
 
 export class PerspectiveTabBar extends TabBar {
@@ -20,8 +20,8 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     onUpdateRequest(msg) {
-        // NOT INERT!  This is a phosphor bug fix.
-        // phosphor/virtualdom keeps a weakmap on contentNode which is later
+        // NOT INERT!  This is a lumino bug fix.
+        // lumino/virtualdom keeps a weakmap on contentNode which is later
         // reset - this causes the diff to double some elements.  Memoizing
         // prevent collection from the weakmap.
         this.__content_node__ = this.contentNode;
@@ -139,7 +139,7 @@ export class PerspectiveTabBar extends TabBar {
 
     /**
      * Shadow dom targets events at the host, not the clicked element, which
-     * Phosphor dislikes.  This makes the event look like it is not crossing
+     * Lumino dislikes.  This makes the event look like it is not crossing
      * the ShadowDom boundary.
      *
      */

@@ -11,14 +11,14 @@ import style from "../less/workspace.less";
 import template from "../html/workspace.html";
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils";
 import {PerspectiveWorkspace, SIDE} from "./workspace";
-import {MessageLoop} from "@phosphor/messaging";
-import {Widget} from "@phosphor/widgets";
+import {MessageLoop} from "@lumino/messaging";
+import {Widget} from "@lumino/widgets";
 
 import injectedStyles from "../less/injected.less";
 
 /**
  * A Custom Element for coordinating a set of `<perspective-viewer>` light DOM
- * children.  `<perspective-workspace>` is built on Phosphor.js to allow a more
+ * children.  `<perspective-workspace>` is built on Lumino.js to allow a more
  * app-like experience than `<perspective-viewer>`, providing
  * these features additionally:
  *

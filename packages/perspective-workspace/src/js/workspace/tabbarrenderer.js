@@ -7,8 +7,8 @@
  *
  */
 
-import {h} from "@phosphor/virtualdom";
-import {TabBar} from "@phosphor/widgets";
+import {h} from "@lumino/virtualdom";
+import {TabBar} from "@lumino/widgets";
 
 export const TabBarItems = {
     Config: "config",

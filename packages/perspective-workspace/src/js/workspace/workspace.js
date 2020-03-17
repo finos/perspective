@@ -7,10 +7,10 @@
  *
  */
 
-import {find, toArray} from "@phosphor/algorithm";
-import {Panel} from "@phosphor/widgets";
+import {find, toArray} from "@lumino/algorithm";
+import {Panel} from "@lumino/widgets";
 import {PerspectiveDockPanel} from "./dockpanel";
-import {Menu} from "@phosphor/widgets";
+import {Menu} from "@lumino/widgets";
 import {MenuRenderer} from "./menu";
 import {createCommands} from "./commands";
 
