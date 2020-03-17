@@ -1,85 +1,87 @@
-declare module '@finos/perspective' {
+declare module "@finos/perspective" {
+    import * as ws from "ws";
+
     /**** object types ****/
     export enum TypeNames {
-        STRING = 'string',
-        FLOAT = 'float',
-        INTEGER = 'integer',
-        BOOLEAN = 'boolean',
-        DATE = 'date'
+        STRING = "string",
+        FLOAT = "float",
+        INTEGER = "integer",
+        BOOLEAN = "boolean",
+        DATE = "date"
     }
 
     export type ValuesByType = {
-        [ key in TypeNames ]: Array<string>
-    }
+        [key in TypeNames]: Array<string>;
+    };
 
     export type ValueByType = {
-        TypeNames: Array<string>
-    }
+        TypeNames: Array<string>;
+    };
 
     export enum SortOrders {
-        ASC = 'asc',
-        ASC_ABS = 'asc abs',
-        DESC = 'desc',
-        DESC_ABS = 'desc abs',
-        NONE = 'none',
+        ASC = "asc",
+        ASC_ABS = "asc abs",
+        DESC = "desc",
+        DESC_ABS = "desc abs",
+        NONE = "none"
     }
 
     enum NUMBER_AGGREGATES {
-        ANY = 'any',
-        AVERAGE = 'avg',
-        COUNT = 'count',
-        DISTINCT_COUNT = 'distinct count',
-        DOMINANT = 'dominant',
-        FIRST = 'first',
-        LAST = 'last',
-        HIGH = 'high',
-        LOW = 'low',
-        MEAN = 'mean',
-        MEDIAN = 'median',
-        PCT_SUM_PARENT = 'pct sum parent',
-        PCT_SUM_TOTAL = 'pct sum grand total',
-        SUM = 'sum',
-        SUM_ABS = 'sum abs',
-        SUM_NOT_NULL = 'sum not null',
-        UNIQUE = 'unique'
+        ANY = "any",
+        AVERAGE = "avg",
+        COUNT = "count",
+        DISTINCT_COUNT = "distinct count",
+        DOMINANT = "dominant",
+        FIRST = "first",
+        LAST = "last",
+        HIGH = "high",
+        LOW = "low",
+        MEAN = "mean",
+        MEDIAN = "median",
+        PCT_SUM_PARENT = "pct sum parent",
+        PCT_SUM_TOTAL = "pct sum grand total",
+        SUM = "sum",
+        SUM_ABS = "sum abs",
+        SUM_NOT_NULL = "sum not null",
+        UNIQUE = "unique"
     }
 
     enum STRING_AGGREGATES {
-        ANY = 'any',
-        COUNT = 'count',
-        DISTINCT_COUNT = 'distinct count',
-        DISTINCT_LEAF = 'distinct leaf',
-        DOMINANT = 'dominant',
-        FIRST = 'first',
-        LAST = 'last',
-        UNIQUE = 'unique'
+        ANY = "any",
+        COUNT = "count",
+        DISTINCT_COUNT = "distinct count",
+        DISTINCT_LEAF = "distinct leaf",
+        DOMINANT = "dominant",
+        FIRST = "first",
+        LAST = "last",
+        UNIQUE = "unique"
     }
 
     enum BOOLEAN_AGGREGATES {
-        AND = 'and',
-        ANY = 'any',
-        COUNT = 'count',
-        DISTINCT_COUNT = 'distinct count',
-        DISTINCT_LEAF = 'distinct leaf',
-        DOMINANT = 'dominant',
-        FIRST = 'first',
-        LAST = 'last',
-        OR ='or',
-        UNIQUE = 'unique'
+        AND = "and",
+        ANY = "any",
+        COUNT = "count",
+        DISTINCT_COUNT = "distinct count",
+        DISTINCT_LEAF = "distinct leaf",
+        DOMINANT = "dominant",
+        FIRST = "first",
+        LAST = "last",
+        OR = "or",
+        UNIQUE = "unique"
     }
 
     /**** Schema ****/
     type SchemaType = TypeNames | NUMBER_AGGREGATES | STRING_AGGREGATES | BOOLEAN_AGGREGATES;
 
     export type Schema = {
-        [ key: string ]: TypeNames ;
-    }
+        [key: string]: TypeNames;
+    };
 
     export interface SerializeConfig {
-        start_row: number,
-        end_row: number,
-        start_col: number,
-        end_col: number,
+        start_row: number;
+        end_row: number;
+        start_col: number;
+        end_col: number;
     }
 
     /**** View ****/
@@ -90,27 +92,27 @@ declare module '@finos/perspective' {
         on_delete(callback: Function): void;
         on_update(callback: UpdateCallback): void;
         schema(): Promise<Schema>;
-        to_arrow(options?: SerializeConfig & { data_slice: any }): Promise<ArrayBuffer>;
+        to_arrow(options?: SerializeConfig & {data_slice: any}): Promise<ArrayBuffer>;
         to_columns(options?: SerializeConfig): Promise<Array<object>>;
-        to_csv(options?: SerializeConfig & { config: object }): Promise<string>;
+        to_csv(options?: SerializeConfig & {config: object}): Promise<string>;
         to_json(options?: SerializeConfig): Promise<Array<object>>;
-    }
+    };
 
     /**** Table ****/
-    export type UpdateCallback = (data: Array<object>) => void
+    export type UpdateCallback = (data: Array<object>) => void;
 
-    export type TableData = string | Array<object> | { [key: string]: Array<object> } | { [key: string]: string }
+    export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string};
 
     export type TableOptions = {
-        index?: string,
-        limit?: number
-    }
+        index?: string;
+        limit?: number;
+    };
 
     export type ViewConfig = {
         columns?: Array<string>;
         row_pivots?: Array<string>;
         column_pivots?: Array<string>;
-        aggregates?: { [column_name:string]: string; },
+        aggregates?: {[column_name: string]: string};
         sort?: Array<Array<string>>;
         filter?: Array<Array<string>>;
     };
@@ -123,34 +125,58 @@ declare module '@finos/perspective' {
         schema(): Promise<Schema>;
         size(): Promise<number>;
         update(data: TableData): void;
-        view(config: ViewConfig): View;
-    }
+        view(config?: ViewConfig): View;
+    };
 
     /**** perspective ****/
     export enum PerspectiveEvents {
-        PERSPECTIVE_READY = 'perspective-ready'
+        PERSPECTIVE_READY = "perspective-ready"
     }
 
     export type PerspectiveWorker = {
         table(data: TableData, options?: TableOptions): Table;
+    };
+
+    export class WebSocketClient {
+        open_table(name: string): Table;
+        open_view(name: string): View;
+        terminate(): void;
+        initialize_profile_thread(): void;
+        send(msg: any): void;
     }
 
+    export type WebSocketServerOptions = {
+        assets?: string[];
+        host_psp?: boolean;
+        port?: number;
+        on_start?: any;
+    };
 
-    export type Client = {
-        open_table(name: string): Table,
-        open_view(name: string): View,
+    export class WebSocketManager {
+        add_connection(ws: ws): void;
+        host_table(name: string, table: Table): void;
+        host_view(name: string, view: View): void;
+        eject_table(name: string): void;
+        eject_view(name: string): void;
     }
+
+    export class WebSocketServer extends WebSocketManager {
+        constructor(config?: WebSocketServerOptions);
+        close(): void;
+    }
+
+    export function perspective_assets(assets: string[], host_psp: boolean): (request: any, response: any) => void;
 
     type perspective = {
-        TYPE_AGGREGATES: ValuesByType,
-        TYPE_FILTERS: ValuesByType,
-        SORT_ORDERS: SortOrders,
-        table(data_or_schema : TableData | Schema, options: TableOptions): Table,
-        worker(): PerspectiveWorker,
-        shared_worker(): PerspectiveWorker,
-        websocket(url: string): Client;
-        override: (x: any) => void
-    }
+        TYPE_AGGREGATES: ValuesByType;
+        TYPE_FILTERS: ValuesByType;
+        SORT_ORDERS: SortOrders;
+        table(data_or_schema: TableData | Schema, options?: TableOptions): Table;
+        worker(): PerspectiveWorker;
+        shared_worker(): PerspectiveWorker;
+        websocket(url: string): WebSocketClient;
+        override: (x: any) => void;
+    };
 
     const impl: perspective;
 
@@ -169,4 +195,3 @@ declare module "@finos/perspective/build/psp.sync.wasm" {
 
 declare module "@finos/perspective/build/perspective.wasm.worker.js" {}
 declare module "@finos/perspective/build/perspective.asmjs.worker.js" {}
-
