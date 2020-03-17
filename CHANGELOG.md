@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.6] (2020-03-17)
+
+#### Added
+  * [#954](https://github.com/finos/perspective/pull/954) New plugin `@finos/perspective-viewer-datagrid` ([@texodus](https://github.com/texodus))
+  * [#979](https://github.com/finos/perspective/pull/979) Datagrid row selection and column resize ([@texodus](https://github.com/texodus))
+  * [#967](https://github.com/finos/perspective/pull/967) Datagrid header click-to-sort and assorted improvements ([@texodus](https://github.com/texodus))
+  * [#969](https://github.com/finos/perspective/pull/969) Add `linked` filter mode to `perspective-workspace` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#963](https://github.com/finos/perspective/pull/963) Refactor out `WebsSocketManager` from `WebSockerServer` ([@zemeolotu](https://github.com/zemeolotu))
+  * [#957](https://github.com/finos/perspective/pull/957) Add ==, !=, >, <, and string equality computed columns ([@sc1f](https://github.com/sc1f))
+
+#### Fixed
+  * [#961](https://github.com/finos/perspective/pull/961) Fully clear queued updates before adding a new computed column ([@sc1f](https://github.com/sc1f))
+  * [#965](https://github.com/finos/perspective/pull/965) PerspectiveManager no longer treats `str` as `bytes` in Python 2 ([@sc1f](https://github.com/sc1f))
+  * [#973](https://github.com/finos/perspective/pull/973) Remove duplicate brew instructions ([@JHawk](https://github.com/JHawk))
+
+#### Internal
+  * [#970](https://github.com/finos/perspective/pull/970) update dependencies to jupyterlab 2.0, phosphor -> lumino ([@timkpaine](https://github.com/timkpaine))
+  * [#977](https://github.com/finos/perspective/pull/977) Update azure-pipelines.yml for Azure Pipelines ([@timkpaine](https://github.com/timkpaine))
+
 ## [0.4.5] (2020-02-28)
 
 #### Fixed
