@@ -22,7 +22,12 @@ import {
     Multiply,
     Divide,
     PercentOf,
+    Equals,
+    NotEquals,
+    GreaterThan,
+    LessThan,
     Length,
+    Is,
     Lowercase,
     Uppercase,
     ConcatComma,
@@ -152,7 +157,12 @@ export class ComputedExpressionColumnParser extends CstParser {
                 {ALT: () => this.CONSUME(Subtract)},
                 {ALT: () => this.CONSUME(Multiply)},
                 {ALT: () => this.CONSUME(Divide)},
-                {ALT: () => this.CONSUME(PercentOf)}
+                {ALT: () => this.CONSUME(PercentOf)},
+                {ALT: () => this.CONSUME(Equals)},
+                {ALT: () => this.CONSUME(NotEquals)},
+                {ALT: () => this.CONSUME(GreaterThan)},
+                {ALT: () => this.CONSUME(LessThan)},
+                {ALT: () => this.CONSUME(Is)}
             ]);
         });
 

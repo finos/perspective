@@ -185,6 +185,206 @@ module.exports = perspective => {
     });
 
     describe("String, arity 2 computed", function() {
+        it("is", async function() {
+            const table = perspective.table({
+                a: ["ABC", "DEF", null, "HIjK", "lMNoP"],
+                b: ["ABC", undefined, null, "HIjK", "lMNoP"]
+            });
+
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+
+            let result = await view.to_columns();
+            expect(result.result).toEqual([true, null, null, true, true]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is with dependencies is not null", async function() {
+            const table = perspective.table({
+                a: ["ABC", "DEF", "cba", "HIjK", "lMNoP"],
+                b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"]
+            });
+
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "computed1",
+                        computed_function_name: "concat_comma",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+
+            let view2 = table.view({
+                computed_columns: [
+                    {
+                        column: "computed1",
+                        computed_function_name: "concat_comma",
+                        inputs: ["a", "b"]
+                    },
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["computed1", "computed1"]
+                    }
+                ]
+            });
+
+            let result = await view2.to_columns();
+            expect(result.result).toEqual([true, true, true, true, true]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is, nulls", async function() {
+            const table = perspective.table({
+                a: ["ABC", "DEF", undefined, null, null],
+                b: ["ABC", "not", "EfG", "HIjK", null]
+            });
+
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+
+            let result = await view.to_columns();
+            expect(result.result).toEqual([true, false, null, null, null]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is, extra long", async function() {
+            const table = perspective.table({
+                a: ["ABC".repeat(10), "DEF".repeat(10), null, "HIjK".repeat(10), "lMNoP"],
+                b: ["ABC".repeat(10), "DEF".repeat(10), undefined, "HIjK", "lMNoP"]
+            });
+
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+
+            let result = await view.to_columns();
+            console.log(result);
+            expect(result.result).toEqual([true, true, null, false, true]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is, short", async function() {
+            const table = perspective.table({
+                a: ["A", "E", null, "h", "l"],
+                b: ["a", "E", undefined, "h", "l"]
+            });
+
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+
+            let result = await view.to_columns();
+            expect(result.result).toEqual([false, true, null, true, true]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is, mixed length", async function() {
+            const table = perspective.table({
+                a: ["ABC".repeat(100), "DEF".repeat(10), null, "hijk".repeat(10), "lm"],
+                b: ["arc".repeat(50), "DEf".repeat(10), undefined, "HIjK", "lMNoP"]
+            });
+
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+
+            let result = await view.to_columns();
+            expect(result.result).toEqual([false, false, null, false, false]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is, UTF-8", async function() {
+            const table = perspective.table({
+                a: [
+                    ">ﺐ{׆Meڱ㒕宾ⷭ̽쉱L𞔚Ո拏۴ګPظǭPۋV|팺㺞㷾墁鴦򒲹|ۿ򧊊䭪񪩛𬦢񺣠񦋳򵾳蛲񖑐iM񊪝񆷯",
+                    "灙𬡍瀳։󷿙񅈕ǐ-kʂiJ!P񙺍󵝳̃੝w𬾐򕕉耨󉋦o򰵏詂3򒤹J<ꑭ񃕱Ӏ𛤦4u򉠚UPf􂢳P##Q񪂈",
+                    "ĈᔞZ񇌖Qఋ?x?#$12ボլ㕢ﺧ𷛘󽙮[񲸧I񟭝򋨰魏ճכ󽺴ۏ󫨫䆐'㓔ǃ[ְ੬䎕寽𤩚ߨ袧򲕊򓰷|%",
+                    "ęԛ򓍯󍩁𨞟㰢󇂣õ􌁇΍Ԥ⥯۷˝㿙צּ񬆩򤿭顂ݦۍ式+=ԋ帋񃴕譋ⴏ0l􅏎߳cί򇈊iȞڈU򆐹񍖮򷡦̥𩮏Ǳ",
+                    "0ой3֝󻙋򑨮꾪߫0󏜬󆑝w󊭟񑓫򾷄𶳿o󏉃纊ʫ􅋶聍𾋊ô򓨼쀨ˆ퍨׽ȿKOŕ􅽾󙸹Ѩ󶭆j񽪌򸢐p򊘏׷򿣂dｇD쩖"
+                ],
+                b: [
+                    ">ﺐ{׆Meڱ㒕宾ⷭ̽쉱L𞔚Ո拏۴ګPظǭPۋV|팺㺞㷾墁鴦򒲹|ۿ򧊊䭪񪩛𬦢񺣠񦋳򵾳蛲񖑐iM񊪝񆷯",
+                    "灙𬡍瀳։󷿙񅈕ǐ-kʂiJ!P񙺍󵝳̃੝w𬾐򕕉耨󉋦o򰵏詂3򒤹J<ꑭ񃕱Ӏ𛤦4u򉠚UPf􂢳P##Q񪂈",
+                    "ĈᔞZ񇌖Qఋ?x?#$12ボլ㕢ﺧ𷛘󽙮[񲸧I񟭝򋨰魏ճכ󽺴ۏ󫨫䆐'㓔ǃ[ְ੬䎕寽𤩚ߨ袧򲕊򓰷|%",
+                    "ęԛ򓍯󍩁𨞟㰢󇂣õ􌁇΍Ԥ⥯۷˝㿙צּ񬆩򤿭顂ݦۍ式+=ԋ帋񃴕譋ⴏ0l􅏎߳cί򇈊iȞڈU򆐹񍖮򷡦̥𩮏Ǳ",
+                    "0ой3֝󻙋򑨮꾪߫0󏜬󆑝w󊭟񑓫򾷄𶳿o󏉃纊ʫ􅋶聍𾋊ô򓨼쀨ˆ퍨׽ȿKOŕ􅽾󙸹Ѩ󶭆j񽪌򸢐p򊘏׷򿣂dｇD쩖2"
+                ]
+            });
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+            let result = await view.to_columns();
+            expect(result.result).toEqual([true, true, true, true, false]);
+            view.delete();
+            table.delete();
+        });
+
+        it("is, UTF-8 converted to Unicode", async function() {
+            const table = perspective.table({
+                a: [">{MeLPPV||iM", "-kiJ!Pwo3J<4uUPfP##Q", "ZQ?x?#$12[I'[|%", "ܦf+=0lciU", "030wo􎼨KOjpdD"],
+                b: [">{MeLPPV||iM", "-kiJ!Pwo3J<4uUPfP##Q", "ZQ?x?#$12[I'[|%", "ܦf+=0lciU", "030wo􎼨KOjpdD2"]
+            });
+            let view = table.view({
+                computed_columns: [
+                    {
+                        column: "result",
+                        computed_function_name: "is",
+                        inputs: ["a", "b"]
+                    }
+                ]
+            });
+            let result = await view.to_columns();
+            expect(result.result).toEqual([true, true, true, true, false]);
+            view.delete();
+            table.delete();
+        });
+
         it("Concat with space", async function() {
             const table = perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],

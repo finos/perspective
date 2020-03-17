@@ -157,6 +157,16 @@ export class ComputedExpressionColumnVisitor extends base_visitor {
             return ctx.divide[0].image;
         } else if (ctx.percent_of) {
             return ctx.percent_of[0].image;
+        } else if (ctx.equals) {
+            return ctx.equals[0].image;
+        } else if (ctx.not_equals) {
+            return ctx.not_equals[0].image;
+        } else if (ctx.greater_than) {
+            return ctx.greater_than[0].image;
+        } else if (ctx.less_than) {
+            return ctx.less_than[0].image;
+        } else if (ctx.is) {
+            return ctx.is[0].image;
         } else {
             return;
         }

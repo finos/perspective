@@ -321,12 +321,22 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::ABS;
     } else if (name == "%" || name == "percent_a_of_b") {
         return t_computed_function_name::PERCENT_A_OF_B;
+    } else if (name == "==" || name == "equals") {
+        return t_computed_function_name::EQUALS;
+    } else if (name == "!=" || name == "not_equals") {
+        return t_computed_function_name::NOT_EQUALS;
+    } else if (name == ">" || name == "greater_than") {
+        return t_computed_function_name::GREATER_THAN;
+    } else if (name == "<" || name == "less_than") {
+        return t_computed_function_name::LESS_THAN;
     } else if (name == "Uppercase" || name == "uppercase") {
         return t_computed_function_name::UPPERCASE;
     } else if (name == "Lowercase" || name == "lowercase") {
         return t_computed_function_name::LOWERCASE;
     } else if (name == "length") {
         return t_computed_function_name::LENGTH;
+    } else if (name == "is") {
+        return t_computed_function_name::IS;
     } else if (name == "concat_space") {
         return t_computed_function_name::CONCAT_SPACE;
     } else if (name == "concat_comma") {
@@ -384,9 +394,14 @@ computed_function_name_to_string(t_computed_function_name name) {
         case SQRT: return "sqrt";
         case ABS: return "abs";
         case PERCENT_A_OF_B: return "%";
+        case EQUALS: return "==";
+        case NOT_EQUALS: return "!=";
+        case GREATER_THAN: return ">";
+        case LESS_THAN: return "<";
         case UPPERCASE: return "uppercase";
         case LOWERCASE: return "lowercase";
         case LENGTH: return "length";
+        case IS: return "is";
         case CONCAT_SPACE: return "concat_space";
         case CONCAT_COMMA: return "concat_comma";
         case BUCKET_10: return "bin10";

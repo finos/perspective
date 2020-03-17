@@ -1121,6 +1121,358 @@ module.exports = perspective => {
                 await view.delete();
                 await table.delete();
             });
+
+            it("Computed column of arity 2, equals, ints", async function() {
+                const table = perspective.table({
+                    a: [100, 75, 50, 25, 10, 1],
+                    b: [100, 100, 100, 100, 100, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "==",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, false, false, false, false, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, equals, floats", async function() {
+                const table = perspective.table({
+                    a: [1.2222222222, 5.5, 7.55555555555, 9.5],
+                    b: [1.22222222222, 5.5, 7.55555555555, 4.5]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "==",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, true, true, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, equals, mixed", async function() {
+                const table = perspective.table({
+                    a: [100.0, 65.5, 100.0, 85.5, 95.5],
+                    b: [100, 100, 100, 100, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "==",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, false, true, false, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, equals, with null", async function() {
+                const table = perspective.table({
+                    a: [100, null, 50.0, 25, 10, 1],
+                    b: [100, undefined, 50, 100, undefined, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "==",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, null, true, false, null, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, not equals, ints", async function() {
+                const table = perspective.table({
+                    a: [100, 75, 50, 25, 10, 1],
+                    b: [100, 100, 100, 100, 100, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "!=",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, true, true, true, true, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, not equals, floats", async function() {
+                const table = perspective.table({
+                    a: [1.2222222222, 5.5, 7.55555555555, 9.5],
+                    b: [1.22222222222, 5.5, 7.55555555555, 4.5]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "!=",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, false, false, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, not equals, mixed", async function() {
+                const table = perspective.table({
+                    a: [100.0, 65.5, 100.0, 85.5, 95.5],
+                    b: [100, 100, 100, 100, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "!=",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, true, false, true, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, not equals, with null", async function() {
+                const table = perspective.table({
+                    a: [100, null, 50.0, 25, 10, 1],
+                    b: [100, undefined, 50, 100, undefined, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "!=",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, null, false, true, null, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, greater than, ints", async function() {
+                const table = perspective.table({
+                    a: [100, 75, 50, 25, 10, 1],
+                    b: [100, 100, 100, 100, 100, 0]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: ">",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, false, false, false, false, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, greater than, floats", async function() {
+                const table = perspective.table({
+                    a: [1.22222222223, 5.5, 7.55555555555, 0.555555556],
+                    b: [1.22222222222, 5.5, 7.55555555555, 0.555555555]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: ">",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, false, false, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, greater than, mixed", async function() {
+                const table = perspective.table({
+                    a: [100.0, 65.5, 100.0, 85.5, 95.5],
+                    b: [100, 100, 100, 100, 5]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: ">",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, false, false, false, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, greater than, with null", async function() {
+                const table = perspective.table({
+                    a: [100, null, 50.0, 25, 10, 10000],
+                    b: [100, undefined, 50, 100, undefined, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: ">",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, null, false, false, null, true]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, less than, ints", async function() {
+                const table = perspective.table({
+                    a: [100, 75, 50, 25, 10, 1],
+                    b: [100, 100, 100, 100, 100, 0]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "<",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, true, true, true, true, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, less than, floats", async function() {
+                const table = perspective.table({
+                    a: [1.2222222222, 5.5, 7.1, 9.5],
+                    b: [1.22222222222, 5.5, 7.55555555555, 4.5]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "<",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, false, true, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, less than, mixed", async function() {
+                const table = perspective.table({
+                    a: [100.0, 65.5, 100.0, 85.5, 95.5],
+                    b: [100, 100, 100, 100, 5]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "<",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([false, true, false, true, false]);
+                view.delete();
+                table.delete();
+            });
+
+            it("Computed column of arity 2, less than, with null", async function() {
+                const table = perspective.table({
+                    a: [10, null, 50.0, 25, 10, 10000],
+                    b: [100, undefined, 50, 100, undefined, 100]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "<",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                expect(result["result"]).toEqual([true, null, false, true, null, false]);
+                view.delete();
+                table.delete();
+            });
         });
     });
 };
