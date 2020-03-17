@@ -35,11 +35,16 @@
 .p-TabBar-tab > .p-TabBar-tabConfigIcon:before {
     content: var(--open-settings-button--content, "\1F527");
     font-family: var(--settings--font-family, "Arial");
+    transition: color 0.5s ease;
 }
 
 .p-TabBar-tab.p-mod-current.settings_open > .p-TabBar-tabConfigIcon:before {
     content: var(--close-settings-button--content, "\1F527");
     font-family: var(--settings--font-family, "Arial");
+}
+
+.p-TabBar-tab.p-mod-current.linked > .p-TabBar-tabConfigIcon:before{
+    color: #22a0ce;;
 }
 
 

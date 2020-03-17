@@ -55,17 +55,32 @@ export class PerspectiveViewerWidget extends Widget {
         return this._name;
     }
 
+    set linked(value) {
+        if (value !== undefined) {
+            if (value) {
+                this.viewer.setAttribute("linked", "");
+            } else {
+                this.viewer.removeAttribute("linked");
+            }
+        }
+    }
+    get linked() {
+        return this.viewer.hasAttribute("linked");
+    }
+
     toggleConfig() {
         return this.viewer.toggleConfig();
     }
 
     restore(config) {
-        const {master, table, name, ...viewerConfig} = config;
+        const {master, table, linked, name, ...viewerConfig} = config;
         this.master = master;
         this.name = name;
         if (table) {
             this.viewer.setAttribute("table", table);
         }
+        this.linked = linked;
+
         this.viewer.restore({...viewerConfig});
     }
 
@@ -74,7 +89,8 @@ export class PerspectiveViewerWidget extends Widget {
             ...this.viewer.save(),
             master: this.master,
             name: this.viewer.getAttribute("name"),
-            table: this.viewer.getAttribute("table")
+            table: this.viewer.getAttribute("table"),
+            linked: this.linked
         };
     }
 

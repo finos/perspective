@@ -29,7 +29,7 @@ describe("workspace", () => {
 
         const widgets = toArray(workspace.dockpanel.widgets());
 
-        const expected = {table: "superstore", name: "One", master: false};
+        const expected = {table: "superstore", name: "One", master: false, linked: false};
         expect(widgets.length).toBe(1);
         expect(widgets[0].save()).toStrictEqual(expected);
     });
@@ -48,7 +48,7 @@ describe("workspace", () => {
 
         const widgets = workspace.masterPanel.widgets;
 
-        const expected = {table: "superstore", name: "One", master: true};
+        const expected = {table: "superstore", name: "One", master: true, linked: false};
         expect(widgets.length).toBe(1);
         expect(widgets[0].save()).toStrictEqual(expected);
     });
@@ -75,8 +75,8 @@ describe("workspace", () => {
         const masterWidgets = workspace.masterPanel.widgets;
         const detailWidgets = toArray(workspace.dockpanel.widgets());
 
-        const master = {table: "superstore", name: "One", master: true};
-        const detail = {table: "superstore", name: "Two", master: false};
+        const master = {table: "superstore", name: "One", master: true, linked: false};
+        const detail = {table: "superstore", name: "Two", master: false, linked: false};
 
         expect(masterWidgets.length).toBe(1);
         expect(masterWidgets[0].save()).toStrictEqual(master);
