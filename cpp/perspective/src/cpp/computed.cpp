@@ -86,7 +86,14 @@ t_computed_column::get_computation_input_types(
             case MONTH_BUCKET:
             case YEAR_BUCKET: {
                 return {DTYPE_TIME, DTYPE_DATE};
-            }
+            };
+            case EQUALS:
+            case NOT_EQUALS:
+            case GREATER_THAN:
+            case LESS_THAN:
+            case IS: {
+                return {DTYPE_BOOL};
+            };
         }
     }
 

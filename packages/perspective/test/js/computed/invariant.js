@@ -265,6 +265,96 @@ module.exports = perspective => {
             });
         });
 
+        describe("Comparison operations should be pure with the same inputs.", function() {
+            jsc.property("== should always be true with the same input column", generator(), async data => {
+                const table = perspective.table(data);
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "==",
+                            inputs: ["a", "a"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                const expected = array_equals(result["result"], Array(data["a"].length).fill(true));
+                view.delete();
+                table.delete();
+                return expected;
+            });
+
+            jsc.property("> should always be false with the same input column", generator(), async data => {
+                const table = perspective.table(data);
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: ">",
+                            inputs: ["a", "a"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                const expected = array_equals(result["result"], Array(data["a"].length).fill(false));
+                view.delete();
+                table.delete();
+                return expected;
+            });
+
+            jsc.property("< should always be false with the same input column", generator(), async data => {
+                const table = perspective.table(data);
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "<",
+                            inputs: ["a", "a"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                const expected = array_equals(result["result"], Array(data["a"].length).fill(false));
+                view.delete();
+                table.delete();
+                return expected;
+            });
+
+            jsc.property("is should always be true with the same input column", generator(), async data => {
+                const table = perspective.table({
+                    a: "float",
+                    b: "float",
+                    c: "string",
+                    d: "datetime",
+                    e: "boolean"
+                });
+
+                table.update(data);
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "result",
+                            computed_function_name: "is",
+                            inputs: ["c", "c"]
+                        }
+                    ]
+                });
+
+                const result = await view.to_columns();
+                const expected = array_equals(result["result"], Array(data["a"].length).fill(true));
+                view.delete();
+                table.delete();
+                return expected;
+            });
+        });
+
         describe("Inverse operations on multiple views inheriting computed columns should be idempotent.", function() {
             jsc.property("(x + y) - x - y == 0", generator(), async data => {
                 const table = perspective.table(data);

@@ -101,6 +101,36 @@ export const PercentOf = createToken({
     categories: [OperatorTokenType]
 });
 
+export const Equals = createToken({
+    name: "equals",
+    pattern: /\==/,
+    categories: [OperatorTokenType]
+});
+
+export const NotEquals = createToken({
+    name: "not_equals",
+    pattern: /\!=/,
+    categories: [OperatorTokenType]
+});
+
+export const GreaterThan = createToken({
+    name: "greater_than",
+    pattern: /\>/,
+    categories: [OperatorTokenType]
+});
+
+export const LessThan = createToken({
+    name: "less_than",
+    pattern: /\</,
+    categories: [OperatorTokenType]
+});
+
+export const Is = createToken({
+    name: "is",
+    pattern: /\is/,
+    categories: [OperatorTokenType]
+});
+
 // Function operators, in the format func("x")
 export const Sqrt = createToken({
     name: "sqrt",
@@ -294,6 +324,10 @@ const tokens = [
     Multiply,
     Divide,
     PercentOf,
+    Equals,
+    NotEquals,
+    GreaterThan,
+    LessThan,
     Sqrt,
     Pow2,
     Abs,
@@ -303,6 +337,8 @@ const tokens = [
     Bin100,
     Bin10th,
     Bin10,
+    Length,
+    Is,
     ConcatComma,
     ConcatSpace,
     Uppercase,
