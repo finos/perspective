@@ -240,6 +240,7 @@ module.exports = perspective => {
 
             let result = await view2.to_columns();
             expect(result.result).toEqual([true, true, true, true, true]);
+            view2.delete();
             view.delete();
             table.delete();
         });

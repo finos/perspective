@@ -58,8 +58,9 @@ class Row extends HTMLElement {
                 ${this._weights.map(x => this._option_template(JSON.stringify(["weighted mean", x]), x))}
             </optgroup>
         `;
+        const has_weighted_mean = category === "TYPE_AGGREGATES" && (type === "integer" || type === "float");
         return html`
-            ${items.map(x => this._option_template(x))} ${type === "integer" || type === "float" ? weighted_options : nothing}
+            ${items.map(x => this._option_template(x))} ${has_weighted_mean ? weighted_options : nothing}
         `;
     }
 

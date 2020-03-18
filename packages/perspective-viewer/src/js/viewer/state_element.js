@@ -42,6 +42,10 @@ export class StateElement extends HTMLElement {
         return Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#active_columns perspective-row")).filter(x => !x.classList.contains("null-column"));
     }
 
+    _get_view_inactive_columns() {
+        return Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#inactive_columns perspective-row"));
+    }
+
     _get_view_all_column_names() {
         return this._get_view_all_columns().map(x => x.getAttribute("name"));
     }
@@ -122,15 +126,15 @@ export class StateElement extends HTMLElement {
     }
 
     _get_view_computed_columns() {
-        return JSON.parse(this.getAttribute("computed-columns"));
+        return JSON.parse(this.getAttribute("computed-columns")) || [];
     }
 
     _get_view_parsed_computed_columns() {
-        return JSON.parse(this.getAttribute("parsed-computed-columns"));
+        return JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
     }
 
     _get_visible_column_count() {
-        return this._get_view_dom_columns().length;
+        return this._get_view_active_columns().length;
     }
 
     get_aggregate_attribute() {

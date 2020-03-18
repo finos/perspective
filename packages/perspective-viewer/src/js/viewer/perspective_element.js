@@ -129,7 +129,6 @@ export class PerspectiveElement extends StateElement {
      * If any column names are invalid, they are removed from the output
      * array of computed column definitions.
      *
-     * @async
      * @param {Array{Object}} computed_columns an Array of computed column
      * definitions
      * @param {Object{String}} computed_schema a computed column schema
@@ -137,7 +136,7 @@ export class PerspectiveElement extends StateElement {
      *
      * @returns {Array{Object}} a validated Array of computed column definitions
      */
-    async _validate_parsed_computed_columns(computed_columns, computed_schema) {
+    _validate_parsed_computed_columns(computed_columns, computed_schema) {
         if (!computed_columns || computed_columns.length === 0) return [];
         const validated = [];
 
@@ -150,13 +149,19 @@ export class PerspectiveElement extends StateElement {
         return validated;
     }
 
-    async _load_table(table, computed = false) {
+    /**
+     * Given a {@link module:perspective~table}, load it into the
+     * {@link module:perspective_viewer~PerspectiveViewer} and set the viewer's
+     * state. If the `computed-columns` attribute is set on the viewer, this
+     * method attempts to validate the computed columns with the `Table` and
+     * reconcile state.
+     *
+     * @param {*} table
+     * @param {*} computed
+     */
+    async _load_table(table) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
         const resolve = this._set_updating();
-
-        if (this._table && !computed) {
-            this.removeAttribute("computed-columns");
-        }
 
         this._clear_state();
         this._table = table;
@@ -169,7 +174,7 @@ export class PerspectiveElement extends StateElement {
         this._initial_col_order = cols.slice();
 
         // Already validated through the attribute API
-        const parsed_computed_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+        const parsed_computed_columns = this._get_view_parsed_computed_columns();
         const computed_column_names = parsed_computed_columns.map(x => x.column);
         const computed_schema = await table.computed_schema(parsed_computed_columns);
 
@@ -243,6 +248,7 @@ export class PerspectiveElement extends StateElement {
         if (this.hasAttribute("filters")) {
             this.filters = this.getAttribute("filters");
         }
+
         try {
             await this._debounce_update({force_update: true});
         } catch (e) {
@@ -421,7 +427,7 @@ export class PerspectiveElement extends StateElement {
 
         // Computed Columns will have been parsed by this point in the
         // setAttribute callback.
-        const computed_columns = this._get_view_parsed_computed_columns() || [];
+        const computed_columns = this._get_view_parsed_computed_columns();
 
         const config = {
             filter: filters,

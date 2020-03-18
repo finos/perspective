@@ -51,7 +51,7 @@ export class DomElement extends PerspectiveElement {
     }
 
     _get_type(name) {
-        let all = this._get_view_dom_columns("#inactive_columns perspective-row");
+        let all = this._get_view_inactive_columns();
         if (all.length > 0) {
             const type = all.find(x => x.getAttribute("name") === name);
             if (type) {
@@ -65,7 +65,7 @@ export class DomElement extends PerspectiveElement {
     }
 
     _set_row_type(row) {
-        const weights = this._get_view_dom_columns("#inactive_columns perspective-row")
+        const weights = this._get_view_inactive_columns()
             .filter(x => x.getAttribute("type") === "integer" || x.getAttribute("type") === "float")
             .map(x => x.getAttribute("name"));
         row.set_weights(weights);
@@ -113,7 +113,7 @@ export class DomElement extends PerspectiveElement {
             }
         }
 
-        const weights = this._get_view_dom_columns("#inactive_columns perspective-row")
+        const weights = this._get_view_inactive_columns()
             .filter(x => x.getAttribute("type") === "integer" || x.getAttribute("type") === "float")
             .map(x => x.getAttribute("name"));
         row.set_weights(weights);
@@ -158,31 +158,56 @@ export class DomElement extends PerspectiveElement {
     }
 
     /**
-     * Using the view's schema, add computed columns to the inactive columns
-     * area if they're not specified to be inserted anywhere else in the UI.
+     * Using a computed schema generated in the attribute callback, add
+     * computed columns to the inactive columns area if they're not specified
+     * to be inserted anywhere else in the UI.
      */
-    async _update_computed_column_view() {
-        if (!this._view) return;
-        const computed_schema = await this._view.computed_schema();
-        const computed_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+    _update_computed_column_view(computed_schema) {
+        const computed_columns = this._get_view_parsed_computed_columns();
         const columns = this._get_view_all_column_names();
         const active = this._get_view_active_column_names();
-        const rp = this._get_view_row_pivots();
-        const cp = this._get_view_column_pivots();
+
+        if (Object.keys(computed_schema).length === 0 || computed_columns.length === 0) {
+            return;
+        }
 
         let added_count = 0;
+
+        const attr = JSON.parse(this.getAttribute("columns")) || [];
+        let reset_columns_attr = false;
+
         for (const cc of computed_columns) {
             const name = cc.column;
-            const should_add = !columns.includes(name) && !active.includes(name) && !rp.includes(name) && !cp.includes(name);
-            if (!should_add) continue;
+
+            // Check for whether the computed column is in the attribute but
+            // NOT in the DOM - occurs when restore is called and a race
+            // condition between `computed-columns` and `columns` occurs.
+            const should_reset = !columns.includes(name) && attr.includes(name);
+
+            if (should_reset) {
+                reset_columns_attr = true;
+            }
+
+            // If the column already exists or is already in the active DOM,
+            // don't add it to the inactive DOM
+            const should_add = !columns.includes(name) && !active.includes(name);
+
+            if (!should_add) {
+                continue;
+            }
+
             const row = this._new_row(name, computed_schema[name], null, null, null, name);
             this._inactive_columns.appendChild(row);
             added_count++;
         }
 
-        // Remove collapse so that new inactive columns show up
-        if (added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
-            this._inactive_columns.parentElement.classList.remove("collapse");
+        if (reset_columns_attr) {
+            this._update_column_view(attr, true);
+        } else {
+            // Remove collapse so that new inactive columns show up
+            if (added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
+                this._inactive_columns.parentElement.classList.remove("collapse");
+            }
         }
     }
 
@@ -243,7 +268,8 @@ export class DomElement extends PerspectiveElement {
 
         // Re-check on whether to collapse inactive columns
         const pop_cols = this._get_view_active_columns().filter(x => typeof x !== "undefined" && x !== null);
-        const lis = this._get_view_dom_columns("#inactive_columns perspective-row");
+        const lis = this._get_view_inactive_columns();
+
         if (pop_cols.length === lis.length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
@@ -255,14 +281,19 @@ export class DomElement extends PerspectiveElement {
         if (!columns) {
             columns = this._get_view_active_column_names();
         }
+
         if (this._plugin.initial && this._plugin.initial.names) {
             while (columns.length < this._plugin.initial.names.length) {
                 columns.push(null);
             }
         }
+
+        // If columns were not passed in, this is needed to keep the attribute
+        // API in sync with DOM state.
         this.setAttribute("columns", JSON.stringify(columns));
+
         const pop_cols = columns.filter(x => typeof x !== "undefined" && x !== null);
-        const lis = this._get_view_dom_columns("#inactive_columns perspective-row");
+        const lis = this._get_view_inactive_columns();
         if (pop_cols.length === lis.length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
@@ -300,8 +331,9 @@ export class DomElement extends PerspectiveElement {
         const active_columns = Array.prototype.slice.call(container.children);
 
         // Make sure that the `computed` attribute is set on computed columns
-        const computed_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+        const computed_columns = this._get_view_parsed_computed_columns();
         const computed_names = computed_columns.map(x => x.column);
+
         for (let i = 0, j = 0; i < active_columns.length || j < columns.length; i++, j++) {
             const name = columns[j];
             const col = active_columns[i];
