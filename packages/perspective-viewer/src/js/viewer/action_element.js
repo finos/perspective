@@ -121,11 +121,7 @@ export class ActionElement extends DomElement {
         const expression = event.detail.expression;
 
         // `computed-columns` stores the raw expression typed by the user.
-        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
-
-        if (computed_columns === null) {
-            computed_columns = [];
-        }
+        let computed_columns = this._get_view_computed_columns();
 
         if (computed_columns.includes(expression)) {
             console.warn(`"${expression}" was not applied because it already exists.`);
@@ -194,13 +190,6 @@ export class ActionElement extends DomElement {
                 this._active_columns.removeChild(parent);
             }
         } else {
-            // check if we're manipulating computed column input
-            if (ev.path[1]?.classList.contains("psp-cc-computation__input-column")) {
-                //  this._computed_column._register_inputs();
-                this._computed_column.deselect_column(ev.currentTarget.getAttribute("name"));
-                this._update_column_view();
-                return;
-            }
             if ((ev.detail.shiftKey && this._plugin.selectMode === "toggle") || (!ev.detail.shiftKey && this._plugin.selectMode === "select")) {
                 for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                     this._active_columns.removeChild(child);

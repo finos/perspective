@@ -247,6 +247,7 @@ enum t_computed_function_name {
  * @param name
  * @return t_computed_function_name
  */
+PERSPECTIVE_EXPORT
 t_computed_function_name
 str_to_computed_function_name(const std::string& name);
 
@@ -257,6 +258,7 @@ str_to_computed_function_name(const std::string& name);
  * @param name
  * @return std::string
  */
+PERSPECTIVE_EXPORT
 std::string
 computed_function_name_to_string(t_computed_function_name name);
 

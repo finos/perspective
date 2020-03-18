@@ -316,6 +316,7 @@ t_computed_column::apply_computation(
         for (t_uindex x = 0; x < arity; ++x) {
             t_tscalar t = table_columns[x]->get_scalar(idx);
             if (!t.is_valid()) {
+                // FIXME: computed columns created with dependencies don't seem to work
                 output_column->clear(idx);
                 skip_row = true;
                 break;

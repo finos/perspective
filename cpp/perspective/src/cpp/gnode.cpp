@@ -923,6 +923,8 @@ t_gnode::_compute_column(
     t_computation computation = t_computed_column::get_computation(
         computed_function_name, input_types);
 
+    // FIXME: computed columns created with dependencies don't seem to work
+
     if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
         std::cerr 
             << "Cannot re-compute column `"
@@ -969,6 +971,8 @@ t_gnode::_recompute_column(
     t_computation computation = t_computed_column::get_computation(
         computed_function_name, input_types);
     t_dtype output_column_type = computation.m_return_type;
+    
+    // FIXME: computed columns created with dependencies don't seem to work
 
     auto output_column = flattened->add_column_sptr(
         computed_column_name, output_column_type, true);

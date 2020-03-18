@@ -90,8 +90,11 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'sqrt(("Sales" * "Profit")) as "third"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["State"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["first", "second", "Sales"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("column-pivots", JSON.stringify(["third"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(
                     element =>
                         element.setAttribute(
@@ -103,6 +106,7 @@ utils.with_server({}, () => {
                         ),
                     viewer
                 );
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(
                     element =>
                         element.setAttribute(
@@ -114,11 +118,13 @@ utils.with_server({}, () => {
                         ),
                     viewer
                 );
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.removeAttribute("computed-columns"), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             // reset
-            test.capture("Resetting the viewer with computed columns should remove computed columns.", async page => {
+            test.capture("Resetting the viewer with computed columns should place columns in the inactive list.", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'sqrt("Profit")');
@@ -128,6 +134,88 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.reset(), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Resetting the viewer with computed columns in active columns should reset columns but not delete columns.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Computed2", "Sales"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.reset(), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Resetting the viewer with computed columns set as pivots should reset pivots but not delete columns.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["Computed"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("column-pivots", JSON.stringify(["Computed2"])), viewer);
+                await page.evaluate(element => element.reset(), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Resetting the viewer with computed columns set as filters should reset filters but not delete columns.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(
+                    element =>
+                        element.setAttribute(
+                            "filters",
+                            JSON.stringify([
+                                ["Computed", "!=", "01 Monday"],
+                                ["State", "==", "Texas"]
+                            ])
+                        ),
+                    viewer
+                );
+                await page.evaluate(element => element.reset(), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Resetting the viewer with computed columns set as sort should reset sort but not delete columns.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(
+                    element =>
+                        element.setAttribute(
+                            "sort",
+                            JSON.stringify([
+                                ["Sales", "desc"],
+                                ["Computed", "desc"]
+                            ])
+                        ),
+                    viewer
+                );
+                await page.evaluate(element => element.reset(), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             // save
@@ -187,11 +275,13 @@ utils.with_server({}, () => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed"])), viewer);
                 await page.evaluate(element => {
                     element.setAttribute("aggregates", JSON.stringify({Computed: "any"}));
                 }, viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
             test.capture("row pivots by computed expression column.", async page => {
@@ -199,7 +289,8 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Computed"]'), viewer);
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "State", "City"])), viewer);
             });
 
             test.capture("column pivots by computed expression column.", async page => {
@@ -207,11 +298,12 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Computed"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.skip("row and column pivots by computed expression column.", async page => {
-                // FIXME: flaky
+            test.capture("row and column pivots by computed expression column.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
@@ -219,7 +311,9 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Computed"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Computed2"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["State", "City"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
@@ -228,8 +322,8 @@ utils.with_server({}, () => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await add_computed_expression(page, 'pow2("Sales") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales"])), viewer);
                 await page.evaluate(element => element.setAttribute("sort", JSON.stringify([["Computed", "desc"]])), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales"])), viewer);
             });
 
             test.capture("filters by computed expression column.", async page => {
@@ -237,6 +331,7 @@ utils.with_server({}, () => {
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Computed", "==", "2 Monday"]]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Order Date"])), viewer);
             });
 
             test.capture("computed expression column aggregates should persist.", async page => {
@@ -283,6 +378,7 @@ utils.with_server({}, () => {
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["First", "Second"])), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 

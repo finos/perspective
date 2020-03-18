@@ -39,7 +39,7 @@ import {expression_to_computed_column_config} from "./computed_expressions/visit
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
+const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "computed-columns", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
 
 /**
  * The HTMLElement class for `<perspective-viewer>` custom element.
@@ -195,7 +195,7 @@ class PerspectiveViewer extends ActionElement {
                 // to exclude all computed columns.
                 if (this.hasAttribute("computed-columns")) {
                     this.removeAttribute("computed-columns");
-                    const parsed = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+                    const parsed = this._get_view_parsed_computed_columns();
                     this._reset_computed_column_view(parsed);
                     this.removeAttribute("parsed-computed-columns");
                     resolve();
@@ -218,8 +218,10 @@ class PerspectiveViewer extends ActionElement {
             }
 
             // Attempt to validate the parsed computed columns against the Table
+            let computed_schema = {};
+
             if (this._table) {
-                const computed_schema = await this._table.computed_schema(parsed_computed_columns);
+                computed_schema = await this._table.computed_schema(parsed_computed_columns);
                 const validated = await this._validate_parsed_computed_columns(parsed_computed_columns, computed_schema);
                 if (validated.length !== parsed_computed_columns.length) {
                     // Generate a diff error message with the invalid columns
@@ -233,14 +235,14 @@ class PerspectiveViewer extends ActionElement {
                             }
                         }
                     }
-                    console.log("Could not apply these computed columns:", JSON.stringify(diff));
+                    console.warn("Could not apply these computed columns:", JSON.stringify(diff));
                 }
                 parsed_computed_columns = validated;
             }
 
             // Need to refresh the UI so that previous computed columns used in
             // pivots, columns, etc. get cleared
-            const old_columns = JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
+            const old_columns = this._get_view_parsed_computed_columns();
             const to_remove = this._diff_computed_column_view(old_columns, parsed_computed_columns);
             this._reset_computed_column_view(to_remove);
 
@@ -248,10 +250,10 @@ class PerspectiveViewer extends ActionElement {
             // validation of column names, etc.
             this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
 
-            await this._debounce_update();
-            await this._update_computed_column_view();
-            resolve();
+            this._update_computed_column_view(computed_schema);
             this.dispatchEvent(new Event("perspective-config-update"));
+            await this._debounce_update();
+            resolve();
         })();
     }
 
@@ -408,9 +410,14 @@ class PerspectiveViewer extends ActionElement {
             pivots = [];
         }
 
-        var inner = this._column_pivots.querySelector("ul");
-        // TODO: does this need computed attr
-        this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
+        const inner = this._column_pivots.querySelector("ul");
+        this._update_column_list(pivots, inner, (pivot, computed_names) => {
+            let computed = undefined;
+            if (computed_names.includes(pivot)) {
+                computed = pivot;
+            }
+            return this._new_row(pivot, undefined, undefined, undefined, undefined, computed);
+        });
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
@@ -431,8 +438,14 @@ class PerspectiveViewer extends ActionElement {
             pivots = [];
         }
 
-        var inner = this._row_pivots.querySelector("ul");
-        this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
+        const inner = this._row_pivots.querySelector("ul");
+        this._update_column_list(pivots, inner, (pivot, computed_names) => {
+            let computed = undefined;
+            if (computed_names.includes(pivot)) {
+                computed = pivot;
+            }
+            return this._new_row(pivot, undefined, undefined, undefined, undefined, computed);
+        });
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
@@ -765,7 +778,6 @@ class PerspectiveViewer extends ActionElement {
         } else {
             this.removeAttribute("columns");
         }
-        this.removeAttribute("computed-columns");
         this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
         this._hide_context_menu();
