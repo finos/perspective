@@ -319,12 +319,11 @@ t_computed_column::apply_computation(
         for (t_uindex x = 0; x < arity; ++x) {
             t_tscalar t = table_columns[x]->get_scalar(idx);
             if (!t.is_valid()) {
-                std::cout << idx << "is invalid in compute" << std::endl;
                 output_column->clear(idx);
                 skip_row = true;
                 break;
             }
-            std::cout << t << std::endl;
+
             args.push_back(t);
         }
 
@@ -444,8 +443,6 @@ t_computed_column::reapply_computation(
                     (row_already_exists && flattened_columns[cidx]->is_cleared(idx)) ||
                     (!row_already_exists && !flattened_columns[cidx]->is_valid(idx));
 
-                std::cout << idx << "is invalid in recompute, unset: " << std::boolalpha << should_unset << std::endl;
-
                 /**
                  * Use `unset` instead of `clear`, as
                  * `t_gstate::update_master_table` will reconcile `STATUS_CLEAR`
@@ -458,11 +455,9 @@ t_computed_column::reapply_computation(
                 } else {
                     // Use the value in the master table to compute.
                     arg = table_columns[cidx]->get_scalar(ridx);
-                    std::cout << "table arg: " << arg << std::endl;
                 }
             }
 
-            std::cout << arg << std::endl;
             args.push_back(arg);
         }
 
