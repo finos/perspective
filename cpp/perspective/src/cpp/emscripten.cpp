@@ -1316,7 +1316,10 @@ namespace binding {
 
             // Add the computed column to the config.
             auto tp = std::make_tuple(
-                computed_column_name, computed_function_name, input_columns);
+                computed_column_name,
+                computed_function_name,
+                input_columns,
+                computation);
             computed_columns.push_back(tp);
         }
 
@@ -1516,10 +1519,17 @@ namespace binding {
                 str_to_computed_function_name(c.at(1).as<std::string>());
             std::vector<std::string> input_columns = 
                 vecFromArray<t_val, std::string>(c.at(2));
+            t_computation invalid_computation = t_computation();
 
-            // Add the computed column to the config.
+            // Further validation is needed in `get_computed_schema`, so
+            // default initialize input and return types and send to the
+            // `Table`, as we cannot assume the configuration is valid
+            // at this point.
             auto tp = std::make_tuple(
-                computed_column_name, computed_function_name, input_columns);
+                computed_column_name,
+                computed_function_name,
+                input_columns,
+                invalid_computation);
             computed_columns.push_back(tp);
         }
         

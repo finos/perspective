@@ -268,6 +268,16 @@ protected:
         t_dtype dtype);
 
     /**
+     * @brief Add a computed column to `tbl` without computing it.
+     * 
+     * @param computed_column 
+     * @param tbl 
+     */
+    void _add_computed_column(
+        const t_computed_column_definition& computed_column,
+        std::shared_ptr<t_data_table> tbl);
+
+    /**
      * @brief Apply a computed column to `tbl`.
      * 
      * @param computed_column 
