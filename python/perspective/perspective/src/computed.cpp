@@ -36,7 +36,10 @@ get_table_computed_schema_py(
 
         // Add the computed column to the config.
         auto tp = std::make_tuple(
-            computed_column_name, computed_function_name, input_columns);
+            computed_column_name,
+            computed_function_name,
+            input_columns,
+            {});
         computed_columns.push_back(tp);
     }
     

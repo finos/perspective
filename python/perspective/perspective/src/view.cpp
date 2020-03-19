@@ -184,7 +184,11 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
 
         // Add the computed column to the config.
         auto tp = std::make_tuple(
-            computed_column_name, computed_function_name, input_columns);
+            computed_column_name,
+            computed_function_name,
+            input_columns,
+            computation);
+
         computed_columns.push_back(tp);
     }
 

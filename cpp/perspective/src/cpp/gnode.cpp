@@ -747,11 +747,10 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     }
 
     // When a context is registered, compute its columns on the master table
-    // so the columns will exist when updates, etc. are processed. FIXME: this
-    // is double computing...
+    // so the columns will exist when updates, etc. are processed.
     std::shared_ptr<t_data_table> gstate_table = get_table_sptr();
     for (const auto& computed : computed_columns) {
-        _compute_column(computed, gstate_table);
+        _add_computed_column(computed, gstate_table);
     }
 }
 
@@ -904,30 +903,49 @@ t_gnode::_add_all_computed_columns(
 }
 
 void
+t_gnode::_add_computed_column(
+    const t_computed_column_definition& computed_column,
+    std::shared_ptr<t_data_table> tbl) {
+    std::string computed_column_name = std::get<0>(computed_column);
+    t_computed_function_name computed_function_name = std::get<1>(computed_column);
+    std::vector<std::string> input_column_names = std::get<2>(computed_column);
+    t_computation computation = std::get<3>(computed_column);
+
+    if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+        std::cerr 
+            << "Cannot add computed column `"
+            << computed_column_name
+            << "` in gnode."
+            << std::endl;
+            return;
+    }
+
+    t_dtype output_column_type = computation.m_return_type;
+
+    tbl->add_column_sptr(
+        computed_column_name, output_column_type, true);
+}
+
+void
 t_gnode::_compute_column(
     const t_computed_column_definition& computed_column,
     std::shared_ptr<t_data_table> tbl) {
-    std::vector<t_dtype> input_types;
+        std::vector<t_dtype> input_types;
     std::vector<std::shared_ptr<t_column>> input_columns;
 
     std::string computed_column_name = std::get<0>(computed_column);
     t_computed_function_name computed_function_name = std::get<1>(computed_column);
     std::vector<std::string> input_column_names = std::get<2>(computed_column);
+    t_computation computation = std::get<3>(computed_column);
     
     for (const auto& name : input_column_names) {
         auto column = tbl->get_column(name);
         input_columns.push_back(column);
-        input_types.push_back(column->get_dtype());
     }
-
-    t_computation computation = t_computed_column::get_computation(
-        computed_function_name, input_types);
-
-    // FIXME: computed columns created with dependencies don't seem to work
 
     if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
         std::cerr 
-            << "Cannot re-compute column `"
+            << "Cannot compute column `"
             << computed_column_name
             << "` in gnode."
             << std::endl;
@@ -938,6 +956,7 @@ t_gnode::_compute_column(
 
     auto output_column = tbl->add_column_sptr(
         computed_column_name, output_column_type, true);
+
     output_column->reserve(input_columns[0]->size());
 
     t_computed_column::apply_computation(
@@ -959,17 +978,24 @@ t_gnode::_recompute_column(
     std::string computed_column_name = std::get<0>(computed_column);
     t_computed_function_name computed_function_name = std::get<1>(computed_column);
     std::vector<std::string> input_column_names = std::get<2>(computed_column);
+    t_computation computation = std::get<3>(computed_column);
+
+    if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+    std::cerr 
+        << "Cannot re-compute column `"
+        << computed_column_name
+        << "` in gnode."
+        << std::endl;
+        return;
+    }
     
     for (const auto& name : input_column_names) {
         auto table_column = table->get_column(name);
         auto flattened_column = flattened->get_column(name);
         table_columns.push_back(table_column);
         flattened_columns.push_back(flattened_column);
-        input_types.push_back(table_column->get_dtype());
     }
 
-    t_computation computation = t_computed_column::get_computation(
-        computed_function_name, input_types);
     t_dtype output_column_type = computation.m_return_type;
     
     // FIXME: computed columns created with dependencies don't seem to work

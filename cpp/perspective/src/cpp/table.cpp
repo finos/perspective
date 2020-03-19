@@ -68,11 +68,7 @@ Table::get_schema() const {
 
 t_schema 
 Table::get_computed_schema(
-    std::vector<
-        std::tuple<
-            std::string,
-            t_computed_function_name,
-            std::vector<std::string>>> computed_columns) const {
+    std::vector<t_computed_column_definition> computed_columns) const {
     std::vector<std::string> computed_column_names;
     std::vector<t_dtype> computed_column_types;
 

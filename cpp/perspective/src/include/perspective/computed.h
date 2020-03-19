@@ -23,21 +23,25 @@
 namespace perspective {
 
 /**
- * @brief A `t_computed_column_definition` is a tuple with three values:
- * 
- * - a string representing the name of the computed column
- * - a `t_computed_function_name` that maps to the computation function
- * - a vector of strings containing the names of input columns
- *
- */
-typedef std::tuple<std::string, t_computed_function_name, std::vector<std::string>> t_computed_column_definition;
-
-/**
  * @brief Stores metadata for a single computation method.
  * 
  */
 struct PERSPECTIVE_EXPORT t_computation {
+
+    /**
+     * @brief Construct a new, invalid `t_computation` with `m_name` set to
+     * `INVALID_COMPUTED_FUNCTION`.
+     * 
+     */
+    t_computation();
     
+    /**
+     * @brief Construct a new, valid `t_computation`.
+     * 
+     * @param name 
+     * @param input_types 
+     * @param return_type 
+     */
     t_computation(
         t_computed_function_name name,
         const std::vector<t_dtype>& input_types,
@@ -48,6 +52,18 @@ struct PERSPECTIVE_EXPORT t_computation {
     std::vector<t_dtype> m_input_types;
     t_dtype m_return_type;
 };
+
+/**
+ * @brief A `t_computed_column_definition` is a tuple with four values:
+ * 
+ * - a string representing the name of the computed column
+ * - a `t_computed_function_name` that maps to the computation function
+ * - a vector of strings containing the names of input columns
+ * - a `t_computation` containing the input data types and return type
+ *
+ */
+typedef std::tuple<std::string, t_computed_function_name, std::vector<std::string>, t_computation> t_computed_column_definition;
+
 
 /**
  * @brief Stores static functions used for computed columns, and a string to
