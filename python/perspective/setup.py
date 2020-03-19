@@ -171,7 +171,7 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
-        for file in ('CMakeLists.txt', 'cmake', 'src', 'test'):
+        for file in ('CMakeLists.txt', 'cmake', 'src'):
             path = os.path.abspath(os.path.join(here, 'dist', file))
             if not os.path.exists(path):
                 raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
