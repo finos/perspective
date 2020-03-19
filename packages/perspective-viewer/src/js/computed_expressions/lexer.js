@@ -331,6 +331,7 @@ const tokens = [
     Sqrt,
     Pow2,
     Abs,
+    Invert,
     Bin1000th,
     Bin1000,
     Bin100th,
