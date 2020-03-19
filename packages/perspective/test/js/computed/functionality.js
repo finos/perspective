@@ -238,6 +238,80 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Should be able to create multiple computed columns in multiple `view()`s, and delete preceding views without affecting later columns.", async function() {
+            const table = perspective.table(common.int_float_data);
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "float + int",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+
+            const view2 = table.view({
+                computed_columns: [
+                    {
+                        column: "float + int",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    },
+                    {
+                        column: "float - int",
+                        computed_function_name: "-",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+
+            const schema = await view.schema();
+
+            expect(schema).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "float + int": "float"
+            });
+            const result = await view.to_columns();
+
+            expect(result).toEqual({
+                w: [1.5, 2.5, 3.5, 4.5],
+                x: [1, 2, 3, 4],
+                y: ["a", "b", "c", "d"],
+                z: [true, false, true, false],
+                "float + int": [2.5, 4.5, 6.5, 8.5]
+            });
+
+            view.delete();
+
+            const schema2 = await view2.schema();
+
+            expect(schema2).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "float + int": "float",
+                "float - int": "float"
+            });
+
+            const result2 = await view2.to_columns();
+
+            expect(result2).toEqual({
+                w: [1.5, 2.5, 3.5, 4.5],
+                x: [1, 2, 3, 4],
+                y: ["a", "b", "c", "d"],
+                z: [true, false, true, false],
+                "float + int": [2.5, 4.5, 6.5, 8.5],
+                "float - int": [0.5, 0.5, 0.5, 0.5]
+            });
+
+            view2.delete();
+            table.delete();
+        });
+
         it("Multiple views inheriting the same computed columns with the same names should not conflict", async function() {
             const table = perspective.table(common.int_float_data);
 

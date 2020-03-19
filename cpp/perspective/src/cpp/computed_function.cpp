@@ -764,6 +764,7 @@ const std::string months_of_year[12] = {
 template <>
 void day_of_week<DTYPE_DATE>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    std::cout << "input:  " << x << std::endl;
     if (x.is_none() || !x.is_valid()) {
         output_column->clear(idx);
         return;
@@ -791,6 +792,7 @@ void day_of_week<DTYPE_DATE>(
 template <>
 void day_of_week<DTYPE_TIME>(
     t_tscalar x, std::int32_t idx, std::shared_ptr<t_column> output_column) {
+    std::cout << "input:  " << x << std::endl;
     if (x.is_none() || !x.is_valid()) {
         output_column->clear(idx);
         return;

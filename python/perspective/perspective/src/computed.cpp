@@ -33,13 +33,14 @@ get_table_computed_schema_py(
         t_computed_function_name computed_function_name = 
             str_to_computed_function_name(c["computed_function_name"].cast<std::string>());
         std::vector<std::string> input_columns = c["inputs"].cast<std::vector<std::string>>();
+        t_computation invalid_computation = t_computation();
 
         // Add the computed column to the config.
         auto tp = std::make_tuple(
             computed_column_name,
             computed_function_name,
             input_columns,
-            {});
+            invalid_computation);
         computed_columns.push_back(tp);
     }
     
