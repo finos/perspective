@@ -25,7 +25,21 @@ const COMPUTED_FUNCS = {
     "+": (x, y) => x + y,
     "-": (x, y) => x - y,
     "*": (x, y) => x * y,
-    "/": (x, y) => x / y
+    "/": (x, y) => x / y,
+    pow2: x => Math.pow(x, 2),
+    sqrt: x => Math.sqrt(x),
+    uppercase: x => x.toUpperCase(),
+    concat_comma: (x, y) => x + y,
+    week_bucket: x => {
+        let date = new Date(x);
+        let day = date.getDay();
+        let diff = date.getDate() - day + (day == 0 ? -6 : 1);
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setDate(diff);
+        return date;
+    }
 };
 const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"]};
 
@@ -157,28 +171,60 @@ describe("View", async () => {
 });
 
 describe("Computed Column", async () => {
-    // Use a single source table for computed
-    let table;
-    let view;
-
-    afterEach(async () => {
-        await table.delete();
-        if (view) {
-            await view.delete();
-        }
-    });
-
     for (const name of Object.keys(COMPUTED_FUNCS)) {
         describe("mixed", async () => {
-            describe("table", () => {
+            // Use a single source table for computed
+            let table;
+
+            afterEach(async () => {
+                await table.delete();
+            });
+
+            describe("view", () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
                 table = worker.table(data.arrow.slice());
                 let add_computed_method;
                 if (table.add_computed) {
                     add_computed_method = table.add_computed;
                 }
-                benchmark(`computed: \`${name}\``, async () => {
-                    COMPUTED_CONFIG.computed_function_name = name;
 
+                COMPUTED_CONFIG.computed_function_name = name;
+
+                switch (name) {
+                    case "pow2":
+                    case "sqrt":
+                        {
+                            COMPUTED_CONFIG.inputs = ["Sales"];
+                        }
+                        break;
+                    case "uppercase":
+                        {
+                            COMPUTED_CONFIG.inputs = ["Customer Name"];
+                        }
+                        break;
+                    case "concat_comma":
+                        {
+                            COMPUTED_CONFIG.inputs = ["State", "City"];
+                        }
+                        break;
+                    case "week_bucket":
+                        {
+                            COMPUTED_CONFIG.inputs = ["Order Date"];
+                        }
+                        break;
+                    default: {
+                        COMPUTED_CONFIG.inputs = ["Sales", "Profit"];
+                    }
+                }
+
+                benchmark(`computed: \`${name}\``, async () => {
                     if (add_computed_method) {
                         COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
                         COMPUTED_CONFIG.type = "float";
@@ -193,6 +239,45 @@ describe("Computed Column", async () => {
                     // must process update
                     await table.size();
                 });
+
+                if (!add_computed_method) {
+                    benchmark(`row pivot computed: \`${name}\``, async () => {
+                        view = table.view({
+                            row_pivots: ["computed"],
+                            computed_columns: [COMPUTED_CONFIG]
+                        });
+
+                        await table.size();
+                    });
+
+                    benchmark(`column pivot computed: \`${name}\``, async () => {
+                        view = table.view({
+                            column_pivots: ["computed"],
+                            computed_columns: [COMPUTED_CONFIG]
+                        });
+
+                        await table.size();
+                    });
+
+                    benchmark(`row and column pivot computed: \`${name}\``, async () => {
+                        view = table.view({
+                            row_pivots: ["computed"],
+                            column_pivots: ["computed"],
+                            computed_columns: [COMPUTED_CONFIG]
+                        });
+
+                        await table.size();
+                    });
+
+                    benchmark(`sort computed: \`${name}\``, async () => {
+                        view = table.view({
+                            sort: [["computed", "desc"]],
+                            computed_columns: [COMPUTED_CONFIG]
+                        });
+
+                        await table.size();
+                    });
+                }
             });
         });
     }
