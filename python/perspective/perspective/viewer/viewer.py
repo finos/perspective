@@ -40,7 +40,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                  filters=None,
                  plugin_config=None,
                  dark=None,
-                 editable=False):
+                 editable=False,
+                 manager=None):
         '''Initialize an instance of `PerspectiveViewer` with the given viewer
         configuration.  Do not pass a `Table` or data into the constructor -
         use the :func:`load()` method to provide the viewer with data.
@@ -65,7 +66,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             plugin (`str`/`perspective.Plugin`): Which plugin to select by
                 default.
             plugin_config (`dict`): Custom config for all plugins by name.
-            dark (`bool`): Whether to invert the colors.
+            editable (`bool`): Whether to allow editing of the frontend grid.
+            manager (`PerspectiveManager`): Manager to use when integrating into more complex systems.
 
         Examples:
             >>> viewer = PerspectiveViewer(
@@ -79,7 +81,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # Create an instance of `PerspectiveManager`, which receives messages
         # from the `PerspectiveJupyterClient` on the front-end.
         if is_libpsp():
-            self.manager = PerspectiveManager()
+            self.manager = manager or PerspectiveManager()
         self.table_name = None  # not a traitlet - only used in python
         self.view_name = None
 

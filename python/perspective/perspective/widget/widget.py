@@ -256,7 +256,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
                 if limit is not None:
                     load_kwargs.update({"limit": limit})
-
                 self.load(table_or_data, **load_kwargs)
 
     def load(self, data, **options):
@@ -427,3 +426,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         True so updates stop being cached.
         '''
         self._displayed = True
+
+    def on_update(self, callback, remove=False):
+        self.manager.on_update(callback, remove=remove)

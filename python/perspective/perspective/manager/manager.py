@@ -12,6 +12,7 @@ import random
 import string
 import datetime
 from functools import partial
+from ipywidgets import CallbackDispatcher
 from ..core.exception import PerspectiveError
 from ..table._callback_cache import _PerspectiveCallBackCache
 from ..table._date_validator import _PerspectiveDateValidator
@@ -62,6 +63,9 @@ class PerspectiveManager(object):
         self._views = {}
         self._callback_cache = _PerspectiveCallBackCache()
         self._queue_process_callback = None
+
+        # ipywidgets-style callbacks (e.g. external callbacks)
+        self._update_handlers = CallbackDispatcher()
 
     def host(self, item, name=None):
         """Given a :obj:`~perspective.Table` or :obj:`~perspective.View`,
@@ -225,12 +229,17 @@ class PerspectiveManager(object):
                     self._views.pop(msg["name"], None)
                     return
 
+                # defer to callbacks
+                if msg["cmd"] == "table_method" and msg["method"] == "update":
+                    self._update_handlers(self, msg)
+
                 if msg["method"].startswith("to_"):
                     # to_format takes dictionary of options
                     result = getattr(table_or_view, msg["method"])(**args)
                 elif msg["method"] != "delete":
                     # otherwise parse args as list
                     result = getattr(table_or_view, msg["method"])(*args)
+
                 if isinstance(result, bytes) and msg["method"] != "to_csv":
                     # return a binary to the client without JSON serialization,
                     # i.e. when we return an Arrow. If a method is added that
@@ -362,3 +371,7 @@ class PerspectiveManager(object):
             "id": id,
             "error": error
         }
+
+    def on_update(self, callback, remove=False):
+        '''register an update callback from the frontend'''
+        self._update_handlers.register_callback(callback, remove=remove)
