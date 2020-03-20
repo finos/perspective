@@ -236,13 +236,13 @@ the Python kernel, and returns the results of the operation to the browser.
 All of this is _enabled_ through `PerspectiveManager`, which handles messaging,
 processing method calls, serializing outputs for the network, etc.
 
-In Python, use `PerspectiveManager` and `PerspectiveTornadoServer` to create
+In Python, use `PerspectiveManager` and `PerspectiveTornadoHandler` to create
 a websocket server that exposes a `Table`:
 
 _*server.py*_
 
 ```python
-from perspective import Table, PerspectiveManager, PerspectiveTornadoServer
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 # Create an instance of PerspectiveManager, and host a Table
 MANAGER = PerspectiveManager()
@@ -298,7 +298,7 @@ _*index.html*_
 
 ### Using a hosted `View` in Javascript
 
-An alternative client/server architecture using `PerspectiveTornadoServer` and
+An alternative client/server architecture using `PerspectiveTornadoHandler` and
 `PerspectiveManager` involves hosting a `View`, and creating a new `table()` in
 Javascript on top of the Python `View`.
 

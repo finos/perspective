@@ -775,7 +775,7 @@ hosting an endpoint at which a `table()` can be accessed:
 _*server.py*_
 
 ```python
-from perspective import Table, PerspectiveManager, PerspectiveTornadoServer
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 # Create an instance of PerspectiveManager, and host a Table
 MANAGER = PerspectiveManager()
