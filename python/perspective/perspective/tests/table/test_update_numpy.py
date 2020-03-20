@@ -299,3 +299,12 @@ class TestUpdateNumpy(object):
             "a": [None, 2, None],
             "b": ["a", "b", "c"]
         }
+
+    def test_numpy_dict(self):
+        x = {"index": [1], "a": np.empty((1,), str)}
+        tbl = Table({"index": int, "a": str}, index='index')
+        tbl.update({"index": np.arange(5)})
+        assert tbl.view().to_dict() == {
+            "index": list(range(5)),
+            "a": [None for _ in range(5)]
+        }
