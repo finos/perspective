@@ -58,11 +58,14 @@ t_computed_column::get_computation_input_types(
             case SUBTRACT:
             case MULTIPLY:
             case DIVIDE:
-            case INVERT:
             case POW:
+            case PERCENT_A_OF_B:
+            case INVERT:
+            case POW2:
             case SQRT:
             case ABS:
-            case PERCENT_A_OF_B:
+            case LOG:
+            case EXP:
             case BUCKET_10:
             case BUCKET_100:
             case BUCKET_1000:
@@ -102,10 +105,12 @@ t_computed_column::get_computation_input_types(
 
 #define GET_NUMERIC_COMPUTED_FUNCTION_1(TYPE)                                  \
     switch (computation.m_name) {                                              \
-        case POW: return computed_function::pow_##TYPE;                        \
+        case POW2: return computed_function::pow2_##TYPE;                      \
         case INVERT: return computed_function::invert_##TYPE;                  \
         case SQRT: return computed_function::sqrt_##TYPE;                      \
         case ABS: return computed_function::abs_##TYPE;                        \
+        case LOG: return computed_function::log_##TYPE;                        \
+        case EXP: return computed_function::exp_##TYPE;                        \
         case BUCKET_10: return computed_function::bucket_10_##TYPE;            \
         case BUCKET_100: return computed_function::bucket_100_##TYPE;          \
         case BUCKET_1000: return computed_function::bucket_1000_##TYPE;        \
@@ -185,6 +190,7 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         case SUBTRACT: return computed_function::subtract<DTYPE>;              \
         case MULTIPLY: return computed_function::multiply<DTYPE>;              \
         case DIVIDE: return computed_function::divide<DTYPE>;                  \
+        case POW: return computed_function::pow<DTYPE>;                       \
         case PERCENT_A_OF_B: return computed_function::percent_of<DTYPE>;      \
         case EQUALS: return computed_function::equals<DTYPE>;                  \
         case NOT_EQUALS: return computed_function::not_equals<DTYPE>;          \
@@ -506,8 +512,8 @@ std::vector<t_computation> t_computed_column::computations = {};
 void t_computed_column::make_computations() {
     // Generate numeric functions
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
-    std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
-    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, PERCENT_A_OF_B};
+    std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW2, SQRT, ABS, LOG, EXP, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
+    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, POW, PERCENT_A_OF_B};
     std::vector<t_computed_function_name> numeric_comparison_2 = {EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN};
     
     for (const auto f : numeric_function_1) {

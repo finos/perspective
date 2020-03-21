@@ -95,6 +95,12 @@ export const Divide = createToken({
     categories: [OperatorTokenType]
 });
 
+export const Pow = createToken({
+    name: "pow",
+    pattern: /\^/,
+    categories: [OperatorTokenType]
+});
+
 export const PercentOf = createToken({
     name: "percent_of",
     pattern: /\%/,
@@ -153,6 +159,18 @@ export const Abs = createToken({
 export const Invert = createToken({
     name: "invert",
     pattern: /invert/,
+    categories: [FunctionTokenType]
+});
+
+export const Log = createToken({
+    name: "log",
+    pattern: /log/,
+    categories: [FunctionTokenType]
+});
+
+export const Exp = createToken({
+    name: "exp",
+    pattern: /exp/,
     categories: [FunctionTokenType]
 });
 
@@ -323,6 +341,7 @@ const tokens = [
     Subtract,
     Multiply,
     Divide,
+    Pow,
     PercentOf,
     Equals,
     NotEquals,
@@ -332,6 +351,8 @@ const tokens = [
     Pow2,
     Abs,
     Invert,
+    Log,
+    Exp,
     Bin1000th,
     Bin1000,
     Bin100th,

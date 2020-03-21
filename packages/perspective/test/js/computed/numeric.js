@@ -494,6 +494,92 @@ module.exports = perspective => {
                 await view.delete();
                 await table.delete();
             });
+
+            it("Log int", async function() {
+                const table = perspective.table({
+                    a: [2, 4, 6, 8, 10]
+                });
+                let view = table.view({
+                    columns: ["log"],
+                    computed_columns: [
+                        {
+                            column: "log",
+                            computed_function_name: "log",
+                            inputs: ["a"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                expect(result.log).toEqual([2, 4, 6, 8, 10].map(x => Math.log(x)));
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Log int, nulls", async function() {
+                const table = perspective.table({
+                    a: [2, 4, null, undefined, 10]
+                });
+                let view = table.view({
+                    columns: ["log"],
+                    computed_columns: [
+                        {
+                            column: "log",
+                            computed_function_name: "log",
+                            inputs: ["a"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                let expected = [2, 4, 6, 8, 10].map(x => Math.log(x));
+                expected[2] = null;
+                expected[3] = null;
+                expect(result.log).toEqual(expected);
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Log float", async function() {
+                const table = perspective.table({
+                    a: [2.5, 4.5, 6.5, 8.5, 10.5]
+                });
+                let view = table.view({
+                    columns: ["log"],
+                    computed_columns: [
+                        {
+                            column: "log",
+                            computed_function_name: "log",
+                            inputs: ["a"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                expect(result.log).toEqual([2.5, 4.5, 6.5, 8.5, 10.5].map(x => Math.log(x)));
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Log float, nulls", async function() {
+                const table = perspective.table({
+                    a: [2.5, 4.5, null, undefined, 10.5]
+                });
+                let view = table.view({
+                    columns: ["log"],
+                    computed_columns: [
+                        {
+                            column: "log",
+                            computed_function_name: "log",
+                            inputs: ["a"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                let expected = [2.5, 4.5, null, undefined, 10.5].map(x => Math.log(x));
+                expected[2] = null;
+                expected[3] = null;
+                expect(result.log).toEqual(expected);
+                await view.delete();
+                await table.delete();
+            });
         });
 
         describe("Numeric, arity 2", function() {
@@ -1034,6 +1120,113 @@ module.exports = perspective => {
                 });
                 let result = await view.to_columns();
                 expect(result["divide"]).toEqual([0.6666666666666666, null, null, 0.8571428571428571, 0.8888888888888888]);
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Computed column of arity 2, pow ints", async function() {
+                const table = perspective.table(common.int_float_subtract_data);
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "pow",
+                            computed_function_name: "pow",
+                            inputs: ["v", "x"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                expect(result["pow"]).toEqual(result["v"].map((x, idx) => Math.pow(x, result["x"][idx])));
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Computed column of arity 2, pow floats", async function() {
+                const table = perspective.table(common.int_float_subtract_data);
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "pow",
+                            computed_function_name: "pow",
+                            inputs: ["v", "x"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                expect(result["pow"]).toEqual(result["v"].map((x, idx) => Math.pow(x, result["x"][idx])));
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Computed column of arity 2, pow mixed", async function() {
+                const table = perspective.table(common.int_float_data);
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "pow",
+                            computed_function_name: "pow",
+                            inputs: ["w", "x"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                expect(result["pow"]).toEqual(result["w"].map((x, idx) => Math.pow(x, result["x"][idx])));
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Computed column of arity 2, pow with null", async function() {
+                const table = perspective.table({
+                    a: [1, 2, null, 3, 4],
+                    b: [1.5, undefined, 2.5, 3.5, 4.5]
+                });
+
+                const full = await table.view();
+                expect(await full.to_columns()).toEqual({
+                    a: [1, 2, null, 3, 4],
+                    b: [1.5, null, 2.5, 3.5, 4.5]
+                });
+                full.delete();
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "pow",
+                            computed_function_name: "pow",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                let expected = result["a"].map((x, idx) => (x ? Math.pow(x, result["b"][idx]) : null));
+                expected[1] = null;
+                expect(result["pow"]).toEqual(expected);
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Computed column of arity 2, pow with null and negative and 0", async function() {
+                const table = perspective.table({
+                    a: [1, 1, 2, null, 3, 4, 5, -100, -25],
+                    b: [0, 1.5, undefined, 2.5, 3.5, 4.5, -10, 0, -5]
+                });
+
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "pow",
+                            computed_function_name: "pow",
+                            inputs: ["a", "b"]
+                        }
+                    ]
+                });
+                let result = await view.to_columns();
+                let expected = result["a"].map((x, idx) => (x ? Math.pow(x, result["b"][idx]) : null));
+                expected[0] = null;
+                expected[2] = null;
+                expected[expected.length - 2] = null; // cannot raise ^0
+                expect(result["pow"]).toEqual(expected);
                 await view.delete();
                 await table.delete();
             });

@@ -311,16 +311,10 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::MULTIPLY;
     } else if (name == "/" || name == "divide") {
         return t_computed_function_name::DIVIDE;
-    } else if (name == "1/x" || name == "invert") {
-        return t_computed_function_name::INVERT;
-    } else if (name == "x^2" || name == "pow2") {
-        return t_computed_function_name::POW;
-    } else if (name == "sqrt") {
-        return t_computed_function_name::SQRT;
-    } else if (name == "abs") {
-        return t_computed_function_name::ABS;
     } else if (name == "%" || name == "percent_a_of_b") {
         return t_computed_function_name::PERCENT_A_OF_B;
+    } else if (name == "^" || name == "pow") {
+        return t_computed_function_name::POW;
     } else if (name == "==" || name == "equals") {
         return t_computed_function_name::EQUALS;
     } else if (name == "!=" || name == "not_equals") {
@@ -329,6 +323,18 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::GREATER_THAN;
     } else if (name == "<" || name == "less_than") {
         return t_computed_function_name::LESS_THAN;
+    } else if (name == "1/x" || name == "invert") {
+        return t_computed_function_name::INVERT;
+    } else if (name == "x^2" || name == "pow2") {
+        return t_computed_function_name::POW2;
+    } else if (name == "sqrt") {
+        return t_computed_function_name::SQRT;
+    } else if (name == "abs") {
+        return t_computed_function_name::ABS;
+    } else if (name == "log") {
+        return t_computed_function_name::LOG;
+    } else if (name == "exp") {
+        return t_computed_function_name::EXP;
     } else if (name == "Uppercase" || name == "uppercase") {
         return t_computed_function_name::UPPERCASE;
     } else if (name == "Lowercase" || name == "lowercase") {
@@ -389,15 +395,18 @@ computed_function_name_to_string(t_computed_function_name name) {
         case SUBTRACT: return "-";
         case MULTIPLY: return "*";
         case DIVIDE: return "/";
-        case INVERT: return "invert";
-        case POW: return "pow2";
-        case SQRT: return "sqrt";
-        case ABS: return "abs";
         case PERCENT_A_OF_B: return "%";
+        case POW: return "pow";
         case EQUALS: return "==";
         case NOT_EQUALS: return "!=";
         case GREATER_THAN: return ">";
         case LESS_THAN: return "<";
+        case INVERT: return "invert";
+        case POW2: return "pow2";
+        case SQRT: return "sqrt";
+        case ABS: return "abs";
+        case LOG: return "log";
+        case EXP: return "exp";
         case UPPERCASE: return "uppercase";
         case LOWERCASE: return "lowercase";
         case LENGTH: return "length";

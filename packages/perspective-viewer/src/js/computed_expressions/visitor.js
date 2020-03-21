@@ -155,6 +155,8 @@ export class ComputedExpressionColumnVisitor extends base_visitor {
             return ctx.multiply[0].image;
         } else if (ctx.divide) {
             return ctx.divide[0].image;
+        } else if (ctx.pow) {
+            return ctx.pow[0].image;
         } else if (ctx.percent_of) {
             return ctx.percent_of[0].image;
         } else if (ctx.equals) {
@@ -184,6 +186,12 @@ export class ComputedExpressionColumnVisitor extends base_visitor {
             return ctx.pow2[0].image;
         } else if (ctx.abs) {
             return ctx.abs[0].image;
+        } else if (ctx.invert) {
+            return ctx.invert[0].image;
+        } else if (ctx.log) {
+            return ctx.log[0].image;
+        } else if (ctx.exp) {
+            return ctx.exp[0].image;
         } else if (ctx.length) {
             return ctx.length[0].image;
         } else if (ctx.uppercase) {
