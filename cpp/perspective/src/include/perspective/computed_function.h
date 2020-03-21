@@ -47,10 +47,12 @@ namespace computed_function {
     t_tscalar NAME##_float32(t_tscalar float32);  \
     t_tscalar NAME##_float64(t_tscalar float64);  \
 
-NUMERIC_FUNCTION_1_HEADER(pow);
-NUMERIC_FUNCTION_1_HEADER(invert);
+NUMERIC_FUNCTION_1_HEADER(pow2);
 NUMERIC_FUNCTION_1_HEADER(sqrt);
 NUMERIC_FUNCTION_1_HEADER(abs);
+NUMERIC_FUNCTION_1_HEADER(invert);
+NUMERIC_FUNCTION_1_HEADER(log);
+NUMERIC_FUNCTION_1_HEADER(exp);
 NUMERIC_FUNCTION_1_HEADER(bucket_10);
 NUMERIC_FUNCTION_1_HEADER(bucket_100);
 NUMERIC_FUNCTION_1_HEADER(bucket_1000);
@@ -85,6 +87,17 @@ t_tscalar greater_than(t_tscalar x, t_tscalar y);
 template <t_dtype T>
 t_tscalar less_than(t_tscalar x, t_tscalar y);
 
+/**
+ * @brief Return x to the power of y.
+ * 
+ * @tparam T 
+ * @param x 
+ * @param y 
+ * @return t_tscalar 
+ */
+template <t_dtype T>
+t_tscalar pow(t_tscalar x, t_tscalar y);
+
 #define NUMERIC_FUNCTION_2_HEADER(NAME)                                    \
     template <> t_tscalar NAME<DTYPE_UINT8>(t_tscalar x, t_tscalar y);     \
     template <> t_tscalar NAME<DTYPE_UINT16>(t_tscalar x, t_tscalar y);    \
@@ -105,6 +118,7 @@ NUMERIC_FUNCTION_2_HEADER(equals);
 NUMERIC_FUNCTION_2_HEADER(not_equals);
 NUMERIC_FUNCTION_2_HEADER(greater_than);
 NUMERIC_FUNCTION_2_HEADER(less_than);
+NUMERIC_FUNCTION_2_HEADER(pow);
 
 // String functions
 t_tscalar length(t_tscalar x);

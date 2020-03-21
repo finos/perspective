@@ -39,12 +39,48 @@ using float64 = double;
     FUNC(float32)                   \
     FUNC(float64)                   \
 
-#define POW(T)                                                      \
-    t_tscalar pow_##T(t_tscalar x) {                                \
+/**
+ * @brief Generate all type permutations for a numeric function that takes
+ * one parameter, and uses the math methods defined in the `std` header.
+ * `NAME` is expected to map into a valid `std` method.
+ */
+#define NUMERIC_STD_MATH_FUNCTION_1(NAME)                         \
+    STD_MATH_ARITY_1(NAME, uint8)                                 \
+    STD_MATH_ARITY_1(NAME, uint16)                                \
+    STD_MATH_ARITY_1(NAME, uint32)                                \
+    STD_MATH_ARITY_1(NAME, uint64)                                \
+    STD_MATH_ARITY_1(NAME, int8)                                  \
+    STD_MATH_ARITY_1(NAME, int16)                                 \
+    STD_MATH_ARITY_1(NAME, int32)                                 \
+    STD_MATH_ARITY_1(NAME, int64)                                 \
+    STD_MATH_ARITY_1(NAME, float32)                               \
+    STD_MATH_ARITY_1(NAME, float64)                               \
+
+/**
+ * @brief Generate a function with `NAME` templated to `T`, using
+ * the math functions defined in the `std` header.
+ */
+#define STD_MATH_ARITY_1(NAME, T)                                   \
+    t_tscalar NAME##_##T(t_tscalar x) {                             \
         t_tscalar rval = mknone();                                  \
         if (x.is_none() || !x.is_valid()) return rval;              \
         rval.set(static_cast<float64>(                              \
-            pow(static_cast<float64>(x.get<T>()), 2)                \
+            std::NAME(static_cast<float64>(x.get<T>()))));        \
+        return rval;                                                \
+}
+
+NUMERIC_STD_MATH_FUNCTION_1(sqrt);
+NUMERIC_STD_MATH_FUNCTION_1(abs);
+NUMERIC_STD_MATH_FUNCTION_1(log);
+NUMERIC_STD_MATH_FUNCTION_1(exp);
+
+
+#define POW2(T)                                                     \
+    t_tscalar pow2_##T(t_tscalar x) {                               \
+        t_tscalar rval = mknone();                                  \
+        if (x.is_none() || !x.is_valid()) return rval;              \
+        rval.set(static_cast<float64>(                              \
+            std::pow(static_cast<float64>(x.get<T>()), 2)           \
         ));                                                         \
         return rval;                                                \
     }
@@ -55,24 +91,6 @@ using float64 = double;
         if (x.is_none() || !x.is_valid()) return rval;              \
         float64 rhs = static_cast<float64>(x.get<T>());             \
         if (rhs != 0) rval.set(static_cast<float64>(1 / rhs));      \
-        return rval;                                                \
-    }
-
-#define SQRT(T)                                                     \
-    t_tscalar sqrt_##T(t_tscalar x) {                               \
-        t_tscalar rval = mknone();                                  \
-        if (x.is_none() || !x.is_valid()) return rval;              \
-        float64 val = static_cast<float64>(x.get<T>());             \
-         rval.set(static_cast<float64>(sqrt(val)));                 \
-        return rval;                                                \
-    }
-
-#define ABS(T)                                                      \
-    t_tscalar abs_##T(t_tscalar x) {                                \
-        t_tscalar rval = mknone();                                  \
-        if (x.is_none() || !x.is_valid()) return rval;              \
-        rval.set(static_cast<float64>(                              \
-            std::abs(static_cast<float64>(x.get<T>()))));           \
         return rval;                                                \
     }
 
@@ -136,10 +154,8 @@ using float64 = double;
         return rval;                                                    \
     }
 
-NUMERIC_FUNCTION_1(POW);
+NUMERIC_FUNCTION_1(POW2);
 NUMERIC_FUNCTION_1(INVERT);
-NUMERIC_FUNCTION_1(SQRT);
-NUMERIC_FUNCTION_1(ABS);
 NUMERIC_FUNCTION_1(BUCKET_10);
 NUMERIC_FUNCTION_1(BUCKET_100);
 NUMERIC_FUNCTION_1(BUCKET_1000);
@@ -301,6 +317,17 @@ NUMERIC_FUNCTION_1(BUCKET_0_0_0_1);
         return rval;                                                           \
     }
 
+#define POW(T1, T2)                                                            \
+    t_tscalar pow_##T1##_##T2(t_tscalar x, t_tscalar y) {                      \
+        t_tscalar rval = mknone();                                             \
+        if ((x.is_none() || !x.is_valid())                                     \
+            || (y.is_none() || !y.is_valid())) return rval;                    \
+        float64 lhs = static_cast<float64>(x.get<T1>());                       \
+        float64 rhs = static_cast<float64>(y.get<T2>());                       \
+        if (rhs != 0) rval.set(static_cast<float64>(std::pow(lhs, rhs)));      \
+        return rval;                                                           \
+    }
+
 #define EQUALS(T1, T2)                                                  \
     t_tscalar equals_##T1##_##T2(t_tscalar x, t_tscalar y) {            \
         t_tscalar rval;                                                 \
@@ -352,6 +379,7 @@ NUMERIC_FUNCTION_2(ADD);
 NUMERIC_FUNCTION_2(SUBTRACT);
 NUMERIC_FUNCTION_2(MULTIPLY);
 NUMERIC_FUNCTION_2(DIVIDE);
+NUMERIC_FUNCTION_2(POW);
 NUMERIC_FUNCTION_2(PERCENT_OF);
 NUMERIC_FUNCTION_2(EQUALS);
 NUMERIC_FUNCTION_2(NOT_EQUALS);
@@ -401,6 +429,7 @@ NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(add);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(subtract);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(multiply);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(divide);
+NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(pow);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(percent_of);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(equals);
 NUMERIC_FUNCTION_2_DISPATCH_ALL_TYPES(not_equals);

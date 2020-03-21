@@ -200,6 +200,77 @@ describe("Computed Expression Parser", function() {
         expect(parsed).toEqual(expected);
     });
 
+    it("Should parse all arity 1 functional operators", function() {
+        const functions = [
+            "abs",
+            "pow2",
+            "sqrt",
+            "invert",
+            "log",
+            "exp",
+            "bin10",
+            "bin100",
+            "bin1000",
+            "bin10th",
+            "bin100th",
+            "bin1000th",
+            "length",
+            "day_of_week",
+            "month_of_year",
+            "second_bucket",
+            "minute_bucket",
+            "hour_bucket",
+            "day_bucket",
+            "week_bucket",
+            "month_bucket",
+            "year_bucket"
+        ];
+
+        for (const f of functions) {
+            const expression = `${f}("column") as "alias"`;
+            const parsed = [
+                {
+                    column: "alias",
+                    computed_function_name: f,
+                    inputs: ["column"]
+                }
+            ];
+            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+        }
+    });
+
+    it("Should parse all arity 2 functional operators", function() {
+        const functions = ["concat_comma", "concat_space"];
+
+        for (const f of functions) {
+            const expression = `${f}("column", "column2") as "alias"`;
+            const parsed = [
+                {
+                    column: "alias",
+                    computed_function_name: f,
+                    inputs: ["column", "column2"]
+                }
+            ];
+            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+        }
+    });
+
+    it("Should parse all arity 2 operators", function() {
+        const functions = ["+", "-", "/", "*", "^", "%", "==", "!=", ">", "<", "is"];
+
+        for (const f of functions) {
+            const expression = `"column" ${f} "column2" as "alias"`;
+            const parsed = [
+                {
+                    column: "alias",
+                    computed_function_name: f,
+                    inputs: ["column", "column2"]
+                }
+            ];
+            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+        }
+    });
+
     it("Should throw when missing an operator", function() {
         expect(() => expression_to_computed_column_config('"Sales"')).toThrow();
     });
