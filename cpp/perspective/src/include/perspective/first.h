@@ -7,6 +7,12 @@
  *
  */
 
+#ifndef PSP_ENABLE_WASM
+#ifndef PSP_PARALLEL_FOR
+#define PSP_PARALLEL_FOR
+#endif
+#endif
+
 #if !defined(__linux__) && !defined(__APPLE__) && !defined(WIN32)
 // default to linux
 #define __linux__
