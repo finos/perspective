@@ -213,7 +213,8 @@ class Table(object):
             return False
 
         schema = self.schema()
-        if (schema[filter[0]] == date or schema[filter[0]] == datetime):
+        in_schema = schema.get(filter[0], None)
+        if in_schema and (schema[filter[0]] == date or schema[filter[0]] == datetime):
             if isinstance(value, str):
                 value = self._accessor.date_validator().parse(value)
 
