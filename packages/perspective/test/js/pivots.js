@@ -603,6 +603,77 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Row Pivot by date column results in correct headers", async function() {
+            var table = perspective.table({
+                a: [
+                    new Date("2020/01/15"),
+                    new Date("2020/02/15"),
+                    new Date("2020/03/15"),
+                    new Date("2020/04/15"),
+                    new Date("2020/05/15"),
+                    new Date("2020/06/15"),
+                    new Date("2020/07/15"),
+                    new Date("2020/08/15"),
+                    new Date("2020/09/15"),
+                    new Date("2020/10/15"),
+                    new Date("2020/11/15"),
+                    new Date("2020/12/15")
+                ],
+                b: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+            });
+            var view = table.view({
+                row_pivots: ["a"]
+            });
+            const results = await view.to_columns();
+            expect(results).toEqual({
+                __ROW_PATH__: [
+                    [],
+                    [1579046400000],
+                    [1581724800000],
+                    [1584230400000],
+                    [1586908800000],
+                    [1589500800000],
+                    [1592179200000],
+                    [1594771200000],
+                    [1597449600000],
+                    [1600128000000],
+                    [1602720000000],
+                    [1605398400000],
+                    [1607990400000]
+                ],
+                a: [12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                b: [78, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+            });
+
+            const dates = results["__ROW_PATH__"];
+            let date_results = [];
+            const expected = [
+                new Date("2020/01/15"),
+                new Date("2020/02/15"),
+                new Date("2020/03/15"),
+                new Date("2020/04/15"),
+                new Date("2020/05/15"),
+                new Date("2020/06/15"),
+                new Date("2020/07/15"),
+                new Date("2020/08/15"),
+                new Date("2020/09/15"),
+                new Date("2020/10/15"),
+                new Date("2020/11/15"),
+                new Date("2020/12/15")
+            ];
+
+            for (const d of dates) {
+                if (d[0]) {
+                    date_results.push(new Date(d[0]));
+                }
+            }
+
+            expect(date_results).toEqual(expected);
+
+            view.delete();
+            table.delete();
+        });
+
         it("['z']", async function() {
             var table = perspective.table(data);
             var view = table.view({

@@ -141,7 +141,7 @@ t_date::day() const {
 std::string
 t_date::str() const {
     std::stringstream ss;
-    ss << year() << "-" << str_(month()) << "-" << str_(day());
+    ss << year() << "-" << str_(month() + 1) << "-" << str_(day());
     return ss.str();
 }
 
