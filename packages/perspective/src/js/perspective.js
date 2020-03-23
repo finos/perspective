@@ -1197,7 +1197,8 @@ export default function(Module) {
         }
 
         const schema = this.schema();
-        if (schema[filter[0]] === "date" || schema[filter[0]] === "datetime") {
+        const exists = schema[filter[0]];
+        if (exists && (schema[filter[0]] === "date" || schema[filter[0]] === "datetime")) {
             value = new DateParser().parse(value);
         }
 

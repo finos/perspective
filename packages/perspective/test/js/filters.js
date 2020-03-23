@@ -548,6 +548,12 @@ module.exports = perspective => {
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
+            it("ignores schema check if column is not in schema", async function() {
+                let table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["not a valid column", "==", 2]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
         });
     });
 };

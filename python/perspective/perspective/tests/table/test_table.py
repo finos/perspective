@@ -470,6 +470,12 @@ class TestTable(object):
         })
         assert tbl.is_valid_filter(filter) is False
 
+    def test_table_is_valid_filter_ignores_not_in_schema(self):
+        filter = ["not in schema", "<", 1]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.is_valid_filter(filter) is True
+
     # index
 
     def test_table_index(self):
