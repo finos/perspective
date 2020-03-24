@@ -1,0 +1,103 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+import {DatagridHeaderViewModel} from "./thead";
+import {DatagridBodyViewModel} from "./tbody";
+import {column_path_2_type} from "./utils";
+
+/**
+ * <table> view model.  In order to handle unknown column width when `draw()`
+ * is called, this model will iteratively fetch more data to fill in columns
+ * until the page is complete, and makes some column viewport estimations
+ * when this information is not availble.
+ *
+ * @class DatagridTableViewModel
+ */
+export class DatagridTableViewModel {
+    constructor(table_clip, column_sizes) {
+        const table = document.createElement("table");
+        table.setAttribute("cellspacing", 0);
+
+        const thead = document.createElement("thead");
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+
+        this.table = table;
+        this._column_sizes = column_sizes;
+        this.header = new DatagridHeaderViewModel(column_sizes, table_clip, thead);
+        this.body = new DatagridBodyViewModel(column_sizes, table_clip, tbody);
+        this.fragment = document.createDocumentFragment();
+    }
+
+    num_columns() {
+        return this.header._get_row(Math.max(0, this.header.rows?.length - 1 || 0)).row_container.length;
+    }
+
+    async draw({width: container_width, height: container_height}, {view, config, column_paths, schema}, selected_id, is_resize, viewport) {
+        const visible_columns = column_paths.slice(viewport.start_col);
+
+        const columns_data = await view.to_columns(viewport);
+        const {start_col: sidx} = viewport;
+        let cont_body,
+            cont_head,
+            cidx = 0,
+            width = 0;
+        const id_column = columns_data["__ID__"];
+
+        if (column_paths[0] === "__ROW_PATH__") {
+            const alias = config.row_pivots.join(",");
+            cont_head = this.header.draw(config, alias, "");
+            cont_body = this.body.draw(container_height, alias, 0, columns_data["__ROW_PATH__"], id_column, selected_id, undefined, config.row_pivots.length, viewport.start_row, 0);
+            selected_id = false;
+            if (!is_resize) {
+                this._column_sizes.indices[0] = cont_body.offsetWidth;
+            }
+            width += cont_body.offsetWidth;
+            cidx++;
+        }
+
+        try {
+            while (cidx < visible_columns.length) {
+                const column_name = visible_columns[cidx];
+                if (!columns_data[column_name]) {
+                    let missing_cidx = Math.max(viewport.end_col, 0);
+                    viewport.start_col = missing_cidx;
+                    viewport.end_col = missing_cidx + 1;
+                    const new_col = await view.to_columns(viewport);
+                    if (!(column_name in new_col)) {
+                        new_col[column_name] = [];
+                    }
+                    columns_data[column_name] = new_col[column_name];
+                }
+                const column_data = columns_data[column_name];
+                const type = column_path_2_type(schema, column_name);
+
+                cont_head = this.header.draw(config, undefined, column_name, type, config.sort, cont_head);
+                cont_body = this.body.draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, undefined, viewport.start_row, sidx);
+                selected_id = false;
+                width += cont_body.offsetWidth || cont_head.th.offsetWidth;
+                if (!is_resize) {
+                    this._column_sizes.indices[cidx + sidx] = cont_body.offsetWidth || cont_head.th.offsetWidth;
+                }
+                cidx++;
+
+                if (width > container_width) {
+                    break;
+                }
+            }
+        } finally {
+            this.body.clean({ridx: cont_body?.ridx || 0, cidx});
+            if (cont_head) {
+                this.header.clean(cont_head);
+            }
+        }
+    }
+}
