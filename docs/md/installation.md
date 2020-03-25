@@ -17,7 +17,7 @@ For using Perspective from Node.js, or as a dependency in a `package.json` based
 via NPM:
 
 ```bash
-$ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-hypergrid
+$ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
 ```
 
 #### An important note about Hosting
@@ -65,7 +65,7 @@ Add these scripts to your `.html`'s `<head>` section:
 ```html
 <script src="https://unpkg.com/@finos/perspective"></script>
 <script src="https://unpkg.com/@finos/perspective-viewer"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-hypergrid"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-datagrid"></script>
 <script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
 ```
 

@@ -13,7 +13,7 @@
         "@finos/perspective": "^0.4.6",
         "@finos/perspective-viewer": "^0.4.6",
         "@finos/perspective-viewer-d3fc": "^0.4.6",
-        "@finos/perspective-viewer-hypergrid": "^0.4.6",
+        "@finos/perspective-viewer-datagrid": "^0.4.6",
         "react": "16.8.6",
         "react-dom": "16.8.6"
     },

@@ -2,7 +2,30 @@
 @import "../../../packages/perspective-viewer/src/themes/material.less";
 
 .homeContainer, #get_started {
-    @import "../../../packages/perspective-viewer/src/themes/material.dark.less";
+    @import "../../../packages/perspective-viewer/src/themes/material-dense.dark.less";
 
    
+}
+
+td, th, table, tbody, thead {
+  border: 0;
+  font-size: 12px;
+  font-family: "Open Sans";
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+
+table tr {
+  border-top: none;
+}
+
+table tr:nth-child(2n) {
+  background-color: transparent;
+}
+
+table th,
+table td {
+  border: none;
+  padding: 0px 5px;
 }

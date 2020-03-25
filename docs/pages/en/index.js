@@ -174,11 +174,9 @@ const FeatureCallout = props => (
         <MarkdownBlock>
             An embeddable, framework-agnostic configuration UI, based on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for responsiveness at high frequency.
         </MarkdownBlock>
-        <MarkdownBlock>
-            A suite of simple visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/), [Hypergrid](https://github.com/fin-hypergrid/core) and
-            [HighCharts](https://github.com/highcharts/highcharts).
-        </MarkdownBlock>
-        <MarkdownBlock>Integration with Jupyterlab.</MarkdownBlock>
+        <MarkdownBlock>A customizable HTML Data Grid plugin, and a Charts plugin built on [D3FC](https://d3fc.io/).</MarkdownBlock>
+        <MarkdownBlock>Integration with Jupyterlab, both natively in a Python kernel, and as a notebook Widget.</MarkdownBlock>
+        <MarkdownBlock>Cross-language streaming & virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).</MarkdownBlock>
         <MarkdownBlock>Runtimes for the browser, Python, and Node.js.</MarkdownBlock>
     </Container>
 );
@@ -191,8 +189,9 @@ datasets.  Use it to build reports, dashboards, notebooks and applications.
 Perspective comes with:
 * A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
 * A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
-* A suite of simple, context-aware visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/) and [Hypergrid](https://github.com/fin-hypergrid/core).
-* Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+* A customizable HTML Data Grid plugin, and a Charts plugin built on [D3FC](https://d3fc.io/).
+* Integration with Jupyterlab, both natively in a Python kernel, and as a notebook Widget.
+* Cross-language streaming & virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).
 * Runtimes for the browser, Python, and Node.js.
 `;
 
