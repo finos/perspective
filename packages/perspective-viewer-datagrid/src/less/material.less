@@ -92,8 +92,12 @@ tbody:hover tr:hover td {
     opacity: 1;
 }
 
+table tr:hover {
+    color: #333;
+}
+
 tr {
-    transition: background-color 0.2s ease-in;
+    transition: background-color 0.2s ease-in, color 0.2s ease-in;
 }
 
 table * {
@@ -103,6 +107,7 @@ table * {
 table {
     position: absolute;
     overflow: hidden;
+    color: #666;
 }
 
 span.pd-row-header-icon {

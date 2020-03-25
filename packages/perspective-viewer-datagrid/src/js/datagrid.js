@@ -86,9 +86,9 @@ export class DatagridViewModel extends DatagridViewEventModel {
         const schema = await view.schema();
         const column_paths = await view.column_paths();
         this._invalid_schema = true;
-        const diff = this._diff(config);
+        const options = this.infer_options(config);
         this._view_cache = {view, config, column_paths, schema};
-        return diff;
+        return options;
     }
 
     set_element(_render_element) {
@@ -102,7 +102,6 @@ export class DatagridViewModel extends DatagridViewEventModel {
         if (this._render_element) {
             if (this._render_element !== this.table_model.table.parentElement) {
                 this._render_element.appendChild(this._sticky_container);
-            } else {
             }
         } else {
             this.appendChild(this.table_model.table);
