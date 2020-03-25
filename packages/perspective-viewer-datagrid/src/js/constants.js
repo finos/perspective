@@ -13,7 +13,7 @@ export const VIEWER_MAP = new WeakMap();
 export const METADATA_MAP = new WeakMap();
 
 // Output runtime debug info like FPS.
-export const DEBUG = true;
+export const DEBUG = false;
 
 export const ROW_HEIGHT = 19;
 

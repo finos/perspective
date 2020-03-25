@@ -41,6 +41,17 @@ export class DatagridTableViewModel {
         return this.header._get_row(Math.max(0, this.header.rows?.length - 1 || 0)).row_container.length;
     }
 
+    _clear_cells(last_cells) {
+        while (last_cells.length > 0) {
+            const [idx, cell, metadata] = last_cells.shift();
+            const offsetWidth = cell.offsetWidth;
+            this._column_sizes.indices[idx] = offsetWidth;
+            if (offsetWidth && !this._column_sizes.override[metadata.size_key]) {
+                this._column_sizes.auto[metadata.size_key] = offsetWidth;
+            }
+        }
+    }
+
     async draw({width: container_width, height: container_height}, {view, config, column_paths, schema}, selected_id, is_resize, viewport) {
         const visible_columns = column_paths.slice(viewport.start_col);
 
@@ -49,7 +60,8 @@ export class DatagridTableViewModel {
         let cont_body,
             cont_head,
             cidx = 0,
-            width = 0;
+            width = 0,
+            last_cells = [];
         const id_column = columns_data["__ID__"];
 
         if (column_paths[0] === "__ROW_PATH__") {
@@ -58,9 +70,9 @@ export class DatagridTableViewModel {
             cont_body = this.body.draw(container_height, alias, 0, columns_data["__ROW_PATH__"], id_column, selected_id, undefined, config.row_pivots.length, viewport.start_row, 0);
             selected_id = false;
             if (!is_resize) {
-                this._column_sizes.indices[0] = cont_body.offsetWidth;
+                last_cells.push([0, cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
             }
-            width += cont_body.offsetWidth;
+            width += this._column_sizes.indices[0] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
             cidx++;
         }
 
@@ -83,9 +95,9 @@ export class DatagridTableViewModel {
                 cont_head = this.header.draw(config, undefined, column_name, type, config.sort, cont_head);
                 cont_body = this.body.draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, undefined, viewport.start_row, sidx);
                 selected_id = false;
-                width += cont_body.offsetWidth || cont_head.th.offsetWidth;
+                width += this._column_sizes.indices[cidx + sidx] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
                 if (!is_resize) {
-                    this._column_sizes.indices[cidx + sidx] = cont_body.offsetWidth || cont_head.th.offsetWidth;
+                    last_cells.push([cidx + sidx, cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
                 }
                 cidx++;
 
@@ -93,6 +105,7 @@ export class DatagridTableViewModel {
                     break;
                 }
             }
+            this._clear_cells(last_cells);
         } finally {
             this.body.clean({ridx: cont_body?.ridx || 0, cidx});
             if (cont_head) {

@@ -120,12 +120,9 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
     _calculate_column_range() {
         const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._container_size.width);
         const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
-
         const max_scroll_column = this._max_scroll_column() + 0.5;
-
         let start_col = Math.floor(max_scroll_column * percent_left);
         let end_col = start_col + (this.table_model.num_columns() || 1) + 1;
-
         return {start_col, end_col};
     }
 

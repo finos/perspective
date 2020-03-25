@@ -120,8 +120,9 @@ export class DatagridHeaderViewModel extends ViewModel {
         if (header_levels === 1 && type === undefined) {
             th.classList.add("pd-group-header");
         }
+        const metadata = this._get_or_create_metadata(th);
         this._clean_rows(offset_cache.length);
-        return {group_header_cache, offset_cache, th};
+        return {group_header_cache, offset_cache, th, metadata};
     }
 
     clean({offset_cache}) {

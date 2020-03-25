@@ -72,8 +72,6 @@ export class DatagridViewModel extends DatagridViewEventModel {
 
     reset_size() {
         this._container_size = undefined;
-        this._nrows = undefined;
-        this.reset_viewport();
     }
 
     reset_scroll() {

@@ -82,11 +82,7 @@ export class DatagridBodyViewModel extends ViewModel {
             }
         }
         this._clean_rows(ridx);
-        const offsetWidth = td?.offsetWidth;
-        if (offsetWidth && !this._column_sizes.override[metadata.size_key]) {
-            this._column_sizes.auto[metadata.size_key] = offsetWidth;
-        }
-        return {offsetWidth: offsetWidth, cidx, ridx};
+        return {td, cidx, ridx, metadata};
     }
 
     clean({ridx, cidx}) {
