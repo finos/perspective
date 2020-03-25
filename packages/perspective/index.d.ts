@@ -101,7 +101,7 @@ declare module "@finos/perspective" {
     /**** Table ****/
     export type UpdateCallback = (data: Array<object>) => void;
 
-    export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string};
+    export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string} | ArrayBuffer;
 
     export type TableOptions = {
         index?: string;

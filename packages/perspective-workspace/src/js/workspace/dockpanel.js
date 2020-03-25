@@ -43,8 +43,10 @@ export class PerspectiveDockPanel extends DiscreteDockPanel {
         if (layout.main) {
             layout.main = PerspectiveDockPanel.mapWidgets(widgetFunc, layout.main);
         } else if (layout.children) {
+            // split-area have children
             layout.children = layout.children.map(widget => PerspectiveDockPanel.mapWidgets(widgetFunc, widget));
         } else if (layout.widgets) {
+            // tab-area have children
             layout.widgets = layout.widgets.map(widget => widgetFunc(widget));
         }
         return layout;

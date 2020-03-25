@@ -10,7 +10,7 @@
 import React from "react";
 import {Table, TableData, TableOptions, Schema} from "@finos/perspective";
 
-export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, HTMLElement {
+interface PerspectiveViewer extends PerspectiveViewerOptions {
     load(data: TableData | Table, options?: TableOptions): void;
     load(schema: Schema, options?: TableOptions): void;
     update(data: TableData): void;
@@ -26,6 +26,14 @@ export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, 
     restyleElement(): void;
     readonly table?: Table;
 }
+
+// Don't export, use document.createElement("perspective-viewer");
+// export const PerspectiveViewer: {
+//     new (): PerspectiveViewer;
+// };
+
+export interface HTMLPerspectiveViewerElement extends PerspectiveViewer, HTMLElement {}
+
 interface ComputedColumn {
     name: string;
     inputs: string[];
@@ -64,12 +72,12 @@ interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions,
 
 interface ReactPerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerHTMLAttributes, React.HTMLAttributes<T> {}
 
-type PerspectiveElement = {class?: string} & React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
+export type PerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<ReactPerspectiveViewerHTMLAttributes<HTMLPerspectiveViewerElement>, HTMLPerspectiveViewerElement>;
 
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            "perspective-viewer": PerspectiveElement;
+            "perspective-viewer": PerspectiveViewerElement;
         }
     }
 

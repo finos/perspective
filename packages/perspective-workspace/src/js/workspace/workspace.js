@@ -171,8 +171,33 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         return {...layout, viewers};
     }
 
+    /**
+     * Ensure that config object doesn't have any bad values
+     * @param {*} value config object
+     */
+    _validate_config(value) {
+        let {detail} = value;
+
+        const ensureCurrentIndex = item => {
+            if (item.type && item.type === "tab-area") {
+                // ensure tab-area have currentIndex set
+                if (!item.currentIndex) {
+                    item.currentIndex = 0;
+                }
+            } else if (item.main) {
+                item.main = ensureCurrentIndex(item.main);
+            } else if (item.children) {
+                item.children = item.children.map(widget => ensureCurrentIndex(widget));
+            }
+            return item;
+        };
+
+        value.detail = ensureCurrentIndex(detail);
+        return value;
+    }
+
     restore(value) {
-        const {sizes, master, detail, viewers: viewer_configs = [], mode = MODE.GLOBAL_FILTERS} = cloneDeep(value);
+        const {sizes, master, detail, viewers: viewer_configs = [], mode = MODE.GLOBAL_FILTERS} = this._validate_config(cloneDeep(value));
         this.mode = mode;
 
         if (this.mode === MODE.GLOBAL_FILTERS && master && master.widgets.length > 0) {
@@ -479,7 +504,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         if (widget.linked) {
             widget.title.className += " linked";
             this._linkedViewers.push(widget.viewer);
-            // if this is the first linked viewer, make viewers with row-pivots selectable
+            // if this is the first linked viewer, make viewers with
+            // row-pivots selectable
             if (this._linkedViewers.length === 1) {
                 this.getAllWidgets().forEach(widget => {
                     const config = widget.viewer.save();
@@ -599,8 +625,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         });
     }
 
-    addViewer(config) {
-        const widget = this._createWidgetAndNode({config});
+    addViewer(config = {}, slotname = "") {
+        const widget = this._createWidgetAndNode({config, slot: slotname});
         if (this.dockpanel.mode === "single-document") {
             this.toggleSingleDocument();
         }
@@ -616,6 +642,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             this.dockpanel.addWidget(widget, {mode: "split-right"});
         }
         this.update();
+        return widget;
     }
 
     /*********************************************************************

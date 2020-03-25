@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "noImplicitAny": true,
+      "noEmitOnError": true,
+      "noUnusedLocals": true,
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "resolveJsonModule": true,
+      "allowSyntheticDefaultImports": true,
+      "target": "es2016",
+      "outDir": "./lib",
+      "lib": ["es2016", "es2015", "dom"],
+      "types": [
+        "jest",
+        "@finos/perspective",
+        "@finos/perspective-viewer",
+        "@finos/perspective-workspace"
+      ]
+    },
+    "include": ["src/*.ts"]
+  }

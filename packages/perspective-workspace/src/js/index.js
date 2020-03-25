@@ -141,18 +141,6 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         return this.workspace.restore(layout);
     }
 
-    addTable(name, table) {
-        this.workspace.addTable(name, table);
-    }
-
-    getTable(name) {
-        return this.workspace.getTable(name);
-    }
-
-    removeTable(name) {
-        return this.workspace.removeTable(name);
-    }
-
     /**
      * A `Map()` of `perspective.Table()` by name.  The names set here will auto
      * wire any child `perspective-viewer` elements in this Workspace's subtree,

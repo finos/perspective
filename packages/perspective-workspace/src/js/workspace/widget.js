@@ -11,9 +11,9 @@ import "@finos/perspective-viewer";
 import {Widget} from "@lumino/widgets";
 
 export class PerspectiveViewerWidget extends Widget {
-    constructor({viewer, node}) {
+    constructor({viewer = document.createElement("perspective-viewer"), node = document.createElement("div")}) {
         super({node});
-        this.viewer = viewer;
+        this._viewer = viewer;
         this.master = false;
     }
 
@@ -37,6 +37,14 @@ export class PerspectiveViewerWidget extends Widget {
 
     get master() {
         return this._master;
+    }
+
+    get viewer() {
+        return this._viewer;
+    }
+
+    set viewer(viewer) {
+        this._viewer = viewer;
     }
 
     get table() {
