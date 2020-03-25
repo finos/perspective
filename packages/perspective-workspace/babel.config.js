@@ -5,12 +5,11 @@ module.exports = {
             {
                 targets: {
                     chrome: "70",
-                    node: "8",
-                    ios: "12",
-                    safari: "12",
-                    edge: "44"
+                    node: "12",
+                    ios: "13",
+                    firefox: "68.5.0"
                 },
-                modules: false,
+                modules: process.env.BABEL_MODULE || false,
                 useBuiltIns: "usage",
                 corejs: 3
             }
@@ -21,7 +20,7 @@ module.exports = {
         "lodash",
         ["@babel/plugin-proposal-decorators", {legacy: true}],
         "transform-custom-element-classes",
-        "@babel/plugin-proposal-optional-chaining",
-        "@babel/plugin-proposal-class-properties"
+        "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-proposal-optional-chaining"
     ]
 };
