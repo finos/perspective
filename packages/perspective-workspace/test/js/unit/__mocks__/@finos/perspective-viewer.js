@@ -20,6 +20,7 @@ const patchUnknownElement = element => {
     element.save = () => config;
     element.restore = value => {
         config = {...config, ...value};
+        return Promise.resolve();
     };
 
     element.restyleElement = jest.fn();
