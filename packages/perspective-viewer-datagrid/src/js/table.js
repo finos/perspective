@@ -44,50 +44,39 @@ export class DatagridTableViewModel {
     /**
      * Calculate amendments to auto size from this render pass.
      *
-     * Disable autosizing when column pivots are applied but the entire column
-     * group is not visible, as this can lead to columns sized to their group
-     * header's min size.
-     *
      * @param {*} last_cells
      * @param {*} {columns, column_pivots}
      * @memberof DatagridTableViewModel
      */
-    _autosize_columns(last_cells, {columns}) {
-        let is_column_group_visible = false;
+    _autosize_columns(last_cells) {
         while (last_cells.length > 0) {
             const [cell, metadata] = last_cells.shift();
             const offsetWidth = cell.offsetWidth;
             this._column_sizes.indices[metadata.cidx] = offsetWidth;
-            const col_offset = (metadata.cidx - 1) % columns.length;
-            if (col_offset === 0) {
-                if (last_cells.length < columns.length) {
-                    is_column_group_visible = false;
-                } else {
-                    is_column_group_visible = true;
-                }
-            }
             const is_override = this._column_sizes.override.hasOwnProperty(metadata.size_key);
-            if ((is_column_group_visible || metadata.cidx === 0) && offsetWidth && !is_override) {
+            if (offsetWidth && !is_override) {
                 this._column_sizes.auto[metadata.size_key] = offsetWidth;
             }
         }
     }
 
-    async draw({width: container_width, height: container_height}, {view, config, column_paths, schema}, selected_id, is_resize, viewport) {
+    async draw(container_size, view_cache, selected_id, is_resize, viewport) {
+        const {width: container_width, height: container_height} = container_size;
+        const {view, config, column_paths, schema, table_schema} = view_cache;
         const visible_columns = column_paths.slice(viewport.start_col);
         const columns_data = await view.to_columns(viewport);
         const {start_col: sidx} = viewport;
+        const id_column = columns_data["__ID__"];
         let cont_body,
             cont_head,
             cidx = 0,
             width = 0,
             last_cells = [];
-        const id_column = columns_data["__ID__"];
-
         if (column_paths[0] === "__ROW_PATH__") {
             const alias = config.row_pivots.join(",");
-            cont_head = this.header.draw(config, alias, "");
-            cont_body = this.body.draw(container_height, alias, 0, columns_data["__ROW_PATH__"], id_column, selected_id, undefined, config.row_pivots.length, viewport.start_row, 0);
+            const types = config.row_pivots.map(x => table_schema[x]);
+            cont_head = this.header.draw(config, alias, "", types);
+            cont_body = this.body.draw(container_height, alias, 0, columns_data["__ROW_PATH__"], id_column, selected_id, types, config.row_pivots.length, viewport.start_row, 0);
             selected_id = false;
             if (!is_resize) {
                 last_cells.push([cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);

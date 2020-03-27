@@ -30,7 +30,7 @@ export class DatagridBodyViewModel extends ViewModel {
         metadata.id = id;
         metadata.cidx = cidx + cidx_offset;
         if (metadata.value !== val || metadata.type !== type) {
-            td.className = type;
+            td.className = `pd-${type}`;
             metadata.type = type;
             metadata.column = column;
             metadata.size_key = `${column}|${type}`;
@@ -42,7 +42,6 @@ export class DatagridBodyViewModel extends ViewModel {
                 td.style.maxWidth = override_width + "px";
             } else {
                 td.classList.remove("pd-cell-clip");
-
                 td.style.minWidth = "0";
                 td.style.maxWidth = "none";
             }
@@ -53,7 +52,7 @@ export class DatagridBodyViewModel extends ViewModel {
                 metadata.row_path = null;
                 metadata.ridx = ridx + ridx_offset;
             } else if (formatter) {
-                formatter.format(td, val, val.length === depth, is_open);
+                formatter.format(td, val, type, val.length === depth, is_open);
                 metadata.value = Array.isArray(val) ? val[val.length - 1] : val;
                 metadata.row_path = val;
                 metadata.ridx = ridx + ridx_offset;

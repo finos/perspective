@@ -11,27 +11,60 @@ import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {METADATA_MAP} from "./constants";
 import {memoize} from "./utils";
 
-function _tree_header(td, path, is_leaf, is_open) {
+function _tree_header(td, path, type, is_leaf, is_open) {
     let name;
     if (path.length > 0) {
         name = path[path.length - 1];
     } else {
         name = "TOTAL";
     }
+
+    const formatter = this._format(type[path.length - 1]);
     if (is_leaf) {
-        let html = "";
+        const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.alignItems = "stretch";
         for (let i = 0; i < path.length; i++) {
-            html += `<span class="pd-tree-group"></span>`;
+            const span = document.createElement("span");
+            span.className = "pd-tree-group";
+            div.appendChild(span);
         }
-        td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-group-name pd-group-leaf">${name}</span></div>`;
+
+        const span = document.createElement("span");
+        span.className = "pd-group-name pd-group-leaf";
+        if (formatter) {
+            formatter.format(span, name);
+        }
+
+        div.appendChild(span);
+        td.innerHTML = "";
+        td.appendChild(div);
     } else {
-        const icon = is_open ? "remove" : "add";
-        let html = "";
+        const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.alignItems = "stretch";
         for (let i = 0; i < path.length; i++) {
-            html += `<span class="pd-tree-group"></span>`;
+            const span = document.createElement("span");
+            span.className = "pd-tree-group";
+            div.appendChild(span);
         }
-        td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-row-header-icon">${icon}</span><span class="pd-group-name">${name}</span></div>`;
+
+        const button = document.createElement("span");
+        button.className = "pd-row-header-icon";
+        button.textContent = is_open ? "remove" : "add";
+        div.appendChild(button);
+
+        const span = document.createElement("span");
+        span.className = "pd-group-name";
+        if (formatter) {
+            formatter.format(span, name);
+        }
+
+        div.appendChild(span);
+        td.innerHTML = "";
+        td.appendChild(div);
     }
+
     td.classList.add("pd-group-header");
 }
 
@@ -65,7 +98,7 @@ export class ViewModel {
     }
 
     @memoize
-    _format(type) {
+    _format_raw(type) {
         const config = get_type_config(type);
         const real_type = config.type || type;
         const format_function = {
@@ -76,21 +109,32 @@ export class ViewModel {
         }[real_type];
         if (format_function) {
             const func = new format_function("en-us", config.format);
-            return {
-                format(td, path) {
-                    td.textContent = func.format(path);
-                    if (real_type === "integer" || real_type === "float") {
-                        if (path > 0) {
-                            td.classList.add("pd-positive");
-                        } else if (path < 0) {
-                            td.classList.add("pd-negative");
-                        }
+            return path => func.format(path);
+        } else {
+            return path => path;
+        }
+    }
+
+    @memoize
+    _format(type) {
+        if (Array.isArray(type)) {
+            return {format: _tree_header.bind(this)};
+        }
+        const fmt = this._format_raw(type);
+        return {
+            format(td, path) {
+                td.textContent = fmt ? fmt(path) : fmt;
+                const config = get_type_config(type);
+                const real_type = config.type || type;
+                if (real_type === "integer" || real_type === "float") {
+                    if (path > 0) {
+                        td.classList.add("pd-positive");
+                    } else if (path < 0) {
+                        td.classList.add("pd-negative");
                     }
                 }
-            };
-        } else if (type === undefined) {
-            return {format: _tree_header};
-        }
+            }
+        };
     }
 
     _get_cell(tag = "td", row_container, cidx, tr) {

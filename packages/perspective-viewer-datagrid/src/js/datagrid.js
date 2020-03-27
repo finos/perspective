@@ -83,11 +83,12 @@ export class DatagridViewModel extends DatagridViewEventModel {
 
     async set_view(view) {
         const config = await view.get_config();
+        const table_schema = await this._render_element.table.schema();
         const schema = await view.schema();
         const column_paths = await view.column_paths();
         this._invalid_schema = true;
         const options = this.infer_options(config);
-        this._view_cache = {view, config, column_paths, schema};
+        this._view_cache = {view, config, column_paths, schema, table_schema};
         return options;
     }
 

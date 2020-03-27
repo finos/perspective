@@ -75,7 +75,7 @@ export class DatagridHeaderViewModel extends ViewModel {
         metadata.size_key = `${column}|${type}`;
         const auto_width = this._column_sizes.auto[metadata.size_key];
         const override_width = this._column_sizes.override[metadata.size_key];
-        th.classList.add(type);
+        th.classList.add(`pd-${type}`);
         if (override_width) {
             th.classList.toggle("pd-cell-clip", auto_width > override_width);
             th.style.minWidth = override_width + "px";
