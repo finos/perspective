@@ -271,7 +271,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     _validate(table) {
-        if (table?.__proto__?.type !== "table") {
+        if (!("view" in table) || typeof table?.view !== "function") {
             throw new Error("Only `perspective.Table()` instances can be added to `tables`");
         }
         return table;
