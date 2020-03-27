@@ -41,12 +41,33 @@ export class DatagridTableViewModel {
         return this.header._get_row(Math.max(0, this.header.rows?.length - 1 || 0)).row_container.length;
     }
 
-    _clear_cells(last_cells) {
+    /**
+     * Calculate amendments to auto size from this render pass.
+     *
+     * Disable autosizing when column pivots are applied but the entire column
+     * group is not visible, as this can lead to columns sized to their group
+     * header's min size.
+     *
+     * @param {*} last_cells
+     * @param {*} {columns, column_pivots}
+     * @memberof DatagridTableViewModel
+     */
+    _autosize_columns(last_cells, {columns}) {
+        let is_column_group_visible = false;
         while (last_cells.length > 0) {
-            const [idx, cell, metadata] = last_cells.shift();
+            const [cell, metadata] = last_cells.shift();
             const offsetWidth = cell.offsetWidth;
-            this._column_sizes.indices[idx] = offsetWidth;
-            if (offsetWidth && !this._column_sizes.override[metadata.size_key]) {
+            this._column_sizes.indices[metadata.cidx] = offsetWidth;
+            const col_offset = (metadata.cidx - 1) % columns.length;
+            if (col_offset === 0) {
+                if (last_cells.length < columns.length) {
+                    is_column_group_visible = false;
+                } else {
+                    is_column_group_visible = true;
+                }
+            }
+            const is_override = this._column_sizes.override.hasOwnProperty(metadata.size_key);
+            if ((is_column_group_visible || metadata.cidx === 0) && offsetWidth && !is_override) {
                 this._column_sizes.auto[metadata.size_key] = offsetWidth;
             }
         }
@@ -54,7 +75,6 @@ export class DatagridTableViewModel {
 
     async draw({width: container_width, height: container_height}, {view, config, column_paths, schema}, selected_id, is_resize, viewport) {
         const visible_columns = column_paths.slice(viewport.start_col);
-
         const columns_data = await view.to_columns(viewport);
         const {start_col: sidx} = viewport;
         let cont_body,
@@ -70,7 +90,7 @@ export class DatagridTableViewModel {
             cont_body = this.body.draw(container_height, alias, 0, columns_data["__ROW_PATH__"], id_column, selected_id, undefined, config.row_pivots.length, viewport.start_row, 0);
             selected_id = false;
             if (!is_resize) {
-                last_cells.push([0, cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
+                last_cells.push([cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
             }
             width += this._column_sizes.indices[0] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
             cidx++;
@@ -97,7 +117,7 @@ export class DatagridTableViewModel {
                 selected_id = false;
                 width += this._column_sizes.indices[cidx + sidx] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
                 if (!is_resize) {
-                    last_cells.push([cidx + sidx, cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
+                    last_cells.push([cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
                 }
                 cidx++;
 
@@ -105,7 +125,7 @@ export class DatagridTableViewModel {
                     break;
                 }
             }
-            this._clear_cells(last_cells);
+            this._autosize_columns(last_cells, config);
         } finally {
             this.body.clean({ridx: cont_body?.ridx || 0, cidx});
             if (cont_head) {

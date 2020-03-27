@@ -295,7 +295,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
                 }
             }
         }
-        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {detail: this}));
+        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {bubbles: true, detail: this}));
     }
 
     /**
@@ -309,7 +309,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         if (!this._virtual_scrolling_disabled && this._needs_swap(args)) {
             this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
         }
-        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-after-update", {detail: this}));
+        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-after-update", {bubbles: true, detail: this}));
     }
 
     /**
