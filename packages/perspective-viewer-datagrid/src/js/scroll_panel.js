@@ -57,7 +57,6 @@ import {DEBUG, BROWSER_MAX_HEIGHT, ROW_HEIGHT, DOUBLE_BUFFER_RECREATE, DOUBLE_BU
 export class DatagridVirtualTableViewModel extends HTMLElement {
     constructor() {
         super();
-        this._create_shadow_dom();
     }
 
     /**
@@ -70,7 +69,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      *
      * @memberof DatagridVirtualTableViewModel
      */
-    _create_shadow_dom() {
+    create_shadow_dom() {
         this.attachShadow({mode: "open"});
         const style = document.createElement("style");
         style.textContent = CONTAINER_STYLE + MATERIAL_STYLE;
@@ -88,7 +87,11 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         scroll_container.appendChild(table_clip);
 
         const slot = document.createElement("slot");
-        table_clip.appendChild(slot);
+        if (this._virtual_scrolling_disabled) {
+            virtual_panel.appendChild(slot);
+        } else {
+            table_clip.appendChild(slot);
+        }
 
         this.shadowRoot.appendChild(scroll_container);
 
@@ -115,9 +118,12 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _calculate_viewport(nrows, preserve_scroll_position) {
+        const id = this._view_cache.config.row_pivots.length > 0;
+        if (this._virtual_scrolling_disabled) {
+            return {id};
+        }
         const {start_row, end_row} = this._calculate_row_range(nrows, preserve_scroll_position);
         const {start_col, end_col} = this._calculate_column_range();
-        const id = this._view_cache.config.row_pivots.length > 0;
         this._nrows = nrows;
         return {start_col, end_col, start_row, end_row, id};
     }
@@ -229,7 +235,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
             width = this._column_sizes.indices[0];
         }
         let max_scroll_column = this._view_cache.column_paths.length;
-        while (width < this._container_size.width) {
+        while (width < this._container_size.width && max_scroll_column >= 0) {
             max_scroll_column--;
             width += this._column_sizes.indices[max_scroll_column] || 100;
         }
@@ -277,14 +283,16 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _swap_in(args) {
-        if (this._needs_swap(args)) {
-            if (this._table_staging !== this.table_model.table.parentElement) {
-                this._sticky_container.replaceChild(this.table_model.table.cloneNode(true), this.table_model.table);
-                this._table_staging.appendChild(this.table_model.table);
-            }
-        } else {
-            if (this._sticky_container !== this.table_model.table.parentElement) {
-                this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
+        if (!this._virtual_scrolling_disabled) {
+            if (this._needs_swap(args)) {
+                if (this._table_staging !== this.table_model.table.parentElement) {
+                    this._sticky_container.replaceChild(this.table_model.table.cloneNode(true), this.table_model.table);
+                    this._table_staging.appendChild(this.table_model.table);
+                }
+            } else {
+                if (this._sticky_container !== this.table_model.table.parentElement) {
+                    this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
+                }
             }
         }
         this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {detail: this}));
@@ -298,7 +306,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _swap_out(args) {
-        if (this._needs_swap(args)) {
+        if (!this._virtual_scrolling_disabled && this._needs_swap(args)) {
             this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
         }
         this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-after-update", {detail: this}));
@@ -389,10 +397,14 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
 
         const nrows = await this._view_cache.view.num_rows();
 
-        this._container_size = this._container_size || {
-            width: this._scroll_container.offsetWidth,
-            height: this._scroll_container.offsetHeight
-        };
+        if (this._virtual_scrolling_disabled) {
+            this._container_size = {width: Infinity, height: Infinity};
+        } else {
+            this._container_size = this._container_size || {
+                width: this._scroll_container.offsetWidth,
+                height: this._scroll_container.offsetHeight
+            };
+        }
 
         const viewport = this._calculate_viewport(nrows, preserve_scroll_position);
         const {invalid_row, invalid_column} = this._validate_viewport(viewport);

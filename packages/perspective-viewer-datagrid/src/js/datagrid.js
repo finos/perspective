@@ -92,12 +92,14 @@ export class DatagridViewModel extends DatagridViewEventModel {
     }
 
     set_element(_render_element) {
-        this._column_sizes = {auto: {}, override: {}, indices: []};
-        this.table_model = new DatagridTableViewModel(this._table_clip, this._column_sizes);
-        this._sticky_container.appendChild(this.table_model.table);
         if (_render_element) {
             this._render_element = _render_element;
         }
+        this._virtual_scrolling_disabled = _render_element.hasAttribute("disable-virtual-datagrid");
+        this.create_shadow_dom();
+        this._column_sizes = {auto: {}, override: {}, indices: []};
+        this.table_model = new DatagridTableViewModel(this._table_clip, this._column_sizes);
+        this._sticky_container.appendChild(this.table_model.table);
         if (!this.table_model) return;
         if (this._render_element) {
             if (this._render_element !== this.table_model.table.parentElement) {

@@ -31,6 +31,7 @@ export class DatagridBodyViewModel extends ViewModel {
         metadata.cidx = cidx + cidx_offset;
         if (metadata.value !== val || metadata.type !== type) {
             td.className = type;
+            metadata.type = type;
             metadata.column = column;
             metadata.size_key = `${column}|${type}`;
             const override_width = this._column_sizes.override[metadata.size_key];

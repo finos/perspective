@@ -33,7 +33,6 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
      * @memberof DatagridViewModel
      */
     async _on_scroll(event) {
-        event.preventDefault();
         event.stopPropagation();
         event.returnValue = false;
         await this.draw();
@@ -48,6 +47,9 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
      * @memberof DatagridViewModel
      */
     _on_mousewheel(event) {
+        if (this._virtual_scrolling_disabled) {
+            return;
+        }
         event.preventDefault();
         event.returnValue = false;
         const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this._scroll_container.offsetHeight);
