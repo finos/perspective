@@ -9,53 +9,17 @@
 
 import React from "react";
 import {Table} from "@finos/perspective";
-import {PerspectiveViewer, PerspectiveViewerElement, PerspectiveViewerOptions} from "@finos/perspective-viewer";
-import {SplitPanel, Widget} from "@lumino/widgets";
+import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
 
 export type Side = "left" | "right";
 export type Mode = "globalFilters" | "linked";
 
-interface PerspectiveWorkspace extends SplitPanel {
-    // Don't expose
-    // addTable(name: string, table: Table | Promise<Table>): void;
-    // getTable(name: string): Table;
-    // removeTable(name: string): Table;
-    // tables: Map<string, Table | Promise<Table>>;
-    side: Side;
-
-    // save(): PerspectiveWorkspaceOptions;
-    // restore(value: PerspectiveWorkspaceOptions): void;
-    // duplicate(widget: PerspectiveViewerWidget): void;
-    // toggleMasterDetail(widget: PerspectiveViewerWidget): void;
-
-    // makeMaster(widget: PerspectiveViewerWidget): void;
-    // makeDetail(widget: PerspectiveViewerWidget): void;
-    // isLinked(widget: PerspectiveViewerWidget): boolean;
-    // toggleLink(widget: PerspectiveViewerWidget): void;
-
-    readonly table?: Table;
+interface PerspectiveWorkspace {
+    save(): PerspectiveWorkspaceOptions;
+    restore(layout: PerspectiveWorkspaceOptions): void;
+    tables: Map<string, Table | Promise<Table>>;
+    notifyResize(): void;
 }
-
-// Don't export, use document.createElement("perspective-workspace");
-// export const PerspectiveWorkspace: {
-//     new (element?: HTMLElement, options?: PerspectiveWorkspaceAttributes): PerspectiveWorkspace;
-// };
-
-interface PerspectiveViewerWidget extends Widget {
-    master: boolean;
-    viewer: PerspectiveViewer;
-    // table: Table; // don't expose
-    name: string;
-    linked: boolean;
-    toggleConfig(): void;
-    save(): PerspectiveViewerWidgetOptions;
-    restore(config: PerspectiveViewerWidgetOptions): void;
-}
-
-// Don't export, use document.createElement("perspective-workspace");
-// export const PerspectiveViewerWidget: {
-//     new (viewer?: PerspectiveViewer, node?: HTMLElement): PerspectiveViewerWidget;
-// };
 
 export interface PerspectiveWorkspaceAttributes {
     mode?: Mode;
@@ -96,13 +60,7 @@ export interface PerspectiveViewerWidgetOptions extends PerspectiveViewerOptions
     name?: string;
 }
 
-export interface HTMLPerspectiveWorkspaceElement extends HTMLElement {
-    side?: Side;
-    save(): PerspectiveWorkspaceOptions;
-    restore(layout: PerspectiveWorkspaceOptions): void;
-    tables: Map<string, Table | Promise<Table>>;
-    notifyResize(): void;
-}
+export interface HTMLPerspectiveWorkspaceElement extends PerspectiveWorkspace, HTMLElement {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PerspectiveWorkspaceHTMLAttributes extends Pick<PerspectiveWorkspaceAttributes, "mode" | "side"> {}
