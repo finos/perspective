@@ -18,7 +18,7 @@ interface PerspectiveWorkspace {
     save(): PerspectiveWorkspaceOptions;
     restore(layout: PerspectiveWorkspaceOptions): void;
     tables: Map<string, Table | Promise<Table>>;
-    notifyResize(): void;
+    notifyResize(): Promise<null>;
 }
 
 export interface PerspectiveWorkspaceAttributes {
