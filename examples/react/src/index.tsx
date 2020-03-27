@@ -12,7 +12,7 @@ import * as ReactDOM from "react-dom";
 import {useEffect, useRef} from "react";
 import perspective, {Table} from "@finos/perspective";
 import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import "./index.css";
 import "@finos/perspective-viewer/dist/umd/material.css";

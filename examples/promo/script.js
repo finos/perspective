@@ -108,7 +108,7 @@ async function script(page) {
     // create filter
     await page.evaluate(viewer => viewer.toggleConfig(), viewer);
     await page.waitFor(200);
-    await poke("plugin", "hypergrid");
+    await poke("plugin", "datagrid");
     await page.waitFor(200);
     await poke("column-pivots", [], "columns", ["chg", "vol"]);
     await page.waitFor(200);

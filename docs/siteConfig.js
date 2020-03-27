@@ -41,7 +41,7 @@ const siteConfig = {
         "https://buttons.github.io/buttons.js",
         "https://unpkg.com/@finos/perspective/dist/umd/perspective.js",
         "https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js",
-        "https://unpkg.com/@finos/perspective-viewer-hypergrid/dist/umd/perspective-viewer-hypergrid.js",
+        "https://unpkg.com/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js",
         "https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js",
         "js/animation.js",
         "js/logo.js"

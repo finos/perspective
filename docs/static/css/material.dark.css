@@ -100,8 +100,8 @@ perspective-viewer,
 }
 .homeContainer perspective-viewer,
 #get_started perspective-viewer,
-.homeContainer .perspective-viewer-material-dark,
-#get_started .perspective-viewer-material-dark {
+.homeContainer .perspective-viewer-material-dense-dark,
+#get_started .perspective-viewer-material-dense-dark {
   font-family: "Open Sans";
   --interface-monospace--font-family: "Roboto Mono";
   --inactive-column-selector--content: "\E835";
@@ -215,4 +215,134 @@ perspective-viewer,
   --highcharts-positive--gradient: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
   --highcharts-negative--gradient: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);
   --warning--color: #333;
+  --hypergrid--padding: 12px 12px 12px 12px;
+  --hypergrid-row--height: 20px;
+  --side_panel--padding: 12px 12px 12px 10px;
+  --top_panel--padding: 0px 0px 12px 0px;
+  --column-drop-label--margin: -10px 0px 0px 0px;
+  --column-drop-container--margin: 12px 12px 0px 0px;
+  --column-container--margin: 12px 0px 0px 0px;
+  --row_draggable--animation: none;
+  --button--padding: 12px 9px;
+  --active-column--height: 45px;
+  --column-drop-label--font-size: 8px;
+  --column_selector--width: 24px;
+}
+.homeContainer perspective-viewer table,
+#get_started perspective-viewer table,
+.homeContainer .perspective-viewer-material-dense-dark table,
+#get_started .perspective-viewer-material-dense-dark table {
+  color: #cfd8dc;
+}
+.homeContainer perspective-viewer tr td span.pd-tree-group,
+#get_started perspective-viewer tr td span.pd-tree-group,
+.homeContainer .perspective-viewer-material-dense-dark tr td span.pd-tree-group,
+#get_started .perspective-viewer-material-dense-dark tr td span.pd-tree-group {
+  border-left: 1px solid #444;
+}
+.homeContainer perspective-viewer tr td.pd-group-header,
+#get_started perspective-viewer tr td.pd-group-header,
+.homeContainer .perspective-viewer-material-dense-dark tr td.pd-group-header,
+#get_started .perspective-viewer-material-dense-dark tr td.pd-group-header,
+.homeContainer perspective-viewer tr th.pd-group-header,
+#get_started perspective-viewer tr th.pd-group-header,
+.homeContainer .perspective-viewer-material-dense-dark tr th.pd-group-header,
+#get_started .perspective-viewer-material-dense-dark tr th.pd-group-header {
+  border-right: 1px solid #999;
+}
+.homeContainer perspective-viewer tr:last-child th,
+#get_started perspective-viewer tr:last-child th,
+.homeContainer .perspective-viewer-material-dense-dark tr:last-child th,
+#get_started .perspective-viewer-material-dense-dark tr:last-child th {
+  border-bottom: 1px solid #999;
+}
+.homeContainer perspective-viewer .pd-selected td,
+#get_started perspective-viewer .pd-selected td,
+.homeContainer .perspective-viewer-material-dense-dark .pd-selected td,
+#get_started .perspective-viewer-material-dense-dark .pd-selected td {
+  background-color: rgba(0, 0, 0, 0);
+}
+.homeContainer perspective-viewer tr.pd-selected:hover td div,
+#get_started perspective-viewer tr.pd-selected:hover td div,
+.homeContainer .perspective-viewer-material-dense-dark tr.pd-selected:hover td div,
+#get_started .perspective-viewer-material-dense-dark tr.pd-selected:hover td div {
+  background-color: #444;
+}
+.homeContainer perspective-viewer td.pd-negative,
+#get_started perspective-viewer td.pd-negative,
+.homeContainer .perspective-viewer-material-dense-dark td.pd-negative,
+#get_started .perspective-viewer-material-dense-dark td.pd-negative {
+  color: #ff8888;
+}
+.homeContainer perspective-viewer td.pd-positive,
+#get_started perspective-viewer td.pd-positive,
+.homeContainer .perspective-viewer-material-dense-dark td.pd-positive,
+#get_started .perspective-viewer-material-dense-dark td.pd-positive {
+  color: #22a0ce;
+}
+.homeContainer perspective-viewer .pd-selected td:not(.pd-group-header),
+#get_started perspective-viewer .pd-selected td:not(.pd-group-header),
+.homeContainer .perspective-viewer-material-dense-dark .pd-selected td:not(.pd-group-header),
+#get_started .perspective-viewer-material-dense-dark .pd-selected td:not(.pd-group-header),
+.homeContainer perspective-viewer .pd-selected td span.pd-group-name,
+#get_started perspective-viewer .pd-selected td span.pd-group-name,
+.homeContainer .perspective-viewer-material-dense-dark .pd-selected td span.pd-group-name,
+#get_started .perspective-viewer-material-dense-dark .pd-selected td span.pd-group-name {
+  background: #EA7319 !important;
+}
+.homeContainer perspective-viewer .pd-selected td,
+#get_started perspective-viewer .pd-selected td,
+.homeContainer .perspective-viewer-material-dense-dark .pd-selected td,
+#get_started .perspective-viewer-material-dense-dark .pd-selected td {
+  color: #000;
+  background-color: rgba(0, 0, 0, 0);
+}
+.homeContainer perspective-viewer .pd-sub-selected td:not(.pd-group-header),
+#get_started perspective-viewer .pd-sub-selected td:not(.pd-group-header),
+.homeContainer .perspective-viewer-material-dense-dark .pd-sub-selected td:not(.pd-group-header),
+#get_started .perspective-viewer-material-dense-dark .pd-sub-selected td:not(.pd-group-header),
+.homeContainer perspective-viewer .pd-sub-selected td span.pd-group-name,
+#get_started perspective-viewer .pd-sub-selected td span.pd-group-name,
+.homeContainer .perspective-viewer-material-dense-dark .pd-sub-selected td span.pd-group-name,
+#get_started .perspective-viewer-material-dense-dark .pd-sub-selected td span.pd-group-name {
+  background: rgba(234, 115, 25, 0.2) !important;
+}
+.homeContainer perspective-viewer tbody:hover tr:hover td,
+#get_started perspective-viewer tbody:hover tr:hover td,
+.homeContainer .perspective-viewer-material-dense-dark tbody:hover tr:hover td,
+#get_started .perspective-viewer-material-dense-dark tbody:hover tr:hover td,
+.homeContainer perspective-viewer tbody:hover tr:hover td span,
+#get_started perspective-viewer tbody:hover tr:hover td span,
+.homeContainer .perspective-viewer-material-dense-dark tbody:hover tr:hover td span,
+#get_started .perspective-viewer-material-dense-dark tbody:hover tr:hover td span {
+  background: #444;
+}
+.homeContainer perspective-viewer table tr:hover,
+#get_started perspective-viewer table tr:hover,
+.homeContainer .perspective-viewer-material-dense-dark table tr:hover,
+#get_started .perspective-viewer-material-dense-dark table tr:hover {
+  color: #ffffff;
+}
+td,
+th,
+table,
+tbody,
+thead {
+  border: 0;
+  font-size: 12px;
+  font-family: "Open Sans";
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+table tr {
+  border-top: none;
+}
+table tr:nth-child(2n) {
+  background-color: transparent;
+}
+table th,
+table td {
+  border: none;
+  padding: 0px 5px;
 }

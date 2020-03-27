@@ -497,7 +497,7 @@ Call `reset()` on the widget to return it to an unpivoted, unmodified state. The
 ```python
 widget = PerspectiveWidget(data, row_pivots=["date"], plugin=Plugin.XBAR)
 widget.reset()
-widget.plugin  # "hypergrid"
+widget.plugin  # "datagrid"
 ```
 
 ## `PerspectiveTornadoHandler`

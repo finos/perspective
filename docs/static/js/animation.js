@@ -63,9 +63,12 @@ function select(id) {
     viewer.restore(
         {
             "#grid": {
-                plugin: "hypergrid",
+                plugin: "datagrid",
                 columns: ["ask", "bid", "chg"],
-                sort: [["name", "desc"], ["lastUpdate", "desc"]],
+                sort: [
+                    ["name", "desc"],
+                    ["lastUpdate", "desc"]
+                ],
                 aggregates: {name: "last", lastUpdate: "last"},
                 "row-pivots": ["name", "lastUpdate"],
                 "column-pivots": ["client"]
@@ -98,7 +101,10 @@ function select(id) {
                 "column-pivots": [],
                 columns: ["bid", "chg"],
                 aggregates: {bid: "sum", chg: "low", name: "last"},
-                sort: [["name", "desc"], ["chg", "desc"]]
+                sort: [
+                    ["name", "desc"],
+                    ["chg", "desc"]
+                ]
             },
             "#enhance": {
                 plugin: "d3_y_line",

@@ -442,11 +442,7 @@ export default function(Module) {
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
                 const col_type = schema[col_name];
-                if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
-                    // Hidden columns are always at the end, so don't emit
-                    // these.
-                    continue;
-                } else if (cidx === start_col && num_sides !== 0) {
+                if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
@@ -457,6 +453,10 @@ export default function(Module) {
                             }
                         }
                     }
+                } else if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
+                    // Hidden columns are always at the end, so don't emit
+                    // these.
+                    continue;
                 } else {
                     let value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
                     if ((col_type === "datetime" || col_type === "date") && value !== undefined) {

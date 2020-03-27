@@ -13,7 +13,7 @@ var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl
 
 function newRows() {
     var rows = [];
-    for (var x = 0; x < 5; x++) {
+    for (var x = 0; x < 100; x++) {
         rows.push({
             name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
             client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],

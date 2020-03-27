@@ -33,12 +33,12 @@ you'll need to import the following modules:
 
 ```javascript
 import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 ```
 
 `perspective-viewer` provides a widget for users to transform and analyze
-their data, while `perspective-viewer-hypergrid` and `perspective-viewer-d3fc`
+their data, while `perspective-viewer-datagrid` and `perspective-viewer-d3fc`
 provide fast, flexible grid and chart visualization plugins, respectively.
 
 These modules register the `<perspective-viewer>`
@@ -119,13 +119,19 @@ and must be imported individually.
 
 Perspective offers these plugin modules:
 
-- `@finos/perspective-viewer-hypergrid`  
-  A `<perspective-viewer>` plugin for
-  [Hypergrid](https://github.com/fin-hypergrid/core).
+- `@finos/perspective-viewer-d3fc`  
+  A custom high-performance data-grid component based on HTML `<table>`.
 
 - `@finos/perspective-viewer-d3fc`  
   A `<perspective-viewer>` plugin for the [d3fc](https://d3fc.io) charting
   library.
+
+Also available are these legacy modules;  though no longer under development,
+they are compatible with perspective versions < 1.0.0:
+
+- `@finos/perspective-viewer-hypergrid`  
+  A `<perspective-viewer>` plugin for
+  [Hypergrid](https://github.com/fin-hypergrid/core).
 
 - `@finos/perspective-viewer-highcharts`  
   A `<perspective-viewer>` plugin for
@@ -149,7 +155,7 @@ your project:
 
 - For Perspective as a simple, browser-based data visualization widget, import:
   - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
-  - `@finos/perspective-viewer-hypergrid` for data grids
+  - `@finos/perspective-viewer-datagrid` for data grids
   - `@finos/perspective-viewer-d3fc` for charting
   - The core data engine `@finos/perspective` is a dependency of these packages
     and does not need to be imported on its own for basic usage.
@@ -548,10 +554,6 @@ module.exports = {
 }
 ```
 
-Styles defined within `format` are only currently read by
-`@finos/perspective-hypergrid`, and affect the formatting of all cells with the
-custom type set.
-
 ## `perspective-viewer` web component
 
 `<perspective-viewer>` provides a complete graphical UI for configuring the
@@ -565,7 +567,7 @@ for use within your site's regular HTML:
 
 ```javascript
 import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 ```
 
