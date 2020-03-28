@@ -4,7 +4,9 @@
     "version": "0.4.6",
     "description": "An example app built using `@finos/perspective-workspace` written in typescript",
     "scripts": {
-        "start": "tsc && webpack-dev-server --open",
+        "tsc:watch": "tsc -w",
+        "webpack:start": "webpack-dev-server --open",
+        "start": "npm-run-all -p tsc:watch webpack:start",
         "webpack": "tsc && webpack --colour"
     },
     "keywords": [],

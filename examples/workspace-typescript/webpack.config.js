@@ -19,8 +19,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            title: "Workspace Example",
-            template: "./src/index.html"
+            title: "Typescript Workspace Example"
         }),
         new PerspectivePlugin({})
     ],

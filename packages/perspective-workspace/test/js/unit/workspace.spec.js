@@ -84,4 +84,42 @@ describe("workspace", () => {
         expect(detailWidgets.length).toBe(1);
         expect(detailWidgets[0].save()).toStrictEqual(detail);
     });
+
+    test("validate config sets currentIndex if missing", () => {
+        const workspace = new PerspectiveWorkspace(document.body);
+        const config = {
+            detail: {
+                main: {
+                    type: "tab-area",
+                    widgets: ["Two"]
+                }
+            }
+        };
+        const validatedConfig = workspace._validate_config(config);
+        expect(validatedConfig.detail.main.currentIndex).toBe(0);
+    });
+
+    test("validate config sets sizes if missing", () => {
+        const workspace = new PerspectiveWorkspace(document.body);
+        const config = {
+            detail: {
+                main: {
+                    type: "split-area",
+                    orientation: "horizontal",
+                    children: [
+                        {
+                            type: "tab-area",
+                            widgets: ["One"]
+                        },
+                        {
+                            type: "tab-area",
+                            widgets: ["Two"]
+                        }
+                    ]
+                }
+            }
+        };
+        const validatedConfig = workspace._validate_config(config);
+        expect(validatedConfig.detail.main.sizes).toStrictEqual([0.5, 0.5]);
+    });
 });

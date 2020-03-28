@@ -178,21 +178,27 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     _validate_config(value) {
         let {detail} = value;
 
-        const ensureCurrentIndex = item => {
+        const _validate = item => {
             if (item.type && item.type === "tab-area") {
                 // ensure tab-area have currentIndex set
                 if (!item.currentIndex) {
                     item.currentIndex = 0;
                 }
             } else if (item.main) {
-                item.main = ensureCurrentIndex(item.main);
+                item.main = _validate(item.main);
             } else if (item.children) {
-                item.children = item.children.map(widget => ensureCurrentIndex(widget));
+                // ensure split-area have sizes set
+                if (!item.sizes) {
+                    item.sizes = new Array(item.children.length).fill(1 / item.children.length);
+                }
+                item.children = item.children.map(widget => _validate(widget));
             }
             return item;
         };
 
-        value.detail = ensureCurrentIndex(detail);
+        if (detail) {
+            value.detail = _validate(detail);
+        }
         return value;
     }
 

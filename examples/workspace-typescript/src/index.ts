@@ -39,29 +39,24 @@ window.addEventListener("WebComponentsReady", async () => {
                 type: "split-area",
                 children: [
                     {
-                        currentIndex: 0,
                         type: "tab-area",
                         widgets: ["Three"]
                     },
                     {
                         type: "split-area",
                         orientation: "horizontal",
-                        sizes: [0.5, 0.5],
                         children: [
                             {
-                                currentIndex: 0,
                                 type: "tab-area",
                                 widgets: ["One"]
                             },
                             {
-                                currentIndex: 0,
                                 type: "tab-area",
                                 widgets: ["Two"]
                             }
                         ]
                     }
-                ],
-                sizes: [0.5, 0.5]
+                ]
             }
         },
         viewers: {

@@ -30,7 +30,7 @@ interface SplitAreaConfig {
     type: "split-area";
     orientation?: "horizontal" | "vertical";
     children: AreaConfig[];
-    sizes: number[];
+    sizes?: number[];
 }
 
 interface TabAreaConfig {
@@ -41,14 +41,19 @@ interface TabAreaConfig {
 
 type AreaConfig = SplitAreaConfig | TabAreaConfig;
 
-interface LayoutConfig {
-    widgets?: Array<string>; // names not widgets
-    main?: AreaConfig;
+export interface DetailLayoutConfig {
+    main: AreaConfig | null;
 }
+
+export interface MasterLayoutConfig {
+    widgets: string[];
+    sizes?: number[];
+}
+
 export interface PerspectiveWorkspaceOptions {
     sizes?: Array<number>;
-    master: LayoutConfig;
-    detail: LayoutConfig;
+    master?: MasterLayoutConfig;
+    detail?: DetailLayoutConfig;
     viewers: {[name: string]: PerspectiveViewerWidgetOptions};
     mode?: Mode;
 }
