@@ -13,13 +13,13 @@ import isEqual from "lodash/isEqual";
 import CONTAINER_STYLE from "../less/container.less";
 import MATERIAL_STYLE from "../less/material.less";
 
-import {log_perf} from "./utils";
+import {log_perf, html} from "./utils";
 import {DEBUG, BROWSER_MAX_HEIGHT, ROW_HEIGHT, DOUBLE_BUFFER_RECREATE, DOUBLE_BUFFER_ROW, DOUBLE_BUFFER_COLUMN} from "./constants";
 
 /**
  * Handles the virtual scroll pane, as well as the double buffering
- * of the underlying <table> (really two). This DOM structure looks
- * a little like this:
+ * of the underlying <table>. This DOM structure looks a little like
+ * this:
  *
  *     +------------------------+      <- div.pd-scroll-container
  *     | +----------------------|------<- div.pd-virtual-panel
@@ -71,38 +71,21 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     create_shadow_dom() {
         this.attachShadow({mode: "open"});
-        const style = document.createElement("style");
-        style.textContent = CONTAINER_STYLE + MATERIAL_STYLE;
-        this.shadowRoot.appendChild(style);
+        const slot = `<slot></slot>`;
+        this.shadowRoot.innerHTML = html`
+            <style>
+                ${CONTAINER_STYLE + MATERIAL_STYLE}
+            </style>
+            <div class="pd-scroll-container">
+                <div class="pd-virtual-panel">${this._virtual_scrolling_disabled && slot}</div>
+                <div class="pd-scroll-table-clip">${this._virtual_scrolling_disabled || slot}</div>
+                <div style="position: absolute; visibility: hidden;"></div>
+            </div>
+        `;
 
-        const virtual_panel = document.createElement("div");
-        virtual_panel.classList.add("pd-virtual-panel");
-
-        const table_clip = document.createElement("div");
-        table_clip.classList.add("pd-scroll-table-clip");
-
-        const scroll_container = document.createElement("div");
-        scroll_container.classList.add("pd-scroll-container");
-        scroll_container.appendChild(virtual_panel);
-        scroll_container.appendChild(table_clip);
-
-        const slot = document.createElement("slot");
-        if (this._virtual_scrolling_disabled) {
-            virtual_panel.appendChild(slot);
-        } else {
-            table_clip.appendChild(slot);
-        }
-
-        this.shadowRoot.appendChild(scroll_container);
-
-        const table_staging = document.createElement("div");
-        table_staging.style.position = "absolute";
-        table_staging.style.visibility = "hidden";
-        scroll_container.appendChild(table_staging);
-
-        const sticky_container = document.createElement("div");
-
-        this._sticky_container = sticky_container;
+        const [, scroll_container] = this.shadowRoot.children;
+        const [virtual_panel, table_clip, table_staging] = scroll_container.children;
+        this._sticky_container = document.createElement("div");
         this._table_clip = table_clip;
         this._table_staging = table_staging;
         this._scroll_container = scroll_container;

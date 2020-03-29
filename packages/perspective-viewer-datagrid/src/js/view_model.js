@@ -10,63 +10,7 @@
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {METADATA_MAP} from "./constants";
 import {memoize} from "./utils";
-
-function _tree_header(td, path, type, is_leaf, is_open) {
-    let name;
-    if (path.length > 0) {
-        name = path[path.length - 1];
-    } else {
-        name = "TOTAL";
-    }
-
-    const formatter = this._format(type[path.length - 1]);
-    if (is_leaf) {
-        const div = document.createElement("div");
-        div.style.display = "flex";
-        div.style.alignItems = "stretch";
-        for (let i = 0; i < path.length; i++) {
-            const span = document.createElement("span");
-            span.className = "pd-tree-group";
-            div.appendChild(span);
-        }
-
-        const span = document.createElement("span");
-        span.className = "pd-group-name pd-group-leaf";
-        if (formatter) {
-            formatter.format(span, name);
-        }
-
-        div.appendChild(span);
-        td.innerHTML = "";
-        td.appendChild(div);
-    } else {
-        const div = document.createElement("div");
-        div.style.display = "flex";
-        div.style.alignItems = "stretch";
-        for (let i = 0; i < path.length; i++) {
-            const span = document.createElement("span");
-            span.className = "pd-tree-group";
-            div.appendChild(span);
-        }
-
-        const button = document.createElement("span");
-        button.className = "pd-row-header-icon";
-        button.textContent = is_open ? "remove" : "add";
-        div.appendChild(button);
-
-        const span = document.createElement("span");
-        span.className = "pd-group-name";
-        if (formatter) {
-            formatter.format(span, name);
-        }
-
-        div.appendChild(span);
-        td.innerHTML = "";
-        td.appendChild(div);
-    }
-
-    td.classList.add("pd-group-header");
-}
+import {tree_header} from "./tree_row_header";
 
 /******************************************************************************
  *
@@ -98,7 +42,7 @@ export class ViewModel {
     }
 
     @memoize
-    _format_raw(type) {
+    _format_text(type) {
         const config = get_type_config(type);
         const real_type = config.type || type;
         const format_function = {
@@ -116,22 +60,35 @@ export class ViewModel {
     }
 
     @memoize
+    _format_class(type) {
+        const config = get_type_config(type);
+        const real_type = config.type || type;
+        if (real_type === "integer" || real_type === "float") {
+            return path => {
+                if (path > 0) {
+                    return "pd-positive";
+                } else if (path < 0) {
+                    return "pd-negative";
+                }
+            };
+        } else {
+            return () => "";
+        }
+    }
+
+    @memoize
     _format(type) {
         if (Array.isArray(type)) {
-            return {format: _tree_header.bind(this)};
+            return {format: tree_header.bind(this)};
         }
-        const fmt = this._format_raw(type);
+        const fmt = this._format_text(type);
+        const cls = this._format_class(type);
         return {
             format(td, path) {
-                td.textContent = fmt ? fmt(path) : fmt;
-                const config = get_type_config(type);
-                const real_type = config.type || type;
-                if (real_type === "integer" || real_type === "float") {
-                    if (path > 0) {
-                        td.classList.add("pd-positive");
-                    } else if (path < 0) {
-                        td.classList.add("pd-negative");
-                    }
+                td.textContent = fmt(path);
+                const c = cls(path);
+                if (c) {
+                    td.classList.add(c);
                 }
             }
         };

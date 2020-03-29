@@ -10,12 +10,6 @@
 import {ViewModel} from "./view_model";
 import {ICON_MAP} from "./constants";
 
-/******************************************************************************
- *
- * Utilities
- *
- */
-
 /**
  * <thead> view model.  This model accumulates state in the form of
  * column_sizes, which leverages <tables> autosize behavior across
