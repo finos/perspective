@@ -29,39 +29,35 @@ export class DatagridBodyViewModel extends ViewModel {
         const metadata = this._get_or_create_metadata(td);
         metadata.id = id;
         metadata.cidx = cidx + cidx_offset;
-        if (metadata.value !== val || metadata.type !== type) {
-            td.className = `pd-${type}`;
-            metadata.type = type;
-            metadata.column = column;
-            metadata.size_key = `${column}|${type}`;
-            const override_width = this._column_sizes.override[metadata.size_key];
-            if (override_width) {
-                const auto_width = this._column_sizes.auto[metadata.size_key];
-                td.classList.toggle("pd-cell-clip", auto_width > override_width);
-                td.style.minWidth = override_width + "px";
-                td.style.maxWidth = override_width + "px";
-            } else {
-                td.classList.remove("pd-cell-clip");
-                td.style.minWidth = "0";
-                td.style.maxWidth = "none";
-            }
-            const formatter = this._format(type);
-            if (val === undefined || val === null) {
-                td.textContent = "-";
-                metadata.value = null;
-                metadata.row_path = null;
-                metadata.ridx = ridx + ridx_offset;
-            } else if (formatter) {
-                formatter.format(td, val, type, val.length === depth, is_open);
-                metadata.value = Array.isArray(val) ? val[val.length - 1] : val;
-                metadata.row_path = val;
-                metadata.ridx = ridx + ridx_offset;
-                metadata.is_open = is_open;
-            } else {
-                td.textContent = val;
-                metadata.value = val;
-                metadata.ridx = ridx + ridx_offset;
-            }
+        metadata.type = type;
+        metadata.column = column;
+        metadata.size_key = `${column}|${type}`;
+        metadata.ridx = ridx + ridx_offset;
+        td.className = `pd-${type}`;
+        const override_width = this._column_sizes.override[metadata.size_key];
+        if (override_width) {
+            const auto_width = this._column_sizes.auto[metadata.size_key];
+            td.classList.toggle("pd-cell-clip", auto_width > override_width);
+            td.style.minWidth = override_width + "px";
+            td.style.maxWidth = override_width + "px";
+        } else {
+            td.classList.remove("pd-cell-clip");
+            td.style.minWidth = "0";
+            td.style.maxWidth = "none";
+        }
+        const formatter = this._format(type);
+        if (val === undefined || val === null) {
+            td.textContent = "-";
+            metadata.value = null;
+            metadata.row_path = null;
+        } else if (formatter) {
+            formatter.format(td, val, type, val.length === depth, is_open);
+            metadata.value = Array.isArray(val) ? val[val.length - 1] : val;
+            metadata.row_path = val;
+            metadata.is_open = is_open;
+        } else {
+            td.textContent = val;
+            metadata.value = val;
         }
 
         return {td, metadata};

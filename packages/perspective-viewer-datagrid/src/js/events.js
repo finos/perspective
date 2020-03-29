@@ -90,7 +90,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 td.style.maxWidth = "none";
                 td.classList.remove("pd-cell-clip");
             }
-            await this.draw({invalid_viewport: true, preserve_scroll_position: true});
+            await this.draw({invalid_viewport: true});
         }
     }
 
@@ -141,7 +141,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             document.removeEventListener("mouseup", up);
             const override_width = this._column_sizes.override[metadata.size_key];
             this._column_sizes.indices[metadata.cidx] = override_width;
-            await this.draw({invalid_viewport: true, preserve_scroll_position: true});
+            await this.draw({invalid_viewport: true});
         };
         document.addEventListener("mousemove", move);
         document.addEventListener("mouseup", up);
@@ -171,8 +171,9 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             td.style.maxWidth = td.style.minWidth = override_width + "px";
             td.classList.toggle("pd-cell-clip", auto_width > override_width);
         }
+
         if (diff < 0) {
-            await this.draw({invalid_viewport: true, preserve_scroll_position: true, preserve_width: true});
+            await this.draw({invalid_viewport: true, preserve_width: true});
         }
     }
 
@@ -234,7 +235,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 await this._view_cache.view.expand(metadata.ridx);
             }
         }
-        await this.draw({invalid_viewport: true, preserve_scroll_position: true});
+        await this.draw({invalid_viewport: true});
     }
 
     /**

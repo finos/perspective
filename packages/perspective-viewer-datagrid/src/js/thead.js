@@ -117,7 +117,7 @@ export class DatagridHeaderViewModel extends ViewModel {
             }
         }
 
-        if (header_levels === 1 && type === undefined) {
+        if (header_levels === 1 && Array.isArray(type)) {
             th.classList.add("pd-group-header");
         }
         const metadata = this._get_or_create_metadata(th);

@@ -113,16 +113,16 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * Calculates the `viewport` argument for perspective's `to_columns` method.
      *
      * @param {*} nrows
-     * @param {*} preserve_scroll_position
+     * @param {*} reset_scroll_position
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
-    _calculate_viewport(nrows, preserve_scroll_position) {
+    _calculate_viewport(nrows, reset_scroll_position) {
         const id = this._view_cache.config.row_pivots.length > 0;
         if (this._virtual_scrolling_disabled) {
             return {id};
         }
-        const {start_row, end_row} = this._calculate_row_range(nrows, preserve_scroll_position);
+        const {start_row, end_row} = this._calculate_row_range(nrows, reset_scroll_position);
         const {start_col, end_col} = this._calculate_column_range();
         this._nrows = nrows;
         return {start_col, end_col, start_row, end_row, id};
@@ -162,17 +162,17 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      *  600px +--------------------------+
      *
      * @param {*} nrows
-     * @param {*} preserve_scroll_position
+     * @param {*} reset_scroll_position
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
-    _calculate_row_range(nrows, preserve_scroll_position) {
+    _calculate_row_range(nrows, reset_scroll_position) {
         const {height} = this._container_size;
         const header_levels = this._view_cache.config.column_pivots.length + 1;
         const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - height);
         const percent_scroll = this._scroll_container.scrollTop / total_scroll_height;
         const virtual_panel_row_height = Math.floor(height / ROW_HEIGHT);
-        const relative_nrows = preserve_scroll_position ? this._nrows || 0 : nrows;
+        const relative_nrows = !reset_scroll_position ? this._nrows || 0 : nrows;
         const scroll_rows = Math.max(0, relative_nrows + (header_levels - virtual_panel_row_height));
         let start_row = Math.floor(scroll_rows * percent_scroll);
         let end_row = start_row + virtual_panel_row_height;
@@ -271,8 +271,8 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
-    _needs_swap({invalid_schema, invalid_row, invalid_column}) {
-        return (DOUBLE_BUFFER_RECREATE && invalid_schema) || (DOUBLE_BUFFER_COLUMN && (invalid_column || invalid_schema)) || (DOUBLE_BUFFER_ROW && (invalid_row || invalid_schema));
+    _needs_swap({invalid_row, invalid_column}) {
+        return (DOUBLE_BUFFER_RECREATE && this._invalid_schema) || (DOUBLE_BUFFER_COLUMN && (invalid_column || this._invalid_schema)) || (DOUBLE_BUFFER_ROW && (invalid_row || this._invalid_schema));
     }
 
     /**
@@ -363,7 +363,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         const old_config = Object.assign({}, this._view_cache.config);
         delete old_config["sort"];
         delete config["sort"];
-        return {preserve_scroll_position: isEqual(config, old_config)};
+        return {reset_scroll_position: !isEqual(config, old_config)};
     }
 
     /**
@@ -371,27 +371,27 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * the implementor to fine tune the individual render frames based on the
      * interaction and previous render state.
      *
-     * `preserve_scroll_position` will prevent the viewport from moving as
+     * `reset_scroll_position` will not prevent the viewport from moving as
      * `draw()` may change the dmiensions of the virtual_panel (and thus,
      * absolute scroll offset).  This calls `reset_scroll`, which will
      * trigger `_on_scroll` and ultimately `draw()` again;  however, this call
      * to `draw()` will be for the same viewport and will not actually cause
      * a render.
      *
-     * @param {*} [options={preserve_scroll_position = true, preserve_width = false, invalid_viewport = false}]
+     * @param {*} [options={reset_scroll_position = false, preserve_width = false, invalid_viewport = false}]
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
     @throttlePromise
     async draw(options = {}) {
         const __debug_start_time__ = DEBUG && performance.now();
-        const {preserve_scroll_position = true, preserve_width = false, invalid_viewport = false} = options;
+        const {reset_scroll_position = false, preserve_width = false, invalid_viewport = false} = options;
 
         if (this._view_cache.column_paths === undefined) {
             return;
         }
 
-        if (!preserve_scroll_position) {
+        if (reset_scroll_position) {
             this.reset_scroll();
         }
 
@@ -406,16 +406,17 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
             };
         }
 
-        const viewport = this._calculate_viewport(nrows, preserve_scroll_position);
-        const {invalid_row, invalid_column} = this._validate_viewport(viewport);
+        const viewport = this._calculate_viewport(nrows, reset_scroll_position);
+        const swap_args = this._validate_viewport(viewport);
+        const {invalid_row, invalid_column} = swap_args;
         this._update_virtual_panel_height(nrows);
 
         if (this._invalid_schema || invalid_row || invalid_column || invalid_viewport) {
-            this._swap_in(options);
+            this._swap_in(swap_args);
             await this.table_model.draw(this._container_size, this._view_cache, this._selected_id, preserve_width, viewport);
-            this._swap_out(options);
+            this._swap_out(swap_args);
             if (!preserve_width) {
-                this._update_virtual_panel_width(this._invalid_schema || invalid_column);
+                this._update_virtual_panel_width(this._invalid_schema || invalid_column || invalid_viewport);
             }
             this._invalid_schema = false;
         }
