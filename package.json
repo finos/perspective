@@ -106,6 +106,7 @@
         "build_python": "node scripts/build_python.js",
         "bench": "node scripts/bench.js",
         "bench_python": "python3 python/perspective/bench/perspective_benchmark.py",
+        "_wheel_python": "node scripts/_wheel_python.js",
         "setup": "node scripts/setup.js",
         "docs": "node scripts/docs.js",
         "test": "node scripts/test.js",
