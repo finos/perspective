@@ -268,10 +268,10 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
     _swap_in(args) {
         if (!this._virtual_scrolling_disabled) {
             if (this._needs_swap(args)) {
-                if (this._table_staging !== this.table_model.table.parentElement) {
+                if (this._sticky_container === this.table_model.table.parentElement) {
                     this._sticky_container.replaceChild(this.table_model.table.cloneNode(true), this.table_model.table);
-                    this._table_staging.appendChild(this.table_model.table);
                 }
+                this._table_staging.appendChild(this.table_model.table);
             } else {
                 if (this._sticky_container !== this.table_model.table.parentElement) {
                     this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
