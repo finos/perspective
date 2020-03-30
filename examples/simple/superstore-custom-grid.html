@@ -15,6 +15,7 @@
 
     <script src="perspective-viewer.js"></script>
     <script src="perspective-viewer-datagrid.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
 
     <link rel='stylesheet' href="index.css">
     <link rel='stylesheet' href="material-dense.dark.css" is="custom-style">
@@ -143,9 +144,9 @@
                 for (const td of datagrid.get_tds()) {
                     const metadata = datagrid.get_meta(td);
                     const clean_name = metadata.value && metadata.value.trim && metadata.value.trim();
-                    if (td.classList.contains("float")) {
+                    if (metadata.type === "float") {
                         make_led_cell(td, metadata);
-                    } else if (td.classList.contains("integer")) {
+                    } else if (metadata.type === "integer") {
                         max = make_bar_chart(td, metadata, max);
                     } else if (clean_name in states) {
                         make_flag(td, metadata, cache, clean_name);
@@ -223,7 +224,7 @@
         }
 
         tbody:hover tr {
-            opacity: 0.5;
+            opacity: 0.7;
             transition: opacity 0.2s ease-in;
         }
 
@@ -257,13 +258,13 @@
             background: rgba(0, 0, 0, 0.1);
         }
 
-        td.float {
+        td.pd-float {
             text-align: center !important;
             font-family: Orbitron;
         }
 
-        th.integer,
-        td.integer {
+        th.pd-integer,
+        td.pd-integer {
             width: 100px;
         }
     </style>

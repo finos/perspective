@@ -9,7 +9,6 @@
 
 import isEqual from "lodash/isEqual";
 import {ViewModel} from "./view_model";
-import {ROW_HEIGHT} from "./constants";
 
 /**
  * <tbody> view model.
@@ -63,7 +62,7 @@ export class DatagridBodyViewModel extends ViewModel {
         return {td, metadata};
     }
 
-    draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, depth, ridx_offset, cidx_offset) {
+    draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, depth, ridx_offset, cidx_offset, row_height) {
         let ridx = 0;
         let td, metadata;
         for (const val of column_data) {
@@ -72,13 +71,13 @@ export class DatagridBodyViewModel extends ViewModel {
             const obj = this._draw_td(ridx++, cidx, column_name, val, id, selected_id, type, depth, next?.length > val?.length, ridx_offset, cidx_offset);
             td = obj.td;
             metadata = obj.metadata;
-
-            if (ridx * ROW_HEIGHT > container_height) {
+            row_height = row_height || td.offsetHeight;
+            if (ridx * row_height > container_height) {
                 break;
             }
         }
         this._clean_rows(ridx);
-        return {td, cidx, ridx, metadata};
+        return {td, cidx, ridx, metadata, row_height};
     }
 
     clean({ridx, cidx}) {

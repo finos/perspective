@@ -43,9 +43,9 @@ export function tree_header(td, path, types, is_leaf, is_open) {
 
     td.classList.add("pd-group-header");
     td.innerHTML = html`
-        <div style="display:flex;align-items:stretch">
+        <span class="pd-tree-container">
             ${tree_levels}
             <span class="${header_classes}">${header_text}</span>
-        </div>
+        </span>
     `;
 }

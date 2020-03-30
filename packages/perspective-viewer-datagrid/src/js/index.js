@@ -73,7 +73,7 @@ class DatagridPlugin {
         if (this.view && VIEWER_MAP.has(this._datavis)) {
             const datagrid = VIEWER_MAP.get(this._datavis);
             datagrid.reset_size();
-            await datagrid.draw();
+            await datagrid.draw({invalid_viewport: true});
         }
     }
 }

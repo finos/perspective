@@ -14,7 +14,7 @@ import CONTAINER_STYLE from "../less/container.less";
 import MATERIAL_STYLE from "../less/material.less";
 
 import {log_perf, html} from "./utils";
-import {DEBUG, BROWSER_MAX_HEIGHT, ROW_HEIGHT, DOUBLE_BUFFER_RECREATE, DOUBLE_BUFFER_ROW, DOUBLE_BUFFER_COLUMN} from "./constants";
+import {DEBUG, BROWSER_MAX_HEIGHT, DOUBLE_BUFFER_RECREATE, DOUBLE_BUFFER_ROW, DOUBLE_BUFFER_COLUMN} from "./constants";
 
 /**
  * Handles the virtual scroll pane, as well as the double buffering
@@ -83,9 +83,10 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
             </div>
         `;
 
+        const stick_container = document.createElement("div");
         const [, scroll_container] = this.shadowRoot.children;
         const [virtual_panel, table_clip, table_staging] = scroll_container.children;
-        this._sticky_container = document.createElement("div");
+        this._sticky_container = stick_container;
         this._table_clip = table_clip;
         this._table_staging = table_staging;
         this._scroll_container = scroll_container;
@@ -151,24 +152,15 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _calculate_row_range(nrows, reset_scroll_position) {
         const {height} = this._container_size;
+        const row_height = this._column_sizes.row_height || 19;
         const header_levels = this._view_cache.config.column_pivots.length + 1;
-        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - height);
+        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this._scroll_container.offsetHeight);
         const percent_scroll = this._scroll_container.scrollTop / total_scroll_height;
-        const virtual_panel_row_height = Math.floor(height / ROW_HEIGHT);
+        const virtual_panel_row_height = Math.floor(height / row_height);
         const relative_nrows = !reset_scroll_position ? this._nrows || 0 : nrows;
         const scroll_rows = Math.max(0, relative_nrows + (header_levels - virtual_panel_row_height));
-        let start_row = Math.floor(scroll_rows * percent_scroll);
+        let start_row = Math.round(scroll_rows * percent_scroll);
         let end_row = start_row + virtual_panel_row_height;
-        if (end_row - 1 > nrows) {
-            const offset = end_row - header_levels - nrows;
-            if (start_row - offset < 0) {
-                end_row = nrows;
-                start_row = 0;
-            } else {
-                start_row -= offset;
-                end_row -= offset;
-            }
-        }
         return {start_row, end_row};
     }
 
@@ -325,8 +317,9 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _update_virtual_panel_height(nrows) {
-        const header_levels = this._view_cache.config.column_pivots.length + 1;
-        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, (nrows + header_levels) * ROW_HEIGHT);
+        const {row_height = 19} = this._column_sizes;
+        //const header_levels = this._view_cache.config.column_pivots.length + 1;
+        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height);
         this._virtual_panel.style.height = `${virtual_panel_px_size}px`;
     }
 
@@ -383,9 +376,9 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         if (this._virtual_scrolling_disabled) {
             this._container_size = {width: Infinity, height: Infinity};
         } else {
-            this._container_size = this._container_size || {
-                width: this._scroll_container.offsetWidth,
-                height: this._scroll_container.offsetHeight
+            this._container_size = (!this._invalid_schema && this._container_size) || {
+                width: this._sticky_container.offsetWidth,
+                height: this._sticky_container.offsetHeight
             };
         }
 
@@ -396,8 +389,9 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
 
         if (this._invalid_schema || invalid_row || invalid_column || invalid_viewport) {
             this._swap_in(swap_args);
-            await this.table_model.draw(this._container_size, this._view_cache, this._selected_id, preserve_width, viewport);
+            const last_cells = await this.table_model.draw(this._container_size, this._view_cache, this._selected_id, preserve_width, viewport);
             this._swap_out(swap_args);
+            this.table_model.autosize_cells(last_cells);
             if (!preserve_width) {
                 this._update_virtual_panel_width(this._invalid_schema || invalid_column || invalid_viewport);
             }
