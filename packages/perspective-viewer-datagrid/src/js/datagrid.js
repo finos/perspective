@@ -61,6 +61,13 @@ export class DatagridViewModel extends DatagridViewEventModel {
      */
     clear() {
         this._sticky_container.innerHTML = "<table></table>";
+        if (this._render_element) {
+            if (this._render_element !== this.table_model.table.parentElement) {
+                this._render_element.appendChild(this._sticky_container);
+            }
+        } else {
+            this.appendChild(this.table_model.table);
+        }
     }
 
     reset_viewport() {
