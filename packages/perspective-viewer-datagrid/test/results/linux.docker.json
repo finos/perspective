@@ -1,15 +1,15 @@
 {
     "superstore_replaces_all_rows_": "7f95361aa2a268a8ee842c4632513578",
-    "__GIT_COMMIT__": "dd2cf3b493844a1995bd52a08d270e241e219814",
+    "__GIT_COMMIT__": "8a1e33ce823d86e0b6dbbdcdac15cff5910c2fc8",
     "empty_empty_grids_do_not_explode": "deb15d155a84145e67da078c803e3eec",
     "regressions_Updates_should_not_render_an_extra_row_for_column_only_views": "676bcaac0bc0d63a2bfa3bd254443b0c",
-    "regressions_Updates_regular_updates": "b1633116a02ca923b95bc277c10adba5",
-    "regressions_Updates_saving_a_computed_column_does_not_interrupt_update_rendering": "718884fdbb8e976354ec18b3eddbb370",
+    "regressions_Updates_regular_updates": "86561ee0ebe91f656f56941e7ff1cf35",
+    "regressions_Updates_saving_a_computed_column_does_not_interrupt_update_rendering": "17f79bc23ea6ea8b54aea4ee367aedd0",
     "superstore_shows_a_grid_without_any_settings_applied_": "4fb387275da7c37f5aaf25af52d9e8d5",
-    "superstore_pivots_by_a_row_": "e902ab3ebaad2199480b456f2e33d656",
+    "superstore_pivots_by_a_row_": "e64d28c2d3e0db45becc230dfc2e6074",
     "superstore_pivots_by_two_rows_": "d0a51ead0b7e397be9b554a56a66e7d4",
     "superstore_pivots_by_a_column_": "ba5ffdc9676ffb53c22f1f5f40bd5c3d",
-    "superstore_pivots_by_a_row_and_a_column_": "fec839043c2c94bc65c4cf12e1762ac1",
+    "superstore_pivots_by_a_row_and_a_column_": "f49e287f55f90a9e583e35ed1d83561b",
     "superstore_pivots_by_two_rows_and_two_columns_": "7e6c8016d402fadd880b162aa38f9bd1",
     "superstore_sorts_by_a_hidden_column_": "f0beae68b6506d75f3126db285d03290",
     "superstore_sorts_by_a_numeric_column_": "b598f9af4aa390f51435e8a8f1fc3020",
@@ -18,6 +18,6 @@
     "superstore_highlights_invalid_filter_": "311401a388e8cf89d0f9a5c5a1eb9146",
     "superstore_sorts_by_an_alpha_column_": "bc2c035e1c21eab541ae2e1119289913",
     "superstore_displays_visible_columns_": "f7ab6c498375d5b98b47ef582105ea25",
-    "superstore_resets_viewable_area_when_the_logical_size_expands_": "8ec6f8f7d4a24c50a006adae19f52913",
+    "superstore_resets_viewable_area_when_the_logical_size_expands_": "a7262cf9d6810d3effd2c00a8e1a464b",
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "4fb387275da7c37f5aaf25af52d9e8d5"
 }

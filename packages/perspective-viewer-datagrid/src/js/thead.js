@@ -10,12 +10,6 @@
 import {ViewModel} from "./view_model";
 import {ICON_MAP} from "./constants";
 
-/******************************************************************************
- *
- * Utilities
- *
- */
-
 /**
  * <thead> view model.  This model accumulates state in the form of
  * column_sizes, which leverages <tables> autosize behavior across
@@ -75,7 +69,7 @@ export class DatagridHeaderViewModel extends ViewModel {
         metadata.size_key = `${column}|${type}`;
         const auto_width = this._column_sizes.auto[metadata.size_key];
         const override_width = this._column_sizes.override[metadata.size_key];
-        th.classList.add(type);
+        th.classList.add(`pd-${type}`);
         if (override_width) {
             th.classList.toggle("pd-cell-clip", auto_width > override_width);
             th.style.minWidth = override_width + "px";
@@ -117,7 +111,7 @@ export class DatagridHeaderViewModel extends ViewModel {
             }
         }
 
-        if (header_levels === 1 && type === undefined) {
+        if (header_levels === 1 && Array.isArray(type)) {
             th.classList.add("pd-group-header");
         }
         const metadata = this._get_or_create_metadata(th);

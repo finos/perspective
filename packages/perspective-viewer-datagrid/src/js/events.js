@@ -52,10 +52,11 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         }
         event.preventDefault();
         event.returnValue = false;
-        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this._scroll_container.offsetHeight);
-        const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._scroll_container.offsetWidth);
-        this._scroll_container.scrollTop = Math.min(total_scroll_height, this._scroll_container.scrollTop + event.deltaY);
-        this._scroll_container.scrollLeft = Math.min(total_scroll_width, this._scroll_container.scrollLeft + event.deltaX);
+        const {offsetWidth, offsetHeight, scrollTop, scrollLeft} = this._scroll_container;
+        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - offsetHeight);
+        const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - offsetWidth);
+        this._scroll_container.scrollTop = Math.min(total_scroll_height, scrollTop + event.deltaY);
+        this._scroll_container.scrollLeft = Math.min(total_scroll_width, scrollLeft + event.deltaX);
         this._on_scroll(event);
     }
 
@@ -78,9 +79,9 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         const metadata = METADATA_MAP.get(element);
         if (is_resize) {
             await new Promise(setTimeout);
-            this._column_sizes.override[metadata.size_key] = undefined;
-            this._column_sizes.auto[metadata.size_key] = undefined;
-            this._column_sizes.indices[metadata.cidx] = undefined;
+            delete this._column_sizes.override[metadata.size_key];
+            delete this._column_sizes.auto[metadata.size_key];
+            delete this._column_sizes.indices[metadata.cidx];
             element.style.minWidth = "0";
             element.style.maxWidth = "none";
             for (const row of this.table_model.body.cells) {
@@ -89,7 +90,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 td.style.maxWidth = "none";
                 td.classList.remove("pd-cell-clip");
             }
-            await this.draw({invalid_viewport: true, preserve_scroll_position: true});
+            await this.draw({invalid_viewport: true});
         }
     }
 
@@ -140,7 +141,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             document.removeEventListener("mouseup", up);
             const override_width = this._column_sizes.override[metadata.size_key];
             this._column_sizes.indices[metadata.cidx] = override_width;
-            await this.draw({invalid_viewport: true, preserve_scroll_position: true});
+            await this.draw({invalid_viewport: true});
         };
         document.addEventListener("mousemove", move);
         document.addEventListener("mouseup", up);
@@ -170,8 +171,9 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             td.style.maxWidth = td.style.minWidth = override_width + "px";
             td.classList.toggle("pd-cell-clip", auto_width > override_width);
         }
+
         if (diff < 0) {
-            await this.draw({invalid_viewport: true, preserve_scroll_position: true, preserve_width: true});
+            await this.draw({invalid_viewport: true, preserve_width: true});
         }
     }
 
@@ -233,7 +235,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 await this._view_cache.view.expand(metadata.ridx);
             }
         }
-        await this.draw({invalid_viewport: true, preserve_scroll_position: true});
+        await this.draw({invalid_viewport: true});
     }
 
     /**

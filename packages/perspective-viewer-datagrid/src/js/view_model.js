@@ -10,30 +10,7 @@
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {METADATA_MAP} from "./constants";
 import {memoize} from "./utils";
-
-function _tree_header(td, path, is_leaf, is_open) {
-    let name;
-    if (path.length > 0) {
-        name = path[path.length - 1];
-    } else {
-        name = "TOTAL";
-    }
-    if (is_leaf) {
-        let html = "";
-        for (let i = 0; i < path.length; i++) {
-            html += `<span class="pd-tree-group"></span>`;
-        }
-        td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-group-name pd-group-leaf">${name}</span></div>`;
-    } else {
-        const icon = is_open ? "remove" : "add";
-        let html = "";
-        for (let i = 0; i < path.length; i++) {
-            html += `<span class="pd-tree-group"></span>`;
-        }
-        td.innerHTML = `<div style="display:flex;align-items:stretch">${html}<span class="pd-row-header-icon">${icon}</span><span class="pd-group-name">${name}</span></div>`;
-    }
-    td.classList.add("pd-group-header");
-}
+import {tree_header} from "./tree_row_header";
 
 /******************************************************************************
  *
@@ -65,7 +42,7 @@ export class ViewModel {
     }
 
     @memoize
-    _format(type) {
+    _format_text(type) {
         const config = get_type_config(type);
         const real_type = config.type || type;
         const format_function = {
@@ -76,21 +53,45 @@ export class ViewModel {
         }[real_type];
         if (format_function) {
             const func = new format_function("en-us", config.format);
-            return {
-                format(td, path) {
-                    td.textContent = func.format(path);
-                    if (real_type === "integer" || real_type === "float") {
-                        if (path > 0) {
-                            td.classList.add("pd-positive");
-                        } else if (path < 0) {
-                            td.classList.add("pd-negative");
-                        }
-                    }
+            return path => func.format(path);
+        } else {
+            return path => path;
+        }
+    }
+
+    @memoize
+    _format_class(type) {
+        const config = get_type_config(type);
+        const real_type = config.type || type;
+        if (real_type === "integer" || real_type === "float") {
+            return path => {
+                if (path > 0) {
+                    return "pd-positive";
+                } else if (path < 0) {
+                    return "pd-negative";
                 }
             };
-        } else if (type === undefined) {
-            return {format: _tree_header};
+        } else {
+            return () => "";
         }
+    }
+
+    @memoize
+    _format(type) {
+        if (Array.isArray(type)) {
+            return {format: tree_header.bind(this)};
+        }
+        const fmt = this._format_text(type);
+        const cls = this._format_class(type);
+        return {
+            format(td, path) {
+                td.textContent = fmt(path);
+                const c = cls(path);
+                if (c) {
+                    td.classList.add(c);
+                }
+            }
+        };
     }
 
     _get_cell(tag = "td", row_container, cidx, tr) {

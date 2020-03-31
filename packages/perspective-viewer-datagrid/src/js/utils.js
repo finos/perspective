@@ -107,3 +107,14 @@ export function column_path_2_type(schema, column) {
     let parts = column.split("|");
     return schema[parts[parts.length - 1]];
 }
+
+/**
+ * Identical to a non-tagger template literal, this is only used to indicate to
+ * babel that this string should be HTML-minified on production builds.
+ */
+export const html = (strings, ...args) =>
+    strings
+        .map((str, i) => [str, args[i]])
+        .flat()
+        .filter(a => !!a)
+        .join("");
