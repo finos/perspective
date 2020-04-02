@@ -1,0 +1,89 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <script src="https://unpkg.com/@finos/perspective-viewer"></script>
+    <script src="https://unpkg.com/@finos/perspective-viewer-datagrid"></script>
+    <script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
+    <script src="https://unpkg.com/@finos/perspective"></script>>
+
+    <link rel='stylesheet' href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.dark.css">
+
+    <style>
+        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
+    </style>
+
+</head>
+
+<body>
+
+    <perspective-viewer id="viewer"></perspective-viewer>
+
+    <script>
+
+        window.addEventListener('WebComponentsReady', async function() {
+            const viewer = document.getElementById('viewer');
+
+            // Create a client that expects a Perspective server to accept connections at the specified URL.
+            const websocket = perspective.websocket("ws://localhost:8888/websocket");
+
+            /* `table` is a proxy for the `Table` we created on the server.
+            
+            All operations that are possible through the Javascript API are possible on the Python API as well,
+            thus calling `view()`, `schema()`, `update()` etc on `const table` will pass those operations to the
+            Python `Table`, execute the commands, and return the result back to Javascript.
+            */
+            const table = websocket.open_table('data_source_one');
+            
+            // Load this in the `<perspective-viewer>`.
+            viewer.load(table);
+            viewer.toggleConfig();
+
+            console.log("before update", await table.size());
+
+            // Attempt to update the table with new data - it should be
+            // blocked because the Manager is locked
+            table.update({
+                "name": "test name",
+                "client": "test client",
+                "open": 100,
+                "high": 120,
+                "low": 90,
+                "close": 110,
+                "lastUpdate": new Date()
+            })
+
+            console.log("after update", await table.size());
+
+            // `clear` should be blocked
+            await table.clear();
+
+            // so should `replace`
+            await table.replace({
+                "name": "test name",
+                "client": "test client",
+                "open": 100,
+                "high": 120,
+                "low": 90,
+                "close": 110,
+                "lastUpdate": new Date()
+            })
+        });
+
+    </script>
+
+</body>
+
+</html>

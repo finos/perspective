@@ -77,7 +77,7 @@ class TestPerspectiveManager(object):
     def test_locked_manager_create_table(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
-            "error": "Access Denied"
+            "error": "`table` failed - access denied"
         })
         message = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager(lock=True)
@@ -245,7 +245,7 @@ class TestPerspectiveManager(object):
     def test_locked_manager_update_table(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
-            "error": "Access Denied"
+            "error": "`table_method.update` failed - access denied"
         })
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "update", "args": [data]}
         manager = PerspectiveManager(lock=True)
@@ -254,7 +254,7 @@ class TestPerspectiveManager(object):
     def test_locked_manager_clear_table(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
-            "error": "Access Denied"
+            "error": "`table_method.clear` failed - access denied"
         })
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "clear", "args": []}
         manager = PerspectiveManager(lock=True)
@@ -263,7 +263,7 @@ class TestPerspectiveManager(object):
     def test_locked_manager_replace_table(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
-            "error": "Access Denied"
+            "error": "`table_method.replace` failed - access denied"
         })
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "replace", "args": [data]}
         manager = PerspectiveManager(lock=True)
@@ -272,7 +272,7 @@ class TestPerspectiveManager(object):
     def test_locked_manager_remove_table(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
-            "error": "Access Denied"
+            "error": "`table_method.remove` failed - access denied"
         })
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "remove", "args": []}
         manager = PerspectiveManager(lock=True)
@@ -281,11 +281,34 @@ class TestPerspectiveManager(object):
     def test_locked_manager_delete_table(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
-            "error": "Access Denied"
+            "error": "`table_method.delete` failed - access denied"
         })
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "delete", "args": []}
         manager = PerspectiveManager(lock=True)
         manager._process(message, post_callback)
+
+    def test_arbitary_lock_unlock_manager(self):
+        manager = PerspectiveManager(lock=True)
+        make_table_message = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager._process(make_table_message, partial(self.validate_post, expected={
+            "id": 1,
+            "error": "`table` failed - access denied"
+        }))
+        manager.unlock()
+        manager._process(make_table_message, self.post)
+        assert manager._tables["table1"].schema() == {
+            "a": int,
+            "b": str
+        }
+        update_message = {"id": 2, "name": "table1", "cmd": "table_method", "method": "update", "args": [data]}
+        manager._process(update_message, self.post)
+        assert manager._tables["table1"].size() == 6
+        manager.lock()
+        update_message_new = {"id": 3, "name": "table1", "cmd": "table_method", "method": "update", "args": [data]}
+        manager._process(update_message_new, partial(self.validate_post, expected={
+            "id": 3,
+            "error": "`table_method.update` failed - access denied"
+        }))
 
     # serialization
 

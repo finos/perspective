@@ -174,8 +174,10 @@ class PerspectiveManager(object):
         cmd = msg["cmd"]
 
         if self._is_locked_command(msg) is True:
+            error_message = "`{0}` failed - access denied".format(
+                msg["cmd"] + (("." + msg["method"]) if msg.get("method", None) is not None else ""))
             post_callback(json.dumps(self._make_error_message(
-                msg["id"], "Access Denied"), cls=DateTimeEncoder))
+                msg["id"], error_message), cls=DateTimeEncoder))
             return
 
         try:
