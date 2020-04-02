@@ -19,11 +19,6 @@ from ..table import Table, PerspectiveCppError
 from ..table.view import View
 from .session import PerspectiveSession
 
-
-def gen_name(size=10, chars=string.ascii_uppercase + string.digits):
-    return "".join(random.choice(chars) for x in range(size))
-
-
 _date_validator = _PerspectiveDateValidator()
 
 
@@ -34,6 +29,10 @@ class DateTimeEncoder(json.JSONEncoder):
             return _date_validator.to_timestamp(obj)
         else:
             return super(DateTimeEncoder, self).default(obj)
+
+
+def gen_name(size=10, chars=string.ascii_uppercase + string.digits):
+    return "".join(random.choice(chars) for x in range(size))
 
 
 class PerspectiveManager(object):
@@ -57,11 +56,31 @@ class PerspectiveManager(object):
         clean up associated resources.
     '''
 
-    def __init__(self):
+    # Commands that should be blocked from execution when the manager is in
+    # `locked` mode, i.e. its tables and views made immutable from remote
+    # modification.
+    LOCKED_COMMANDS = ["table", "update", "remove", "replace", "clear"]
+
+    def __init__(self, lock=False):
         self._tables = {}
         self._views = {}
         self._callback_cache = _PerspectiveCallBackCache()
         self._queue_process_callback = None
+        self._lock = lock
+
+    def lock(self):
+        """Block messages that can mutate the state of `Table`s and `View`s
+        under management.
+
+        All `PerspectiveManager`s exposed over the internet should be locked to
+        prevent content from being mutated by clients.
+        """
+        self._lock = True
+
+    def unlock(self):
+        """Unblock messages that can mutate the state of `Table`s and `View`s
+        under management."""
+        self._lock = False
 
     def host(self, item, name=None):
         """Given a :obj:`~perspective.Table` or :obj:`~perspective.View`,
@@ -153,6 +172,11 @@ class PerspectiveManager(object):
                 "JSON-serialized string or a dict.")
 
         cmd = msg["cmd"]
+
+        if self._is_locked_command(msg) is True:
+            post_callback(json.dumps(self._make_error_message(
+                msg["id"], "Access Denied"), cls=DateTimeEncoder))
+            return
 
         try:
             if cmd == "init":
@@ -362,3 +386,18 @@ class PerspectiveManager(object):
             "id": id,
             "error": error
         }
+
+    def _is_locked_command(self, msg):
+        '''Returns `True` if the manager instance is locked and the command
+        is in `PerspectiveManager.LOCKED_COMMANDS`, and `False` otherwise.'''
+        if not self._lock:
+            return False
+
+        cmd = msg["cmd"]
+        method = msg.get("method", None)
+
+        if cmd == "table_method" and method == "delete":
+            # table.delete is blocked, but view.delete is not
+            return True
+
+        return cmd == "table" or method in PerspectiveManager.LOCKED_COMMANDS

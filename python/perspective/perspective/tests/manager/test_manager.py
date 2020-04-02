@@ -7,6 +7,7 @@
 #
 
 import json
+from functools import partial
 from pytest import raises
 from perspective import Table, PerspectiveError, PerspectiveManager
 
@@ -19,6 +20,11 @@ class TestPerspectiveManager(object):
         '''boilerplate callback to simulate a client's `post()` method.'''
         msg = json.loads(msg)
         assert msg["id"] is not None
+
+    def validate_post(self, msg, expected=None):
+        msg = json.loads(msg)
+        if expected:
+            assert msg == expected
 
     def test_manager_host_table(self):
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "schema", "args": []}
@@ -67,6 +73,15 @@ class TestPerspectiveManager(object):
             "a": int,
             "b": str
         }
+
+    def test_locked_manager_create_table(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "error": "Access Denied"
+        })
+        message = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager(lock=True)
+        manager._process(message, post_callback)
 
     def test_manager_create_indexed_table(self):
         message = {"id": 1, "name": "table1", "cmd": "table", "args": [data], "options": {"index": "a"}}
@@ -117,9 +132,22 @@ class TestPerspectiveManager(object):
             "b": ["c"]
         }
 
-    def test_manager_host_view(self):
+    def test_manager_create_view(self):
         message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": []}
         manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, self.post)
+        assert manager.get_view("view1").schema() == {
+            "a": int,
+            "b": str
+        }
+
+    def test_locked_manager_create_view(self):
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": []}
+        manager = PerspectiveManager(lock=True)
         table = Table(data)
         view = table.view()
         manager.host_table("table1", table)
@@ -213,6 +241,52 @@ class TestPerspectiveManager(object):
         with raises(PerspectiveError):
             manager.clear_views(None)
 
+    # locked manager
+    def test_locked_manager_update_table(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "error": "Access Denied"
+        })
+        message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "update", "args": [data]}
+        manager = PerspectiveManager(lock=True)
+        manager._process(message, post_callback)
+
+    def test_locked_manager_clear_table(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "error": "Access Denied"
+        })
+        message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "clear", "args": []}
+        manager = PerspectiveManager(lock=True)
+        manager._process(message, post_callback)
+
+    def test_locked_manager_replace_table(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "error": "Access Denied"
+        })
+        message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "replace", "args": [data]}
+        manager = PerspectiveManager(lock=True)
+        manager._process(message, post_callback)
+
+    def test_locked_manager_remove_table(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "error": "Access Denied"
+        })
+        message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "remove", "args": []}
+        manager = PerspectiveManager(lock=True)
+        manager._process(message, post_callback)
+
+    def test_locked_manager_delete_table(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "error": "Access Denied"
+        })
+        message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "delete", "args": []}
+        manager = PerspectiveManager(lock=True)
+        manager._process(message, post_callback)
+
     # serialization
 
     def test_manager_to_dict(self, sentinel):
@@ -224,6 +298,22 @@ class TestPerspectiveManager(object):
             assert message["data"] == data
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        manager._process(message, self.post)
+        to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
+        manager._process(to_dict_message, handle_to_dict)
+        assert s.get() is True
+
+    def test_locked_manager_to_dict(self, sentinel):
+        s = sentinel(False)
+
+        def handle_to_dict(msg):
+            s.set(True)
+            message = json.loads(msg)
+            assert message["data"] == data
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager = PerspectiveManager(lock=True)
         table = Table(data)
         manager.host_table("table1", table)
         manager._process(message, self.post)
