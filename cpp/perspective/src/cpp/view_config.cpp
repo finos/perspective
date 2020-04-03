@@ -199,7 +199,11 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
             t_aggtype agg_type;
 
-            if (is_row_pivot || is_column_pivot || is_column_only) {
+            if (is_column_only) {
+                // Always sort by `ANY` in column only views
+                agg_type = t_aggtype::AGGTYPE_ANY;
+            } else if (is_row_pivot || is_column_pivot) {
+                // Otherwise if the hidden column is in pivots, use `UNIQUE`
                 agg_type = t_aggtype::AGGTYPE_UNIQUE;      
             } else if (m_aggregates.count(column) > 0) {
                 auto col = m_aggregates.at(column);
