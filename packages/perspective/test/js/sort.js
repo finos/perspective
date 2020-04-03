@@ -185,12 +185,12 @@ module.exports = perspective => {
                     sort: [["x", "col desc"]]
                 });
                 const paths = await view.column_paths();
-                expect(paths).toEqual(["d|w", "c|w", "b|w", "a|w"]);
+                expect(paths).toEqual(["a|w", "b|w", "c|w", "d|w"]);
                 const answer = {
-                    "d|w": [null, null, null, 4.5, null, null, null, 8.5],
-                    "c|w": [null, null, 3.5, null, null, null, 7.5, null],
+                    "a|w": [1.5, null, null, null, 5.5, null, null, null],
                     "b|w": [null, 2.5, null, null, null, 6.5, null, null],
-                    "a|w": [1.5, null, null, null, 5.5, null, null, null]
+                    "c|w": [null, null, 3.5, null, null, null, 7.5, null],
+                    "d|w": [null, null, null, 4.5, null, null, null, 8.5]
                 };
                 const result = await view.to_columns();
                 expect(result).toEqual(answer);

@@ -200,7 +200,7 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
             t_aggtype agg_type;
 
             if (is_row_pivot || is_column_pivot || is_column_only) {
-                agg_type = t_aggtype::AGGTYPE_ANY;      
+                agg_type = t_aggtype::AGGTYPE_UNIQUE;      
             } else if (m_aggregates.count(column) > 0) {
                 auto col = m_aggregates.at(column);
                 if (col.at(0) == "weighted mean") {
