@@ -99,7 +99,7 @@ Sets this `perspective.table.view`'s `sort` property, an array of columnnames.
 **Example** *(via Javascript DOM)*  
 ```js
 let elem = document.getElementById('my_viewer');
-elem.setAttribute('sort', JSON.stringify([["x","desc"]));
+elem.setAttribute('sort', JSON.stringify([["x","desc"]]));
 ```
 **Example** *(via HTML)*  
 ```js
@@ -462,4 +462,3 @@ Opens/closes the element's config menu.
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 
 * * *
-
