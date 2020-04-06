@@ -192,17 +192,19 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
             = std::find(m_columns.begin(), m_columns.end(), column) == m_columns.end();
 
         if (is_hidden_column) {
-            bool is_pivot = (std::find(m_row_pivots.begin(), m_row_pivots.end(), column)
-                                != m_row_pivots.end())
-                || (std::find(m_column_pivots.begin(), m_column_pivots.end(), column)
-                       != m_column_pivots.end());
+            bool is_row_pivot = std::find(m_row_pivots.begin(), m_row_pivots.end(), column) != m_row_pivots.end();
+            bool is_column_pivot = std::find(m_column_pivots.begin(), m_column_pivots.end(), column) != m_column_pivots.end();
+            bool is_column_only = m_row_pivots.size() == 0 || m_column_only;
 
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
             t_aggtype agg_type;
 
-            // use the `any` agg for columns used as pivots/column_only views
-            if (m_row_pivots.size() == 0 || m_column_only) {
-                agg_type = t_aggtype::AGGTYPE_ANY;      
+            if (is_column_only) {
+                // Always sort by `ANY` in column only views
+                agg_type = t_aggtype::AGGTYPE_ANY;
+            } else if (is_row_pivot || is_column_pivot) {
+                // Otherwise if the hidden column is in pivots, use `UNIQUE`
+                agg_type = t_aggtype::AGGTYPE_UNIQUE;      
             } else if (m_aggregates.count(column) > 0) {
                 auto col = m_aggregates.at(column);
                 if (col.at(0) == "weighted mean") {
@@ -211,8 +213,6 @@ t_view_config::fill_aggspecs(const t_schema& schema) {
                 } else {
                     agg_type = str_to_aggtype(col.at(0));
                 }
-            } else if (is_pivot) {
-                agg_type = t_aggtype::AGGTYPE_ANY;
             } else {
                 t_dtype dtype = schema.get_dtype(column);
                 agg_type = _get_default_aggregate(dtype);
