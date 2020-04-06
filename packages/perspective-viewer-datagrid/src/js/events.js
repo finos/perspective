@@ -82,12 +82,12 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             delete this._column_sizes.override[metadata.size_key];
             delete this._column_sizes.auto[metadata.size_key];
             delete this._column_sizes.indices[metadata.cidx];
-            element.style.minWidth = "0";
-            element.style.maxWidth = "none";
+            element.style.minWidth = "";
+            element.style.maxWidth = "";
             for (const row of this.table_model.body.cells) {
                 const td = row[metadata.cidx];
-                td.style.minWidth = "0";
-                td.style.maxWidth = "none";
+                td.style.minWidth = "";
+                td.style.maxWidth = "";
                 td.classList.remove("pd-cell-clip");
             }
             await this.draw({invalid_viewport: true});
@@ -103,6 +103,10 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
      * @memberof DatagridVirtualTableViewModel
      */
     async _on_click(event) {
+        if (event.button !== 0) {
+            return;
+        }
+
         let element = event.target;
         while (element.tagName !== "TD" && element.tagName !== "TH") {
             element = element.parentElement;
@@ -110,6 +114,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 return;
             }
         }
+
         const is_button = event.target.classList.contains("pd-row-header-icon");
         const is_resize = event.target.classList.contains("pd-column-resize");
         const metadata = METADATA_MAP.get(element);
@@ -134,7 +139,8 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
      */
     _on_resize_column(event, element, metadata) {
         const start = event.pageX;
-        const width = element.offsetWidth;
+        element = this.table_model.header.get_column_header(metadata.vcidx);
+        const width = this._column_sizes.indices[metadata.cidx];
         const move = event => this._on_resize_column_move(event, element, start, width, metadata);
         const up = async () => {
             document.removeEventListener("mousemove", move);
@@ -163,17 +169,20 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         const diff = event.pageX - start;
         const override_width = width + diff;
         this._column_sizes.override[metadata.size_key] = override_width;
-        th.style.minWidth = override_width + "px";
-        th.style.maxWidth = override_width + "px";
-        const auto_width = this._column_sizes.auto[metadata.size_key];
-        for (const row of this.table_model.body.cells) {
-            const td = row[metadata.cidx];
-            td.style.maxWidth = td.style.minWidth = override_width + "px";
-            td.classList.toggle("pd-cell-clip", auto_width > override_width);
-        }
 
+        // If the column is smaller, new columns may need to be fetched, so
+        // redraw, else just update the DOM widths as if redrawn.
         if (diff < 0) {
             await this.draw({invalid_viewport: true, preserve_width: true});
+        } else {
+            th.style.minWidth = override_width + "px";
+            th.style.maxWidth = override_width + "px";
+            const auto_width = this._column_sizes.auto[metadata.size_key];
+            for (const row of this.table_model.body.cells) {
+                const td = row[metadata.vcidx];
+                td.style.maxWidth = td.style.minWidth = override_width + "px";
+                td.classList.toggle("pd-cell-clip", auto_width > override_width);
+            }
         }
     }
 

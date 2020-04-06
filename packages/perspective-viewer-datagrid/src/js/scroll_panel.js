@@ -212,7 +212,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         let max_scroll_column = this._view_cache.column_paths.length;
         while (width < this._container_size.width && max_scroll_column >= 0) {
             max_scroll_column--;
-            width += this._column_sizes.indices[max_scroll_column] || 100;
+            width += this._column_sizes.indices[max_scroll_column] || 60;
         }
         const psp_offset = this._view_cache.config.row_pivots.length > 0;
         return Math.min(this._view_cache.column_paths.length - (psp_offset ? 2 : 1), max_scroll_column + (psp_offset ? 0 : 1));
@@ -301,7 +301,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
             let cidx = 0,
                 virtual_width = 0;
             while (cidx < max_scroll_column) {
-                virtual_width += this._column_sizes.indices[cidx] || 100;
+                virtual_width += this._column_sizes.indices[cidx] || 60;
                 cidx++;
             }
             const panel_width = this._container_size.width + virtual_width;
@@ -318,7 +318,6 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _update_virtual_panel_height(nrows) {
         const {row_height = 19} = this._column_sizes;
-        //const header_levels = this._view_cache.config.column_pivots.length + 1;
         const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height);
         this._virtual_panel.style.height = `${virtual_panel_px_size}px`;
     }

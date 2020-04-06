@@ -9,7 +9,7 @@
 
 @row-height: 19px;
 
-perspective-viewer div {
+perspective-viewer > div {
     position: absolute;
     overflow: hidden;
     top: 12px;
@@ -23,6 +23,12 @@ perspective-viewer, :host {
     
     th {
         text-align: center;
+    }
+
+    // Header groups should overflow and not contribute to auto-sizing.
+    thead tr:not(:last-child) th {
+        overflow: hidden;
+        max-width: 0px;
     }
 
     thead tr:last-child .pd-float,
@@ -138,6 +144,8 @@ perspective-viewer, :host {
     span.pd-column-header-icon {
         font-size: 10px;
         padding-left: 3px;
+        display: inline-block;
+        width: 10px;
         font-family: "Material Icons";
     }
 

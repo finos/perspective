@@ -82,12 +82,12 @@ class HomeSplash extends React.Component {
                     <perspective-viewer class="titleViewer" />
 
                     <PromoSection>
-                        <Button id="grid">Slice</Button>
-                        <Button id="cyclone">Dice</Button>
-                        <Button id="enhance">Pivot</Button>
-                        <Button id="crosssect">Crosssect</Button>
-                        <Button id="intersect">Retrospect</Button>
-                        <Button id="pivot">Enhance</Button>
+                        <Button id="grid">Datagrid</Button>
+                        <Button id="cyclone">X Bar</Button>
+                        <Button id="enhance">Y Line</Button>
+                        <Button id="crosssect">XY Scatter</Button>
+                        <Button id="intersect">Treemap</Button>
+                        <Button id="pivot">Heatmap</Button>
                     </PromoSection>
                 </div>
             </SplashContainer>
@@ -183,16 +183,19 @@ const FeatureCallout = props => (
 
 const DESCRIPTION_TEXT = `
 # What is Perspective?
-Originally developed for J.P. Morgan's trading business, Perspective is
-an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
-datasets.  Use it to build reports, dashboards, notebooks and applications.
-Perspective comes with:
-* A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
-* A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
-* A customizable HTML Data Grid plugin, and a Charts plugin built on [D3FC](https://d3fc.io/).
-* Integration with Jupyterlab, both natively in a Python kernel, and as a notebook Widget.
-* Cross-language streaming & virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).
-* Runtimes for the browser, Python, and Node.js.
+Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
+datasets. Originally developed for J.P. Morgan's trading business,  Perspective
+makes it simple to build real-time & user configurable analytics entirely in the
+browser, or in concert with Python and/or
+[Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+Use it to create reports, dashboards, notebooks and applications, with static
+data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
+- A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
+- A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
+- A customizable HTML Data Grid plugin, and a Chart plugin built on [D3FC](https://d3fc.io/).
+- Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/), both natively in a Python kernel, and as a notebook Widget.
+- Cross-language streaming and/or virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).
+- Runtimes for the browser, Python, and Node.js.
 `;
 
 const Description = props => (

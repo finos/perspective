@@ -31,6 +31,10 @@ export class ViewModel {
         return this.cells.length;
     }
 
+    _set_metadata(td, metadata) {
+        METADATA_MAP.set(td, metadata);
+    }
+
     _get_or_create_metadata(td) {
         if (METADATA_MAP.has(td)) {
             return METADATA_MAP.get(td);
