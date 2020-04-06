@@ -9,7 +9,7 @@
 
 import {DatagridHeaderViewModel} from "./thead";
 import {DatagridBodyViewModel} from "./tbody";
-import {column_path_2_type} from "./utils";
+import {column_path_2_type, html} from "./utils";
 
 /**
  * <table> view model.  In order to handle unknown column width when `draw()`
@@ -20,16 +20,15 @@ import {column_path_2_type} from "./utils";
  * @class DatagridTableViewModel
  */
 export class DatagridTableViewModel {
-    constructor(table_clip, column_sizes) {
-        const table = document.createElement("table");
-        table.setAttribute("cellspacing", 0);
-
-        const thead = document.createElement("thead");
-        table.appendChild(thead);
-
-        const tbody = document.createElement("tbody");
-        table.appendChild(tbody);
-
+    constructor(table_clip, column_sizes, element) {
+        element.innerHTML = html`
+            <table cellspacing="0">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        `;
+        const [table] = element.children;
+        const [thead, tbody] = table.children;
         this.table = table;
         this._column_sizes = column_sizes;
         this.header = new DatagridHeaderViewModel(column_sizes, table_clip, thead);
@@ -61,31 +60,33 @@ export class DatagridTableViewModel {
         }
     }
 
-    async draw(container_size, view_cache, selected_id, is_resize, viewport) {
+    async draw(container_size, view_cache, selected_id, preserve_width, viewport) {
         const {width: container_width, height: container_height} = container_size;
         const {view, config, column_paths, schema, table_schema} = view_cache;
         const visible_columns = column_paths.slice(viewport.start_col);
         const columns_data = await view.to_columns(viewport);
-        const {start_col: sidx} = viewport;
+        const {start_row: ridx_offset, start_col: cidx_offset} = viewport;
+        const depth = config.row_pivots.length;
         const id_column = columns_data["__ID__"];
-        let row_height = this._column_sizes.row_height;
+        const view_state = {viewport_width: 0, selected_id, depth, ridx_offset, cidx_offset, row_height: this._column_sizes.row_height};
+
         let cont_body,
-            cont_head,
             cidx = 0,
-            width = 0,
             last_cells = [];
         if (column_paths[0] === "__ROW_PATH__") {
-            const alias = config.row_pivots.join(",");
-            const types = config.row_pivots.map(x => table_schema[x]);
-            cont_head = this.header.draw(config, alias, "", types);
-            cont_body = this.body.draw(container_height, alias, 0, columns_data["__ROW_PATH__"], id_column, selected_id, types, config.row_pivots.length, viewport.start_row, 0, row_height);
-            selected_id = false;
-            if (!is_resize) {
+            const column_name = config.row_pivots.join(",");
+            const type = config.row_pivots.map(x => table_schema[x]);
+            const column_data = columns_data["__ROW_PATH__"];
+            const column_state = {column_name, cidx: 0, column_data, id_column, type};
+            const cont_head = this.header.draw(config, column_name, "", type, 0);
+            cont_body = this.body.draw(container_height, column_state, {...view_state, cidx_offset: 0});
+            view_state.selected_id = false;
+            view_state.viewport_width += this._column_sizes.indices[0] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
+            view_state.row_height = view_state.row_height || cont_body.row_height;
+            cidx++;
+            if (!preserve_width) {
                 last_cells.push([cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
             }
-            row_height = row_height || cont_body.row_height;
-            width += this._column_sizes.indices[0] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
-            cidx++;
         }
 
         try {
@@ -103,19 +104,20 @@ export class DatagridTableViewModel {
                     columns_data[column_name] = new_col[column_name];
                 }
 
-                const column_data = columns_data[column_name];
                 const type = column_path_2_type(schema, column_name);
-                cont_head = this.header.draw(config, undefined, column_name, type, config.sort, cont_head);
-                cont_body = this.body.draw(container_height, column_name, cidx, column_data, id_column, selected_id, type, undefined, viewport.start_row, sidx, cont_body?.row_height);
-                selected_id = false;
-                width += this._column_sizes.indices[cidx + sidx] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
-                if (!is_resize) {
+                const column_data = columns_data[column_name];
+                const column_state = {column_name, cidx, column_data, id_column, type};
+                const cont_head = this.header.draw(config, undefined, column_name, type, cidx + cidx_offset);
+                cont_body = this.body.draw(container_height, column_state, view_state);
+                view_state.selected_id = false;
+                view_state.viewport_width += this._column_sizes.indices[cidx + cidx_offset] || cont_body.td?.offsetWidth || cont_head.th.offsetWidth;
+                view_state.row_height = view_state.row_height || cont_body.row_height;
+                cidx++;
+                if (!preserve_width) {
                     last_cells.push([cont_body.td || cont_head.th, cont_body.metadata || cont_head.metadata]);
                 }
 
-                row_height = row_height || cont_body.row_height;
-                cidx++;
-                if (width > container_width) {
+                if (view_state.viewport_width > container_width) {
                     break;
                 }
             }
@@ -123,9 +125,7 @@ export class DatagridTableViewModel {
             return last_cells;
         } finally {
             this.body.clean({ridx: cont_body?.ridx || 0, cidx});
-            if (cont_head) {
-                this.header.clean(cont_head);
-            }
+            this.header.clean();
         }
     }
 }

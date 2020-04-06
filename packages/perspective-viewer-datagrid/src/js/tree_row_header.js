@@ -36,7 +36,7 @@ function _tree_header_levels(path, is_open, is_leaf) {
 
 export function tree_header(td, path, types, is_leaf, is_open) {
     const type = types[path.length - 1];
-    const name = path[path.length - 1] || "TOTAL";
+    const name = path.length === 0 ? "TOTAL" : path[path.length - 1];
     const header_classes = _tree_header_classes.call(this, name, type, is_leaf);
     const tree_levels = _tree_header_levels(path, is_open, is_leaf);
     const header_text = this._format_text(type)(name);
