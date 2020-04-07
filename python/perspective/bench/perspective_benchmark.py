@@ -9,8 +9,9 @@
 import os
 import sys
 import subprocess
+import random
 from functools import partial
-from bench import Benchmark, Suite, Runner, VirtualEnvHandler
+from bench import Benchmark, Suite, Runner
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table  # noqa: E402
 from perspective.tests.common import superstore  # noqa: E402
@@ -32,6 +33,9 @@ def make_meta(group, name):
         "group": group,
         "name": name
     }
+
+def empty_callback():
+    pass
 
 
 class PerspectiveBenchmark(Suite):
@@ -55,6 +59,10 @@ class PerspectiveBenchmark(Suite):
         self.arrow = self._view.to_arrow()
         self._table = tbl
 
+    def _get_update_data(self, n=30):
+        """Retrieve n rows from self.records to be used as update data."""
+        return random.sample(self.records, n)
+
     def register_benchmarks(self):
         """Register all the benchmark methods - each method creates a number of
         lambdas, and then calls `setattr` on the Suite itself so that the
@@ -65,6 +73,10 @@ class PerspectiveBenchmark(Suite):
         self.benchmark_view_one()
         self.benchmark_view_two()
         self.benchmark_view_two_column_only()
+        self.benchmark_view_zero_updates()
+        self.benchmark_view_one_updates()
+        self.benchmark_view_two_updates()
+        self.benchmark_view_two_column_only_updates()
         self.benchmark_to_format_zero()
         self.benchmark_to_format_one()
         self.benchmark_to_format_two()
@@ -92,6 +104,21 @@ class PerspectiveBenchmark(Suite):
         func = Benchmark(lambda: self._table.view(), meta=make_meta("view", "zero"))
         setattr(self, "view_zero", func)
 
+    def benchmark_view_zero_updates(self):
+        """Benchmark how long it takes for each update to resolve fully, using
+        the on update callback that forces resolution of updates across
+        10 views."""
+        table = Table(self.arrow)
+        views = [table.view() for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = self._get_update_data(1000)
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "zero"))
+        setattr(self, "update_zero", func)
+
     def benchmark_view_one(self):
         """Benchmark view creation with different pivots."""
         for pivot in PerspectiveBenchmark.ROW_PIVOT_OPTIONS:
@@ -101,6 +128,21 @@ class PerspectiveBenchmark(Suite):
             view_constructor = partial(self._table.view, row_pivots=pivot)
             func = Benchmark(lambda: view_constructor(), meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
+
+    def benchmark_view_one_updates(self):
+        """Benchmark how long it takes for each update to resolve fully, using
+        the on update callback that forces resolution of updates across
+        25 views."""
+        table = Table(self.arrow)
+        views = [table.view(row_pivots=["State", "City"]) for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = self._get_update_data(1000)
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "one"))
+        setattr(self, "update_one", func)
 
     def benchmark_view_two(self):
         """Benchmark view creation with row and column pivots."""
@@ -116,6 +158,21 @@ class PerspectiveBenchmark(Suite):
             func = Benchmark(lambda: view_constructor(), meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
 
+    def benchmark_view_two_updates(self):
+        """Benchmark how long it takes for each update to resolve fully, using
+        the on update callback that forces resolution of updates across
+        25 views."""
+        table = Table(self.arrow)
+        views = [table.view(row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = self._get_update_data(1000)
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "two"))
+        setattr(self, "update_two", func)
+
     def benchmark_view_two_column_only(self):
         """Benchmark column-only view creation."""
         for pivot in PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS:
@@ -126,6 +183,21 @@ class PerspectiveBenchmark(Suite):
             view_constructor = partial(self._table.view, column_pivots=pivot)
             func = Benchmark(lambda: view_constructor(), meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
+
+    def benchmark_view_two_column_only_updates(self):
+        """Benchmark how long it takes for each update to resolve fully, using
+        the on update callback that forces resolution of updates across
+        25 views."""
+        table = Table(self.arrow)
+        views = [table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = self._get_update_data(1000)
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "two_column_only"))
+        setattr(self, "update_two_column_only", func)
 
     def benchmark_to_format_zero(self):
         """Benchmark each `to_format` method."""
@@ -179,7 +251,7 @@ class PerspectiveBenchmark(Suite):
 
 
 if __name__ == "__main__":
-    VERSION = sys.argv[1]
+    VERSION = "master"
 
     # Initialize a suite and runner, then call `.run()`
     suite = PerspectiveBenchmark()
