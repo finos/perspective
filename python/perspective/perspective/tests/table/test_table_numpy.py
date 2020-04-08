@@ -7,6 +7,7 @@
 #
 
 import six
+import pandas as pd
 import numpy as np
 from pytest import raises
 from perspective import PerspectiveError
@@ -687,6 +688,82 @@ class TestTableNumpy(object):
         table.update(df)
         # truncates decimal
         assert table.view().to_dict()["a"] == [None, 1, None, 2, None, 3, 4]
+
+    def test_table_numpy_from_schema_float_to_int_with_nan(self):
+        df = {"a": np.array([np.nan, 1.5, np.nan, 2.5, np.nan, 3.5, 4.5])}
+        table = Table({
+            "a": int
+        })
+        table.update(df)
+        # truncates decimal
+        assert table.view().to_dict()["a"] == [None, 1, None, 2, None, 3, 4]
+
+    
+    def test_table_numpy_from_schema_float_to_int_with_nan_partial(self):
+        df = {
+            "a": np.array([np.nan, 1.5, np.nan, 2.5, np.nan, 3.5, 4.5])
+        }
+        table = Table({
+            "a": int,
+            "b": int
+        })
+        table.update(df)
+        assert table.size() == 7
+        # truncates decimal
+        assert table.view().to_dict() == {
+            "a": [None, 1, None, 2, None, 3, 4],
+            "b": [None, None, None, None, None, None, None]
+        }
+
+    def test_table_numpy_from_schema_float_to_int_with_nan_partial_indexed(self):
+        """Assert that the null masking works even when primary keys
+        are being reordered."""
+        df = {
+            "a": np.array([np.nan, 1.5, np.nan, 2.5, np.nan, 3.5, 4.5]),
+            "b": np.array([1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5])
+        }
+        table = Table({
+            "a": int,
+            "b": int
+        }, index="b")
+        table.update(df)
+
+        # truncates decimal
+        assert table.view().to_dict() == {
+            "a": [None, 1, None, 2, None, 3, 4],
+            "b": [1, 2, 3, 4, 5, 6, 7],
+        }
+
+        table.update(pd.DataFrame({
+            "a": [10, 9, 8],
+            "b": [2, 3, 5]
+        }))
+
+        assert table.view().to_dict() == {
+            "a": [None, 10, 9, 2, 8, 3, 4],
+            "b": [1, 2, 3, 4, 5, 6, 7]
+        }
+
+        table.update({
+            "a": np.array([100, np.nan], dtype=np.float64),
+            "b": np.array([-1, 6], dtype=np.float64)
+        })
+
+        assert table.view().to_dict() == {
+            "a": [100, None, 10, 9, 2, 8, None, 4],
+            "b": [-1, 1, 2, 3, 4, 5, 6, 7]
+        }
+
+        table.update({
+            "a": np.array([100, 1000, np.nan], dtype=np.float64),
+            "b": np.array([100, 6, 97], dtype=np.float64)
+        })
+
+        assert table.view().to_dict() == {
+            "a": [100, None, 10, 9, 2, 8, 1000, 4, None, 100],
+            "b": [-1, 1, 2, 3, 4, 5, 6, 7, 97, 100]
+        }
+
 
     def test_table_numpy_from_schema_int_to_float(self):
         data = [None, 1, None, 2, None, 3, 4]

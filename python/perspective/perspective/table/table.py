@@ -208,6 +208,12 @@ class Table(object):
             [name for name in self._accessor._names if name == "__INDEX__"]
         self._accessor._types = types[:len(columns)]
 
+        if self._accessor._is_numpy:
+            # Try to cast arrays to the Perspective dtype before they end up in
+            # the C++, thus allowing for int/floats to be copied when they are
+            # the same bit width
+            self._accessor.try_cast_numpy_arrays()
+
         if "__INDEX__" in self._accessor._names:
             if self._index != "":
                 index_pos = self._accessor._names.index(self._index)

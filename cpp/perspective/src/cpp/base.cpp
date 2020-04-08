@@ -170,43 +170,43 @@ get_dtype_descr(t_dtype dtype) {
             return "none";
         } break;
         case DTYPE_INT64: {
-            return "i64";
+            return "int64";
         } break;
         case DTYPE_INT32: {
-            return "i32";
+            return "int32";
         } break;
         case DTYPE_INT16: {
-            return "i16";
+            return "int16";
         } break;
         case DTYPE_INT8: {
-            return "i8";
+            return "int8";
         } break;
         case DTYPE_UINT64: {
-            return "u64";
+            return "uint64";
         } break;
         case DTYPE_UINT32: {
-            return "u32";
+            return "uint32";
         } break;
         case DTYPE_UINT16: {
-            return "u16";
+            return "uint16";
         } break;
         case DTYPE_UINT8: {
-            return "u8";
+            return "uint8";
         } break;
         case DTYPE_BOOL: {
             return "bool";
         } break;
         case DTYPE_FLOAT64: {
-            return "f64";
+            return "float64";
         } break;
         case DTYPE_FLOAT32: {
-            return "f32";
+            return "float32";
         } break;
         case DTYPE_STR: {
             return "str";
         } break;
         case DTYPE_TIME: {
-            return "time";
+            return "datetime";
         } break;
         case DTYPE_DATE: {
             return "date";

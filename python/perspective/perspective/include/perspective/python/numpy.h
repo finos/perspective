@@ -49,8 +49,6 @@ namespace numpy {
              */
             void init();
 
-            bool has_numeric_dtype() const;
-
             /**
              * Given `inferred_types` from Perspective, use the `m_types` array of numpy array dtypes and 
              * reconcile differences between numeric dtypes by *preferring the dtype of the numpy array* and 
@@ -150,12 +148,6 @@ namespace numpy {
 
             bool m_init;
 
-            /**
-             * A flag to determine whether to reconcile numpy array dtype with perspective inferred types.
-             *
-             * Defaults to false - is true when any array dtype is of int/float/bool.
-             */
-            bool m_has_numeric_dtype;
             py::object m_accessor;
             std::vector<std::string> m_names;
             std::vector<t_dtype> m_types;
