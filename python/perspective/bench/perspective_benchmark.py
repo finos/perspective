@@ -10,6 +10,7 @@ import os
 import sys
 import subprocess
 import random
+import pandas as pd
 from functools import partial
 from bench import Benchmark, Suite, Runner
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
@@ -51,6 +52,13 @@ class PerspectiveBenchmark(Suite):
     def __init__(self):
         """Create a benchmark suite for `perspective-python`."""
         tbl = Table(SUPERSTORE)
+        self._schema = tbl.schema()
+        self._df_schema = tbl.schema()
+        # mutate schema to have some integer columns, so as to force numpy 
+        # float-to-int demotion
+        self._df_schema["Sales"] = int
+        self._df_schema["Profit"] = int
+        self._df_schema["Quantity"] = int
         self._view = tbl.view()
         self.dict = self._view.to_dict()
         self.records = self._view.to_records()
@@ -77,6 +85,10 @@ class PerspectiveBenchmark(Suite):
         self.benchmark_view_one_updates()
         self.benchmark_view_two_updates()
         self.benchmark_view_two_column_only_updates()
+        self.benchmark_view_zero_df_updates()
+        self.benchmark_view_one_df_updates()
+        self.benchmark_view_two_df_updates()
+        self.benchmark_view_two_column_only_df_updates()
         self.benchmark_to_format_zero()
         self.benchmark_to_format_one()
         self.benchmark_to_format_two()
@@ -108,7 +120,7 @@ class PerspectiveBenchmark(Suite):
         """Benchmark how long it takes for each update to resolve fully, using
         the on update callback that forces resolution of updates across
         10 views."""
-        table = Table(self.arrow)
+        table = Table(self._schema)
         views = [table.view() for i in range(25)]
         for v in views:
             v.on_update(empty_callback)
@@ -118,6 +130,23 @@ class PerspectiveBenchmark(Suite):
             table.size()
         func = Benchmark(resolve_update, meta=make_meta("update", "zero"))
         setattr(self, "update_zero", func)
+
+    def benchmark_view_zero_df_updates(self):
+        """Benchmark how long it takes for each update to resolve fully, using
+        the on update callback that forces resolution of updates across
+        10 views. This version updates using dataframes, and is designed to
+        compare the overhead of dataframe loading vs. regular data structure
+        loading."""
+        table = Table(self._df_schema)
+        views = [table.view() for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = pd.DataFrame(self._get_update_data(1000))
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "zero_df"))
+        setattr(self, "update_zero_df", func)
 
     def benchmark_view_one(self):
         """Benchmark view creation with different pivots."""
@@ -133,7 +162,7 @@ class PerspectiveBenchmark(Suite):
         """Benchmark how long it takes for each update to resolve fully, using
         the on update callback that forces resolution of updates across
         25 views."""
-        table = Table(self.arrow)
+        table = Table(self._schema)
         views = [table.view(row_pivots=["State", "City"]) for i in range(25)]
         for v in views:
             v.on_update(empty_callback)
@@ -143,6 +172,19 @@ class PerspectiveBenchmark(Suite):
             table.size()
         func = Benchmark(resolve_update, meta=make_meta("update", "one"))
         setattr(self, "update_one", func)
+
+    def benchmark_view_one_df_updates(self):
+        """Benchmark dataframe updates for one-sided views."""
+        table = Table(self._df_schema)
+        views = [table.view(row_pivots=["State", "City"]) for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = pd.DataFrame(self._get_update_data(1000))
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "one_df"))
+        setattr(self, "update_one_df", func)
 
     def benchmark_view_two(self):
         """Benchmark view creation with row and column pivots."""
@@ -162,7 +204,7 @@ class PerspectiveBenchmark(Suite):
         """Benchmark how long it takes for each update to resolve fully, using
         the on update callback that forces resolution of updates across
         25 views."""
-        table = Table(self.arrow)
+        table = Table(self._schema)
         views = [table.view(row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]) for i in range(25)]
         for v in views:
             v.on_update(empty_callback)
@@ -172,6 +214,20 @@ class PerspectiveBenchmark(Suite):
             table.size()
         func = Benchmark(resolve_update, meta=make_meta("update", "two"))
         setattr(self, "update_two", func)
+
+
+    def benchmark_view_two_df_updates(self):
+        """Benchmark dataframe updates for two-sided views."""
+        table = Table(self._df_schema)
+        views = [table.view(row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = pd.DataFrame(self._get_update_data(1000))
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "two_df"))
+        setattr(self, "update_two_df", func)
 
     def benchmark_view_two_column_only(self):
         """Benchmark column-only view creation."""
@@ -188,7 +244,7 @@ class PerspectiveBenchmark(Suite):
         """Benchmark how long it takes for each update to resolve fully, using
         the on update callback that forces resolution of updates across
         25 views."""
-        table = Table(self.arrow)
+        table = Table(self._schema)
         views = [table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)]
         for v in views:
             v.on_update(empty_callback)
@@ -198,6 +254,19 @@ class PerspectiveBenchmark(Suite):
             table.size()
         func = Benchmark(resolve_update, meta=make_meta("update", "two_column_only"))
         setattr(self, "update_two_column_only", func)
+    
+    def benchmark_view_two_column_only_df_updates(self):
+        """Benchmark dataframe updates for two-sided column only views."""
+        table = Table(self._df_schema)
+        views = [table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        for v in views:
+            v.on_update(empty_callback)
+        update_data = pd.DataFrame(self._get_update_data(1000))
+        def resolve_update():
+            table.update(update_data)
+            table.size()
+        func = Benchmark(resolve_update, meta=make_meta("update", "two_column_only_df"))
+        setattr(self, "update_two_column_only_df", func)
 
     def benchmark_to_format_zero(self):
         """Benchmark each `to_format` method."""
