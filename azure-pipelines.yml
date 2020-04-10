@@ -149,6 +149,7 @@ jobs:
         artifactName: '$(artifact_name)'
 
 - job: 'Windows'
+  condition: 'false' # FIXME: boost no longer found on VM image, need to fix and restore.
   pool:
     vmImage: 'vs2017-win2016'
 
