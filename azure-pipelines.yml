@@ -56,26 +56,31 @@ jobs:
         python_flag: '--python2'
         manylinux_flag: ''
         artifact_name: 'cp27-cp27m'
+        virtualenv_command: 'virtualenv'
       Python27ManyLinux2010:
         python.version: '2.7'
         python_flag: '--python2'
         manylinux_flag: '--manylinux2010'
         artifact_name: 'cp27-cp27m-manylinux2010'
+        virtualenv_command: 'virtualenv'
       Python37:
         python.version: '3.7'
         python_flag: ''
         manylinux_flag: ''
         artifact_name: 'cp37-cp37m'
+        virtualenv_command: 'venv'
       Python37ManyLinux2010:
         python.version: '3.7'
         python_flag: ''
         manylinux_flag: '--manylinux2010'
         artifact_name: 'cp37-cp37m-manylinux2010'
+        virtualenv_command: 'venv'
       Python37ManyLinux2014:
         python.version: '3.7'
         python_flag: ''
         manylinux_flag: '--manylinux2014'
         artifact_name: 'cp37-cp37m-manylinux2014'
+        virtualenv_command: 'venv'
 
   steps:
     - task: UsePythonVersion@0
@@ -109,21 +114,40 @@ jobs:
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
-    # Build a python wheel for the given platform, but don't publish it, 
-    # as a separate job will test and upload the artifact.
+    # Build a python wheel for the given platform
     - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Build wheel'
       env:
         PSP_DOCKER: 1
+    
+    # Install virtualenv for Python 2
+    - bash: python -m pip install virtualenv
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], '--python2'))
+      displayName: 'Install virtualenv'
+
+    # Start a new virtual environment for the Perspective wheel, so as to
+    # isolate it from previously installed dependencies
+    - bash: python -m $(virtualenv_command) ./temp_venv
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: "Create virtualenv"
+
+    - bash: source ./temp_venv/bin/activate
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: "Activate virtualenv"
+    
+    # Make sure that Perspective is not installed
+    - bash: "python -c 'from __future__ import print_function\ntry: import perspective; print(perspective.is_libpsp())\nexcept:pass'"
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Verify successful installation'
 
     # Install the manylinux wheel
-    - bash: python -m pip install -U $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
+    - bash: python -m pip install --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Install from wheel'
 
     # Make sure that the binaries are valid and can be imported
-    - bash: python -c 'import perspective; print(perspective.is_libpsp())'
+    - bash: python -c 'from __future__ import print_function\nimport perspective; print(perspective.is_libpsp())'
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Verify successful installation'
 
