@@ -109,20 +109,29 @@ jobs:
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
-    # Build a python wheel for the given platform
+    # Build a python wheel for the given platform, but don't publish it, 
+    # as a separate job will test and upload the artifact.
     - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      # condition: contains(variables['Build.SourceBranch'], 'tags')
       displayName: 'Build wheel'
       env:
         PSP_DOCKER: 1
 
-    # Save it to Azure pipeline storage
+    # Install the manylinux wheel
+    - bash: python -m pip install -U $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Install from wheel'
+
+    # Make sure that the binaries are valid and can be imported
+    - bash: python -c 'import perspective; print(perspective.is_libpsp())'
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Verify successful installation'
+
+    # Save the artifact to Azure storage
     - task: PublishPipelineArtifact@1
-      # condition: contains(variables['Build.SourceBranch'], 'tags')
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl'
+        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
         artifactName: '$(artifact_name)'
 
 - job: 'Windows'
