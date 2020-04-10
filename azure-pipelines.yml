@@ -2,6 +2,9 @@ trigger:
   branches:
     include:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
+  tags:
+    include:
+    - 'v*'
 
 pr:
   branches:
@@ -52,22 +55,27 @@ jobs:
         python.version: '2.7'
         python_flag: '--python2'
         manylinux_flag: ''
+        artifact_name: 'cp27-cp27m'
       Python27ManyLinux2010:
         python.version: '2.7'
         python_flag: '--python2'
         manylinux_flag: '--manylinux2010'
+        artifact_name: 'cp27-cp27m-manylinux2010'
       Python37:
         python.version: '3.7'
         python_flag: ''
         manylinux_flag: ''
+        artifact_name: 'cp37-cp37m'
       Python37ManyLinux2010:
         python.version: '3.7'
         python_flag: ''
-        manylinux_flag: '--manylinux2010' 
+        manylinux_flag: '--manylinux2010'
+        artifact_name: 'cp37-cp37m-manylinux2010'
       Python37ManyLinux2014:
         python.version: '3.7'
         python_flag: ''
         manylinux_flag: '--manylinux2014'
+        artifact_name: 'cp37-cp37m-manylinux2014'
 
   steps:
     - task: UsePythonVersion@0
@@ -100,6 +108,20 @@ jobs:
       inputs: 
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+
+    # Build a python wheel for the given platform
+    - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
+      # condition: contains(variables['Build.SourceBranch'], 'tags')
+      displayName: 'Build wheel'
+      env:
+        PSP_DOCKER: 1
+
+    # Save it to Azure pipeline storage
+    - task: PublishPipelineArtifact@1
+      # condition: contains(variables['Build.SourceBranch'], 'tags')
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist'
+        artifactName: '$(artifact_name)'
 
 - job: 'Windows'
   pool:
