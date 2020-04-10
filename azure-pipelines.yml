@@ -111,6 +111,7 @@ jobs:
 
     # Build a python wheel for the given platform
     - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       # condition: contains(variables['Build.SourceBranch'], 'tags')
       displayName: 'Build wheel'
       env:
@@ -119,8 +120,9 @@ jobs:
     # Save it to Azure pipeline storage
     - task: PublishPipelineArtifact@1
       # condition: contains(variables['Build.SourceBranch'], 'tags')
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist'
+        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl'
         artifactName: '$(artifact_name)'
 
 - job: 'Windows'
