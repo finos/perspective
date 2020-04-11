@@ -286,10 +286,25 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASMJS_MODE_FLAGS "")
 
 	if(PSP_CPP_BUILD)
+		if (WIN32)
+			# BOOST_ROOT has been removed on Windows VMs in Azure - 
+			# add BOOST_ROOT_1_72_0 so it can find the custom installation of
+			# boost on those VMs:
+			# https://github.com/actions/virtual-environments/issues/6870
+			if(DEFINED(ENV{BOOST_ROOT_1_72_0}))
+				message("Boost 1.72 path found in environment: $ENV{BOOST_ROOT_1_72_0}")
+				SET (BOOST_ROOT "$ENV{BOOST_ROOT_1_72_0}")
+				SET (BOOST_INCLUDEDIR "$ENV{BOOST_ROOT_1_72_0}/boost/include")
+				SET (BOOST_LIBRARYDIR "$ENV{BOOST_ROOT_1_72_0}/lib")
+				SET (Boost_NO_BOOST_CMAKE ON)
+				message("BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+				message("BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+			endif()
+		endif()
 		# filesystem not required for Python, as we link to prebuilt arrow shared library
 		find_package(Boost COMPONENTS filesystem)
 		if(NOT Boost_FOUND)
-			message("${Red}Boost could not be located${ColorReset}")
+			message("${Red}Boost filesystem could not be located${ColorReset}")
 		else()
 			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
 		endif()

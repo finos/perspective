@@ -188,9 +188,6 @@ jobs:
 
     - script: yarn build_python  --ci $(python_flag)
       displayName: 'build'
-      env:
-        # https://github.com/actions/virtual-environments/issues/319
-        BOOST_ROOT : "/usr/local/share/boost/1.72.0"
 
 
 - job: 'Mac'
