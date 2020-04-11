@@ -289,12 +289,20 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if (WIN32)
 			# BOOST_ROOT has been removed on Windows VMs in Azure:
 			#
-			# - https://github.com/actions/virtual-environments/issues/6870
 			# - https://github.com/actions/virtual-environments/issues/687
+			# - https://github.com/actions/virtual-environments/issues/319
 			# 
 			# `BOOST_ROOT` must be set in the environment, and policy CMP0074
 			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
 			cmake_policy(SET CMP0074 NEW)
+
+			if(DEFINED(ENV{BOOST_INCLUDEDIR}))
+				set(BOOST_INCLUDEDIR $ENV{BOOST_INCLUDEDIR})
+			endif()
+
+			if(DEFINED(ENV{BOOST_LIBRARYDIR}))
+				set(BOOST_LIBRARYDIR $ENV{BOOST_LIBRARYDIR})
+			endif()
 		endif()
 		# filesystem not required for Python, as we link to prebuilt arrow shared library
 		find_package(Boost COMPONENTS filesystem)
