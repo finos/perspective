@@ -297,12 +297,17 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			cmake_policy(SET CMP0074 NEW)
 
 			if(DEFINED(ENV{BOOST_ROOT}))
-				set(Boost_NO_BOOST_CMAKE ON)
+				# set(Boost_NO_BOOST_CMAKE ON)
 				set(BOOST_INCLUDEDIR $ENV{BOOST_ROOT}/include)
 				set(BOOST_LIBRARYDIR $ENV{BOOST_ROOT}/lib)
+
+				message("${Cyan}BOOST_ROOT: ENV{$BOOST_ROOT} ${ColorReset}")
+				message("${Cyan}BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR} ${ColorReset}")
+				message("${Cyan}BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR} ${ColorReset}")
 			endif()
+
 		endif()
-		# filesystem not required for Python, as we link to prebuilt arrow shared library
+		# Filesystem required for Python build
 		find_package(Boost COMPONENTS filesystem)
 		if(NOT Boost_FOUND)
 			message("${Red}Boost filesystem could not be located${ColorReset}")
@@ -325,6 +330,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
 		endforeach(warning)
+		# When linking against Boost on Azure, bcrypt fails to link:
+		# - https://github.com/microsoft/vcpkg/issues/4481
+		# - https://github.com/boostorg/uuid/issues/68
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_UUID_FORCE_AUTO_LINK")
 	else()
 		include_directories("/usr/local/include")
 	endif()
