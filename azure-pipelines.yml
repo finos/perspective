@@ -188,6 +188,8 @@ jobs:
 
     - script: yarn build_python  --ci $(python_flag)
       displayName: 'build'
+      env:
+        BOOST_ROOT_1_72_0: "C:/hostedtoolcache/windows/Boost/1.72.0/"
 
 
 - job: 'Mac'

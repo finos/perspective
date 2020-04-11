@@ -291,15 +291,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# add BOOST_ROOT_1_72_0 so it can find the custom installation of
 			# boost on those VMs:
 			# https://github.com/actions/virtual-environments/issues/6870
-			if(DEFINED(ENV{BOOST_ROOT_1_72_0}))
-				message("Boost 1.72 path found in environment: $ENV{BOOST_ROOT_1_72_0}")
-				SET (BOOST_ROOT "$ENV{BOOST_ROOT_1_72_0}")
-				SET (BOOST_INCLUDEDIR "$ENV{BOOST_ROOT_1_72_0}/boost/include")
-				SET (BOOST_LIBRARYDIR "$ENV{BOOST_ROOT_1_72_0}/lib")
-				SET (Boost_NO_BOOST_CMAKE ON)
-				message("BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
-				message("BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
-			endif()
+			# FIXME: do not let this get merged
+			message("SETTING BOOST TO C:/hostedtoolcache/windows/Boost/1.72.0/")
+			SET (BOOST_ROOT "C:/hostedtoolcache/windows/Boost/1.72.0/")
+			SET (BOOST_INCLUDEDIR "C:/hostedtoolcache/windows/Boost/1.72.0/include")
+			SET (BOOST_LIBRARYDIR "$C:/hostedtoolcache/windows/Boost/1.72.0/lib")
+			SET (Boost_NO_BOOST_CMAKE ON)
+			message("BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
+			message("BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
 		endif()
 		# filesystem not required for Python, as we link to prebuilt arrow shared library
 		find_package(Boost COMPONENTS filesystem)
