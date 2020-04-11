@@ -296,12 +296,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
 			cmake_policy(SET CMP0074 NEW)
 
-			if(DEFINED(ENV{BOOST_INCLUDEDIR}))
-				set(BOOST_INCLUDEDIR $ENV{BOOST_INCLUDEDIR})
-			endif()
-
-			if(DEFINED(ENV{BOOST_LIBRARYDIR}))
-				set(BOOST_LIBRARYDIR $ENV{BOOST_LIBRARYDIR})
+			if(DEFINED(ENV{BOOST_ROOT}))
+				set(Boost_NO_BOOST_CMAKE ON)
+				set(BOOST_INCLUDEDIR $ENV{BOOST_ROOT}/include)
+				set(BOOST_LIBRARYDIR $ENV{BOOST_ROOT}/lib)
 			endif()
 		endif()
 		# filesystem not required for Python, as we link to prebuilt arrow shared library
