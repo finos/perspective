@@ -81,7 +81,7 @@ export class PerspectiveViewerWidget extends Widget {
         }
         this.linked = linked;
 
-        this.viewer.restore({...viewerConfig});
+        return this.viewer.restore({...viewerConfig});
     }
 
     save() {

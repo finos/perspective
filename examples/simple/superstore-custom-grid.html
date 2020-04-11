@@ -15,6 +15,7 @@
 
     <script src="perspective-viewer.js"></script>
     <script src="perspective-viewer-datagrid.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
 
     <link rel='stylesheet' href="index.css">
     <link rel='stylesheet' href="material-dense.dark.css" is="custom-style">
@@ -143,9 +144,9 @@
                 for (const td of datagrid.get_tds()) {
                     const metadata = datagrid.get_meta(td);
                     const clean_name = metadata.value && metadata.value.trim && metadata.value.trim();
-                    if (td.classList.contains("float")) {
+                    if (metadata.type === "float") {
                         make_led_cell(td, metadata);
-                    } else if (td.classList.contains("integer")) {
+                    } else if (metadata.type === "integer") {
                         max = make_bar_chart(td, metadata, max);
                     } else if (clean_name in states) {
                         make_flag(td, metadata, cache, clean_name);
@@ -213,57 +214,57 @@
     </script>
 
     <style>
-        td {
+        perspective-viewer td {
             height: 24px;
         }
 
-        tr td.pd-group-header,
-        tr th.pd-group-header {
+        perspective-viewer tr td.pd-group-header,
+        perspective-viewer tr th.pd-group-header {
             border-right: 1px solid #666 !important;
         }
 
-        tbody:hover tr {
-            opacity: 0.5;
+        perspective-viewer tbody:hover tr {
+            opacity: 0.7;
             transition: opacity 0.2s ease-in;
         }
 
-        tbody:hover tr:hover td div {
+        perspective-viewer tbody:hover tr:hover td div {
             transform: scaleY(1.3);
             transform-origin: 0;
             transition: transform 0.2s ease-in;
         }
 
-        tbody:hover tr:hover {
+        perspective-viewer tbody:hover tr:hover {
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);
             opacity: 1;
             transition: none;
         }
 
-        tr:last-child th {
+        perspective-viewer tr:last-child th {
             border-bottom: 1px solid #666;
         }
 
-        tr th {
+        perspective-viewer tr th {
             border-right: 1px solid #666;
         }
 
-        tbody:hover tr:hover td {
+        perspective-viewer tbody:hover tr:hover td {
             background: none;
             opacity: 1;
         }
 
-        tbody:hover tr:nth-child(even):hover td,
-        tbody tr:nth-child(even) td {
+        perspective-viewer tbody:hover tr:nth-child(even):hover td,
+        perspective-viewer tbody tr:nth-child(even) td {
             background: rgba(0, 0, 0, 0.1);
         }
 
-        td.float {
+        perspective-viewer td.pd-float {
             text-align: center !important;
             font-family: Orbitron;
         }
 
-        th.integer,
-        td.integer {
+        perspective-viewer th.pd-integer,
+        perspective-viewer td.pd-integer {
             width: 100px;
         }
     </style>

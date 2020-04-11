@@ -10,7 +10,7 @@
 import perspective from "@finos/perspective";
 
 import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
 import "@finos/perspective-viewer/dist/umd/material.css";

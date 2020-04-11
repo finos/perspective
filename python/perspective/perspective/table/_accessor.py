@@ -114,7 +114,7 @@ class _PerspectiveAccessor(object):
 
                 dtype = array.dtype
 
-                if name == "index" and isinstance(data_or_schema.index, pandas.DatetimeIndex):
+                if name == "index" and hasattr(data_or_schema, "index") and isinstance(data_or_schema.index, pandas.DatetimeIndex):
                     # use the index of the original, unflattened dataframe
                     dtype = _parse_datetime_index(data_or_schema.index)
 

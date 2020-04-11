@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.7] (2020-04-06)
+
+#### Added
+  * [#991](https://github.com/finos/perspective/pull/991) Purge `@finos/perspective-viewer-hypergrid` ([@texodus](https://github.com/texodus))
+  * [#993](https://github.com/finos/perspective/pull/993) `@finos/perspective-viewer-datagrid` Tree Formatting ([@texodus](https://github.com/texodus))
+
+#### Fixed
+  * [#1002](https://github.com/finos/perspective/pull/1002) Fix column resizing when column pivots are present, and update docs and examples. ([@texodus](https://github.com/texodus))
+  * [#997](https://github.com/finos/perspective/pull/997) `@finos/perspective-viewer-datagrid` Bug Fixes ([@texodus](https://github.com/texodus))
+  * [#1000](https://github.com/finos/perspective/pull/1000) Fix incorrect sort order when hidden, pivoted columns are sorted ([@sc1f](https://github.com/sc1f))
+  * [#985](https://github.com/finos/perspective/pull/985) tweak accessor to accept numpy dict ([@timkpaine](https://github.com/timkpaine))
+  * [#982](https://github.com/finos/perspective/pull/982) remove cpp test check from setup.py (no more cpp tests) ([@timkpaine](https://github.com/timkpaine))
+  * [#990](https://github.com/finos/perspective/pull/990) perspective-workspace fixes ([@zemeolotu](https://github.com/zemeolotu))
+
+#### Internal
+  * [#999](https://github.com/finos/perspective/pull/999) Add `lock` to PerspectiveManager ([@sc1f](https://github.com/sc1f))
+  * [#995](https://github.com/finos/perspective/pull/995) Look for PyArrow relative to Perspective in @rpath ([@sc1f](https://github.com/sc1f))
+
 ## [0.4.6] (2020-03-17)
 
 #### Added

@@ -12,7 +12,7 @@ import {PerspectiveWorkspace, PerspectiveWidget} from "@finos/perspective-worksp
 import {Widget} from "@lumino/widgets";
 import "@finos/perspective-workspace/src/theme/material/index.less";
 
-import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
 import "./style/index.less";

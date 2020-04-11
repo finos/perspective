@@ -265,20 +265,20 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
 
         if (widget.linked) {
-            this._linkedViewers.push(widget.viewer);
+            this._linkWidget(widget);
         }
         return widget;
     }
 
     _validate(table) {
-        if (!table.hasOwnProperty("view") || table.type !== "table") {
+        if (!("view" in table) || typeof table?.view !== "function") {
             throw new Error("Only `perspective.Table()` instances can be added to `tables`");
         }
         return table;
     }
 
     _set_listener(name, table) {
-        if (table instanceof Promise) {
+        if (typeof table?.then === "function") {
             table = table.then(this._validate);
         } else {
             this._validate(table);
@@ -348,6 +348,9 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         const config = widget.save();
         config.name = config.name ? `${config.name} (duplicate)` : "";
         const duplicate = this._createWidgetAndNode({config});
+        if (config.linked) {
+            this._linkWidget(duplicate);
+        }
         if (widget.master) {
             const index = this.masterPanel.widgets.indexOf(widget) + 1;
             this.masterPanel.insertWidget(index, duplicate);
@@ -474,10 +477,9 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         return this._linkedViewers.indexOf(widget.viewer) > -1;
     }
 
-    toggleLink(widget) {
-        widget.linked = !widget.linked;
-        if (widget.linked) {
-            widget.title.className += " linked";
+    _linkWidget(widget) {
+        widget.title.className += " linked";
+        if (this._linkedViewers.indexOf(widget.viewer) === -1) {
             this._linkedViewers.push(widget.viewer);
             // if this is the first linked viewer, make viewers with row-pivots selectable
             if (this._linkedViewers.length === 1) {
@@ -488,6 +490,13 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                     }
                 });
             }
+        }
+    }
+
+    toggleLink(widget) {
+        widget.linked = !widget.linked;
+        if (widget.linked) {
+            this._linkWidget(widget);
         } else {
             widget.title.className = widget.title.className.replace(/ linked/g, "");
             this._linkedViewers = this._linkedViewers.filter(viewer => viewer !== widget.viewer);
@@ -678,11 +687,12 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.element.dispatchEvent(event);
         widget.title.closable = true;
         this.element.appendChild(widget.viewer);
-        this._addWidgetEventListeners(widget);
         if (table) {
             widget.viewer.load(table);
         }
-        widget.restore(config);
+        widget.restore(config).then(() => {
+            this._addWidgetEventListeners(widget);
+        });
         return widget;
     }
 
@@ -703,7 +713,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             if (this.mode === MODE.LINKED) {
                 const config = event.target?.save();
                 if (config) {
-                    event.target.restore({selectable: this._linkedViewers.length > 0 && !!config["row-pivots"]});
+                    const selectable = this._linkedViewers.length > 0 && !!config["row-pivots"];
+                    if (selectable !== !!config.selectable) {
+                        event.target.restore({selectable});
+                    }
                 }
             }
         };
