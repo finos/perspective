@@ -287,18 +287,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 	if(PSP_CPP_BUILD)
 		if (WIN32)
-			# BOOST_ROOT has been removed on Windows VMs in Azure - 
-			# add BOOST_ROOT_1_72_0 so it can find the custom installation of
-			# boost on those VMs:
-			# https://github.com/actions/virtual-environments/issues/6870
-			# FIXME: do not let this get merged
-			message("SETTING BOOST TO C:/hostedtoolcache/windows/Boost/1.72.0/")
-			SET (BOOST_ROOT "C:/hostedtoolcache/windows/Boost/1.72.0/")
-			SET (BOOST_INCLUDEDIR "C:/hostedtoolcache/windows/Boost/1.72.0/include")
-			SET (BOOST_LIBRARYDIR "$C:/hostedtoolcache/windows/Boost/1.72.0/lib")
-			SET (Boost_NO_BOOST_CMAKE ON)
-			message("BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
-			message("BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
+			# BOOST_ROOT has been removed on Windows VMs in Azure:
+			#
+			# - https://github.com/actions/virtual-environments/issues/6870
+			# - https://github.com/actions/virtual-environments/issues/687
+			# 
+			# `BOOST_ROOT` must be set in the environment, and policy CMP0074
+			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
+			cmake_policy(SET CMP0074 NEW)
 		endif()
 		# filesystem not required for Python, as we link to prebuilt arrow shared library
 		find_package(Boost COMPONENTS filesystem)
