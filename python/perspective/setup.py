@@ -91,6 +91,8 @@ class PSPExtension(Extension):
 
 class PSPBuild(build_ext):
     def run(self):
+        for i, j in os.environ.items():
+            print(i, j)
         self.run_cmake()
 
     def run_cmake(self):
