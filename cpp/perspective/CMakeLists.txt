@@ -297,13 +297,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			cmake_policy(SET CMP0074 NEW)
 
 			if(DEFINED(ENV{BOOST_ROOT}))
-				# set(Boost_NO_BOOST_CMAKE ON)
-				set(BOOST_INCLUDEDIR $ENV{BOOST_ROOT}/include)
-				set(BOOST_LIBRARYDIR $ENV{BOOST_ROOT}/lib)
+				set(Boost_NO_BOOST_CMAKE TRUE)
 
-				message("${Cyan}BOOST_ROOT: ENV{$BOOST_ROOT} ${ColorReset}")
-				message("${Cyan}BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR} ${ColorReset}")
-				message("${Cyan}BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_ROOT: ENV{$BOOST_ROOT} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR} ${ColorReset}")
 			endif()
 
 		endif()
@@ -333,7 +331,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# When linking against Boost on Azure, bcrypt fails to link:
 		# - https://github.com/microsoft/vcpkg/issues/4481
 		# - https://github.com/boostorg/uuid/issues/68
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_UUID_FORCE_AUTO_LINK")
+		#add_definitions("-DBOOST_UUID_FORCE_AUTO_LINK")
 	else()
 		include_directories("/usr/local/include")
 	endif()
