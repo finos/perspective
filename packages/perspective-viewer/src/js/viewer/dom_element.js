@@ -197,7 +197,7 @@ export class DomElement extends PerspectiveElement {
             }
 
             const row = this._new_row(name, computed_schema[name], null, null, null, name);
-            this._inactive_columns.appendChild(row);
+            this._inactive_columns.insertBefore(row, this._inactive_columns.childNodes[0] || null);
             added_count++;
         }
 
