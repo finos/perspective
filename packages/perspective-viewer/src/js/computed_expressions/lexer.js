@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {Lexer, createToken} from "chevrotain";
+import {Lexer, createToken, tokenMatcher} from "chevrotain";
 import {PerspectiveLexerErrorMessage} from "./error";
 
 export const vocabulary = {};
@@ -142,6 +142,7 @@ export const Sqrt = createToken({
     name: "sqrt",
     pattern: /sqrt/,
     categories: [FunctionTokenType]
+    // TODO: add num_params so autocomplete only displays commas when needed
 });
 
 export const Pow2 = createToken({
@@ -378,17 +379,32 @@ const tokens = [
     UpperLowerCaseTokenType
 ];
 
+export const function_tokens = [];
+export const operator_tokens = [];
+
 // Add each token to the vocabulary exported for the Parser
 tokens.forEach(t => {
     vocabulary[t.name] = t;
+    let raw = t.PATTERN.source;
+    if (raw) {
+        if (raw.indexOf("\\") == 0) {
+            raw = raw.substring(1);
+        }
+    }
+
+    if (tokenMatcher(t, FunctionTokenType)) {
+        function_tokens.push(raw);
+    } else if (tokenMatcher(t, OperatorTokenType)) {
+        operator_tokens.push(raw);
+    }
 });
 
-const lexer = new Lexer(tokens, {
+export const ComputedExpressionColumnLexer = new Lexer(tokens, {
     errorMessageProvider: PerspectiveLexerErrorMessage
 });
 
 export const lex = function(input) {
-    const result = lexer.tokenize(input);
+    const result = ComputedExpressionColumnLexer.tokenize(input);
 
     if (result.errors.length > 0) {
         let message = result.errors.map(e => e.message);

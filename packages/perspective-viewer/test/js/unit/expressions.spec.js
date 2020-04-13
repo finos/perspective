@@ -7,6 +7,7 @@
  *
  */
 
+import {get_autocomplete_suggestions} from "../../../src/js/computed_expressions/autocomplete";
 import {expression_to_computed_column_config} from "../../../src/js/computed_expressions/visitor";
 
 describe("Computed Expression Parser", function() {
@@ -281,5 +282,23 @@ describe("Computed Expression Parser", function() {
 
     it("Should throw when a token is unrecognized", function() {
         expect(() => expression_to_computed_column_config("?")).toThrow();
+    });
+
+    describe("Autocomplete", function() {
+        it("Should return [] if expression is empty", function() {
+            expect(get_autocomplete_suggestions("")).toEqual([]);
+        });
+
+        it("Should return correct functions when function is at beginning of expression", function() {
+            expect(get_autocomplete_suggestions("c")).toEqual(["concat_comma", "concat_space"]);
+        });
+
+        it("Should return all operator types when last token is a column name", function() {
+            expect(get_autocomplete_suggestions("'Sales'")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+        });
+
+        it("Should make no distinction between a last token with or without space", function() {
+            expect(get_autocomplete_suggestions("'Sales' ")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+        });
     });
 });

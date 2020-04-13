@@ -155,4 +155,38 @@
             }
         }
     }
+
+    .awesomplete {
+        ul {
+            background: var(--background-color, #eee);
+            font-family: var(--interface-monospace--font-family, monospace);
+            font-size: 12px;
+            list-style: none;
+            margin-block-start: 0;
+            padding-inline-start: 0;
+            position: absolute;
+            z-index: 10000;
+            max-height: 75px;
+            padding: 10px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            top: 100%;
+            width: 100%;
+            word-break: break-word;
+        }
+
+        li {
+            padding: 2px;
+            border-bottom: 1px solid gray;
+            cursor: pointer;
+
+            &:last-of-type {
+                border: none;
+            }
+        }
+
+        span[role="status"] {
+            display: none !important;
+        }
+    }
 }
