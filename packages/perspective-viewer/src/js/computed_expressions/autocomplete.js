@@ -39,8 +39,6 @@ export function extract_partial_function(expression) {
  * @returns {Array}
  */
 export function get_autocomplete_suggestions(expression) {
-    if (!expression || expression.length === 0) return [];
-
     const lexer_result = ComputedExpressionColumnLexer.tokenize(expression);
 
     if (lexer_result.errors.length > 0) {
@@ -63,15 +61,16 @@ export function get_autocomplete_suggestions(expression) {
 
     const tokens = lexer_result.tokens;
     const suggestions = parser_instance.computeContentAssist("SuperExpression", tokens);
-
-    return suggestions.map(x => {
-        const str = x.nextTokenType.PATTERN.source;
-        if (str) {
+    const cleaned_suggestions = suggestions
+        .filter(x => typeof x.nextTokenType.PATTERN.source !== "undefined")
+        .map(suggestion => {
+            const str = suggestion.nextTokenType.PATTERN.source;
             if (str.indexOf("\\") == 0) {
                 return str.substring(1);
+            } else {
+                return str;
             }
-
-            return str;
-        }
-    });
+        });
+    cleaned_suggestions.unshift('"Column Name"');
+    return cleaned_suggestions;
 }

@@ -15,7 +15,7 @@ import template from "../html/computed_expression_editor.html";
 
 import style from "../less/computed_expression_editor.less";
 
-import {operator_tokens} from "./computed_expressions/lexer";
+import {function_tokens, operator_tokens} from "./computed_expressions/lexer";
 
 import {expression_to_computed_column_config} from "./computed_expressions/visitor";
 
@@ -38,9 +38,15 @@ class ComputedExpressionEditor extends HTMLElement {
         this._textarea_observer = new MutationObserver(this._resize_textarea.bind(this));
         this._awesomplete_exceptions = ["(", ")", ","];
         this._awesomplete = new Awesomplete(this._expression_input, {
+            autoFirst: true,
             minChars: 0,
+            maxItems: 30,
+            sort: false,
             filter: (suggestion, input) => {
-                // short-circuit when suggestion is a comma or open/end paren
+                if (input.length === 0) {
+                    return true;
+                }
+
                 if (input && this._awesomplete_exceptions.includes(suggestion.value) && !this._awesomplete_exceptions.includes(input[input.length - 1])) {
                     return true;
                 }
@@ -58,13 +64,25 @@ class ComputedExpressionEditor extends HTMLElement {
                 return suggestion.value.indexOf(partial) !== -1;
             },
             replace: text => {
+                if (text.value === ")") {
+                    this._expression_input.value += text.value;
+                    return;
+                }
+
                 const last_input = extract_partial_function(this._expression_input.value);
+                const add_parenthesis = function_tokens.includes(text.value);
+
                 if (!last_input) {
-                    this._expression_input.value += ` ${text}`;
+                    const space = this._expression_input.value.length > 0 ? " " : "";
+                    this._expression_input.value += `${space}${text}`;
                 } else {
                     const old_value = this._expression_input.value;
                     const new_value = old_value.substring(0, old_value.length - last_input.length) + text;
                     this._expression_input.value = new_value;
+                }
+
+                if (add_parenthesis) {
+                    this._expression_input.value += "(";
                 }
             }
         });
@@ -75,6 +93,7 @@ class ComputedExpressionEditor extends HTMLElement {
      * Observe the textarea when the editor is opened.
      */
     _observe_textarea() {
+        // Show functional options when opening editor
         this._awesomplete.close();
         this._textarea_observer.observe(this._expression_input, {
             attributes: true,
@@ -123,6 +142,9 @@ class ComputedExpressionEditor extends HTMLElement {
         this._clear_autocomplete_suggestions();
 
         if (expression.length === 0) {
+            // Show all suggestions
+            const suggestions = get_autocomplete_suggestions(expression);
+            this._set_autocomplete_suggestions(suggestions);
             this._clear_error_messages();
             this._enable_save_button();
             return;
@@ -285,6 +307,7 @@ class ComputedExpressionEditor extends HTMLElement {
      */
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_expression_editor.bind(this));
+        this._expression_input.addEventListener("focus", this._validate_expression.bind(this));
         this._expression_input.addEventListener("keyup", this._validate_expression.bind(this));
         this._expression_input.addEventListener("drop", this._capture_drop_data.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
