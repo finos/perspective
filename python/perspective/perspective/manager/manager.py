@@ -68,7 +68,7 @@ class PerspectiveManager(object):
         self._callback_cache = _PerspectiveCallBackCache()
         self._queue_process_callback = None
         self._lock = lock
-        
+
         # ipywidgets-style callbacks (e.g. external callbacks)
         self._update_handlers = CallbackDispatcher()
 
