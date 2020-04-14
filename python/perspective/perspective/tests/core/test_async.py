@@ -82,6 +82,7 @@ class TestAsync(object):
         global SENTINEL
         SENTINEL = AsyncSentinel(0)
 
+    @mark.skip
     def test_async_queue_process(self):
         tbl = Table({
             "a": int,

@@ -286,12 +286,31 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASMJS_MODE_FLAGS "")
 
 	if(PSP_CPP_BUILD)
-		# filesystem not required for Python, as we link to prebuilt arrow shared library
+		if (WIN32)
+			# BOOST_ROOT has been removed on Windows VMs in Azure:
+			#
+			# - https://github.com/actions/virtual-environments/issues/687
+			# - https://github.com/actions/virtual-environments/issues/319
+			# 
+			# `BOOST_ROOT` must be set in the environment, and policy CMP0074
+			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
+			cmake_policy(SET CMP0074 NEW)
+
+			if(DEFINED(ENV{BOOST_ROOT}))
+				set(Boost_NO_BOOST_CMAKE TRUE)
+
+				message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_INCLUDEDIR: $ENV{BOOST_INCLUDEDIR} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_LIBRARYDIR: $ENV{BOOST_LIBRARYDIR} ${ColorReset}")
+			endif()
+
+		endif()
+		# Filesystem required for Python build
 		find_package(Boost COMPONENTS filesystem)
 		if(NOT Boost_FOUND)
-			message("${Red}Boost could not be located${ColorReset}")
+			message("${Red}Boost filesystem could not be located${ColorReset}")
 		else()
-			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+			message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
 		endif()
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
@@ -309,6 +328,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
 		endforeach(warning)
+		# When linking against Boost on Azure, bcrypt fails to link:
+		# - https://github.com/microsoft/vcpkg/issues/4481
+		# - https://github.com/boostorg/uuid/issues/68
+		#add_definitions("-DBOOST_UUID_FORCE_AUTO_LINK")
 	else()
 		include_directories("/usr/local/include")
 	endif()

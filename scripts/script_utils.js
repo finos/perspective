@@ -224,7 +224,7 @@ exports.docker = function docker(image = "puppeteer") {
     const IMAGE = `perspective/${image}`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
         -ePACKAGE="${PACKAGE}"`;
-    let flags = IS_CI ? bash`--rm`: bash`--rm -it`;
+    let flags = IS_CI ? bash`--rm` : bash`--rm -it`;
 
     if (IS_MANYLINUX) {
         console.log(`-- Using manylinux build`);
