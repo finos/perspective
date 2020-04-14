@@ -37,7 +37,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this._register_callbacks();
         this._textarea_observer = new MutationObserver(this._resize_textarea.bind(this));
         this._awesomplete_exceptions = ["(", ")", ","];
-        this._awesomplete = new Awesomplete(this._expression_input, {
+        this._awesomplete = new Awesomplete(this._expression_editor._textarea, {
             autoFirst: true,
             minChars: 0,
             maxItems: 30,
@@ -65,24 +65,25 @@ class ComputedExpressionWidget extends HTMLElement {
             },
             replace: text => {
                 if (text.value === ")") {
-                    this._expression_input.value += text.value;
+                    this._expression_editor._textarea.value += text.value;
+                    this._enable_save_button();
                     return;
                 }
 
-                const last_input = extract_partial_function(this._expression_input.value);
+                const last_input = extract_partial_function(this._expression_editor._textarea.value);
                 const add_parenthesis = function_tokens.includes(text.value);
 
                 if (!last_input) {
-                    const space = this._expression_input.value.length > 0 ? " " : "";
-                    this._expression_input.value += `${space}${text}`;
+                    const space = this._expression_editor._textarea.value.length > 0 ? " " : "";
+                    this._expression_editor._textarea.value += `${space}${text}`;
                 } else {
-                    const old_value = this._expression_input.value;
+                    const old_value = this._expression_editor._textarea.value;
                     const new_value = old_value.substring(0, old_value.length - last_input.length) + text;
-                    this._expression_input.value = new_value;
+                    this._expression_editor._textarea.value = new_value;
                 }
 
                 if (add_parenthesis) {
-                    this._expression_input.value += "(";
+                    this._expression_editor._textarea.value += "(";
                 }
 
                 // Clicking on a partial can never complete the expression,
@@ -98,7 +99,7 @@ class ComputedExpressionWidget extends HTMLElement {
      */
     _observe_textarea() {
         this._awesomplete.close();
-        this._textarea_observer.observe(this._expression_input, {
+        this._textarea_observer.observe(this._expression_editor._textarea, {
             attributes: true,
             attributeFilter: ["style"]
         });
@@ -127,7 +128,7 @@ class ComputedExpressionWidget extends HTMLElement {
                 const parsed = JSON.parse(data);
                 if (Array.isArray(parsed) && parsed.length > 4) {
                     event.preventDefault();
-                    this._expression_input.value += `"${parsed[0]}"`;
+                    this._expression_editor._textarea.value += `"${parsed[0]}"`;
                 }
             } catch (e) {
                 // regular text, don't do anything as browser will handle
@@ -140,7 +141,7 @@ class ComputedExpressionWidget extends HTMLElement {
     // Expression actions
     @throttlePromise
     async _validate_expression() {
-        const expression = this._expression_input.value;
+        const expression = this._expression_editor._textarea.value;
 
         this._clear_autocomplete_suggestions();
 
@@ -221,7 +222,7 @@ class ComputedExpressionWidget extends HTMLElement {
     }
 
     _save_expression() {
-        const expression = this._expression_input.value;
+        const expression = this._expression_editor._textarea.value;
         const parsed_expression = this._parsed_expression || [];
 
         const event = new CustomEvent("perspective-computed-expression-save", {
@@ -237,16 +238,15 @@ class ComputedExpressionWidget extends HTMLElement {
     }
 
     // UI actions
-    _clear_expression_input() {
-        const input = this._expression_input;
-        input.value = "";
+    _clear_expression_editor() {
+        this._expression_editor._textarea.value = "";
     }
 
     _close_expression_widget() {
         this.style.display = "none";
         this._side_panel_actions.style.display = "flex";
         this._clear_error_messages();
-        this._clear_expression_input();
+        this._clear_expression_editor();
         // Disconnect the observer.
         this._textarea_observer.disconnect();
     }
@@ -289,7 +289,7 @@ class ComputedExpressionWidget extends HTMLElement {
     _register_ids() {
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
         this._close_button = this.shadowRoot.querySelector("#psp-computed-expression-widget-close");
-        this._expression_input = this.shadowRoot.querySelector("#psp-computed-expression-widget-input");
+        this._expression_editor = this.shadowRoot.querySelector("perspective-expression-editor");
         this._error = this.shadowRoot.querySelector("#psp-computed-expression-widget-error");
         this._save_button = this.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
     }
@@ -299,9 +299,9 @@ class ComputedExpressionWidget extends HTMLElement {
      */
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_expression_widget.bind(this));
-        this._expression_input.addEventListener("focus", this._validate_expression.bind(this));
-        this._expression_input.addEventListener("keyup", this._validate_expression.bind(this));
-        this._expression_input.addEventListener("drop", this._capture_drop_data.bind(this));
+        this._expression_editor._textarea.addEventListener("focus", this._validate_expression.bind(this));
+        this._expression_editor._textarea.addEventListener("keyup", this._validate_expression.bind(this));
+        this._expression_editor._textarea.addEventListener("drop", this._capture_drop_data.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }

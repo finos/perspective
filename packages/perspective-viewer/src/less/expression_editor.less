@@ -1,0 +1,62 @@
+/******************************************************************************
+*
+* Copyright (c) 2017, the Perspective Authors.
+*
+* This file is part of the Perspective library, distributed under the terms of
+* the Apache License 2.0.  The full license can be found in the LICENSE file.
+*
+*/
+
+@import "variables";
+
+:host {
+    textarea {
+        background: var(--background-color, none);
+        border-color: var(--inactive-color, #ccc);
+        box-sizing: border-box;
+        color: var(--color, #666666);
+        font-size: 12px;
+        font-family: var(--interface-monospace--font-family, monospace);
+        height: 75px;
+        margin-top: 5px;
+        padding-left: 5px;
+        resize: auto;
+        overflow: auto;
+        width: 100%;
+    }
+
+    .awesomplete {
+        ul {
+            background: var(--background-color, #eee);
+            box-sizing: border-box;
+            font-family: var(--interface-monospace--font-family, monospace);
+            font-size: 12px;
+            list-style: none;
+            margin-block-start: 0;
+            padding-inline-start: 0;
+            position: absolute;
+            z-index: 10000;
+            max-height: 75px;
+            padding: 10px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            top: 100%;
+            word-break: break-word;
+            width: 100%;
+        }
+
+        li {
+            padding: 2px;
+            border-bottom: 1px solid gray;
+            cursor: pointer;
+
+            &:last-of-type {
+                border: none;
+            }
+        }
+
+        span[role="status"] {
+            display: none !important;
+        }
+    }
+}
