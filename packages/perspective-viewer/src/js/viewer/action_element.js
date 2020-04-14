@@ -98,16 +98,11 @@ export class ActionElement extends DomElement {
      *
      * @param {*} event
      */
-    _open_computed_expression_editor(event) {
+    _open_computed_expression_widget(event) {
         event.stopImmediatePropagation();
-        if (this._computed_expression_editor.expressions.length == 0) {
-            this._computed_expression_editor._disable_remove_button();
-        } else {
-            this._computed_expression_editor._enable_remove_button();
-        }
-        this._computed_expression_editor.style.display = "flex";
+        this._computed_expression_widget.style.display = "flex";
         this._side_panel_actions.style.display = "none";
-        this._computed_expression_editor._observe_textarea();
+        this._computed_expression_widget._observe_textarea();
     }
 
     /**
@@ -136,7 +131,7 @@ export class ActionElement extends DomElement {
     async _type_check_computed_expression(event) {
         const parsed = event.detail.parsed_expression || [];
         if (parsed.length === 0) {
-            this._computed_expression_editor._type_check_expression({});
+            this._computed_expression_widget._type_check_expression({});
             return;
         }
         const functions = {};
@@ -152,7 +147,7 @@ export class ActionElement extends DomElement {
             }
         }
 
-        this._computed_expression_editor._type_check_expression(schema, expected_types);
+        this._computed_expression_widget._type_check_expression(schema, expected_types);
     }
 
     /**
@@ -341,12 +336,12 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_editor.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
+        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_widget.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
         this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
         this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));

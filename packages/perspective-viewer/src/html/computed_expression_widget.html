@@ -7,17 +7,16 @@ the Apache License 2.0.  The full license can be found in the LICENSE file.
 
 -->
 
-<template id="perspective-computed-expression-editor">
+<template id="perspective-computed-expression-widget">
     <div id="psp-expression__body">
         <div class="psp-expression__container">
-            <span id="psp-expression-close" aria-label="Close Expression Editor">&times;</span>
+            <span id="psp-expression-close" aria-label="Close Expression Widget">&times;</span>
             <div class="psp-expression__content psp-expression__content--nomargin" id="psp-expression-content">
                 <textarea placeholder="Write an expression" autocomplete="off" id="psp-expression-input"></textarea>
                 <div class="psp-expression__label psp-expression__error" id="psp-expression-error"></div>
             </div>
         </div>
         <div id="psp-expression-actions">
-            <button id="psp-expression-button-remove" class="psp-expression__button" disabled>Remove All</button>
             <button id="psp-expression-button-save" class="psp-expression__button" disabled>Save</button>
         </div>
     </div>

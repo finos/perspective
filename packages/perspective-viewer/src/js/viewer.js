@@ -13,7 +13,7 @@ import "./polyfill.js";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
-import "./computed_expression_editor.js";
+import "./computed_expression_widget.js";
 
 import template from "../html/viewer.html";
 
@@ -187,8 +187,8 @@ class PerspectiveViewer extends ActionElement {
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._computed_expression_editor.style.display !== "none") {
-                this._computed_expression_editor._close_expression_editor();
+            if (this._computed_expression_widget.style.display !== "none") {
+                this._computed_expression_widget._close_expression_widget();
             }
             if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
                 // Remove computed columns from the DOM, and reset the config

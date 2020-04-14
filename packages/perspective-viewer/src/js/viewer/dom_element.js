@@ -475,7 +475,7 @@ export class DomElement extends PerspectiveElement {
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
         this._add_computed_expression_button = this.shadowRoot.querySelector("#add-computed-expression");
-        this._computed_expression_editor = this.shadowRoot.querySelector("perspective-computed-expression-editor");
+        this._computed_expression_widget = this.shadowRoot.querySelector("perspective-computed-expression-widget");
         this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
         this._drop_target = this.shadowRoot.querySelector("#drop_target");
         this._config_button = this.shadowRoot.querySelector("#config_button");
