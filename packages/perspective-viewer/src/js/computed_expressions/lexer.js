@@ -383,12 +383,12 @@ tokens.forEach(t => {
     vocabulary[t.name] = t;
 });
 
-const lexer = new Lexer(tokens, {
+export const ComputedExpressionColumnLexer = new Lexer(tokens, {
     errorMessageProvider: PerspectiveLexerErrorMessage
 });
 
 export const lex = function(input) {
-    const result = lexer.tokenize(input);
+    const result = ComputedExpressionColumnLexer.tokenize(input);
 
     if (result.errors.length > 0) {
         let message = result.errors.map(e => e.message);

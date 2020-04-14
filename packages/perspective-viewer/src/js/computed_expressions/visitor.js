@@ -10,8 +10,8 @@ import {lex} from "./lexer";
 import {ComputedExpressionColumnParser} from "./parser";
 import {COMPUTED_FUNCTION_FORMATTERS} from "./formatter";
 
-const parser = new ComputedExpressionColumnParser([]);
-const base_visitor = parser.getBaseCstVisitorConstructor();
+export const parser_instance = new ComputedExpressionColumnParser([]);
+const base_visitor = parser_instance.getBaseCstVisitorConstructor();
 
 export class ComputedExpressionColumnVisitor extends base_visitor {
     constructor() {
@@ -273,12 +273,12 @@ export const expression_to_computed_column_config = function(expression) {
     const lex_result = lex(expression);
 
     // calling `parser.input` resets state.
-    parser.input = lex_result.tokens;
+    parser_instance.input = lex_result.tokens;
 
-    const cst = parser.SuperExpression();
+    const cst = parser_instance.SuperExpression();
 
-    if (parser.errors.length > 0) {
-        let message = parser.errors.map(e => e.message);
+    if (parser_instance.errors.length > 0) {
+        let message = parser_instance.errors.map(e => e.message);
         throw new Error(`${message.join("\n")}`);
     }
 
