@@ -13,7 +13,8 @@ import "./polyfill.js";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
-import "./computed_expression_widget.js";
+import "./expression-editor.js";
+import "./computed_expressions/widget.js";
 
 import template from "../html/viewer.html";
 

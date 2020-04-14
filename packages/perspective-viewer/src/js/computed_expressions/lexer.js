@@ -16,17 +16,22 @@ export const vocabulary = {};
  * - OperatorTokenType: operators that require left and right-hand side operands
  * - FunctionTokenType: operators that have 1...n comma separated parameters.
  */
-const OperatorTokenType = createToken({
+export const OperatorTokenType = createToken({
     name: "OperatorTokenType",
     pattern: Lexer.NA
 });
 
-const FunctionTokenType = createToken({
+export const FunctionTokenType = createToken({
     name: "FunctionTokenType",
     pattern: Lexer.NA
 });
 
-const UpperLowerCaseTokenType = createToken({
+export const ColumnNameTokenType = createToken({
+    name: "ColumnNameTokenType",
+    pattern: Lexer.NA
+});
+
+export const UpperLowerCaseTokenType = createToken({
     name: "UpperLowerTokenType",
     pattern: /(uppercase|lowercase)/
 });
@@ -59,7 +64,8 @@ const match_column_name = function(string, start_offset) {
 export const ColumnName = createToken({
     name: "columnName",
     pattern: {exec: match_column_name},
-    line_breaks: false
+    line_breaks: false,
+    categories: [ColumnNameTokenType]
 });
 
 // Allow users to specify custom names using `AS`
@@ -326,8 +332,7 @@ export const Comma = createToken({
 // Whitespace
 export const Whitespace = createToken({
     name: "whitespace",
-    pattern: /\s+/,
-    group: Lexer.SKIPPED
+    pattern: /\s+/
 });
 
 // Order of tokens is important
@@ -410,6 +415,17 @@ export const lex = function(input) {
         let message = result.errors.map(e => e.message);
         throw new Error(`${message.join("\n")}`);
     }
+
+    // Remove whitespace tokens
+    const cleaned_tokens = [];
+
+    for (const token of result.tokens) {
+        if (token.tokenType.name !== "whitespace") {
+            cleaned_tokens.push(token);
+        }
+    }
+
+    result.tokens = cleaned_tokens;
 
     return result;
 };

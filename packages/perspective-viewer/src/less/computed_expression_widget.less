@@ -41,6 +41,27 @@
         }
     }
 
+    .psp-computed-expression-widget__action {
+        align-items: center;
+        display: flex;
+
+        span#psp-computed-expression-widget-close {
+            color: #999;
+            font-family: var(--column-add--font-family,inherit);
+            font-size: 18px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        span#psp-computed-expression-widget-title {
+            font-size: 12px;
+            color: var(--color, @darkgray);
+            margin-left: 20px;
+        }
+    }
+
     .psp-computed-expression-widget__content {
         align-items: center;
         display: flex;
@@ -63,28 +84,7 @@
         margin-top: 12px;
     }
 
-    span#psp-computed-expression-widget-close {
-        color: @darkgray;
-        padding-left: 3px;
 
-        &:hover {
-            cursor: pointer;
-        }
-    }
-
-    textarea#psp-computed-expression-widget-input {
-        background: var(--background-color, none);
-        border-color: var(--inactive-color, #ccc);
-        color: var(--color, #666666);
-        font-size: 12px;
-        font-family: var(--interface-monospace--font-family, monospace);
-        height: 75px;
-        margin-top: 5px;
-        padding-left: 5px;
-        resize: auto;
-        overflow: auto;
-        width: 100%;
-    }
 
     .psp-computed-expression-widget__label {
         color: var(--color, darkgray);
@@ -153,40 +153,6 @@
                 background: #0160b1;
                 border-bottom-color: #014986;
             }
-        }
-    }
-
-    .awesomplete {
-        ul {
-            background: var(--background-color, #eee);
-            font-family: var(--interface-monospace--font-family, monospace);
-            font-size: 12px;
-            list-style: none;
-            margin-block-start: 0;
-            padding-inline-start: 0;
-            position: absolute;
-            z-index: 10000;
-            max-height: 75px;
-            padding: 10px;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            top: 100%;
-            width: 100%;
-            word-break: break-word;
-        }
-
-        li {
-            padding: 2px;
-            border-bottom: 1px solid gray;
-            cursor: pointer;
-
-            &:last-of-type {
-                border: none;
-            }
-        }
-
-        span[role="status"] {
-            display: none !important;
         }
     }
 }

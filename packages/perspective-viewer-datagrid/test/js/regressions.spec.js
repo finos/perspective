@@ -47,7 +47,13 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-expression").click(), viewer);
-                    await page.shadow_type('length("y") as "new_cc"', "perspective-viewer", "perspective-computed-expression-widget", "#psp-computed-expression-widget-input");
+                    await page.shadow_type(
+                        'length("y") as "new_cc"',
+                        "perspective-viewer",
+                        "perspective-computed-expression-widget",
+                        "perspective-expression-editor",
+                        ".perspective-expression-editor__edit_area"
+                    );
                     await page.evaluate(element => {
                         const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
                         const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");

@@ -59,8 +59,18 @@ export function get_autocomplete_suggestions(expression) {
         }
     }
 
-    const tokens = lexer_result.tokens;
-    const suggestions = parser_instance.computeContentAssist("SuperExpression", tokens);
+    // Remove whitespace tokens
+    const cleaned_tokens = [];
+
+    for (const token of lexer_result.tokens) {
+        if (token.tokenType.name !== "whitespace") {
+            cleaned_tokens.push(token);
+        }
+    }
+
+    lexer_result.tokens = cleaned_tokens;
+
+    const suggestions = parser_instance.computeContentAssist("SuperExpression", lexer_result.tokens);
     const cleaned_suggestions = suggestions
         .filter(x => typeof x.nextTokenType.PATTERN.source !== "undefined")
         .map(suggestion => {
@@ -71,6 +81,5 @@ export function get_autocomplete_suggestions(expression) {
                 return str;
             }
         });
-    cleaned_suggestions.unshift('"Column Name"');
     return cleaned_suggestions;
 }

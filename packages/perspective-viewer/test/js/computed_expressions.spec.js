@@ -23,7 +23,7 @@ const add_computed_expression = async (page, expression) => {
     const viewer = await page.$("perspective-viewer");
     await page.waitForSelector("perspective-viewer:not([updating])");
     await page.shadow_click("perspective-viewer", "#add-computed-expression");
-    await page.shadow_type(expression, "perspective-viewer", "perspective-computed-expression-widget", "#psp-computed-expression-widget-input");
+    await page.shadow_type(expression, "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
     await page.evaluate(element => {
         const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
         const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
@@ -57,7 +57,13 @@ utils.with_server({}, () => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
-                await page.shadow_type('"Sales" + ("Profit" * "Quantity") as "new column"', "perspective-viewer", "perspective-computed-expression-widget", "#psp-computed-expression-widget-input");
+                await page.shadow_type(
+                    '"Sales" + ("Profit" * "Quantity") as "new column"',
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
@@ -74,7 +80,8 @@ utils.with_server({}, () => {
                     '"Sales" + ("Profit" * "Quantity") as "new column"\n'.repeat(10),
                     "perspective-viewer",
                     "perspective-computed-expression-widget",
-                    "#psp-computed-expression-widget-input"
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
                 );
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
