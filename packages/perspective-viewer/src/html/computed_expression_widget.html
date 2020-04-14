@@ -8,16 +8,16 @@ the Apache License 2.0.  The full license can be found in the LICENSE file.
 -->
 
 <template id="perspective-computed-expression-widget">
-    <div id="psp-expression__body">
-        <div class="psp-expression__container">
-            <span id="psp-expression-close" aria-label="Close Expression Widget">&times;</span>
-            <div class="psp-expression__content psp-expression__content--nomargin" id="psp-expression-content">
-                <textarea placeholder="Write an expression" autocomplete="off" id="psp-expression-input"></textarea>
-                <div class="psp-expression__label psp-expression__error" id="psp-expression-error"></div>
+    <div class="psp-computed-expression-widget__body psp-computed-expression-widget__container">
+        <div class="psp-computed-expression-widget__container">
+            <span id="psp-computed-expression-widget-close" aria-label="Close Computed Expression Widget">&times;</span>
+            <div class="psp-computed-expression-widget__content psp-computed-expression-widget__content--nomargin" id="psp-computed-expression-widget-content">
+                <textarea placeholder="Write an expression" autocomplete="off" id="psp-computed-expression-widget-input"></textarea>
+                <div class="psp-computed-expression-widget__label psp-computed-expression-widget__error" id="psp-computed-expression-widget-error"></div>
             </div>
         </div>
-        <div id="psp-expression-actions">
-            <button id="psp-expression-button-save" class="psp-expression__button" disabled>Save</button>
+        <div id="psp-computed-expression-widget-actions">
+            <button id="psp-computed-expression-widget-button-save" class="psp-computed-expression-widget__button" disabled>Save</button>
         </div>
     </div>
 </template>

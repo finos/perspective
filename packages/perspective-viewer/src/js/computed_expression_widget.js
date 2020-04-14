@@ -84,6 +84,10 @@ class ComputedExpressionWidget extends HTMLElement {
                 if (add_parenthesis) {
                     this._expression_input.value += "(";
                 }
+
+                // Clicking on a partial can never complete the expression,
+                // as there is no column name autocompletion
+                this._disable_save_button();
             }
         });
         this._awesomplete.close();
@@ -93,7 +97,6 @@ class ComputedExpressionWidget extends HTMLElement {
      * Observe the textarea when the widget is opened.
      */
     _observe_textarea() {
-        // Show functional options when opening editor
         this._awesomplete.close();
         this._textarea_observer.observe(this._expression_input, {
             attributes: true,
@@ -285,11 +288,10 @@ class ComputedExpressionWidget extends HTMLElement {
      */
     _register_ids() {
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
-        this._close_button = this.shadowRoot.querySelector("#psp-expression-close");
-        this._expression_input = this.shadowRoot.querySelector("#psp-expression-input");
-        this._autocomplete_suggestions = this.shadowRoot.querySelector("#psp-expression-autocomplete-suggestions");
-        this._error = this.shadowRoot.querySelector("#psp-expression-error");
-        this._save_button = this.shadowRoot.querySelector("#psp-expression-button-save");
+        this._close_button = this.shadowRoot.querySelector("#psp-computed-expression-widget-close");
+        this._expression_input = this.shadowRoot.querySelector("#psp-computed-expression-widget-input");
+        this._error = this.shadowRoot.querySelector("#psp-computed-expression-widget-error");
+        this._save_button = this.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
     }
 
     /**
