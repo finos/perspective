@@ -36,6 +36,7 @@ export function extract_partial_function(expression) {
  * the next token.
  *
  * @param {String} expression
+ * @returns {Array}
  */
 export function get_autocomplete_suggestions(expression) {
     if (!expression || expression.length === 0) return [];
@@ -47,7 +48,7 @@ export function get_autocomplete_suggestions(expression) {
         // quotes). If true, the suggest function names that match.
         const partial_function = extract_partial_function(expression);
 
-        if (partial_function) {
+        if (partial_function && partial_function.indexOf('"') === -1) {
             // Remove open parenthesis and column name rule
             const all_functions = parser_instance
                 .computeContentAssist("SuperExpression", [])
@@ -56,7 +57,7 @@ export function get_autocomplete_suggestions(expression) {
             return all_functions.filter(str => str.startsWith(partial_function));
         } else {
             // Don't parse, error-ridden
-            return;
+            return [];
         }
     }
 
@@ -65,11 +66,11 @@ export function get_autocomplete_suggestions(expression) {
 
     return suggestions.map(x => {
         const str = x.nextTokenType.PATTERN.source;
-        if (!str) {
-            return;
-        } else if (str.indexOf("\\") == 0) {
-            return str.substring(1);
-        } else {
+        if (str) {
+            if (str.indexOf("\\") == 0) {
+                return str.substring(1);
+            }
+
             return str;
         }
     });

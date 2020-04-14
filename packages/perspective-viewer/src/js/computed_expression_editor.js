@@ -7,13 +7,19 @@
  *
  */
 
+import Awesomplete from "awesomplete";
+
 import {bindTemplate, throttlePromise} from "./utils.js";
 
 import template from "../html/computed_expression_editor.html";
 
 import style from "../less/computed_expression_editor.less";
 
+import {operator_tokens} from "./computed_expressions/lexer";
+
 import {expression_to_computed_column_config} from "./computed_expressions/visitor";
+
+import {extract_partial_function, get_autocomplete_suggestions} from "./computed_expressions/autocomplete";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -30,12 +36,46 @@ class ComputedExpressionEditor extends HTMLElement {
         this._register_ids();
         this._register_callbacks();
         this._textarea_observer = new MutationObserver(this._resize_textarea.bind(this));
+        this._awesomplete_exceptions = ["(", ")", ","];
+        this._awesomplete = new Awesomplete(this._expression_input, {
+            minChars: 0,
+            filter: (suggestion, input) => {
+                // short-circuit when suggestion is a comma or open/end paren
+                if (input && this._awesomplete_exceptions.includes(suggestion.value) && !this._awesomplete_exceptions.includes(input[input.length - 1])) {
+                    return true;
+                }
+
+                const partial = extract_partial_function(input);
+
+                if (operator_tokens.includes(suggestion.value)) {
+                    return true;
+                }
+
+                if (!partial || partial.length === 0 || partial.indexOf('"') !== -1) {
+                    return false;
+                }
+
+                return suggestion.value.indexOf(partial) !== -1;
+            },
+            replace: text => {
+                const last_input = extract_partial_function(this._expression_input.value);
+                if (!last_input) {
+                    this._expression_input.value += ` ${text}`;
+                } else {
+                    const old_value = this._expression_input.value;
+                    const new_value = old_value.substring(0, old_value.length - last_input.length) + text;
+                    this._expression_input.value = new_value;
+                }
+            }
+        });
+        this._awesomplete.close();
     }
 
     /**
      * Observe the textarea when the editor is opened.
      */
     _observe_textarea() {
+        this._awesomplete.close();
         this._textarea_observer.observe(this._expression_input, {
             attributes: true,
             attributeFilter: ["style"]
@@ -80,13 +120,13 @@ class ComputedExpressionEditor extends HTMLElement {
     async _validate_expression() {
         const expression = this._expression_input.value;
 
+        this._clear_autocomplete_suggestions();
+
         if (expression.length === 0) {
             this._clear_error_messages();
             this._enable_save_button();
             return;
         }
-
-        // FIXME: make the error UI an overlay like the render warning.
 
         try {
             // Use this just for validation. On anything short of a massive
@@ -94,10 +134,20 @@ class ComputedExpressionEditor extends HTMLElement {
             // share an instance of the parser throughout the viewer.
             this._parsed_expression = expression_to_computed_column_config(expression);
         } catch (e) {
-            const message = e.message ? e.message : JSON.stringify(e);
-            this._disable_save_button();
-            this._set_error_message(message, this._error);
-            return;
+            // If input is invalid, try to get suggestions
+            const suggestions = get_autocomplete_suggestions(expression);
+
+            if (suggestions && suggestions.length > 0) {
+                this._set_autocomplete_suggestions(suggestions);
+                this._clear_error_messages();
+                return;
+            } else {
+                this._clear_autocomplete_suggestions();
+                const message = e.message ? e.message : JSON.stringify(e);
+                this._disable_save_button();
+                this._set_error_message(message, this._error);
+                return;
+            }
         }
 
         // Take the parsed expression and type check it on the viewer,
@@ -176,6 +226,16 @@ class ComputedExpressionEditor extends HTMLElement {
         this._textarea_observer.disconnect();
     }
 
+    _set_autocomplete_suggestions(suggestions) {
+        this._awesomplete.list = suggestions;
+        this._awesomplete.evaluate();
+    }
+
+    _clear_autocomplete_suggestions() {
+        this._awesomplete.list = [];
+        this._awesomplete.close();
+    }
+
     // error message handlers
     _set_error_message(message, target) {
         if (target) {
@@ -214,6 +274,7 @@ class ComputedExpressionEditor extends HTMLElement {
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
         this._close_button = this.shadowRoot.querySelector("#psp-expression-close");
         this._expression_input = this.shadowRoot.querySelector("#psp-expression-input");
+        this._autocomplete_suggestions = this.shadowRoot.querySelector("#psp-expression-autocomplete-suggestions");
         this._error = this.shadowRoot.querySelector("#psp-expression-error");
         this._save_button = this.shadowRoot.querySelector("#psp-expression-button-save");
         this._remove_button = this.shadowRoot.querySelector("#psp-expression-button-remove");

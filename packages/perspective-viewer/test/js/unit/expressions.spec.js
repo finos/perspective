@@ -294,11 +294,11 @@ describe("Computed Expression Parser", function() {
         });
 
         it("Should return all operator types when last token is a column name", function() {
-            expect(get_autocomplete_suggestions("'Sales'")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "Is"]);
+            expect(get_autocomplete_suggestions("'Sales'")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
         });
 
         it("Should make no distinction between a last token with or without space", function() {
-            expect(get_autocomplete_suggestions("'Sales' ")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "Is"]);
+            expect(get_autocomplete_suggestions("'Sales' ")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
         });
     });
 });
