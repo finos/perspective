@@ -25,7 +25,7 @@ FROM debian:stretch AS stage_build
 # -------------------------------- STAGE BUILD  --------------------------------
 # ------------------------------------------------------------------------------
 
-ENV EMSCRIPTEN_SDK 1.38.46-upstream
+ENV EMSCRIPTEN_SDK 1.39.12
 ENV EMSDK_CHANGESET master
 
 # ------------------------------------------------------------------------------
@@ -432,8 +432,6 @@ RUN printf '#include <iostream>\n#include <emscripten.h>\n#include <emscripten/b
 
 RUN em++ --std=c++14 -O3 test.cpp -o test.js --closure 1
 RUN node test.js
-
-RUN embuilder.py build libc-extras
 
 RUN cd /
 RUN rm -fr /tmp/emscripten_test
