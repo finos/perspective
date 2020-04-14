@@ -11,9 +11,9 @@ import Awesomplete from "awesomplete";
 
 import {bindTemplate, throttlePromise} from "./utils.js";
 
-import template from "../html/computed_expression_editor.html";
+import template from "../html/computed_expression_widget.html";
 
-import style from "../less/computed_expression_editor.less";
+import style from "../less/computed_expression_widget.less";
 
 import {function_tokens, operator_tokens} from "./computed_expressions/lexer";
 
@@ -24,7 +24,7 @@ import {extract_partial_function, get_autocomplete_suggestions} from "./computed
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
 @bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
-class ComputedExpressionEditor extends HTMLElement {
+class ComputedExpressionWidget extends HTMLElement {
     constructor() {
         super();
 
@@ -90,7 +90,7 @@ class ComputedExpressionEditor extends HTMLElement {
     }
 
     /**
-     * Observe the textarea when the editor is opened.
+     * Observe the textarea when the widget is opened.
      */
     _observe_textarea() {
         // Show functional options when opening editor
@@ -156,6 +156,7 @@ class ComputedExpressionEditor extends HTMLElement {
             // share an instance of the parser throughout the viewer.
             this._parsed_expression = expression_to_computed_column_config(expression);
         } catch (e) {
+            this._disable_save_button();
             // If input is invalid, try to get suggestions
             const suggestions = get_autocomplete_suggestions(expression);
 
@@ -166,7 +167,6 @@ class ComputedExpressionEditor extends HTMLElement {
             } else {
                 this._clear_autocomplete_suggestions();
                 const message = e.message ? e.message : JSON.stringify(e);
-                this._disable_save_button();
                 this._set_error_message(message, this._error);
                 return;
             }
@@ -239,7 +239,7 @@ class ComputedExpressionEditor extends HTMLElement {
         input.value = "";
     }
 
-    _close_expression_editor() {
+    _close_expression_widget() {
         this.style.display = "none";
         this._side_panel_actions.style.display = "flex";
         this._clear_error_messages();
@@ -280,15 +280,6 @@ class ComputedExpressionEditor extends HTMLElement {
         this._save_button.removeAttribute("disabled");
     }
 
-    // Remove button handlers
-    _disable_remove_button() {
-        this._remove_button.toggleAttribute("disabled", true);
-    }
-
-    _enable_remove_button() {
-        this._remove_button.removeAttribute("disabled");
-    }
-
     /**
      * Map DOM IDs to class properties.
      */
@@ -299,14 +290,13 @@ class ComputedExpressionEditor extends HTMLElement {
         this._autocomplete_suggestions = this.shadowRoot.querySelector("#psp-expression-autocomplete-suggestions");
         this._error = this.shadowRoot.querySelector("#psp-expression-error");
         this._save_button = this.shadowRoot.querySelector("#psp-expression-button-save");
-        this._remove_button = this.shadowRoot.querySelector("#psp-expression-button-remove");
     }
 
     /**
      * Map callback functions to class properties.
      */
     _register_callbacks() {
-        this._close_button.addEventListener("click", this._close_expression_editor.bind(this));
+        this._close_button.addEventListener("click", this._close_expression_widget.bind(this));
         this._expression_input.addEventListener("focus", this._validate_expression.bind(this));
         this._expression_input.addEventListener("keyup", this._validate_expression.bind(this));
         this._expression_input.addEventListener("drop", this._capture_drop_data.bind(this));
