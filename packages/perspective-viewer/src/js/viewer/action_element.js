@@ -102,7 +102,7 @@ export class ActionElement extends DomElement {
         event.stopImmediatePropagation();
         this._computed_expression_widget.style.display = "flex";
         this._side_panel_actions.style.display = "none";
-        this._computed_expression_widget._observe_textarea();
+        this._computed_expression_widget._observe_editor();
     }
 
     /**
