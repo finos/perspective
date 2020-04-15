@@ -16,17 +16,22 @@ export const vocabulary = {};
  * - OperatorTokenType: operators that require left and right-hand side operands
  * - FunctionTokenType: operators that have 1...n comma separated parameters.
  */
-const OperatorTokenType = createToken({
+export const OperatorTokenType = createToken({
     name: "OperatorTokenType",
     pattern: Lexer.NA
 });
 
-const FunctionTokenType = createToken({
+export const FunctionTokenType = createToken({
     name: "FunctionTokenType",
     pattern: Lexer.NA
 });
 
-const UpperLowerCaseTokenType = createToken({
+export const ColumnNameTokenType = createToken({
+    name: "ColumnNameTokenType",
+    pattern: Lexer.NA
+});
+
+export const UpperLowerCaseTokenType = createToken({
     name: "UpperLowerTokenType",
     pattern: /(uppercase|lowercase)/
 });
@@ -59,7 +64,8 @@ const match_column_name = function(string, start_offset) {
 export const ColumnName = createToken({
     name: "columnName",
     pattern: {exec: match_column_name},
-    line_breaks: false
+    line_breaks: false,
+    categories: [ColumnNameTokenType]
 });
 
 // Allow users to specify custom names using `AS`

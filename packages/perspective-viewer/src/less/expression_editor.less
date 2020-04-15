@@ -13,7 +13,7 @@
 
     width: 100%;
 
-    div.perspective-expression-editor__edit_area {
+    .perspective-expression-editor__edit_area {
         @default-text-color: var(--color, #666666);
 
         background: var(--background-color, none);
@@ -21,13 +21,34 @@
         box-sizing: border-box;
         color: @default-text-color;
         font-size: 12px;
+        display: block;
         font-family: var(--interface-monospace--font-family, monospace);
         height: 75px;
         margin-top: 5px;
         padding-left: 5px;
         resize: auto;
         overflow: auto;
+        white-space: pre-wrap;
         width: 100%;
+
+        .psp-expression__column_name {
+            border: 1px solid black;
+            padding: 2px;
+        }
+
+        .psp-expression__function {
+            color: rgb(226, 165, 84);
+        }
+
+        .psp-expression__operator {
+            color: rgb(84, 105, 223);
+        }
+
+        .psp-expression__errored {
+            font-weight: 700;
+            color: rgb(245, 68, 68);
+            text-decoration: underline dotted rgb(245, 68, 68);
+        }
     }
 
     .awesomplete {

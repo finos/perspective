@@ -6,7 +6,6 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-// import {html, render} from "lit-html";
 
 import {bindTemplate} from "./utils.js";
 
@@ -20,49 +19,154 @@ import style from "../less/expression_editor.less";
 class PerspectiveExpressionEditor extends HTMLElement {
     constructor() {
         super();
+        this._value = "";
+        this._tokens = [];
     }
 
     connectedCallback() {
         this._register_ids();
         this._register_callbacks();
-        this._edit_area.value = "";
-    }
 
-    // Get/set/append content of editor
+        // `renderer` is a function that takes a string of content and
+        // returns an array of `lit-html` elements. The default renderer
+        // splits the string by space and returns `span` elements.
+        this.renderer = this._render_content;
+    }
 
     /**
-     * Returns the `children` of the edit area.
+     * Replace the render function of the editor instance with a custom
+     * renderer, which allows for full manipulation of the final rendered
+     * output of the editor.
+     *
+     * @param {Function} render_function a function that takes a string and
+     * returns an array of `lit-html` elements.
      */
-    get_html() {
-        return this._edit_area.children;
+    set_renderer(render_function) {
+        this.renderer = render_function;
     }
 
-    // TODO: these should all be replaced with a litHTML renderer that takes
-    // an AST and renders it into the correct values
-    set_html(value) {
-        this._edit_area.innerHTML = value;
+    /**
+     * Analyze the content in the editor and redraw the selection caret every
+     * time an `input` event is fired.
+     */
+    update_content() {
+        const selection = this.shadowRoot.getSelection();
+        const tokens = this.get_tokens(this._edit_area);
+
+        let anchor_idx = null;
+        let focus_idx = null;
+        let current_idx = 0;
+
+        for (const token of tokens) {
+            if (token.node === selection.anchorNode) {
+                anchor_idx = current_idx + selection.anchorOffset;
+            }
+
+            if (token.node === selection.focusNode) {
+                focus_idx = current_idx + selection.focusOffset;
+            }
+
+            current_idx += token.text.length;
+        }
+
+        this._value = tokens.map(t => t.text).join("");
+
+        if (this._value.length === 0) {
+            // Clear all input
+            //render(nothing, this._edit_area);
+            this.clear_content();
+        } else {
+            // Calls the editor's `renderer` function and adds it to the DOM
+            const markup = this.renderer(this._value);
+            this._edit_area.innerHTML = markup;
+            //render(markup, this._edit_area);
+        }
+
+        this.restore_selection(anchor_idx, focus_idx);
+        const event = new CustomEvent("perspective-expression-editor-rendered", {
+            detail: {
+                nodes: tokens.map(t => t.node),
+                text: this._value
+            }
+        });
+
+        this.dispatchEvent(event);
     }
 
-    append_html(value) {
-        this._edit_area.innerHTML += value;
+    clear_content() {
+        this._edit_area.innerHTML = "";
+    }
+
+    _render_content(content) {
+        return `<span class="psp-expression__fragment">${content}</span>`;
+    }
+
+    /**
+     * After editor content has been rendered, "un-reset" the caret position
+     * by returning it to where the user selected.
+     *
+     * @param {Number} absolute_anchor_idx
+     * @param {Number} absolute_focus_idx
+     */
+    restore_selection(absolute_anchor_idx, absolute_focus_idx) {
+        const selection = this.shadowRoot.getSelection();
+        const tokens = this.get_tokens(this._edit_area);
+        let anchor_node = this._edit_area;
+        let anchor_idx = 0;
+        let focus_node = this._edit_area;
+        let focus_idx = 0;
+        let current_idx = 0;
+
+        for (const token of tokens) {
+            const start_idx = current_idx;
+            const end_idx = start_idx + token.text.length;
+
+            if (start_idx <= absolute_anchor_idx && absolute_anchor_idx <= end_idx) {
+                anchor_node = token.node;
+                anchor_idx = absolute_anchor_idx - start_idx;
+            }
+
+            if (start_idx <= absolute_focus_idx && absolute_focus_idx <= end_idx) {
+                focus_node = token.node;
+                focus_idx = absolute_focus_idx - start_idx;
+            }
+
+            current_idx += token.text.length;
+        }
+
+        selection.setBaseAndExtent(anchor_node, anchor_idx, focus_node, focus_idx);
     }
 
     get_text() {
-        return this._edit_area.innerText.trim();
+        return this.get_tokens(this._edit_area)
+            .map(token => token.text)
+            .join("");
     }
 
-    set_text(text) {
-        this._edit_area.innerText = text;
+    get_tokens(element) {
+        const tokens = [];
+        for (const node of element.childNodes) {
+            if (node.nodeName === "BR") continue;
+            switch (node.nodeType) {
+                case Node.TEXT_NODE:
+                    tokens.push({text: node.nodeValue, node});
+                    break;
+                case Node.ELEMENT_NODE:
+                    tokens.splice(tokens.length, 0, ...this.get_tokens(node));
+                    break;
+                default:
+                    continue;
+            }
+        }
+        return tokens;
     }
 
-    append_text(text) {
-        this._edit_area.innerText += text;
-    }
-
-    // Event handlers
-
-    keydown() {
-        this._edit_area.value = this.get_text();
+    keydown(ev) {
+        if (ev.key === "Enter" || (this.get_text().length === 0 && ev.key === "Backspace")) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            return false;
+        }
     }
 
     /**
@@ -76,6 +180,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * Map callback functions to class properties.
      */
     _register_callbacks() {
+        this._edit_area.addEventListener("input", this.update_content.bind(this));
         this._edit_area.addEventListener("keydown", this.keydown.bind(this));
     }
 
