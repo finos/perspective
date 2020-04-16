@@ -7,7 +7,7 @@
  *
  */
 
-import {bindTemplate} from "./utils.js";
+import {bindTemplate, throttlePromise} from "./utils.js";
 
 import template from "../html/expression_editor.html";
 
@@ -49,9 +49,11 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * Analyze the content in the editor and redraw the selection caret every
      * time an `input` event is fired.
      */
+    @throttlePromise
     update_content() {
         const selection = this.shadowRoot.getSelection();
         const tokens = this.get_tokens(this._edit_area);
+        console.log(tokens);
 
         let anchor_idx = null;
         let focus_idx = null;
@@ -77,7 +79,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
             this.clear_content();
         } else {
             // Calls the editor's `renderer` function and adds it to the DOM
-            const markup = this.renderer(this._value);
+            const markup = this.renderer(this._value, tokens);
             this._edit_area.innerHTML = markup;
             //render(markup, this._edit_area);
         }
@@ -109,6 +111,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * @param {Number} absolute_focus_idx
      */
     restore_selection(absolute_anchor_idx, absolute_focus_idx) {
+        console.log(absolute_anchor_idx, absolute_focus_idx);
         const selection = this.shadowRoot.getSelection();
         const tokens = this.get_tokens(this._edit_area);
         let anchor_node = this._edit_area;
@@ -133,6 +136,8 @@ class PerspectiveExpressionEditor extends HTMLElement {
 
             current_idx += token.text.length;
         }
+
+        console.log(anchor_node, anchor_idx, focus_node, focus_idx);
 
         selection.setBaseAndExtent(anchor_node, anchor_idx, focus_node, focus_idx);
     }
@@ -161,11 +166,40 @@ class PerspectiveExpressionEditor extends HTMLElement {
         return tokens;
     }
 
+    keyup(ev) {
+        const event = new CustomEvent("perspective-expression-editor-keyup", {
+            detail: ev
+        });
+        this.dispatchEvent(event);
+    }
+
     keydown(ev) {
-        if (ev.key === "Enter" || (this.get_text().length === 0 && ev.key === "Backspace")) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            return false;
+        const event = new CustomEvent("perspective-expression-editor-keydown", {
+            detail: ev
+        });
+        this.dispatchEvent(event);
+    }
+
+    /**
+     * When a column/text is dragged and dropped into the textbox, read it
+     * properly.
+     *
+     * @param {*} event
+     */
+    _capture_drop_data(event) {
+        const data = event.dataTransfer.getData("text");
+        if (data !== "") {
+            try {
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed) && parsed.length > 4) {
+                    event.preventDefault();
+                    this._edit_area.textContent += `"${parsed[0]}"`;
+                }
+            } catch (e) {
+                // regular text, don't do anything as browser will handle
+            } finally {
+                this.update_content();
+            }
         }
     }
 
@@ -180,15 +214,9 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * Map callback functions to class properties.
      */
     _register_callbacks() {
+        this._edit_area.addEventListener("drop", this._capture_drop_data.bind(this));
         this._edit_area.addEventListener("input", this.update_content.bind(this));
+        this._edit_area.addEventListener("keyup", this.keyup.bind(this));
         this._edit_area.addEventListener("keydown", this.keydown.bind(this));
-    }
-
-    get placeholder() {
-        return this.getAttribute("placeholder");
-    }
-
-    set placeholder(value) {
-        this._edit_area.setAttribute("placeholder", value);
     }
 }

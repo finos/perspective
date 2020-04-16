@@ -332,8 +332,7 @@ export const Comma = createToken({
 // Whitespace
 export const Whitespace = createToken({
     name: "whitespace",
-    pattern: /\s+/,
-    group: Lexer.SKIPPED
+    pattern: /\s+/
 });
 
 // Order of tokens is important
@@ -416,6 +415,17 @@ export const lex = function(input) {
         let message = result.errors.map(e => e.message);
         throw new Error(`${message.join("\n")}`);
     }
+
+    // Remove whitespace tokens
+    const cleaned_tokens = [];
+
+    for (const token of result.tokens) {
+        if (token.tokenType.name !== "whitespace") {
+            cleaned_tokens.push(token);
+        }
+    }
+
+    result.tokens = cleaned_tokens;
 
     return result;
 };

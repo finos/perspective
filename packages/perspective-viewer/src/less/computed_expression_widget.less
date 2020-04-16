@@ -41,6 +41,27 @@
         }
     }
 
+    .psp-computed-expression-widget__action {
+        align-items: center;
+        display: flex;
+
+        span#psp-computed-expression-widget-close {
+            color: #999;
+            font-family: var(--column-add--font-family,inherit);
+            font-size: 18px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        span#psp-computed-expression-widget-title {
+            font-size: 12px;
+            color: var(--color, @darkgray);
+            margin-left: 20px;
+        }
+    }
+
     .psp-computed-expression-widget__content {
         align-items: center;
         display: flex;
@@ -63,14 +84,7 @@
         margin-top: 12px;
     }
 
-    span#psp-computed-expression-widget-close {
-        color: @darkgray;
-        padding-left: 3px;
 
-        &:hover {
-            cursor: pointer;
-        }
-    }
 
     .psp-computed-expression-widget__label {
         color: var(--color, darkgray);
