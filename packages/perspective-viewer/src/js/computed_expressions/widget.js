@@ -36,73 +36,6 @@ class ComputedExpressionWidget extends HTMLElement {
         this._register_callbacks();
         this._expression_editor.set_renderer(this.render_expression.bind(this));
         this._editor_observer = new MutationObserver(this._resize_editor.bind(this));
-        /**
-         * TODO: remove awesomeplete temporarily and replace with a lit-html
-         * template function that takes [tokens...] from chevrotain lexer and
-         * returns <div><span>...</div> containing class-tagged, highlighted,
-         * styled markup containing input.
-         *
-         * Requires ability to incrementally highlight, i.e. "Sales" + " should
-         * have the first two tokens highlighted, and the third partial should
-         * not be highlighted. Ultimately requires the ability to auto-suggest
-         * column names, function names, operators, etc. Might be easier to
-         * roll our own minimal autocomplete that is completely inline and
-         * attaches to a `.psp-expression__partial` class span:
-         *
-         * "Sa|
-         *  -------------
-         *  | Sales     |
-         *  | Saline    |
-         *  | Santorini |
-         *  -------------
-         *
-         * Best way to implement would be to write a single token-to-span
-         * renderer - because syntax highlighting of an entire expression is
-         * on a token-by-token basis, i.e. highlighting does not depend on the
-         * relation of one token to another but is rather entirely
-         * based on category of token, all we need to do is highlight a word
-         * when it has been successfully parsed as a token, and unhighlight it
-         * if it's been turned back into a partial token:
-         *
-         * +, -, sqrt() etc. are highlighted, but ab, sq, concat_ are not
-         * highlighted. Similarly, sqrt -> sqr will become unhighlighted as
-         * `sqr` is no longer a complete token.
-         *
-         * So:
-         *
-         * - Remove all autocomplete/validation functionality for now,
-         * with an eye towards rewriting validation and autocomplete to be more
-         * helpful in terms of messages and appearance.
-         *
-         * - Make sure the editor is as bare-bones as possible; provide good,
-         * clean APIs to get, set, and append content as text (an array of
-         * strings that contain the textContent of each individual span, joined
-         * with? or without spaces, as long as `array.join()` can be parsed by
-         * the parser) and as HTML, i.e. provide `HTMLElement` returning and
-         * consuming methods that elide the difficulty of manipulating the
-         * *complex* tree that is inside the editable div.
-         *
-         * - Implement all computed-column specific functionality in this
-         * file, or another file that is imported into this one. Do NOT
-         * implement column-specific functionality (like validation, type
-         * checking, etc.) in the editor itself - the editor is supposed to be
-         * abstract and not tied to a specific language or syntax.
-         *
-         * - Implement more robust state management inside this class - we are
-         * only concerned with the expression in the editor at the moment, which
-         * simplifies down the problem somewhat. We should be able to have a
-         * this._tokens = [] which tracks each chevrotain token present in the
-         * expression, and (for now) simply submits all tokens to be generated
-         * into HTML - token_to_markup(tokens) => render(markup, this._editor)
-         *
-         * - Re-implement some sort of token autocompletion using Chevrotain
-         * syntax suggestions - we need to make the suggestion method a little
-         * more robust and fault-tolerant, as well as perform some sort of
-         * markup on each token: add metadata to each token, perhaps? And then
-         * custom generate HTML for the actual dropdown box to enable a question
-         * mark icon that provides more detailed help tooltips?
-         *
-         */
     }
 
     /**
@@ -153,7 +86,6 @@ class ComputedExpressionWidget extends HTMLElement {
         const names = this._get_view_all_column_names();
 
         for (const token of lex_result.tokens) {
-            console.log(token);
             let class_name = "fragment";
             let content = token.image;
             if (tokenMatcher(token, FunctionTokenType)) {
@@ -303,8 +235,9 @@ class ComputedExpressionWidget extends HTMLElement {
         this._valid = true;
     }
 
-    _keydown(ev) {
+    _editor_keydown(ev) {
         if (ev.detail.key === "Enter") {
+            // Save the expression when enter is typed.
             ev.detail.preventDefault();
             ev.detail.stopPropagation();
             this._save_expression();
@@ -328,7 +261,7 @@ class ComputedExpressionWidget extends HTMLElement {
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_expression_widget.bind(this));
         this._expression_editor.addEventListener("perspective-expression-editor-rendered", this._validate_expression.bind(this));
-        this._expression_editor.addEventListener("perspective-expression-editor-keydown", this._keydown.bind(this));
+        this._expression_editor.addEventListener("perspective-expression-editor-keydown", this._editor_keydown.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }

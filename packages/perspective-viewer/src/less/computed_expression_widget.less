@@ -42,13 +42,22 @@
     }
 
     .psp-computed-expression-widget__action {
-        align-items: center;
-        display: flex;
+        margin-bottom: 10px;
 
         span#psp-computed-expression-widget-close {
             color: #999;
-            font-family: var(--column-add--font-family,inherit);
-            font-size: 18px;
+            display: flex;
+            font-family: var(--column-close--font-family, inherit);
+            font-size: 16px;
+            width: 20px;
+            min-width: 20px;
+            margin-top: -2px;
+            height: 0;
+
+            &:before {
+                font-feature-settings: "liga";
+                content: var(--column-close--before, "x");
+            }
 
             &:hover {
                 cursor: pointer;
@@ -56,9 +65,13 @@
         }
 
         span#psp-computed-expression-widget-title {
+            display: flex;
+            font-size: 12px;
+            display: flex;
+            margin-left: 34px;
+            margin-top: 3px;
             font-size: 12px;
             color: var(--color, @darkgray);
-            margin-left: 20px;
         }
     }
 

@@ -107,15 +107,25 @@ async function get_new_page() {
                     document.dispatchEvent(keyEvent);
                 }
 
+                function triggerInputEvent(element) {
+                    const event = new Event("input", {
+                        bubbles: true,
+                        cancelable: true
+                    });
+
+                    element.dispatchEvent(event);
+                }
+
                 for (let i = 0; i < content.length; i++) {
                     const char = content[i];
                     triggerKeyEvent(char, "keydown");
+                    triggerInputEvent(elem);
                     triggerKeyEvent(char, "keyUp");
-                    elem.value += char;
+                    elem.innerText += char;
                 }
 
-                if (elem.value !== content) {
-                    elem.value = content;
+                if (elem.innerText !== content) {
+                    elem.innerText = content;
                 }
             },
             content,
