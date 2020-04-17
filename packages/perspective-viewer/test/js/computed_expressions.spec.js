@@ -72,7 +72,39 @@ utils.with_server({}, () => {
                 }, viewer);
             });
 
-            test.capture("Typing a large expression in the textarea should work even when pushed down to page bottom.", async page => {
+            test.capture("Typing enter should save a valid expression", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    '"Sales" + ("Profit" * "Quantity") as "new column"',
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.press("Enter");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Typing enter should not save an invalid expression", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    "definitely not valid",
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.press("Enter");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.skip("Typing a large expression in the textarea should work even when pushed down to page bottom.", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");

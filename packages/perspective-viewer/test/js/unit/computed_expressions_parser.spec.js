@@ -287,7 +287,6 @@ describe("Computed Expression Parser", function() {
     describe("Autocomplete", function() {
         it("Should return all valid tokens for beginning expression if expression is empty", function() {
             expect(get_autocomplete_suggestions("")).toEqual([
-                '"Column Name"',
                 "(",
                 "sqrt",
                 "pow2",
@@ -324,11 +323,11 @@ describe("Computed Expression Parser", function() {
         });
 
         it("Should return all operator types when last token is a column name", function() {
-            expect(get_autocomplete_suggestions("'Sales'")).toEqual(['"Column Name"', "+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+            expect(get_autocomplete_suggestions("'Sales'")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
         });
 
         it("Should make no distinction between a last token with or without space", function() {
-            expect(get_autocomplete_suggestions("'Sales' ")).toEqual(['"Column Name"', "+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+            expect(get_autocomplete_suggestions("'Sales' ")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
         });
     });
 });
