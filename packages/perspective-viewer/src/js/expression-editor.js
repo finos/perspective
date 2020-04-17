@@ -20,7 +20,6 @@ class PerspectiveExpressionEditor extends HTMLElement {
     constructor() {
         super();
         this._value = "";
-        this._tokens = [];
     }
 
     connectedCallback() {
@@ -53,7 +52,17 @@ class PerspectiveExpressionEditor extends HTMLElement {
     update_content() {
         const selection = this.shadowRoot.getSelection();
         const tokens = this.get_tokens(this._edit_area);
-        console.log(tokens);
+
+        // Dispatch a `perspective-expression-editor-input` event,
+        // signifying that the input has reached the editor but has not
+        // been rendered into HTML yet
+        const input_event = new CustomEvent("perspective-expression-editor-input", {
+            detail: {
+                nodes: tokens.map(t => t.node),
+                text: this._edit_area.textContent
+            }
+        });
+        this.dispatchEvent(input_event);
 
         let anchor_idx = null;
         let focus_idx = null;
@@ -75,24 +84,25 @@ class PerspectiveExpressionEditor extends HTMLElement {
 
         if (this._value.length === 0) {
             // Clear all input
-            //render(nothing, this._edit_area);
             this.clear_content();
         } else {
             // Calls the editor's `renderer` function and adds it to the DOM
             const markup = this.renderer(this._value, tokens);
             this._edit_area.innerHTML = markup;
-            //render(markup, this._edit_area);
         }
 
         this.restore_selection(anchor_idx, focus_idx);
-        const event = new CustomEvent("perspective-expression-editor-rendered", {
+
+        // Dispatch `perspective-expression-editor-rendered`, which signifies
+        // that the editor UI has updated to its final state.
+        const rendered_event = new CustomEvent("perspective-expression-editor-rendered", {
             detail: {
                 nodes: tokens.map(t => t.node),
                 text: this._value
             }
         });
 
-        this.dispatchEvent(event);
+        this.dispatchEvent(rendered_event);
     }
 
     clear_content() {
@@ -111,7 +121,6 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * @param {Number} absolute_focus_idx
      */
     restore_selection(absolute_anchor_idx, absolute_focus_idx) {
-        console.log(absolute_anchor_idx, absolute_focus_idx);
         const selection = this.shadowRoot.getSelection();
         const tokens = this.get_tokens(this._edit_area);
         let anchor_node = this._edit_area;
@@ -137,15 +146,11 @@ class PerspectiveExpressionEditor extends HTMLElement {
             current_idx += token.text.length;
         }
 
-        console.log(anchor_node, anchor_idx, focus_node, focus_idx);
-
         selection.setBaseAndExtent(anchor_node, anchor_idx, focus_node, focus_idx);
     }
 
     get_text() {
-        return this.get_tokens(this._edit_area)
-            .map(token => token.text)
-            .join("");
+        return this._edit_area.textContent;
     }
 
     get_tokens(element) {
@@ -166,6 +171,12 @@ class PerspectiveExpressionEditor extends HTMLElement {
         return tokens;
     }
 
+    /**
+     * Dispatch a `perspective-expression-editor-keyup` event containing
+     * the original `keyup` event in `event.details`.
+     *
+     * @param {*} ev a `keyup` event.
+     */
     keyup(ev) {
         const event = new CustomEvent("perspective-expression-editor-keyup", {
             detail: ev
@@ -173,6 +184,12 @@ class PerspectiveExpressionEditor extends HTMLElement {
         this.dispatchEvent(event);
     }
 
+    /**
+     * Dispatch a `perspective-expression-editor-keydown` event containing
+     * the original `keyup` event in `event.details`.
+     *
+     * @param {*} ev a `keydown` event.
+     */
     keydown(ev) {
         const event = new CustomEvent("perspective-expression-editor-keydown", {
             detail: ev
@@ -182,11 +199,13 @@ class PerspectiveExpressionEditor extends HTMLElement {
 
     /**
      * When a column/text is dragged and dropped into the textbox, read it
-     * properly.
+     * properly and set selection state on the editor.
      *
      * @param {*} event
      */
     _capture_drop_data(event) {
+        this._edit_area.focus();
+        const selection = this.shadowRoot.getSelection();
         const data = event.dataTransfer.getData("text");
         if (data !== "") {
             try {
@@ -197,7 +216,12 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 }
             } catch (e) {
                 // regular text, don't do anything as browser will handle
+                // the `drop` event.
             } finally {
+                // When text is dropped into the editor, set the caret
+                // at the end of the editor's text content as the default
+                // selection fires with the caret at the beginning.
+                selection.setBaseAndExtent(selection.anchorNode, this._edit_area.textContent.length, selection.focusNode, this._edit_area.textContent.length);
                 this.update_content();
             }
         }
