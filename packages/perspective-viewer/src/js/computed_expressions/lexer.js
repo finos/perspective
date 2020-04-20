@@ -71,6 +71,7 @@ export const ColumnName = createToken({
 // Allow users to specify custom names using `AS`
 export const As = createToken({
     name: "as",
+    label: "Name new column as",
     pattern: /(AS|As|as)/,
     longer_alt: UpperLowerCaseTokenType
 });
@@ -79,66 +80,77 @@ export const As = createToken({
 
 export const Add = createToken({
     name: "add",
+    label: "+",
     pattern: /\+/,
     categories: [OperatorTokenType]
 });
 
 export const Subtract = createToken({
     name: "subtract",
+    label: "-",
     pattern: /-/,
     categories: [OperatorTokenType]
 });
 
 export const Multiply = createToken({
     name: "multiply",
+    label: "*",
     pattern: /\*/,
     categories: [OperatorTokenType]
 });
 
 export const Divide = createToken({
     name: "divide",
+    label: "/",
     pattern: /\//,
     categories: [OperatorTokenType]
 });
 
 export const Pow = createToken({
     name: "pow",
+    label: "x ^ y",
     pattern: /\^/,
     categories: [OperatorTokenType]
 });
 
 export const PercentOf = createToken({
     name: "percent_of",
+    label: "x % y",
     pattern: /\%/,
     categories: [OperatorTokenType]
 });
 
 export const Equals = createToken({
     name: "equals",
+    label: "x == y",
     pattern: /\==/,
     categories: [OperatorTokenType]
 });
 
 export const NotEquals = createToken({
     name: "not_equals",
+    label: "x != y",
     pattern: /\!=/,
     categories: [OperatorTokenType]
 });
 
 export const GreaterThan = createToken({
     name: "greater_than",
+    label: "x > y",
     pattern: /\>/,
     categories: [OperatorTokenType]
 });
 
 export const LessThan = createToken({
     name: "less_than",
+    label: "x < y",
     pattern: /\</,
     categories: [OperatorTokenType]
 });
 
 export const Is = createToken({
     name: "is",
+    label: "x is y",
     pattern: /\is/,
     categories: [OperatorTokenType]
 });
@@ -146,6 +158,7 @@ export const Is = createToken({
 // Function operators, in the format func("x")
 export const Sqrt = createToken({
     name: "sqrt",
+    label: "sqrt(x)",
     pattern: /sqrt/,
     categories: [FunctionTokenType]
     // TODO: add num_params so autocomplete only displays commas when needed
@@ -153,30 +166,35 @@ export const Sqrt = createToken({
 
 export const Pow2 = createToken({
     name: "pow2",
+    label: "x ^ 2",
     pattern: /pow2/,
     categories: [FunctionTokenType]
 });
 
 export const Abs = createToken({
     name: "abs",
+    label: "abs(x)",
     pattern: /abs/,
     categories: [FunctionTokenType]
 });
 
 export const Invert = createToken({
     name: "invert",
+    label: "1 / x",
     pattern: /invert/,
     categories: [FunctionTokenType]
 });
 
 export const Log = createToken({
     name: "log",
+    label: "log(x)",
     pattern: /log/,
     categories: [FunctionTokenType]
 });
 
 export const Exp = createToken({
     name: "exp",
+    label: "exp(x)",
     pattern: /exp/,
     categories: [FunctionTokenType]
 });
@@ -185,36 +203,42 @@ export const Exp = createToken({
 
 export const Bin10 = createToken({
     name: "bin10",
+    label: "Bucket x by 10",
     pattern: /bin10/,
     categories: [FunctionTokenType]
 });
 
 export const Bin100 = createToken({
     name: "bin100",
+    label: "Bucket x by 100",
     pattern: /bin100/,
     categories: [FunctionTokenType]
 });
 
 export const Bin1000 = createToken({
     name: "bin1000",
+    label: "Bucket x by 1000",
     pattern: /bin1000/,
     categories: [FunctionTokenType]
 });
 
 export const Bin10th = createToken({
     name: "bin10th",
+    label: "Bucket x by 1/10",
     pattern: /bin10th/,
     categories: [FunctionTokenType]
 });
 
 export const Bin100th = createToken({
     name: "bin100th",
+    label: "Bucket x by 1/100",
     pattern: /bin100th/,
     categories: [FunctionTokenType]
 });
 
 export const Bin1000th = createToken({
     name: "bin1000th",
+    label: "Bucket x by 1/1000",
     pattern: /bin1000th/,
     categories: [FunctionTokenType]
 });
@@ -223,30 +247,35 @@ export const Bin1000th = createToken({
 
 export const Length = createToken({
     name: "length",
+    label: "length(x)",
     pattern: /length/,
     categories: [FunctionTokenType]
 });
 
 export const Lowercase = createToken({
     name: "lowercase",
+    label: "lowercase(x)",
     pattern: /lowercase/,
     categories: [FunctionTokenType]
 });
 
 export const Uppercase = createToken({
     name: "uppercase",
+    label: "uppercase(x)",
     pattern: /uppercase/,
     categories: [FunctionTokenType]
 });
 
 export const ConcatComma = createToken({
     name: "concat_comma",
+    label: "Concat(x, y) with comma",
     pattern: /concat_comma/,
     categories: [FunctionTokenType]
 });
 
 export const ConcatSpace = createToken({
     name: "concat_space",
+    label: "Concat(x, y) with space",
     pattern: /concat_space/,
     categories: [FunctionTokenType]
 });
@@ -255,77 +284,91 @@ export const ConcatSpace = createToken({
 
 export const HourOfDay = createToken({
     name: "hour_of_day",
+    label: "Hour of day",
     pattern: /hour_of_day/,
     categories: [FunctionTokenType]
 });
 
 export const DayOfWeek = createToken({
     name: "day_of_week",
+    label: "Day of week",
     pattern: /day_of_week/,
     categories: [FunctionTokenType]
 });
 
 export const MonthOfYear = createToken({
     name: "month_of_year",
+    label: "Month of year",
     pattern: /month_of_year/,
     categories: [FunctionTokenType]
 });
 
 export const SecondBucket = createToken({
     name: "second_bucket",
+    label: "Bucket(x) by seconds",
     pattern: /second_bucket/,
     categories: [FunctionTokenType]
 });
 
 export const MinuteBucket = createToken({
     name: "minute_bucket",
+    label: "Bucket(x) by minutes",
     pattern: /minute_bucket/,
     categories: [FunctionTokenType]
 });
 
 export const HourBucket = createToken({
     name: "hour_bucket",
-    pattern: /hour_bucket/
+    label: "Bucket(x) by hours",
+    pattern: /hour_bucket/,
+    categories: [FunctionTokenType]
 });
 
 export const DayBucket = createToken({
     name: "day_bucket",
     pattern: /day_bucket/,
+    label: "Bucket(x) by day",
     categories: [FunctionTokenType]
 });
 
 export const WeekBucket = createToken({
     name: "week_bucket",
     pattern: /week_bucket/,
+    label: "Bucket(x) by week",
     categories: [FunctionTokenType]
 });
 
 export const MonthBucket = createToken({
     name: "month_bucket",
     pattern: /month_bucket/,
+    label: "Bucket(x) by month",
     categories: [FunctionTokenType]
 });
 
 export const YearBucket = createToken({
     name: "year_bucket",
     pattern: /year_bucket/,
+    label: "Bucket(x) by year",
     categories: [FunctionTokenType]
 });
 
 // Parenthesis
 export const LeftParen = createToken({
     name: "leftParen",
+    label: "(",
     pattern: /\(/
 });
 
 export const RightParen = createToken({
     name: "rightParen",
+    label: ")",
     pattern: /\)/
 });
 
 // Comma
 export const Comma = createToken({
     name: "comma",
+    label: ",",
     pattern: /,/
 });
 
@@ -408,6 +451,25 @@ export const ComputedExpressionColumnLexer = new Lexer(tokens, {
     errorMessageProvider: PerspectiveLexerErrorMessage
 });
 
+/**
+ * Return a list of tokens with whitespace tokens removed, as the parser and
+ * visitor do not support whitespace tokens (but they are needed for the
+ * expression editor to function correctly).
+ *
+ * @param {Array{IToken}} tokens
+ */
+export const clean_tokens = function(tokens) {
+    const cleaned_tokens = [];
+
+    for (const token of tokens) {
+        if (token.tokenType.name !== "whitespace") {
+            cleaned_tokens.push(token);
+        }
+    }
+
+    return cleaned_tokens;
+};
+
 export const lex = function(input) {
     const result = ComputedExpressionColumnLexer.tokenize(input);
 
@@ -417,15 +479,7 @@ export const lex = function(input) {
     }
 
     // Remove whitespace tokens
-    const cleaned_tokens = [];
-
-    for (const token of result.tokens) {
-        if (token.tokenType.name !== "whitespace") {
-            cleaned_tokens.push(token);
-        }
-    }
-
-    result.tokens = cleaned_tokens;
+    result.tokens = clean_tokens(result.tokens);
 
     return result;
 };

@@ -1,5 +1,6 @@
-import {ComputedExpressionColumnLexer} from "./lexer";
+import {clean_tokens, FunctionTokenType, OperatorTokenType} from "./lexer";
 import {parser_instance} from "./visitor";
+import {tokenMatcher} from "chevrotain";
 
 /**
  * Try to extract a function name from the expression by backtracking until
@@ -31,16 +32,49 @@ export function extract_partial_function(expression) {
 }
 
 /**
- * Given the text of a partial expression, use Chevrotain's
- * `computeContentAssist` to generate syntactically-correct suggestions for
- * the next token.
+ * Given a list of suggestions, transform each suggestion into an object with
+ * `label` and `value`.
  *
+ * @param {*} suggestions
+ */
+function _apply_metadata(suggestions) {
+    const suggestions_with_metadata = [];
+
+    for (const suggestion of suggestions) {
+        if (!suggestion.nextTokenType || !suggestion.nextTokenType.PATTERN.source) {
+            continue;
+        }
+
+        const label = suggestion.nextTokenType.LABEL;
+        let value = suggestion.nextTokenType.PATTERN.source.replace(/\\/g, "");
+
+        if (tokenMatcher(suggestion.nextTokenType, FunctionTokenType)) {
+            value = `${value}(`;
+        } else if (tokenMatcher(suggestion.nextTokenType, OperatorTokenType)) {
+            value = `${value} `;
+        }
+
+        suggestions_with_metadata.push({
+            label,
+            value
+        });
+    }
+
+    return suggestions_with_metadata;
+}
+
+/**
+ * Given a lexer result and the raw expression that was lexed,
+ * suggest syntactically possible tokens.
+ *
+ * @param {ILexingResult} lexer_result
  * @param {String} expression
  * @returns {Array}
  */
-export function get_autocomplete_suggestions(expression) {
-    const lexer_result = ComputedExpressionColumnLexer.tokenize(expression);
-
+export function get_autocomplete_suggestions(expression, lexer_result) {
+    if (!lexer_result) {
+        return _apply_metadata(parser_instance.computeContentAssist("SuperExpression", []));
+    }
     if (lexer_result.errors.length > 0) {
         // Check if the last token is partial AND not a column name (not in
         // quotes). If true, the suggest function names that match.
@@ -48,11 +82,8 @@ export function get_autocomplete_suggestions(expression) {
 
         if (partial_function && partial_function.indexOf('"') === -1) {
             // Remove open parenthesis and column name rule
-            const all_functions = parser_instance
-                .computeContentAssist("SuperExpression", [])
-                .slice(2)
-                .map(x => x.nextTokenType.PATTERN.source);
-            return all_functions.filter(str => str.startsWith(partial_function));
+            const suggestions = _apply_metadata(parser_instance.computeContentAssist("SuperExpression", []).slice(2));
+            return suggestions.filter(s => s.value.startsWith(partial_function));
         } else {
             // Don't parse, error-ridden
             return [];
@@ -60,26 +91,8 @@ export function get_autocomplete_suggestions(expression) {
     }
 
     // Remove whitespace tokens
-    const cleaned_tokens = [];
-
-    for (const token of lexer_result.tokens) {
-        if (token.tokenType.name !== "whitespace") {
-            cleaned_tokens.push(token);
-        }
-    }
-
-    lexer_result.tokens = cleaned_tokens;
+    lexer_result.tokens = clean_tokens(lexer_result.tokens);
 
     const suggestions = parser_instance.computeContentAssist("SuperExpression", lexer_result.tokens);
-    const cleaned_suggestions = suggestions
-        .filter(x => typeof x.nextTokenType.PATTERN.source !== "undefined")
-        .map(suggestion => {
-            const str = suggestion.nextTokenType.PATTERN.source;
-            if (str.indexOf("\\") == 0) {
-                return str.substring(1);
-            } else {
-                return str;
-            }
-        });
-    return cleaned_suggestions;
+    return _apply_metadata(suggestions);
 }

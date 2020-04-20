@@ -18,6 +18,7 @@ import {ComputedExpressionColumnLexer, ColumnNameTokenType, FunctionTokenType, O
 import {expression_to_computed_column_config} from "./visitor";
 
 import {tokenMatcher} from "chevrotain";
+import {get_autocomplete_suggestions, extract_partial_function} from "./autocomplete.js";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -46,6 +47,12 @@ class ComputedExpressionWidget extends HTMLElement {
             attributes: true,
             attributeFilter: ["style"]
         });
+
+        // Focus on the editor immediately
+        this._expression_editor.focus();
+
+        // Render the initial autocomplete - all functions + column names
+        this._render_initial_autocomplete();
     }
 
     /**
@@ -69,17 +76,33 @@ class ComputedExpressionWidget extends HTMLElement {
         throw new Error(`Cannot get column type for "${name}".`);
     }
 
-    render_expression(expression) {
-        if (expression.length === 0) {
-            this._clear_error();
-            return "";
-        }
+    /**
+     * Returns a list of objects from column names, suitable for rendering
+     * in the autocomplete widget.
+     */
+    _get_column_names() {
+        // label = what is shown in the autocomplete DOM
+        // value = what the fragment in the editor will be replaced with
+        return this._get_view_all_column_names().map(name => {
+            return {
+                label: name,
+                value: `"${name}"`
+            };
+        });
+    }
 
+    /**
+     * Given an expression string, render it into markup. Called only when the
+     * expression is not an empty string.
+     *
+     * @param {String} expression
+     */
+    render_expression(expression) {
+        this._clear_autocomplete();
         const lex_result = ComputedExpressionColumnLexer.tokenize(expression);
 
         if (lex_result.errors.length > 0) {
-            const message = lex_result.errors.map(e => (e.message ? e.message : JSON.stringify(e))).join("\n");
-            return this.render_error(expression, message);
+            return `<span class="psp-expression__errored">${expression}</span>`;
         }
 
         const output = [];
@@ -113,12 +136,19 @@ class ComputedExpressionWidget extends HTMLElement {
         return `<span class="psp-expression__errored">${expression}</span>`;
     }
 
-    // Expression actions
+    /**
+     * Validate the expression after the
+     * `perspective-expression-editor-rendered` has been fired. Fires on every
+     * event, even when the expression is an empty string.
+     * @param {*} ev
+     */
     @throttlePromise
     async _validate_expression(ev) {
+        this._clear_autocomplete();
         const expression = ev.detail.text;
 
         if (expression.length === 0) {
+            this._render_initial_autocomplete();
             this._clear_error();
             return;
         }
@@ -129,6 +159,39 @@ class ComputedExpressionWidget extends HTMLElement {
             // share an instance of the parser throughout the viewer.
             this._parsed_expression = expression_to_computed_column_config(expression);
         } catch (e) {
+            // Show autocomplete OR error, but not both
+            this._clear_error();
+            this._disable_save_button();
+
+            // Show the column name autocomplete if there is an open quote
+            // or open parenthesis. FIXME: this is too eager and should try to
+            // differentiate between open/close quotes, which needs lexer
+            // information - maybe step through tokens and generate the
+            // autocomplete that way?
+            const name_fragments = expression.match(/(["'])[\s\w()]*?$/);
+            const has_name_fragments = name_fragments && name_fragments.length > 0 && name_fragments[0] !== '" ';
+            const show_column_names = has_name_fragments || expression[expression.length - 1] === "(";
+
+            if (show_column_names) {
+                let fragment = "";
+                let suggestions = this._get_column_names();
+                if (has_name_fragments) {
+                    fragment = name_fragments[0].substring(1);
+                    suggestions = suggestions.filter(name => name.label.toLowerCase().startsWith(fragment.toLowerCase()));
+                }
+                this.render_autocomplete(expression, suggestions, true);
+                return;
+            } else {
+                const lex_result = ComputedExpressionColumnLexer.tokenize(expression);
+                const suggestions = get_autocomplete_suggestions(expression, lex_result);
+                if (suggestions.length > 0) {
+                    // Show autocomplete and not error box
+                    this.render_autocomplete(expression, suggestions);
+                    return;
+                }
+            }
+
+            // Expression is syntactically valid but unparsable
             const message = e.message ? e.message : JSON.stringify(e);
             this._set_error(message, this._error);
             return;
@@ -187,6 +250,75 @@ class ComputedExpressionWidget extends HTMLElement {
         this.dispatchEvent(event);
 
         this.expressions.push(expression);
+    }
+
+    // TODO: split out the autocomplete at some point
+    // TODO: make sure it only shows columns of the correct type
+    // TODO: separate column-name only autocomplete?
+    render_autocomplete(expression, suggestions, is_column_name) {
+        this._autocomplete_container.style.display = "block";
+        for (const suggestion of suggestions) {
+            const span = document.createElement("span");
+            if (!suggestion.label) {
+                continue;
+            }
+            span.textContent = suggestion.label;
+            span.classList.add("psp-computed-expression-widget__autocomplete--item");
+            if (is_column_name) {
+                span.classList.add("psp-computed-expression-widget__autocomplete--column-name");
+                span.classList.add(this._get_type(suggestion.label));
+            }
+            span.setAttribute("data-value", suggestion.value);
+            this._autocomplete_container.appendChild(span);
+        }
+    }
+
+    _clear_autocomplete() {
+        this._autocomplete_container.style.display = "none";
+        this._autocomplete_container.innerHTML = "";
+    }
+
+    _render_initial_autocomplete() {
+        this._clear_autocomplete();
+        const suggestions = get_autocomplete_suggestions("");
+        if (suggestions.length > 0) {
+            // Show autocomplete and not error box
+            this.render_autocomplete("", suggestions);
+            this.render_autocomplete("", this._get_column_names(), true);
+        }
+    }
+
+    _autocomplete_value_click(ev) {
+        if (ev.target && ev.target.matches("span.psp-computed-expression-widget__autocomplete--item")) {
+            const old_value = this._expression_editor.get_text();
+            const new_value = ev.target.getAttribute("data-value");
+            if (!new_value) {
+                return;
+            }
+            const last_input = extract_partial_function(old_value);
+
+            if (last_input && last_input !== '"') {
+                // replace the fragment with the full function/operator
+                const final_value = old_value.substring(0, old_value.length - last_input.length) + new_value;
+                this._expression_editor._edit_area.innerText = final_value;
+            } else {
+                // Check whether we are appending a column name
+                const quote_index = old_value.lastIndexOf('"');
+                if (quote_index > -1 && new_value.indexOf('"') != -1) {
+                    const final_value = old_value.substring(0, quote_index) + new_value;
+                    this._expression_editor._edit_area.innerText = final_value;
+                } else {
+                    // Append the autocomplete value
+                    const space = old_value.length > 0 && old_value.indexOf('"') === -1 ? " " : "";
+                    this._expression_editor._edit_area.innerText += `${space}${new_value}`;
+                }
+            }
+
+            this._expression_editor._reset_selection();
+            this._expression_editor.update_content();
+
+            this._clear_autocomplete();
+        }
     }
 
     // UI actions
@@ -251,6 +383,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
         this._close_button = this.shadowRoot.querySelector("#psp-computed-expression-widget-close");
         this._expression_editor = this.shadowRoot.querySelector("perspective-expression-editor");
+        this._autocomplete_container = this.shadowRoot.querySelector(".psp-computed-expression-widget__autocomplete");
         this._error = this.shadowRoot.querySelector("#psp-computed-expression-widget-error");
         this._save_button = this.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
     }
@@ -262,6 +395,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this._close_button.addEventListener("click", this._close_expression_widget.bind(this));
         this._expression_editor.addEventListener("perspective-expression-editor-rendered", this._validate_expression.bind(this));
         this._expression_editor.addEventListener("perspective-expression-editor-keydown", this._editor_keydown.bind(this));
+        this._autocomplete_container.addEventListener("click", this._autocomplete_value_click.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }
