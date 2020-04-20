@@ -9,6 +9,7 @@
 
 import {get_autocomplete_suggestions} from "../../../src/js/computed_expressions/autocomplete";
 import {expression_to_computed_column_config} from "../../../src/js/computed_expressions/visitor";
+import {ComputedExpressionColumnLexer} from "../../../src/js/computed_expressions/lexer";
 
 describe("Computed Expression Parser", function() {
     it("Should parse an operator notation expression", function() {
@@ -319,15 +320,31 @@ describe("Computed Expression Parser", function() {
         });
 
         it("Should return correct functions when function is at beginning of expression", function() {
-            expect(get_autocomplete_suggestions("c")).toEqual(["concat_comma", "concat_space"]);
+            const result = ComputedExpressionColumnLexer.tokenize("c");
+            expect(get_autocomplete_suggestions("c", result)).toEqual(["concat_comma", "concat_space"]);
+        });
+
+        it("Should return close parenthesis or comma inside a function", function() {
+            const result = ComputedExpressionColumnLexer.tokenize("concat_comma('Sales'");
+            expect(get_autocomplete_suggestions("concat_comma('Sales'", result)).toEqual([",", ")"]);
         });
 
         it("Should return all operator types when last token is a column name", function() {
-            expect(get_autocomplete_suggestions("'Sales'")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+            const result = ComputedExpressionColumnLexer.tokenize("'Sales'");
+            expect(get_autocomplete_suggestions("'Sales'", result)).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
         });
 
         it("Should make no distinction between a last token with or without space", function() {
-            expect(get_autocomplete_suggestions("'Sales' ")).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+            const result = ComputedExpressionColumnLexer.tokenize("'Sales' ");
+            expect(get_autocomplete_suggestions("'Sales' ", result)).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+        });
+
+        it("Should return functions based on substring, not beginsWith", function() {
+            const result = ComputedExpressionColumnLexer.tokenize("'rt' ");
+            expect(get_autocomplete_suggestions("'rt' ", result)).toEqual([
+                {label: "sqrt(x)", value: "sqrt"},
+                {label: "1 / x", value: "invert"}
+            ]);
         });
     });
 });

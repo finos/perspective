@@ -20,6 +20,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
     constructor() {
         super();
         this._value = "";
+        this._ignored_nodes = ["BR", "DIV"];
     }
 
     connectedCallback() {
@@ -83,10 +84,11 @@ class PerspectiveExpressionEditor extends HTMLElement {
         this._value = tokens.map(t => t.text).join("");
 
         if (this._value.length === 0) {
-            // Clear all input
+            // Clear input from the editor
             this.clear_content();
         } else {
-            // Calls the editor's `renderer` function and adds it to the DOM
+            // Calls the `renderer` to transform a text string to DOM tokens,
+            // but only when string.length > 0
             const markup = this.renderer(this._value, tokens);
             this._edit_area.innerHTML = markup;
         }
@@ -156,7 +158,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
     get_tokens(element) {
         const tokens = [];
         for (const node of element.childNodes) {
-            if (node.nodeName === "BR") continue;
+            if (this._ignored_nodes.includes(node.nodeName)) continue;
             switch (node.nodeType) {
                 case Node.TEXT_NODE:
                     tokens.push({text: node.nodeValue, node});
@@ -169,6 +171,10 @@ class PerspectiveExpressionEditor extends HTMLElement {
             }
         }
         return tokens;
+    }
+
+    focus() {
+        this._edit_area.focus();
     }
 
     /**
@@ -205,7 +211,6 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _capture_drop_data(event) {
         this._edit_area.focus();
-        const selection = this.shadowRoot.getSelection();
         const data = event.dataTransfer.getData("text");
         if (data !== "") {
             try {
@@ -221,10 +226,15 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 // When text is dropped into the editor, set the caret
                 // at the end of the editor's text content as the default
                 // selection fires with the caret at the beginning.
-                selection.setBaseAndExtent(selection.anchorNode, this._edit_area.textContent.length, selection.focusNode, this._edit_area.textContent.length);
+                this._reset_selection();
                 this.update_content();
             }
         }
+    }
+
+    _reset_selection() {
+        const selection = this.shadowRoot.getSelection();
+        selection.setBaseAndExtent(selection.anchorNode, this._edit_area.textContent.length, selection.focusNode, this._edit_area.textContent.length);
     }
 
     /**

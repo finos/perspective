@@ -100,14 +100,11 @@ export class ActionElement extends DomElement {
      */
     _open_computed_expression_widget(event) {
         event.stopImmediatePropagation();
-        this._computed_expression_widget.style.display = "flex";
-        this._side_panel_actions.style.display = "none";
-        this._computed_expression_widget._observe_editor();
-
-        // TODO: need a less hacky way to get perspective metadata from viewer
-        // to children of viewer
         this._computed_expression_widget._get_type = this._get_type.bind(this);
         this._computed_expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
+        this._computed_expression_widget._observe_editor();
+        this._computed_expression_widget.style.display = "flex";
+        this._side_panel_actions.style.display = "none";
     }
 
     /**
