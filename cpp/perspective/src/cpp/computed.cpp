@@ -11,6 +11,9 @@
 
 namespace perspective {
 
+t_computation::t_computation()
+    : m_name(INVALID_COMPUTED_FUNCTION) {};
+
 t_computation::t_computation(
     t_computed_function_name name,
     const std::vector<t_dtype>& input_types,
@@ -27,15 +30,87 @@ t_computed_column::get_computation(
             return computation;
         }
     }
-    PSP_COMPLAIN_AND_ABORT("Could not find computation.");
+
+    std::stringstream ss;
+    ss
+        << "Error: Could not find computation for function `" 
+        << computed_function_name_to_string(name)
+        << "` with input types: [ ";
+    for (t_dtype dtype : input_types) {
+        ss << "`" << get_dtype_descr(dtype) << "` ";
+    }
+    ss << "]" << std::endl;
+    std::cerr << ss.str();
+
+    // Return invalid computation instead of abort
+    t_computation invalid = t_computation(
+        INVALID_COMPUTED_FUNCTION, {}, DTYPE_NONE);
+    return invalid;
 };
+
+
+std::vector<t_dtype>
+t_computed_column::get_computation_input_types(
+    t_computed_function_name name) {
+        switch (name) {
+            case INVALID_COMPUTED_FUNCTION: return {};
+            case ADD:
+            case SUBTRACT:
+            case MULTIPLY:
+            case DIVIDE:
+            case POW:
+            case PERCENT_A_OF_B:
+            case INVERT:
+            case POW2:
+            case SQRT:
+            case ABS:
+            case LOG:
+            case EXP:
+            case BUCKET_10:
+            case BUCKET_100:
+            case BUCKET_1000:
+            case BUCKET_0_1:
+            case BUCKET_0_0_1:
+            case BUCKET_0_0_0_1: {
+                return {DTYPE_INT64, DTYPE_FLOAT64};
+            } break;
+            case UPPERCASE:
+            case LOWERCASE:
+            case LENGTH:
+            case CONCAT_SPACE:
+            case CONCAT_COMMA: {
+                return {DTYPE_STR};
+            };
+            case HOUR_OF_DAY:
+            case DAY_OF_WEEK:
+            case MONTH_OF_YEAR:
+            case SECOND_BUCKET:
+            case MINUTE_BUCKET:
+            case HOUR_BUCKET:
+            case DAY_BUCKET:
+            case WEEK_BUCKET:
+            case MONTH_BUCKET:
+            case YEAR_BUCKET: {
+                return {DTYPE_TIME, DTYPE_DATE};
+            };
+            case EQUALS:
+            case NOT_EQUALS:
+            case GREATER_THAN:
+            case LESS_THAN:
+            case IS: {
+                return {DTYPE_BOOL};
+            };
+        }
+    }
 
 #define GET_NUMERIC_COMPUTED_FUNCTION_1(TYPE)                                  \
     switch (computation.m_name) {                                              \
-        case POW: return computed_function::pow_##TYPE;                        \
+        case POW2: return computed_function::pow2_##TYPE;                      \
         case INVERT: return computed_function::invert_##TYPE;                  \
         case SQRT: return computed_function::sqrt_##TYPE;                      \
         case ABS: return computed_function::abs_##TYPE;                        \
+        case LOG: return computed_function::log_##TYPE;                        \
+        case EXP: return computed_function::exp_##TYPE;                        \
         case BUCKET_10: return computed_function::bucket_10_##TYPE;            \
         case BUCKET_100: return computed_function::bucket_100_##TYPE;          \
         case BUCKET_1000: return computed_function::bucket_1000_##TYPE;        \
@@ -106,7 +181,7 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         default: break;
     }
 
-    PSP_COMPLAIN_AND_ABORT("Invalid computation function");
+    PSP_COMPLAIN_AND_ABORT("Invalid computed function");
 }
 
 #define GET_COMPUTED_FUNCTION_2(DTYPE)                                         \
@@ -115,6 +190,7 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         case SUBTRACT: return computed_function::subtract<DTYPE>;              \
         case MULTIPLY: return computed_function::multiply<DTYPE>;              \
         case DIVIDE: return computed_function::divide<DTYPE>;                  \
+        case POW: return computed_function::pow<DTYPE>;                       \
         case PERCENT_A_OF_B: return computed_function::percent_of<DTYPE>;      \
         case EQUALS: return computed_function::equals<DTYPE>;                  \
         case NOT_EQUALS: return computed_function::not_equals<DTYPE>;          \
@@ -165,7 +241,7 @@ t_computed_column::get_computed_function_2(t_computation computation) {
         default: break;
     }
 
-    PSP_COMPLAIN_AND_ABORT("Could not find computation function for arity 2.");
+    PSP_COMPLAIN_AND_ABORT("Could not find computed function for arity 2.");
 }
 
 std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column> output_column)>
@@ -199,24 +275,16 @@ t_computed_column::get_computed_function_string_2(t_computation computation) {
         case CONCAT_SPACE: return computed_function::concat_space;
         case CONCAT_COMMA: return computed_function::concat_comma;
         default: PSP_COMPLAIN_AND_ABORT(
-            "Could not find computation function for arity 2, string.");
+            "Could not find computed function for arity 2, string.");
     }
 }
 
 void
 t_computed_column::apply_computation(
     const std::vector<std::shared_ptr<t_column>>& table_columns,
-    const std::vector<std::shared_ptr<t_column>>& flattened_columns,
     std::shared_ptr<t_column> output_column,
-    const std::vector<t_rlookup>& row_indices,
     t_computation computation) {
-    std::uint32_t end = row_indices.size();
-    if (end == 0) {
-        end = flattened_columns[0]->size();
-    }
-
-    output_column->reserve(end);
-
+    std::uint32_t end = table_columns[0]->size();
     auto arity = table_columns.size();
 
     std::function<t_tscalar(t_tscalar)> function_1;
@@ -253,24 +321,21 @@ t_computed_column::apply_computation(
     }
 
     for (t_uindex idx = 0; idx < end; ++idx) {
-        // iterate through row indices OR through all rows
-        t_uindex ridx = idx;
-        if (row_indices.size() > 0) {
-            ridx = row_indices[idx].m_idx;
-        }
-
-        // create args
+        bool skip_row = false;
         std::vector<t_tscalar> args;
         for (t_uindex x = 0; x < arity; ++x) {
-            t_tscalar t = flattened_columns[x]->get_scalar(idx);
+            t_tscalar t = table_columns[x]->get_scalar(idx);
             if (!t.is_valid()) {
-                t = table_columns[x]->get_scalar(ridx);
-                if (!t.is_valid()) {
-                    break;
-                }
+                output_column->clear(idx);
+                skip_row = true;
+                break;
             }
 
             args.push_back(t);
+        }
+
+        if (skip_row) {
+            continue;
         }
 
         t_tscalar rval = mknone();
@@ -300,10 +365,144 @@ t_computed_column::apply_computation(
                 }
             }
 
-            output_column->set_scalar(idx, rval);
+            if (!rval.is_valid() || rval.is_none()) {
+                output_column->clear(idx);
+            } else {
+                output_column->set_scalar(idx, rval);
+            }
+        }
+    }
+}
 
-            if (rval.is_none()) {
-                output_column->set_valid(idx, false);
+void
+t_computed_column::reapply_computation(
+    const std::vector<std::shared_ptr<t_column>>& table_columns,
+    const std::vector<std::shared_ptr<t_column>>& flattened_columns,
+    const std::vector<t_rlookup>& changed_rows,
+    std::shared_ptr<t_column> output_column,
+    t_computation computation) {
+    std::uint32_t end = changed_rows.size();
+    if (end == 0) {
+        end = table_columns[0]->size();
+    }
+    auto arity = table_columns.size();
+
+    std::function<t_tscalar(t_tscalar)> function_1;
+    std::function<t_tscalar(t_tscalar, t_tscalar)> function_2;
+    std::function<void(t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_1;
+    std::function<void(t_tscalar, t_tscalar, std::int32_t idx, std::shared_ptr<t_column>)> string_function_2;
+
+    switch (arity) {
+        case 1: {
+            // Functions that generate strings need to have access to vocab so
+            // that strings can be stored.
+            switch (computation.m_return_type) {
+                case DTYPE_STR: {
+                    string_function_1 = t_computed_column::get_computed_function_string_1(computation);
+                } break;  
+                default: {
+                    function_1 = t_computed_column::get_computed_function_1(computation);
+                } break;
+            } 
+        } break;
+        case 2: {
+            switch (computation.m_return_type) {
+                case DTYPE_STR: {
+                    string_function_2 = t_computed_column::get_computed_function_string_2(computation);
+                } break;  
+                default: {
+                    function_2 = t_computed_column::get_computed_function_2(computation);
+                } break;
+            }   
+        } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+        }
+    }
+
+    for (t_uindex idx = 0; idx < end; ++idx) {
+        bool row_already_exists = false;
+        t_uindex ridx = idx;
+
+        // Look up the changed row index, and whether the row already exists
+        if (changed_rows.size() > 0) {
+            ridx = changed_rows[idx].m_idx;
+            row_already_exists = changed_rows[idx].m_exists;
+        }
+
+        // Create args
+        std::vector<t_tscalar> args;
+
+        // Required to break out of this loop if any args are invalid
+        bool skip_row = false;
+        for (t_uindex cidx = 0; cidx < arity; ++cidx) {
+            t_tscalar arg = flattened_columns[cidx]->get_scalar(idx);
+
+            if (!arg.is_valid()) {
+                /**
+                 * If the row already exists, and the cell in `flattened` is
+                 * `STATUS_CLEAR`, do not compute the row. 
+                 * 
+                 * If the row does not exist, and the cell in `flattened` is
+                 * `STATUS_INVALID`, do not compute the row.
+                 */
+                bool should_unset = 
+                    (row_already_exists && flattened_columns[cidx]->is_cleared(idx)) ||
+                    (!row_already_exists && !flattened_columns[cidx]->is_valid(idx));
+
+                /**
+                 * Use `unset` instead of `clear`, as
+                 * `t_gstate::update_master_table` will reconcile `STATUS_CLEAR`
+                 * into `STATUS_INVALID`.
+                 */
+                if (should_unset) {
+                    output_column->unset(idx);
+                    skip_row = true;
+                    break;  
+                } else {
+                    // Use the value in the master table to compute.
+                    arg = table_columns[cidx]->get_scalar(ridx);
+                }
+            }
+
+            args.push_back(arg);
+        }
+
+        if (skip_row) {
+            continue;
+        }
+        
+        t_tscalar rval = mknone();
+
+        if (computation.m_return_type == DTYPE_STR) {
+            switch (arity) {
+                case 1: {
+                    string_function_1(args[0], idx, output_column);
+                } break;
+                case 2: {
+                    string_function_2(args[0], args[1], idx, output_column); 
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+                }
+            }
+        } else {
+            switch (arity) {
+                case 1: {
+                    rval = function_1(args[0]);
+                } break;
+                case 2: {
+                    rval = function_2(args[0], args[1]); 
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Computed columns must have 1 or 2 inputs.");
+                }
+            }
+
+            if (!rval.is_valid() || rval.is_none()) {
+                output_column->clear(idx);
+            } else {
+                output_column->set_scalar(idx, rval);
             }
         }
     }
@@ -314,8 +513,8 @@ std::vector<t_computation> t_computed_column::computations = {};
 void t_computed_column::make_computations() {
     // Generate numeric functions
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
-    std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW, SQRT, ABS, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
-    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, PERCENT_A_OF_B};
+    std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW2, SQRT, ABS, LOG, EXP, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
+    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, POW, PERCENT_A_OF_B};
     std::vector<t_computed_function_name> numeric_comparison_2 = {EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN};
     
     for (const auto f : numeric_function_1) {
@@ -463,5 +662,220 @@ void t_computed_column::make_computations() {
         t_computation{HOUR_OF_DAY, std::vector<t_dtype>{DTYPE_TIME}, DTYPE_INT64}
     );    
 }
+
+// TODO: add this to the Table API
+std::map<std::string, std::map<std::string, std::string>>
+t_computed_column::computed_functions = {
+    {"add", {
+        {"computed_function_name", "+"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} + ${y})`"}
+    }},
+    {"subtract", {
+        {"computed_function_name", "-"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} - ${y})`"}
+    }},
+    {"multiply", {
+        {"computed_function_name", "*"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} * ${y})`"}
+    }},
+    {"divide", {
+        {"computed_function_name", "/"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "(x, y) => `(${x} / ${y})`"}
+    }},
+    {"invert", {
+        {"computed_function_name", "1/x"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `(1 / ${x})`"}
+    }},
+    {"pow", {
+        {"computed_function_name", "x^2"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `(${x} ^ 2)`"}
+    }},
+    {"sqrt", {
+        {"computed_function_name", "sqrt"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `sqrt(${x})`"}
+    }},
+    {"abs", {
+        {"computed_function_name", "abs"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `abs(${x})`"}
+    }},
+    {"percent_a_of_b", {
+        {"computed_function_name", "%"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `(x, y) => `(${x} % ${y})`"}
+    }},
+    {"10_bucket", {
+        {"computed_function_name", "Bucket (10)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin10(${x})`"}
+    }},
+    {"100_bucket", {
+        {"computed_function_name", "Bucket (100)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin100(${x})`"}
+    }},
+    {"1000_bucket", {
+        {"computed_function_name", "Bucket (1000)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin1000(${x})`"}
+    }},
+    {"0.1_bucket", {
+        {"computed_function_name", "Bucket (1/10)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin10th(${x})`"}
+    }},
+    {"0.01_bucket", {
+        {"computed_function_name", "Bucket (1/100)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin100th(${x})`"}
+    }},
+    {"0.001_bucket", {
+        {"computed_function_name", "Bucket (1/1000)"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"group", "Math"},
+        {"format_function", "x => `bin1000th(${x})`"}
+    }},
+    {"length", {
+        {"computed_function_name", "length"},
+        {"input_type", "string"},
+        {"return_type", "integer"},
+        {"group", "Text"},
+        {"format_function", "x => `length(${x})`"}
+    }},
+    {"uppercase", {
+        {"computed_function_name", "Uppercase"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `uppercase(${x})`"}
+    }},
+    {"lowercase", {
+        {"computed_function_name", "Lowercase"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `lowercase(${x})`"}
+    }},
+    {"concat_space", {
+        {"computed_function_name", "concat_space"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `concat_space(${x})`"}
+    }},
+    {"concat_comma", {
+        {"computed_function_name", "concat_comma"},
+        {"input_type", "string"},
+        {"return_type", "string"},
+        {"group", "Text"},
+        {"format_function", "x => `concat_comma(${x})`"}
+    }},
+    {"hour_of_day", {
+        {"computed_function_name", "Hour of Day"},
+        {"input_type", "datetime"},
+        {"return_type", "integer"},
+        {"group", "Time"},
+        {"format_function", "x => `hour_of_day(${x})`"}
+    }},
+    {"day_of_week", {
+        {"computed_function_name", "Day of Week"},
+        {"input_type", "datetime"},
+        {"return_type", "string"},
+        {"group", "Time"},
+        {"format_function", "x => `day_of_week(${x})`"}
+    }},
+    {"month_of_year", {
+        {"computed_function_name", "Month of Year"},
+        {"input_type", "datetime"},
+        {"return_type", "string"},
+        {"group", "Time"},
+        {"format_function", "x => `month_of_year(${x})`"}
+    }},
+    {"second_bucket", {
+        {"computed_function_name", "Bucket (s)"},
+        {"input_type", "datetime"},
+        {"return_type", "datetime"},
+        {"group", "Time"},
+        {"format_function", "x => `second_bucket(${x})`"}
+    }},
+    {"minute_bucket", {
+        {"computed_function_name", "Bucket (m)"},
+        {"input_type", "datetime"},
+        {"return_type", "datetime"},
+        {"group", "Time"},
+        {"format_function", "x => `minute_bucket(${x})`"}
+    }},
+    {"hour_bucket", {
+        {"computed_function_name", "Bucket (h)"},
+        {"input_type", "datetime"},
+        {"return_type", "datetime"},
+        {"group", "Time"},
+        {"format_function", "x => `hour_bucket(${x})`"}
+    }},
+    {"day_bucket", {
+        {"computed_function_name", "Bucket (D)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `day_bucket(${x})`"}
+    }},
+    {"week_bucket", {
+        {"computed_function_name", "Bucket (W)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `week_bucket(${x})`"}
+    }},
+    {"month_bucket", {
+        {"computed_function_name", "Bucket (M)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `month_bucket(${x})`"}
+    }},
+    {"year_bucket", {
+        {"computed_function_name", "Bucket (Y)"},
+        {"input_type", "datetime"},
+        {"return_type", "date"},
+        {"group", "Time"},
+        {"format_function", "x => `year_bucket(${x})`"}
+    }}
+};
 
 } // end namespace perspective

@@ -32,19 +32,6 @@ void set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, t_val value);
 
 void _fill_data(t_data_table& tbl, t_data_accessor accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_update);
 
-/******************************************************************************
- *
- * Add computed columns
- */
-
-/*
-template <>
-void add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, t_val computed_def);
-
-template <>
-void make_computed_lambdas(std::vector<t_val> computed)
-*/
-
 } //namespace binding
 } //namespace perspective
 

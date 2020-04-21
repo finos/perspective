@@ -93,66 +93,77 @@ export class ActionElement extends DomElement {
         }
     }
 
-    // UI action
-    _open_computed_column(event) {
-        //const data = event.detail;
+    /**
+     * Display the computed expressions panel.
+     *
+     * @param {*} event
+     */
+    _open_computed_expression_editor(event) {
         event.stopImmediatePropagation();
-        /*if (event.type === 'perspective-computed-column-edit') {
-            this._computed_column._edit_computed_column(data);
-        }*/
-        this._computed_column.style.display = "flex";
+        if (this._computed_expression_editor.expressions.length == 0) {
+            this._computed_expression_editor._disable_remove_button();
+        } else {
+            this._computed_expression_editor._enable_remove_button();
+        }
+        this._computed_expression_editor.style.display = "flex";
         this._side_panel_actions.style.display = "none";
+        this._computed_expression_editor._observe_textarea();
     }
 
-    // edits state
-    _set_computed_column_input(event) {
-        event.detail.target.appendChild(this._new_row(event.detail.column.name, event.detail.column.type));
-        this._update_column_view();
-    }
+    /**
+     * Given an expression (in the `detail` property of the
+     * `perspective-computed-expression-save` event), retrieve the viewer's
+     * `computed-columns` array and append the new expression to be parsed.
+     *
+     * @param {*} event
+     */
+    _save_computed_expression(event) {
+        const expression = event.detail.expression;
 
-    // edits state
-    _validate_computed_column(event) {
-        const new_column = event.detail;
-        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
-        if (computed_columns === null) {
-            computed_columns = [];
+        // `computed-columns` stores the raw expression typed by the user.
+        let computed_columns = this._get_view_computed_columns();
+
+        if (computed_columns.includes(expression)) {
+            console.warn(`"${expression}" was not applied because it already exists.`);
+            return;
         }
-        // names cannot be duplicates
-        for (let col of computed_columns) {
-            if (new_column.name === col.name) {
-                return;
-            }
-        }
-        computed_columns.push(new_column);
+
+        computed_columns.push(expression);
+
         this.setAttribute("computed-columns", JSON.stringify(computed_columns));
     }
 
-    // edits state, calls reload
-    async _create_computed_column(event) {
-        const data = event.detail;
-        let computed_column_name = data.column_name;
-
-        const cols = await this._table.columns();
-        // edit overwrites last column, otherwise avoid name collision
-        if (cols.includes(computed_column_name)) {
-            computed_column_name += ` ${Math.round(Math.random() * 100)}`;
+    async _type_check_computed_expression(event) {
+        const parsed = event.detail.parsed_expression || [];
+        if (parsed.length === 0) {
+            this._computed_expression_editor._type_check_expression({});
+            return;
+        }
+        const functions = {};
+        for (const col of parsed) {
+            functions[col.column] = col.computed_function_name;
+        }
+        const schema = await this._table.computed_schema(parsed);
+        // Look at the failing values, and get their expected types
+        const expected_types = {};
+        for (const key in functions) {
+            if (!schema[key]) {
+                expected_types[key] = await this._table.get_computation_input_types(functions[key]);
+            }
         }
 
-        const params = [
-            {
-                computation: data.computation,
-                column: computed_column_name,
-                computed_function_name: data.computation.name,
-                func: data.computation.func,
-                inputs: data.input_columns.map(col => col.name),
-                input_type: data.computation.input_type,
-                type: data.computation.return_type
-            }
-        ];
+        this._computed_expression_editor._type_check_expression(schema, expected_types);
+    }
 
-        const table = this._table.add_computed(params);
-        await this._load_table(table, true);
-        this._update_column_view();
+    /**
+     * Remove all computed expressions from the DOM.
+     */
+    _clear_all_computed_expressions() {
+        this.setAttribute("computed-columns", JSON.stringify([]));
+    }
+
+    _set_computed_expression(event) {
+        return event;
     }
 
     _column_visibility_clicked(ev) {
@@ -179,13 +190,6 @@ export class ActionElement extends DomElement {
                 this._active_columns.removeChild(parent);
             }
         } else {
-            // check if we're manipulating computed column input
-            if (ev.path[1]?.classList.contains("psp-cc-computation__input-column")) {
-                //  this._computed_column._register_inputs();
-                this._computed_column.deselect_column(ev.currentTarget.getAttribute("name"));
-                this._update_column_view();
-                return;
-            }
             if ((ev.detail.shiftKey && this._plugin.selectMode === "toggle") || (!ev.detail.shiftKey && this._plugin.selectMode === "select")) {
                 for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                     this._active_columns.removeChild(child);
@@ -337,13 +341,12 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_column.addEventListener("click", this._open_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
-        // this._side_panel.addEventListener('
-        //     perspective-computed-column-edit',
-        //     this._open_computed_column.bind(this)
-        // );
+        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_editor.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
+        this._computed_expression_editor.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
         this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
         this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));

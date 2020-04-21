@@ -62,7 +62,7 @@ class _PerspectiveDateValidator(object):
 
     def to_date_components(self, obj):
         '''Return a dictionary of string keys and integer values for `year`,
-        `month`, and `day`.
+        `month` (from 0 - 11), and `day`.
 
         This method converts both datetime.date and numpy.datetime64 objects
         that contain datetime.date.
@@ -85,9 +85,12 @@ class _PerspectiveDateValidator(object):
             if (six.PY2 and isinstance(obj, long)) or isinstance(obj, int):
                 obj = datetime.fromtimestamp(obj / 1000000000)
 
+        # Perspective stores month in `t_date` as an integer [0-11],
+        # while Python stores month as [1-12], so decrement the Python value
+        # before Perspective attempts to use it.
         return {
             "year": obj.year,
-            "month": obj.month,
+            "month": obj.month - 1,
             "day": obj.day
         }
 

@@ -21,6 +21,9 @@
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
 #include <perspective/process_state.h>
+#include <perspective/computed.h>
+#include <perspective/computed_column_map.h>
+#include <perspective/computed_function.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -28,8 +31,6 @@
 #include <chrono>
 
 namespace perspective {
-
-typedef std::function<void(std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>, const std::vector<t_rlookup>&)> t_computed_column_lambda;
 
 PERSPECTIVE_EXPORT t_tscalar calc_delta(
     t_value_transition trans, t_tscalar oval, t_tscalar nval);
@@ -79,7 +80,6 @@ public:
     // send data to input port with at index idx
     // schema should match port schema
     void _send(t_uindex idx, const t_data_table& fragments);
-    void _send(t_uindex idx, const t_data_table& fragments, const std::vector<t_computed_column_lambda>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
 
@@ -138,30 +138,16 @@ public:
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
 
-    std::vector<t_computed_column_lambda> get_computed_lambdas() const;
-
     void pprint() const;
     std::string repr() const;
+
 protected:
-    void recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs);
-    void append_computed_lambdas(std::vector<t_computed_column_lambda> new_lambdas);
-
-    void notify_contexts(const t_data_table& flattened);
-
-    template <typename CTX_T>
-    void notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh);
-
-    template <typename CTX_T>
-    void notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
-        const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
-        const t_data_table& existed);
-
     /**
      * @brief Given `tbl`, notify each registered context with `tbl`.
      * 
      * @param tbl 
      */
-    void _update_contexts_from_state(const t_data_table& tbl);
+    void _update_contexts_from_state(std::shared_ptr<t_data_table> tbl);
 
     /**
      * @brief Notify a single registered `ctx` with `tbl`.
@@ -169,9 +155,15 @@ protected:
      * @tparam CTX_T 
      * @param ctx 
      * @param tbl 
+     * @param flattened 
+     * @param delta 
+     * @param prev 
+     * @param current 
+     * @param transitions 
+     * @param changed_rows 
      */
     template <typename CTX_T>
-    void update_context_from_state(CTX_T* ctx, const t_data_table& tbl);
+    void update_context_from_state(CTX_T* ctx, std::shared_ptr<t_data_table> tbl);
 
     /**
      * @brief Provide the registered `t_ctx*` with a pointer to this gnode's
@@ -183,6 +175,17 @@ protected:
      */
     template <typename CTX_T>
     void set_ctx_state(void* ptr);
+
+    bool have_context(const std::string& name) const;
+    void notify_contexts(const t_data_table& flattened);
+
+    template <typename CTX_T>
+    void notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh);
+
+    template <typename CTX_T>
+    void notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
+        const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+        const t_data_table& existed);
 
     /**
      * @brief Given the process state, create a `t_mask` bitset set to true for
@@ -208,7 +211,7 @@ protected:
      * @param tcolumn 
      * @param process_state 
      */
-    template <typename DATA_T>
+    template <typename T>
     void _process_column(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
         t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_process_state& process_state);
 
@@ -228,6 +231,75 @@ protected:
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
 
+    /**
+     * @brief For all valid computed columns registered with the gnode,
+     * the master `m_table` of `m_state`.
+     * 
+     * @param tbl 
+     * @param flattened 
+     * @param changed_rows 
+     */
+    void
+    _recompute_all_columns(
+        std::shared_ptr<t_data_table> tbl,
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& changed_rows);
+
+    /**
+     * @brief For each `t_data_table` in tables, apply computations for each
+     * computed column registered with the gnode.
+     * 
+     * @param table 
+     */
+    void _compute_all_columns(
+        std::vector<std::shared_ptr<t_data_table>> tables);
+
+    /**
+     * @brief Add all valid computed columns to `table` with the specified
+     * `dtype`. Used when a column needs to be present for future operations,
+     * but when a computation is not necessary/the dtype of the column != the
+     * dtype of the actual computed column.
+     * 
+     * @param table 
+     * @param dtype 
+     */
+    void _add_all_computed_columns(
+        std::shared_ptr<t_data_table> table,
+        t_dtype dtype);
+
+    /**
+     * @brief Add a computed column to `tbl` without computing it.
+     * 
+     * @param computed_column 
+     * @param tbl 
+     */
+    void _add_computed_column(
+        const t_computed_column_definition& computed_column,
+        std::shared_ptr<t_data_table> tbl);
+
+    /**
+     * @brief Apply a computed column to `tbl`.
+     * 
+     * @param computed_column 
+     * @param tbl 
+     */
+    void _compute_column(
+        const t_computed_column_definition& computed_column,
+        std::shared_ptr<t_data_table> tbl);
+
+    /**
+     * @brief Recompute the computed column on `flattened`,
+     * using information from both `flattened` and `tbl`.
+     * 
+     * @param ctx 
+     * @param tbl 
+     */
+    void _recompute_column(
+        const t_computed_column_definition& computed_column,
+        std::shared_ptr<t_data_table> table,
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& changed_rows);
+
 private:
     /**
      * @brief Process the input data table by flattening it, calculating
@@ -236,8 +308,7 @@ private:
      * @return std::shared_ptr<t_data_table> 
      */
     std::shared_ptr<t_data_table> _process_table();
-    
-    std::vector<t_computed_column_lambda> m_computed_lambdas;
+
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
 
@@ -250,10 +321,12 @@ private:
     // A vector of `t_schema`s for each transitional `t_data_table`.
     std::vector<t_schema> m_transitional_schemas;
 
+    t_computed_column_map m_computed_column_map;
+
     bool m_init;
     std::vector<std::shared_ptr<t_port>> m_iports;
     std::vector<std::shared_ptr<t_port>> m_oports;
-    t_sctxhmap m_contexts;
+    std::map<std::string, t_ctx_handle> m_contexts;
     std::shared_ptr<t_gstate> m_gstate;
     t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
@@ -274,6 +347,7 @@ template <typename CTX_T>
 void
 t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh) {
     CTX_T* ctx = ctxh.get<CTX_T>();
+    // These tables are guaranteed to have all computed columns.
     const t_data_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
     const t_data_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
     const t_data_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
@@ -302,16 +376,14 @@ void
 t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
     const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
     const t_data_table& existed) {
-    auto t1 = std::chrono::high_resolution_clock::now();
+    auto ctx_config = ctx->get_config();
+    auto computed_columns = ctx_config.get_computed_columns();
+
     ctx->step_begin();
+    // Flattened has the computed columns at this point, as it has
+    // passed through the body of `process_table`.
     ctx->notify(flattened, delta, prev, current, transitions, existed);
     ctx->step_end();
-    if (t_env::log_time_ctx_notify()) {
-        auto t2 = std::chrono::high_resolution_clock::now();
-        std::cout << ctx->repr() << " ctx_notify "
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
-                  << std::endl;
-    }
 }
 
 /**
@@ -325,23 +397,46 @@ t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_
  */
 template <typename CTX_T>
 void
-t_gnode::update_context_from_state(CTX_T* ctx, const t_data_table& flattened) {
+t_gnode::update_context_from_state(
+    CTX_T* ctx, std::shared_ptr<t_data_table> flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
-        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
+        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently")
 
-    if (flattened.size() == 0)
+    if (flattened->size() == 0)
         return;
 
+    // Flattened won't have the computed columns if it didn't pass through the
+    // main body of `process_table`, i.e. creating a 1/2 sided context, so
+    // compute again here.
+    auto computed_columns = m_computed_column_map.m_computed_columns;
+
+    if (computed_columns.size() > 0) {
+        for (const auto& computed : computed_columns) {
+            _compute_column(computed.second, flattened);
+        }
+    }
+
+    // Need to cast shared ptr to a const reference before passing to notify,
+    // reference is valid as `notify` is not async
+    const t_data_table& const_flattened = 
+        const_cast<const t_data_table&>(*flattened);
+
     ctx->step_begin();
-    ctx->notify(flattened);
+    ctx->notify(const_flattened);
     ctx->step_end();
 }
 
 template <>
-void t_gnode::_process_column<std::string>(const t_column* fcolumn, const t_column* scolumn,
-    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
+void
+t_gnode::_process_column<std::string>(
+    const t_column* fcolumn,
+    const t_column* scolumn,
+    t_column* dcolumn,
+    t_column* pcolumn,
+    t_column* ccolumn,
+    t_column* tcolumn,
     const t_process_state& process_state);
 
 template <typename DATA_T>

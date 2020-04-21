@@ -63,7 +63,7 @@ t_ctx0::step_end() {
     auto stbl = m_gstate->get_table();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ncols), 1,
+    tbb::parallel_for(0, int(ncols), 1,
         [&rval, &stbl, pkeys, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
@@ -550,13 +550,13 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
     const t_column* pkey_col = flattened.get_const_column("psp_pkey").get();
 
     t_uindex ncols = m_config.get_num_columns();
+    const auto& column_names = m_config.get_column_names();
 
-    for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
-        std::string col = m_config.col_at(cidx);
-
-        const t_column* tcol = transitions.get_const_column(col).get();
-        const t_column* pcol = prev.get_const_column(col).get();
-        const t_column* ccol = curr.get_const_column(col).get();
+    for (const auto& name : column_names) {
+        auto cidx = m_config.get_colidx(name);
+        const t_column* tcol = transitions.get_const_column(name).get();
+        const t_column* pcol = prev.get_const_column(name).get();
+        const t_column* ccol = curr.get_const_column(name).get();
 
         for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
             const std::uint8_t* trans_ = tcol->get_nth<std::uint8_t>(ridx);

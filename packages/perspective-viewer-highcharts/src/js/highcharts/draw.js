@@ -53,7 +53,7 @@ export const draw = (mode, set_config, restyle) =>
         const columns = config.columns;
         const real_columns = JSON.parse(this.getAttribute("columns"));
 
-        const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false, false)]);
+        const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false)]);
         let element;
 
         if (task.cancelled) {

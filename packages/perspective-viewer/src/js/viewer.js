@@ -12,8 +12,8 @@ import "./polyfill.js";
 
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
-import {COMPUTATIONS} from "./computed_column.js";
 import "./row.js";
+import "./computed_expression_editor.js";
 
 import template from "../html/viewer.html";
 
@@ -21,6 +21,7 @@ import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
 import {ActionElement} from "./viewer/action_element.js";
+import {expression_to_computed_column_config} from "./computed_expressions/visitor.js";
 
 /**
  * Module for the `<perspective-viewer>` custom element.
@@ -38,7 +39,7 @@ import {ActionElement} from "./viewer/action_element.js";
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
+const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "computed-columns", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
 
 /**
  * The HTMLElement class for `<perspective-viewer>` custom element.
@@ -115,13 +116,17 @@ class PerspectiveViewer extends ActionElement {
         this._update_column_list(
             sort,
             inner,
-            s => {
+            (s, computed_names) => {
                 let dir = "asc";
                 if (Array.isArray(s)) {
                     dir = s[1];
                     s = s[0];
                 }
-                return this._new_row(s, false, false, false, dir);
+                let computed = undefined;
+                if (computed_names.includes(s)) {
+                    computed = s;
+                }
+                return this._new_row(s, false, false, false, dir, computed);
             },
             (sort, node) => {
                 if (Array.isArray(sort)) {
@@ -173,43 +178,82 @@ class PerspectiveViewer extends ActionElement {
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", func: "add", inputs: ["x", "y"]}]));
+     * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""></perspective-viewer>
+     * <perspective-viewer computed-columns="[{name:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
      */
     @array_attribute
     "computed-columns"(computed_columns) {
-        if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
-            if (this.hasAttribute("computed-columns")) {
-                this.removeAttribute("computed-columns");
-            }
-            computed_columns = [];
-        }
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._table) {
-                const computed_schema = await this._table.computed_schema();
-                this._computed_column._close_computed_column();
-                for (let col of computed_columns) {
-                    if (!computed_schema[col.name]) {
-                        await this._create_computed_column({
-                            detail: {
-                                column_name: col.name,
-                                input_columns: col.inputs.map(x => ({name: x})),
-                                computation: COMPUTATIONS[col.func]
-                            }
-                        });
-                    }
-                }
-
-                await this._debounce_update();
-                resolve();
-            } else {
-                this._computed_column._close_computed_column();
+            if (this._computed_expression_editor.style.display !== "none") {
+                this._computed_expression_editor._close_expression_editor();
             }
+            if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
+                // Remove computed columns from the DOM, and reset the config
+                // to exclude all computed columns.
+                if (this.hasAttribute("computed-columns")) {
+                    this.removeAttribute("computed-columns");
+                    const parsed = this._get_view_parsed_computed_columns();
+                    this._reset_computed_column_view(parsed);
+                    this.removeAttribute("parsed-computed-columns");
+                    resolve();
+                    return;
+                }
+                computed_columns = [];
+            }
+
+            let parsed_computed_columns = [];
+
+            for (const column of computed_columns) {
+                if (typeof column === "string") {
+                    // Either validated through the UI, or will be validated
+                    // here. TODO: rearchitect so we don't triple parse each
+                    // expression.
+                    parsed_computed_columns = parsed_computed_columns.concat(expression_to_computed_column_config(column));
+                } else {
+                    parsed_computed_columns.push(column);
+                }
+            }
+
+            // Attempt to validate the parsed computed columns against the Table
+            let computed_schema = {};
+
+            if (this._table) {
+                computed_schema = await this._table.computed_schema(parsed_computed_columns);
+                const validated = await this._validate_parsed_computed_columns(parsed_computed_columns, computed_schema);
+                if (validated.length !== parsed_computed_columns.length) {
+                    // Generate a diff error message with the invalid columns
+                    const diff = [];
+                    for (let i = 0; i < parsed_computed_columns.length; i++) {
+                        if (i > validated.length - 1) {
+                            diff.push(parsed_computed_columns[i]);
+                        } else {
+                            if (parsed_computed_columns[i].column !== validated[i].column) {
+                                diff.push(parsed_computed_columns[i]);
+                            }
+                        }
+                    }
+                    console.warn("Could not apply these computed columns:", JSON.stringify(diff));
+                }
+                parsed_computed_columns = validated;
+            }
+
+            // Need to refresh the UI so that previous computed columns used in
+            // pivots, columns, etc. get cleared
+            const old_columns = this._get_view_parsed_computed_columns();
+            const to_remove = this._diff_computed_column_view(old_columns, parsed_computed_columns);
+            this._reset_computed_column_view(to_remove);
+
+            // Always store a copy of the parsed computed columns for
+            // validation of column names, etc.
+            this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
+
+            this._update_computed_column_view(computed_schema);
             this.dispatchEvent(new Event("perspective-config-update"));
-            this.dispatchEvent(new Event("perspective-computed-column-update"));
+            await this._debounce_update();
+            resolve();
         })();
     }
 
@@ -286,12 +330,17 @@ class PerspectiveViewer extends ActionElement {
             this._update_column_list(
                 filters,
                 inner,
-                filter => {
+                (filter, computed_names) => {
                     const fterms = JSON.stringify({
                         operator: filter[1],
                         operand: filter[2]
                     });
-                    return this._new_row(filter[0], undefined, undefined, fterms);
+                    const name = filter[0];
+                    let computed = undefined;
+                    if (computed_names.includes(name)) {
+                        computed = name;
+                    }
+                    return this._new_row(name, undefined, undefined, fterms, undefined, computed);
                 },
                 (filter, node) =>
                     node.getAttribute("name") === filter[0] &&
@@ -361,8 +410,14 @@ class PerspectiveViewer extends ActionElement {
             pivots = [];
         }
 
-        var inner = this._column_pivots.querySelector("ul");
-        this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
+        const inner = this._column_pivots.querySelector("ul");
+        this._update_column_list(pivots, inner, (pivot, computed_names) => {
+            let computed = undefined;
+            if (computed_names.includes(pivot)) {
+                computed = pivot;
+            }
+            return this._new_row(pivot, undefined, undefined, undefined, undefined, computed);
+        });
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
@@ -383,8 +438,14 @@ class PerspectiveViewer extends ActionElement {
             pivots = [];
         }
 
-        var inner = this._row_pivots.querySelector("ul");
-        this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
+        const inner = this._row_pivots.querySelector("ul");
+        this._update_column_list(pivots, inner, (pivot, computed_names) => {
+            let computed = undefined;
+            if (computed_names.includes(pivot)) {
+                computed = pivot;
+            }
+            return this._new_row(pivot, undefined, undefined, undefined, undefined, computed);
+        });
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }

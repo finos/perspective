@@ -40,3 +40,19 @@ class TestValidate:
     def test_validate_filters_is_not_null(self):
         filters = [["a", "is not null"]]
         assert validate.validate_filters(filters) == filters
+
+    def test_validate_computed_columns_valid(self):
+        computed = [{
+            "column": "abc",
+            "computed_function_name": "+",
+            "inputs": ["first", "second"]
+        }]
+        assert validate.validate_computed_columns(computed) == computed
+
+    def test_validate_computed_columns_invalid(self):
+        with raises(PerspectiveError):
+            assert validate.validate_computed_columns([{"column": "abc", "inputs": ["first", "second"]}])
+
+    def test_validate_computed_columns_str(self):
+        computed = ["expression"]
+        assert validate.validate_computed_columns(computed) == computed

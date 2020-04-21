@@ -13,7 +13,9 @@ from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
 from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
-from .libbinding import make_table, str_to_filter_op, t_filter_op, \
+from .libbinding import make_table, get_table_computed_schema, \
+                        get_computation_input_types, \
+                        str_to_filter_op, t_filter_op, \
                         t_op, t_dtype
 
 
@@ -47,7 +49,7 @@ class Table(object):
 
         self._limit = limit or 4294967295
         self._index = index or ""
-        self._table = make_table(None, self._accessor, None, self._limit,
+        self._table = make_table(None, self._accessor, self._limit,
                                  self._index, t_op.OP_INSERT, False,
                                  self._is_arrow)
         self._gnode_id = self._table.get_gnode().get_id()
@@ -65,7 +67,7 @@ class Table(object):
 
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''
-        return False
+        return True
 
     def clear(self):
         '''Removes all the rows in the :class:`~perspective.Table`, but
@@ -116,6 +118,61 @@ class Table(object):
                     schema[columns[i]] = _dtype_to_pythontype(types[i])
         return schema
 
+    def computed_schema(self, computed_columns=None, **kwargs):
+        '''Returns a schema containing the column names and data types of
+        the ``computed_columns`` argument.
+
+        If any column has invalid input columns or invalid types, they
+        will not be included in the output schema and a warning will be
+        logged.
+
+        Args:
+            computed_columns (:obj:`list`): A list of computed column
+                definitions to create a schema from.
+
+        Keyword Args:
+            as_string (:obj:`bool`): returns the data types as string
+                representations, if True
+        '''
+        schema = {}
+        if computed_columns is None or len(computed_columns) == 0:
+            return schema
+
+        s = get_table_computed_schema(self._table, computed_columns)
+        columns = s.columns()
+        types = s.types()
+        as_string = kwargs.pop("as_string", False)
+        for i in range(0, len(columns)):
+            if as_string:
+                schema[columns[i]] = _dtype_to_str(types[i])
+            else:
+                schema[columns[i]] = _dtype_to_pythontype(types[i])
+        return schema
+
+    def get_computation_input_types(self, computed_function_name=None, **kwargs):
+        '''Returns a list of accepted input types for the provided
+        ``computed_function_name``.
+
+        Args:
+            computed_function_name (:obj:`str`): A :obj:`str` computed function
+                name for which valid input types must be returned.
+
+        Keyword Args:
+            as_string (:obj:`bool`): returns the data types as string
+                representations, if True.
+        '''
+        new_types = []
+        if computed_function_name is None:
+            return new_types
+        types = get_computation_input_types(computed_function_name)
+        as_string = kwargs.pop("as_string", False)
+        for i in range(0, len(types)):
+            if as_string:
+                new_types.append(_dtype_to_str(types[i]))
+            else:
+                new_types.append(_dtype_to_pythontype(types[i]))
+        return new_types
+
     def columns(self, computed=False):
         '''Returns the column names of this :class:`~perspective.Table`.
 
@@ -128,16 +185,6 @@ class Table(object):
         '''
         return [name for name in self._table.get_schema().columns()
                 if name != "psp_okey"]
-
-    def computed_schema(self):
-        '''Returns a schema of computed columns added by the user.
-
-        Returns:
-            :obj:`dict`: a key-value mapping of column names to computed
-                columns. Each value is a dictionary that contains
-                ``column_name``, ``column_type``, and ``computation``.
-        '''
-        return {}
 
     def is_valid_filter(self, filter):
         '''Tests whether a given filter expression string is valid, e.g. that
@@ -166,7 +213,8 @@ class Table(object):
             return False
 
         schema = self.schema()
-        if (schema[filter[0]] == date or schema[filter[0]] == datetime):
+        in_schema = schema.get(filter[0], None)
+        if in_schema and (schema[filter[0]] == date or schema[filter[0]] == datetime):
             if isinstance(value, str):
                 value = self._accessor.date_validator().parse(value)
 
@@ -196,7 +244,7 @@ class Table(object):
 
         if (_is_arrow):
             self._accessor = data
-            self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, True)
+            self._table = make_table(self._table, self._accessor, self._limit, self._index, t_op.OP_INSERT, True, True)
             self._state_manager.set_process(
                 self._table.get_pool(), self._table.get_id())
             return
@@ -222,7 +270,7 @@ class Table(object):
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, self._accessor, None, self._limit,
+        self._table = make_table(self._table, self._accessor, self._limit,
                                  self._index, t_op.OP_INSERT, True, False)
         self._state_manager.set_process(
             self._table.get_pool(), self._table.get_id())
@@ -250,12 +298,12 @@ class Table(object):
         self._accessor = _PerspectiveAccessor(pkeys)
         self._accessor._names = [self._index]
         self._accessor._types = types
-        t = make_table(self._table, self._accessor, None, self._limit,
+        t = make_table(self._table, self._accessor, self._limit,
                        self._index, t_op.OP_DELETE, True, False)
         self._state_manager.set_process(t.get_pool(), t.get_id())
 
     def view(self, columns=None, row_pivots=None, column_pivots=None,
-             aggregates=None, sort=None, filter=None):
+             aggregates=None, sort=None, filter=None, computed_columns=None):
         ''' Create a new :class:`~perspective.View` from this
         :class:`~perspective.Table` via the supplied keyword arguments.
 
@@ -292,9 +340,14 @@ class Table(object):
             >>> {"a": [1]}
         '''
         self._state_manager.call_process(self._table.get_id())
+
         config = {}
         if columns is None:
-            config["columns"] = self.columns()  # TODO: push into C++
+            config["columns"] = self.columns()
+            if computed_columns is not None:
+                # append all computed columns if columns are not specified
+                for col in computed_columns:
+                    config["columns"].append(col["column"])
         else:
             config["columns"] = columns
         if row_pivots is not None:
@@ -307,6 +360,9 @@ class Table(object):
             config["sort"] = sort
         if filter is not None:
             config["filter"] = filter
+        if computed_columns is not None:
+            config["computed_columns"] = computed_columns
+
         view = View(self, **config)
         self._views.append(view._name)
         return view

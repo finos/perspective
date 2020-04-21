@@ -22,6 +22,8 @@ try:
     from .manager import *  # noqa: F401, F403
     from .tornado_handler import *  # noqa: F401, F403
     from .viewer import *  # noqa: F401, F403
+    from .table.libbinding import make_computations
+    make_computations()
 except ImportError:
     __is_libpsp__ = False
     critical("Failed to import C++ bindings for Perspective "

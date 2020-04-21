@@ -44,8 +44,6 @@ const double PSP_TABLE_GROW_RATIO = 1.3;
 #define PSP_THR_LOCAL __thread
 #endif
 
-#define PSP_PFOR tbb::parallel_for
-
 const t_index INVALID_INDEX = -1;
 
 #ifdef PSP_PARALLEL_FOR
@@ -102,14 +100,6 @@ PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
         }                                                                                      \
     }
 
-#define PSP_COMPLAIN_AND_ABORT(X)                                                              \
-    {                                                                                          \
-        std::stringstream ss;                                                                  \
-        ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
-        perror(ss.str().c_str());                                                              \
-        psp_abort(X);                                                                          \
-    }
-
 #define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
 static_assert(                                               \
 std::is_pod<X>::value && std::is_standard_layout<X>::value , \
@@ -141,6 +131,7 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
             psp_abort(ss.str());                                                               \
         }                                                                                      \
     }
+    
 #define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG)                                                   \
     {                                                                                          \
         if (!(EXPR COND)) {                                                                    \
@@ -149,12 +140,14 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
             psp_abort(ss.str());                                                               \
         }                                                                                      \
     }
-#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X); abort();
+
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
+
+#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X); abort();
 
 #define PSP_VERBOSE_ASSERT(...)                                                                \
     _ID(GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(         \
@@ -205,6 +198,74 @@ enum t_filter_op {
 
 PERSPECTIVE_EXPORT std::string filter_op_to_str(t_filter_op op);
 PERSPECTIVE_EXPORT t_filter_op str_to_filter_op(const std::string& str);
+
+/**
+ * @brief The name for a single computed method. Names should be defined here,
+ * and are unique for each method.
+ */
+enum t_computed_function_name {
+    INVALID_COMPUTED_FUNCTION,
+    ADD,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE,
+    PERCENT_A_OF_B,
+    POW,
+    EQUALS,
+    NOT_EQUALS,
+    GREATER_THAN,
+    LESS_THAN,
+    INVERT,
+    POW2,
+    SQRT,
+    ABS,
+    LOG,
+    EXP,
+    UPPERCASE,
+    LOWERCASE,
+    LENGTH,
+    IS,
+    CONCAT_SPACE,
+    CONCAT_COMMA,
+    BUCKET_10,
+    BUCKET_100,
+    BUCKET_1000,
+    BUCKET_0_1,
+    BUCKET_0_0_1,
+    BUCKET_0_0_0_1,
+    HOUR_OF_DAY,
+    DAY_OF_WEEK,
+    MONTH_OF_YEAR,
+    SECOND_BUCKET,
+    MINUTE_BUCKET,
+    HOUR_BUCKET,
+    DAY_BUCKET,
+    WEEK_BUCKET,
+    MONTH_BUCKET,
+    YEAR_BUCKET
+};
+
+/**
+ * @brief Convert a string to an instance of the `t_computed_function_name`
+ * enum. Aborts if the string does not map to a function name.
+ *
+ * @param name
+ * @return t_computed_function_name
+ */
+PERSPECTIVE_EXPORT
+t_computed_function_name
+str_to_computed_function_name(const std::string& name);
+
+/**
+ * @brief Convert an instance of the `t_computed_function_name` enum to string.
+ * Aborts if the function name does not map to a string.
+ *
+ * @param name
+ * @return std::string
+ */
+PERSPECTIVE_EXPORT
+std::string
+computed_function_name_to_string(t_computed_function_name name);
 
 enum t_header { HEADER_ROW, HEADER_COLUMN };
 
@@ -385,6 +446,7 @@ PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);
+PERSPECTIVE_EXPORT std::string value_transition_to_str(t_value_transition t);
 
 template <typename T>
 inline std::ostream&

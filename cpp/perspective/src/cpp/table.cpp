@@ -66,27 +66,108 @@ Table::get_schema() const {
     return m_gnode->get_output_schema();
 }
 
-void
-Table::add_computed_columns(
-    std::shared_ptr<t_data_table> data_table,
-    std::vector<t_computed_column_lambda> computed_lambdas) {
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_uindex prev_gnode_id = m_gnode->get_id();
+t_schema 
+Table::get_computed_schema(
+    std::vector<t_computed_column_definition> computed_columns) const {
+    std::vector<std::string> computed_column_names;
+    std::vector<t_dtype> computed_column_types;
+
+    computed_column_names.reserve(computed_columns.size());
+    computed_column_types.reserve(computed_columns.size());
     
-    // transfer computed lambdas across to the new gnode and recalculate
-    auto lambdas = m_gnode->get_computed_lambdas();
-    lambdas.insert(lambdas.end(), computed_lambdas.begin(), computed_lambdas.end());
+    // Computed columns live on the `t_gstate` master table, so use that schema
+    auto schema = m_gnode->get_table_sptr()->get_schema();
 
-    auto new_gnode = make_gnode(data_table->get_schema());
-    set_gnode(new_gnode);
+    for (const auto& computed : computed_columns) {
+        bool skip = false;
+        std::string name = std::get<0>(computed);
 
-    m_pool->register_gnode(m_gnode.get());
-    m_pool->send(m_gnode->get_id(), 0, *data_table, lambdas);
-    m_pool->_process();
+        // If the computed column has already been created, i.e. it exists on
+        // the master table, return that type instead of doing a further lookup.
+        if (schema.has_column(name)) {
+            computed_column_names.push_back(name);
+            computed_column_types.push_back(schema.get_dtype(name));
+            continue;
+        }
 
-    unregister_gnode(prev_gnode_id);
+        t_computed_function_name computed_function_name = std::get<1>(computed);
+        std::vector<std::string> input_columns = std::get<2>(computed);
 
-    // need to unregister contexts linked back to table
+        // Look up return types
+        std::vector<t_dtype> input_types;
+        for (const auto& input_column : input_columns) {
+            // If input column is not in the table schema, then it must be
+            // in the computed schema as the column definitions read L-R
+            t_dtype type;
+            if (!schema.has_column(input_column)) {
+                auto it = std::find(
+                    computed_column_names.begin(),
+                    computed_column_names.end(),
+                    input_column);
+                if (it == computed_column_names.end()) {
+                    // Column doesn't exist anywhere, so treat this column
+                    // as completely invalid. This also means that columns
+                    // on its right, which may or may not depend on this column,
+                    // are also invalidated.
+                    std::cerr 
+                        << "Input column `"
+                        << input_column
+                        << "` does not exist."
+                        << std::endl;
+                    skip = true;
+                    break;
+                } else {
+                    auto name_idx = std::distance(
+                        computed_column_names.begin(), it);
+                    type = computed_column_types[name_idx];
+                }
+            } else {
+                type = schema.get_dtype(input_column);
+            }
+            input_types.push_back(type);
+        }
+
+        t_computation computation = t_computed_column::get_computation(
+            computed_function_name, input_types);
+
+        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+            // Build error message and set skip to true
+            std::vector<t_dtype> expected_dtypes = 
+                t_computed_column::get_computation_input_types(computed_function_name);
+
+            std::stringstream ss;
+            ss
+                << "Error: `"
+                << computed_function_name_to_string(computed_function_name)
+                << "`"
+                << " expected input column types: [ ";
+            for (t_dtype dtype : expected_dtypes) {
+                ss << "`" << get_dtype_descr(dtype) << "` ";
+            }
+            ss << "], but received: [ ";
+            for (t_dtype dtype : input_types) {
+                ss << "`" << get_dtype_descr(dtype) << "` ";
+            }
+            ss << "]." << std::endl;
+            std::cerr << ss.str();
+            skip = true;
+        }
+
+        if (skip) {
+            // this column depends on a column that does not exist, or has
+            // an invalid type, so don't write into the
+            continue;
+        }
+
+        t_dtype output_column_type = computation.m_return_type;
+
+        computed_column_names.push_back(name);
+        computed_column_types.push_back(output_column_type);
+    }
+
+    t_schema computed_schema(computed_column_names, computed_column_types);
+
+    return computed_schema;
 }
 
 std::shared_ptr<t_gnode>

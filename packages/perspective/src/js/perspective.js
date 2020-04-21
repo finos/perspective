@@ -41,89 +41,6 @@ export default function(Module) {
     let accessor = new DataAccessor();
     const SIDES = ["zero", "one", "two"];
 
-    /**
-     * Map a string name of a computation function to a value in the
-     * `t_computed_function_name` enum.
-     *
-     * @param {String} name The name of a computation function.
-     */
-    function name_to_computation(name) {
-        switch (name) {
-            case "+":
-                return __MODULE__.t_computed_function_name.ADD;
-            case "-":
-                return __MODULE__.t_computed_function_name.SUBTRACT;
-            case "*":
-                return __MODULE__.t_computed_function_name.MULTIPLY;
-            case "/":
-                return __MODULE__.t_computed_function_name.DIVIDE;
-            case "1/x":
-                return __MODULE__.t_computed_function_name.INVERT;
-            case "x^2":
-                return __MODULE__.t_computed_function_name.POW;
-            case "sqrt":
-                return __MODULE__.t_computed_function_name.SQRT;
-            case "abs":
-                return __MODULE__.t_computed_function_name.ABS;
-            case "%":
-                return __MODULE__.t_computed_function_name.PERCENT_A_OF_B;
-            case "==":
-                return __MODULE__.t_computed_function_name.EQUALS;
-            case "!=":
-                return __MODULE__.t_computed_function_name.NOT_EQUALS;
-            case ">":
-                return __MODULE__.t_computed_function_name.GREATER_THAN;
-            case "<":
-                return __MODULE__.t_computed_function_name.LESS_THAN;
-            case "Uppercase":
-                return __MODULE__.t_computed_function_name.UPPERCASE;
-            case "Lowercase":
-                return __MODULE__.t_computed_function_name.LOWERCASE;
-            case "length":
-                return __MODULE__.t_computed_function_name.LENGTH;
-            case "is":
-                return __MODULE__.t_computed_function_name.IS;
-            case "concat_space":
-                return __MODULE__.t_computed_function_name.CONCAT_SPACE;
-            case "concat_comma":
-                return __MODULE__.t_computed_function_name.CONCAT_COMMA;
-            case "Bucket (10)":
-                return __MODULE__.t_computed_function_name.BUCKET_10;
-            case "Bucket (100)":
-                return __MODULE__.t_computed_function_name.BUCKET_100;
-            case "Bucket (1000)":
-                return __MODULE__.t_computed_function_name.BUCKET_1000;
-            case "Bucket (1/10)":
-                return __MODULE__.t_computed_function_name.BUCKET_0_1;
-            case "Bucket (1/100)":
-                return __MODULE__.t_computed_function_name.BUCKET_0_0_1;
-            case "Bucket (1/1000)":
-                return __MODULE__.t_computed_function_name.BUCKET_0_0_0_1;
-            case "Hour of Day":
-                return __MODULE__.t_computed_function_name.HOUR_OF_DAY;
-            case "Day of Week":
-                return __MODULE__.t_computed_function_name.DAY_OF_WEEK;
-            case "Month of Year":
-                return __MODULE__.t_computed_function_name.MONTH_OF_YEAR;
-            case "Bucket (s)":
-                return __MODULE__.t_computed_function_name.SECOND_BUCKET;
-            case "Bucket (m)":
-                return __MODULE__.t_computed_function_name.MINUTE_BUCKET;
-            case "Bucket (h)":
-                return __MODULE__.t_computed_function_name.HOUR_BUCKET;
-            case "Bucket (D)":
-                return __MODULE__.t_computed_function_name.DAY_BUCKET;
-            case "Bucket (W)":
-                return __MODULE__.t_computed_function_name.WEEK_BUCKET;
-            case "Bucket (M)":
-                return __MODULE__.t_computed_function_name.MONTH_BUCKET;
-            case "Bucket (Y)":
-                return __MODULE__.t_computed_function_name.YEAR_BUCKET;
-            default:
-                return null;
-        }
-    }
-
     /***************************************************************************
      *
      * Private
@@ -172,8 +89,8 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, computed, index, limit, op, is_update, is_arrow) {
-        _Table = __MODULE__.make_table(_Table, accessor, computed, limit || 4294967295, index, op, is_update, is_arrow);
+    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow) {
+        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -331,6 +248,34 @@ export default function(Module) {
      */
     view.prototype.schema = function(override = true) {
         const schema = extract_map(this._View.schema());
+        if (override) {
+            for (const key of Object.keys(schema)) {
+                let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
+                colname = colname[colname.length - 1];
+                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                    schema[key] = this.overridden_types[colname];
+                }
+            }
+        }
+        return schema;
+    };
+
+    /**
+     * The computed column schema of this {@link module:perspective~view},
+     * containing only user-created computed columns. A schema is an Object, the
+     * keys of which are the columns of this {@link module:perspective~view},
+     * and the values are their string type names. If this
+     * {@link module:perspective~view} is aggregated, theses will be the
+     * aggregated types; otherwise these types will be the same as the columns
+     * in the underlying {@link module:perspective~table}
+     *
+     * @async
+     *
+     * @returns {Promise<Object>} A Promise of this
+     * {@link module:perspective~view}'s computed column schema.
+     */
+    view.prototype.computed_schema = function(override = true) {
+        const schema = extract_map(this._View.computed_schema());
         if (override) {
             for (const key of Object.keys(schema)) {
                 let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
@@ -938,6 +883,7 @@ export default function(Module) {
         this.columns = config.columns;
         this.filter = config.filter || [];
         this.sort = config.sort || [];
+        this.computed_columns = config.computed_columns || [];
         this.filter_op = config.filter_op || "and";
         this.row_pivot_depth = config.row_pivot_depth;
         this.column_pivot_depth = config.column_pivot_depth;
@@ -981,6 +927,19 @@ export default function(Module) {
             let sort_vector = __MODULE__.make_string_vector();
             let filled = fill_vector(sort_vector, sort);
             vector.push_back(filled);
+        }
+        return vector;
+    };
+
+    view_config.prototype.get_computed_columns = function() {
+        let vector = __MODULE__.make_2d_val_vector();
+        for (let computed of this.computed_columns) {
+            let computed_vector = __MODULE__.make_val_vector();
+            computed_vector.push_back(computed.column);
+            computed_vector.push_back(computed.computed_function_name);
+            // make this input_columns
+            computed_vector.push_back(computed.inputs);
+            vector.push_back(computed_vector);
         }
         return vector;
     };
@@ -1055,7 +1014,7 @@ export default function(Module) {
         _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
         this.update(data);
-        _call_process(this._Table.get_id());
+        _call_process(this.get_id());
     };
 
     /**
@@ -1066,7 +1025,7 @@ export default function(Module) {
      */
     table.prototype.delete = function() {
         if (this.views.length > 0) {
-            throw "Table still has contexts - refusing to delete.";
+            throw `Cannot delete Table as it still has ${this.views.length} registered View(s).`;
         }
         _remove_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
@@ -1126,15 +1085,14 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this
      * {@link module:perspective~table}'s schema.
      */
-    table.prototype.schema = function(computed = false, override = true) {
+    table.prototype.schema = function(override = true) {
         let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
         let new_schema = {};
-        const computed_schema = this.computed_schema();
         for (let key = 0; key < columns.size(); key++) {
             const name = columns.get(key);
-            if (name === "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
+            if (name === "psp_okey") {
                 continue;
             }
             if (override && this.overridden_types[name]) {
@@ -1150,36 +1108,74 @@ export default function(Module) {
     };
 
     /**
-     * The computed schema of this {@link module:perspective~table}. Returns a
-     * schema of only computed columns added by the user, the keys of which are
-     * computed columns and the values an Object containing the associated
-     * column_name, column_type, and computation.
+     * Given an array of computed column definitions, perform type lookups to
+     * create a schema for the computed column without calculating or
+     * constructing any new columns.
      *
      * @async
+     * @param {Array<Object>} computed_columns an array of computed column
+     * definitions.
      *
-     * @returns {Promise<Object>} A Promise of this
-     * {@link module:perspective~table}'s computed schema.
+     * @returns {Promise<Object>} A Promise that resolves to a computed schema
+     * based on the computed column definitions provided.
      */
-    table.prototype.computed_schema = function() {
-        if (this.computed.length < 0) return {};
+    table.prototype.computed_schema = function(computed_columns, override = true) {
+        const new_schema = {};
 
-        const computed_schema = {};
+        if (!computed_columns || computed_columns.length === 0) return new_schema;
 
-        for (let i = 0; i < this.computed.length; i++) {
-            const column_name = this.computed[i].column;
-            const column_type = this.computed[i].type;
+        // Before passing into C++, transform array of objects into vector of
+        // Tuples expected by the Emscripten binding function.
+        let vector = __MODULE__.make_2d_val_vector();
 
-            const column = {};
-
-            column.type = column_type;
-            column.input_columns = this.computed[i].inputs;
-            column.input_type = this.computed[i].input_type;
-            column.computation = this.computed[i].computation;
-
-            computed_schema[column_name] = column;
+        for (let computed of computed_columns) {
+            let computed_vector = __MODULE__.make_val_vector();
+            computed_vector.push_back(computed.column);
+            computed_vector.push_back(computed.computed_function_name);
+            computed_vector.push_back(computed.inputs);
+            vector.push_back(computed_vector);
         }
 
-        return computed_schema;
+        let computed_schema = __MODULE__.get_table_computed_schema(this._Table, vector);
+        let columns = computed_schema.columns();
+        let types = computed_schema.types();
+
+        for (let key = 0; key < columns.size(); key++) {
+            const name = columns.get(key);
+            const type = types.get(key);
+            if (override && this.overridden_types[name]) {
+                new_schema[name] = this.overridden_types[name];
+            } else {
+                new_schema[name] = get_column_type(type.value);
+            }
+        }
+
+        computed_schema.delete();
+        columns.delete();
+        types.delete();
+
+        return new_schema;
+    };
+
+    /**
+     * Given a computed function name, return an array of strings containing
+     * the expected input column types for the computed function.
+     *
+     * @private
+     * @async
+     * @param {String} computed_function_name
+     * @returns {Promise<Array<String>>}
+     */
+    table.prototype.get_computation_input_types = function(computed_function_name) {
+        const types = __MODULE__.get_computation_input_types(computed_function_name);
+        const new_types = [];
+
+        for (let i = 0; i < types.size(); i++) {
+            const type = types.get(i);
+            new_types.push(get_column_type(type.value));
+        }
+
+        return new_types;
     };
 
     /**
@@ -1201,7 +1197,8 @@ export default function(Module) {
         }
 
         const schema = this.schema();
-        if (schema[filter[0]] === "date" || schema[filter[0]] === "datetime") {
+        const exists = schema[filter[0]];
+        if (exists && (schema[filter[0]] === "date" || schema[filter[0]] === "datetime")) {
             value = new DateParser().parse(value);
         }
 
@@ -1282,10 +1279,16 @@ export default function(Module) {
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
+        config.computed_columns = config.computed_columns || [];
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
-            config.columns = this.columns(true);
+            config.columns = this.columns();
+            if (config.computed_columns.length > 0) {
+                for (let col of config.computed_columns) {
+                    config.columns.push(col.column);
+                }
+            }
         }
 
         let name = Math.random() + "";
@@ -1399,7 +1402,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.computed, this.index || "", this.limit, op, true, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1439,7 +1442,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, undefined, this.index || "", this.limit, op, false, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1449,33 +1452,28 @@ export default function(Module) {
     };
 
     /**
-     * Create a new table with the addition of new computed columns (defined as
-     * javascript functions)
+     * Return an Object containing computed function metadata. Keys are strings,
+     * and each value is an Object containing the following metadata:
      *
-     * @param {Computation} computed A computation specification object
+     * - computed_function_name: the name of the computed function
+     * - input_type: the type of its input columns (all input columns are of
+     * the same type)
+     * - return_type: the return type of its output column
+     * - group: a category for the function
+     * - num_params: the number of input parameters
+     * - format_function: an anonymous function used for naming new columns
      */
-    table.prototype.add_computed = function(computed) {
-        let _Table;
-
-        for (let c of computed) {
-            if (c["computed_function_name"]) {
-                c["computed_function_name"] = name_to_computation(c["computed_function_name"]);
+    table.prototype.get_computed_functions = function() {
+        const two_params = ["add", "subtract", "multiply", "divide", "percent_a_of_b", "concat_space", "concat_comma"];
+        let functions = extract_map(__MODULE__.get_computed_functions());
+        for (const f in functions) {
+            if (functions.hasOwnProperty(f)) {
+                functions[f] = extract_map(functions[f]);
+                functions[f]["num_params"] = two_params.includes(f) ? 2 : 1;
             }
         }
-
-        try {
-            _call_process(this._Table.get_id());
-            _Table = __MODULE__.make_computed_table(this._Table, computed);
-            if (this.computed.length > 0) {
-                computed = this.computed.concat(computed);
-            }
-            return new table(_Table, this.index, computed, this.limit, this.overridden_types);
-        } catch (e) {
-            if (_Table) {
-                _Table.delete();
-            }
-            throw e;
-        }
+        console.log(functions);
+        return functions;
     };
 
     /**
@@ -1487,14 +1485,13 @@ export default function(Module) {
      * @returns {Promise<Array<string>>} An array of column names for this
      * table.
      */
-    table.prototype.columns = function(computed = false) {
+    table.prototype.columns = function() {
         let schema = this._Table.get_schema();
-        let computed_schema = this.computed_schema();
         let cols = schema.columns();
         let names = [];
         for (let cidx = 0; cidx < cols.size(); cidx++) {
             let name = cols.get(cidx);
-            if (name !== "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
+            if (name !== "psp_okey") {
                 names.push(name);
             }
         }
@@ -1589,7 +1586,7 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                _Table = make_table(data_accessor, undefined, undefined, options.index, options.limit, op, false, is_arrow);
+                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow);
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {

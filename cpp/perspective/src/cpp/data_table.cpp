@@ -105,7 +105,7 @@ t_data_table::init() {
     m_columns = std::vector<std::shared_ptr<t_column>>(m_schema.size());
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(m_schema.size()), 1,
+    tbb::parallel_for(0, int(m_schema.size()), 1,
         [this](int idx)
 #else
     for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
@@ -159,11 +159,43 @@ t_data_table::get_dtype(const std::string& colname) const {
 }
 
 std::shared_ptr<t_column>
+t_data_table::get_column_safe(const std::string& colname) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx_safe(colname);
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
+}
+
+std::shared_ptr<t_column>
 t_data_table::get_column(const std::string& colname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
     return m_columns[idx];
+}
+
+std::shared_ptr<t_column>
+t_data_table::get_column(const std::string& colname) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx(colname);
+    return m_columns[idx];
+}
+
+std::shared_ptr<t_column>
+t_data_table::get_column_safe(const std::string& colname) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx_safe(colname);
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
 }
 
 std::shared_ptr<const t_column>
@@ -175,10 +207,33 @@ t_data_table::get_const_column(const std::string& colname) const {
 }
 
 std::shared_ptr<const t_column>
+t_data_table::get_const_column_safe(const std::string& colname) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex idx = m_schema.get_colidx_safe(colname);
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
+}
+
+std::shared_ptr<const t_column>
 t_data_table::get_const_column(t_uindex idx) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns[idx];
+}
+
+std::shared_ptr<const t_column>
+t_data_table::get_const_column_safe(t_uindex idx) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    if (idx == -1) {
+        return nullptr;
+    } else {
+        return m_columns[idx];
+    }
 }
 
 std::vector<t_column*>
@@ -387,7 +442,7 @@ t_data_table::append(const t_data_table& other) {
     }
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(src_cols.size()), 1,
+    tbb::parallel_for(0, int(src_cols.size()), 1,
         [&src_cols, dst_cols](int colidx)
 #else
     for (t_uindex colidx = 0, loop_end = src_cols.size(); colidx < loop_end; ++colidx)
@@ -527,6 +582,28 @@ t_data_table::clone() const {
     return rval;
 }
 
+std::shared_ptr<t_data_table>
+t_data_table::borrow(const std::vector<std::string>& columns) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    std::vector<t_dtype> dtypes;
+
+    for (const auto& col : columns) {
+        dtypes.push_back(m_schema.get_dtype(col));
+    }
+
+    t_schema borrowed_schema = t_schema(columns, dtypes);
+    auto rval = std::make_shared<t_data_table>("", "", borrowed_schema, 5, BACKING_STORE_MEMORY);
+    rval->init();
+
+    for (const auto& cname : borrowed_schema.m_columns) {
+        rval->set_column(cname, get_column(cname));
+    }
+
+    rval->set_size(size());
+    return rval;
+}
+
 std::shared_ptr<t_column>
 t_data_table::add_column_sptr(const std::string& name, t_dtype dtype, bool status_enabled) {
     PSP_TRACE_SENTINEL();
@@ -546,6 +623,19 @@ t_data_table::add_column_sptr(const std::string& name, t_dtype dtype, bool statu
 t_column*
 t_data_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled) {
     return add_column_sptr(name, dtype, status_enabled).get();
+}
+
+void
+t_data_table::drop_column(const std::string& name) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+
+    if (m_schema.has_column(name)) {
+        auto idx = m_schema.get_colidx(name);
+        auto col = m_columns[idx];
+        // FIXME: make sure that we can erase columns from m_schema eventually.
+        m_columns[idx]->clear();
+    }
 }
 
 void

@@ -164,26 +164,20 @@ namespace binding {
     void set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, T value);
 
     /**
-     * @brief Create a computed column.
+     * @brief Return a map of computed function metadata for use in the binding
+     * language. Keys are strings that map to maps containing strings of
+     * the following metadata:
      * 
-     * @tparam T 
-     * @param table 
-     * @param row_indices 
-     * @param computed_def 
-     */
-    template <typename T>
-    void add_computed_column(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices, T computed_def);
-
-    /**
-     * @brief Given a list of computed column declarations in the binding language, convert them to C++ lambdas that allow
-     * access from deeper inside the engine without importing the semantics of t_val. 
+     * - computed_function_name: the name of the computed function
+     * - input_type: the type of its input columns (all input columns are of
+     * the same type)
+     * - return_type: the return type of its output column
+     * - group: a category for the function
      * 
-     * @tparam T 
-     * @param computed 
-     * @return std::vector<t_computed_column_lambda> 
+     * @return std::map<std::string, std::map<std::string, std::string>> 
      */
-    template <typename T>
-    std::vector<t_computed_column_lambda> make_computed_lambdas(std::vector<T> computed);
+    std::map<std::string, std::map<std::string, std::string>>
+    get_computed_functions();
 
     /**
      * @brief Utility function for accessing columns and adding data.
@@ -212,7 +206,14 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_data_table& tbl, T accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_update);
+    void _fill_data(
+        t_data_table& tbl,
+        T accessor,
+        const t_schema& input_schema,
+        const std::string& index,
+        std::uint32_t offset,
+        std::uint32_t limit,
+        bool is_update);
 
     /**
      * @brief Create and populate a table.
@@ -221,7 +222,6 @@ namespace binding {
      * @param pool
      * @param gnode
      * @param accessor
-     * @param computed
      * @param limit
      * @param index
      * @param is_update
@@ -229,21 +229,14 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> make_table(T table, T accessor, T computed,
-        std::uint32_t limit, const std::string& index, t_op op, bool is_update, bool is_arrow);
-
-    /**
-     * @brief Given an array-like container with new computed columns, add them to the
-     * already-existing `Table`.
-     *
-     * @tparam T
-     * @param pool
-     * @param gnode
-     * @param computed
-     * @return std::shared_ptr<t_gnode>
-     */
-    template <typename T>
-    std::shared_ptr<Table> make_computed_table(std::shared_ptr<Table> table, T computed);
+    std::shared_ptr<Table> make_table(
+        T table,
+        T accessor,
+        std::uint32_t limit,
+        const std::string& index,
+        t_op op,
+        bool is_update,
+        bool is_arrow);
 
     /******************************************************************************
      *
@@ -294,7 +287,7 @@ namespace binding {
      */
     template <typename T>
     std::shared_ptr<t_view_config> make_view_config(
-        const t_schema& schema, T date_parser, T config);
+        std::shared_ptr<t_schema> schema, T date_parser, T config);
 
     /**
      * @brief Create a new view.
@@ -334,9 +327,35 @@ namespace binding {
     template <typename CTX_T>
     std::shared_ptr<CTX_T> make_context(
         std::shared_ptr<Table> table,
-        const t_schema& schema,
+        std::shared_ptr<t_schema> schema,
         std::shared_ptr<t_view_config> view_config,
         const std::string& name);
+
+    /**
+     * @brief Given a table and a vector of computed column definitions,
+     * get a `t_schema` containing the return types of computed columns
+     * without constructing/calculating the computed column.
+     * 
+     * @tparam T 
+     * @param table 
+     * @param j_computed_columns 
+     * @return t_schema 
+     */
+    template <typename T>
+    t_schema
+    get_table_computed_schema(
+        std::shared_ptr<Table> table,
+        std::vector<std::vector<T>> j_computed_columns);
+
+    /**
+     * @brief Given a string that resolves to a valid computed function name,
+     * return a vector of its accepted input column types.
+     * 
+     * @param computed_function_name 
+     * @return std::vector<t_dtype> 
+     */
+    std::vector<t_dtype>
+    get_computation_input_types(const std::string& computed_function_name);
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.

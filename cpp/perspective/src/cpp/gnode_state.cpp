@@ -113,8 +113,8 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
     // insert into empty `m_table`
     m_free.clear();
     m_mapping.clear();
-   
-    const t_schema& master_schema = m_table->get_schema();
+
+    const t_schema& master_table_schema = m_table->get_schema();
 
     auto flattened_pkey_col = flattened->get_const_column("psp_pkey").get();
     auto flattened_op_col = flattened->get_const_column("psp_op").get();
@@ -123,16 +123,17 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
     auto master_table = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ncols), 1,
-        [&master_table, &master_schema, &flattened](int idx)
+    tbb::parallel_for(0, int(ncols), 1,
+        [&master_table, &master_table_schema, &flattened](int idx)
 #else
     for (t_uindex idx = 0; idx < ncols; ++idx)
 #endif
         {
             // Clone each column from flattened into `m_table`
-            const std::string& column_name = master_schema.m_columns[idx];
-            master_table->set_column(
-                idx, flattened->get_const_column(column_name)->clone());
+            const std::string& column_name = master_table_schema.m_columns[idx];
+            // No need for safe lookup as master_table schema == flattened schema
+            const t_column* flattened_column = flattened->get_const_column(column_name).get();
+            master_table->set_column(idx, flattened_column->clone());
         }
 #ifdef PSP_PARALLEL_FOR
     );
@@ -210,7 +211,7 @@ t_gstate::update_master_table(const t_data_table* flattened) {
     const t_schema& master_schema = m_table->get_schema();
     t_uindex ncols = master_table->num_columns();
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ncols), 1,
+    tbb::parallel_for(0, int(ncols), 1,
         [flattened, flattened_op_col, &master_schema, &master_table, &master_table_indexes, this](int idx)
 #else
     for (t_uindex idx = 0; idx < ncols; ++idx)
@@ -218,10 +219,17 @@ t_gstate::update_master_table(const t_data_table* flattened) {
         {
             const std::string& column_name = master_schema.m_columns[idx];
             t_column* master_column = master_table->get_column(column_name).get();
-            const t_column* flattened_column = flattened->get_const_column(column_name).get();
+            auto flattened_column = flattened->get_const_column_safe(column_name);
+            if (!flattened_column) {
+            #ifdef PSP_PARALLEL_FOR
+                return;
+            #else
+                continue;
+            #endif
+            }
             update_master_column(
                 master_column,
-                flattened_column,
+                flattened_column.get(),
                 flattened_op_col,
                 master_table_indexes,
                 flattened->num_rows());
@@ -563,7 +571,7 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
     const t_data_table* tbl = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(o_ncols), 1,
+    tbb::parallel_for(0, int(o_ncols), 1,
         [&sch_cols, rval, tbl, &mask](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < o_ncols; ++colidx)

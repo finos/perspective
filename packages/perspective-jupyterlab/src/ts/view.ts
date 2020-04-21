@@ -29,8 +29,8 @@ export class PerspectiveView extends DOMWidgetView {
             aggregates: this.model.get("aggregates"),
             sort: this.model.get("sort"),
             filters: this.model.get("filters"),
+            computed_columns: this.model.get("computed_columns"),
             plugin_config: this.model.get("plugin_config"),
-            computed_columns: [],
             client: this.model.get("client"),
             dark:
                 this.model.get("dark") === null // only set if its a bool, otherwise inherit
@@ -95,6 +95,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:aggregates", this.aggregates_changed, this);
         this.model.on("change:sort", this.sort_changed, this);
         this.model.on("change:filters", this.filters_changed, this);
+        this.model.on("change:computed_columns", this.computed_columns_changed, this);
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:dark", this.dark_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
@@ -104,7 +105,7 @@ export class PerspectiveView extends DOMWidgetView {
         const observer = new MutationObserver(this._synchronize_state.bind(this));
         observer.observe(this.pWidget.viewer, {
             attributes: true,
-            attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters"],
+            attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters", "computed-columns"],
             subtree: false
         });
 
@@ -220,6 +221,10 @@ export class PerspectiveView extends DOMWidgetView {
 
     filters_changed() {
         this.pWidget.filters = this.model.get("filters");
+    }
+
+    computed_columns_changed() {
+        this.pWidget.computed_columns = this.model.get("computed_columns");
     }
 
     plugin_config_changed() {

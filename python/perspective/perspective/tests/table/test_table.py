@@ -317,7 +317,7 @@ class TestTable(object):
 
         tbl = Table(data)
 
-        assert tbl.schema(True) == {
+        assert tbl.schema(as_string=True) == {
             "a": "integer",
             "b": "float",
             "c": "string",
@@ -363,7 +363,7 @@ class TestTable(object):
         }
 
         tbl = Table(data)
-        schema = tbl.schema(True)
+        schema = tbl.schema(as_string=True)
 
         assert schema == {
             "a": "integer",
@@ -376,7 +376,7 @@ class TestTable(object):
 
         tbl2 = Table(schema)
 
-        assert tbl2.schema(True) == schema
+        assert tbl2.schema(as_string=True) == schema
 
     def test_table_long_schema(self):
         if six.PY2:
@@ -469,6 +469,12 @@ class TestTable(object):
             "a": datetime
         })
         assert tbl.is_valid_filter(filter) is False
+
+    def test_table_is_valid_filter_ignores_not_in_schema(self):
+        filter = ["not in schema", "<", 1]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.is_valid_filter(filter) is True
 
     # index
 

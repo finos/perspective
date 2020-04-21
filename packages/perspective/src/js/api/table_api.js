@@ -56,35 +56,6 @@ export function table(worker, data, options) {
 table.prototype.type = "table";
 
 /**
- * Create a new computed table, serializing each computation to a string for
- * processing by the engine.
- *
- * @param {*} worker
- * @param {*} computed
- * @param {*} name
- */
-function computed_table(worker, computed, name) {
-    this._worker = worker;
-    this._name = Math.random() + "";
-    let original = name;
-    // serialize functions
-    for (let i = 0; i < computed.length; ++i) {
-        let column = computed[i];
-        let func = column["func"];
-        if (typeof func == "function") {
-            column["func"] = func.toString();
-        }
-    }
-    var msg = {
-        cmd: "add_computed",
-        original: original,
-        name: this._name,
-        computed: computed
-    };
-    this._worker.post(msg);
-}
-
-/**
  * Create a reference to a Perspective table at `worker` for use by remote
  * clients.
  *
@@ -96,14 +67,9 @@ export function proxy_table(worker, name) {
     this._name = name;
 }
 
-computed_table.prototype = table.prototype;
 proxy_table.prototype = table.prototype;
 
 // Dispatch table methods that create new objects to the worker
-table.prototype.add_computed = function(computed) {
-    return new computed_table(this._worker, computed, this._name);
-};
-
 table.prototype.view = function(config) {
     return new view(this._worker, this._name, config);
 };
@@ -116,6 +82,10 @@ table.prototype.compute = async_queue("compute", "table_method");
 table.prototype.schema = async_queue("schema", "table_method");
 
 table.prototype.computed_schema = async_queue("computed_schema", "table_method");
+
+table.prototype.get_computation_input_types = async_queue("get_computation_input_types", "table_method");
+
+table.prototype.get_computed_functions = async_queue("get_computed_functions", "table_method");
 
 table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
 

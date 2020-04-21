@@ -470,6 +470,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
 	${PSP_CPP_SRC}/src/cpp/computed.cpp
+	${PSP_CPP_SRC}/src/cpp/computed_column_map.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_function.cpp
 	${PSP_CPP_SRC}/src/cpp/config.cpp
 	${PSP_CPP_SRC}/src/cpp/context_base.cpp
@@ -537,6 +538,7 @@ set (SOURCE_FILES
 
 set (PYTHON_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
+	${PSP_PYTHON_SRC}/src/computed.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
 	${PSP_PYTHON_SRC}/src/fill.cpp
 	${PSP_PYTHON_SRC}/src/numpy.cpp

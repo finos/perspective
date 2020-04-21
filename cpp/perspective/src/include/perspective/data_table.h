@@ -56,27 +56,47 @@ public:
     PSP_NEW_DELETE(t_data_table)
 #endif
     PSP_NON_COPYABLE(t_data_table);
-    t_data_table(const t_schema& s, t_uindex capacity = DEFAULT_EMPTY_CAPACITY);
-    // Only use in tests, it inits the table unlike other constructors
-    t_data_table(const t_schema& s, const std::vector<std::vector<t_tscalar>>& v);
 
-    t_data_table(const std::string& name, const std::string& dirname, const t_schema& s,
+    t_data_table(
+        const t_schema& s, t_uindex capacity = DEFAULT_EMPTY_CAPACITY);
+
+    // Only use in tests, it inits the table unlike other constructors
+    t_data_table(
+        const t_schema& s, const std::vector<std::vector<t_tscalar>>& v);
+
+    t_data_table(
+        const std::string& name, const std::string& dirname, const t_schema& s,
         t_uindex init_cap, t_backing_store backing_store);
     ~t_data_table();
 
-    const std::string& name() const;
     void init();
+
+    const std::string& name() const;
+
     t_uindex num_columns() const;
     t_uindex num_rows() const;
+
     const t_schema& get_schema() const;
+
     t_uindex size() const;
     t_uindex get_capacity() const;
     t_dtype get_dtype(const std::string& colname) const;
 
     std::shared_ptr<t_column> get_column(const std::string& colname);
+
+    std::shared_ptr<t_column> get_column_safe(const std::string& colname);
+
+    std::shared_ptr<t_column> get_column(const std::string& colname) const;
+
+    std::shared_ptr<t_column> get_column_safe(const std::string& colname) const;
+
     std::shared_ptr<const t_column> get_const_column(const std::string& colname) const;
 
+    std::shared_ptr<const t_column> get_const_column_safe(const std::string& colname) const;
+
     std::shared_ptr<const t_column> get_const_column(t_uindex idx) const;
+
+    std::shared_ptr<const t_column> get_const_column_safe(t_uindex idx) const;
 
     // Only increment capacity
     void reserve(t_uindex nelems);
@@ -103,25 +123,63 @@ public:
     void clear();
     void reset();
 
-    t_mask filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fops) const;
+    t_mask filter_cpp(
+        t_filter_op combiner, const std::vector<t_fterm>& fops) const;
     t_data_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone() const;
 
-    t_column* clone_column(const std::string& existing_col, const std::string& new_colname);
+    /**
+     * @brief Create a new `t_data_table` from the specified schema. For each
+     * column in the schema, retrieve a shared pointer to the current instance's
+     * column, and set it in the new `t_data_table` to be returned.
+     * 
+     * @return std::shared_ptr<t_data_table> 
+     */
+    std::shared_ptr<t_data_table> borrow(
+        const std::vector<std::string>& columns) const;
+
+    t_column* clone_column(
+        const std::string& existing_col, const std::string& new_colname);
 
     std::vector<const t_column*> get_const_columns() const;
     std::vector<t_column*> get_columns();
 
     void set_column(t_uindex idx, std::shared_ptr<t_column> col);
     void set_column(const std::string& name, std::shared_ptr<t_column> col);
-    std::shared_ptr<t_column> add_column_sptr(const std::string& cname, t_dtype dtype, bool status_enabled);
-    t_column* add_column(const std::string& cname, t_dtype dtype, bool status_enabled);
+
+    std::shared_ptr<t_column> add_column_sptr(
+        const std::string& cname, t_dtype dtype, bool status_enabled);
+
+    t_column* add_column(
+        const std::string& cname, t_dtype dtype, bool status_enabled);
+
     void promote_column(
         const std::string& cname, t_dtype new_dtype, std::int32_t iter_limit, bool fill);
 
     std::shared_ptr<t_column> make_column(
         const std::string& colname, t_dtype dtype, bool status_enabled);
+
+    /**
+     * @brief Given a column name, clear the underlying column but do not
+     * mutate the `t_data_table` instance's `m_schema` and `m_columns`. Use
+     * `t_data_table::reindex` with a vector of column names signifying
+     * dropped columns that can be cleared by mutating `m_schema` and
+     * `m_columns`.
+     * 
+     * @param name 
+     */
+    void drop_column(const std::string& name);
+
+    /**
+     * @brief Given a vector of column names marking dropped columns,
+     * mutate the instance's `m_schema` and `m_columns` to ensure that column
+     * indices belonging to deleted columns are dropped, and that new column
+     * indices are assigned sequentially.
+     * 
+     * @param dropped_columns 
+     */
+    void reindex(const std::vector<std::string&> dropped_columns);
 
     void verify() const;
     void set_capacity(t_uindex idx);
@@ -347,7 +405,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     t_uindex ndata_cols = d_columns.size();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(ndata_cols), 1,
+    tbb::parallel_for(0, int(ndata_cols), 1,
         [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ndata_cols; ++colidx)
@@ -407,7 +465,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
 #endif
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0, int(m_schema.get_num_columns()),
+    tbb::parallel_for(0, int(m_schema.get_num_columns()),
         [&flattened, this](int colidx)
 #else
     for (t_uindex colidx = 0, loop_end = m_schema.get_num_columns(); colidx < loop_end;

@@ -27,9 +27,9 @@ export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, 
     readonly table?: Table;
 }
 interface ComputedColumn {
-    name: string;
+    column: string;
     inputs: string[];
-    func: string;
+    computed_function_name: string;
 }
 
 export type Filters = Array<[string, string, string]>;

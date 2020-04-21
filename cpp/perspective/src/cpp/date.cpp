@@ -73,7 +73,7 @@ t_date::get_tm() const {
     std::tm rval;
 
     rval.tm_year = year() - 1900; // tm years are since 1900
-    rval.tm_mon = month() - 1; // tm months from 0
+    rval.tm_mon = month(); // tm months from 0, so no need to decrement
     rval.tm_mday = day();
     rval.tm_hour = 0;
     rval.tm_min = 0;
@@ -141,7 +141,7 @@ t_date::day() const {
 std::string
 t_date::str() const {
     std::stringstream ss;
-    ss << year() << "-" << str_(month()) << "-" << str_(day());
+    ss << year() << "-" << str_(month() + 1) << "-" << str_(day());
     return ss.str();
 }
 

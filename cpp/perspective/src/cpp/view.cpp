@@ -52,6 +52,7 @@ View<CTX_T>::View(
     m_columns = m_view_config->get_columns();
     m_filter = m_view_config->get_fterm();
     m_sort = m_view_config->get_sortspec();
+    m_computed_columns = m_view_config->get_computed_columns();
 
     // Add hidden columns used in sorts to the `m_hidden_sort` vector.
     if (m_sort.size() > 0) {
@@ -65,14 +66,19 @@ View<CTX_T>::View(
 
     // configure data window for `get_data` and `row_delta`
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
+
     // TODO: make sure is 0 for column only - right now get_data returns row path for everything
     sides() > 0 ? m_col_offset = 1 : m_col_offset = 0;
+
+    // TODO: add index shifting ability
 }
 
 template <typename CTX_T>
 View<CTX_T>::~View() {
     auto pool = m_table->get_pool();
     auto gnode = m_table->get_gnode();
+    // TODO: need to invalidate memory used by previous computed columns
+    // without affecting views that depend on those computed columns.
     pool->unregister_context(gnode->get_id(), m_name);
 }
 
@@ -228,7 +234,8 @@ View<CTX_T>::column_paths() const {
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
-    auto schema = m_table->get_schema();
+    // TODO: should revert to m_table
+    auto schema = m_ctx->get_schema();
     auto _types = schema.types();
     auto names = schema.columns();
 
@@ -257,7 +264,7 @@ View<CTX_T>::schema() const {
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() const {
-    t_schema schema = m_table->get_schema();
+    t_schema schema = m_ctx->get_schema();
     std::vector<t_dtype> _types = schema.types();
     std::vector<std::string> names = schema.columns();
 
@@ -274,6 +281,54 @@ View<t_ctx0>::schema() const {
         if (name == "psp_okey") {
             continue;
         }
+        new_schema[name] = dtype_to_str(types[name]);
+    }
+
+    return new_schema;
+}
+
+
+template <typename CTX_T>
+std::map<std::string, std::string>
+View<CTX_T>::computed_schema() const {
+    auto schema = m_ctx->get_schema();
+    auto _types = schema.types();
+    auto names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    for (const auto& c : m_computed_columns) {
+        std::string name = std::get<0>(c);
+        new_schema[name] = dtype_to_str(types[name]);
+
+        if (m_row_pivots.size() > 0 && !is_column_only()) {
+            new_schema[name] = _map_aggregate_types(name, new_schema[name]);
+        }
+    }
+
+    return new_schema;
+}
+
+template <>
+std::map<std::string, std::string>
+View<t_ctx0>::computed_schema() const {
+    t_schema schema = m_ctx->get_schema();
+    std::vector<t_dtype> _types = schema.types();
+    std::vector<std::string> names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    std::map<std::string, std::string> new_schema;
+    for (const auto& c : m_computed_columns) {
+        std::string name = std::get<0>(c);
         new_schema[name] = dtype_to_str(types[name]);
     }
 
@@ -638,6 +693,12 @@ template <typename CTX_T>
 std::vector<t_sortspec>
 View<CTX_T>::get_sort() const {
     return m_sort;
+}
+
+template <typename CTX_T>
+std::vector<t_computed_column_definition>
+View<CTX_T>::get_computed_columns() const {
+    return m_computed_columns;
 }
 
 template <>
