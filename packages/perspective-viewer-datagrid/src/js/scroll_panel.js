@@ -77,8 +77,8 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
                 ${CONTAINER_STYLE + MATERIAL_STYLE}
             </style>
             <div class="pd-scroll-container">
-                <div class="pd-virtual-panel">${this._virtual_scrolling_disabled && slot}</div>
-                <div class="pd-scroll-table-clip">${this._virtual_scrolling_disabled || slot}</div>
+                <div class="pd-virtual-panel">${this._virtual_scrolling_disabled ? slot : ""}</div>
+                <div class="pd-scroll-table-clip">${this._virtual_scrolling_disabled ? "" : slot}</div>
                 <div style="position: absolute; visibility: hidden;"></div>
             </div>
         `;
