@@ -13,17 +13,18 @@ from datetime import datetime
 DATE_DTYPES = [np.dtype("datetime64[D]"), np.dtype("datetime64[W]"), np.dtype("datetime64[M]"), np.dtype("datetime64[Y]")]
 
 
-def deconstruct_numpy(array):
-    '''Given a numpy array, parse it and return the data as well as a numpy
-    array of null indices.
+def make_null_mask(array):
+    """Given a numpy array, return a numpy array of int64s containing the
+    indices of `array` where the value is either invalid or null.
+
+    Invalid values are:
+        - None
+        - numpy.nat
+        - numpy.nan
 
     Args:
-        array (numpy.array)
-
-    Returns:
-        `dict`: `array` is the original array, and `mask` is an array of
-            booleans where `True` represents a nan/None value.
-    '''
+        array (:obj:`numpy.array`)
+    """
     mask = []
 
     is_object_or_string_dtype = np.issubdtype(array.dtype, np.str_) or\
@@ -46,6 +47,26 @@ def deconstruct_numpy(array):
 
         if invalid:
             mask.append(i)
+
+    return mask
+
+
+def deconstruct_numpy(array, mask=None):
+    '''Given a numpy array, parse it and return the data as well as a numpy
+    array of null indices.
+
+    Args:
+        array (:obj:`numpy.array`)
+
+    Keyword Args:
+        mask (:obj:`numpy.array`)
+
+    Returns:
+        (:obj:`dict`): `array` is the original array, and `mask` is an array of
+            booleans where `True` represents a nan/None value.
+    '''
+    if mask is None:
+        mask = make_null_mask(array)
 
     if array.dtype == bool or array.dtype == "?":
         # bool => byte

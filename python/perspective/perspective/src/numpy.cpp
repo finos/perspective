@@ -19,7 +19,6 @@ namespace numpy {
 
     NumpyLoader::NumpyLoader(py::object accessor)
         : m_init(false)
-        , m_has_numeric_dtype(false)
         , m_accessor(accessor) {}
 
     NumpyLoader::~NumpyLoader() {}
@@ -29,12 +28,6 @@ namespace numpy {
         m_names = make_names();
         m_types = make_types();
         m_init = true;
-    }
-
-    bool
-    NumpyLoader::has_numeric_dtype() const {
-        PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-        return m_has_numeric_dtype;
     }
 
     std::vector<t_dtype> 

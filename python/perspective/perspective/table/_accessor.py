@@ -13,7 +13,7 @@ from distutils.util import strtobool
 from math import isnan
 
 from ._date_validator import _PerspectiveDateValidator
-from ..core.data import deconstruct_numpy, deconstruct_pandas
+from ..core.data import deconstruct_numpy, make_null_mask, deconstruct_pandas
 from ..core.data.pd import _parse_datetime_index
 from ..core.exception import PerspectiveError
 from .libbinding import t_dtype
@@ -121,6 +121,11 @@ class _PerspectiveAccessor(object):
                 # keep a string representation of the dtype, as PyBind only has
                 # access to the char dtype code
                 self._types.append(str(dtype))
+
+        # When numpy arrays are cast from float to int, NaNs are lost. Use this
+        # map to store the pre-cast masks, as we know the indices of NaNs do
+        # not change when we cast from float to int.
+        self._numpy_column_masks = {}
 
     def data(self):
         return self._data_or_schema
@@ -232,12 +237,42 @@ class _PerspectiveAccessor(object):
 
         return val
 
+    def try_cast_numpy_arrays(self):
+        """When a numpy dataset is used to update, and when self._types
+        contains t_dtype objects from Perspective's already-initialized table,
+        use perspective dtypes and numpy dtypes to cast trivially comparable
+        dtypes to avoid iterative fills in C++.
+        """
+        for i in range(len(self._names)):
+            name = self._names[i]
+
+            if name == "__INDEX__":
+                # Don't try to coerce implicit index column
+                continue
+
+            array = self._data_or_schema.get(name, None)
+
+            if array is None:
+                continue
+
+            type = self._types[i]
+
+            if array.dtype == numpy.float64 and type == t_dtype.DTYPE_INT64:
+                # masking will take care of the `nan`/None values in the array
+                # when the conversion to int64 garbles them
+                mask = make_null_mask(array)
+                self._numpy_column_masks[name] = mask
+                self._data_or_schema[name] = numpy.int64(array)
+            elif array.dtype == numpy.int64 and type == t_dtype.DTYPE_FLOAT64:
+                # there cannot be `nan` values in int64
+                self._data_or_schema[name] = array.astype(numpy.float64)
+
     def _get_numpy_column(self, name):
         '''For columnar datasets, return the :obj:`list`/Numpy array that
         contains the data for a single column.
 
         Args:
-            name (:obj:`str)`: the column name to look up
+            name (:obj:`str`): the column name to look up
 
         Returns:
             (:obj:`list`/numpy.array/None): returns the column's data, or None
@@ -246,7 +281,8 @@ class _PerspectiveAccessor(object):
         data = self._data_or_schema.get(name, None)
         if data is None:
             raise PerspectiveError("Column `{0}` does not exist.".format(name))
-        return deconstruct_numpy(data)
+        mask = self._numpy_column_masks.get(name, None)
+        return deconstruct_numpy(data, mask)
 
     def _has_column(self, ridx, name):
         '''Given a column name, validate that it is in the row.
