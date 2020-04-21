@@ -20,6 +20,7 @@ perspective-viewer > div {
 
 
 perspective-viewer, :host {
+
     
     th {
         text-align: center;
@@ -195,5 +196,23 @@ perspective-viewer, :host {
         top: 0;
         right: 0;
         cursor: col-resize;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    :hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.3);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0,0,0,0);
+    }
+
+    ::-webkit-scrollbar-corner {
+        background-color: rgba(0,0,0,0);
     }
 }
