@@ -208,7 +208,7 @@
         padding: 0px;
         width: 100%;
         margin: var(--column-container--margin, 8px 0px 0px 0px);
-        overflow-y: auto;
+        overflow-y: overlay;
         overflow-x: hidden;
         position: relative;
     }
@@ -453,5 +453,23 @@
         bottom: 0;
         width: 8px;
         cursor: col-resize;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    :hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.3);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0,0,0,0);
+    }
+
+    ::-webkit-scrollbar-corner {
+        background-color: rgba(0,0,0,0);
     }
 }
