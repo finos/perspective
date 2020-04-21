@@ -156,11 +156,11 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         const header_levels = this._view_cache.config.column_pivots.length + 1;
         const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this._scroll_container.offsetHeight);
         const percent_scroll = this._scroll_container.scrollTop / total_scroll_height;
-        const virtual_panel_row_height = Math.floor(height / row_height);
+        const virtual_panel_row_height = height / row_height;
         const relative_nrows = !reset_scroll_position ? this._nrows || 0 : nrows;
         const scroll_rows = Math.max(0, relative_nrows + (header_levels - virtual_panel_row_height));
-        let start_row = Math.round(scroll_rows * percent_scroll);
-        let end_row = start_row + virtual_panel_row_height;
+        let start_row = Math.ceil(scroll_rows * percent_scroll);
+        let end_row = start_row + virtual_panel_row_height + 1;
         return {start_row, end_row};
     }
 
@@ -258,6 +258,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _swap_in(args) {
+        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {bubbles: true, detail: this}));
         if (!this._virtual_scrolling_disabled) {
             if (this._needs_swap(args)) {
                 if (this._sticky_container === this.table_model.table.parentElement) {
@@ -270,7 +271,6 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
                 }
             }
         }
-        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {bubbles: true, detail: this}));
     }
 
     /**
@@ -318,7 +318,9 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _update_virtual_panel_height(nrows) {
         const {row_height = 19} = this._column_sizes;
-        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height);
+        const {height} = this._container_size;
+        const zoom_factor = this._scroll_container.offsetHeight / (height - this.table_model.header.cells.length * row_height);
+        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height * zoom_factor);
         this._virtual_panel.style.height = `${virtual_panel_px_size}px`;
     }
 
