@@ -41,8 +41,7 @@ if __name__ == "__main__":
     for version in VERSIONS[1:]:
         print("Installing perspective-python=={}".format(version))
         subprocess.check_output(
-            "yes | python3 -m pip uninstall perspective-python".format(version),
-            shell=True)
+            "yes | python3 -m pip uninstall perspective-python", shell=True)
         subprocess.check_output(
             "yes | python3 -m pip install perspective-python=={}".format(version),
             shell=True)

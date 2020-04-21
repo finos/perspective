@@ -12,6 +12,7 @@ import signal
 import subprocess
 import venv
 import tornado
+from datetime import datetime
 from timeit import timeit
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler  # noqa: E402
@@ -207,8 +208,9 @@ class Runner(object):
     def write_results(self):
         if self._table is None:
             return
-        logging.info("Writing results to `benchmark.arrow`")
-        arrow_path = os.path.join(os.path.dirname(__file__), "benchmark.arrow")
+        name = "benchmark_{}_.arrow".format(datetime.now().isoformat())
+        logging.info("Writing results to `{}`".format(name))
+        arrow_path = os.path.join(os.path.dirname(__file__), name)
         with open(arrow_path, "wb") as file:
             arrow = self._table.view().to_arrow()
             file.write(arrow)
