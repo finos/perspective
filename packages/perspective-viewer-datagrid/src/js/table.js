@@ -65,7 +65,7 @@ export class DatagridTableViewModel {
         const {view, config, column_paths, schema, table_schema} = view_cache;
         const visible_columns = column_paths.slice(viewport.start_col);
         const columns_data = await view.to_columns(viewport);
-        const {start_row: ridx_offset, start_col: cidx_offset} = viewport;
+        const {start_row: ridx_offset = 0, start_col: cidx_offset = 0} = viewport;
         const depth = config.row_pivots.length;
         const id_column = columns_data["__ID__"];
         const view_state = {viewport_width: 0, selected_id, depth, ridx_offset, cidx_offset, row_height: this._column_sizes.row_height};

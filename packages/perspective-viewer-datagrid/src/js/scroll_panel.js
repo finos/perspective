@@ -295,18 +295,22 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _update_virtual_panel_width(invalid_schema) {
         if (invalid_schema) {
-            const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._container_size.width);
-            const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
-            const max_scroll_column = this._max_scroll_column();
-            let cidx = 0,
-                virtual_width = 0;
-            while (cidx < max_scroll_column) {
-                virtual_width += this._column_sizes.indices[cidx] || 60;
-                cidx++;
+            if (this._virtual_scrolling_disabled) {
+                this._virtual_panel.style.width = this._column_sizes.indices.reduce((x, y) => x + y, 0) + "px";
+            } else {
+                const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._container_size.width);
+                const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
+                const max_scroll_column = this._max_scroll_column();
+                let cidx = 0,
+                    virtual_width = 0;
+                while (cidx < max_scroll_column) {
+                    virtual_width += this._column_sizes.indices[cidx] || 60;
+                    cidx++;
+                }
+                const panel_width = this._container_size.width + virtual_width;
+                this._virtual_panel.style.width = panel_width + "px";
+                this._scroll_container.scrollLeft = percent_left * virtual_width;
             }
-            const panel_width = this._container_size.width + virtual_width;
-            this._virtual_panel.style.width = panel_width + "px";
-            this._scroll_container.scrollLeft = percent_left * virtual_width;
         }
     }
 
@@ -318,9 +322,15 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _update_virtual_panel_height(nrows) {
         const {row_height = 19} = this._column_sizes;
-        const {height} = this._container_size;
-        const zoom_factor = this._scroll_container.offsetHeight / (height - this.table_model.header.cells.length * row_height);
-        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height * zoom_factor);
+        const header_height = this.table_model.header.cells.length * row_height;
+        let virtual_panel_px_size;
+        if (this._virtual_scrolling_disabled) {
+            virtual_panel_px_size = nrows * row_height + header_height;
+        } else {
+            const {height} = this._container_size;
+            const zoom_factor = this._scroll_container.offsetHeight / (height - header_height);
+            virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height * zoom_factor);
+        }
         this._virtual_panel.style.height = `${virtual_panel_px_size}px`;
     }
 
