@@ -234,9 +234,13 @@ namespace binding {
                 std::int32_t bidx = offsets[i];
                 std::size_t es = offsets[i + 1] - bidx;
                 elem.assign(reinterpret_cast<char*>(data.data()) + bidx, es);
-                t_uindex idx = vocab->get_interned(elem);
+#ifdef PSP_DEBUG
                 // Make sure there are no duplicates in the arrow dictionary
+                t_uindex idx = vocab->get_interned(elem);
                 assert(idx == i);
+#else
+                vocab->get_interned(elem);
+#endif
             }
         }
     } // namespace arraybuffer
@@ -1321,7 +1325,7 @@ namespace binding {
         auto pkeyed_table = gnode->get_pkeyed_table_sptr();
         auto computed_defs = vecFromArray<t_val, t_val>(computed);
         auto computed_lambdas = make_computed_lambdas(computed_defs);
-        for (const auto lambda : computed_lambdas) {
+        for (const auto & lambda : computed_lambdas) {
             lambda(pkeyed_table, pkeyed_table, {});
         }
         table->add_computed_columns(pkeyed_table, computed_lambdas);

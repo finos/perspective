@@ -34,8 +34,8 @@ empty_callback() {
 }
 
 t_pool::t_pool()
-    : m_sleep(0)
-    , m_update_delegate(empty_callback()) {
+    : m_update_delegate(empty_callback()) 
+    , m_sleep(0) {
         m_run.clear();
     }
 
@@ -47,8 +47,8 @@ empty_callback() {
 }
 
 t_pool::t_pool()
-    : m_sleep(0)
-    , m_update_delegate(empty_callback()) {
+    : m_update_delegate(empty_callback())
+    , m_sleep(0) {
         m_run.clear();
     }
 

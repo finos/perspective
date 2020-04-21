@@ -187,9 +187,10 @@ t_computed_column::get_computed_function_string_1(t_computation computation) {
                 default: break;
             }
         } break;
-        default: PSP_COMPLAIN_AND_ABORT(
-            "Could not find computation function for arity 1, string.");
+        default: break;
     }
+    PSP_COMPLAIN_AND_ABORT(
+            "Could not find computation function for arity 1, string.");
 }
 
 std::function<void(t_tscalar, t_tscalar, std::int32_t idx, std::shared_ptr<t_column> output_column)>

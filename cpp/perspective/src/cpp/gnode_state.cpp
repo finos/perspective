@@ -113,7 +113,7 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
     // insert into empty `m_table`
     m_free.clear();
     m_mapping.clear();
-    const t_schema& flattened_schema = flattened->get_schema();
+   
     const t_schema& master_schema = m_table->get_schema();
 
     auto flattened_pkey_col = flattened->get_const_column("psp_pkey").get();

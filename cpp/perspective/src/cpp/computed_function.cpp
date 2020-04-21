@@ -700,9 +700,6 @@ t_tscalar month_bucket<DTYPE_TIME>(t_tscalar x) {
     // Cast the `time_point` to contain year/month/day
     auto ymd = date::year_month_day(days);
 
-    // Construct a new year_month_day
-    auto new_ymd = date::year_month_day(ymd.year(), ymd.month(), date::day(1));
-
     // Get the year and create a new `t_date`
     std::int32_t year = static_cast<std::int32_t>(ymd.year());
     std::int32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
@@ -788,9 +785,6 @@ void day_of_week<DTYPE_DATE>(
     date::month month {static_cast<std::uint32_t>(val.month()) + 1};
     date::day day {static_cast<std::uint32_t>(val.day())};
     date::year_month_day ymd(year, month, day);
-
-    // Convert to a `sys_days` representing no. of days since epoch
-    date::sys_days days_since_epoch = ymd;
 
     // Construct a `date::year_month_weekday` from `date::sys_days` since epoch
     auto weekday = date::year_month_weekday(ymd).weekday_indexed().weekday();
