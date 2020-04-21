@@ -261,7 +261,7 @@ t_aggspec::get_inv_mode() const {
 std::vector<std::string>
 t_aggspec::get_input_depnames() const {
     std::vector<std::string> rval;
-    for (const auto d : m_dependencies) {
+    for (const auto & d : m_dependencies) {
         rval.push_back(d.name());
     }
     return rval;
@@ -270,7 +270,7 @@ t_aggspec::get_input_depnames() const {
 std::vector<std::string>
 t_aggspec::get_output_depnames() const {
     std::vector<std::string> rval;
-    for (const auto d : m_dependencies) {
+    for (const auto & d: m_dependencies) {
         rval.push_back(d.name());
     }
     return rval;

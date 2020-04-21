@@ -382,8 +382,6 @@ View<CTX_T>::data_slice_to_arrow(
     std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
     // From the data slice, get all the metadata we need
     t_get_data_extents extents = data_slice->get_data_extents();
-    std::int32_t start_row = extents.m_srow;
-    std::int32_t end_row = extents.m_erow;
     std::int32_t start_col = extents.m_scol;
     std::int32_t end_col = extents.m_ecol;
     std::int32_t col_offset = data_slice->get_col_offset();

@@ -149,7 +149,7 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
             psp_abort(ss.str());                                                               \
         }                                                                                      \
     }
-#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X);
+#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X); abort();
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
