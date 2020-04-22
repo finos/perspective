@@ -24,6 +24,8 @@ const add_computed_expression = async (page, expression) => {
     await page.waitForSelector("perspective-viewer:not([updating])");
     await page.shadow_click("perspective-viewer", "#add-computed-expression");
     await page.shadow_type(expression, "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+    // a little hacky around waiting for the UI, etc. to render final state
+    await page.waitFor(200);
     await page.evaluate(element => {
         const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
         const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");

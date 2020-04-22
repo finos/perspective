@@ -92,39 +92,63 @@
     }
 
     .psp-computed-expression-widget__autocomplete {
-        font-size: 12px;
-        margin-top: 5px;
-        max-width: 100%;
-        box-sizing: border-box;
         color: var(--color, #666666);
         font-family: var(--interface-monospace--font-family, monospace);
+        box-sizing: border-box;
         display: none;
         z-index: 100000;
         max-height: 75px;
+        font-size: 12px;
+        margin-top: 5px;
+        max-width: 100%;
         overflow-x: hidden;
         overflow-y: scroll;
-        width: 100%;
         word-break: break-word;
 
+        // Single-line expressions where the autocomplete follows the caret
+        &.undocked {
+            background: var(--plugin--background, #fff);
+            border: 1px solid @border-color;
+            position: absolute;
+            top: 24px;
+        }
+
+        // Multi-line expressions where the autocomplete is static
+        &.docked {
+            background: var(--plugin--background, none);
+            position: static;
+            width: 100%;
+
+            span.psp-computed-expression-widget__autocomplete--item {
+                border-bottom: 1px solid @border-color;
+            }
+        }
+
         span.psp-computed-expression-widget__autocomplete--item {
-            border-bottom: 1px solid @border-color;
             display: block;
-            padding: 2px;
+            overflow-x: auto;
+            padding: 5px;
 
             &:hover {
-                border-bottom-color: var(--autocomplete-hover-background);
-                background: var(--autocomplete-hover-background, rgb(243, 209, 18));
+                // Default colors are the same as Awesomeplete defaults to
+                // achieve consistent look.
+                background: var(--autocomplete-hover-background, hsl(200, 40%, 80%));
             }
 
             &:focus, &[aria-selected="true"]{
-                border-bottom-color: var(--autocomplete-select-background);
-                background: var(--autocomplete-select-background, rgb(243, 209, 18));
-                color: var(--autocomplete-select-color);
+                background: var(--autocomplete-select-background, hsl(205, 40%, 40%));
+                color: var(--color, #fff);
                 cursor: pointer;
             }
 
             &.psp-computed-expression-widget__autocomplete--column-name {
                 font-family: var(--interface--font-family, @sans-serif-fonts);
+
+                &:hover, &:focus, &[aria-selected="true"] {
+                    &::before {
+                        color: var(--color, #fff) !important;
+                    }
+                }
 
                 // TODO: find a way to just use these styles instead of copying
                 // them from the row

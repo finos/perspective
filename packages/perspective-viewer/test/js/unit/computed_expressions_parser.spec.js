@@ -287,64 +287,58 @@ describe("Computed Expression Parser", function() {
 
     describe("Autocomplete", function() {
         it("Should return all valid tokens for beginning expression if expression is empty", function() {
-            expect(get_autocomplete_suggestions("")).toEqual([
+            expect(get_autocomplete_suggestions("").map(x => x.value)).toEqual([
                 "(",
-                "sqrt",
-                "pow2",
-                "abs",
-                "invert",
-                "log",
-                "exp",
-                "bin1000th",
-                "bin1000",
-                "bin100th",
-                "bin100",
-                "bin10th",
-                "bin10",
-                "length",
-                "uppercase",
-                "lowercase",
-                "concat_comma",
-                "concat_space",
-                "hour_of_day",
-                "day_of_week",
-                "month_of_year",
-                "second_bucket",
-                "minute_bucket",
-                "hour_bucket",
-                "day_bucket",
-                "week_bucket",
-                "month_bucket",
-                "year_bucket"
+                "sqrt(",
+                "pow2(",
+                "abs(",
+                "invert(",
+                "log(",
+                "exp(",
+                "bin1000th(",
+                "bin1000(",
+                "bin100th(",
+                "bin100(",
+                "bin10th(",
+                "bin10(",
+                "length(",
+                "uppercase(",
+                "lowercase(",
+                "concat_comma(",
+                "concat_space(",
+                "hour_of_day(",
+                "day_of_week(",
+                "month_of_year(",
+                "second_bucket(",
+                "minute_bucket(",
+                "hour_bucket(",
+                "day_bucket(",
+                "week_bucket(",
+                "month_bucket(",
+                "year_bucket("
             ]);
         });
 
         it("Should return correct functions when function is at beginning of expression", function() {
             const result = ComputedExpressionColumnLexer.tokenize("c");
-            expect(get_autocomplete_suggestions("c", result)).toEqual(["concat_comma", "concat_space"]);
+            expect(get_autocomplete_suggestions("c", result).map(x => x.value)).toEqual(["concat_comma(", "concat_space("]);
         });
 
         it("Should return close parenthesis or comma inside a function", function() {
             const result = ComputedExpressionColumnLexer.tokenize("concat_comma('Sales'");
-            expect(get_autocomplete_suggestions("concat_comma('Sales'", result)).toEqual([",", ")"]);
+            expect(get_autocomplete_suggestions("concat_comma('Sales'", result).map(x => x.value)).toEqual([",", ")"]);
         });
+
+        const operators = ["+ ", "- ", "* ", "/ ", "^ ", "% ", "== ", "!= ", "> ", "< ", "is "];
 
         it("Should return all operator types when last token is a column name", function() {
             const result = ComputedExpressionColumnLexer.tokenize("'Sales'");
-            expect(get_autocomplete_suggestions("'Sales'", result)).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
+            expect(get_autocomplete_suggestions("'Sales'", result).map(x => x.value)).toEqual(operators);
         });
 
         it("Should make no distinction between a last token with or without space", function() {
             const result = ComputedExpressionColumnLexer.tokenize("'Sales' ");
-            expect(get_autocomplete_suggestions("'Sales' ", result)).toEqual(["+", "-", "*", "/", "^", "%", "==", "!=", ">", "<", "is"]);
-        });
-
-        it("Should return functions based on substring, not beginsWith", function() {
-            const result = ComputedExpressionColumnLexer.tokenize("'rt' ");
-            expect(get_autocomplete_suggestions("'rt' ", result)).toEqual([
-                {label: "sqrt(x)", value: "sqrt"},
-                {label: "1 / x", value: "invert"}
-            ]);
+            expect(get_autocomplete_suggestions("'Sales' ", result).map(x => x.value)).toEqual(operators);
         });
     });
 });

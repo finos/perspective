@@ -259,6 +259,11 @@ class ComputedExpressionWidget extends HTMLElement {
     // TODO: use lit-html
     render_autocomplete(expression, suggestions, is_column_name) {
         // FIXME: these should be encapsulated lol
+        if (suggestions.length === 0) {
+            this._clear_autocomplete();
+            return;
+        }
+        this._position_autocomplete();
         this._autocomplete_index = -1;
         this._autocomplete_container.style.display = "block";
         this._autocomplete_container.scrollTop = 0;
@@ -269,7 +274,6 @@ class ComputedExpressionWidget extends HTMLElement {
                 continue;
             }
             span.textContent = suggestion.label;
-            span.setAttribute("tabindex", 0);
             span.classList.add("psp-computed-expression-widget__autocomplete--item");
             if (is_column_name) {
                 span.classList.add("psp-computed-expression-widget__autocomplete--column-name");
@@ -280,10 +284,51 @@ class ComputedExpressionWidget extends HTMLElement {
         }
     }
 
+    _position_autocomplete() {
+        const editor = this._expression_editor;
+        const last_span = this._expression_editor._edit_area.lastChild;
+
+        if (editor.get_text().length === 0 || !last_span) {
+            this._autocomplete_container.classList.remove("undocked");
+            this._autocomplete_container.classList.add("docked");
+            return;
+        }
+
+        if (editor.offsetWidth === 250) {
+            this._autocomplete_container.removeAttribute("style");
+            this._autocomplete_container.classList.remove("undocked");
+            this._autocomplete_container.classList.add("docked");
+            return;
+        } else {
+            this._autocomplete_container.classList.remove("docked");
+            this._autocomplete_container.classList.add("undocked");
+        }
+
+        const offset_left = last_span.offsetLeft;
+        const offset_width = last_span.offsetWidth;
+        const offset_top = last_span.offsetTop;
+
+        const left = offset_left + offset_width > 0 ? offset_left + offset_width : 0;
+        const top = offset_top + 20 > 20 ? offset_top + 20 : 20;
+
+        // Set width when autocomplete is in right half of editor
+        if (left > editor.offsetWidth * 0.5) {
+            this._autocomplete_container.style.width = "150px";
+        } else {
+            this._autocomplete_container.style.width = "auto";
+        }
+
+        this._autocomplete_container.style.left = `${left}px`;
+        this._autocomplete_container.style.top = `${top}px`;
+    }
+
     _clear_autocomplete() {
         this._autocomplete_index = -1;
+        this._autocomplete_container.removeAttribute("style");
         this._autocomplete_container.style.display = "none";
         this._autocomplete_container.innerHTML = "";
+        this._autocomplete_container.classList.remove("undocked");
+        this._autocomplete_container.classList.add("docked");
     }
 
     _render_initial_autocomplete() {
@@ -356,7 +401,7 @@ class ComputedExpressionWidget extends HTMLElement {
 
         if (idx > -1 && children.length > 0) {
             children[idx].setAttribute("aria-selected", "true");
-            let scroll_top = children[idx].offsetTop - this._autocomplete_container.offsetTop - this._autocomplete_container.clientHeight + children[idx].clientHeight * 2.25;
+            let scroll_top = children[idx].offsetTop - this._autocomplete_container.offsetTop - this._autocomplete_container.clientHeight + children[idx].clientHeight * 2;
             this._autocomplete_container.scrollTop = scroll_top;
         }
     }
@@ -372,6 +417,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this._clear_error();
         this._disable_save_button();
         this._clear_expression_editor();
+        this._clear_autocomplete();
         // Disconnect the observer.
         this._editor_observer.disconnect();
     }
@@ -408,6 +454,7 @@ class ComputedExpressionWidget extends HTMLElement {
     }
 
     _editor_keydown(ev) {
+        // All operations need to be done on `ev.detail`, not `ev`
         switch (ev.detail.key) {
             case "Enter":
                 ev.detail.preventDefault();
@@ -415,7 +462,9 @@ class ComputedExpressionWidget extends HTMLElement {
                 {
                     // If autocomplete is open, select the current autocomplete
                     // value. Otherwise, save the expression.
-                    if (this._autocomplete_container.style.display !== "none") {
+                    // TODO: this is an asinine check for whether autocomplete
+                    // is open.
+                    if (getComputedStyle(this._autocomplete_container).display !== "none") {
                         if (this._autocomplete_index !== -1) {
                             const value = this._autocomplete_container.children[this._autocomplete_index].getAttribute("data-value");
                             this._autocomplete_replace(value);
@@ -425,16 +474,23 @@ class ComputedExpressionWidget extends HTMLElement {
                     }
                 }
                 break;
+            case "Tab":
             case "ArrowDown":
                 {
-                    ev.preventDefault();
-                    this._next();
+                    ev.detail.preventDefault();
+                    ev.detail.stopPropagation();
+                    if (getComputedStyle(this._autocomplete_container).display !== "none") {
+                        this._next();
+                    }
                 }
                 break;
             case "ArrowUp":
                 {
-                    ev.preventDefault();
-                    this._prev();
+                    ev.detail.preventDefault();
+                    ev.detail.stopPropagation();
+                    if (getComputedStyle(this._autocomplete_container).display !== "none") {
+                        this._prev();
+                    }
                 }
                 break;
             default:

@@ -25,6 +25,7 @@
         font-family: var(--interface-monospace--font-family, monospace);
         height: 75px;
         margin-top: 5px;
+        max-width: 250px;
         padding: 5px;
         resize: auto;
         overflow: auto;
@@ -120,43 +121,6 @@
             font-weight: 700;
             color: var(--expression--error-color, rgb(250, 51, 51));
             text-decoration: underline dotted var(--expression--error-color, rgb(250, 51, 51));
-        }
-    }
-
-    .awesomplete {
-        width: 100%;
-
-        ul {
-            background: var(--background-color, #eee);
-            box-sizing: border-box;
-            font-family: var(--interface-monospace--font-family, monospace);
-            font-size: 12px;
-            list-style: none;
-            margin-block-start: 0;
-            padding-inline-start: 0;
-            position: absolute;
-            z-index: 10000;
-            max-height: 75px;
-            padding: 5px 0 5px 0;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            top: 100%;
-            word-break: break-word;
-            width: 100%;
-        }
-
-        li {
-            padding: 2px;
-            border-bottom: 1px solid gray;
-            cursor: pointer;
-
-            &:last-of-type {
-                border: none;
-            }
-        }
-
-        span[role="status"] {
-            display: none !important;
         }
     }
 }
