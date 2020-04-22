@@ -474,8 +474,8 @@ export const lex = function(input) {
     const result = ComputedExpressionColumnLexer.tokenize(input);
 
     if (result.errors.length > 0) {
-        let message = result.errors.map(e => e.message);
-        throw new Error(`${message.join("\n")}`);
+        let message = result.errors[0].message;
+        throw new Error(message);
     }
 
     // Remove whitespace tokens

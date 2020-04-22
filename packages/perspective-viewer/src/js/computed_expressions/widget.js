@@ -30,6 +30,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this._parsed_expression = undefined;
         this.expressions = [];
         this._valid = false;
+        this._autocomplete_index = -1;
     }
 
     connectedCallback() {
@@ -255,14 +256,20 @@ class ComputedExpressionWidget extends HTMLElement {
     // TODO: split out the autocomplete at some point
     // TODO: make sure it only shows columns of the correct type
     // TODO: separate column-name only autocomplete?
+    // TODO: use lit-html
     render_autocomplete(expression, suggestions, is_column_name) {
+        // FIXME: these should be encapsulated lol
+        this._autocomplete_index = -1;
         this._autocomplete_container.style.display = "block";
+        this._autocomplete_container.scrollTop = 0;
+        this._autocomplete_container.setAttribute("data-count", suggestions.length);
         for (const suggestion of suggestions) {
             const span = document.createElement("span");
             if (!suggestion.label) {
                 continue;
             }
             span.textContent = suggestion.label;
+            span.setAttribute("tabindex", 0);
             span.classList.add("psp-computed-expression-widget__autocomplete--item");
             if (is_column_name) {
                 span.classList.add("psp-computed-expression-widget__autocomplete--column-name");
@@ -274,6 +281,7 @@ class ComputedExpressionWidget extends HTMLElement {
     }
 
     _clear_autocomplete() {
+        this._autocomplete_index = -1;
         this._autocomplete_container.style.display = "none";
         this._autocomplete_container.innerHTML = "";
     }
@@ -288,36 +296,68 @@ class ComputedExpressionWidget extends HTMLElement {
         }
     }
 
-    _autocomplete_value_click(ev) {
-        if (ev.target && ev.target.matches("span.psp-computed-expression-widget__autocomplete--item")) {
-            const old_value = this._expression_editor.get_text();
-            const new_value = ev.target.getAttribute("data-value");
-            if (!new_value) {
-                return;
-            }
-            const last_input = extract_partial_function(old_value);
+    _autocomplete_replace(new_value) {
+        const old_value = this._expression_editor.get_text();
+        const last_input = extract_partial_function(old_value);
 
-            if (last_input && last_input !== '"') {
-                // replace the fragment with the full function/operator
-                const final_value = old_value.substring(0, old_value.length - last_input.length) + new_value;
+        if (last_input && last_input !== '"') {
+            // replace the fragment with the full function/operator
+            const final_value = old_value.substring(0, old_value.length - last_input.length) + new_value;
+            this._expression_editor._edit_area.innerText = final_value;
+        } else {
+            // Check whether we are appending a column name
+            const quote_index = old_value.lastIndexOf('"');
+            if (quote_index > -1 && new_value.indexOf('"') != -1) {
+                const final_value = old_value.substring(0, quote_index) + new_value;
                 this._expression_editor._edit_area.innerText = final_value;
             } else {
-                // Check whether we are appending a column name
-                const quote_index = old_value.lastIndexOf('"');
-                if (quote_index > -1 && new_value.indexOf('"') != -1) {
-                    const final_value = old_value.substring(0, quote_index) + new_value;
-                    this._expression_editor._edit_area.innerText = final_value;
-                } else {
-                    // Append the autocomplete value
-                    const space = old_value.length > 0 && old_value.indexOf('"') === -1 ? " " : "";
-                    this._expression_editor._edit_area.innerText += `${space}${new_value}`;
-                }
+                // Append the autocomplete value
+                const space = old_value.length > 0 && old_value.indexOf('"') === -1 ? " " : "";
+                this._expression_editor._edit_area.innerText += `${space}${new_value}`;
             }
+        }
 
-            this._expression_editor._reset_selection();
-            this._expression_editor.update_content();
+        this._expression_editor._reset_selection();
+        this._expression_editor.update_content();
 
-            this._clear_autocomplete();
+        this._clear_autocomplete();
+    }
+
+    _autocomplete_value_click(ev) {
+        if (ev.target && ev.target.matches("span.psp-computed-expression-widget__autocomplete--item")) {
+            this._autocomplete_replace(ev.target.getAttribute("data-value"));
+        }
+    }
+
+    // FIXME: move these out into autocomplete
+    _next() {
+        const count = this._autocomplete_container.children.length;
+        const idx = this._autocomplete_index < count - 1 ? this._autocomplete_index + 1 : count ? 0 : -1;
+        this._go_to(idx);
+    }
+
+    _prev() {
+        const count = this._autocomplete_container.children.length;
+        const position = this._autocomplete_index - 1;
+        const idx = this._autocomplete_index > -1 && position !== -1 ? position : count - 1;
+        this._go_to(idx);
+    }
+
+    _go_to(idx) {
+        // liberally borrowed from awesomplete
+        const children = this._autocomplete_container.children;
+
+        if (this._autocomplete_index > -1) {
+            children[this._autocomplete_index].setAttribute("aria-selected", false);
+        }
+
+        // reset selection
+        this._autocomplete_index = idx;
+
+        if (idx > -1 && children.length > 0) {
+            children[idx].setAttribute("aria-selected", "true");
+            let scroll_top = children[idx].offsetTop - this._autocomplete_container.offsetTop - this._autocomplete_container.clientHeight + children[idx].clientHeight * 2.25;
+            this._autocomplete_container.scrollTop = scroll_top;
         }
     }
 
@@ -368,11 +408,37 @@ class ComputedExpressionWidget extends HTMLElement {
     }
 
     _editor_keydown(ev) {
-        if (ev.detail.key === "Enter") {
-            // Save the expression when enter is typed.
-            ev.detail.preventDefault();
-            ev.detail.stopPropagation();
-            this._save_expression();
+        switch (ev.detail.key) {
+            case "Enter":
+                ev.detail.preventDefault();
+                ev.detail.stopPropagation();
+                {
+                    // If autocomplete is open, select the current autocomplete
+                    // value. Otherwise, save the expression.
+                    if (this._autocomplete_container.style.display !== "none") {
+                        if (this._autocomplete_index !== -1) {
+                            const value = this._autocomplete_container.children[this._autocomplete_index].getAttribute("data-value");
+                            this._autocomplete_replace(value);
+                        }
+                    } else {
+                        this._save_expression();
+                    }
+                }
+                break;
+            case "ArrowDown":
+                {
+                    ev.preventDefault();
+                    this._next();
+                }
+                break;
+            case "ArrowUp":
+                {
+                    ev.preventDefault();
+                    this._prev();
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -396,6 +462,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this._expression_editor.addEventListener("perspective-expression-editor-rendered", this._validate_expression.bind(this));
         this._expression_editor.addEventListener("perspective-expression-editor-keydown", this._editor_keydown.bind(this));
         this._autocomplete_container.addEventListener("click", this._autocomplete_value_click.bind(this));
+        this._autocomplete_container.addEventListener("mousedown", ev => ev.preventDefault());
         this._save_button.addEventListener("click", this._save_expression.bind(this));
     }
 }

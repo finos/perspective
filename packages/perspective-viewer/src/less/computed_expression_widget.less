@@ -111,6 +111,18 @@
             display: block;
             padding: 2px;
 
+            &:hover {
+                border-bottom-color: var(--autocomplete-hover-background);
+                background: var(--autocomplete-hover-background, rgb(243, 209, 18));
+            }
+
+            &:focus, &[aria-selected="true"]{
+                border-bottom-color: var(--autocomplete-select-background);
+                background: var(--autocomplete-select-background, rgb(243, 209, 18));
+                color: var(--autocomplete-select-color);
+                cursor: pointer;
+            }
+
             &.psp-computed-expression-widget__autocomplete--column-name {
                 font-family: var(--interface--font-family, @sans-serif-fonts);
 

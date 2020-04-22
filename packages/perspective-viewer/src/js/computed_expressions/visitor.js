@@ -278,8 +278,8 @@ export const expression_to_computed_column_config = function(expression) {
     const cst = parser_instance.SuperExpression();
 
     if (parser_instance.errors.length > 0) {
-        let message = parser_instance.errors.map(e => e.message);
-        throw new Error(`${message.join("\n")}`);
+        let message = parser_instance.errors[0].message;
+        throw new Error(message);
     }
 
     return visitor.visit(cst);
