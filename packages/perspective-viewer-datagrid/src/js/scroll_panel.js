@@ -102,7 +102,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _calculate_viewport(nrows, reset_scroll_position) {
-        const id = this._view_cache.config.row_pivots.length > 0;
+        const id = this._view_cache.config.row_pivots.length > 0 || this._render_element.hasAttribute("selectable");
         if (this._virtual_scrolling_disabled) {
             return {id};
         }

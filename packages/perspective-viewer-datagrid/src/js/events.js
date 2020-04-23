@@ -96,7 +96,9 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
 
     /**
      * Dispatches all click events to other handlers, depending on
-     * `event.target`.
+     * `event.target`. Always dispatches 'perspective-click' in
+     * addition to any other appropriate and more specific CustomEvent
+     * objects
      *
      * @param {*} event
      * @returns
@@ -118,6 +120,8 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         const is_button = event.target.classList.contains("pd-row-header-icon");
         const is_resize = event.target.classList.contains("pd-column-resize");
         const metadata = METADATA_MAP.get(element);
+        const cellConfig = await getCellConfig(this._view_cache, metadata.ridx, metadata.cidx);
+
         if (is_button) {
             await this._on_toggle(event, metadata);
         } else if (is_resize) {
@@ -125,8 +129,16 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         } else if (metadata?.is_column_header) {
             await this._on_sort(event, metadata);
         } else {
-            await this._on_select(metadata);
+            await this._on_select(metadata, cellConfig);
         }
+
+        this._render_element.dispatchEvent(
+            new CustomEvent("perspective-click", {
+                bubbles: true,
+                composed: true,
+                detail: cellConfig
+            })
+        );
     }
 
     /**
@@ -193,22 +205,14 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
-    async _on_select(metadata) {
+    async _on_select(metadata, cellConfig) {
         if (!this._render_element.hasAttribute("selectable")) {
             return;
         }
 
         const is_deselect = isEqual(metadata.id, this._selected_id);
-        let filters = [];
-        if (is_deselect) {
-            this._selected_id = undefined;
-            await this.draw({invalid_viewport: true});
-        } else {
-            this._selected_id = metadata.id;
-            await this.draw({invalid_viewport: true});
-            filters = await getCellConfig(this._view_cache, metadata.ridx, metadata.cidx);
-            filters = filters.config.filters;
-        }
+        this._selected_id = is_deselect ? undefined : metadata.id;
+        await this.draw({invalid_viewport: true});
 
         this._render_element.dispatchEvent(
             new CustomEvent("perspective-select", {
@@ -216,7 +220,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 composed: true,
                 detail: {
                     selected: !is_deselect,
-                    config: {filters}
+                    ...cellConfig
                 }
             })
         );

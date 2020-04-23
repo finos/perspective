@@ -1,7 +1,7 @@
 <!--
-   
+
    Copyright (c) 2017, the Perspective Authors.
-   
+
    This file is part of the Perspective library, distributed under the terms of
    the Apache License 2.0.  The full license can be found in the LICENSE file.
 
@@ -23,8 +23,9 @@
 </head>
 
 <body>
-    <perspective-viewer 
-        plugin="datagrid" 
+    <perspective-viewer
+        plugin="datagrid"
+        selectable
         columns='["Profit","Sub-Category","State","Sales","Category","Order Date","Quantity"]'>
     </perspective-viewer>
 
@@ -102,7 +103,7 @@
                 }
                 img.setAttribute("crossorigin", "anonymous")
                 img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
-   
+
                 td.textContent = "";
                 span.appendChild(img)
                 td.appendChild(span);
