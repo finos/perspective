@@ -378,6 +378,7 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_row_delta_two", &get_row_delta_two);
     m.def("get_table_computed_schema", &get_table_computed_schema_py);
     m.def("get_computation_input_types", &get_computation_input_types);
+    m.def("get_computed_functions", &get_computed_functions);
     m.def("make_computations", &make_computations);
 }
 

@@ -309,8 +309,8 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::MULTIPLY;
     } else if (name == "/" || name == "divide") {
         return t_computed_function_name::DIVIDE;
-    } else if (name == "%" || name == "percent_a_of_b") {
-        return t_computed_function_name::PERCENT_A_OF_B;
+    } else if (name == "%" || name == "percent_of") {
+        return t_computed_function_name::PERCENT_OF;
     } else if (name == "^" || name == "pow") {
         return t_computed_function_name::POW;
     } else if (name == "==" || name == "equals") {
@@ -393,7 +393,7 @@ computed_function_name_to_string(t_computed_function_name name) {
         case SUBTRACT: return "-";
         case MULTIPLY: return "*";
         case DIVIDE: return "/";
-        case PERCENT_A_OF_B: return "%";
+        case PERCENT_OF: return "%";
         case POW: return "pow";
         case EQUALS: return "==";
         case NOT_EQUALS: return "!=";

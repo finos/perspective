@@ -13,12 +13,8 @@ import template from "../../html/computed_expression_widget.html";
 
 import style from "../../less/computed_expression_widget.less";
 
-import {ComputedExpressionColumnLexer, ColumnNameTokenType, FunctionTokenType, OperatorTokenType} from "./lexer";
-
-import {expression_to_computed_column_config} from "./visitor";
-
+import {ColumnNameTokenType, FunctionTokenType, OperatorTokenType} from "./lexer";
 import {tokenMatcher} from "chevrotain";
-import {get_autocomplete_suggestions, extract_partial_function} from "./autocomplete.js";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -100,7 +96,7 @@ class ComputedExpressionWidget extends HTMLElement {
      */
     render_expression(expression) {
         this._clear_autocomplete();
-        const lex_result = ComputedExpressionColumnLexer.tokenize(expression);
+        const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
         if (lex_result.errors.length > 0) {
             return `<span class="psp-expression__errored">${expression}</span>`;
@@ -158,7 +154,7 @@ class ComputedExpressionWidget extends HTMLElement {
             // Use this just for validation. On anything short of a massive
             // expression, this should have no performance impact as we
             // share an instance of the parser throughout the viewer.
-            this._parsed_expression = expression_to_computed_column_config(expression);
+            this._parsed_expression = this._computed_expression_parser.parse(expression);
         } catch (e) {
             // Show autocomplete OR error, but not both
             this._clear_error();
@@ -183,8 +179,8 @@ class ComputedExpressionWidget extends HTMLElement {
                 this.render_autocomplete(expression, suggestions, true);
                 return;
             } else {
-                const lex_result = ComputedExpressionColumnLexer.tokenize(expression);
-                const suggestions = get_autocomplete_suggestions(expression, lex_result);
+                const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
+                const suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result);
                 if (suggestions.length > 0) {
                     // Show autocomplete and not error box
                     this.render_autocomplete(expression, suggestions);
@@ -333,7 +329,7 @@ class ComputedExpressionWidget extends HTMLElement {
 
     _render_initial_autocomplete() {
         this._clear_autocomplete();
-        const suggestions = get_autocomplete_suggestions("");
+        const suggestions = this._computed_expression_parser.get_autocomplete_suggestions("");
         if (suggestions.length > 0) {
             // Show autocomplete and not error box
             this.render_autocomplete("", suggestions);
@@ -342,8 +338,9 @@ class ComputedExpressionWidget extends HTMLElement {
     }
 
     _autocomplete_replace(new_value) {
+        // TODO: use regex here
         const old_value = this._expression_editor.get_text();
-        const last_input = extract_partial_function(old_value);
+        const last_input = this._computed_expression_parser.extract_partial_function(old_value);
 
         if (last_input && last_input !== '"') {
             // replace the fragment with the full function/operator

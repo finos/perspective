@@ -88,7 +88,7 @@ export const Add = createToken({
 export const Subtract = createToken({
     name: "subtract",
     label: "-",
-    pattern: /-/,
+    pattern: /\-/,
     categories: [OperatorTokenType]
 });
 
@@ -151,7 +151,7 @@ export const LessThan = createToken({
 export const Is = createToken({
     name: "is",
     label: "x is y",
-    pattern: /\is/,
+    pattern: /is/,
     categories: [OperatorTokenType]
 });
 
@@ -468,18 +468,4 @@ export const clean_tokens = function(tokens) {
     }
 
     return cleaned_tokens;
-};
-
-export const lex = function(input) {
-    const result = ComputedExpressionColumnLexer.tokenize(input);
-
-    if (result.errors.length > 0) {
-        let message = result.errors[0].message;
-        throw new Error(message);
-    }
-
-    // Remove whitespace tokens
-    result.tokens = clean_tokens(result.tokens);
-
-    return result;
 };

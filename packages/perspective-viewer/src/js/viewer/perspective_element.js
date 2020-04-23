@@ -16,7 +16,6 @@ import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
 
 import {StateElement} from "./state_element.js";
-import {expression_to_computed_column_config} from "../computed_expressions/visitor";
 
 /******************************************************************************
  *
@@ -167,6 +166,12 @@ export class PerspectiveElement extends StateElement {
         this._clear_state();
         this._table = table;
 
+        if (!this._computed_expression_parser.is_initialized) {
+            // Use metadata from the `Table` to construct the expression parser
+            const computed_functions = await table.get_computed_functions();
+            this._computed_expression_parser.init(computed_functions);
+        }
+
         let [cols, schema] = await Promise.all([table.columns(), table.schema(true)]);
 
         // Initial col order never contains computed columns
@@ -183,7 +188,7 @@ export class PerspectiveElement extends StateElement {
             const computed_expressions = this._get_view_computed_columns();
             for (const expression of computed_expressions) {
                 if (typeof expression === "string") {
-                    parsed_computed_columns = parsed_computed_columns.concat(expression_to_computed_column_config(expression));
+                    parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(expression));
                 } else {
                     parsed_computed_columns.push(expression);
                 }

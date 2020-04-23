@@ -1116,7 +1116,7 @@ module.exports = perspective => {
                 const expected = ["integer", "float"];
                 expect(await table.get_computation_input_types("pow2")).toEqual(expected);
                 expect(await table.get_computation_input_types("+")).toEqual(expected);
-                expect(await table.get_computation_input_types("percent_a_of_b")).toEqual(expected);
+                expect(await table.get_computation_input_types("percent_of")).toEqual(expected);
             });
 
             it("Should return correct types for string functions", async function() {

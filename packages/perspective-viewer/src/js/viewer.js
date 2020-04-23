@@ -13,7 +13,7 @@ import "./polyfill.js";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
-import "./expression-editor.js";
+import "./expression_editor.js";
 import "./computed_expressions/widget.js";
 
 import template from "../html/viewer.html";
@@ -22,7 +22,7 @@ import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
 import {ActionElement} from "./viewer/action_element.js";
-import {expression_to_computed_column_config} from "./computed_expressions/visitor.js";
+import {COMPUTED_EXPRESSION_PARSER} from "./computed_expressions/computed_expression_parser.js";
 
 /**
  * Module for the `<perspective-viewer>` custom element.
@@ -72,6 +72,7 @@ class PerspectiveViewer extends ActionElement {
         this._show_warnings = true;
         this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
+        this._computed_expression_parser = COMPUTED_EXPRESSION_PARSER;
         window.addEventListener("resize", this._resize_handler);
     }
 
@@ -209,10 +210,12 @@ class PerspectiveViewer extends ActionElement {
 
             for (const column of computed_columns) {
                 if (typeof column === "string") {
-                    // Either validated through the UI, or will be validated
-                    // here. TODO: rearchitect so we don't triple parse each
-                    // expression.
-                    parsed_computed_columns = parsed_computed_columns.concat(expression_to_computed_column_config(column));
+                    // Either validated through the UI or here. If a `table`
+                    // has not been loaded when the parsing happens,
+                    // the column will be skipped.
+                    if (this._computed_expression_parser.is_initialized) {
+                        parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(column));
+                    }
                 } else {
                     parsed_computed_columns.push(column);
                 }
