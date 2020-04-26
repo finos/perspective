@@ -8,7 +8,7 @@
  */
 import {Lexer, createToken, tokenMatcher} from "chevrotain";
 import {PerspectiveLexerErrorMessage} from "./error";
-import {clean_tokens, Comma, ColumnName, As, Whitespace, LeftParen, RightParen, OperatorTokenType, FunctionTokenType, UpperLowerCaseTokenType} from "./lexer";
+import {clean_tokens, Comma, ColumnName, As, Whitespace, LeftParen, RightParen, OperatorTokenType, FunctionTokenType, UpperLowerCaseTokenType, ColumnNameTokenType} from "./lexer";
 import {ComputedExpressionColumnParser} from "./parser";
 import {COMPUTED_FUNCTION_FORMATTERS} from "./formatter";
 
@@ -90,41 +90,9 @@ class PerspectiveComputedExpressionParser {
     }
 
     /**
-     * Try to extract a function name from the expression by backtracking until
-     * we hit the last open parenthesis.
-     *
-     * FIXME: lol this doesn't actually make sense and we should use regex
-     * instead.
-     *
-     * Because all functions need to be parenthesis-wrapped unless at the
-     * beginning of the expression, simply checking for parenthesis is enough
-     * to get a partial from common expressions:
-     *
-     * - "Sales" + (s => ["sqrt"]
-     * - "(a" => ["abs"]
-     *
-     * @param {String} expression
-     */
-    extract_partial_function(expression) {
-        this._check_initialized();
-        const paren_index = expression.lastIndexOf("(");
-
-        if (paren_index === -1) {
-            // check whether we have a column name or not
-            const quote_index = expression.indexOf('"');
-            if (quote_index === -1) {
-                // entire expression should be tested against function patterns
-                return expression;
-            }
-        } else {
-            // i.e. '"Sales" + (sqr'
-            return expression.substring(paren_index).replace("(", "");
-        }
-    }
-
-    /**
      * Given a lexer result and the raw expression that was lexed,
-     * suggest syntactically possible tokens.
+     * suggest syntactically possible tokens. If the last non-whitespace/comma
+     * token is a column name, only show operators that take the correct type.
      *
      * @param {ILexingResult} lexer_result
      * @param {String} expression
@@ -143,12 +111,12 @@ class PerspectiveComputedExpressionParser {
             // quotes). If true, the suggest function names that match.
             const partial_function = this.extract_partial_function(expression);
 
-            if (partial_function && partial_function.indexOf('"') === -1) {
+            if (partial_function && partial_function.search(/["']$/) === -1) {
                 // Remove open parenthesis and column name rule
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
                 return suggestions.filter(s => s.value.startsWith(partial_function));
             } else {
-                // Don't parse, error-ridden
+                // Expression has unrecoverable errors
                 return [];
             }
         }
@@ -157,6 +125,89 @@ class PerspectiveComputedExpressionParser {
         lexer_result.tokens = clean_tokens(lexer_result.tokens);
         const suggestions = this._parser.computeContentAssist("SuperExpression", lexer_result.tokens);
         return this._apply_suggestion_metadata(suggestions);
+    }
+
+    /**
+     * Try to extract a function name from the expression by backtracking until
+     * we hit the last open parenthesis or comma.
+     *
+     * Because all functions need to be parenthesis-wrapped unless at the
+     * beginning of the expression, simply checking for parenthesis is enough
+     * to get a partial from common expressions:
+     *
+     * - "Sales" + (s => ["sqrt"]
+     * - "(a" => ["abs"]
+     *
+     * @param {String} expression
+     */
+    extract_partial_function(expression) {
+        this._check_initialized();
+        const paren_index = expression.lastIndexOf("(");
+        const comma_index = expression.lastIndexOf(",");
+
+        if (comma_index > paren_index) {
+            // i.e. concat_comma("Sales",
+            return expression.substring(comma_index).replace(",", "");
+        } else if (paren_index === -1) {
+            // If it can't find a parenthesis, and there are no column names,
+            // return the entire expression. Otherwise, a partial function
+            // could not be found, so return undefined.
+            if (expression.search(/["']/) === -1) {
+                return expression;
+            } else {
+                return undefined;
+            }
+        } else {
+            // i.e. '"Sales" + (sqr', remove the parenthesis so the pattern
+            // can be matched.
+            return expression.substring(paren_index).replace("(", "");
+        }
+    }
+
+    /**
+     * Look backwards through a list of tokens for a function or operator,
+     * stopping after `limit` tokens. Whitespace tokens are removed from the
+     * token list before the search.
+     *
+     * @param {ILexingResult} lexer_result A result from the lexer, containing
+     * valid tokens and errors.
+     * @param {*} limit the number of tokens to search through before
+     * exiting or returning a valid result. If limit > tokens.length or is
+     * undefined, search all tokens.
+     */
+    get_last_function_or_operator(lexer_result, limit) {
+        const tokens = clean_tokens(lexer_result.tokens);
+        if (!limit || limit <= 0 || limit >= tokens.length) {
+            limit = tokens.length;
+        }
+        for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
+            if (tokenMatcher(tokens[i], FunctionTokenType) || tokenMatcher(tokens[i], OperatorTokenType)) {
+                return tokens[i];
+            }
+        }
+    }
+
+    /**
+     * Look backwards through a list of tokens for a column name, stopping after
+     * `limit` tokens. Whitespace tokens are removed from the token list
+     * before the search.
+     *
+     * @param {ILexingResult} lexer_result A result from the lexer, containing
+     * valid tokens and errors.
+     * @param {Number} limit the number of tokens to search through before
+     * exiting or returning a valid result. If limit > tokens.length or is
+     * undefined, search all tokens.
+     */
+    get_last_column_name(lexer_result, limit) {
+        const tokens = clean_tokens(lexer_result.tokens);
+        if (!limit || limit <= 0 || limit >= tokens.length) {
+            limit = tokens.length;
+        }
+        for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
+            if (tokenMatcher(tokens[i], ColumnNameTokenType)) {
+                return tokens[i];
+            }
+        }
     }
 
     /**
@@ -224,10 +275,16 @@ class PerspectiveComputedExpressionParser {
         return token;
     }
 
+    /**
+     * Construct a singleton parser instance that will be reused.
+     */
     _construct_parser() {
         this._parser = new ComputedExpressionColumnParser(this._vocabulary);
     }
 
+    /**
+     * Define and construct a singleton visitor instance.
+     */
     _construct_visitor() {
         const base_visitor = this._parser.getBaseCstVisitorConstructor();
 

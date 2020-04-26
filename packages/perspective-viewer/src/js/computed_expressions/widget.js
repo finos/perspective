@@ -77,10 +77,10 @@ class ComputedExpressionWidget extends HTMLElement {
      * Returns a list of objects from column names, suitable for rendering
      * in the autocomplete widget.
      */
-    _get_column_names() {
+    _make_column_name_suggestions(names) {
         // label = what is shown in the autocomplete DOM
         // value = what the fragment in the editor will be replaced with
-        return this._get_view_all_column_names().map(name => {
+        return names.map(name => {
             return {
                 label: name,
                 value: `"${name}"`
@@ -159,27 +159,62 @@ class ComputedExpressionWidget extends HTMLElement {
             // Show autocomplete OR error, but not both
             this._clear_error();
             this._disable_save_button();
+            const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
-            // Show the column name autocomplete if there is an open quote
-            // or open parenthesis. FIXME: this is too eager and should try to
-            // differentiate between open/close quotes, which needs lexer
-            // information - maybe step through tokens and generate the
-            // autocomplete that way?
+            /**
+             * Show the column name autocomplete if:
+             *
+             * - there is an open quote or open parenthesis
+             * - the immediately preceding token is NOT a column name, i.e. to
+             * prevent the autocomplete from showing after a column name has
+             * been closed with a quote.
+             * - the immediately preceding token is an operator.
+             */
             const name_fragments = expression.match(/(["'])[\s\w()]*?$/);
             const has_name_fragments = name_fragments && name_fragments.length > 0 && name_fragments[0] !== '" ';
-            const show_column_names = has_name_fragments || expression[expression.length - 1] === "(";
+            const last_column_name = this._computed_expression_parser.get_last_column_name(lex_result, 1);
+            const last_operator = this._computed_expression_parser.get_last_function_or_operator(lex_result, 1);
+            const show_column_names = (has_name_fragments && !last_column_name) || last_operator;
 
             if (show_column_names) {
                 let fragment = "";
-                let suggestions = this._get_column_names();
+                let column_names;
+                let suggestions;
+
+                // check previous token to see if it is a function or operator
+                const last_function_or_operator = this._computed_expression_parser.get_last_function_or_operator(lex_result);
+
+                if (last_function_or_operator) {
+                    const input_types = last_function_or_operator.tokenType.input_types;
+                    column_names = this._get_view_column_names_by_types(input_types);
+                } else {
+                    // Show all column names
+                    column_names = this._get_view_all_column_names();
+                }
+
+                // Convert list of names into objects with `label` and `value`
+                suggestions = this._make_column_name_suggestions(column_names);
+
+                // Filter down by `startsWith`
                 if (has_name_fragments) {
                     fragment = name_fragments[0].substring(1);
                     suggestions = suggestions.filter(name => name.label.toLowerCase().startsWith(fragment.toLowerCase()));
                 }
+
+                if (last_operator) {
+                    // Make sure we have opening parenthesis if the last token
+                    // is an operator
+                    this.render_autocomplete("", [
+                        {
+                            label: "(",
+                            value: "("
+                        }
+                    ]);
+                }
+
                 this.render_autocomplete(expression, suggestions, true);
                 return;
             } else {
-                const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
                 const suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result);
                 if (suggestions.length > 0) {
                     // Show autocomplete and not error box
@@ -249,12 +284,7 @@ class ComputedExpressionWidget extends HTMLElement {
         this.expressions.push(expression);
     }
 
-    // TODO: split out the autocomplete at some point
-    // TODO: make sure it only shows columns of the correct type
-    // TODO: separate column-name only autocomplete?
-    // TODO: use lit-html
     render_autocomplete(expression, suggestions, is_column_name) {
-        // FIXME: these should be encapsulated lol
         if (suggestions.length === 0) {
             this._clear_autocomplete();
             return;
@@ -332,30 +362,28 @@ class ComputedExpressionWidget extends HTMLElement {
         const suggestions = this._computed_expression_parser.get_autocomplete_suggestions("");
         if (suggestions.length > 0) {
             // Show autocomplete and not error box
+            const column_names = this._make_column_name_suggestions(this._get_view_all_column_names());
             this.render_autocomplete("", suggestions);
-            this.render_autocomplete("", this._get_column_names(), true);
+            this.render_autocomplete("", column_names, true);
         }
     }
 
     _autocomplete_replace(new_value) {
-        // TODO: use regex here
         const old_value = this._expression_editor.get_text();
         const last_input = this._computed_expression_parser.extract_partial_function(old_value);
-
         if (last_input && last_input !== '"') {
             // replace the fragment with the full function/operator
             const final_value = old_value.substring(0, old_value.length - last_input.length) + new_value;
             this._expression_editor._edit_area.innerText = final_value;
         } else {
             // Check whether we are appending a column name
-            const quote_index = old_value.lastIndexOf('"');
-            if (quote_index > -1 && new_value.indexOf('"') != -1) {
-                const final_value = old_value.substring(0, quote_index) + new_value;
+            const last_quote_index = old_value.search(/["']$/);
+            if (last_quote_index !== -1 && new_value.search(/["']$/) !== -1) {
+                const final_value = old_value.substring(0, last_quote_index) + new_value;
                 this._expression_editor._edit_area.innerText = final_value;
             } else {
                 // Append the autocomplete value
-                const space = old_value.length > 0 && old_value.indexOf('"') === -1 ? " " : "";
-                this._expression_editor._edit_area.innerText += `${space}${new_value}`;
+                this._expression_editor._edit_area.innerText += new_value;
             }
         }
 
@@ -397,8 +425,9 @@ class ComputedExpressionWidget extends HTMLElement {
         this._autocomplete_index = idx;
 
         if (idx > -1 && children.length > 0) {
+            const multiplier = this._autocomplete_container.clientHeight < 75 ? 3 : 2;
             children[idx].setAttribute("aria-selected", "true");
-            let scroll_top = children[idx].offsetTop - this._autocomplete_container.offsetTop - this._autocomplete_container.clientHeight + children[idx].clientHeight * 2;
+            let scroll_top = children[idx].offsetTop - this._autocomplete_container.offsetTop - this._autocomplete_container.clientHeight + children[idx].clientHeight * multiplier;
             this._autocomplete_container.scrollTop = scroll_top;
         }
     }

@@ -74,6 +74,98 @@ utils.with_server({}, () => {
                 }, viewer);
             });
 
+            // Autocomplete
+            test.capture("Typing a numeric function should show autocomplete for numeric columns", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type("sqrt('", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => {
+                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
+                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    button.removeAttribute("disabled");
+                }, viewer);
+            });
+
+            test.capture("Typing a string function should show autocomplete for string columns", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type("uppercase('", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => {
+                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
+                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    button.removeAttribute("disabled");
+                }, viewer);
+            });
+
+            test.capture("Typing a datetime function should show autocomplete for datetime columns", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type("month_bucket('", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => {
+                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
+                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    button.removeAttribute("disabled");
+                }, viewer);
+            });
+
+            test.capture("Typing a partial column name should show autocomplete", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => {
+                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
+                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    button.removeAttribute("disabled");
+                }, viewer);
+            });
+
+            test.capture("Typing a long expression should dock the autocomplete", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    '"Sales" + "Profit" + "Sales" + "Profit" + "Sales" + "Profit" +',
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => {
+                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
+                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    button.removeAttribute("disabled");
+                }, viewer);
+            });
+
+            test.capture("An expression that doesn't reach max-width should undock the autocomplete", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    '"Sales" + "Profit" + "Sales',
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => {
+                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
+                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    button.removeAttribute("disabled");
+                }, viewer);
+            });
+
+            // Functionality
             test.capture("Typing enter should save a valid expression", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");

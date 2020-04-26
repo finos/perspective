@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /******************************************************************************
  *
  * Copyright (c) 2017, the Perspective Authors.
@@ -7,7 +8,7 @@
  *
  */
 
-import {expression_to_computed_column_config} from "../../../src/js/computed_expressions/visitor";
+//import {expression_to_computed_column_config} from "../../../src/js/computed_expressions/visitor";
 
 // TODO: need to re-enable testing when metadata is better defined
 describe.skip("Computed Expression Parser", function() {
