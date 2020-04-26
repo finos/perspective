@@ -61,9 +61,9 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     await page.mouse.click(80, 100);
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    await page.waitFor(1000);
                 },
                 {wait_for_update: false, timeout: 30000}
             );
@@ -78,9 +78,9 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, testConfig);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     await page.mouse.click(80, 100);
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    await page.waitFor(1000);
                 },
                 {wait_for_update: false, timeout: 30000}
             );
@@ -95,9 +95,9 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, testConfig);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     await page.mouse.click(80, 100);
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    await page.waitFor(1000);
                 },
                 {wait_for_update: false, timeout: 30000}
             );

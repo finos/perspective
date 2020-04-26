@@ -45,7 +45,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {wait_for_update: false, timeout: 30000}
             );
@@ -68,7 +68,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {wait_for_update: false, timeout: 30000}
             );
@@ -99,7 +99,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {wait_for_update: false, timeout: 30000}
             );
@@ -126,7 +126,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
 
                     await page.evaluate(() => {
                         const workspace = document.getElementById("workspace").workspace;
@@ -134,7 +134,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.duplicate(widget);
                     });
 
-                    await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {wait_for_update: false, timeout: 30000}
             );
