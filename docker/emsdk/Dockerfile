@@ -25,7 +25,7 @@ FROM debian:stretch AS stage_build
 # -------------------------------- STAGE BUILD  --------------------------------
 # ------------------------------------------------------------------------------
 
-ENV EMSCRIPTEN_SDK 1.38.46-upstream
+ENV EMSCRIPTEN_SDK 1.39.13
 ENV EMSDK_CHANGESET master
 
 # ------------------------------------------------------------------------------
@@ -398,7 +398,6 @@ libidn11
 
 RUN apt-get -qq update && apt-get install -q -y software-properties-common
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BA9EF27F
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y
 RUN apt-get -qq update && apt-get install -qy g++ gcc git wget
 RUN wget --quiet --max-redirect 3 https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz
 RUN mkdir -p /usr/include/boost && tar zxf boost_1_71_0.tar.gz -C /usr/include/boost --strip-components=1
@@ -432,8 +431,6 @@ RUN printf '#include <iostream>\n#include <emscripten.h>\n#include <emscripten/b
 
 RUN em++ --std=c++14 -O3 test.cpp -o test.js --closure 1
 RUN node test.js
-
-RUN embuilder.py build libc-extras
 
 RUN cd /
 RUN rm -fr /tmp/emscripten_test

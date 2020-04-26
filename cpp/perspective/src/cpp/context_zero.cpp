@@ -549,7 +549,6 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
 
     const t_column* pkey_col = flattened.get_const_column("psp_pkey").get();
 
-    t_uindex ncols = m_config.get_num_columns();
     const auto& column_names = m_config.get_column_names();
 
     for (const auto& name : column_names) {

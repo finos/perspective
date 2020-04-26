@@ -12,10 +12,14 @@ tramp
 package-lock.json
 
 # Intellij/WebStorm IDE
+*.iml
 /.idea
 
 # Visual Studio Code configuration
+*.code-workspace
+.history
 /jsconfig.json
+.vscode
 
 # Org-mode
 .org-id-locations

@@ -907,7 +907,6 @@ t_gnode::_add_computed_column(
     const t_computed_column_definition& computed_column,
     std::shared_ptr<t_data_table> tbl) {
     std::string computed_column_name = std::get<0>(computed_column);
-    t_computed_function_name computed_function_name = std::get<1>(computed_column);
     std::vector<std::string> input_column_names = std::get<2>(computed_column);
     t_computation computation = std::get<3>(computed_column);
 
@@ -934,7 +933,6 @@ t_gnode::_compute_column(
     std::vector<std::shared_ptr<t_column>> input_columns;
 
     std::string computed_column_name = std::get<0>(computed_column);
-    t_computed_function_name computed_function_name = std::get<1>(computed_column);
     std::vector<std::string> input_column_names = std::get<2>(computed_column);
     t_computation computation = std::get<3>(computed_column);
     
@@ -976,7 +974,6 @@ t_gnode::_recompute_column(
     std::vector<std::shared_ptr<t_column>> flattened_columns;
 
     std::string computed_column_name = std::get<0>(computed_column);
-    t_computed_function_name computed_function_name = std::get<1>(computed_column);
     std::vector<std::string> input_column_names = std::get<2>(computed_column);
     t_computation computation = std::get<3>(computed_column);
 

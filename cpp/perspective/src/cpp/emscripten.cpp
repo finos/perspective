@@ -764,10 +764,7 @@ namespace binding {
                 continue;
             }
 
-            std::wstring welem = item.as<std::wstring>();
-            std::wstring_convert<utf16convert_type, wchar_t> converter;
-            std::string elem = converter.to_bytes(welem);
-            col->set_nth(i, elem);
+            col->set_nth(i, item.as<std::string>());
         }
     }
 
@@ -909,11 +906,7 @@ namespace binding {
                 break;
             }
             case DTYPE_STR: {
-                std::wstring welem = value.as<std::wstring>();
-
-                std::wstring_convert<utf16convert_type, wchar_t> converter;
-                std::string elem = converter.to_bytes(welem);
-                col->set_nth(idx, elem, STATUS_VALID);
+                col->set_nth(idx, value.as<std::string>(), STATUS_VALID);
                 break;
             }
             case DTYPE_DATE: {

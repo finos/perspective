@@ -23,8 +23,8 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_col_sortspecs(col_sortspecs)
     , m_aggregates(aggregates)
     , m_detail_columns(col_names) // this should be the columns property
-    , m_combiner(combiner)
-    , m_fterms(fterms) {
+    , m_fterms(fterms)
+    , m_combiner(combiner) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
     }
@@ -102,8 +102,8 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms)
     : m_aggregates(aggregates)
     , m_totals(totals)
-    , m_combiner(combiner)
     , m_fterms(fterms)
+    , m_combiner(combiner)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
