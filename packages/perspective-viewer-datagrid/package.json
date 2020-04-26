@@ -6,6 +6,7 @@
     "module": "dist/cjs/perspective-viewer-datagrid.js",
     "browser": "dist/cjs/perspective-viewer-datagrid.js",
     "unpkg": "dist/umd/perspective-viewer-datagrid.js",
+    "jsdelivr": "dist/umd/perspective-viewer-datagrid.js",
     "files": [
         "dist/**/*",
         "babel.config.js"

@@ -5,6 +5,7 @@
     "private": true,
     "main": "src/js/bench.js",
     "unpkg": "src/js/browser_runtime.js",
+    "jsdelivr": "src/js/browser_runtime.js",
     "browser": "src/js/browser_runtime.js",
     "module": "src/js/bench.js",
     "files": [

@@ -17,6 +17,7 @@
         "y-scatter": "./dist/esm/index/y-scatter.js"
     },
     "unpkg": "./dist/umd/perspective-viewer-d3fc.js",
+    "jsdelivr": "./dist/umd/perspective-viewer-d3fc.js",
     "files": [
         "dist/**/*",
         "babel.config.js"

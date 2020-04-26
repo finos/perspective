@@ -6,6 +6,7 @@
     "module": "dist/cjs/perspective-viewer-hypergrid.js",
     "browser": "dist/cjs/perspective-viewer-hypergrid.js",
     "unpkg": "dist/umd/perspective-viewer-hypergrid.js",
+    "jsdelivr": "dist/umd/perspective-viewer-hypergrid.js",
     "files": [
         "dist/**/*",
         "babel.config.js"
