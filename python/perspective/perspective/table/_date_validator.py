@@ -153,7 +153,7 @@ class _PerspectiveDateValidator(object):
             if isinstance(obj, int):
                 return round(obj / 1000000)
 
-        if isinstance(obj, (int, float)):
+        if isinstance(obj, (int, float, numpy.integer, numpy.float)):
             return _normalize_timestamp(obj)
 
         timetuple = getattr(obj, to_timetuple)()
@@ -170,7 +170,9 @@ class _PerspectiveDateValidator(object):
         # using `to_format`, it will be in *local time* - Pybind will
         # automatically localize any conversion to `datetime.datetime`
         # from C++ to Python.
-        return int((converter(timetuple) + obj.microsecond / 1000000.0) * 1000)
+        seconds_timestamp = (converter(timetuple) + obj.microsecond / 1000000.0)
+        ms_timestamp = int(seconds_timestamp * 1000)
+        return ms_timestamp
 
     def format(self, s):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on
