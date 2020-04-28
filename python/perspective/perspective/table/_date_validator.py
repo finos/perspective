@@ -156,13 +156,21 @@ class _PerspectiveDateValidator(object):
         if isinstance(obj, (int, float)):
             return _normalize_timestamp(obj)
 
+        timetuple = getattr(obj, to_timetuple)()
+
+        is_datetime_min = timetuple.tm_year == 1 and timetuple.tm_mon == 1 \
+            and timetuple.tm_mday == 1 and timetuple.tm_hour == 0 \
+            and timetuple.tm_min == 0 and timetuple.tm_sec == 0
+        if is_datetime_min:
+            # Return beginning of epoch for datetime.min
+            return 0
+
         # At this point, aware datetime objects are in UTC, and naive datetime
         # objects have not been modified. When the timestamp is serialized
         # using `to_format`, it will be in *local time* - Pybind will
         # automatically localize any conversion to `datetime.datetime`
         # from C++ to Python.
-        return int((converter(
-            getattr(obj, to_timetuple)()) + obj.microsecond / 1000000.0) * 1000)
+        return int((converter(timetuple) + obj.microsecond / 1000000.0) * 1000)
 
     def format(self, s):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on
@@ -182,9 +190,12 @@ class _PerspectiveDateValidator(object):
 
         dtype = t_dtype.DTYPE_STR
 
+        print(s, has_separators)
+
         if has_separators:
             try:
                 parsed = parse(s)
+                print(parsed)
                 if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
                     dtype = t_dtype.DTYPE_DATE
                 else:

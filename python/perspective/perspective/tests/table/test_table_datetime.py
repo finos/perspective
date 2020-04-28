@@ -158,6 +158,66 @@ if os.name != 'nt':
                 datetime(2019, 11, 3, 7, 10, 20)
             ]
 
+        def test_table_datetime_min(self):
+            data = {
+                "a": [datetime.min]
+            }
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1969, 12, 31, 19, 0)
+            ]
+
+        def test_table_datetime_min_df(self):
+            data = pd.DataFrame({
+                "a": [datetime.min]
+            })
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1969, 12, 31, 19, 0)
+            ]
+
+        def test_table_datetime_1900(self):
+            data = {
+                "a": [datetime(1900, 1, 1)]
+            }
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1900, 1, 1)
+            ]
+
+        def test_table_datetime_1900_df(self):
+            data = pd.DataFrame({
+                "a": [datetime(1900, 1, 1)]
+            })
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1899, 12, 31, 19)
+            ]
+
+        def test_table_datetime_min_epoch(self):
+            data = {
+                "a": [0]
+            }
+            table = Table({
+                "a": datetime
+            })
+            table.update(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1969, 12, 31, 19, 0)
+            ]
+
+        def test_table_datetime_min_epoch_df(self):
+            data = pd.DataFrame({
+                "a": [0]
+            })
+            table = Table({
+                "a": datetime
+            })
+            table.update(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1969, 12, 31, 19, 0)
+            ]
+
     class TestTableDateTimeUTCToLocal(object):
 
         def teardown_method(self):
