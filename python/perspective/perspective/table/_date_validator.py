@@ -158,8 +158,6 @@ class _PerspectiveDateValidator(object):
 
         timetuple = getattr(obj, to_timetuple)()
 
-        print(timetuple)
-
         is_datetime_min = timetuple.tm_year == 1 and timetuple.tm_mon == 1 \
             and timetuple.tm_mday == 1 and timetuple.tm_hour == 0 \
             and timetuple.tm_min == 0 and timetuple.tm_sec == 0
