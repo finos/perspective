@@ -174,21 +174,17 @@ class PerspectiveManager(object):
         cmd = msg["cmd"]
 
         if self._is_locked_command(msg) is True:
-            error_message = "`{0}` failed - access denied".format(
+            error_string = "`{0}` failed - access denied".format(
                 msg["cmd"] + (("." + msg["method"]) if msg.get("method", None) is not None else ""))
-            post_callback(json.dumps(self._make_error_message(
-                msg["id"], error_message), cls=DateTimeEncoder))
+            error_message = self._make_error_message(msg["id"], error_string)
+            post_callback(self._message_to_json(msg["id"], error_message))
             return
 
         try:
             if cmd == "init":
                 # return empty response
-                post_callback(
-                    json.dumps(
-                        self._make_message(
-                            msg["id"],
-                            None),
-                        cls=DateTimeEncoder))
+                message = self._make_message(msg["id"], None)
+                post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table":
                 try:
                     # create a new Table and track it
@@ -207,12 +203,8 @@ class PerspectiveManager(object):
                 self._process_method_call(msg, post_callback, client_id)
         except(PerspectiveError, PerspectiveCppError) as e:
             # Catch errors and return them to client
-            post_callback(
-                json.dumps(
-                    self._make_error_message(
-                        msg["id"],
-                        str(e))),
-                cls=DateTimeEncoder)
+            error_message = self._make_error_message(msg["id"], str(e))
+            post_callback(self._message_to_json(msg["id"], error_message))
 
     def _process_method_call(self, msg, post_callback, client_id):
         '''When the client calls a method, validate the instance it calls on
@@ -223,12 +215,9 @@ class PerspectiveManager(object):
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
-                post_callback(
-                    json.dumps(
-                        self._make_error_message(
-                            msg["id"],
-                            "View is not initialized"),
-                        cls=DateTimeEncoder))
+                error_message = self._make_error_message(
+                    msg["id"], "View is not initialized")
+                post_callback(self._message_to_json(msg["id"], error_message))
         try:
             if msg.get("subscribe", False) is True:
                 self._process_subscribe(
@@ -268,11 +257,11 @@ class PerspectiveManager(object):
                     self._process_bytes(result, msg, post_callback)
                 else:
                     # return the result to the client
-                    post_callback(json.dumps(self._make_message(
-                            msg["id"], result), cls=DateTimeEncoder))
+                    message = self._make_message(msg["id"], result)
+                    post_callback(self._message_to_json(msg["id"], message))
         except Exception as error:
-            post_callback(json.dumps(self._make_error_message(
-                msg["id"], str(error)), cls=DateTimeEncoder))
+            message = self._make_error_message(msg["id"], str(error))
+            post_callback(self._message_to_json(msg["id"], message))
 
     def _process_subscribe(self, msg, table_or_view, post_callback, client_id):
         '''When the client attempts to add or remove a subscription callback,
@@ -322,7 +311,8 @@ class PerspectiveManager(object):
             else:
                 logging.info("callback not found for remote call {}".format(msg))
         except Exception as error:
-            post_callback(json.dumps(self._make_error_message(msg["id"], error), cls=DateTimeEncoder))
+            message = self._make_error_message(msg["id"], str(error))
+            post_callback(self._message_to_json(msg["id"], message))
 
     def _process_bytes(self, binary, msg, post_callback):
         """Send a bytestring message to the client without attempting to
@@ -345,7 +335,7 @@ class PerspectiveManager(object):
         """
         pre_msg = self._make_message(msg["id"], "")
         pre_msg["is_transferable"] = True
-        post_callback(json.dumps(pre_msg, cls=DateTimeEncoder))
+        post_callback(self._message_to_json(msg["id"], pre_msg))
         post_callback(binary, binary=True)
 
     def callback(self, *args, **kwargs):
@@ -357,7 +347,7 @@ class PerspectiveManager(object):
         if len(args) > 0 and type(args[0]) == bytes:
             self._process_bytes(args[0], msg, post_callback)
         else:
-            post_callback(json.dumps(msg, cls=DateTimeEncoder))
+            post_callback(self._message_to_json(msg["id"], msg))
 
     def clear_views(self, client_id):
         '''Garbage collect views that belong to closed connections.'''
@@ -391,6 +381,32 @@ class PerspectiveManager(object):
             "id": id,
             "error": error
         }
+
+    def _message_to_json(self, id, message):
+        '''Given a message object to be passed to Perspective, serialize it
+        into a string using `DateTimeEncoder` and `allow_nan=False`.
+
+        If an Exception occurs in serialization, catch the Exception and
+        return an error message using `self._make_error_message`.
+
+        Args:
+            message (:obj:`dict`) a serializable message to be passed to
+                Perspective.
+        '''
+        try:
+            return json.dumps(message, allow_nan=False, cls=DateTimeEncoder)
+        except ValueError as error:
+            error_string = str(error)
+
+            # Augment the default error message when invalid values are
+            # detected, i.e. `NaN`
+            if error_string == "Out of range float values are not JSON compliant":
+                error_string = "Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON."
+
+            error_message = self._make_error_message(id, "JSON serialization error: {}".format(error_string))
+
+            logging.warning(error_message["error"])
+            return json.dumps(error_message)
 
     def _is_locked_command(self, msg):
         '''Returns `True` if the manager instance is locked and the command
