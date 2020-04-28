@@ -194,6 +194,24 @@ if os.name != 'nt':
                 datetime(1899, 12, 31, 19)
             ]
 
+        def test_table_datetime_1899(self):
+            data = {
+                "a": [datetime(1899, 1, 1)]
+            }
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1898, 12, 31, 19)
+            ]
+
+        def test_table_datetime_1899_df(self):
+            data = pd.DataFrame({
+                "a": [datetime(1899, 1, 1)]
+            })
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(1898, 12, 31, 19)
+            ]
+
         def test_table_datetime_min_epoch(self):
             data = {
                 "a": [0]

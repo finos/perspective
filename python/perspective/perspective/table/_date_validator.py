@@ -158,12 +158,20 @@ class _PerspectiveDateValidator(object):
 
         timetuple = getattr(obj, to_timetuple)()
 
+        print(timetuple)
+
         is_datetime_min = timetuple.tm_year == 1 and timetuple.tm_mon == 1 \
             and timetuple.tm_mday == 1 and timetuple.tm_hour == 0 \
             and timetuple.tm_min == 0 and timetuple.tm_sec == 0
+
         if is_datetime_min:
-            # Return beginning of epoch for datetime.min
+            # Return beginning of epoch when datetime is datetime.min
             return 0
+
+        if timetuple.tm_year < 1900:
+            # Use calendar.timegm to do conversion between timetuple and
+            # seconds timestamp
+            converter = timegm
 
         # At this point, aware datetime objects are in UTC, and naive datetime
         # objects have not been modified. When the timestamp is serialized
@@ -191,8 +199,6 @@ class _PerspectiveDateValidator(object):
         # match commonly-used date separators
 
         dtype = t_dtype.DTYPE_STR
-
-        print(s, has_separators)
 
         if has_separators:
             try:
