@@ -307,7 +307,7 @@ private:
      * 
      * @return std::shared_ptr<t_data_table> 
      */
-    std::shared_ptr<t_data_table> _process_table();
+    std::vector<std::shared_ptr<t_data_table>> _process_table();
 
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
