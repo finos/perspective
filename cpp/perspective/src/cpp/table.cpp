@@ -32,7 +32,7 @@ Table::Table(
     }
 
 void
-Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
+Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op, const t_uindex port_id) {
     /**
      * For the Table to be initialized correctly, make sure that the operation and index columns are
      * processed before the new offset is calculated. Calculating the offset before the `process_op_column`
@@ -49,7 +49,8 @@ Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
     }
 
     PSP_VERBOSE_ASSERT(m_gnode_set, "gnode is not set!");
-    m_pool->send(m_gnode->get_id(), 0, data_table);
+    // TODO: set a new gnode id > 0
+    m_pool->send(m_gnode->get_id(), port_id, data_table);
 
     m_init = true;
 }

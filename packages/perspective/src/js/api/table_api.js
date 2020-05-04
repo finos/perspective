@@ -105,13 +105,13 @@ table.prototype.remove = async_queue("remove", "table_method");
 
 table.prototype.remove_delete = unsubscribe("remove_delete", "table_method", true);
 
-table.prototype.update = function(data) {
+table.prototype.update = function(data, options) {
     return new Promise((resolve, reject) => {
         var msg = {
             name: this._name,
             cmd: "table_method",
             method: "update",
-            args: [data]
+            args: [data, options || {}]
         };
         this._worker.post(msg, resolve, reject, false);
     });

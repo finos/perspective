@@ -56,7 +56,7 @@ public:
      * @param row_count
      * @param op
      */
-    void init(t_data_table& data_table, std::uint32_t row_count, const t_op op);
+    void init(t_data_table& data_table, std::uint32_t row_count, const t_op op, const t_uindex port_id);
 
     /**
      * @brief The size of the underlying `t_data_table`, i.e. a row count

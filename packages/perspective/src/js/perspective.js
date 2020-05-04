@@ -89,8 +89,8 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow) {
-        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow);
+    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, port_id) {
+        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow, port_id);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -1345,7 +1345,9 @@ export default function(Module) {
      *
      * @see {@link module:perspective~table}
      */
-    table.prototype.update = function(data) {
+    table.prototype.update = function(data, options) {
+        options.port_id = options.port_id || 0;
+        console.log("Updating, port id:", options.port_ids);
         let pdata;
         let cols = this.columns();
         let schema = this._Table.get_schema();
@@ -1402,7 +1404,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1419,7 +1421,7 @@ export default function(Module) {
      *
      * @see {@link module:perspective~table}
      */
-    table.prototype.remove = function(data) {
+    table.prototype.remove = function(data, port_id = 0) {
         let pdata;
         let cols = this.columns();
         let schema = this._Table.get_schema();
@@ -1442,7 +1444,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow, port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1557,6 +1559,7 @@ export default function(Module) {
         table: function(data, options) {
             options = options || {};
             options.index = options.index || "";
+            options.port_id = options.port_id || 0;
 
             let data_accessor;
             let is_arrow = false;
@@ -1586,7 +1589,7 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow);
+                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, options.port_id);
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {

@@ -1020,7 +1020,8 @@ namespace binding {
         const std::string& index,
         t_op op,
         bool is_update,
-        bool is_arrow) {
+        bool is_arrow,
+        t_uindex port_id) {
         bool table_initialized = has_value(table);
         std::shared_ptr<t_pool> pool;
         std::shared_ptr<Table> tbl;
@@ -1162,7 +1163,7 @@ namespace binding {
         }
 
         // calculate offset, limit, and set the gnode
-        tbl->init(data_table, row_count, op);
+        tbl->init(data_table, row_count, op, port_id);
         return tbl;
     }
 

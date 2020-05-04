@@ -236,7 +236,8 @@ namespace binding {
         const std::string& index,
         t_op op,
         bool is_update,
-        bool is_arrow);
+        bool is_arrow,
+        t_uindex port_id);
 
     /******************************************************************************
      *

@@ -44,11 +44,13 @@ t_port::set_table(std::shared_ptr<t_data_table> table) {
 
 void
 t_port::send(std::shared_ptr<const t_data_table> table) {
+    std::cout << "Received shared ptr to table of size " << table->size() << std::endl;
     m_table->append(*table.get());
 }
 
 void
 t_port::send(const t_data_table& table) {
+    std::cout << "Received ref to table of size " << table.size() << std::endl;
     m_table->append(table);
 }
 
