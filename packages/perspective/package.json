@@ -59,7 +59,7 @@
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
-        "papaparse": "^4.3.6",
+        "papaparse": "^5.2.0",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
