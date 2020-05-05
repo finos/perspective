@@ -191,13 +191,19 @@ class _PerspectiveAccessor(object):
         if val is None:
             return val
 
+        # if item implements custom repr, use it
+        if hasattr(val, "_psp_repr_"):
+            val = val._psp_repr_()
+
         # first, check for numpy nans without using numpy.isnan as it tries to
         # cast values
         if isinstance(val, float) and isnan(val):
             return None
+
         elif isinstance(val, list) and len(val) == 1:
             # strip out values encased lists
             val = val[0]
+
         elif dtype == t_dtype.DTYPE_STR:
             if isinstance(val, (bytes, bytearray)):
                 return val.decode("utf-8")
@@ -234,7 +240,9 @@ class _PerspectiveAccessor(object):
             if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
                 # update float columns with either ints or floats
                 return float(val)
-
+        elif dtype == t_dtype.DTYPE_OBJECT:
+            # will extract the id from the object
+            pass
         return val
 
     def try_cast_numpy_arrays(self):

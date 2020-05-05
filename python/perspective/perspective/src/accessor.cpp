@@ -69,6 +69,29 @@ infer_type(t_val x, t_val date_validator) {
     std::string type_string = x.get_type().attr("__name__").cast<std::string>();
     t_dtype t = t_dtype::DTYPE_STR;
 
+    // If object provides its own type, use that
+    if (py::hasattr(x, "_psp_dtype_" )) {
+        auto new_type = x.attr("_psp_dtype_")();
+
+        if (py::hasattr(new_type, "__name__")){
+            // If type is a class, get its name
+            type_string = new_type.attr("__name__").cast<std::string>();
+
+        } else {
+            // Assume that the string is the type
+            type_string = new_type.cast<std::string>();
+        }
+
+        // Extract representation if not storing as object
+        if (type_string != "object") {
+            if (py::hasattr(x, "_psp_repr_")) {
+                x = x.attr("_psp_repr_")();
+            } else {
+                x = x.cast<py::str>();
+            }
+        }
+    }
+
     if (x.is_none()) {
         t = t_dtype::DTYPE_NONE;
     } else if (py::isinstance<py::bool_>(x) || type_string == "bool") {
@@ -76,9 +99,9 @@ infer_type(t_val x, t_val date_validator) {
         t = t_dtype::DTYPE_BOOL;
     } else if (type_string == "long") {
         t = t_dtype::DTYPE_INT64;
-    } else if (py::isinstance<py::float_>(x)) {
+    } else if (py::isinstance<py::float_>(x) || type_string == "float") {
         t = t_dtype::DTYPE_FLOAT64;
-    } else if (py::isinstance<py::int_>(x)) {
+    } else if (py::isinstance<py::int_>(x) || type_string == "int"){
         if (PY_MAJOR_VERSION < 3) {
             t = t_dtype::DTYPE_INT32;
         } else {

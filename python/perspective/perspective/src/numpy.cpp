@@ -17,7 +17,7 @@ namespace numpy {
 
     const std::vector<std::string> NumpyLoader::DATE_UNITS = {"[D]", "[W]", "[M]", "[Y]"};
 
-    NumpyLoader::NumpyLoader(py::object accessor)
+    NumpyLoader::NumpyLoader(t_val accessor)
         : m_init(false)
         , m_accessor(accessor) {}
 

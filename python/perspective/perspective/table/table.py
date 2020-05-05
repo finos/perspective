@@ -11,6 +11,7 @@ from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
+from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 from .libbinding import make_table, get_table_computed_schema, \
@@ -43,13 +44,15 @@ class Table(object):
         '''
         self._is_arrow = isinstance(data, (bytes, bytearray))
         if (self._is_arrow):
-            self._accessor = data
+            _accessor = data
         else:
-            self._accessor = _PerspectiveAccessor(data)
+            _accessor = _PerspectiveAccessor(data)
+
+        self._date_validator = _PerspectiveDateValidator()
 
         self._limit = limit or 4294967295
         self._index = index or ""
-        self._table = make_table(None, self._accessor, self._limit,
+        self._table = make_table(None, _accessor, self._limit,
                                  self._index, t_op.OP_INSERT, False,
                                  self._is_arrow)
         self._gnode_id = self._table.get_gnode().get_id()
@@ -216,7 +219,7 @@ class Table(object):
         in_schema = schema.get(filter[0], None)
         if in_schema and (schema[filter[0]] == date or schema[filter[0]] == datetime):
             if isinstance(value, str):
-                value = self._accessor.date_validator().parse(value)
+                value = self._date_validator.parse(value)
 
         return value is not None
 
@@ -243,34 +246,34 @@ class Table(object):
         _is_arrow = isinstance(data, (bytes, bytearray))
 
         if (_is_arrow):
-            self._accessor = data
-            self._table = make_table(self._table, self._accessor, self._limit, self._index, t_op.OP_INSERT, True, True)
+            _accessor = data
+            self._table = make_table(self._table, _accessor, self._limit, self._index, t_op.OP_INSERT, True, True)
             self._state_manager.set_process(
                 self._table.get_pool(), self._table.get_id())
             return
 
         columns = self.columns()
         types = self._table.get_schema().types()
-        self._accessor = _PerspectiveAccessor(data)
-        self._accessor._names = columns + \
-            [name for name in self._accessor._names if name == "__INDEX__"]
-        self._accessor._types = types[:len(columns)]
+        _accessor = _PerspectiveAccessor(data)
+        _accessor._names = columns + \
+            [name for name in _accessor._names if name == "__INDEX__"]
+        _accessor._types = types[:len(columns)]
 
-        if self._accessor._is_numpy:
+        if _accessor._is_numpy:
             # Try to cast arrays to the Perspective dtype before they end up in
             # the C++, thus allowing for int/floats to be copied when they are
             # the same bit width
-            self._accessor.try_cast_numpy_arrays()
+            _accessor.try_cast_numpy_arrays()
 
-        if "__INDEX__" in self._accessor._names:
+        if "__INDEX__" in _accessor._names:
             if self._index != "":
-                index_pos = self._accessor._names.index(self._index)
-                index_dtype = self._accessor._types[index_pos]
-                self._accessor._types.append(index_dtype)
+                index_pos = _accessor._names.index(self._index)
+                index_dtype = _accessor._types[index_pos]
+                _accessor._types.append(index_dtype)
             else:
-                self._accessor._types.append(t_dtype.DTYPE_INT32)
+                _accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, self._accessor, self._limit,
+        self._table = make_table(self._table, _accessor, self._limit,
                                  self._index, t_op.OP_INSERT, True, False)
         self._state_manager.set_process(
             self._table.get_pool(), self._table.get_id())
@@ -295,10 +298,10 @@ class Table(object):
             return
         pkeys = list(map(lambda idx: {self._index: idx}, pkeys))
         types = [self._table.get_schema().get_dtype(self._index)]
-        self._accessor = _PerspectiveAccessor(pkeys)
-        self._accessor._names = [self._index]
-        self._accessor._types = types
-        t = make_table(self._table, self._accessor, self._limit,
+        _accessor = _PerspectiveAccessor(pkeys)
+        _accessor._names = [self._index]
+        _accessor._types = types
+        t = make_table(self._table, _accessor,  self._limit,
                        self._index, t_op.OP_DELETE, True, False)
         self._state_manager.set_process(t.get_pool(), t.get_id())
 

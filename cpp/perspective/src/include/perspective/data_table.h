@@ -457,6 +457,9 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
                 case DTYPE_STR: {
                     this->flatten_helper_2<t_uindex, t_rpvec>(sorted, fltrecs, scol, dcol);
                 } break;
+                case DTYPE_OBJECT: {
+                    this->flatten_helper_2<void *, t_rpvec>(sorted, fltrecs, scol, dcol);
+                } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
             }
         }

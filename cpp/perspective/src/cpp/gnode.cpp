@@ -387,6 +387,9 @@ t_gnode::_process_table() {
                 case DTYPE_STR: {
                     _process_column<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
+                case DTYPE_OBJECT: {
+                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
             }
         }

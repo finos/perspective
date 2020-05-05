@@ -325,6 +325,11 @@ t_tscalar::compare_common(const t_tscalar& rhs) const {
             t_const_char_comparator<COMPARER_T> cmp;
             return cmp(get_char_ptr(), rhs.get_char_ptr());
         } break;
+        case DTYPE_OBJECT: {
+            // Just promote to int64 and compare
+            COMPARER_T<std::uint64_t> cmp;
+            return cmp(m_data.m_uint64, rhs.m_data.m_uint64);
+        } break;
         default: {
 #ifdef PSP_DEBUG
             std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type " << m_type
