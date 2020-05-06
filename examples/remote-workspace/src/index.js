@@ -16,7 +16,9 @@ import "./index.less";
 
 window.addEventListener("load", () => {
     const websocket = perspective.websocket("ws://localhost:8080");
-    const table = websocket.open_table("securities");
+    const worker = perspective.shared_worker();
+    const view = websocket.open_view("securities");
+    const table = worker.table(view);
 
     const workspace = document.createElement("perspective-workspace");
     document.body.appendChild(workspace);

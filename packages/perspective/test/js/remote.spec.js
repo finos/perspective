@@ -67,6 +67,7 @@ describe("WebSocketManager", function() {
         const client_table = client.open_table("test");
 
         const client_view = client_table.view();
+        // eslint-disable-next-line no-unused-vars
         const on_update = () => {
             client_view.to_json().then(async updated_data => {
                 server.eject_table("test");

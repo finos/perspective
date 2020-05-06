@@ -119,6 +119,7 @@ export class Client {
                 }
             }
         }
+
         if (e.data.id) {
             var handler = this._worker.handlers[e.data.id];
             if (handler) {

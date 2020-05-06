@@ -77,11 +77,22 @@ public:
     void init();
     void reset();
 
-    // send data to input port with at index idx
-    // schema should match port schema
-    void _send(t_uindex idx, const t_data_table& fragments);
-    void _send_and_process(const t_data_table& fragments);
-    void _process();
+    /**
+     * @brief Send a t_data_table with a schema that matches the gnode's
+     * input schema to the input port at `port_id`.
+     * 
+     * @param port_id 
+     * @param fragments 
+     */
+    void send(t_uindex port_id, const t_data_table& fragments);
+
+    /**
+     * @brief Given a port_id, call `process_table` on the port's data table,
+     * reconciling all queued calls to `update` and `remove` on that port.
+     * 
+     * @param port_id 
+     */
+    void process(t_uindex port_id);
 
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
@@ -96,6 +107,9 @@ public:
 
     t_schema get_output_schema() const;
     const t_schema& get_state_input_schema() const;
+
+    t_uindex num_input_ports() const;
+    t_uindex num_output_ports() const;
 
     std::vector<t_pivot> get_pivots() const;
     std::vector<t_stree*> get_trees();
@@ -307,7 +321,7 @@ private:
      * 
      * @return std::shared_ptr<t_data_table> 
      */
-    std::vector<std::shared_ptr<t_data_table>> _process_table();
+    std::shared_ptr<t_data_table> _process_table(t_uindex port_id);
 
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;

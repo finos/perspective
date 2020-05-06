@@ -22,7 +22,24 @@ export class WebSocketClient extends Client {
                 return;
             }
             if (this._pending_arrow) {
-                this._handle({data: {id: this._pending_arrow, data: msg.data}});
+                let result = {
+                    data: {
+                        id: this._pending_arrow,
+                        data: msg.data
+                    }
+                };
+
+                // make sure on_update callbacks are called with a `port_id`
+                // AND the transferred arrow.
+                if (this._pending_port_id) {
+                    const new_data_with_port_id = {
+                        port_id: this._pending_port_id,
+                        delta: msg.data
+                    };
+                    result.data.data = new_data_with_port_id;
+                }
+                this._handle(result);
+                delete this._pending_port_id;
                 delete this._pending_arrow;
             } else {
                 msg = JSON.parse(msg.data);
@@ -33,6 +50,14 @@ export class WebSocketClient extends Client {
                 // the ArrayBuffer containing arrow data.
                 if (msg.is_transferable) {
                     this._pending_arrow = msg.id;
+
+                    // Check whether the message also contains a `port_id`,
+                    // indicating that we are in an `on_update` callback and
+                    // the pending arrow needs to be joined with the port_id
+                    // for on_update handlers to work properly.
+                    if (msg.data && msg.data.port_id !== undefined) {
+                        this._pending_port_id = msg.data.port_id;
+                    }
                 } else {
                     this._handle({data: msg});
                 }

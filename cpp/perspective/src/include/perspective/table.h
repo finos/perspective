@@ -123,6 +123,16 @@ public:
     void reset_gnode(t_uindex id);
 
     /**
+     * @brief Create a `t_port` on `m_gnode`, which allows updates and removes
+     * to be processed on a specific port. Returns a `t_uindex` containing the
+     * id of the port.
+     * 
+     * @return t_uindex the ID of the port, which can be passed into `update`
+     * and `delete` methods in Javascript or Python. 
+     */
+    t_uindex make_and_get_port();
+
+    /**
      * @brief The offset determines where we begin to write data into the Table. 
      * Using `m_offset`, `m_limit`, and the length of the dataset, calculate the new position at which we write data.
      * 

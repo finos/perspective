@@ -21,16 +21,18 @@ t_update_task::run() {
     if (work_to_do) {
         m_pool.m_data_remaining.store(true);
         for (auto g : m_pool.m_gnodes) {
-            if (g)
-                g->_process();
-        }
-        for (auto g : m_pool.m_gnodes) {
-            if (g)
-                g->clear_output_ports();
+            if (g) {
+                t_uindex num_input_ports = g->num_input_ports();
+
+                for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
+                    g->process(port_id);
+                }
+            }
+            g->clear_output_ports();
         }
         m_pool.m_data_remaining.store(false);
     }
-    m_pool.notify_userspace();
+    m_pool.notify_userspace(0);
     m_pool.inc_epoch();
 }
 
@@ -39,17 +41,24 @@ t_update_task::run(t_uindex gnode_id) {
     auto work_to_do = m_pool.m_data_remaining.load();
     if (work_to_do) {
         for (auto g : m_pool.m_gnodes) {
-            if (g)
-                g->_process();
+            if (g) {
+                t_uindex num_input_ports = g->num_input_ports();
+
+                for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
+                    g->process(port_id);
+                    m_pool.notify_userspace(port_id);
+                }
+            }
         }
         m_pool.m_data_remaining.store(true);
+
         for (auto g : m_pool.m_gnodes) {
             if (g)
                 g->clear_output_ports();
         }
+
         m_pool.m_data_remaining.store(false);
     }
-    m_pool.notify_userspace();
     m_pool.inc_epoch();
 }
 } // end namespace perspective
