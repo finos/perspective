@@ -243,6 +243,13 @@ class PerspectiveManager(object):
                 if msg["method"].startswith("to_"):
                     # to_format takes dictionary of options
                     result = getattr(table_or_view, msg["method"])(**args)
+                elif msg["method"] in ("update", "remove"):
+                    # Apply first arg as position, then options dict as kwargs
+                    data = args[0]
+                    options = {}
+                    if (len(data) > 1):
+                        options = args[1]
+                    result = getattr(table_or_view, msg["method"])(data, **options)
                 elif msg["method"] in ("computed_schema", "get_computation_input_types"):
                     # these methods take args and kwargs
                     result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **args)
@@ -333,19 +340,22 @@ class PerspectiveManager(object):
                 client, with a `binary` (bool) kwarg that allows it to pass
                 byte messages without serializing to JSON.
         """
-        pre_msg = self._make_message(msg["id"], "")
-        pre_msg["is_transferable"] = True
-        post_callback(self._message_to_json(msg["id"], pre_msg))
+        msg["is_transferable"] = True
+        post_callback(json.dumps(msg, cls=DateTimeEncoder))
         post_callback(binary, binary=True)
 
     def callback(self, *args, **kwargs):
         '''Return a message to the client using the `post_callback` method.'''
         id = kwargs.get("msg")["id"]
-        data = kwargs.get("event", None)
         post_callback = kwargs.get("post_callback")
-        msg = self._make_message(id, data)
-        if len(args) > 0 and type(args[0]) == bytes:
-            self._process_bytes(args[0], msg, post_callback)
+        # Coerce the message to be an object so it can be handled in
+        # Javascript, where promises cannot be resolved with multiple args.
+        updated = {
+            "port_id": args[0],
+        }
+        msg = self._make_message(id, updated)
+        if len(args) > 1 and type(args[1]) == bytes:
+            self._process_bytes(args[1], msg, post_callback)
         else:
             post_callback(self._message_to_json(msg["id"], msg))
 

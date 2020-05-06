@@ -75,6 +75,8 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_schema", &Table::get_schema)
         .def("unregister_gnode", &Table::unregister_gnode)
         .def("reset_gnode", &Table::reset_gnode)
+        .def("make_and_get_input_port", &Table::make_and_get_input_port)
+        .def("remove_input_port", &Table::remove_input_port)
         .def("get_id", &Table::get_id)
         .def("get_pool", &Table::get_pool)
         .def("get_gnode", &Table::get_gnode);

@@ -52,9 +52,12 @@ class Table(object):
 
         self._limit = limit or 4294967295
         self._index = index or ""
+
+        # Always create tables on port 0
         self._table = make_table(None, _accessor, self._limit,
                                  self._index, t_op.OP_INSERT, False,
-                                 self._is_arrow)
+                                 self._is_arrow, 0)
+
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
         self._delete_callbacks = _PerspectiveCallBackCache()
@@ -67,6 +70,16 @@ class Table(object):
 
         # Each table always contains its own instance of state manager.
         self._state_manager = _PerspectiveStateManager()
+
+    def make_and_get_input_port(self):
+        '''Create a new input port on the underlying `gnode`, and return an
+        :obj:`int` containing the ID of the new input port.
+        '''
+        return self._table.make_and_get_input_port()
+
+    def remove_input_port(self, port_id):
+        '''Remove the specified input port from the underlying `gnode`.'''
+        self._table.remove_input_port()
 
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''
@@ -223,7 +236,7 @@ class Table(object):
 
         return value is not None
 
-    def update(self, data):
+    def update(self, data, port_id=0):
         '''Update the :class:`~perspective.Table` with new data.
 
         Updates on :class:`~perspective.Table` without an explicit ``index``
@@ -247,7 +260,7 @@ class Table(object):
 
         if (_is_arrow):
             _accessor = data
-            self._table = make_table(self._table, _accessor, self._limit, self._index, t_op.OP_INSERT, True, True)
+            self._table = make_table(self._table, _accessor, self._limit, self._index, t_op.OP_INSERT, True, True, port_id)
             self._state_manager.set_process(
                 self._table.get_pool(), self._table.get_id())
             return
@@ -274,11 +287,11 @@ class Table(object):
                 _accessor._types.append(t_dtype.DTYPE_INT32)
 
         self._table = make_table(self._table, _accessor, self._limit,
-                                 self._index, t_op.OP_INSERT, True, False)
+                                 self._index, t_op.OP_INSERT, True, False, port_id)
         self._state_manager.set_process(
             self._table.get_pool(), self._table.get_id())
 
-    def remove(self, pkeys):
+    def remove(self, pkeys, port_id=0):
         '''Removes the rows with the primary keys specified in ``pkeys``.
 
         If the :class:`~perspective.Table` does not have an index, ``remove()``
@@ -302,7 +315,7 @@ class Table(object):
         _accessor._names = [self._index]
         _accessor._types = types
         t = make_table(self._table, _accessor,  self._limit,
-                       self._index, t_op.OP_DELETE, True, False)
+                       self._index, t_op.OP_DELETE, True, False, port_id)
         self._state_manager.set_process(t.get_pool(), t.get_id())
 
     def view(self, columns=None, row_pivots=None, column_pivots=None,
@@ -420,7 +433,15 @@ class Table(object):
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 
-    def _update_callback(self):
+    def _update_callback(self, port_id):
+        """After `process` completes internally, this method is called by the
+        C++ with a `port_id`, indicating the port on which the update was
+        processed.
+
+        Arguments:
+            port_id (:obj:`int`): an int indicating which port the update
+            came from.
+        """
         cache = {}
         for callback in self._callbacks.get_callbacks():
-            callback["callback"](cache=cache)
+            callback["callback"](port_id=port_id, cache=cache)

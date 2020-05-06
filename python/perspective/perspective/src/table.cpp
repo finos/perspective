@@ -27,7 +27,7 @@ namespace binding {
  */
 
 std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
-        std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow) {
+        std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow, t_uindex port_id) {
     bool table_initialized = !table.is_none();
     std::shared_ptr<t_pool> pool;
     std::shared_ptr<Table> tbl;
@@ -187,7 +187,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     }
 
     // calculate offset, limit, and set the gnode
-    tbl->init(data_table, row_count, op);
+    tbl->init(data_table, row_count, op, port_id);
 
     //pool->_process();
     return tbl;

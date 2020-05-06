@@ -35,7 +35,8 @@ def make_meta(group, name):
         "name": name
     }
 
-def empty_callback():
+
+def empty_callback(port_id):
     pass
 
 
