@@ -116,4 +116,17 @@ export class DatagridViewModel extends DatagridViewEventModel {
             this.appendChild(this.table_model.table);
         }
     }
+
+    save() {
+        const selected = this._get_selected();
+        if (selected !== undefined) {
+            return {selected};
+        }
+    }
+
+    restore(config) {
+        if (config.selected) {
+            this._set_selected(config.selected);
+        }
+    }
 }

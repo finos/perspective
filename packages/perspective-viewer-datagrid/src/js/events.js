@@ -185,6 +185,32 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             }
         }
     }
+    /**
+     * Get the id of the selected row
+     *
+     * @memberof DatagridVirtualTableViewModel
+     */
+    _get_selected() {
+        return this._selected_id;
+    }
+    /**
+     * sets the selected row to the `selected_id`. The row for the id
+     * will be highlighted if it's in the viewport
+     *
+     * @param {*} selected_id
+     * @memberof DatagridVirtualTableViewModel
+     */
+    _set_selected(selected_id) {
+        this._selected_id = selected_id;
+    }
+    /**
+     * Clears selected row
+     *
+     * @memberof DatagridVirtualTableViewModel
+     */
+    _clear_selected() {
+        delete this._selected_id;
+    }
 
     /**
      * Datagrid event which handles row selection.
@@ -198,13 +224,13 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             return;
         }
 
-        const is_deselect = isEqual(metadata.id, this._selected_id);
+        const is_deselect = isEqual(metadata.id, this._get_selected());
         let filters = [];
         if (is_deselect) {
-            this._selected_id = undefined;
+            this._clear_selected();
             await this.draw({invalid_viewport: true});
         } else {
-            this._selected_id = metadata.id;
+            this._set_selected(metadata.id);
             await this.draw({invalid_viewport: true});
             filters = await getCellConfig(this._view_cache, metadata.ridx, metadata.cidx);
             filters = filters.config.filters;

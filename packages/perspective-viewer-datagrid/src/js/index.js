@@ -66,6 +66,10 @@ class DatagridPlugin {
     static async create(div, view) {
         const datagrid = get_or_create_datagrid(this, div);
         const options = await datagrid.set_view(view);
+        if (this._plugin_config) {
+            datagrid.restore(this._plugin_config);
+            delete this._plugin_config;
+        }
         await datagrid.draw(options);
     }
 
@@ -74,6 +78,29 @@ class DatagridPlugin {
             const datagrid = VIEWER_MAP.get(this._datavis);
             datagrid.reset_size();
             await datagrid.draw({invalid_viewport: true});
+        }
+    }
+
+    static delete() {
+        if (this.view && VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            datagrid.clear();
+        }
+    }
+
+    static save() {
+        if (this.view && VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            return datagrid.save();
+        }
+    }
+
+    static restore(config) {
+        if (this.view && VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            datagrid.restore(config);
+        } else {
+            this._plugin_config = config;
         }
     }
 }
