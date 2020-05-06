@@ -77,8 +77,8 @@ perspective-viewer,
   --hypergrid-scrollbar--border-radius: 5px;
   --hypergrid--font-size: 12px;
   --hypergrid-header--font-size: 12px;
-  --hypergrid--font-family: "Open Sans";
-  --hypergrid-header--font-family: "Open Sans";
+  --hypergrid--font-family: "monospace";
+  --hypergrid-header--font-family: "monospace";
   --d3fc-treedata-axis--lines: none;
   --active--color: #1a7da1;
   --hypergrid--color: #666;
