@@ -7,6 +7,8 @@
 #
 
 import os.path
+import numpy as np
+import pandas as pd
 import pyarrow as pa
 from datetime import date, datetime
 from perspective.table import Table
@@ -501,3 +503,33 @@ class TestTableArrow(object):
             "a": ["a", "b", "b", None],
             "b": ["x", "y", None, "z"]
         }
+
+    def test_table_arrow_loads_arrow_from_df_with_nan(self):
+        data = pd.DataFrame({
+            "a": [1.5, 2.5, np.nan, 3.5, 4.5, np.nan, np.nan, np.nan]
+        })
+
+        arrow_table = pa.Table.from_pandas(data)
+
+        assert arrow_table["a"].null_count == 4
+
+        # write arrow to stream
+        stream = pa.BufferOutputStream()
+        writer = pa.RecordBatchStreamWriter(
+            stream, arrow_table.schema, use_legacy_format=False)
+        writer.write_table(arrow_table)
+        arrow = stream.getvalue().to_pybytes()
+
+        # load
+        tbl = Table(arrow)
+        assert tbl.size() == 8
+
+        # check types
+        assert tbl.schema() == {
+            "a": float
+        }
+
+        # check nans
+        json = tbl.view().to_columns()
+
+        assert json["a"] == [1.5, 2.5, None, 3.5, 4.5, None, None, None]
