@@ -886,6 +886,94 @@ module.exports = perspective => {
             table.update(partial);
         });
 
+        it("Partial column oriented update with new pkey", async function(done) {
+            const data = {
+                x: [0, 1, null, 2, 3],
+                y: ["a", "b", "c", "d", "e"]
+            };
+            const table = perspective.table(data, {index: "x"});
+            const view = table.view();
+            const result = await view.to_columns();
+
+            expect(result).toEqual({
+                x: [null, 0, 1, 2, 3], // null before 0
+                y: ["c", "a", "b", "d", "e"]
+            });
+
+            const expected = {
+                x: [null, 0, 1, 2, 3, 4],
+                y: ["c", "a", "b", "d", "e", "f"]
+            };
+
+            view.on_update(
+                async function(updated) {
+                    expect(updated.delta).toEqual([
+                        {
+                            x: 4,
+                            y: "f"
+                        }
+                    ]);
+                    const result2 = await view.to_columns();
+                    expect(result2).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+
+            table.update({
+                x: [4],
+                y: ["f"]
+            });
+        });
+
+        it("Partial column oriented update with new pkey, missing columns", async function(done) {
+            const data = {
+                x: [0, 1, null, 2, 3],
+                y: ["a", "b", "c", "d", "e"],
+                z: [true, false, true, false, true]
+            };
+            const table = perspective.table(data, {index: "x"});
+            const view = table.view();
+            const result = await view.to_columns();
+
+            expect(result).toEqual({
+                x: [null, 0, 1, 2, 3], // null before 0
+                y: ["c", "a", "b", "d", "e"],
+                z: [true, true, false, false, true]
+            });
+
+            const expected = {
+                x: [null, 0, 1, 2, 3, 4],
+                y: ["c", "a", "b", "d", "e", "f"],
+                z: [true, true, false, false, true, null]
+            };
+
+            view.on_update(
+                async function(updated) {
+                    expect(updated.delta).toEqual([
+                        {
+                            x: 4,
+                            y: "f",
+                            z: null
+                        }
+                    ]);
+                    const result2 = await view.to_columns();
+                    expect(result2).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+
+            table.update({
+                x: [4],
+                y: ["f"]
+            });
+        });
+
         it("partial column oriented update with entire columns missing", function(done) {
             var partial = {
                 y: ["a", "b"],

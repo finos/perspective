@@ -106,6 +106,7 @@ t_gnode::init() {
 
 t_uindex
 t_gnode::make_and_get_input_port() {
+    PSP_VERBOSE_ASSERT(m_init, "Cannot `make_and_get_input_port` on an uninited gnode.");
     std::shared_ptr<t_port> input_port = 
         std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
     input_port->init();
@@ -117,6 +118,24 @@ t_gnode::make_and_get_input_port() {
     m_last_input_port_id = port_id;
 
     return port_id;
+}
+
+void
+t_gnode::remove_input_port(t_uindex port_id) {
+    PSP_VERBOSE_ASSERT(m_init, "Cannot `remove_input_port` on an uninited gnode.");
+
+    if (m_input_ports.count(port_id) == 0) {
+        std::cerr << "Input port `" << port_id << "` cannot be removed, as it does not exist.";
+        return;
+    }
+
+    std::shared_ptr<t_port> input_port = m_input_ports[port_id];
+
+    // clear the table at the port
+    input_port->clear();
+
+    // remove from the map
+    m_input_ports.erase(port_id);
 }
 
 t_value_transition
@@ -218,8 +237,6 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
 
 std::shared_ptr<t_data_table>
 t_gnode::_process_table(t_uindex port_id) {
-    std::cout << "Processing port:" << port_id << std::endl;
-
     m_was_updated = false;
     std::shared_ptr<t_data_table> flattened = nullptr;
 
@@ -251,6 +268,7 @@ t_gnode::_process_table(t_uindex port_id) {
         row_lookup[idx] = m_gstate->lookup(pkey);
     }
 
+    // first update - master table is empty
     if (m_gstate->mapping_size() == 0) {
         // Update context from state first - computes columns during update
         _update_contexts_from_state(flattened);
@@ -266,10 +284,7 @@ t_gnode::_process_table(t_uindex port_id) {
         return nullptr;
     }
 
-    for (auto& iter : m_input_ports) {
-        std::shared_ptr<t_port> input_port = iter.second;
-        input_port->release_or_clear();
-    }
+    input_port->release_or_clear();
 
     // Use `t_process_state` to manage intermediate structures
     t_process_state _process_state;
@@ -1239,7 +1254,6 @@ t_gnode::clear_input_ports() {
 void
 t_gnode::clear_output_ports() {
     for (t_uindex idx = 0, loop_end = m_oports.size(); idx < loop_end; ++idx) {
-        std::cout << "Clearing " << idx << std::endl;
         m_oports[idx]->get_table()->clear();
     }
 }

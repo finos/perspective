@@ -94,4 +94,12 @@ t_port::release_or_clear()
     m_prevsize = size;
 }
 
+void
+t_port::clear() {
+     if (!m_table.get())
+        return;
+    
+    m_table->clear();
+}
+
 } // end namespace perspective

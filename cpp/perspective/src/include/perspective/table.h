@@ -133,6 +133,13 @@ public:
     t_uindex make_and_get_input_port();
 
     /**
+     * @brief Given a port ID, remove the input port associated with the ID.
+     * 
+     * @param port_id 
+     */
+    void remove_input_port(t_uindex port_id);
+
+    /**
      * @brief The offset determines where we begin to write data into the Table. 
      * Using `m_offset`, `m_limit`, and the length of the dataset, calculate the new position at which we write data.
      * 

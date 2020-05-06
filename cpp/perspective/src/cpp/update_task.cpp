@@ -30,9 +30,8 @@ t_update_task::run() {
                 for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
                     g->process(port_id);
                     m_pool.notify_userspace(port_id);
+                    g->clear_output_ports();
                 }
-
-                g->clear_output_ports();
             }
         }
     }

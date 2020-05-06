@@ -1007,8 +1007,15 @@ export default function(Module) {
         return this._Table.get_pool();
     };
 
+    table.prototype.make_and_get_input_port = function() {
+        return this._Table.make_and_get_input_port();
+    };
+
+    table.prototype.remove_input_port = function() {
+        this._Table.remove_input_port();
+    };
+
     table.prototype._update_callback = function(port_id) {
-        console.log("NOTIFY called for", port_id);
         let cache = {};
         for (let e in this.callbacks) {
             this.callbacks[e].callback(port_id, cache);

@@ -103,6 +103,14 @@ public:
      */
     t_uindex make_and_get_input_port();
 
+    /**
+     * @brief Given a port ID, remove the input port that belongs to that
+     * input ID and clean up its associated table.
+     * 
+     * @param port_id 
+     */
+    void remove_input_port(t_uindex port_id);
+
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
 
