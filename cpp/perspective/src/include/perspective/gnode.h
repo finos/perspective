@@ -24,6 +24,7 @@
 #include <perspective/computed.h>
 #include <perspective/computed_column_map.h>
 #include <perspective/computed_function.h>
+#include <tsl/ordered_map.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -94,6 +95,14 @@ public:
      */
     void process(t_uindex port_id);
 
+    /**
+     * @brief Create a new input port, store it in `m_input_ports`, and
+     * return the integer ID that references the new port.
+     * 
+     * @return t_uindex 
+     */
+    t_uindex make_and_get_input_port();
+
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
 
@@ -102,8 +111,8 @@ public:
 
     std::shared_ptr<t_data_table> get_table_sptr();
 
-    t_data_table* _get_otable(t_uindex portidx);
-    t_data_table* _get_itable(t_uindex portidx);
+    t_data_table* _get_otable(t_uindex port_id);
+    t_data_table* _get_itable(t_uindex port_id);
 
     t_schema get_output_schema() const;
     const t_schema& get_state_input_schema() const;
@@ -119,6 +128,7 @@ public:
 
     void release_inputs();
     void release_outputs();
+
     std::vector<std::string> get_registered_contexts() const;
     std::vector<std::string> get_contexts_last_updated() const;
 
@@ -338,11 +348,19 @@ private:
     t_computed_column_map m_computed_column_map;
 
     bool m_init;
-    std::vector<std::shared_ptr<t_port>> m_iports;
+    t_uindex m_id;
+
+    // Input ports mapped by integer id
+    tsl::ordered_map<t_uindex, std::shared_ptr<t_port>> m_input_ports;
+
+    // Input port IDs are sequential, starting from 0
+    t_uindex m_last_input_port_id;
+
+    // Output ports stored sequentially in a vector, keyed by the
+    // `t_gnode_port` enum.
     std::vector<std::shared_ptr<t_port>> m_oports;
     std::map<std::string, t_ctx_handle> m_contexts;
     std::shared_ptr<t_gstate> m_gstate;
-    t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::vector<t_custom_column> m_custom_columns;
     std::function<void()> m_pool_cleanup;

@@ -46,6 +46,7 @@ t_gnode::t_gnode(const t_schema& input_schema, const t_schema& output_schema)
     , m_output_schema(output_schema)
     , m_init(false)
     , m_id(0)
+    , m_last_input_port_id(0)
     , m_pool_cleanup([]() {}) {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_gnode");
@@ -77,10 +78,14 @@ t_gnode::init() {
     m_gstate = std::make_shared<t_gstate>(m_input_schema, m_output_schema);
     m_gstate->init();
 
-    std::shared_ptr<t_port> port
-        = std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
-    port->init();
-    m_iports.push_back(port);
+    // Create and store the main input port, which is always port 0. The next
+    // input port will be port 1, and so on
+    std::shared_ptr<t_port> input_port = 
+        std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
+
+    input_port->init();
+
+    m_input_ports[0] = input_port;
 
     for (t_uindex idx = 0, loop_end = m_transitional_schemas.size(); idx < loop_end; ++idx) {
         t_port_mode mode = idx == 0 ? PORT_MODE_PKEYED : PORT_MODE_RAW;
@@ -91,11 +96,27 @@ t_gnode::init() {
         m_oports.push_back(port);
     }
 
-    for (std::shared_ptr<t_port> input_port : m_iports) {
+    for (auto& iter : m_input_ports) {
+        std::shared_ptr<t_port> input_port = iter.second;
         input_port->get_table()->flatten();
     }
 
     m_init = true;
+}
+
+t_uindex
+t_gnode::make_and_get_input_port() {
+    std::shared_ptr<t_port> input_port = 
+        std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
+    input_port->init();
+
+    t_uindex port_id = m_last_input_port_id + 1;
+    m_input_ports[port_id] = input_port;
+
+    // increment the global input port id
+    m_last_input_port_id = port_id;
+
+    return port_id;
 }
 
 t_value_transition
@@ -202,12 +223,12 @@ t_gnode::_process_table(t_uindex port_id) {
     m_was_updated = false;
     std::shared_ptr<t_data_table> flattened = nullptr;
 
-    if (port_id > m_iports.size()) {
+    if (m_input_ports.count(port_id) == 0) {
         std::cerr << "Cannot process table on port `" << port_id << "` as it does not exist." << std::endl;
         return flattened;
     }
 
-    std::shared_ptr<t_port> input_port = m_iports[port_id];
+    std::shared_ptr<t_port> input_port = m_input_ports[port_id];
 
     if (input_port->get_table()->size() == 0) {
         return flattened;
@@ -245,8 +266,9 @@ t_gnode::_process_table(t_uindex port_id) {
         return nullptr;
     }
 
-    for (t_uindex idx = 0, loop_end = m_iports.size(); idx < loop_end; ++idx) {
-        m_iports[idx]->release_or_clear();
+    for (auto& iter : m_input_ports) {
+        std::shared_ptr<t_port> input_port = iter.second;
+        input_port->release_or_clear();
     }
 
     // Use `t_process_state` to manage intermediate structures
@@ -521,15 +543,15 @@ t_gnode::send(t_uindex port_id, const t_data_table& fragments) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `send` to an uninited gnode.");
 
-    if (port_id > m_iports.size()) {
-        std::cerr << "Cannot send table to a port that does not exist." << std::endl;
+    if (m_input_ports.count(port_id) == 0) {
+        std::cerr << "Cannot send table to port `" << port_id << "`, which does not exist." << std::endl;
         return;
     }
 
     std:: cout << "sending to port_id: " << port_id << std::endl;
 
-    std::shared_ptr<t_port>& iport = m_iports[port_id];
-    iport->send(fragments);
+    std::shared_ptr<t_port>& input_port = m_input_ports[port_id];
+    input_port->send(fragments);
 }
 
 void
@@ -550,19 +572,19 @@ t_gnode::mapping_size() const {
 }
 
 t_data_table*
-t_gnode::_get_otable(t_uindex portidx) {
+t_gnode::_get_otable(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `_get_otable` on an uninited gnode.");
-    PSP_VERBOSE_ASSERT(portidx < m_oports.size(), "Invalid port number");
-    return m_oports[portidx]->get_table().get();
+    PSP_VERBOSE_ASSERT(port_id < m_oports.size(), "Invalid port number");
+    return m_oports[port_id]->get_table().get();
 }
 
 t_data_table*
-t_gnode::_get_itable(t_uindex portidx) {
+t_gnode::_get_itable(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `_get_itable` on an uninited gnode.");
-    PSP_VERBOSE_ASSERT(portidx < m_iports.size(), "Invalid port number");
-    return m_iports[portidx]->get_table().get();
+    PSP_VERBOSE_ASSERT(m_input_ports.count(port_id) != 0, "Invalid port number");
+    return m_input_ports[port_id]->get_table().get();
 }
 
 t_data_table*
@@ -598,8 +620,10 @@ t_gnode::promote_column(const std::string& name, t_dtype new_type) {
     get_table()->promote_column(name, new_type, 0, false);
     _get_otable(0)->promote_column(name, new_type, 0, false);
 
-    for (t_uindex idx = 0; idx < m_iports.size(); ++idx) {
-        _get_itable(idx)->promote_column(name, new_type, 0, false);
+    for (auto& iter : m_input_ports) {
+        std::shared_ptr<t_port> input_port = iter.second;
+        std::shared_ptr<t_data_table> input_table = input_port->get_table();
+        input_table->promote_column(name, new_type, 0, false);
     }
 
     m_output_schema.retype_column(name, new_type);
@@ -1101,7 +1125,7 @@ t_gnode::get_id() const {
 
 t_uindex
 t_gnode::num_input_ports() const {
-    return m_iports.size();
+    return m_input_ports.size();
 }
 
 t_uindex
@@ -1111,8 +1135,9 @@ t_gnode::num_output_ports() const {
 
 void
 t_gnode::release_inputs() {
-    for (const auto& p : m_iports) {
-        p->release();
+    for (auto& iter : m_input_ports) {
+        std::shared_ptr<t_port> input_port = iter.second;
+        input_port->release();
     }
 }
 
@@ -1205,8 +1230,9 @@ t_gnode::reset() {
 
 void
 t_gnode::clear_input_ports() {
-    for (t_uindex idx = 0, loop_end = m_iports.size(); idx < loop_end; ++idx) {
-        m_iports[idx]->get_table()->clear();
+    for (auto& iter : m_input_ports) {
+        std::shared_ptr<t_port> input_port = iter.second;
+        input_port->get_table()->clear();
     }
 }
 

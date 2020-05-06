@@ -197,6 +197,12 @@ Table::reset_gnode(t_uindex id) {
     gnode->reset();
 }
 
+t_uindex
+Table::make_and_get_input_port() {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    return m_gnode->make_and_get_input_port();
+}
+
 void
 Table::calculate_offset(std::uint32_t row_count) {
     m_offset = (m_offset + row_count) % m_limit;

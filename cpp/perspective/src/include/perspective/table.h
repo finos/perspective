@@ -130,7 +130,7 @@ public:
      * @return t_uindex the ID of the port, which can be passed into `update`
      * and `delete` methods in Javascript or Python. 
      */
-    t_uindex make_and_get_port();
+    t_uindex make_and_get_input_port();
 
     /**
      * @brief The offset determines where we begin to write data into the Table. 
