@@ -523,6 +523,23 @@ module.exports = perspective => {
             table.delete();
             done();
         });
+
+        it("`on_update()` that calls operations on the table should not recurse", function(done) {
+            var table = perspective.table(meta);
+            var view = table.view();
+            view.on_update(async function(updated) {
+                expect(updated.port_id).toEqual(0);
+                const json = await view.to_json();
+                // Not checking for correctness, literally just to assert
+                // that the `process()` call triggered by `to_json` will not
+                // infinitely recurse.
+                expect(json).toEqual(await view.to_json());
+                view.delete();
+                table.delete();
+                done();
+            });
+            table.update(data);
+        });
     });
 
     describe("Limit", function() {

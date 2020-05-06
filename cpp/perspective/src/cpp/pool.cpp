@@ -316,30 +316,6 @@ t_pool::inc_epoch() {
     ++m_epoch;
 }
 
-void
-t_pool::flush() {
-    std::lock_guard<std::mutex> lg(m_mtx);
-    if (!m_data_remaining.load())
-        return;
-
-    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx) {
-        if (m_gnodes[idx]) {
-            t_update_task task(*this);
-            task.run(idx);
-        }
-    }
-}
-
-void
-t_pool::flush(t_uindex gnode_id) {
-    std::lock_guard<std::mutex> lg(m_mtx);
-    auto work_to_do = m_data_remaining.load();
-    if (work_to_do) {
-        t_update_task task(*this);
-        task.run(gnode_id);
-    }
-}
-
 std::vector<t_uindex>
 t_pool::get_gnodes_last_updated() {
     std::lock_guard<std::mutex> lg(m_mtx);

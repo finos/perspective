@@ -799,6 +799,7 @@ export default function(Module) {
                 }
 
                 let updated = {port_id};
+
                 switch (mode) {
                     case "cell":
                         {

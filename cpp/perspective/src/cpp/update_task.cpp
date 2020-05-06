@@ -18,61 +18,25 @@ t_update_task::t_update_task(t_pool& pool)
 void
 t_update_task::run() {
     auto work_to_do = m_pool.m_data_remaining.load();
-    if (work_to_do) {
-        m_pool.m_data_remaining.store(true);
+    m_pool.m_data_remaining.store(false);
 
-        for (auto g : m_pool.m_gnodes) {
-            if (g) {
-                t_uindex num_input_ports = g->num_input_ports();
-
-                for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
-                    g->process(port_id);
-                }
-            }
-            g->clear_output_ports();
-        }
-
-        m_pool.m_data_remaining.store(false);
-    }
-
-    // Notify for each gnode after the process loop, as notify_userspace
-    // ?blocks?
-    for (auto g : m_pool.m_gnodes) {
-        if (g) {
-            t_uindex num_input_ports = g->num_input_ports();
-
-            for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
-                m_pool.notify_userspace(port_id);
-            }
-        }
-    }
-
-    m_pool.inc_epoch();
-}
-
-void
-t_update_task::run(t_uindex gnode_id) {
-    auto work_to_do = m_pool.m_data_remaining.load();
     if (work_to_do) {
         for (auto g : m_pool.m_gnodes) {
             if (g) {
                 t_uindex num_input_ports = g->num_input_ports();
 
+                // Call process for each port, and notify the updates from
+                // each port individually.
                 for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
                     g->process(port_id);
                     m_pool.notify_userspace(port_id);
                 }
+
+                g->clear_output_ports();
             }
         }
-        m_pool.m_data_remaining.store(true);
-
-        for (auto g : m_pool.m_gnodes) {
-            if (g)
-                g->clear_output_ports();
-        }
-
-        m_pool.m_data_remaining.store(false);
     }
+
     m_pool.inc_epoch();
 }
 } // end namespace perspective

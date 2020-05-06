@@ -1205,7 +1205,7 @@ t_gnode::reset() {
 
 void
 t_gnode::clear_input_ports() {
-    for (t_uindex idx = 0, loop_end = m_oports.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_iports.size(); idx < loop_end; ++idx) {
         m_iports[idx]->get_table()->clear();
     }
 }
@@ -1213,6 +1213,7 @@ t_gnode::clear_input_ports() {
 void
 t_gnode::clear_output_ports() {
     for (t_uindex idx = 0, loop_end = m_oports.size(); idx < loop_end; ++idx) {
+        std::cout << "Clearing " << idx << std::endl;
         m_oports[idx]->get_table()->clear();
     }
 }
