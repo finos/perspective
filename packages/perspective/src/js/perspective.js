@@ -797,14 +797,15 @@ export default function(Module) {
                 if (cache[port_id] === undefined) {
                     cache[port_id] = {};
                 }
+
+                let updated = {port_id};
                 switch (mode) {
                     case "cell":
                         {
                             if (cache[port_id]["step_delta"] === undefined) {
                                 cache[port_id]["step_delta"] = await this._get_step_delta();
                             }
-                            console.log("CACHE", cache);
-                            callback(port_id, cache[port_id]["step_delta"]);
+                            updated.delta = cache[port_id]["step_delta"];
                         }
                         break;
                     case "row":
@@ -812,15 +813,16 @@ export default function(Module) {
                             if (cache[port_id]["row_delta"] === undefined) {
                                 cache[port_id]["row_delta"] = await this._get_row_delta();
                             }
-                            console.log("CACHE", cache);
-                            callback(port_id, cache[port_id]["row_delta"]);
+                            updated.delta = cache[port_id]["row_delta"];
                         }
                         break;
-                    default: {
-                        console.log("CACHE", cache);
-                        callback(port_id);
-                    }
+                    default:
+                        break;
                 }
+
+                // Call the callback with the updated object containing
+                // `port_id` and `delta`.
+                callback(updated);
             }
         });
     };

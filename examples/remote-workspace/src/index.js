@@ -23,7 +23,7 @@ window.addEventListener("load", () => {
     const workspace = document.createElement("perspective-workspace");
     document.body.appendChild(workspace);
 
-    workspace.tables.set("superstore", table);
+    workspace.tables.set("securities", table);
 
     workspace.restore({
         detail: {
@@ -46,8 +46,8 @@ window.addEventListener("load", () => {
             }
         },
         viewers: {
-            One: {table: "superstore", name: "Heat Map", plugin: "heatmap", "row-pivots": ["client"], columns: ["chg"], "column-pivots": '["name"]'},
-            Two: {table: "superstore", name: "Bar Chart", plugin: "x_bar", "row-pivots": ["client"], columns: ["chg"]}
+            One: {table: "securities", name: "Heat Map", plugin: "heatmap", "row-pivots": ["client"], columns: ["chg"], "column-pivots": '["name"]'},
+            Two: {table: "securities", name: "Bar Chart", plugin: "x_bar", "row-pivots": ["client"], columns: ["chg"]}
         }
     });
 

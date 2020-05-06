@@ -31,7 +31,7 @@ export class WebSocketClient extends Client {
 
                 // make sure on_update callbacks are called with a `port_id`
                 // AND the transferred arrow.
-                if (this._pending_port_id) {
+                if (this._pending_port_id !== undefined) {
                     const new_data_with_port_id = {
                         port_id: this._pending_port_id,
                         delta: msg.data

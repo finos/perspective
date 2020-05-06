@@ -143,46 +143,27 @@ export class Server {
     process_subscribe(msg, obj) {
         try {
             let callback;
-            if (msg.method === "on_update") {
-                callback = (port_id, delta) => {
-                    // `on_update` will always call callback functions with
-                    // an object containing `port_id` and `delta`.
-                    let result = {
-                        id: msg.id,
-                        data: {
-                            port_id,
-                            delta
-                        }
-                    };
-                    try {
-                        // post transferable data for arrow
-                        if (msg.args && msg.args[0]) {
-                            if (msg.args[0]["mode"] === "row") {
-                                this.post(result, [delta]);
-                                return;
-                            }
-                        }
-
-                        this.post(result);
-                    } catch (e) {
-                        console.error(`Removing failed callback to \`on_update\` (presumably due to failed connection)`);
-                        obj["remove_update"](callback);
-                    }
-                };
-                if (msg.callback_id) {
-                    this._callback_cache.set(msg.callback_id, callback);
-                }
-            } else if (msg.method === "on_delete") {
+            if (msg.method.slice(0, 2) === "on") {
                 callback = ev => {
                     let result = {
                         id: msg.id,
                         data: ev
                     };
                     try {
+                        // post transferable data for arrow
+                        if (msg.args && msg.args[0]) {
+                            if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
+                                // actual arrow is in the `delta`
+                                this.post(result, [ev.delta]);
+                                return;
+                            }
+                        }
+
                         this.post(result);
                     } catch (e) {
-                        console.error(`Removing failed callback to \`on_delete\` (presumably due to failed connection)`);
-                        obj["remove_delete"](callback);
+                        console.error(`Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`);
+                        const remove_method = msg.method.substring(3);
+                        obj[`remove_${remove_method}`](callback);
                     }
                 };
                 if (msg.callback_id) {

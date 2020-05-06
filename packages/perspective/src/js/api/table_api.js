@@ -40,7 +40,12 @@ export function table(worker, data, options) {
                 options: options || {}
             };
             this._worker.post(msg);
-            data.on_update(this.update, {mode: "row"});
+            data.on_update(
+                updated => {
+                    this.update(updated.delta);
+                },
+                {mode: "row"}
+            );
         });
     } else {
         var msg = {
