@@ -35,6 +35,7 @@ class Aggregate(Enum):
     PCT_SUM_GRAND_TOTAL = 'pct sum grand total'
     SUM = 'sum'
     SUM_ABS = 'sum abs'
+    ABS_SUM = 'abs sum'
     SUM_NOT_NULL = 'sum not null'
     UNIQUE = 'unique'
 

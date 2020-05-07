@@ -590,8 +590,10 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_HIGH_WATER_MARK;
     } else if (str == "low" || str == "low_water_mark") {
         return t_aggtype::AGGTYPE_LOW_WATER_MARK;
-    } else if (str == "sum abs") {
+    } else if (str == "sum abs" || str == "sum_abs") {
         return t_aggtype::AGGTYPE_SUM_ABS;
+    } else if (str == "abs sum" || str == "abs_sum") {
+        return t_aggtype::AGGTYPE_ABS_SUM;
     } else if (str == "sum not null" || str == "sum_not_null") {
         return t_aggtype::AGGTYPE_SUM_NOT_NULL;
     } else if (str == "mean by count" || str == "mean_by_count") {
