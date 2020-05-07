@@ -383,7 +383,8 @@ module.exports = perspective => {
 
                 const view = table.view();
 
-                let last_port_id = 0;
+                // because no updates were called in port 0, start at 1
+                let last_port_id = 1;
                 view.on_update(function(updated) {
                     expect(updated.port_id).toEqual(last_port_id);
                     if (last_port_id == 10) {
@@ -408,7 +409,7 @@ module.exports = perspective => {
                 }
             });
 
-            it("All ports should be notified in on_update regardless of which port was updated.", async function(done) {
+            it("Only the port that was updated should be notified in on_update", async function(done) {
                 const table = perspective.table(data);
                 const port_ids = [];
 
@@ -420,19 +421,15 @@ module.exports = perspective => {
 
                 const view = table.view();
 
-                let last_port_id = 0;
+                const port_id = get_random_int(1, 9);
+
                 view.on_update(function(updated) {
-                    expect(updated.port_id).toEqual(last_port_id);
-                    if (last_port_id == 10) {
-                        view.delete();
-                        table.delete();
-                        done();
-                    } else {
-                        last_port_id++;
-                    }
+                    expect(updated.port_id).toEqual(port_id);
+                    view.delete();
+                    table.delete();
+                    done();
                 });
 
-                const port_id = get_random_int(1, 9);
                 table.update(
                     {
                         w: [1.5],
@@ -548,5 +545,7 @@ module.exports = perspective => {
                 }
             });
         });
+
+        describe("deltas on different ports", function() {});
     });
 };

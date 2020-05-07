@@ -28,8 +28,10 @@ t_update_task::run() {
                 // Call process for each port, and notify the updates from
                 // each port individually.
                 for (t_uindex port_id = 0; port_id < num_input_ports; ++port_id) {
-                    g->process(port_id);
-                    m_pool.notify_userspace(port_id);
+                    bool did_notify_context = g->process(port_id);
+                    if (did_notify_context) {
+                        m_pool.notify_userspace(port_id);
+                    }
                     g->clear_output_ports();
                 }
             }

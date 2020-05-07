@@ -52,6 +52,21 @@ class t_ctx_grouped_pkey;
 #define PSP_GNODE_VERIFY_TABLE(X)
 #endif
 
+/**
+ * @brief The struct returned from `_process_table`, which contains a
+ * pointer to the flattened and processed `t_data_table`, and a boolean showing
+ * whether the user's `on_update` callbacks should be called, i.e. whether the 
+ * update contained new data or not.
+ * 
+ * Given that `_process_table` may be called multiple times, as is `_process`,
+ * `t_update_task` will accumulate the values of `m_should_notify_userspace`
+ * over multiple calls and only consider an update a no-op if all values of
+ * `m_should_notify_userspace` are false.
+ */
+struct PERSPECTIVE_EXPORT t_process_table_result {
+    std::shared_ptr<t_data_table> m_flattened_data_table;
+    bool m_should_notify_userspace;
+};
 class PERSPECTIVE_EXPORT t_gnode {
 public:
     /**
@@ -90,10 +105,12 @@ public:
     /**
      * @brief Given a port_id, call `process_table` on the port's data table,
      * reconciling all queued calls to `update` and `remove` on that port.
+     * Returns a boolean indicating whether the update was valid and whether
+     * contexts were notified.
      * 
      * @param port_id 
      */
-    void process(t_uindex port_id);
+    bool process(t_uindex port_id);
 
     /**
      * @brief Create a new input port, store it in `m_input_ports`, and
@@ -337,9 +354,9 @@ private:
      * @brief Process the input data table by flattening it, calculating
      * transitional values, and returning a new masked version.
      * 
-     * @return std::shared_ptr<t_data_table> 
+     * @return t_process_table_result
      */
-    std::shared_ptr<t_data_table> _process_table(t_uindex port_id);
+    t_process_table_result _process_table(t_uindex port_id);
 
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;

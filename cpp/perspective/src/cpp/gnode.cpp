@@ -235,20 +235,25 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     return mask;
 }
 
-std::shared_ptr<t_data_table>
+t_process_table_result
 t_gnode::_process_table(t_uindex port_id) {
     m_was_updated = false;
+
+    t_process_table_result result;
+    result.m_flattened_data_table = nullptr;
+    result.m_should_notify_userspace = false;
+
     std::shared_ptr<t_data_table> flattened = nullptr;
 
     if (m_input_ports.count(port_id) == 0) {
         std::cerr << "Cannot process table on port `" << port_id << "` as it does not exist." << std::endl;
-        return flattened;
+        return result;
     }
 
     std::shared_ptr<t_port> input_port = m_input_ports[port_id];
 
     if (input_port->get_table()->size() == 0) {
-        return flattened;
+        return result;
     }
 
     m_was_updated = true;
@@ -281,7 +286,9 @@ t_gnode::_process_table(t_uindex port_id) {
         auto state_table = get_table();
         PSP_GNODE_VERIFY_TABLE(state_table);
     #endif
-        return nullptr;
+        // Make sure user is notified after first update.
+        result.m_should_notify_userspace = true;
+        return result;
     }
 
     input_port->release_or_clear();
@@ -466,7 +473,10 @@ t_gnode::_process_table(t_uindex port_id) {
 
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
 
-    return flattened_masked;
+    result.m_flattened_data_table = flattened_masked;
+    result.m_should_notify_userspace = true;
+
+    return result;
 }
 
 template <>
@@ -566,22 +576,24 @@ t_gnode::send(t_uindex port_id, const t_data_table& fragments) {
         return;
     }
 
-    std:: cout << "sending to port_id: " << port_id << std::endl;
-
     std::shared_ptr<t_port>& input_port = m_input_ports[port_id];
     input_port->send(fragments);
 }
 
-void
+bool
 t_gnode::process(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `process` on an uninited gnode.");
 
-    std::shared_ptr<t_data_table> flattened_masked = _process_table(port_id);
+    t_process_table_result result = _process_table(port_id);
 
-    if (flattened_masked) {
-        notify_contexts(*flattened_masked);
-    }
+    if (result.m_flattened_data_table) {
+        notify_contexts(*result.m_flattened_data_table);
+    } 
+    
+    // Whether the user should be notified - False if process_table exited
+    // early, True otherwise.
+    return result.m_should_notify_userspace;
 }
 
 t_uindex

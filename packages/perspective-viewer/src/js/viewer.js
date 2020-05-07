@@ -10,7 +10,7 @@
 import "@webcomponents/webcomponentsjs";
 import "./polyfill.js";
 
-import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, throttlePromise} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, invertPromise, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
 import "./computed_expression_editor.js";
@@ -71,6 +71,8 @@ class PerspectiveViewer extends ActionElement {
         this._show_warnings = true;
         this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
+        this._edit_port_id = null;
+        this._edit_port_id_lock = invertPromise();
         window.addEventListener("resize", this._resize_handler);
     }
 
@@ -849,6 +851,16 @@ class PerspectiveViewer extends ActionElement {
      */
     async toggleConfig() {
         await this._toggle_config();
+    }
+
+    /**
+     * Returns a promise that resolves to the element's edit port ID, used
+     * internally when edits are made using Hypergrid or DataGrid.
+     *
+     * @async
+     */
+    async getEditPortId() {
+        return this._edit_port_id_lock;
     }
 }
 
