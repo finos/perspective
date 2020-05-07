@@ -247,7 +247,7 @@ class PerspectiveManager(object):
                     # Apply first arg as position, then options dict as kwargs
                     data = args[0]
                     options = {}
-                    if (len(data) > 1):
+                    if (len(args) > 1 and isinstance(args[1], dict)):
                         options = args[1]
                     result = getattr(table_or_view, msg["method"])(data, **options)
                 elif msg["method"] in ("computed_schema", "get_computation_input_types"):

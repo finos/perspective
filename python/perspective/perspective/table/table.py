@@ -256,6 +256,9 @@ class Table(object):
             >>> tbl.view().to_dict()
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
         '''
+        if not port_id:
+            port_id = 0
+
         _is_arrow = isinstance(data, (bytes, bytearray))
 
         if (_is_arrow):

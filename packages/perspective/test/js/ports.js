@@ -546,6 +546,83 @@ module.exports = perspective => {
             });
         });
 
-        describe("deltas on different ports", function() {});
+        describe("deltas", function() {
+            it("Deltas should be unique to each port", async function(done) {
+                const table = perspective.table(data);
+                const port_ids = [];
+
+                for (let i = 0; i < 10; i++) {
+                    port_ids.push(await table.make_and_get_input_port());
+                }
+
+                expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+                const view = table.view();
+
+                let update_count = 0;
+
+                view.on_update(
+                    async function(updated) {
+                        const _t = perspective.table(updated.delta);
+                        const _v = _t.view();
+                        const result = await _v.to_columns();
+
+                        if (updated.port_id == first_port) {
+                            expect(result).toEqual({
+                                w: [100],
+                                x: [first_port],
+                                y: ["first port"],
+                                z: [false]
+                            });
+                        } else if (updated.port_id == second_port) {
+                            expect(result).toEqual({
+                                w: [200],
+                                x: [second_port],
+                                y: ["second port"],
+                                z: [true]
+                            });
+                        }
+
+                        update_count++;
+
+                        if (update_count === 2) {
+                            _v.delete();
+                            _t.delete();
+                            view.delete();
+                            table.delete();
+                            done();
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                const first_port = get_random_int(0, 10);
+                let second_port = get_random_int(0, 10);
+
+                if (second_port === first_port) {
+                    second_port = get_random_int(0, 10);
+                }
+
+                table.update(
+                    {
+                        w: [100],
+                        x: [first_port],
+                        y: ["first port"],
+                        z: [false]
+                    },
+                    {port_id: first_port}
+                );
+
+                table.update(
+                    {
+                        w: [200],
+                        x: [second_port],
+                        y: ["second port"],
+                        z: [true]
+                    },
+                    {port_id: second_port}
+                );
+            });
+        });
     });
 };
