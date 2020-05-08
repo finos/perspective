@@ -83,4 +83,46 @@ describe("WebSocketManager", function() {
             table.update([{x: 2}]);
         });
     });
+
+    it("Calls `update` and sends arraybuffers using `is_transferable`", async () => {
+        const data = [{x: 1}];
+        const table = perspective.table(data);
+        const view = table.view();
+        const arrow = await view.to_arrow();
+
+        server.host_table("test", table);
+
+        const client = perspective.websocket(`ws://localhost:${port}`);
+        const client_table = client.open_table("test");
+
+        client_table.update(arrow);
+
+        const client_data = await client_table.view().to_json();
+        expect(client_data).toEqual([{x: 1}, {x: 1}]);
+
+        await client.terminate();
+        server.eject_table("test");
+    });
+
+    it("Calls `update` and sends arraybuffers using `is_transferable` multiple times", async () => {
+        const data = [{x: 1}];
+        const table = perspective.table(data);
+        const view = table.view();
+        const arrow = await view.to_arrow();
+
+        server.host_table("test", table);
+
+        const client = perspective.websocket(`ws://localhost:${port}`);
+        const client_table = client.open_table("test");
+
+        client_table.update(arrow);
+        client_table.update(arrow);
+        client_table.update(arrow);
+
+        const client_data = await client_table.view().to_json();
+        expect(client_data).toEqual([{x: 1}, {x: 1}, {x: 1}, {x: 1}]);
+
+        await client.terminate();
+        server.eject_table("test");
+    });
 });
