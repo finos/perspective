@@ -10,6 +10,7 @@
         "index.d.ts"
     ],
     "unpkg": "./dist/umd/perspective-workspace.js",
+    "jsdelivr": "./dist/umd/perspective-workspace.js",
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",

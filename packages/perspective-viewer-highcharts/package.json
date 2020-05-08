@@ -4,6 +4,7 @@
     "description": "Perspective.js",
     "main": "./dist/cjs/perspective-viewer-highcharts.js",
     "unpkg": "./dist/umd/perspective-viewer-highcharts.js",
+    "jsdelivr": "./dist/umd/perspective-viewer-highcharts.js",
     "browser": {
         "heatmap": "./dist/esm/heatmap.js",
         "sunburst": "./dist/esm/sunburst.js",

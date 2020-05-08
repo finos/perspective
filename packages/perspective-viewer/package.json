@@ -5,6 +5,7 @@
     "main": "dist/cjs/perspective-viewer.js",
     "module": "dist/cjs/perspective-viewer.js",
     "unpkg": "dist/umd/perspective-viewer.js",
+    "jsdelivr": "dist/umd/perspective-viewer.js",
     "browser": {
         "themes/all-themes.less": "./dist/themes/all-themes.less",
         "themes/all-themes.css": "./dist/umd/all-themes.css",
