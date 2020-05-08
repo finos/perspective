@@ -118,3 +118,61 @@ class TestPorts(object):
 
         for port in ports_to_update:
             table.update(unique_data[port], port_id=port)
+
+    def test_ports_should_queue_updates_properly(self):
+        table = Table(data)
+        port_ids = []
+
+        for i in range(10):
+            port_ids.append(table.make_and_get_input_port())
+
+        assert port_ids == list(range(1, 11))
+
+        view = table.view()
+        ports_to_update = [random.randint(0, 10) for i in range(5)]
+
+        def callback(port_id):
+            assert port_id in ports_to_update
+
+        view.on_update(callback)
+
+        for port in ports_to_update:
+            table.update(data, port_id=port)
+
+    def test_ports_multiple_tables_with_different_ports(self):
+        server = Table(data)
+        client = Table(data)
+
+        for i in range(random.randint(5, 15)):
+            # reserve an arbitary number of ports
+            server.make_and_get_input_port()
+
+        # port for client is now far above the ports "ON" the client, as the
+        # client ports will begin creation at 1.
+        server_port_for_client = server.make_and_get_input_port()
+        client_port = client.make_and_get_input_port()
+
+        server_view = server.view()
+        client_view = client.view()
+
+        # when the client updates, check whether the port id matches that
+        # of the server, and complete the test.
+        def client_callback(port_id, delta):
+            if port_id == client_port:
+                print("UPDATING SERVER")
+                server.update(delta, port_id=server_port_for_client)
+
+        # when the server updates, pass the update back to the client
+        def server_callback(port_id, delta):
+            print("UPDATING CLIENT")
+            assert port_id == server_port_for_client
+            assert server.size() == 8
+            server_view.delete()
+            server.delete()
+            client_view.delete()
+            client.delete()
+
+        client_view.on_update(client_callback, mode="row")
+        server_view.on_update(server_callback, mode="row")
+
+        client.update(data, port_id=client_port)

@@ -624,5 +624,225 @@ module.exports = perspective => {
                 );
             });
         });
+
+        describe("Cross-table port operations", function() {
+            it("Should allow a client-server round trip without loops", async function(done) {
+                const client_table = perspective.table(data);
+                const server_table = perspective.table(data);
+                const client_port = await client_table.make_and_get_input_port();
+
+                // "get rid" of a random number of ports by creating them
+                for (let i = 0; i < get_random_int(5, 20); i++) {
+                    await server_table.make_and_get_input_port();
+                }
+
+                const server_port = await server_table.make_and_get_input_port();
+
+                expect(client_port).toBeLessThan(server_port);
+
+                const client_view = client_table.view();
+
+                let CLIENT_TO_SERVER_UPDATES = 0;
+
+                client_view.on_update(
+                    async updated => {
+                        if (updated.port_id === client_port) {
+                            server_table.update(updated.delta, {port_id: server_port});
+                            CLIENT_TO_SERVER_UPDATES++;
+                        } else {
+                            // Should not pass forward that update, and break
+                            // the chain.
+                            expect(CLIENT_TO_SERVER_UPDATES).toEqual(1);
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                const server_view = server_table.view();
+
+                server_view.on_update(
+                    async updated => {
+                        if (updated.port_id !== server_port) {
+                            client_table.update(updated.delta);
+                        } else {
+                            // update is trapped in this state - assert correct
+                            // state and exit the test.
+                            expect(await client_table.size()).toEqual(8);
+                            expect(await server_table.size()).toEqual(8);
+                            client_view.delete();
+                            server_view.delete();
+                            client_table.delete();
+                            server_table.delete();
+                            done();
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                // this should go to the server and round trip back to the
+                // client, but stop when it gets to the client again.
+                client_table.update(data, {port_id: client_port});
+            });
+
+            it("Should allow a client-server round trip without loops and server updates", async function(done) {
+                const client_table = perspective.table(data);
+                const server_table = perspective.table(data);
+                const client_port = await client_table.make_and_get_input_port();
+
+                // "get rid" of a random number of ports by creating them
+                for (let i = 0; i < get_random_int(5, 20); i++) {
+                    await server_table.make_and_get_input_port();
+                }
+
+                const server_port = await server_table.make_and_get_input_port();
+
+                expect(client_port).toBeLessThan(server_port);
+
+                const client_view = client_table.view();
+
+                let CLIENT_TO_SERVER_UPDATES = 0;
+
+                client_view.on_update(
+                    async updated => {
+                        if (updated.port_id === client_port) {
+                            server_table.update(updated.delta, {port_id: server_port});
+                            CLIENT_TO_SERVER_UPDATES++;
+                        } else {
+                            // Should not pass forward that update, and break
+                            // the chain.
+                            expect(CLIENT_TO_SERVER_UPDATES).toBeLessThanOrEqual(2);
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                const server_view = server_table.view();
+
+                server_view.on_update(
+                    async updated => {
+                        if (updated.port_id !== server_port) {
+                            client_table.update(updated.delta);
+                        } else {
+                            // update is trapped in this state - assert correct
+                            // state and exit the test.
+                            expect(await client_table.size()).toEqual(16);
+                            expect(await server_table.size()).toEqual(16);
+                            client_view.delete();
+                            server_view.delete();
+                            client_table.delete();
+                            server_table.delete();
+                            done();
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                // this should go to the server and round trip back to the
+                // client, but stop when it gets to the client again.
+                client_table.update(data, {port_id: client_port});
+
+                // this should go to the client
+                server_table.update(data);
+
+                // this should go to the server
+                client_table.update(data, {port_id: client_port});
+            });
+
+            it("Should allow multi client-server round trips without loops", async function(done) {
+                const client_table = perspective.table(data, {index: "w"});
+                const client_table2 = perspective.table(data, {index: "w"});
+                const server_table = perspective.table(data, {index: "w"});
+                const client_port = await client_table.make_and_get_input_port();
+                const client_port2 = await client_table2.make_and_get_input_port();
+
+                // "get rid" of a random number of ports by creating them
+                for (let i = 0; i < get_random_int(5, 20); i++) {
+                    await server_table.make_and_get_input_port();
+                }
+
+                const server_port = await server_table.make_and_get_input_port();
+                const server_port2 = await server_table.make_and_get_input_port();
+
+                expect(client_port).toBeLessThan(server_port);
+                expect(client_port2).toBeLessThan(server_port);
+                expect(client_port).toBeLessThan(server_port2);
+                expect(client_port2).toBeLessThan(server_port2);
+
+                // port numbers can be equal between clients
+                expect(client_port2).toEqual(client_port);
+
+                const client_view = client_table.view();
+                const client_view2 = client_table2.view();
+
+                client_view.on_update(
+                    async updated => {
+                        // client1 and server handlers are as minimal as can be
+                        if (updated.port_id === client_port) {
+                            server_table.update(updated.delta, {port_id: server_port});
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                client_view2.on_update(
+                    // eslint-disable-next-line no-unused-vars
+                    async updated => {
+                        // client2 only reads updates from other clients
+                        const results = await client_view2.to_columns();
+                        expect(results).toEqual({
+                            w: [1.5, 2.5, 3.5, 4.5],
+                            x: [1, 2, 300, 4],
+                            y: ["a", "b", "ccc", "d"],
+                            z: [true, false, true, false]
+                        });
+                        expect(await client_view.to_columns()).toEqual(results);
+                        expect(await server_view.to_columns()).toEqual(results);
+                        client_view.delete();
+                        client_view2.delete();
+                        server_view.delete();
+                        client_table.delete();
+                        client_table2.delete();
+                        server_table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+
+                const server_view = server_table.view();
+
+                // Simulate multiple connections to the server
+                server_view.on_update(
+                    async updated => {
+                        if (updated.port_id !== server_port) {
+                            client_table.update(updated.delta);
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                server_view.on_update(
+                    async updated => {
+                        if (updated.port_id !== server_port2) {
+                            client_table2.update(updated.delta);
+                        }
+                    },
+                    {mode: "row"}
+                );
+
+                // this should go to the server and round trip back to the
+                // client, but stop when it gets to the client again. It should
+                // reflect on the client2 table though.
+                client_table.update(
+                    [
+                        {
+                            w: 3.5,
+                            x: 300,
+                            y: "ccc"
+                        }
+                    ],
+                    {port_id: client_port}
+                );
+            });
+        });
     });
 };

@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import random
 import six
 import tornado.ioloop
 from functools import partial
@@ -82,7 +83,6 @@ class TestAsync(object):
         global SENTINEL
         SENTINEL = AsyncSentinel(0)
 
-    @mark.skip
     def test_async_queue_process(self):
         tbl = Table({
             "a": int,
@@ -98,16 +98,10 @@ class TestAsync(object):
         for i in range(5):
             tbl.update([data[i]])
 
-        table_id = tbl._table.get_id()
-        pool = tbl._table.get_pool()
+        # process should have been called at least once
+        assert SENTINEL.get() > 0
 
-        assert _PerspectiveStateManager.TO_PROCESS == {
-            table_id: pool
-        }
-        assert tbl.view().to_records() == data[:5]
-
-        # should have flushed the process queue
-        assert _PerspectiveStateManager.TO_PROCESS == {}
+        tbl.delete()
 
     def test_async_multiple_managers_queue_process(self):
         tbl = Table({
@@ -136,10 +130,15 @@ class TestAsync(object):
         assert SENTINEL.get() != 0
 
         # flush `TO_PROCESS`
-        assert tbl.view().to_records() == data[:5]
+        view = tbl.view()
+        assert view.to_records() == data[:5]
 
         for i in range(5):
             tbl2.update([data[i]])
+
+        view.delete()
+        tbl2.delete()
+        tbl.delete()
 
     def test_async_multiple_managers_mixed_queue_process(self):
         # mutate when synchronously calling queue_process for each update
@@ -182,8 +181,13 @@ class TestAsync(object):
         assert tbl2_id not in _PerspectiveStateManager.TO_PROCESS
 
         # flush `TO_PROCESS`
-        assert tbl.view().to_records() == data[:5]
+        view = tbl.view()
+        assert view.to_records() == data[:5]
         assert tbl_id not in _PerspectiveStateManager.TO_PROCESS
+
+        tbl2.delete()
+        view.delete()
+        tbl.delete()
 
     def test_async_multiple_managers_delayed_process(self):
         from time import sleep
@@ -232,3 +236,214 @@ class TestAsync(object):
         # that would call `call_process`, but instead wait for the
         # callbacks to execute asynchronously.
         sleep(1)
+
+        tbl2.delete()
+        tbl.delete()
+
+    def test_async_queue_process_multiple_ports(self):
+        tbl = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+
+        port_ids = [0]
+        port_data = [{
+            "a": 0,
+            "b": 0,
+            "c": "0"
+        }]
+
+        for i in range(10):
+            port_id = tbl.make_and_get_input_port()
+            port_ids.append(port_id)
+            port_data.append({
+                "a": port_id,
+                "b": port_id * 1.5,
+                "c": str(port_id)
+            })
+
+        assert port_ids == list(range(0, 11))
+
+        manager = PerspectiveManager()
+        manager._set_queue_process(TestAsync.wrapped_queue_process)
+        manager.host(tbl)
+
+        assert tbl.size() == 0
+
+        random.shuffle(port_ids)
+
+        for port_id in port_ids:
+            idx = port_id if port_id < len(port_ids) else len(port_ids) - 1
+            tbl.update([port_data[idx]], port_id=port_id)
+
+        # assert that process is being called asynchronously
+        assert SENTINEL.get() > 0
+
+        tbl.delete()
+
+    def test_async_multiple_managers_queue_process_multiple_ports(self):
+        tbl = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+
+        tbl2 = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+
+        port_ids = [0]
+        port_data = [{
+            "a": 0,
+            "b": 0,
+            "c": "0"
+        }]
+
+        for i in range(10):
+            port_id = tbl.make_and_get_input_port()
+            port_id2 = tbl2.make_and_get_input_port()
+
+            assert port_id == port_id2
+
+            port_ids.append(port_id)
+            port_data.append({
+                "a": port_id,
+                "b": port_id * 1.5,
+                "c": str(port_id)
+            })
+
+        manager = PerspectiveManager()
+        manager2 = PerspectiveManager()
+
+        manager.host_table("tbl", tbl)
+        manager2.host_table("tbl2", tbl2)
+
+        manager._set_queue_process(TestAsync.wrapped_queue_process)
+        manager2._set_queue_process(TestAsync.wrapped_queue_process)
+
+        random.shuffle(port_ids)
+
+        for port_id in port_ids:
+            idx = port_id if port_id < len(port_ids) else len(port_ids) - 1
+            tbl.update([port_data[idx]], port_id=port_id)
+            tbl2.update([port_data[idx]], port_id=port_id)
+
+        # assert that process gets called at some point
+        assert SENTINEL.get() != 0
+
+    def test_async_multiple_managers_mixed_queue_process_multiple_ports(self):
+        # mutate when synchronously calling queue_process for each update
+        SENTINEL_2 = AsyncSentinel(0)
+
+        def sync_queue_process(table_id, state_manager):
+            SENTINEL_2.set(SENTINEL_2.get() - 1)
+            state_manager.call_process(table_id)
+
+        tbl = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+
+        tbl2 = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+
+        port_ids = [0]
+        port_data = [{
+            "a": 0,
+            "b": 0,
+            "c": "0"
+        }]
+
+        for i in range(10):
+            port_id = tbl.make_and_get_input_port()
+            port_id2 = tbl2.make_and_get_input_port()
+
+            assert port_id == port_id2
+
+            port_ids.append(port_id)
+            port_data.append({
+                "a": port_id,
+                "b": port_id * 1.5,
+                "c": str(port_id)
+            })
+
+        manager = PerspectiveManager()
+        manager2 = PerspectiveManager()
+
+        manager.host_table("tbl", tbl)
+        manager2.host_table("tbl2", tbl2)
+
+        # manager uses tornado, manager2 is synchronous
+        manager._set_queue_process(TestAsync.wrapped_queue_process)
+        manager2._set_queue_process(sync_queue_process)
+
+        random.shuffle(port_ids)
+
+        for port_id in port_ids:
+            idx = port_id if port_id < len(port_ids) else len(port_ids) - 1
+            tbl.update([port_data[idx]], port_id=port_id)
+            tbl2.update([port_data[idx]], port_id=port_id)
+
+        assert SENTINEL.get() != 0
+        assert SENTINEL_2.get() == -11
+
+        tbl2.delete()
+        tbl.delete()
+
+    def test_async_multiple_managers_delayed_process_multiple_ports(self):
+        from time import sleep
+        short_delay_queue_process = partial(queue_process_async_delay,
+                                            delay=0.5, loop=TestAsync.loop)
+        long_delay_queue_process = partial(queue_process_async_delay,
+                                           delay=1, loop=TestAsync.loop)
+
+        tbl = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+        tbl2 = Table({
+            "a": int,
+            "b": float,
+            "c": str
+        })
+        manager = PerspectiveManager()
+        manager2 = PerspectiveManager()
+
+        manager.host_table("tbl", tbl)
+        manager2.host_table("tbl2", tbl2)
+
+        # The guarantee of `queue_process` is that eventually `_process`
+        # will be called, either by user action or loop iteration. By adding
+        # the delay, we can artificially queue up actions for later execution
+        # and see that it's working properly.
+        manager._set_queue_process(short_delay_queue_process)
+        manager2._set_queue_process(long_delay_queue_process)
+
+        tbl_id = tbl._table.get_id()
+        tbl2_id = tbl2._table.get_id()
+
+        for i in range(10):
+            tbl.update([data[i]])
+            tbl2.update([data[i]])
+
+        assert SENTINEL.get() != 0
+
+        # updates are now queued
+        assert tbl_id in _PerspectiveStateManager.TO_PROCESS
+        assert tbl2_id in _PerspectiveStateManager.TO_PROCESS
+
+        # Wait for the callbacks to run - we don't call any methods
+        # that would call `call_process`, but instead wait for the
+        # callbacks to execute asynchronously.
+        sleep(1)
+
+        tbl2.delete()
+        tbl.delete()

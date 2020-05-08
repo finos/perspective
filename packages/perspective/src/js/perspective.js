@@ -1373,7 +1373,6 @@ export default function(Module) {
         options = options || {};
         options.port_id = options.port_id || 0;
 
-        console.log("Updating, port id:", options.port_id);
         let pdata;
         let cols = this.columns();
         let schema = this._Table.get_schema();
