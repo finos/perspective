@@ -1192,6 +1192,15 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                         }));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
+            case AGGTYPE_ABS_SUM: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+                gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
+                double sum = std::accumulate(values.begin(), values.end(), double(0));
+                new_value.set(std::abs(sum));
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
             case AGGTYPE_MUL: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);

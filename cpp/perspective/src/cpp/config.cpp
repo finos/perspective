@@ -193,6 +193,7 @@ t_config::setup(const std::vector<std::string>& detail_columns,
             case AGGTYPE_PY_AGG:
             case AGGTYPE_SUM_NOT_NULL:
             case AGGTYPE_SUM_ABS:
+            case AGGTYPE_ABS_SUM:
             case AGGTYPE_MUL:
             case AGGTYPE_DISTINCT_COUNT:
             case AGGTYPE_DISTINCT_LEAF:
