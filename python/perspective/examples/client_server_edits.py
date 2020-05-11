@@ -43,7 +43,7 @@ def make_app():
         (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
         (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
-    ])
+    ], websocket_ping_interval=15)
 
 
 if __name__ == "__main__":
