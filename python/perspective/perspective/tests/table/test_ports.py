@@ -23,7 +23,7 @@ class TestPorts(object):
         port_ids = []
 
         for i in range(10):
-            port_ids.append(table.make_and_get_input_port())
+            port_ids.append(table.make_port())
 
         assert port_ids == list(range(1, 11))
 
@@ -32,7 +32,7 @@ class TestPorts(object):
         port_ids = []
 
         for i in range(10):
-            port_ids.append(table.make_and_get_input_port())
+            port_ids.append(table.make_port())
 
         assert port_ids == list(range(1, 11))
 
@@ -57,7 +57,7 @@ class TestPorts(object):
         port_ids = []
 
         for i in range(10):
-            port_ids.append(table.make_and_get_input_port())
+            port_ids.append(table.make_port())
 
         assert port_ids == list(range(1, 11))
 
@@ -78,7 +78,7 @@ class TestPorts(object):
         port_ids = []
 
         for i in range(10):
-            port_ids.append(table.make_and_get_input_port())
+            port_ids.append(table.make_port())
 
         assert port_ids == list(range(1, 11))
 
@@ -98,7 +98,7 @@ class TestPorts(object):
         port_ids = []
 
         for i in range(10):
-            port_ids.append(table.make_and_get_input_port())
+            port_ids.append(table.make_port())
 
         assert port_ids == list(range(1, 11))
 
@@ -124,7 +124,7 @@ class TestPorts(object):
         port_ids = []
 
         for i in range(10):
-            port_ids.append(table.make_and_get_input_port())
+            port_ids.append(table.make_port())
 
         assert port_ids == list(range(1, 11))
 
@@ -145,12 +145,12 @@ class TestPorts(object):
 
         for i in range(random.randint(5, 15)):
             # reserve an arbitary number of ports
-            server.make_and_get_input_port()
+            server.make_port()
 
         # port for client is now far above the ports "ON" the client, as the
         # client ports will begin creation at 1.
-        server_port_for_client = server.make_and_get_input_port()
-        client_port = client.make_and_get_input_port()
+        server_port_for_client = server.make_port()
+        client_port = client.make_port()
 
         server_view = server.view()
         client_view = client.view()

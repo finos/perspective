@@ -71,8 +71,8 @@ class PerspectiveViewer extends ActionElement {
         this._show_warnings = true;
         this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
-        this._edit_port_id = null;
-        this._edit_port_id_lock = invertPromise();
+        this._edit_port = null;
+        this._edit_port_lock = invertPromise();
         window.addEventListener("resize", this._resize_handler);
     }
 
@@ -859,8 +859,8 @@ class PerspectiveViewer extends ActionElement {
      *
      * @async
      */
-    async getEditPortId() {
-        return this._edit_port_id_lock;
+    async getEditPort() {
+        return this._edit_port_lock;
     }
 }
 

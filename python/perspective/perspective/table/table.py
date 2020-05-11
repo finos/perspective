@@ -71,15 +71,15 @@ class Table(object):
         # Each table always contains its own instance of state manager.
         self._state_manager = _PerspectiveStateManager()
 
-    def make_and_get_input_port(self):
+    def make_port(self):
         '''Create a new input port on the underlying `gnode`, and return an
         :obj:`int` containing the ID of the new input port.
         '''
-        return self._table.make_and_get_input_port()
+        return self._table.make_port()
 
-    def remove_input_port(self, port_id):
-        '''Remove the specified input port from the underlying `gnode`.'''
-        self._table.remove_input_port()
+    def remove_port(self, port_id):
+        '''Remove the specified port from the underlying `gnode`.'''
+        self._table.remove_port()
 
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''

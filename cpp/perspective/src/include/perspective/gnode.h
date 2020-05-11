@@ -118,7 +118,7 @@ public:
      * 
      * @return t_uindex 
      */
-    t_uindex make_and_get_input_port();
+    t_uindex make_input_port();
 
     /**
      * @brief Given a port ID, remove the input port that belongs to that

@@ -81,9 +81,9 @@ table.prototype.view = function(config) {
 
 // Dispatch table methods that do not create new objects (getters, setters etc.)
 // to the queue for processing.
-table.prototype.make_and_get_input_port = async_queue("make_and_get_input_port", "table_method");
+table.prototype.make_port = async_queue("make_port", "table_method");
 
-table.prototype.remove_input_port = async_queue("remove_input_port", "table_method");
+table.prototype.remove_port = async_queue("remove_port", "table_method");
 
 table.prototype.compute = async_queue("compute", "table_method");
 

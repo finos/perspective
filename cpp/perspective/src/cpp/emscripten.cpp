@@ -1629,8 +1629,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_computed_schema", &Table::get_computed_schema)
         .function("unregister_gnode", &Table::unregister_gnode)
         .function("reset_gnode", &Table::reset_gnode)
-        .function("make_and_get_input_port", &Table::make_and_get_input_port)
-        .function("remove_input_port", &Table::remove_input_port)
+        .function("make_port", &Table::make_port)
+        .function("remove_port", &Table::remove_port)
         .function("get_id", &Table::get_id)
         .function("get_pool", &Table::get_pool)
         .function("get_gnode", &Table::get_gnode);

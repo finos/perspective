@@ -105,8 +105,8 @@ t_gnode::init() {
 }
 
 t_uindex
-t_gnode::make_and_get_input_port() {
-    PSP_VERBOSE_ASSERT(m_init, "Cannot `make_and_get_input_port` on an uninited gnode.");
+t_gnode::make_input_port() {
+    PSP_VERBOSE_ASSERT(m_init, "Cannot `make_input_port` on an uninited gnode.");
     std::shared_ptr<t_port> input_port = 
         std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
     input_port->init();

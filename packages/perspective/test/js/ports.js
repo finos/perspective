@@ -28,7 +28,7 @@ module.exports = perspective => {
             const table = perspective.table(data);
             const port_ids = [];
             for (let i = 0; i < 10; i++) {
-                port_ids.push(await table.make_and_get_input_port());
+                port_ids.push(await table.make_port());
             }
             expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
             table.delete();
@@ -39,7 +39,7 @@ module.exports = perspective => {
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
-                port_ids.push(await table.make_and_get_input_port());
+                port_ids.push(await table.make_port());
             }
 
             expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -79,7 +79,7 @@ module.exports = perspective => {
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
-                port_ids.push(await table.make_and_get_input_port());
+                port_ids.push(await table.make_port());
             }
 
             expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -111,7 +111,7 @@ module.exports = perspective => {
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
-                port_ids.push(await table.make_and_get_input_port());
+                port_ids.push(await table.make_port());
             }
 
             expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -186,7 +186,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -292,7 +292,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -376,7 +376,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -414,7 +414,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -446,7 +446,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -489,7 +489,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -552,7 +552,7 @@ module.exports = perspective => {
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_and_get_input_port());
+                    port_ids.push(await table.make_port());
                 }
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -629,14 +629,14 @@ module.exports = perspective => {
             it("Should allow a client-server round trip without loops", async function(done) {
                 const client_table = perspective.table(data);
                 const server_table = perspective.table(data);
-                const client_port = await client_table.make_and_get_input_port();
+                const client_port = await client_table.make_port();
 
                 // "get rid" of a random number of ports by creating them
                 for (let i = 0; i < get_random_int(5, 20); i++) {
-                    await server_table.make_and_get_input_port();
+                    await server_table.make_port();
                 }
 
-                const server_port = await server_table.make_and_get_input_port();
+                const server_port = await server_table.make_port();
 
                 expect(client_port).toBeLessThan(server_port);
 
@@ -687,14 +687,14 @@ module.exports = perspective => {
             it("Should allow a client-server round trip without loops and server updates", async function(done) {
                 const client_table = perspective.table(data);
                 const server_table = perspective.table(data);
-                const client_port = await client_table.make_and_get_input_port();
+                const client_port = await client_table.make_port();
 
                 // "get rid" of a random number of ports by creating them
                 for (let i = 0; i < get_random_int(5, 20); i++) {
-                    await server_table.make_and_get_input_port();
+                    await server_table.make_port();
                 }
 
-                const server_port = await server_table.make_and_get_input_port();
+                const server_port = await server_table.make_port();
 
                 expect(client_port).toBeLessThan(server_port);
 
@@ -752,16 +752,16 @@ module.exports = perspective => {
                 const client_table = perspective.table(data, {index: "w"});
                 const client_table2 = perspective.table(data, {index: "w"});
                 const server_table = perspective.table(data, {index: "w"});
-                const client_port = await client_table.make_and_get_input_port();
-                const client_port2 = await client_table2.make_and_get_input_port();
+                const client_port = await client_table.make_port();
+                const client_port2 = await client_table2.make_port();
 
                 // "get rid" of a random number of ports by creating them
                 for (let i = 0; i < get_random_int(5, 20); i++) {
-                    await server_table.make_and_get_input_port();
+                    await server_table.make_port();
                 }
 
-                const server_port = await server_table.make_and_get_input_port();
-                const server_port2 = await server_table.make_and_get_input_port();
+                const server_port = await server_table.make_port();
+                const server_port2 = await server_table.make_port();
 
                 expect(client_port).toBeLessThan(server_port);
                 expect(client_port2).toBeLessThan(server_port);

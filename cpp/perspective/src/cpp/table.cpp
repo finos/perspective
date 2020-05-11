@@ -198,14 +198,14 @@ Table::reset_gnode(t_uindex id) {
 }
 
 t_uindex
-Table::make_and_get_input_port() {
+Table::make_port() {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_gnode_set, "Cannot make input port on a gnode that does not exist.");
-    return m_gnode->make_and_get_input_port();
+    return m_gnode->make_input_port();
 }
 
 void
-Table::remove_input_port(t_uindex port_id) {
+Table::remove_port(t_uindex port_id) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_gnode_set, "Cannot remove input port on a gnode that does not exist.");
     m_gnode->remove_input_port(port_id);

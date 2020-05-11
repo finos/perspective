@@ -469,8 +469,8 @@ class TestPerspectiveManager(object):
         manager._process(make_view, self.post)
 
         # Get two ports on the table
-        make_port = {"id": 3, "name": "table1", "cmd": "table_method", "method": "make_and_get_input_port"}
-        make_port2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "make_and_get_input_port"}
+        make_port = {"id": 3, "name": "table1", "cmd": "table_method", "method": "make_port"}
+        make_port2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "make_port"}
 
         manager._process(make_port, self.post)
         manager._process(make_port2, self.post)

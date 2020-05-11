@@ -1007,12 +1007,12 @@ export default function(Module) {
         return this._Table.get_pool();
     };
 
-    table.prototype.make_and_get_input_port = function() {
-        return this._Table.make_and_get_input_port();
+    table.prototype.make_port = function() {
+        return this._Table.make_port();
     };
 
-    table.prototype.remove_input_port = function() {
-        this._Table.remove_input_port();
+    table.prototype.remove_port = function() {
+        this._Table.remove_port();
     };
 
     table.prototype._update_callback = function(port_id) {

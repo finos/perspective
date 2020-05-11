@@ -255,7 +255,7 @@ class TestAsync(object):
         }]
 
         for i in range(10):
-            port_id = tbl.make_and_get_input_port()
+            port_id = tbl.make_port()
             port_ids.append(port_id)
             port_data.append({
                 "a": port_id,
@@ -303,8 +303,8 @@ class TestAsync(object):
         }]
 
         for i in range(10):
-            port_id = tbl.make_and_get_input_port()
-            port_id2 = tbl2.make_and_get_input_port()
+            port_id = tbl.make_port()
+            port_id2 = tbl2.make_port()
 
             assert port_id == port_id2
 
@@ -362,8 +362,8 @@ class TestAsync(object):
         }]
 
         for i in range(10):
-            port_id = tbl.make_and_get_input_port()
-            port_id2 = tbl2.make_and_get_input_port()
+            port_id = tbl.make_port()
+            port_id2 = tbl2.make_port()
 
             assert port_id == port_id2
 

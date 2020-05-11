@@ -46,8 +46,8 @@
 
             await viewer.load(client_table);
 
-            const client_edit_port = await viewer.getEditPortId();
-            const server_edit_port = await server_table.make_and_get_input_port();
+            const client_edit_port = await viewer.getEditPort();
+            const server_edit_port = await server_table.make_port();
 
             // When the client updates, if the update comes through the edit
             // port then forward it to the server.
