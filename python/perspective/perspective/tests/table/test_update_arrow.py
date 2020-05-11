@@ -7,8 +7,11 @@
 #
 
 import os
+import random
+import uuid
 import pyarrow as pa
 from datetime import date, datetime
+from pytest import mark
 from perspective.table import Table
 
 SOURCE_STREAM_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
@@ -476,3 +479,51 @@ class TestUpdateArrow(object):
         assert tbl.view().to_dict() == {
             name: data[0] for name in names
         }
+
+    def test_update_arrow_thread_safe_int_index(self, util):
+        data = [["a", "b", "c"] for i in range(10)]
+        data += [[1, 2, 3]]
+        names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "uid"]
+        arrow = util.make_arrow(names, data)
+        tbl = Table(arrow, index="uid")
+
+        for i in range(100):
+            idx = (1, 2, 3)[random.randint(0, 2)]
+            update_data = [[str(uuid.uuid4()) + str(random.randint(100, 1000000000))], [idx]]
+            update_names = [names[random.randint(0, 9)], "uid"]
+            update_arrow = util.make_arrow(update_names, update_data)
+            tbl.update(update_arrow)
+
+        assert tbl.size() == 3
+
+    def test_update_arrow_thread_safe_datetime_index(self, util):
+        data = [["a", "b", "c"] for i in range(10)]
+        data += [[datetime(2020, 1, 15, 12, 17), datetime(2020, 1, 15, 12, 18), datetime(2020, 1, 15, 12, 19)]]
+        names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "uid"]
+        arrow = util.make_arrow(names, data)
+        tbl = Table(arrow, index="uid")
+
+        for i in range(100):
+            idx = (datetime(2020, 1, 15, 12, 17), datetime(2020, 1, 15, 12, 18), datetime(2020, 1, 15, 12, 19))[random.randint(0, 2)]
+            update_data = [[str(uuid.uuid4()) + str(random.randint(100, 1000000000))], [idx]]
+            update_names = [names[random.randint(0, 9)], "uid"]
+            update_arrow = util.make_arrow(update_names, update_data)
+            tbl.update(update_arrow)
+
+        assert tbl.size() == 3
+
+    @mark.skip
+    def test_update_arrow_thread_safe_str_index(self, util):
+        data = [["a", "b", "c"] for i in range(11)]
+        names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "uid"]
+        arrow = util.make_arrow(names, data)
+        tbl = Table(arrow, index="uid")
+
+        for i in range(100):
+            idx = ("a", "b", "c")[random.randint(0, 2)]
+            update_data = [[str(uuid.uuid4()) + str(random.randint(100, 1000000000))], [idx]]
+            update_names = [names[random.randint(0, 9)], "uid"]
+            update_arrow = util.make_arrow(update_names, update_data)
+            tbl.update(update_arrow)
+
+        assert tbl.size() == 3
