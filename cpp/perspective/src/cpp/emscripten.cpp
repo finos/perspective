@@ -1064,7 +1064,8 @@ namespace binding {
             
             // Always use the `Table` column names and data types on up
             if (table_initialized && is_update) {
-                auto schema = gnode->get_output_schema();
+                auto gnode_output_schema = gnode->get_output_schema();
+                auto schema = gnode_output_schema.drop({"psp_okey"});
                 column_names = schema.columns();
                 data_types = schema.types();
 
@@ -1099,7 +1100,7 @@ namespace binding {
                     }
 
                     // Updated data types need to reflect in new data table
-                    auto new_schema = gnode->get_output_schema();
+                    auto new_schema = gnode->get_output_schema().drop({"psp_okey"});
                     data_types = new_schema.types();
                 }
             } else {
