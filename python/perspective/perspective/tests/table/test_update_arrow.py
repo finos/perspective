@@ -512,7 +512,6 @@ class TestUpdateArrow(object):
 
         assert tbl.size() == 3
 
-    @mark.skip
     def test_update_arrow_thread_safe_str_index(self, util):
         data = [["a", "b", "c"] for i in range(11)]
         names = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "uid"]

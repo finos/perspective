@@ -413,7 +413,10 @@ t_data_table::append(const t_data_table& other) {
 
     std::set<std::string> incoming;
 
-    for (const auto& cname : other.m_schema.m_columns) {
+    std::cout << "existing schema: " << m_schema << std::endl;
+    std::cout << "schema to append: " << other.m_schema << std::endl;
+
+    for (const auto& cname : m_schema.m_columns) {
         t_dtype col_dtype = get_column(cname)->get_dtype();
         t_dtype other_col_dtype = other.get_const_column(cname)->get_dtype();
         if (col_dtype != other_col_dtype) {
