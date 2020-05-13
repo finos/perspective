@@ -62,7 +62,8 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
 
         // Always use the `Table` column names and data types on update.
         if (table_initialized && is_update) {
-            auto schema = gnode->get_output_schema();
+            auto gnode_output_schema = gnode->get_output_schema();
+            auto schema = gnode_output_schema.drop({"psp_okey"});
             column_names = schema.columns();
             data_types = schema.types();
 
@@ -97,7 +98,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
                 }
             }
             // Make sure promoted types are used to construct data table
-            auto new_schema = gnode->get_output_schema();
+            auto new_schema = gnode->get_output_schema().drop({"psp_okey"});
             data_types = new_schema.types();
         } else {
             column_names = arrow_loader.names();
