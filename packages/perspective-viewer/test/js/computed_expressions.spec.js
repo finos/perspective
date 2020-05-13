@@ -165,6 +165,77 @@ utils.with_server({}, () => {
                 }, viewer);
             });
 
+            test.capture("Pressing arrow down should select the next autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_focus("perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowDown");
+            });
+
+            test.capture("Pressing arrow down on the last item should select the first autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_focus("perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowUp");
+                await page.keyboard.press("ArrowDown");
+            });
+
+            test.capture("Pressing arrow up should select the previous autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_focus("perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowUp");
+            });
+
+            test.capture("Pressing arrow up from the first item should select the last autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_focus("perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowUp");
+            });
+
+            test.capture("Pressing arrow down on an undocked autocomplete should select the next autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowDown");
+            });
+
+            test.capture("Pressing arrow down on the last item on an undocked autocomplete should select the first autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowUp");
+                await page.keyboard.press("ArrowDown");
+            });
+
+            test.capture("Pressing arrow up on an undocked autocomplete should select the previous autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowUp");
+            });
+
+            test.capture("Pressing arrow up from the first item on an undocked autocomplete should select the last autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowUp");
+            });
+
             // Functionality
             test.capture("Typing enter should save a valid expression", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");

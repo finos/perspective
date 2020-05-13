@@ -103,6 +103,7 @@ export class ActionElement extends DomElement {
         // FIXME: not a great pattern to commit to
         this._computed_expression_widget._computed_expression_parser = this._computed_expression_parser;
         this._computed_expression_widget._get_type = this._get_type.bind(this);
+        this._computed_expression_widget._autocomplete._get_type = this._get_type.bind(this);
         this._computed_expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
         this._computed_expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
         this._computed_expression_widget.style.display = "flex";

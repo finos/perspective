@@ -8,9 +8,10 @@
  */
 import {Lexer, createToken, tokenMatcher} from "chevrotain";
 import {PerspectiveLexerErrorMessage} from "./error";
-import {clean_tokens, Comma, ColumnName, As, Whitespace, LeftParen, RightParen, OperatorTokenType, FunctionTokenType, UpperLowerCaseTokenType, ColumnNameTokenType} from "./lexer";
+import {clean_tokens, Comma, ColumnName, As, Whitespace, LeftParen, RightParen, OperatorTokenType, FunctionTokenType, UpperLowerCaseTokenType} from "./lexer";
 import {ComputedExpressionColumnParser} from "./parser";
 import {COMPUTED_FUNCTION_FORMATTERS} from "./formatter";
+import {AutocompleteSuggestion} from "../autocomplete_widget";
 
 const token_types = {FunctionTokenType, OperatorTokenType};
 
@@ -111,6 +112,8 @@ class PerspectiveComputedExpressionParser {
             // quotes). If true, the suggest function names that match.
             const partial_function = this.extract_partial_function(expression);
 
+            console.log(partial_function);
+
             if (partial_function && partial_function.search(/["']$/) === -1) {
                 // Remove open parenthesis and column name rule
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
@@ -128,83 +131,73 @@ class PerspectiveComputedExpressionParser {
     }
 
     /**
-     * Try to extract a function name from the expression by backtracking until
-     * we hit the last open parenthesis or comma.
+     * Try to extract a partial function name, i.e. a string not within quotes
+     * and not ending with a parenthesis.
      *
-     * Because all functions need to be parenthesis-wrapped unless at the
-     * beginning of the expression, simply checking for parenthesis is enough
-     * to get a partial from common expressions:
-     *
-     * - "Sales" + (s => ["sqrt"]
-     * - "(a" => ["abs"]
+     * - "Sales" + (s => "s"
+     * - "(ab" => "ab"
      *
      * @param {String} expression
      */
     extract_partial_function(expression) {
         this._check_initialized();
-        const paren_index = expression.lastIndexOf("(");
-        const comma_index = expression.lastIndexOf(",");
+        const matches = expression.match(/([^(,\s]+$)/);
 
-        if (comma_index > paren_index) {
-            // i.e. concat_comma("Sales",
-            return expression.substring(comma_index).replace(",", "");
-        } else if (paren_index === -1) {
-            // If it can't find a parenthesis, and there are no column names,
-            // return the entire expression. Otherwise, a partial function
-            // could not be found, so return undefined.
-            if (expression.search(/["']/) === -1) {
-                return expression;
-            } else {
-                return undefined;
-            }
-        } else {
-            // i.e. '"Sales" + (sqr', remove the parenthesis so the pattern
-            // can be matched.
-            return expression.substring(paren_index).replace("(", "");
-        }
-    }
+        if (matches && matches.length > 0) {
+            const partial = matches[0];
 
-    /**
-     * Look backwards through a list of tokens for a function or operator,
-     * stopping after `limit` tokens. Whitespace tokens are removed from the
-     * token list before the search.
-     *
-     * @param {ILexingResult} lexer_result A result from the lexer, containing
-     * valid tokens and errors.
-     * @param {*} limit the number of tokens to search through before
-     * exiting or returning a valid result. If limit > tokens.length or is
-     * undefined, search all tokens.
-     */
-    get_last_function_or_operator(lexer_result, limit) {
-        const tokens = clean_tokens(lexer_result.tokens);
-        if (!limit || limit <= 0 || limit >= tokens.length) {
-            limit = tokens.length;
-        }
-        for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
-            if (tokenMatcher(tokens[i], FunctionTokenType) || tokenMatcher(tokens[i], OperatorTokenType)) {
-                return tokens[i];
+            // Ignore if match is a partial column name, i.e. has quotes
+            if (!/['"]/.test(partial)) {
+                return matches[0];
             }
         }
     }
 
     /**
-     * Look backwards through a list of tokens for a column name, stopping after
-     * `limit` tokens. Whitespace tokens are removed from the token list
-     * before the search.
+     * Look backwards through a list of tokens, checking whether each token is
+     * of a type in the `types` array, stopping after `limit` tokens.
+     * Whitespace tokens are removed from the token list before the search.
      *
+     * @param {Array{TokenType}} types An array of token types to look through.
      * @param {ILexingResult} lexer_result A result from the lexer, containing
      * valid tokens and errors.
      * @param {Number} limit the number of tokens to search through before
      * exiting or returning a valid result. If limit > tokens.length or is
      * undefined, search all tokens.
      */
-    get_last_column_name(lexer_result, limit) {
+    get_last_token_with_types(types, lexer_result, limit) {
         const tokens = clean_tokens(lexer_result.tokens);
         if (!limit || limit <= 0 || limit >= tokens.length) {
             limit = tokens.length;
         }
         for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
-            if (tokenMatcher(tokens[i], ColumnNameTokenType)) {
+            for (const type of types) {
+                if (tokenMatcher(tokens[i], type)) {
+                    return tokens[i];
+                }
+            }
+        }
+    }
+
+    /**
+     * Look backwards through a list of tokens, checking whether each token is
+     * of a type in the `types` array, stopping after `limit` tokens.
+     * Whitespace tokens are removed from the token list before the search.
+     *
+     * @param {String} name A string name of a token to match.
+     * @param {ILexingResult} lexer_result A result from the lexer, containing
+     * valid tokens and errors.
+     * @param {Number} limit the number of tokens to search through before
+     * exiting or returning a valid result. If limit > tokens.length or is
+     * undefined, search all tokens.
+     */
+    get_last_token_with_name(name, lexer_result, limit) {
+        const tokens = clean_tokens(lexer_result.tokens);
+        if (!limit || limit <= 0 || limit >= tokens.length) {
+            limit = tokens.length;
+        }
+        for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
+            if (tokens[i].tokenType.name === name) {
                 return tokens[i];
             }
         }
@@ -566,10 +559,7 @@ class PerspectiveComputedExpressionParser {
                 value = `${value} `;
             }
 
-            suggestions_with_metadata.push({
-                label,
-                value
-            });
+            suggestions_with_metadata.push(new AutocompleteSuggestion(label, value));
         }
 
         return suggestions_with_metadata;

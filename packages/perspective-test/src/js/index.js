@@ -133,6 +133,20 @@ async function get_new_page() {
         );
     };
 
+    page.shadow_focus = async function(...path) {
+        await this.evaluate(path => {
+            let elem = document;
+            while (path.length > 0) {
+                if (elem.shadowRoot) {
+                    elem = elem.shadowRoot;
+                }
+                elem = elem.querySelector(path.shift());
+            }
+
+            elem.focus();
+        }, path);
+    };
+
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});

@@ -355,7 +355,7 @@ str_to_computed_function_name(const std::string& name) {
         return t_computed_function_name::BUCKET_0_1;
     } else if (name == "Bucket (1/100)" || name == "bin100th") {
         return t_computed_function_name::BUCKET_0_0_1;
-    } else if (name == "Bucket (1/1000)" || name == "bin100th") {
+    } else if (name == "Bucket (1/1000)" || name == "bin1000th") {
         return t_computed_function_name::BUCKET_0_0_0_1;
     } else if (name == "Hour of Day" || name == "hour_of_day") {
         return t_computed_function_name::HOUR_OF_DAY;
