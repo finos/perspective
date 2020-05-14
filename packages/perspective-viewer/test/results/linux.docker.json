@@ -2,6 +2,7 @@
     "Computed_Expressions_click_on_add_column_button_opens_the_computed_expression_UI_": "dbe1ec0fec75b5fcdf2e22b027c2d4f4",
     "Computed_Expressions_click_on_close_button_closes_the_computed_expression_UI_": "6bb59f8783bc095f18245153a7a8309f",
     "Computed_Expressions_An_expression_that_doesn_t_reach_max-width_should_undock_the_autocomplete": "12c5fb7c55fa7ecd04c74717e3cd3418",
+    "Computed_Expressions_Typing_a_partial_expression_should_search_by_expression_label_and_value": "9f3dc874a106064cbf77c0e572cb3864",
     "Computed_Expressions_Typing_a_numeric_function_should_show_autocomplete_for_numeric_columns": "d738f899436299bfc7bf7fe90ef3bb43",
     "Computed_Expressions_Typing_a_string_function_should_show_autocomplete_for_string_columns": "54944335c9936323a93815e53a90e082",
     "Computed_Expressions_Typing_a_datetime_function_should_show_autocomplete_for_datetime_columns": "9d97e80f7a0db8322590c5c34c0f1f0d",

@@ -165,6 +165,14 @@ utils.with_server({}, () => {
                 }, viewer);
             });
 
+            // Prediction/search
+            test.capture("Typing a partial expression should search by expression label and value", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type("day", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+            });
+
             test.capture("Pressing arrow down should select the next autocomplete item", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");

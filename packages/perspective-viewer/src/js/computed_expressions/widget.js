@@ -86,7 +86,7 @@ class ComputedExpressionWidget extends HTMLElement {
         // label = what is shown in the autocomplete DOM
         // value = what the fragment in the editor will be replaced with
         return names.map(name => {
-            return new AutocompleteSuggestion(name, `"${name}"`);
+            return new AutocompleteSuggestion(name, `"${name}"`, true);
         });
     }
 
@@ -177,7 +177,7 @@ class ComputedExpressionWidget extends HTMLElement {
             const name_fragments = expression.match(/(["'])[\s\w()]*?$/);
             const has_name_fragments = name_fragments && name_fragments.length > 0 && !/['"]\s/.test(name_fragments[0]);
             const last_column_name = this._computed_expression_parser.get_last_token_with_types([ColumnNameTokenType], lex_result, 1);
-            const last_operator = this._computed_expression_parser.get_last_token_with_types([FunctionTokenType, OperatorTokenType], lex_result, 1);
+            const last_operator = this._computed_expression_parser.get_last_token_with_types([OperatorTokenType], lex_result, 1);
             const is_alias = this._computed_expression_parser.get_last_token_with_name("as", lex_result, 1);
             const show_column_names = (!is_alias && has_name_fragments && !last_column_name) || last_operator;
 
@@ -209,11 +209,11 @@ class ComputedExpressionWidget extends HTMLElement {
                 if (last_operator) {
                     // Make sure we have opening parenthesis if the last token
                     // is an operator
-                    this._autocomplete.render([new AutocompleteSuggestion("(", "(")]);
+                    suggestions = [new AutocompleteSuggestion("(", "(")].concat(suggestions);
                 }
 
                 // Render column names inside autocomplete
-                this._autocomplete.render(suggestions, true);
+                this._autocomplete.render(suggestions);
                 return;
             } else {
                 const suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result);
@@ -344,8 +344,7 @@ class ComputedExpressionWidget extends HTMLElement {
         if (suggestions.length > 0) {
             // Show autocomplete and not error box
             const column_names = this._make_column_name_suggestions(this._get_view_all_column_names());
-            this._autocomplete.render(suggestions);
-            this._autocomplete.render(column_names, true);
+            this._autocomplete.render(suggestions.concat(column_names));
         }
     }
 
@@ -359,7 +358,10 @@ class ComputedExpressionWidget extends HTMLElement {
         const old_value = this._expression_editor.get_text();
         const last_input = this._computed_expression_parser.extract_partial_function(old_value);
 
-        if (last_input && last_input !== '"') {
+        if (new_value === "(") {
+            // Always append parentheses
+            this._expression_editor._edit_area.innerText += new_value;
+        } else if (last_input && last_input !== '"') {
             // replace the fragment with the full function/operator
             const final_value = old_value.substring(0, old_value.length - last_input.length) + new_value;
             this._expression_editor._edit_area.innerText = final_value;
@@ -377,9 +379,8 @@ class ComputedExpressionWidget extends HTMLElement {
                 // TODO: collapse some of these repeated regex tests
                 const partials_inside_func = /\(['"]\w+$/.exec(last_word);
 
-                if (partials_inside_func[0] && (last_word_idx === 0 || last_word[0] === "(")) {
+                if (partials_inside_func && partials_inside_func[0] && (last_word_idx === 0 || last_word[0] === "(")) {
                     // replace upto the open quote, but not before it
-                    console.log(final_value, last_word.substring(0, partials_inside_func.index + 1));
                     final_value += last_word.substring(0, partials_inside_func.index + 1);
                 }
 

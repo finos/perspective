@@ -117,7 +117,18 @@ class PerspectiveComputedExpressionParser {
             if (partial_function && partial_function.search(/["']$/) === -1) {
                 // Remove open parenthesis and column name rule
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
-                return suggestions.filter(s => s.value.startsWith(partial_function));
+                const cleaned_suggestions = [];
+
+                for (const suggestion of suggestions) {
+                    const lower_label = suggestion.label.toLowerCase();
+                    const lower_value = suggestion.value.toLowerCase();
+                    const lower_input = partial_function.toLowerCase();
+
+                    if (lower_label.includes(lower_input) || lower_value.includes(lower_input)) {
+                        cleaned_suggestions.push(suggestion);
+                    }
+                }
+                return cleaned_suggestions;
             } else {
                 // Expression has unrecoverable errors
                 return [];

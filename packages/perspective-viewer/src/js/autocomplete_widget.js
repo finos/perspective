@@ -6,7 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {bindTemplate} from "./utils.js";
+import {html, render} from "lit-html";
+
+import {repeat} from "lit-html/directives/repeat";
+
+import {bindTemplate, throttlePromise} from "./utils.js";
 
 import template from "../html/autocomplete_widget.html";
 
@@ -18,9 +22,18 @@ import style from "../less/autocomplete_widget.less";
  * into the input when a selection is chosen.
  */
 export class AutocompleteSuggestion {
-    constructor(label, value) {
+    /**
+     * Construct a new autocomplete suggestion.
+     *
+     * @param {String} label the text shown to the user
+     * @param {String} value the text used to replace inside the input
+     * @param {Boolean} is_column_name whether the item is a column name or not,
+     * as additional styling will be applied to column names.
+     */
+    constructor(label, value, is_column_name) {
         this.label = label;
         this.value = value;
+        this.is_column_name = is_column_name || false;
     }
 }
 
@@ -49,11 +62,13 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      * @param {Boolean} is_column_name if true, suggestions will be rendered
      * with additional CSS classes denoting that they are column names.
      */
-    render(suggestions, is_column_name) {
+    @throttlePromise
+    render(suggestions) {
         if (suggestions.length === 0) {
             this.clear();
             return;
         }
+
         this.reposition();
 
         // Reset selection state
@@ -65,29 +80,22 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         // Reset scroll inside container to be at the top
         this._container.scrollTop = 0;
 
-        for (const suggestion of suggestions) {
-            const span = document.createElement("span");
+        const items = repeat(
+            suggestions,
+            suggestion => suggestion.label,
+            suggestion =>
+                suggestion.label
+                    ? html`
+                          <span
+                              class="${suggestion.is_column_name ? `psp-autocomplete__item--column-name ${this._get_type(suggestion.label)}` : ""} psp-autocomplete__item"
+                              data-value="${suggestion.value}"
+                              >${suggestion.label}</span
+                          >
+                      `
+                    : ""
+        );
 
-            // Don't attempt to render objects that don't have correct metadata
-            if (!suggestion.label) {
-                continue;
-            }
-
-            // Display the `label` to users
-            span.textContent = suggestion.label;
-            span.classList.add("psp-autocomplete__item");
-
-            // Render column names a little differently - they need their own
-            // CSS class as well as a class denoting their type.
-            if (is_column_name) {
-                span.classList.add("psp-autocomplete__item--column-name");
-                span.classList.add(this._get_type(suggestion.label));
-            }
-
-            // `value` is the text used inside the input container
-            span.setAttribute("data-value", suggestion.value);
-            this._container.appendChild(span);
-        }
+        render(items, this._container);
     }
 
     /**
@@ -124,7 +132,6 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         this.hide();
         this._selection_index = -1;
         this._container.removeAttribute("style");
-        this._container.innerHTML = "";
         this._container.classList.remove("undocked");
         this._container.classList.add("docked");
     }
