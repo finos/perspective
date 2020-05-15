@@ -15,7 +15,12 @@ the Apache License 2.0.  The full license can be found in the LICENSE file.
                 <span id="psp-computed-expression-widget-title">New Column</span>
             </div>
             <div class="psp-computed-expression-widget__content psp-computed-expression-widget__content--nomargin">
-                <perspective-expression-editor aria-label="Type a computed expression here"></perspective-expression-editor>
+                <perspective-expression-editor
+                    aria-autocomplete="list"
+                    aria-label="Type a computed expression here"
+                    aria-placeholder="Type a computed expression"
+                    aria-haspopup="true"
+                ></perspective-expression-editor>
                 <perspective-autocomplete-widget id="psp-computed-expression-widget-autocomplete"></perspective-autocomplete-widget>
                 <div class="psp-computed-expression-widget__label psp-computed-expression-widget__error" id="psp-computed-expression-widget-error"></div>
             </div>

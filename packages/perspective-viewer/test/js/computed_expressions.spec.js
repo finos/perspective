@@ -244,6 +244,25 @@ utils.with_server({}, () => {
                 await page.keyboard.press("ArrowUp");
             });
 
+            test.capture("Pressing enter should apply the autocomplete item", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_focus("perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("Enter");
+            });
+
+            test.capture("Pressing enter should apply the selected column", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type("'S", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.keyboard.press("ArrowDown");
+                await page.keyboard.press("Enter");
+            });
+
             // Functionality
             test.capture("Typing enter should save a valid expression", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");

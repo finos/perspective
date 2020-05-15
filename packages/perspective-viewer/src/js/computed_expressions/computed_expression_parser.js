@@ -15,6 +15,37 @@ import {AutocompleteSuggestion} from "../autocomplete_widget";
 
 const token_types = {FunctionTokenType, OperatorTokenType};
 
+/**
+ * A more complex suggestion object for computed expressions, which may suggest
+ * functions, operators, and column names, each with their own metadata.
+ */
+export class ComputedExpressionAutocompleteSuggestion extends AutocompleteSuggestion {
+    /**
+     * Construct a new autocomplete suggestion.
+     *
+     * @param {String} label the text shown to the user
+     * @param {String} value the text used to replace inside the input
+     * @param {String} signature a Typescript-style signature for the function
+     * @param {String} help a help string displayed in the UI
+     * @param {Array<String>} input_types input data types for the suggestion
+     * function or operator.
+     * @param {String} return_type the return type of the computed column
+     * @param {Number} num_params the number of input columns required by the
+     * function or operator.
+     * @param {Boolean} is_column_name whether the item is a column name or not,
+     * as additional styling will be applied to column names.
+     */
+    constructor({label, value, signature, help, input_types, return_type, num_params, is_column_name} = {}) {
+        super(label, value);
+        this.input_types = input_types;
+        this.return_type = return_type;
+        this.num_params = num_params;
+        this.signature = signature;
+        this.help = help;
+        this.is_column_name = is_column_name || false;
+    }
+}
+
 class PerspectiveComputedExpressionParser {
     constructor() {
         this.is_initialized = false;
@@ -112,14 +143,15 @@ class PerspectiveComputedExpressionParser {
             // quotes). If true, the suggest function names that match.
             const partial_function = this.extract_partial_function(expression);
 
-            console.log(partial_function);
-
             if (partial_function && partial_function.search(/["']$/) === -1) {
                 // Remove open parenthesis and column name rule
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
                 const cleaned_suggestions = [];
 
                 for (const suggestion of suggestions) {
+                    // Search for suggestions in both the label and value, as
+                    // we don't expect users to know the exact syntax for each
+                    // function name.
                     const lower_label = suggestion.label.toLowerCase();
                     const lower_value = suggestion.value.toLowerCase();
                     const lower_input = partial_function.toLowerCase();
@@ -265,8 +297,6 @@ class PerspectiveComputedExpressionParser {
             categories: [token_types[meta.category]]
         });
 
-        token.return_type = meta.return_type;
-
         // float/int and date/datetime are interchangable
         if (meta.input_type === "float") {
             token.input_types = ["float", "integer"];
@@ -275,6 +305,11 @@ class PerspectiveComputedExpressionParser {
         } else {
             token.input_types = [meta.input_type];
         }
+
+        token.return_type = meta.return_type;
+        token.num_params = meta.num_params;
+        token.signature = meta.signature;
+        token.help = meta.help;
 
         return token;
     }
@@ -557,20 +592,32 @@ class PerspectiveComputedExpressionParser {
         const suggestions_with_metadata = [];
 
         for (const suggestion of suggestions) {
-            if (!suggestion.nextTokenType || !suggestion.nextTokenType.PATTERN.source) {
+            const token = suggestion.nextTokenType;
+
+            if (!token || !token.PATTERN.source) {
                 continue;
             }
 
-            const label = suggestion.nextTokenType.LABEL;
-            let value = suggestion.nextTokenType.PATTERN.source.replace(/\\/g, "");
+            const label = token.LABEL;
+            let value = token.PATTERN.source.replace(/\\/g, "");
 
-            if (tokenMatcher(suggestion.nextTokenType, FunctionTokenType)) {
+            if (tokenMatcher(token, FunctionTokenType)) {
                 value = `${value}(`;
-            } else if (tokenMatcher(suggestion.nextTokenType, OperatorTokenType)) {
+            } else if (tokenMatcher(token, OperatorTokenType)) {
                 value = `${value} `;
             }
 
-            suggestions_with_metadata.push(new AutocompleteSuggestion(label, value));
+            suggestions_with_metadata.push(
+                new ComputedExpressionAutocompleteSuggestion({
+                    label,
+                    value,
+                    signature: token.signature,
+                    help: token.help,
+                    input_types: token.input_types,
+                    return_type: token.return_type,
+                    num_params: token.num_params
+                })
+            );
         }
 
         return suggestions_with_metadata;

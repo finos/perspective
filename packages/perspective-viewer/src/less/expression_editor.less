@@ -26,11 +26,17 @@
         height: 75px;
         margin-top: 5px;
         max-width: 250px;
+        min-height: 50px;
         padding: 5px;
         resize: auto;
+        outline: none;
         overflow: auto;
         white-space: pre-wrap;
         width: 100%;
+
+        &:hover {
+            cursor: text;
+        }
 
         .psp-expression__column_name {
             font-family: var(--interface--font-family, @sans-serif-fonts);

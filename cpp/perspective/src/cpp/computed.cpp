@@ -675,7 +675,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"}, // integer needs to be parsed in front-end
-        {"format_function", "(x, y) => `(${x} + ${y})`"}
+        {"format_function", "(x, y) => `(${x} + ${y})`"}, // JS style function
+        {"help", "Adds the values of two numeric columns."},
+        {"signature", "(x: Number) + (y: Number): Number"}
     }},
     {"subtract", {
         {"name", "subtract"},
@@ -686,7 +688,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "(x, y) => `(${x} - ${y})`"}
+        {"format_function", "(x, y) => `(${x} - ${y})`"},
+        {"help", "Subtracts the values of two numeric columns."},
+        {"signature", "(x: Number) - (y: Number): Number"}
     }},
     {"multiply", {
         {"name", "multiply"},
@@ -697,7 +701,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "(x, y) => `(${x} * ${y})`"}
+        {"format_function", "(x, y) => `(${x} * ${y})`"},
+        {"help", "Multiplies the values of two numeric columns."},
+        {"signature", "(x: Number) * (y: Number): Number"}
     }},
     {"divide", {
         {"name", "divide"},
@@ -708,7 +714,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "(x, y) => `(${x} / ${y})`"}
+        {"format_function", "(x, y) => `(${x} / ${y})`"},
+        {"help", "Divides the values of two numeric columns."},
+        {"signature", "(x: Number) / (y: Number): Number"}
     }},
     {"pow", {
         {"name", "pow"},
@@ -719,7 +727,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(${x} ^ ${y})`"}
+        {"format_function", "x => `(${x} ^ ${y})`"},
+        {"help", "Raises the first column to the power of the second column."},
+        {"signature", "(x: Number) ^ (y: Number): Number"}
     }},
     {"percent_of", {
         {"name", "percent_of"},
@@ -730,7 +740,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(x, y) => `(${x} % ${y})`"}
+        {"format_function", "x => `(x, y) => `(${x} % ${y})`"},
+        {"help", "Returns the first column as a percent of the second column."},
+        {"signature", "(x: Number) % (y: Number): Number"}
     }},
     {"equals", {
         {"name", "equals"},
@@ -741,7 +753,9 @@ t_computed_column::computed_functions = {
         {"return_type", "boolean"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(x, y) => `(${x} == ${y})`"}
+        {"format_function", "x => `(x, y) => `(${x} == ${y})`"},
+        {"help", "Whether the values in two numeric columns are equal."},
+        {"signature", "(x: Number) == (y: Number): Boolean"}
     }},
     {"not_equals", {
         {"name", "not_equals"},
@@ -752,7 +766,9 @@ t_computed_column::computed_functions = {
         {"return_type", "boolean"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(x, y) => `(${x} != ${y})`"}
+        {"format_function", "x => `(x, y) => `(${x} != ${y})`"},
+        {"help", "Whether the values in two numeric columns are not equal."},
+        {"signature", "(x: Number) != (y: Number): Boolean"}
     }},
     {"greater_than", {
         {"name", "greater_than"},
@@ -763,7 +779,9 @@ t_computed_column::computed_functions = {
         {"return_type", "boolean"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(x, y) => `(${x} > ${y})`"}
+        {"format_function", "x => `(x, y) => `(${x} > ${y})`"},
+        {"help", "Whether the first numeric column is greater than the second numeric column."},
+        {"signature", "(x: Number) > (y: Number): Boolean"}
     }},
     {"less_than", {
         {"name", "less_than"},
@@ -774,7 +792,9 @@ t_computed_column::computed_functions = {
         {"return_type", "boolean"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(x, y) => `(${x} < ${y})`"}
+        {"format_function", "x => `(x, y) => `(${x} < ${y})`"},
+        {"help", "Whether the first numeric column is less than the second numeric column."},
+        {"signature", "(x: Number) < (y: Number): Boolean"}
     }},
     {"is", {
         {"name", "is"},
@@ -785,7 +805,9 @@ t_computed_column::computed_functions = {
         {"return_type", "boolean"},
         {"category", "OperatorTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `(x, y) => `(${x} < ${y})`"}
+        {"format_function", "x => `(x, y) => `(${x} < ${y})`"},
+        {"help", "Whether the values in two string columns are equal."},
+        {"signature", "(x: String) is (y: String): Boolean"}
     }},
     // Numeric Functions
     {"invert", {
@@ -797,7 +819,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `(1 / ${x})`"}
+        {"format_function", "x => `(1 / ${x})`"},
+        {"help", "Returns 1 / the numeric column."},
+        {"signature", "invert(x: Number): Number"}
     }},
     {"pow2", {
         {"name", "pow2"},
@@ -808,7 +832,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `(${x} ^ 2)`"}
+        {"format_function", "x => `(${x} ^ 2)`"},
+        {"help", "Returns the numeric column to the power of 2."},
+        {"signature", "pow2(x: Number): Number"}
     }},
     {"log", {
         {"name", "log"},
@@ -819,7 +845,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `log(${x})`"}
+        {"format_function", "x => `log(${x})`"},
+        {"help", "Returns the natural log of the numeric column."},
+        {"signature", "log(x: Number): Number"}
     }},
     {"exp", {
         {"name", "exp"},
@@ -830,7 +858,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `exp(${x})`"}
+        {"format_function", "x => `exp(${x})`"},
+        {"help", "Returns the base-e exponent of the numeric column."},
+        {"signature", "exp(x: Number): Number"}
     }},
     {"sqrt", {
         {"name", "sqrt"},
@@ -841,7 +871,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `sqrt(${x})`"}
+        {"format_function", "x => `sqrt(${x})`"},
+        {"help", "Returns the square root of the numeric column."},
+        {"signature", "sqrt(x: Number): Number"}
     }},
     {"abs", {
         {"name", "abs"},
@@ -852,7 +884,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `abs(${x})`"}
+        {"format_function", "x => `abs(${x})`"},
+        {"help", "Returns the absolute value of the numeric column."},
+        {"signature", "abs(x: Number): Number"}
     }},
     {"bin10", {
         {"name", "bin10"},
@@ -863,7 +897,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `bin10(${x})`"}
+        {"format_function", "x => `bin10(${x})`"},
+        {"help", "Returns the numeric column bucketed to the nearest 10."},
+        {"signature", "bin10(x: Number): Number"}
     }},
     {"bin100", {
         {"name", "bin100"},
@@ -874,7 +910,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `bin100(${x})`"}
+        {"format_function", "x => `bin100(${x})`"},
+        {"help", "Returns the numeric column bucketed to the nearest 100."},
+        {"signature", "bin100(x: Number): Number"}
     }},
     {"bin1000", {
         {"name", "bin1000"},
@@ -885,7 +923,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `bin1000(${x})`"}
+        {"format_function", "x => `bin1000(${x})`"},
+        {"help", "Returns the numeric column bucketed to the nearest 1000."},
+        {"signature", "bin1000(x: Number): Number"}
     }},
     {"bin10th", {
         {"name", "bin10th"},
@@ -896,7 +936,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `bin10th(${x})`"}
+        {"format_function", "x => `bin10th(${x})`"},
+        {"help", "Returns the numeric column bucketed to the nearest 0.1."},
+        {"signature", "bin10th(x: Number): Number"}
     }},
     {"bin100th", {
         {"name", "bin100th"},
@@ -907,7 +949,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `bin100th(${x})`"}
+        {"format_function", "x => `bin100th(${x})`"},
+        {"help", "Returns the numeric column bucketed to the nearest 0.01."},
+        {"signature", "bin100th(x: Number): Number"}
     }},
     {"bin1000th", {
         {"name", "bin1000th"},
@@ -918,7 +962,9 @@ t_computed_column::computed_functions = {
         {"return_type", "float"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `bin1000th(${x})`"}
+        {"format_function", "x => `bin1000th(${x})`"},
+        {"help", "Returns the numeric column bucketed to the nearest 0.001."},
+        {"signature", "bin1000th(x: Number): Number"}
     }},
     // String Functions
     {"length", {
@@ -930,7 +976,9 @@ t_computed_column::computed_functions = {
         {"return_type", "integer"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `length(${x})`"}
+        {"format_function", "x => `length(${x})`"},
+        {"help", "Returns the length of each string in the string column."},
+        {"signature", "length(x: String): Number"}
     }},
     {"uppercase", {
         {"name", "uppercase"},
@@ -941,7 +989,9 @@ t_computed_column::computed_functions = {
         {"return_type", "string"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `uppercase(${x})`"}
+        {"format_function", "x => `uppercase(${x})`"},
+        {"help", "Returns each string to uppercase in the string column."},
+        {"signature", "uppercase(x: String): String"}
     }},
     {"lowercase", {
         {"name", "lowercase"},
@@ -952,7 +1002,9 @@ t_computed_column::computed_functions = {
         {"return_type", "string"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `lowercase(${x})`"}
+        {"format_function", "x => `lowercase(${x})`"},
+        {"help", "Returns each string to lowercase in the string column."},
+        {"signature", "lowercase(x: String): String"}
     }},
     {"concat_space", {
         {"name", "concat_space"},
@@ -963,7 +1015,9 @@ t_computed_column::computed_functions = {
         {"return_type", "string"},
         {"category", "FunctionTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `concat_space(${x})`"}
+        {"format_function", "x => `concat_space(${x})`"},
+        {"help", "Returns the values of two string columns, concatenated with a space."},
+        {"signature", "concat_space(x: String, y: String): String"}
     }},
     {"concat_comma", {
         {"name", "concat_comma"},
@@ -974,7 +1028,9 @@ t_computed_column::computed_functions = {
         {"return_type", "string"},
         {"category", "FunctionTokenType"},
         {"num_params", "2"},
-        {"format_function", "x => `concat_comma(${x})`"}
+        {"format_function", "x => `concat_comma(${x})`"},
+        {"help", "Returns the values of two string columns, concatenated with a comma."},
+        {"signature", "concat_comma(x: String, y: String): String"}
     }},
     // Date Functions
     {"hour_of_day", {
@@ -986,7 +1042,9 @@ t_computed_column::computed_functions = {
         {"return_type", "integer"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `hour_of_day(${x})`"}
+        {"format_function", "x => `hour_of_day(${x})`"},
+        {"help", "Returns the hour of day for the datetime column."},
+        {"signature", "hour_of_day(x: Datetime): Number"}
     }},
     {"day_of_week", {
         {"name", "day_of_week"},
@@ -997,7 +1055,9 @@ t_computed_column::computed_functions = {
         {"return_type", "string"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `day_of_week(${x})`"}
+        {"format_function", "x => `day_of_week(${x})`"},
+        {"help", "Returns the day of week for the datetime column."},
+        {"signature", "day_of_week(x: Datetime): String"}
     }},
     {"month_of_year", {
         {"name", "month_of_year"},
@@ -1008,7 +1068,9 @@ t_computed_column::computed_functions = {
         {"return_type", "string"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `month_of_year(${x})`"}
+        {"format_function", "x => `month_of_year(${x})`"},
+        {"help", "Returns the month of year for the datetime column."},
+        {"signature", "month_of_year(x: Datetime): String"}
     }},
     {"second_bucket", {
         {"name", "second_bucket"},
@@ -1019,7 +1081,9 @@ t_computed_column::computed_functions = {
         {"return_type", "datetime"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `second_bucket(${x})`"}
+        {"format_function", "x => `second_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest second."},
+        {"signature", "second_bucket(x: Datetime): Datetime"}
     }},
     {"minute_bucket", {
         {"name", "minute_bucket"},
@@ -1030,7 +1094,9 @@ t_computed_column::computed_functions = {
         {"return_type", "datetime"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `minute_bucket(${x})`"}
+        {"format_function", "x => `minute_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest minute."},
+        {"signature", "minute_bucket(x: Datetime): Datetime"}
     }},
     {"hour_bucket", {
         {"name", "hour_bucket"},
@@ -1041,7 +1107,9 @@ t_computed_column::computed_functions = {
         {"return_type", "datetime"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `hour_bucket(${x})`"}
+        {"format_function", "x => `hour_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest hour."},
+        {"signature", "hour_bucket(x: Datetime): Datetime"}
     }},
     {"day_bucket", {
         {"name", "day_bucket"},
@@ -1052,7 +1120,9 @@ t_computed_column::computed_functions = {
         {"return_type", "date"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `day_bucket(${x})`"}
+        {"format_function", "x => `day_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest day."},
+        {"signature", "day_bucket(x: Datetime): Datetime"}
     }},
     {"week_bucket", {
         {"name", "week_bucket"},
@@ -1063,7 +1133,9 @@ t_computed_column::computed_functions = {
         {"return_type", "date"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `week_bucket(${x})`"}
+        {"format_function", "x => `week_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest week."},
+        {"signature", "week_bucket(x: Datetime): Datetime"}
     }},
     {"month_bucket", {
         {"name", "month_bucket"},
@@ -1074,7 +1146,9 @@ t_computed_column::computed_functions = {
         {"return_type", "date"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `month_bucket(${x})`"}
+        {"format_function", "x => `month_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest month."},
+        {"signature", "month_bucket(x: Datetime): Datetime"}
     }},
     {"year_bucket", {
         {"name", "year_bucket"},
@@ -1085,7 +1159,9 @@ t_computed_column::computed_functions = {
         {"return_type", "date"},
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
-        {"format_function", "x => `year_bucket(${x})`"}
+        {"format_function", "x => `year_bucket(${x})`"},
+        {"help", "Returns the datetime column bucketed to the nearest year."},
+        {"signature", "year_bucket(x: Datetime): Datetime"}
     }}
 };
 

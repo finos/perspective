@@ -28,7 +28,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
         this._register_callbacks();
 
         // `renderer` is a function that takes a string of content and
-        // returns an array of `lit-html` elements. The default renderer
+        // returns a string of valid HTML. The default renderer
         // splits the string by space and returns `span` elements.
         this.renderer = this._render_content;
     }
@@ -39,7 +39,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * output of the editor.
      *
      * @param {Function} render_function a function that takes a string and
-     * returns an array of `lit-html` elements.
+     * returns a string of valid HTML.
      */
     set_renderer(render_function) {
         this.renderer = render_function;

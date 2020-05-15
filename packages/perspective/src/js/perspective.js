@@ -1465,6 +1465,7 @@ export default function(Module) {
      * - group: a category for the function
      * - num_params: the number of input parameters
      * - format_function: an anonymous function used for naming new columns
+     * - help: a help string that can be displayed in the UI.
      */
     table.prototype.get_computed_functions = function() {
         let functions = extract_map(__MODULE__.get_computed_functions());

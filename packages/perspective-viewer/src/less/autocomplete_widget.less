@@ -30,6 +30,8 @@
         &.undocked {
             background: var(--plugin--background, #fff);
             border: 1px solid @border-color;
+            max-height: 100px;
+            max-width: 150px;
             position: absolute;
             top: 24px;
         }
@@ -40,12 +42,12 @@
             position: static;
             width: 100%;
     
-            span.psp-autocomplete__item {
+            div.psp-autocomplete__item {
                 border-bottom: 1px solid @border-color;
             }
         }
     
-        span.psp-autocomplete__item {
+        div.psp-autocomplete__item {
             display: block;
             overflow-x: auto;
             padding: 5px;
@@ -54,87 +56,108 @@
                 // Default colors are the same as Awesomeplete defaults to
                 // achieve consistent look.
                 background: var(--autocomplete-hover-background, hsl(200, 40%, 80%));
+                cursor: pointer;
+
+                div.psp-autocomplete-item__detail {
+                    display: block;
+                }
             }
     
             &:focus, &[aria-selected="true"]{
                 background: var(--autocomplete-select-background, hsl(205, 40%, 40%));
                 color: var(--color, #fff);
                 cursor: pointer;
-            }
-    
-            &.psp-autocomplete__item--column-name {
-                font-family: var(--interface--font-family, @sans-serif-fonts);
-    
-                &:focus, &[aria-selected="true"] {
-                    &::before {
-                        color: var(--color, #fff) !important;
-                    }
+
+                div.psp-autocomplete-item__detail {
+                    display: block;
                 }
 
-                &:before {
-                    font-family: var(--interface-monospace--font-family, monospace);
-                    position: relative;
-                    display: inline-block;
-                    // display: var(--name-before-display, none);
-                    padding: var(--column_type--padding, 0px 5px);
-                    min-width: 18px;
-                    width: var(--column_type--width, auto);
+                span.psp-autocomplete-item__label.psp-autocomplete-item__label--column-name::before {
+                    color: var(--color, #fff) !important;
                 }
-    
-                &.integer:before,
-                &.float:before {
-                    content: var(
-                        --float--column-type--content,
-                        var(--column-type--content, "123")
-                    );
-                    color: var(
-                        --float--column-type--color,
-                        var(--column-type--color, #016bc6)
-                    );
+            }
+
+            div.psp-autocomplete-item__detail {
+                display: none;
+                font-size: 10px;
+                margin-top: 5px;
+                max-width: 150px;
+
+                span.psp-autocomplete-item-detail__item {
+                    display: block;
                 }
+            }
+
+            span.psp-autocomplete-item__label {
+
+                &.psp-autocomplete-item__label--column-name {
+                    font-family: var(--interface--font-family, @sans-serif-fonts);
     
-                &.string:before {
-                    content: var(
-                        --string--column-type--content,
-                        var(--column-type--content, "abc")
-                    );
-                    color: var(
-                        --string--column-type--color,
-                        var(--column-type--color, #fe9292)
-                    );
-                }
-    
-                &.boolean:before {
-                    content: var(
-                        --boolean--column-type--content,
-                        var(--column-type--content, "t/f")
-                    );
-                    color: var(
-                        --boolean--column-type--color,
-                        var(--column-type--color, #999999)
-                    );
-                }
-    
-                &.date:before {
-                    content: var(
-                        --date--column-type--content,
-                        var(--column-type--content, "mdy")
-                    );
-                    color: var(
-                        --date--column-type--color,
-                        var(--column-type--color, #999999)
-                    );
-                }
-    
-                &.datetime:before {
-                    content: var(
-                        --datetime--column-type--content,
-                        var(--column-type--content, "mdy")
-                    );
-                    color: var(
-                        --datetime--column-type--color,
-                        var(--column-type--color, #999999)
-                    );
+                    &:before {
+                        font-family: var(--interface-monospace--font-family, monospace);
+                        position: relative;
+                        display: inline-block;
+                        // display: var(--name-before-display, none);
+                        padding: var(--column_type--padding, 0px 5px);
+                        min-width: 18px;
+                        width: var(--column_type--width, auto);
+                    }
+        
+                    &.integer:before,
+                    &.float:before {
+                        content: var(
+                            --float--column-type--content,
+                            var(--column-type--content, "123")
+                        );
+                        color: var(
+                            --float--column-type--color,
+                            var(--column-type--color, #016bc6)
+                        );
+                    }
+        
+                    &.string:before {
+                        content: var(
+                            --string--column-type--content,
+                            var(--column-type--content, "abc")
+                        );
+                        color: var(
+                            --string--column-type--color,
+                            var(--column-type--color, #fe9292)
+                        );
+                    }
+        
+                    &.boolean:before {
+                        content: var(
+                            --boolean--column-type--content,
+                            var(--column-type--content, "t/f")
+                        );
+                        color: var(
+                            --boolean--column-type--color,
+                            var(--column-type--color, #999999)
+                        );
+                    }
+        
+                    &.date:before {
+                        content: var(
+                            --date--column-type--content,
+                            var(--column-type--content, "mdy")
+                        );
+                        color: var(
+                            --date--column-type--color,
+                            var(--column-type--color, #999999)
+                        );
+                    }
+        
+                    &.datetime:before {
+                        content: var(
+                            --datetime--column-type--content,
+                            var(--column-type--content, "mdy")
+                        );
+                        color: var(
+                            --datetime--column-type--color,
+                            var(--column-type--color, #999999)
+                        );
+                    }
                 }
             }
         }

@@ -161,7 +161,6 @@ export const Sqrt = createToken({
     label: "sqrt(x)",
     pattern: /sqrt/,
     categories: [FunctionTokenType]
-    // TODO: add num_params so autocomplete only displays commas when needed
 });
 
 export const Pow2 = createToken({

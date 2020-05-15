@@ -6,9 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {html, render} from "lit-html";
-
-import {repeat} from "lit-html/directives/repeat";
+import {nothing, render} from "lit-html";
 
 import {bindTemplate, throttlePromise} from "./utils.js";
 
@@ -27,13 +25,10 @@ export class AutocompleteSuggestion {
      *
      * @param {String} label the text shown to the user
      * @param {String} value the text used to replace inside the input
-     * @param {Boolean} is_column_name whether the item is a column name or not,
-     * as additional styling will be applied to column names.
      */
-    constructor(label, value, is_column_name) {
+    constructor(label, value) {
         this.label = label;
         this.value = value;
-        this.is_column_name = is_column_name || false;
     }
 }
 
@@ -54,18 +49,22 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
 
     /**
      * Render an array of suggestions inside the autocomplete. Calling this
-     * method does not overwrite the existing suggestions inside the
+     * method will overwrite the existing suggestions inside the
      * autocomplete container.
      *
-     * @param {Array{Object}} suggestions An array of suggestion objects with
-     * `label` and `value`.
+     * @param {Array<Template>} markup An array of `lit-html` template objects
+     * that will be rendered. If the length of `markup` is 0, the autocomplete
+     * is cleared and hidden.
      * @param {Boolean} is_column_name if true, suggestions will be rendered
      * with additional CSS classes denoting that they are column names.
+     *
+     * TODO: do we want throttlePromise on all render functions?
      */
     @throttlePromise
-    render(suggestions) {
-        if (suggestions.length === 0) {
+    render(markup) {
+        if (markup.length === 0) {
             this.clear();
+            render(nothing, this._container);
             return;
         }
 
@@ -80,22 +79,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         // Reset scroll inside container to be at the top
         this._container.scrollTop = 0;
 
-        const items = repeat(
-            suggestions,
-            suggestion => suggestion.label,
-            suggestion =>
-                suggestion.label
-                    ? html`
-                          <span
-                              class="${suggestion.is_column_name ? `psp-autocomplete__item--column-name ${this._get_type(suggestion.label)}` : ""} psp-autocomplete__item"
-                              data-value="${suggestion.value}"
-                              >${suggestion.label}</span
-                          >
-                      `
-                    : ""
-        );
-
-        render(items, this._container);
+        render(markup, this._container);
     }
 
     /**
@@ -115,12 +99,22 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      * @param {*} ev
      */
     item_clicked(ev) {
-        if (ev.target && ev.target.matches("span.psp-autocomplete__item")) {
+        if (ev.target && ev.target.matches(".psp-autocomplete__item")) {
             const event = new CustomEvent("perspective-autocomplete-item-clicked", {
                 detail: ev,
                 bubbles: true
             });
             this.dispatchEvent(event);
+        }
+    }
+
+    /**
+     * Returns the `data-value` attribute of the currently selected item, or
+     * `undefined` if there is no selection.
+     */
+    get_selected_value() {
+        if (this._selection_index !== -1) {
+            return this._container.children[this._selection_index].getAttribute("data-value");
         }
     }
 
@@ -188,10 +182,11 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         this._selection_index = idx;
 
         if (idx > -1 && children.length > 0) {
-            const multiplier = this._container.clientHeight < 75 ? 3 : 2;
             children[idx].setAttribute("aria-selected", "true");
-            let scroll_top = children[idx].offsetTop - this._container.offsetTop - this._container.clientHeight + children[idx].clientHeight * multiplier;
-            this._container.scrollTop = scroll_top;
+            children[idx].scrollIntoView(true, {
+                behavior: "smooth",
+                block: "nearest"
+            });
         }
     }
 

@@ -7,6 +7,10 @@
  *
  */
 
+import {html} from "lit-html";
+
+import {repeat} from "lit-html/directives/repeat";
+
 import {bindTemplate, throttlePromise} from "../utils.js";
 
 import template from "../../html/computed_expression_widget.html";
@@ -14,8 +18,8 @@ import template from "../../html/computed_expression_widget.html";
 import style from "../../less/computed_expression_widget.less";
 
 import {ColumnNameTokenType, FunctionTokenType, OperatorTokenType, clean_tokens} from "./lexer";
+import {ComputedExpressionAutocompleteSuggestion} from "./computed_expression_parser";
 import {tokenMatcher} from "chevrotain";
-import {AutocompleteSuggestion} from "../autocomplete_widget.js";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -86,7 +90,11 @@ class ComputedExpressionWidget extends HTMLElement {
         // label = what is shown in the autocomplete DOM
         // value = what the fragment in the editor will be replaced with
         return names.map(name => {
-            return new AutocompleteSuggestion(name, `"${name}"`, true);
+            return new ComputedExpressionAutocompleteSuggestion({
+                label: name,
+                value: `"${name}"`,
+                is_column_name: true
+            });
         });
     }
 
@@ -132,9 +140,47 @@ class ComputedExpressionWidget extends HTMLElement {
         return output.join("");
     }
 
-    render_error(expression, error) {
-        this._set_error(error, this._error);
-        return `<span class="psp-expression__errored">${expression}</span>`;
+    /**
+     * Given an Array of autocomplete suggestions, transform them to an Array
+     * of `lit-html` templates so they can be rendered inside the autocomplete.
+     *
+     * Because the computed expression autocomplete contains large amounts
+     * of metadata and additional functionality, we create the templates here
+     * and let the autocomplete render the markup without any additional
+     * changes.
+     *
+     * @param {Array<ComputedExpressionAutocompleteSuggestion>} suggestions an
+     * Array of suggestion objects.
+     */
+    make_autocomplete_markup(suggestions) {
+        const make_detail = suggestion => {
+            if (suggestion.signature) {
+                return html`
+                    <div class="psp-autocomplete-item__detail">
+                        <span class="psp-autocomplete-item-detail__item" style="font-weight: bold; margin-bottom: 5px;">${suggestion.signature}</span>
+                        <span class="psp-autocomplete-item-detail__item" style="font-size: 9px">${suggestion.help}</span>
+                    </div>
+                `;
+            } else {
+                return "";
+            }
+        };
+
+        return repeat(
+            suggestions,
+            suggestion => suggestion.label,
+            suggestion =>
+                suggestion.label
+                    ? html`
+                          <div class="psp-autocomplete__item" data-value=${suggestion.value} role="listitem" title=${suggestion.help ? suggestion.help : ""}>
+                              <span class="psp-autocomplete-item__label ${suggestion.is_column_name ? `psp-autocomplete-item__label--column-name ${this._get_type(suggestion.label)}` : ""}">
+                                  ${suggestion.label}
+                              </span>
+                              ${make_detail(suggestion)}
+                          </div>
+                      `
+                    : ""
+        );
     }
 
     /**
@@ -165,24 +211,33 @@ class ComputedExpressionWidget extends HTMLElement {
             this._disable_save_button();
             const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
-            /**
-             * Show the column name autocomplete if:
-             *
-             * - there is an open quote or open parenthesis
-             * - the immediately preceding token is NOT a column name, i.e. to
-             * prevent the autocomplete from showing after a column name has
-             * been closed with a quote.
-             * - the immediately preceding token is an operator.
-             */
+            // Check if the expression has a fragment of a column name,
+            // i.e. if it's been opened with a quote but not closed
             const name_fragments = expression.match(/(["'])[\s\w()]*?$/);
             const has_name_fragments = name_fragments && name_fragments.length > 0 && !/['"]\s/.test(name_fragments[0]);
+
+            // Make sure that the last valid token in the chain is NOT a column
+            // name, so that we don't show column name autocomplete after it's
+            // been completed.
             const last_column_name = this._computed_expression_parser.get_last_token_with_types([ColumnNameTokenType], lex_result, 1);
+
+            // Force column name autocomplete to show if the last token is an
+            // operator.
             const last_operator = this._computed_expression_parser.get_last_token_with_types([OperatorTokenType], lex_result, 1);
+
+            // But not if the last token is a parenthesis, as that indicates
+            // a closed logical block.
+            const last_paren = this._computed_expression_parser.get_last_token_with_name("rightParen", lex_result, 1);
+
+            // And not if the last token is `as/AS`, as that indicates a custom
+            // column name supplied by the user.
             const is_alias = this._computed_expression_parser.get_last_token_with_name("as", lex_result, 1);
-            const show_column_names = (!is_alias && has_name_fragments && !last_column_name) || last_operator;
+
+            // Use the above criteria to decide whether to show the column name
+            // autocomplete.
+            const show_column_names = (has_name_fragments && !is_alias && !last_column_name && !last_paren) || last_operator;
 
             if (show_column_names) {
-                let fragment = "";
                 let column_names;
                 let suggestions;
 
@@ -202,24 +257,31 @@ class ComputedExpressionWidget extends HTMLElement {
 
                 // Filter down by `startsWith`
                 if (has_name_fragments) {
-                    fragment = name_fragments[0].substring(1);
+                    const fragment = name_fragments[0].substring(1);
                     suggestions = suggestions.filter(name => name.label.toLowerCase().startsWith(fragment.toLowerCase()));
                 }
 
                 if (last_operator) {
                     // Make sure we have opening parenthesis if the last token
                     // is an operator
-                    suggestions = [new AutocompleteSuggestion("(", "(")].concat(suggestions);
+                    suggestions = [
+                        new ComputedExpressionAutocompleteSuggestion({
+                            label: "(",
+                            value: "("
+                        })
+                    ].concat(suggestions);
                 }
 
                 // Render column names inside autocomplete
-                this._autocomplete.render(suggestions);
+                const markup = this.make_autocomplete_markup(suggestions);
+                this._autocomplete.render(markup);
                 return;
             } else {
                 const suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result);
                 if (suggestions.length > 0) {
                     // Show autocomplete and not error box
-                    this._autocomplete.render(suggestions);
+                    const markup = this.make_autocomplete_markup(suggestions);
+                    this._autocomplete.render(markup);
                     return;
                 } else if (is_alias) {
                     // don't show error if last token is alias
@@ -344,7 +406,8 @@ class ComputedExpressionWidget extends HTMLElement {
         if (suggestions.length > 0) {
             // Show autocomplete and not error box
             const column_names = this._make_column_name_suggestions(this._get_view_all_column_names());
-            this._autocomplete.render(suggestions.concat(column_names));
+            const markup = this.make_autocomplete_markup(suggestions.concat(column_names));
+            this._autocomplete.render(markup);
         }
     }
 
@@ -388,8 +451,10 @@ class ComputedExpressionWidget extends HTMLElement {
 
                 this._expression_editor._edit_area.innerText = final_value;
             } else {
-                if (last_word[last_word.length - 1] === '"' || last_word[last_word.length - 1] === '"') {
-                    this._expression_editor._edit_area.innerText = this._expression_editor._edit_area.innerText.substring(0, this._expression_editor._edit_area.innerText.length - 1);
+                if (!last_word_is_column_name && (last_word[last_word.length - 1] === '"' || last_word[last_word.length - 1] === '"')) {
+                    // Remove the last quote in strings like `pow2("
+                    const stripped_last = this._expression_editor._edit_area.innerText.substring(0, this._expression_editor._edit_area.innerText.length - 1);
+                    this._expression_editor._edit_area.innerText = stripped_last;
                 }
                 // Append the autocomplete value
                 this._expression_editor._edit_area.innerText += new_value;
@@ -473,10 +538,8 @@ class ComputedExpressionWidget extends HTMLElement {
                     // If autocomplete is open, select the current autocomplete
                     // value. Otherwise, save the expression.
                     if (this._autocomplete.displayed === true) {
-                        if (this._autocomplete._selection_index !== -1) {
-                            // TODO: a cleaner `get_value` or `get_item` API
-                            // for keypress selection.
-                            const value = this._autocomplete._container.children[this._autocomplete._selection_index].getAttribute("data-value");
+                        const value = this._autocomplete.get_selected_value();
+                        if (value) {
                             this._autocomplete_replace(value);
                         }
                     } else {
