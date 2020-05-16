@@ -443,9 +443,7 @@ export class DomElement extends PerspectiveElement {
                     this._persisted_side_panel_width = this._side_panel.style.width;
                     this._side_panel.style.width = old || "";
                     app.classList.add("columns_horizontal");
-                    return false;
                 }
-                return false;
             } else if (app.classList.contains("columns_horizontal")) {
                 const panel = this.shadowRoot.querySelector("#pivot_chart_container");
                 panel.clientWidth + this._side_panel.clientWidth;
@@ -458,7 +456,14 @@ export class DomElement extends PerspectiveElement {
                     app.classList.remove("columns_horizontal");
                 });
                 return true;
+            } else if (this.clientWidth < 600) {
+                if (!app.classList.contains("narrow")) {
+                    app.classList.add("narrow");
+                }
+            } else if (app.classList.contains("narrow")) {
+                app.classList.remove("narrow");
             }
+            return false;
         }
         return false;
     }

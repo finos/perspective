@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {nothing, render} from "lit-html";
+import {html, nothing, render} from "lit-html";
 
 import {bindTemplate, throttlePromise} from "./utils.js";
 
@@ -62,9 +62,17 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      */
     @throttlePromise
     render(markup) {
+        this._details.style.display = "none";
+        this._list.classList.remove("small", "show-details");
+
+        if (this._selection_index > -1) {
+            const children = this._list.children;
+            children[this._selection_index].setAttribute("aria-selected", false);
+        }
+
         if (markup.length === 0) {
             this.clear();
-            render(nothing, this._container);
+            render(nothing, this._list);
             return;
         }
 
@@ -77,9 +85,14 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         this.display();
 
         // Reset scroll inside container to be at the top
-        this._container.scrollTop = 0;
+        this._list.scrollTop = 0;
 
-        render(markup, this._container);
+        // Special classes for smaller selections
+        if (markup.length < 4) {
+            this._list.classList.add("small");
+        }
+
+        render(markup, this._list);
     }
 
     /**
@@ -99,7 +112,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      * @param {*} ev
      */
     item_clicked(ev) {
-        if (ev.target && ev.target.matches(".psp-autocomplete__item")) {
+        if (ev.target && (ev.target.matches(".psp-autocomplete__item") || ev.target.matches(".psp-autocomplete-item__label"))) {
             const event = new CustomEvent("perspective-autocomplete-item-clicked", {
                 detail: ev,
                 bubbles: true
@@ -109,12 +122,34 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
     }
 
     /**
+     * When an item is hovered over, render the details panel if necessary.
+     *
+     * @param {*} ev
+     */
+    item_mouseover(ev) {
+        if (ev.target && ev.target.matches(".psp-autocomplete__item")) {
+            this._render_details_panel(ev.target);
+        }
+    }
+
+    /**
+     * When hover exits, clear the details panel.
+     *
+     * @param {*} ev
+     */
+    item_mouseleave(ev) {
+        if (ev.target && ev.target.matches(".psp-autocomplete__item")) {
+            this._render_details_panel(ev.target);
+        }
+    }
+
+    /**
      * Returns the `data-value` attribute of the currently selected item, or
      * `undefined` if there is no selection.
      */
     get_selected_value() {
         if (this._selection_index !== -1) {
-            return this._container.children[this._selection_index].getAttribute("data-value");
+            return this._list.children[this._selection_index].getAttribute("data-value");
         }
     }
 
@@ -126,15 +161,14 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         this.hide();
         this._selection_index = -1;
         this._container.removeAttribute("style");
-        this._container.classList.remove("undocked");
-        this._container.classList.add("docked");
+        this._container.classList.add("undocked");
     }
 
     /**
      * Displays the autocomplete and sets `this.displayed` to true.
      */
     display() {
-        this._container.style.display = "block";
+        this._container.style.display = "flex";
         this.displayed = true;
     }
 
@@ -150,7 +184,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      * Navigate to the next element inside the container.
      */
     _next() {
-        const count = this._container.children.length;
+        const count = this._list.children.length;
         const idx = this._selection_index < count - 1 ? this._selection_index + 1 : count ? 0 : -1;
         this._go_to(idx);
     }
@@ -159,7 +193,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      * Go back one element inside the container.
      */
     _prev() {
-        const count = this._container.children.length;
+        const count = this._list.children.length;
         const position = this._selection_index - 1;
         const idx = this._selection_index > -1 && position !== -1 ? position : count - 1;
         this._go_to(idx);
@@ -172,7 +206,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      */
     _go_to(idx) {
         // liberally borrowed from awesomplete
-        const children = this._container.children;
+        const children = this._list.children;
 
         if (this._selection_index > -1) {
             children[this._selection_index].setAttribute("aria-selected", false);
@@ -187,18 +221,42 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
                 behavior: "smooth",
                 block: "nearest"
             });
+
+            this._render_details_panel(children[idx]);
+        }
+    }
+
+    _render_details_panel(item) {
+        // Because hover and keyboard events can interact, always clear before
+        // re-rendering the details panel.
+        this._clear_details_panel();
+
+        if (item.hasAttribute("data-help") && item.getAttribute("data-help")) {
+            this._list.classList.add("show-details");
+            const label = item.getAttribute("data-label");
+            const help = item.getAttribute("data-help");
+            const signature = item.getAttribute("data-signature");
+
+            const template = html`
+                <span class="psp-autocomplete-item-detail__item--label">${label}</span>
+                <span class="psp-autocomplete-item-detail__item--signature">${signature}</span>
+                <span class="psp-autocomplete-item-detail__item--help">${help}</span>
+            `;
+
+            render(template, this._details);
+
+            this._details.scrollTop = 0;
+            this._details.style.display = "block";
         }
     }
 
     /**
-     * A stub for the widget to have access to `perspective-viewer`'s _get_type
-     * method. Replaced by a reference to the proper method when the widget is
-     * opened inside `perspective-viewer`.
-     *
-     * @param {String} name a column name
+     * Remove and hide the details panel.
      */
-    _get_type(name) {
-        throw new Error(`Cannot get column type for "${name}".`);
+    _clear_details_panel() {
+        render(nothing, this._details);
+        this._details.style.display = "none";
+        this._list.classList.remove("show-details");
     }
 
     /**
@@ -206,6 +264,8 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      */
     _register_ids() {
         this._container = this.shadowRoot.querySelector(".psp-autocomplete-widget");
+        this._list = this.shadowRoot.querySelector(".psp-autocomplete-widget__list");
+        this._details = this.shadowRoot.querySelector(".psp-autocomplete-widget__details");
     }
 
     /**
@@ -213,7 +273,9 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
      */
     _register_callbacks() {
         // Dispatch a custom event on click & disable the `mousedown` handler
-        this._container.addEventListener("click", this.item_clicked.bind(this));
-        this._container.addEventListener("mousedown", ev => ev.preventDefault());
+        this._list.addEventListener("click", this.item_clicked.bind(this));
+        this._list.addEventListener("mousedown", ev => ev.preventDefault());
+        this._list.addEventListener("mouseover", this.item_mouseover.bind(this));
+        this._list.addEventListener("mouseleave", this.item_mouseleave.bind(this));
     }
 }

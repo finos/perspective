@@ -25,6 +25,7 @@ export class ComputedExpressionAutocompleteSuggestion extends AutocompleteSugges
      *
      * @param {String} label the text shown to the user
      * @param {String} value the text used to replace inside the input
+     * @param {String} pattern the actual string that makes up the token
      * @param {String} signature a Typescript-style signature for the function
      * @param {String} help a help string displayed in the UI
      * @param {Array<String>} input_types input data types for the suggestion
@@ -35,8 +36,9 @@ export class ComputedExpressionAutocompleteSuggestion extends AutocompleteSugges
      * @param {Boolean} is_column_name whether the item is a column name or not,
      * as additional styling will be applied to column names.
      */
-    constructor({label, value, signature, help, input_types, return_type, num_params, is_column_name} = {}) {
+    constructor({label, value, pattern, signature, help, input_types, return_type, num_params, is_column_name} = {}) {
         super(label, value);
+        this.pattern = pattern;
         this.input_types = input_types;
         this.return_type = return_type;
         this.num_params = num_params;
@@ -146,21 +148,20 @@ class PerspectiveComputedExpressionParser {
             if (partial_function && partial_function.search(/["']$/) === -1) {
                 // Remove open parenthesis and column name rule
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
-                const cleaned_suggestions = [];
+                const exact_matches = [];
+                const fuzzy_matches = [];
 
                 for (const suggestion of suggestions) {
-                    // Search for suggestions in both the label and value, as
-                    // we don't expect users to know the exact syntax for each
-                    // function name.
-                    const lower_label = suggestion.label.toLowerCase();
-                    const lower_value = suggestion.value.toLowerCase();
-                    const lower_input = partial_function.toLowerCase();
+                    const lower_value = suggestion.value.toLowerCase().trim();
+                    const lower_input = partial_function.toLowerCase().trim();
 
-                    if (lower_label.includes(lower_input) || lower_value.includes(lower_input)) {
-                        cleaned_suggestions.push(suggestion);
+                    if (lower_value.startsWith(lower_input)) {
+                        exact_matches.push(suggestion);
+                    } else if (lower_value.includes(lower_input)) {
+                        fuzzy_matches.push(suggestion);
                     }
                 }
-                return cleaned_suggestions;
+                return exact_matches.concat(fuzzy_matches);
             } else {
                 // Expression has unrecoverable errors
                 return [];
@@ -599,7 +600,8 @@ class PerspectiveComputedExpressionParser {
             }
 
             const label = token.LABEL;
-            let value = token.PATTERN.source.replace(/\\/g, "");
+            let pattern = token.PATTERN.source.replace(/\\/g, "");
+            let value = pattern;
 
             if (tokenMatcher(token, FunctionTokenType)) {
                 value = `${value}(`;
@@ -611,6 +613,7 @@ class PerspectiveComputedExpressionParser {
                 new ComputedExpressionAutocompleteSuggestion({
                     label,
                     value,
+                    pattern,
                     signature: token.signature,
                     help: token.help,
                     input_types: token.input_types,

@@ -100,12 +100,18 @@ export class ActionElement extends DomElement {
      */
     _open_computed_expression_widget(event) {
         event.stopImmediatePropagation();
-        // FIXME: not a great pattern to commit to
+        // FIXME: we need a better way to pass down types, metadata, etc.
+        // from the parent viewer to child web components.
         this._computed_expression_widget._computed_expression_parser = this._computed_expression_parser;
+
+        // Bind `get_type` so the expression editor can render the correct
+        // types for each column.
         this._computed_expression_widget._get_type = this._get_type.bind(this);
-        this._computed_expression_widget._autocomplete._get_type = this._get_type.bind(this);
+
+        // Pass down a way to get the column names from the viewer.
         this._computed_expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
         this._computed_expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
+
         this._computed_expression_widget.style.display = "flex";
         this._side_panel_actions.style.display = "none";
         this._computed_expression_widget._observe_editor();

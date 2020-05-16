@@ -138,12 +138,20 @@ utils.with_server({}, () => {
                     "perspective-expression-editor",
                     ".perspective-expression-editor__edit_area"
                 );
-                const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => {
-                    const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
-                    button.removeAttribute("disabled");
-                }, viewer);
+            });
+
+            test.capture("Typing a long expression should dock the autocomplete, and the details panel should show", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    '"Sales" + "Profit" + "Sales" + "Profit" + "Sales" + "Profit" + (s',
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.keyboard.press("ArrowDown");
             });
 
             test.capture("An expression that doesn't reach max-width should undock the autocomplete", async page => {

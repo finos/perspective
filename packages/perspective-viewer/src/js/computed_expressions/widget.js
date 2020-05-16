@@ -9,8 +9,6 @@
 
 import {html} from "lit-html";
 
-import {repeat} from "lit-html/directives/repeat";
-
 import {bindTemplate, throttlePromise} from "../utils.js";
 
 import template from "../../html/computed_expression_widget.html";
@@ -56,9 +54,6 @@ class ComputedExpressionWidget extends HTMLElement {
 
         // Focus on the editor immediately
         this._expression_editor.focus();
-
-        // Render the initial autocomplete - all functions + column names
-        this._render_initial_autocomplete();
     }
 
     /**
@@ -153,33 +148,27 @@ class ComputedExpressionWidget extends HTMLElement {
      * Array of suggestion objects.
      */
     make_autocomplete_markup(suggestions) {
-        const make_detail = suggestion => {
-            if (suggestion.signature) {
-                return html`
-                    <div class="psp-autocomplete-item__detail">
-                        <span class="psp-autocomplete-item-detail__item" style="font-weight: bold; margin-bottom: 5px;">${suggestion.signature}</span>
-                        <span class="psp-autocomplete-item-detail__item" style="font-size: 9px">${suggestion.help}</span>
-                    </div>
-                `;
-            } else {
-                return "";
-            }
-        };
-
-        return repeat(
-            suggestions,
-            suggestion => suggestion.label,
-            suggestion =>
-                suggestion.label
-                    ? html`
-                          <div class="psp-autocomplete__item" data-value=${suggestion.value} role="listitem" title=${suggestion.help ? suggestion.help : ""}>
-                              <span class="psp-autocomplete-item__label ${suggestion.is_column_name ? `psp-autocomplete-item__label--column-name ${this._get_type(suggestion.label)}` : ""}">
-                                  ${suggestion.label}
-                              </span>
-                              ${make_detail(suggestion)}
-                          </div>
-                      `
-                    : ""
+        return suggestions.map(suggestion =>
+            suggestion.label
+                ? html`
+                      <div
+                          role="listitem"
+                          title=${suggestion.help ? suggestion.help : ""}
+                          class="psp-autocomplete__item"
+                          data-label=${suggestion.label}
+                          data-value=${suggestion.value}
+                          data-signature=${suggestion.signature ? suggestion.signature : ""}
+                          data-help=${suggestion.help ? suggestion.help : ""}
+                      >
+                          <span
+                              class="psp-autocomplete-item__label ${suggestion.is_column_name ? `psp-autocomplete-item__label--column-name ${this._get_type(suggestion.label)}` : ""}"
+                              data-value=${suggestion.value}
+                          >
+                              ${suggestion.pattern ? suggestion.pattern : suggestion.label}
+                          </span>
+                      </div>
+                  `
+                : ""
         );
     }
 
@@ -195,7 +184,6 @@ class ComputedExpressionWidget extends HTMLElement {
         const expression = ev.detail.text;
 
         if (expression.length === 0) {
-            this._render_initial_autocomplete();
             this._clear_error();
             return;
         }
@@ -255,10 +243,25 @@ class ComputedExpressionWidget extends HTMLElement {
                 // Convert list of names into objects with `label` and `value`
                 suggestions = this._make_column_name_suggestions(column_names);
 
-                // Filter down by `startsWith`
+                // Filter down by `startsWith` and `contains`, putting the
+                // more exact matches first.
                 if (has_name_fragments) {
                     const fragment = name_fragments[0].substring(1);
-                    suggestions = suggestions.filter(name => name.label.toLowerCase().startsWith(fragment.toLowerCase()));
+                    const exact_matches = [];
+                    const fuzzy_matches = [];
+
+                    for (const suggestion of suggestions) {
+                        const column_name = suggestion.label.toLowerCase();
+                        const partial = fragment.toLowerCase();
+
+                        if (column_name.startsWith(partial)) {
+                            exact_matches.push(suggestion);
+                        } else if (column_name.includes(partial)) {
+                            fuzzy_matches.push(suggestion);
+                        }
+                    }
+
+                    suggestions = exact_matches.concat(fuzzy_matches);
                 }
 
                 if (last_operator) {
@@ -361,12 +364,6 @@ class ComputedExpressionWidget extends HTMLElement {
         const editor = this._expression_editor;
         const last_span = this._expression_editor._edit_area.lastChild;
 
-        if (editor.get_text().length === 0 || !last_span) {
-            this._autocomplete._container.classList.remove("undocked");
-            this._autocomplete._container.classList.add("docked");
-            return;
-        }
-
         if (editor.offsetWidth === 250) {
             this._autocomplete._container.removeAttribute("style");
             this._autocomplete._container.classList.remove("undocked");
@@ -384,31 +381,8 @@ class ComputedExpressionWidget extends HTMLElement {
         const left = offset_left + offset_width > 0 ? offset_left + offset_width : 0;
         const top = offset_top + 20 > 20 ? offset_top + 20 : 20;
 
-        // Set width when autocomplete is in right half of editor
-        if (left > editor.offsetWidth * 0.5) {
-            this._autocomplete._container.style.width = "150px";
-        } else {
-            this._autocomplete._container.style.width = "auto";
-        }
-
         this._autocomplete._container.style.left = `${left}px`;
         this._autocomplete._container.style.top = `${top}px`;
-    }
-
-    /**
-     * Generate the initial list of suggestions for the autocomplete, containing
-     * all functions and column names, and render it.
-     */
-    _render_initial_autocomplete() {
-        this._autocomplete.clear();
-        const suggestions = this._computed_expression_parser.get_autocomplete_suggestions("");
-
-        if (suggestions.length > 0) {
-            // Show autocomplete and not error box
-            const column_names = this._make_column_name_suggestions(this._get_view_all_column_names());
-            const markup = this.make_autocomplete_markup(suggestions.concat(column_names));
-            this._autocomplete.render(markup);
-        }
     }
 
     /**
