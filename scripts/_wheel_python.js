@@ -45,7 +45,7 @@ try {
     // Create a wheel
     cmd = cmd + `${PYTHON} setup.py bdist_wheel`;
     console.log(`Building wheel for \`perspective-python\` using ${IMAGE} in Docker`);
-    execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd} "`;
+    execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd} && auditwheel show ./dist/*.whl"`;
 } catch (e) {
     console.error(e.message);
     process.exit(1);
