@@ -126,6 +126,7 @@ async function get_new_page() {
 
                 if (elem.innerText !== content) {
                     elem.innerText = content;
+                    triggerInputEvent(elem);
                 }
             },
             content,

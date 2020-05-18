@@ -100,7 +100,6 @@ class ComputedExpressionWidget extends HTMLElement {
      * @param {String} expression
      */
     render_expression(expression) {
-        this._autocomplete.clear();
         const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
         if (lex_result.errors.length > 0) {
@@ -159,6 +158,7 @@ class ComputedExpressionWidget extends HTMLElement {
                           data-value=${suggestion.value}
                           data-signature=${suggestion.signature ? suggestion.signature : ""}
                           data-help=${suggestion.help ? suggestion.help : ""}
+                          aria-selected="false"
                       >
                           <span
                               class="psp-autocomplete-item__label ${suggestion.is_column_name ? `psp-autocomplete-item__label--column-name ${this._get_type(suggestion.label)}` : ""}"

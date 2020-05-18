@@ -63,7 +63,8 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
     @throttlePromise
     render(markup) {
         this._details.style.display = "none";
-        this._list.classList.remove("small", "show-details");
+        this._container.classList.remove("show-details");
+        this._list.classList.remove("small");
 
         if (this._selection_index > -1) {
             const children = this._list.children;
@@ -72,7 +73,6 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
 
         if (markup.length === 0) {
             this.clear();
-            render(nothing, this._list);
             return;
         }
 
@@ -162,6 +162,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         this._selection_index = -1;
         this._container.removeAttribute("style");
         this._container.classList.add("undocked");
+        render(nothing, this._list);
     }
 
     /**
@@ -232,7 +233,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         this._clear_details_panel();
 
         if (item.hasAttribute("data-help") && item.getAttribute("data-help")) {
-            this._list.classList.add("show-details");
+            this._container.classList.add("show-details");
             const label = item.getAttribute("data-label");
             const help = item.getAttribute("data-help");
             const signature = item.getAttribute("data-signature");
@@ -256,7 +257,7 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
     _clear_details_panel() {
         render(nothing, this._details);
         this._details.style.display = "none";
-        this._list.classList.remove("show-details");
+        this._container.classList.remove("show-details");
     }
 
     /**

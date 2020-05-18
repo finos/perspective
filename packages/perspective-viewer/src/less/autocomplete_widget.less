@@ -24,17 +24,24 @@
         overflow-x: hidden;
         overflow-y: hidden;
         word-break: break-word;
-
-        &.narrow {
-            min-width: 200px;
-        }
     
-        // Single-line expressions where the autocomplete follows the caret
+        // Single-line expressions where the autocomplete follows the caret,
+        // and is positioned by the `reposition` method
         &.undocked {
             max-height: 100px;
-            min-width: 300px;
+            min-width: 150px;
             position: absolute;
             top: 24px;
+
+            // When details panel is shown, make sure the autocomplete has
+            // enough width to render everything.
+            &.show-details {
+                min-width: 300px;
+
+                div.psp-autocomplete-widget__list {
+                    border-right: none;
+                }
+            }
         }
     
         // Multi-line expressions where the autocomplete is static
@@ -52,7 +59,7 @@
             div.psp-autocomplete-widget__details {
                 position: absolute;
                 left: 100%;
-                z-index: 1;
+                z-index: 100000;
                 min-width: 150px;
                 max-width: 200px;
             }
@@ -68,10 +75,6 @@
             flex: auto;
             min-width: 40%;
             overflow-y: scroll;
-
-            &.show-details {
-                border-right: none;
-            }
 
             &.small {
                 align-self: flex-start;
