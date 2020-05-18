@@ -11,7 +11,6 @@ import {PerspectiveLexerErrorMessage} from "./error";
 import {clean_tokens, Comma, ColumnName, As, Whitespace, LeftParen, RightParen, OperatorTokenType, FunctionTokenType, UpperLowerCaseTokenType} from "./lexer";
 import {ComputedExpressionColumnParser} from "./parser";
 import {COMPUTED_FUNCTION_FORMATTERS} from "./formatter";
-import {AutocompleteSuggestion} from "../autocomplete_widget";
 
 const token_types = {FunctionTokenType, OperatorTokenType};
 
@@ -19,7 +18,7 @@ const token_types = {FunctionTokenType, OperatorTokenType};
  * A more complex suggestion object for computed expressions, which may suggest
  * functions, operators, and column names, each with their own metadata.
  */
-export class ComputedExpressionAutocompleteSuggestion extends AutocompleteSuggestion {
+export class ComputedExpressionAutocompleteSuggestion {
     /**
      * Construct a new autocomplete suggestion.
      *
@@ -37,7 +36,8 @@ export class ComputedExpressionAutocompleteSuggestion extends AutocompleteSugges
      * as additional styling will be applied to column names.
      */
     constructor({label, value, pattern, signature, help, input_types, return_type, num_params, is_column_name} = {}) {
-        super(label, value);
+        this.label = label;
+        this.value = value;
         this.pattern = pattern;
         this.input_types = input_types;
         this.return_type = return_type;

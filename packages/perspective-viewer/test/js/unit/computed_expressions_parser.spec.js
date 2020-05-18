@@ -8,10 +8,27 @@
  *
  */
 
-//import {expression_to_computed_column_config} from "../../../src/js/computed_expressions/visitor";
+// The parser reads metadata from the Perspective `Table`, so unit tests need
+// to import Perspective in order to `seed` the parser with actual, valid
+// computations.
+import perspective from "@finos/perspective";
+import {COMPUTED_EXPRESSION_PARSER} from "../../../src/js/computed_expressions/computed_expression_parser";
 
-// TODO: need to re-enable testing when metadata is better defined
-describe.skip("Computed Expression Parser", function() {
+let TABLE;
+
+describe("Computed Expression Parser", function() {
+    beforeAll(async () => {
+        TABLE = perspective.table({
+            a: [1, 2, 3]
+        });
+        const computed_functions = await TABLE.get_computed_functions();
+        COMPUTED_EXPRESSION_PARSER.init(computed_functions);
+    });
+
+    afterAll(() => {
+        TABLE.delete();
+    });
+
     it("Should parse an operator notation expression", function() {
         const expected = [
             {
@@ -20,7 +37,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["w", "x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" + "x"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x"');
         expect(parsed).toEqual(expected);
     });
 
@@ -32,7 +49,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["w", "x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" + "x" as "custom column name"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" as "custom column name"');
         expect(parsed).toEqual(expected);
     });
 
@@ -59,7 +76,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["w", "((w + x) * (w - x))"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" / (("w" + "x") * ("w" - "x"))');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x") * ("w" - "x"))');
         expect(parsed).toEqual(expected);
     });
 
@@ -86,7 +103,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["w", "sub3"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" / (("w" + "x" as "sub1") * ("w" - "x" as "sub2") as "sub3") as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x" as "sub1") * ("w" - "x" as "sub2") as "sub3") as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -98,7 +115,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt("x")');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x")');
         expect(parsed).toEqual(expected);
     });
 
@@ -110,7 +127,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt("x") as "custom column name"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x") as "custom column name"');
         expect(parsed).toEqual(expected);
     });
 
@@ -127,7 +144,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["(x ^ 2)"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt((pow2("x")))');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x")))');
         expect(parsed).toEqual(expected);
     });
 
@@ -144,7 +161,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["first"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt((pow2("x") as "first")) as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x") as "first")) as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -166,7 +183,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["second"]
             }
         ];
-        const parsed = expression_to_computed_column_config('pow2(("x" * ("w" + "x" as "first") as "second")) as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('pow2(("x" * ("w" + "x" as "first") as "second")) as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -198,7 +215,7 @@ describe.skip("Computed Expression Parser", function() {
                 inputs: ["second", "fourth"]
             }
         ];
-        const parsed = expression_to_computed_column_config('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -237,7 +254,7 @@ describe.skip("Computed Expression Parser", function() {
                     inputs: ["column"]
                 }
             ];
-            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
         }
     });
 
@@ -253,7 +270,7 @@ describe.skip("Computed Expression Parser", function() {
                     inputs: ["column", "column2"]
                 }
             ];
-            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
         }
     });
 
@@ -269,76 +286,19 @@ describe.skip("Computed Expression Parser", function() {
                     inputs: ["column", "column2"]
                 }
             ];
-            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
         }
     });
 
     it("Should throw when missing an operator", function() {
-        expect(() => expression_to_computed_column_config('"Sales"')).toThrow();
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toThrow();
     });
 
     it("Should throw when parentheses are unmatched", function() {
-        expect(() => expression_to_computed_column_config('"sqrt("Sales"')).toThrow();
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"sqrt("Sales"')).toThrow();
     });
 
     it("Should throw when a token is unrecognized", function() {
-        expect(() => expression_to_computed_column_config("?")).toThrow();
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse("?")).toThrow();
     });
-
-    // describe.skip("Autocomplete", function() {
-    //     it("Should return all valid tokens for beginning expression if expression is empty", function() {
-    //         expect(get_autocomplete_suggestions("").map(x => x.value)).toEqual([
-    //             "(",
-    //             "sqrt(",
-    //             "pow2(",
-    //             "abs(",
-    //             "invert(",
-    //             "log(",
-    //             "exp(",
-    //             "bin1000th(",
-    //             "bin1000(",
-    //             "bin100th(",
-    //             "bin100(",
-    //             "bin10th(",
-    //             "bin10(",
-    //             "length(",
-    //             "uppercase(",
-    //             "lowercase(",
-    //             "concat_comma(",
-    //             "concat_space(",
-    //             "hour_of_day(",
-    //             "day_of_week(",
-    //             "month_of_year(",
-    //             "second_bucket(",
-    //             "minute_bucket(",
-    //             "hour_bucket(",
-    //             "day_bucket(",
-    //             "week_bucket(",
-    //             "month_bucket(",
-    //             "year_bucket("
-    //         ]);
-    //     });
-
-    //     it("Should return correct functions when function is at beginning of expression", function() {
-    //         const result = ComputedExpressionColumnLexer.tokenize("c");
-    //         expect(get_autocomplete_suggestions("c", result).map(x => x.value)).toEqual(["concat_comma(", "concat_space("]);
-    //     });
-
-    //     it("Should return close parenthesis or comma inside a function", function() {
-    //         const result = ComputedExpressionColumnLexer.tokenize("concat_comma('Sales'");
-    //         expect(get_autocomplete_suggestions("concat_comma('Sales'", result).map(x => x.value)).toEqual([",", ")"]);
-    //     });
-
-    //     const operators = ["+ ", "- ", "* ", "/ ", "^ ", "% ", "== ", "!= ", "> ", "< ", "is "];
-
-    //     it("Should return all operator types when last token is a column name", function() {
-    //         const result = ComputedExpressionColumnLexer.tokenize("'Sales'");
-    //         expect(get_autocomplete_suggestions("'Sales'", result).map(x => x.value)).toEqual(operators);
-    //     });
-
-    //     it("Should make no distinction between a last token with or without space", function() {
-    //         const result = ComputedExpressionColumnLexer.tokenize("'Sales' ");
-    //         expect(get_autocomplete_suggestions("'Sales' ", result).map(x => x.value)).toEqual(operators);
-    //     });
-    // });
 });
