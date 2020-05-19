@@ -221,7 +221,7 @@ exports.docker = function docker(image = "puppeteer") {
     const CWD = process.cwd();
     const IS_CI = getarg("--ci");
     const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
-    const IMAGE = `perspective/${image}`;
+    const IMAGE = `${image}`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
         -ePACKAGE="${PACKAGE}"`;
     let flags = IS_CI ? bash`--rm` : bash`--rm -it`;

@@ -24,6 +24,10 @@ RUN cp -arf /opt/python/cp37-cp37m/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
 RUN python3 -m pip install pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
 
+# Force reinstall auditwheel
+RUN python3 -m pip install --ignore-installed auditwheel
+RUN which auditwheel
+
 # install boost
 RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
 RUN tar xfz boost_1_71_0.tar.gz
@@ -31,7 +35,12 @@ RUN tar xfz boost_1_71_0.tar.gz
 RUN cd boost_1_71_0 && ./bootstrap.sh
 RUN cd boost_1_71_0 && ./b2 -j8 --with-program_options --with-filesystem --with-system install 
 
-RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.15.1'
+RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
+
+# install pyarrow
+RUN wget https://github.com/apache/arrow/archive/apache-arrow-0.15.1.tar.gz >/dev/null 2>&1  || echo "wget arrow failed"
+RUN tar xfz apache-arrow-0.15.1.tar.gz
+RUN cd arrow-apache-arrow-0.15.1 && mkdir build && cd build && cmake ../cpp/ -DARROW_RPATH_ORIGIN=ON -DARROW_PYTHON=ON -DARROW_FLIGHT=OFF -DARROW_IPC=ON -DARROW_COMPUTE=ON -DCMAKE_INSTALL_PREFIX=/usr -DARROW_DATASET=OFF -DARROW_BUILD_UTILITIES=OFF -DARROW_JEMALLOC=OFF -DARROW_DEPENDENCY_SOURCE=BUNDLED -DARROW_HDFS=OFF -DARROW_WITH_BACKTRACE=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=OFF && make -j2 && sudo make install && cd ../python && PYARROW_BUNDLE_ARROW_CPP=1 sudo python3.7 setup.py install --single-version-externally-managed --record RECORD
 
 # install node
 RUN curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -

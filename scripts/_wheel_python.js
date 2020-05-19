@@ -11,7 +11,7 @@ const {execute, docker, clean, resolve, getarg, bash, python_image} = require(".
 const fs = require("fs-extra");
 const IS_PY2 = getarg("--python2");
 const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
-const IMAGE = python_image(getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "", PYTHON);
+const IMAGE = "py3_manylinux2010"; //python_image(getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "", PYTHON);
 
 /**
  * Using Perspective's docker images, create a wheel built for the image
@@ -45,7 +45,7 @@ try {
     // Create a wheel
     cmd = cmd + `${PYTHON} setup.py bdist_wheel`;
     console.log(`Building wheel for \`perspective-python\` using ${IMAGE} in Docker`);
-    execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd} && auditwheel show ./dist/*.whl"`;
+    execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd} && auditwheel -v show ./dist/*.whl && auditwheel -v repair ./dist/*.whl"`;
 } catch (e) {
     console.error(e.message);
     process.exit(1);
