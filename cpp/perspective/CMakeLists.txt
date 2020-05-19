@@ -352,13 +352,22 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			message("${Red}Manylinux build has no python shared libraries${ColorReset}")
 			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
 			find_package( PythonHeaders ${PSP_PYTHON_VERSION} REQUIRED)
+			message("${Cyan}Using PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")
+
+			# find_package(PythonHeaders) sets the uppercased version of
+			# PYTHON_INCLUDE_DIRS, and the camelcased version (in the else
+			# clause) is not set.
+			include_directories( ${PYTHON_INCLUDE_DIRS} )
 		else()
 			message("${Cyan}Use python shared libraries${ColorReset}")
 			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
 			link_directories( ${Python_LIBRARY_DIRS} )
+			message("${Cyan}Using PYTHON_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")
+
+			# The camelcased version of `Python_INCLUDE_DIRS` is set,
+			# whereas the uppercase version is not set.
+			include_directories( ${Python_INCLUDE_DIRS} )
 		endif()
-		message("${Cyan}Using python ${PYTHON_INCLUDE_DIRS} ${Python_LIBRARIES} ${ColorReset}")
-		include_directories( ${Python_INCLUDE_DIRS} )
 
         # already found from before
 		find_package(Boost)

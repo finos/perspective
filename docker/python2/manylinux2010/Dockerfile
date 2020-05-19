@@ -24,10 +24,6 @@ RUN cp -arf /opt/python/cp27-cp27m/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
 RUN python2 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
 
-# Force reinstall auditwheel
-RUN python2 -m pip install --ignore-installed auditwheel
-RUN which auditwheel
-
 # install boost
 RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
 RUN tar xfz boost_1_71_0.tar.gz
