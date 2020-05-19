@@ -22,7 +22,7 @@ RUN ln -s /opt/cmake/bin/ctest /usr/local/bin/ctest
 RUN rm -rf /opt/python/cp37-cp37m/bin/auditwheel
 RUN cp -arf /opt/python/cp37-cp37m/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
-RUN python3 -m pip install pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
+RUN python3 -m pip install pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 
 # Force reinstall auditwheel
 RUN python3 -m pip install --ignore-installed auditwheel

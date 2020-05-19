@@ -22,7 +22,7 @@ RUN ln -s /opt/cmake/bin/ctest /usr/local/bin/ctest
 RUN rm -rf /opt/python/cp27-cp27m/bin/auditwheel
 RUN cp -arf /opt/python/cp27-cp27m/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
-RUN python2 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
+RUN python2 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 
 # install boost
 RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1

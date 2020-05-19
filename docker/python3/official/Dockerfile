@@ -21,7 +21,7 @@ RUN rm -fr /opt/cmake/bin/cpack
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 RUN ln -s /opt/cmake/bin/ctest /usr/local/bin/ctest
 
-RUN python3.7 -m pip install numpy pandas cython codecov nose2 mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
+RUN python3.7 -m pip install numpy pandas cython codecov nose2 mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 
 # install boost
 RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
