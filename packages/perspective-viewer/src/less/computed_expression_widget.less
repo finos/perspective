@@ -11,7 +11,6 @@
 
 :host {
     display: none;
-    //font-family: var(--interface--font-family, @sans-serif-fonts);
     flex-direction: column;
     max-height: 35%;
     margin-top: 34px;
@@ -23,9 +22,12 @@
     * {
         box-sizing: border-box;
     }
-    
-    #psp-expression__body,
-    .psp-expression__container {
+
+    .psp-computed-expression-widget__body {
+        margin-bottom: 0;
+    }
+
+    .psp-computed-expression-widget__container {
         display: flex;
         flex-direction: column;
 
@@ -33,66 +35,76 @@
             align-items: center;
             flex-direction: row;
         }
-    }
 
-    .psp-expression__container {
         &:first-of-type {
             margin-bottom: 0;
         }
     }
 
-    .psp-expression__content {
+    .psp-computed-expression-widget__action {
+        margin-bottom: 10px;
+
+        span#psp-computed-expression-widget-close {
+            color: #999;
+            display: flex;
+            font-family: var(--column-close--font-family, inherit);
+            font-size: 16px;
+            width: 20px;
+            min-width: 20px;
+            margin-top: -2px;
+            height: 0;
+
+            &:before {
+                font-feature-settings: "liga";
+                content: var(--column-close--before, "x");
+            }
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        span#psp-computed-expression-widget-title {
+            display: flex;
+            font-size: 12px;
+            display: flex;
+            margin-left: 34px;
+            margin-top: 3px;
+            font-size: 12px;
+            color: var(--color, @darkgray);
+        }
+    }
+
+    .psp-computed-expression-widget__content {
         align-items: center;
         display: flex;
+        flex-direction: column;
         margin-top: 5px;
 
-        &.psp_expression__content--absolute {
+        &.psp-computed-expression-widget__content--absolute {
             position: absolute;
         }
 
-        &.psp-expression__content--nomargin {
+        &.psp-computed-expression-widget__content--nomargin {
             margin-top: 0;
             position: relative;
         }
     }
 
-    #psp-expression-actions {
+    #psp-computed-expression-widget-actions {
         display: flex;
         justify-content: flex-end;
         margin-left: 20px;
         margin-top: 12px;
     }
 
-    span#psp-expression-close {
-        color: @darkgray;
-        padding-left: 3px;
-
-        &:hover {
-            cursor: pointer;
-        }
-    }
-
-    textarea#psp-expression-input {
-        background: var(--background-color, none);
-        border-color: var(--inactive-color, #ccc);
-        color: var(--color, #666666);
-        font-size: 12px;
-        font-family: var(--interface-monospace--font-family, monospace);
-        height: 75px;
-        margin-top: 5px;
-        padding-left: 5px;
-        resize: auto;
-        overflow: auto;
-        width: 100%;
-    }
-
-    .psp-expression__label {
+    .psp-computed-expression-widget__label {
         color: var(--color, darkgray);
         font-size: 10px;
         margin-top: 5px;
         max-width: 100%;
 
-        &.psp-expression__error {
+        &.psp-computed-expression-widget__error {
             background-color: #cb4549;
             box-sizing: border-box;
             color: #fff !important;
@@ -109,7 +121,7 @@
         }
     }
 
-    .psp-expression__button {
+    .psp-computed-expression-widget__button {
         border-radius: 0;
         border-bottom: 1px solid @border-color;
         border-left: 0;
@@ -131,7 +143,7 @@
             opacity: 0.5;
         }
 
-        &#psp-expression-button-remove {
+        &#psp-computed-expression-widget-button-remove {
             background: #e76056;
             border-bottom-color: #bf4d45;
             color: #fff;
@@ -143,7 +155,7 @@
             }
         }
 
-        &#psp-expression-button-save {
+        &#psp-computed-expression-widget-button-save {
             background: #0171d2;
             border-bottom-color: #0160b1;
             color: #fff;

@@ -1484,6 +1484,9 @@ export default function(Module) {
      * Return an Object containing computed function metadata. Keys are strings,
      * and each value is an Object containing the following metadata:
      *
+     * - name
+     * - label
+     * - pattern
      * - computed_function_name: the name of the computed function
      * - input_type: the type of its input columns (all input columns are of
      * the same type)
@@ -1491,17 +1494,17 @@ export default function(Module) {
      * - group: a category for the function
      * - num_params: the number of input parameters
      * - format_function: an anonymous function used for naming new columns
+     * - help: a help string that can be displayed in the UI.
      */
     table.prototype.get_computed_functions = function() {
-        const two_params = ["add", "subtract", "multiply", "divide", "percent_a_of_b", "concat_space", "concat_comma"];
         let functions = extract_map(__MODULE__.get_computed_functions());
         for (const f in functions) {
             if (functions.hasOwnProperty(f)) {
+                // Extract inner map
                 functions[f] = extract_map(functions[f]);
-                functions[f]["num_params"] = two_params.includes(f) ? 2 : 1;
+                functions[f]["num_params"] = parseInt(functions[f]["num_params"]);
             }
         }
-        console.log(functions);
         return functions;
     };
 

@@ -15,9 +15,8 @@ from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 from .libbinding import make_table, get_table_computed_schema, \
-                        get_computation_input_types, \
-                        str_to_filter_op, t_filter_op, \
-                        t_op, t_dtype
+                        get_computed_functions, get_computation_input_types, \
+                        str_to_filter_op, t_filter_op, t_op, t_dtype
 
 
 class Table(object):
@@ -105,6 +104,25 @@ class Table(object):
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
         self._state_manager.call_process(self._table.get_id())
+
+    def get_computed_functions(self):
+        """Returns a dict of computed function metadata, where each value is a
+        dict that contains the following metadata:
+            - name
+            - label
+            - pattern
+            - computed_function_name: the name of the computed function
+            - input_type: the data type of input columns ("float"/"integer" and
+            "date"/"datetime" are interchangable)
+            - return_type: the return type of its output column
+            - group: a category for the function
+            - num_params: the number of input parameters
+            - format_function: an anonymous function used for naming new columns
+        """
+        computed_functions = get_computed_functions()
+        for value in computed_functions.values():
+            value["num_params"] = int(value["num_params"])
+        return computed_functions
 
     def size(self):
         '''Returns the row count of the :class:`~perspective.Table`.'''

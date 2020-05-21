@@ -13,7 +13,9 @@ import "./polyfill.js";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, invertPromise, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
-import "./computed_expression_editor.js";
+import "./autocomplete_widget.js";
+import "./expression_editor.js";
+import "./computed_expressions/widget.js";
 
 import template from "../html/viewer.html";
 
@@ -21,7 +23,7 @@ import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
 import {ActionElement} from "./viewer/action_element.js";
-import {expression_to_computed_column_config} from "./computed_expressions/visitor.js";
+import {COMPUTED_EXPRESSION_PARSER} from "./computed_expressions/computed_expression_parser.js";
 
 /**
  * Module for the `<perspective-viewer>` custom element.
@@ -71,6 +73,7 @@ class PerspectiveViewer extends ActionElement {
         this._show_warnings = true;
         this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
+        this._computed_expression_parser = COMPUTED_EXPRESSION_PARSER;
         this._edit_port = null;
         this._edit_port_lock = invertPromise();
         window.addEventListener("resize", this._resize_handler);
@@ -189,8 +192,8 @@ class PerspectiveViewer extends ActionElement {
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._computed_expression_editor.style.display !== "none") {
-                this._computed_expression_editor._close_expression_editor();
+            if (this._computed_expression_widget.style.display !== "none") {
+                this._computed_expression_widget._close_expression_widget();
             }
             if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
                 // Remove computed columns from the DOM, and reset the config
@@ -210,10 +213,12 @@ class PerspectiveViewer extends ActionElement {
 
             for (const column of computed_columns) {
                 if (typeof column === "string") {
-                    // Either validated through the UI, or will be validated
-                    // here. TODO: rearchitect so we don't triple parse each
-                    // expression.
-                    parsed_computed_columns = parsed_computed_columns.concat(expression_to_computed_column_config(column));
+                    // Either validated through the UI or here. If a `table`
+                    // has not been loaded when the parsing happens,
+                    // the column will be skipped.
+                    if (this._computed_expression_parser.is_initialized) {
+                        parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(column));
+                    }
                 } else {
                     parsed_computed_columns.push(column);
                 }

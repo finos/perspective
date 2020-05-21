@@ -1950,7 +1950,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("INVERT", INVERT)
         .value("SQRT", SQRT)
         .value("ABS", ABS)
-        .value("PERCENT_A_OF_B", PERCENT_A_OF_B)
+        .value("PERCENT_OF", PERCENT_OF)
         .value("EQUALS", EQUALS)
         .value("NOT_EQUALS", NOT_EQUALS)
         .value("GREATER_THAN", GREATER_THAN)

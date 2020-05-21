@@ -209,7 +209,7 @@ enum t_computed_function_name {
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
-    PERCENT_A_OF_B,
+    PERCENT_OF,
     POW,
     EQUALS,
     NOT_EQUALS,

@@ -233,7 +233,7 @@ module.exports = perspective => {
                     computed_columns: [
                         {
                             column: "result",
-                            computed_function_name: "percent_a_of_b",
+                            computed_function_name: "percent_of",
                             inputs: ["a", "a"]
                         }
                     ]

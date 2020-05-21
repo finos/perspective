@@ -197,7 +197,7 @@ export class DomElement extends PerspectiveElement {
             }
 
             const row = this._new_row(name, computed_schema[name], null, null, null, name);
-            this._inactive_columns.appendChild(row);
+            this._inactive_columns.insertBefore(row, this._inactive_columns.childNodes[0] || null);
             added_count++;
         }
 
@@ -443,9 +443,7 @@ export class DomElement extends PerspectiveElement {
                     this._persisted_side_panel_width = this._side_panel.style.width;
                     this._side_panel.style.width = old || "";
                     app.classList.add("columns_horizontal");
-                    return false;
                 }
-                return false;
             } else if (app.classList.contains("columns_horizontal")) {
                 const panel = this.shadowRoot.querySelector("#pivot_chart_container");
                 panel.clientWidth + this._side_panel.clientWidth;
@@ -458,7 +456,14 @@ export class DomElement extends PerspectiveElement {
                     app.classList.remove("columns_horizontal");
                 });
                 return true;
+            } else if (this.clientWidth < 600) {
+                if (!app.classList.contains("narrow")) {
+                    app.classList.add("narrow");
+                }
+            } else if (app.classList.contains("narrow")) {
+                app.classList.remove("narrow");
             }
+            return false;
         }
         return false;
     }
@@ -475,7 +480,7 @@ export class DomElement extends PerspectiveElement {
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
         this._add_computed_expression_button = this.shadowRoot.querySelector("#add-computed-expression");
-        this._computed_expression_editor = this.shadowRoot.querySelector("perspective-computed-expression-editor");
+        this._computed_expression_widget = this.shadowRoot.querySelector("perspective-computed-expression-widget");
         this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
         this._drop_target = this.shadowRoot.querySelector("#drop_target");
         this._config_button = this.shadowRoot.querySelector("#config_button");

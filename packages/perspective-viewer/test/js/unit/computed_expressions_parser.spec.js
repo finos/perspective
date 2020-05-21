@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /******************************************************************************
  *
  * Copyright (c) 2017, the Perspective Authors.
@@ -7,9 +8,27 @@
  *
  */
 
-import {expression_to_computed_column_config} from "../../../src/js/computed_expressions/visitor";
+// The parser reads metadata from the Perspective `Table`, so unit tests need
+// to import Perspective in order to `seed` the parser with actual, valid
+// computations.
+import perspective from "@finos/perspective";
+import {COMPUTED_EXPRESSION_PARSER} from "../../../src/js/computed_expressions/computed_expression_parser";
+
+let TABLE;
 
 describe("Computed Expression Parser", function() {
+    beforeAll(async () => {
+        TABLE = perspective.table({
+            a: [1, 2, 3]
+        });
+        const computed_functions = await TABLE.get_computed_functions();
+        COMPUTED_EXPRESSION_PARSER.init(computed_functions);
+    });
+
+    afterAll(() => {
+        TABLE.delete();
+    });
+
     it("Should parse an operator notation expression", function() {
         const expected = [
             {
@@ -18,7 +37,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["w", "x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" + "x"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x"');
         expect(parsed).toEqual(expected);
     });
 
@@ -30,7 +49,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["w", "x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" + "x" as "custom column name"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" as "custom column name"');
         expect(parsed).toEqual(expected);
     });
 
@@ -57,7 +76,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["w", "((w + x) * (w - x))"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" / (("w" + "x") * ("w" - "x"))');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x") * ("w" - "x"))');
         expect(parsed).toEqual(expected);
     });
 
@@ -84,7 +103,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["w", "sub3"]
             }
         ];
-        const parsed = expression_to_computed_column_config('"w" / (("w" + "x" as "sub1") * ("w" - "x" as "sub2") as "sub3") as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x" as "sub1") * ("w" - "x" as "sub2") as "sub3") as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -96,7 +115,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt("x")');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x")');
         expect(parsed).toEqual(expected);
     });
 
@@ -108,7 +127,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["x"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt("x") as "custom column name"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x") as "custom column name"');
         expect(parsed).toEqual(expected);
     });
 
@@ -125,7 +144,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["(x ^ 2)"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt((pow2("x")))');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x")))');
         expect(parsed).toEqual(expected);
     });
 
@@ -142,7 +161,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["first"]
             }
         ];
-        const parsed = expression_to_computed_column_config('sqrt((pow2("x") as "first")) as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x") as "first")) as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -164,7 +183,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["second"]
             }
         ];
-        const parsed = expression_to_computed_column_config('pow2(("x" * ("w" + "x" as "first") as "second")) as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('pow2(("x" * ("w" + "x" as "first") as "second")) as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -196,7 +215,7 @@ describe("Computed Expression Parser", function() {
                 inputs: ["second", "fourth"]
             }
         ];
-        const parsed = expression_to_computed_column_config('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
         expect(parsed).toEqual(expected);
     });
 
@@ -235,7 +254,7 @@ describe("Computed Expression Parser", function() {
                     inputs: ["column"]
                 }
             ];
-            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
         }
     });
 
@@ -251,7 +270,7 @@ describe("Computed Expression Parser", function() {
                     inputs: ["column", "column2"]
                 }
             ];
-            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
         }
     });
 
@@ -267,19 +286,19 @@ describe("Computed Expression Parser", function() {
                     inputs: ["column", "column2"]
                 }
             ];
-            expect(expression_to_computed_column_config(expression)).toEqual(parsed);
+            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
         }
     });
 
     it("Should throw when missing an operator", function() {
-        expect(() => expression_to_computed_column_config('"Sales"')).toThrow();
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toThrow();
     });
 
     it("Should throw when parentheses are unmatched", function() {
-        expect(() => expression_to_computed_column_config('"sqrt("Sales"')).toThrow();
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"sqrt("Sales"')).toThrow();
     });
 
     it("Should throw when a token is unrecognized", function() {
-        expect(() => expression_to_computed_column_config("?")).toThrow();
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse("?")).toThrow();
     });
 });

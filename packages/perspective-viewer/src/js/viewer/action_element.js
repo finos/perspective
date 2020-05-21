@@ -98,16 +98,23 @@ export class ActionElement extends DomElement {
      *
      * @param {*} event
      */
-    _open_computed_expression_editor(event) {
+    _open_computed_expression_widget(event) {
         event.stopImmediatePropagation();
-        if (this._computed_expression_editor.expressions.length == 0) {
-            this._computed_expression_editor._disable_remove_button();
-        } else {
-            this._computed_expression_editor._enable_remove_button();
-        }
-        this._computed_expression_editor.style.display = "flex";
+        // FIXME: we need a better way to pass down types, metadata, etc.
+        // from the parent viewer to child web components.
+        this._computed_expression_widget._computed_expression_parser = this._computed_expression_parser;
+
+        // Bind `get_type` so the expression editor can render the correct
+        // types for each column.
+        this._computed_expression_widget._get_type = this._get_type.bind(this);
+
+        // Pass down a way to get the column names from the viewer.
+        this._computed_expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
+        this._computed_expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
+
+        this._computed_expression_widget.style.display = "flex";
         this._side_panel_actions.style.display = "none";
-        this._computed_expression_editor._observe_textarea();
+        this._computed_expression_widget._observe_editor();
     }
 
     /**
@@ -136,7 +143,7 @@ export class ActionElement extends DomElement {
     async _type_check_computed_expression(event) {
         const parsed = event.detail.parsed_expression || [];
         if (parsed.length === 0) {
-            this._computed_expression_editor._type_check_expression({});
+            this._computed_expression_widget._type_check_expression({});
             return;
         }
         const functions = {};
@@ -152,7 +159,7 @@ export class ActionElement extends DomElement {
             }
         }
 
-        this._computed_expression_editor._type_check_expression(schema, expected_types);
+        this._computed_expression_widget._type_check_expression(schema, expected_types);
     }
 
     /**
@@ -341,12 +348,12 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_editor.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
-        this._computed_expression_editor.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
+        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_widget.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
+        this._computed_expression_widget.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
         this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
         this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));

@@ -59,7 +59,7 @@ t_computed_column::get_computation_input_types(
             case MULTIPLY:
             case DIVIDE:
             case POW:
-            case PERCENT_A_OF_B:
+            case PERCENT_OF:
             case INVERT:
             case POW2:
             case SQRT:
@@ -191,7 +191,7 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         case MULTIPLY: return computed_function::multiply<DTYPE>;              \
         case DIVIDE: return computed_function::divide<DTYPE>;                  \
         case POW: return computed_function::pow<DTYPE>;                       \
-        case PERCENT_A_OF_B: return computed_function::percent_of<DTYPE>;      \
+        case PERCENT_OF: return computed_function::percent_of<DTYPE>;      \
         case EQUALS: return computed_function::equals<DTYPE>;                  \
         case NOT_EQUALS: return computed_function::not_equals<DTYPE>;          \
         case GREATER_THAN: return computed_function::greater_than<DTYPE>;      \
@@ -514,7 +514,7 @@ void t_computed_column::make_computations() {
     // Generate numeric functions
     std::vector<t_dtype> dtypes = {DTYPE_FLOAT64, DTYPE_FLOAT32, DTYPE_INT64, DTYPE_INT32, DTYPE_INT16, DTYPE_INT8, DTYPE_UINT64, DTYPE_UINT32, DTYPE_UINT16, DTYPE_UINT8};
     std::vector<t_computed_function_name> numeric_function_1 = {INVERT, POW2, SQRT, ABS, LOG, EXP, BUCKET_10, BUCKET_100, BUCKET_1000, BUCKET_0_1, BUCKET_0_0_1, BUCKET_0_0_0_1};
-    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, POW, PERCENT_A_OF_B};
+    std::vector<t_computed_function_name> numeric_function_2 = {ADD, SUBTRACT, MULTIPLY, DIVIDE, POW, PERCENT_OF};
     std::vector<t_computed_function_name> numeric_comparison_2 = {EQUALS, NOT_EQUALS, GREATER_THAN, LESS_THAN};
     
     for (const auto f : numeric_function_1) {
@@ -663,218 +663,505 @@ void t_computed_column::make_computations() {
     );    
 }
 
-// TODO: add this to the Table API
 std::map<std::string, std::map<std::string, std::string>>
 t_computed_column::computed_functions = {
+    // Operators
     {"add", {
+        {"name", "add"},
+        {"label", "+"},
+        {"pattern", "\\+"},
         {"computed_function_name", "+"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "(x, y) => `(${x} + ${y})`"}
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"}, // integer needs to be parsed in front-end
+        {"format_function", "(x, y) => `(${x} + ${y})`"}, // JS style function
+        {"help", "Add together two numeric columns."},
+        {"signature", "(x: Number) + (y: Number): Number"}
     }},
     {"subtract", {
+        {"name", "subtract"},
+        {"label", "-"},
+        {"pattern", "\\-"},
         {"computed_function_name", "-"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "(x, y) => `(${x} - ${y})`"}
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "(x, y) => `(${x} - ${y})`"},
+        {"help", "Subtract two numeric columns."},
+        {"signature", "(x: Number) - (y: Number): Number"}
     }},
     {"multiply", {
+        {"name", "multiply"},
+        {"label", "*"},
+        {"pattern", "\\*"},
         {"computed_function_name", "*"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "(x, y) => `(${x} * ${y})`"}
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "(x, y) => `(${x} * ${y})`"},
+        {"help", "Multiplies two numeric columns."},
+        {"signature", "(x: Number) * (y: Number): Number"}
     }},
     {"divide", {
+        {"name", "divide"},
+        {"label", "/"},
+        {"pattern", "\\/"},
         {"computed_function_name", "/"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "(x, y) => `(${x} / ${y})`"}
-    }},
-    {"invert", {
-        {"computed_function_name", "1/x"},
-        {"input_type", "float"},
-        {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `(1 / ${x})`"}
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "(x, y) => `(${x} / ${y})`"},
+        {"help", "Divides two numeric columns."},
+        {"signature", "(x: Number) / (y: Number): Number"}
     }},
     {"pow", {
-        {"computed_function_name", "x^2"},
+        {"name", "pow"},
+        {"label", "x ^ y"},
+        {"pattern", "\\^"},
+        {"computed_function_name", "pow"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `(${x} ^ 2)`"}
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(${x} ^ ${y})`"},
+        {"help", "Raises the first column to the power of the second column."},
+        {"signature", "(x: Number) ^ (y: Number): Number"}
     }},
-    {"sqrt", {
-        {"computed_function_name", "sqrt"},
-        {"input_type", "float"},
-        {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `sqrt(${x})`"}
-    }},
-    {"abs", {
-        {"computed_function_name", "abs"},
-        {"input_type", "float"},
-        {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `abs(${x})`"}
-    }},
-    {"percent_a_of_b", {
+    {"percent_of", {
+        {"name", "percent_of"},
+        {"label", "x % y"},
+        {"pattern", "\\%"},
         {"computed_function_name", "%"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `(x, y) => `(${x} % ${y})`"}
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(x, y) => `(${x} % ${y})`"},
+        {"help", "Returns the first column as a percent of the second column."},
+        {"signature", "(x: Number) % (y: Number): Number"}
     }},
-    {"10_bucket", {
+    {"equals", {
+        {"name", "equals"},
+        {"label", "x == y"},
+        {"pattern", "\\=="},
+        {"computed_function_name", "equals"},
+        {"input_type", "float"},
+        {"return_type", "boolean"},
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(x, y) => `(${x} == ${y})`"},
+        {"help", "Checks the equality of two numeric columns."},
+        {"signature", "(x: Number) == (y: Number): Boolean"}
+    }},
+    {"not_equals", {
+        {"name", "not_equals"},
+        {"label", "x != y"},
+        {"pattern", "\\!="},
+        {"computed_function_name", "not_equals"},
+        {"input_type", "float"},
+        {"return_type", "boolean"},
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(x, y) => `(${x} != ${y})`"},
+        {"help", "Whether two numeric columns are not equal."},
+        {"signature", "(x: Number) != (y: Number): Boolean"}
+    }},
+    {"greater_than", {
+        {"name", "greater_than"},
+        {"label", "x > y"},
+        {"pattern", "\\>"},
+        {"computed_function_name", "greater_than"},
+        {"input_type", "float"},
+        {"return_type", "boolean"},
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(x, y) => `(${x} > ${y})`"},
+        {"help", "Whether the first numeric column is greater than the second numeric column."},
+        {"signature", "(x: Number) > (y: Number): Boolean"}
+    }},
+    {"less_than", {
+        {"name", "less_than"},
+        {"label", "x < y"},
+        {"pattern", "\\<"},
+        {"computed_function_name", "less_than"},
+        {"input_type", "float"},
+        {"return_type", "boolean"},
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(x, y) => `(${x} < ${y})`"},
+        {"help", "Whether the first numeric column is less than the second numeric column."},
+        {"signature", "(x: Number) < (y: Number): Boolean"}
+    }},
+    {"is", {
+        {"name", "is"},
+        {"label", "x is y"},
+        {"pattern", "is"},
+        {"computed_function_name", "is"},
+        {"input_type", "string"},
+        {"return_type", "boolean"},
+        {"category", "OperatorTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `(x, y) => `(${x} < ${y})`"},
+        {"help", "Checks equality of two string columns."},
+        {"signature", "(x: String) is (y: String): Boolean"}
+    }},
+    // Numeric Functions
+    {"invert", {
+        {"name", "invert"},
+        {"label", "1 / x"},
+        {"pattern", "invert"},
+        {"computed_function_name", "1/x"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `(1 / ${x})`"},
+        {"help", "Returns 1 / the numeric column."},
+        {"signature", "invert(x: Number): Number"}
+    }},
+    {"pow2", {
+        {"name", "pow2"},
+        {"label", "x ^ 2"},
+        {"pattern", "pow2"},
+        {"computed_function_name", "x^2"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `(${x} ^ 2)`"},
+        {"help", "Returns the numeric column to the power of 2."},
+        {"signature", "pow2(x: Number): Number"}
+    }},
+    {"log", {
+        {"name", "log"},
+        {"label", "log(x)"},
+        {"pattern", "log"},
+        {"computed_function_name", "log"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `log(${x})`"},
+        {"help", "Returns the natural log of the numeric column."},
+        {"signature", "log(x: Number): Number"}
+    }},
+    {"exp", {
+        {"name", "exp"},
+        {"label", "exp(x)"},
+        {"pattern", "exp"},
+        {"computed_function_name", "exp"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `exp(${x})`"},
+        {"help", "Returns the base-e exponent of the numeric column."},
+        {"signature", "exp(x: Number): Number"}
+    }},
+    {"sqrt", {
+        {"name", "sqrt"},
+        {"label", "sqrt(x)"},
+        {"pattern", "sqrt"},
+        {"computed_function_name", "sqrt"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `sqrt(${x})`"},
+        {"help", "Returns the square root of the numeric column."},
+        {"signature", "sqrt(x: Number): Number"}
+    }},
+    {"abs", {
+        {"name", "abs"},
+        {"label", "abs(x)"},
+        {"pattern", "abs"},
+        {"computed_function_name", "abs"},
+        {"input_type", "float"},
+        {"return_type", "float"},
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `abs(${x})`"},
+        {"help", "Returns the absolute value of the numeric column."},
+        {"signature", "abs(x: Number): Number"}
+    }},
+    {"bin10", {
+        {"name", "bin10"},
+        {"label", "Bucket x by 10"},
+        {"pattern", "bin10"},
         {"computed_function_name", "Bucket (10)"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `bin10(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `bin10(${x})`"},
+        {"help", "Buckets the numeric column to the nearest 10."},
+        {"signature", "bin10(x: Number): Number"}
     }},
-    {"100_bucket", {
+    {"bin100", {
+        {"name", "bin100"},
+        {"label", "Bucket x by 100"},
+        {"pattern", "bin100"},
         {"computed_function_name", "Bucket (100)"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `bin100(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `bin100(${x})`"},
+        {"help", "Buckets the numeric column to the nearest 100."},
+        {"signature", "bin100(x: Number): Number"}
     }},
-    {"1000_bucket", {
+    {"bin1000", {
+        {"name", "bin1000"},
+        {"label", "Bucket x by 1000"},
+        {"pattern", "bin1000"},
         {"computed_function_name", "Bucket (1000)"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `bin1000(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `bin1000(${x})`"},
+        {"help", "Buckets the numeric column to the nearest 1000."},
+        {"signature", "bin1000(x: Number): Number"}
     }},
-    {"0.1_bucket", {
+    {"bin10th", {
+        {"name", "bin10th"},
+        {"label", "Bucket x by 1/10"},
+        {"pattern", "bin10th"},
         {"computed_function_name", "Bucket (1/10)"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `bin10th(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `bin10th(${x})`"},
+        {"help", "Buckets the numeric column to the nearest 0.1."},
+        {"signature", "bin10th(x: Number): Number"}
     }},
-    {"0.01_bucket", {
+    {"bin100th", {
+        {"name", "bin100th"},
+        {"label", "Bucket x by 1/100"},
+        {"pattern", "bin100th"},
         {"computed_function_name", "Bucket (1/100)"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `bin100th(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `bin100th(${x})`"},
+        {"help", "Buckets the numeric column to the nearest 0.01."},
+        {"signature", "bin100th(x: Number): Number"}
     }},
-    {"0.001_bucket", {
+    {"bin1000th", {
+        {"name", "bin1000th"},
+        {"label", "Bucket x by 1/1000"},
+        {"pattern", "bin1000th"},
         {"computed_function_name", "Bucket (1/1000)"},
         {"input_type", "float"},
         {"return_type", "float"},
-        {"group", "Math"},
-        {"format_function", "x => `bin1000th(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `bin1000th(${x})`"},
+        {"help", "Buckets the numeric column to the nearest 0.001."},
+        {"signature", "bin1000th(x: Number): Number"}
     }},
+    // String Functions
     {"length", {
+        {"name", "length"},
+        {"label", "length(x)"},
+        {"pattern", "length"},
         {"computed_function_name", "length"},
         {"input_type", "string"},
         {"return_type", "integer"},
-        {"group", "Text"},
-        {"format_function", "x => `length(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `length(${x})`"},
+        {"help", "Returns the length of the string column."},
+        {"signature", "length(x: String): Number"}
     }},
     {"uppercase", {
+        {"name", "uppercase"},
+        {"label", "uppercase(x)"},
+        {"pattern", "uppercase"},
         {"computed_function_name", "Uppercase"},
         {"input_type", "string"},
         {"return_type", "string"},
-        {"group", "Text"},
-        {"format_function", "x => `uppercase(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `uppercase(${x})`"},
+        {"help", "Converts each string to uppercase in the column."},
+        {"signature", "uppercase(x: String): String"}
     }},
     {"lowercase", {
+        {"name", "lowercase"},
+        {"label", "lowercase(x)"},
+        {"pattern", "lowercase"},
         {"computed_function_name", "Lowercase"},
         {"input_type", "string"},
         {"return_type", "string"},
-        {"group", "Text"},
-        {"format_function", "x => `lowercase(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `lowercase(${x})`"},
+        {"help", "Converts each string to lowercase in the column."},
+        {"signature", "lowercase(x: String): String"}
     }},
     {"concat_space", {
+        {"name", "concat_space"},
+        {"label", "Concat(x, y) with space"},
+        {"pattern", "concat_space"},
         {"computed_function_name", "concat_space"},
         {"input_type", "string"},
         {"return_type", "string"},
-        {"group", "Text"},
-        {"format_function", "x => `concat_space(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `concat_space(${x})`"},
+        {"help", "Concatenates two columns with a space."},
+        {"signature", "concat_space(x: String, y: String): String"}
     }},
     {"concat_comma", {
+        {"name", "concat_comma"},
+        {"label", "Concat(x, y) with comma"},
+        {"pattern", "concat_comma"},
         {"computed_function_name", "concat_comma"},
         {"input_type", "string"},
         {"return_type", "string"},
-        {"group", "Text"},
-        {"format_function", "x => `concat_comma(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "2"},
+        {"format_function", "x => `concat_comma(${x})`"},
+        {"help", "Concatenates two columns with a comma."},
+        {"signature", "concat_comma(x: String, y: String): String"}
     }},
+    // Date Functions
     {"hour_of_day", {
+        {"name", "hour_of_day"},
+        {"label", "Hour of day"},
+        {"pattern", "hour_of_day"},
         {"computed_function_name", "Hour of Day"},
         {"input_type", "datetime"},
         {"return_type", "integer"},
-        {"group", "Time"},
-        {"format_function", "x => `hour_of_day(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `hour_of_day(${x})`"},
+        {"help", "Returns the hour of day (0-23) in UTC for the datetime column."},
+        {"signature", "hour_of_day(x: Datetime): Number"}
     }},
     {"day_of_week", {
+        {"name", "day_of_week"},
+        {"label", "Day of week"},
+        {"pattern", "day_of_week"},
         {"computed_function_name", "Day of Week"},
         {"input_type", "datetime"},
         {"return_type", "string"},
-        {"group", "Time"},
-        {"format_function", "x => `day_of_week(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `day_of_week(${x})`"},
+        {"help", "Returns the day of week in UTC for the datetime column."},
+        {"signature", "day_of_week(x: Datetime): String"}
     }},
     {"month_of_year", {
+        {"name", "month_of_year"},
+        {"label", "Month of year"},
+        {"pattern", "month_of_year"},
         {"computed_function_name", "Month of Year"},
         {"input_type", "datetime"},
         {"return_type", "string"},
-        {"group", "Time"},
-        {"format_function", "x => `month_of_year(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `month_of_year(${x})`"},
+        {"help", "Returns the month of year in UTC for the datetime column."},
+        {"signature", "month_of_year(x: Datetime): String"}
     }},
     {"second_bucket", {
+        {"name", "second_bucket"},
+        {"label", "Bucket(x) by seconds"},
+        {"pattern", "second_bucket"},
         {"computed_function_name", "Bucket (s)"},
         {"input_type", "datetime"},
         {"return_type", "datetime"},
-        {"group", "Time"},
-        {"format_function", "x => `second_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `second_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest second."},
+        {"signature", "second_bucket(x: Datetime): Datetime"}
     }},
     {"minute_bucket", {
+        {"name", "minute_bucket"},
+        {"label", "Bucket(x) by minutes"},
+        {"pattern", "minute_bucket"},
         {"computed_function_name", "Bucket (m)"},
         {"input_type", "datetime"},
         {"return_type", "datetime"},
-        {"group", "Time"},
-        {"format_function", "x => `minute_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `minute_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest minute."},
+        {"signature", "minute_bucket(x: Datetime): Datetime"}
     }},
     {"hour_bucket", {
+        {"name", "hour_bucket"},
+        {"label", "Bucket(x) by hours"},
+        {"pattern", "hour_bucket"},
         {"computed_function_name", "Bucket (h)"},
         {"input_type", "datetime"},
         {"return_type", "datetime"},
-        {"group", "Time"},
-        {"format_function", "x => `hour_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `hour_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest hour."},
+        {"signature", "hour_bucket(x: Datetime): Datetime"}
     }},
     {"day_bucket", {
+        {"name", "day_bucket"},
+        {"label", "Bucket(x) by days"},
+        {"pattern", "day_bucket"},
         {"computed_function_name", "Bucket (D)"},
         {"input_type", "datetime"},
         {"return_type", "date"},
-        {"group", "Time"},
-        {"format_function", "x => `day_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `day_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest day."},
+        {"signature", "day_bucket(x: Datetime): Datetime"}
     }},
     {"week_bucket", {
+        {"name", "week_bucket"},
+        {"label", "Bucket(x) by weeks"},
+        {"pattern", "week_bucket"},
         {"computed_function_name", "Bucket (W)"},
         {"input_type", "datetime"},
         {"return_type", "date"},
-        {"group", "Time"},
-        {"format_function", "x => `week_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `week_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest week."},
+        {"signature", "week_bucket(x: Datetime): Datetime"}
     }},
     {"month_bucket", {
+        {"name", "month_bucket"},
+        {"label", "Bucket(x) by months"},
+        {"pattern", "month_bucket"},
         {"computed_function_name", "Bucket (M)"},
         {"input_type", "datetime"},
         {"return_type", "date"},
-        {"group", "Time"},
-        {"format_function", "x => `month_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `month_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest month."},
+        {"signature", "month_bucket(x: Datetime): Datetime"}
     }},
     {"year_bucket", {
+        {"name", "year_bucket"},
+        {"label", "Bucket(x) by years"},
+        {"pattern", "year_bucket"},
         {"computed_function_name", "Bucket (Y)"},
         {"input_type", "datetime"},
         {"return_type", "date"},
-        {"group", "Time"},
-        {"format_function", "x => `year_bucket(${x})`"}
+        {"category", "FunctionTokenType"},
+        {"num_params", "1"},
+        {"format_function", "x => `year_bucket(${x})`"},
+        {"help", "Buckets the datetime column to the nearest year."},
+        {"signature", "year_bucket(x: Datetime): Datetime"}
     }}
 };
 

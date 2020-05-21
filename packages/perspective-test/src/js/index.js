@@ -107,20 +107,45 @@ async function get_new_page() {
                     document.dispatchEvent(keyEvent);
                 }
 
+                function triggerInputEvent(element) {
+                    const event = new Event("input", {
+                        bubbles: true,
+                        cancelable: true
+                    });
+
+                    element.dispatchEvent(event);
+                }
+
                 for (let i = 0; i < content.length; i++) {
                     const char = content[i];
                     triggerKeyEvent(char, "keydown");
+                    triggerInputEvent(elem);
                     triggerKeyEvent(char, "keyUp");
-                    elem.value += char;
+                    elem.innerText += char;
                 }
 
-                if (elem.value !== content) {
-                    elem.value = content;
+                if (elem.innerText !== content) {
+                    elem.innerText = content;
+                    triggerInputEvent(elem);
                 }
             },
             content,
             path
         );
+    };
+
+    page.shadow_focus = async function(...path) {
+        await this.evaluate(path => {
+            let elem = document;
+            while (path.length > 0) {
+                if (elem.shadowRoot) {
+                    elem = elem.shadowRoot;
+                }
+                elem = elem.querySelector(path.shift());
+            }
+
+            elem.focus();
+        }, path);
     };
 
     // CSS Animations break our screenshot tests, so set the

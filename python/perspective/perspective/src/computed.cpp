@@ -54,6 +54,11 @@ get_computation_input_types(const std::string& computed_function_name) {
     return t_computed_column::get_computation_input_types(function);
 }
 
+std::map<std::string, std::map<std::string, std::string>>
+get_computed_functions() {
+    return t_computed_column::computed_functions;
+}
+
 } //namespace binding
 } //namespace perspective
 

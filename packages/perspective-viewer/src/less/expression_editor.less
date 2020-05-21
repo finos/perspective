@@ -1,0 +1,132 @@
+/******************************************************************************
+*
+* Copyright (c) 2017, the Perspective Authors.
+*
+* This file is part of the Perspective library, distributed under the terms of
+* the Apache License 2.0.  The full license can be found in the LICENSE file.
+*
+*/
+
+@import "variables";
+
+:host {
+
+    width: 100%;
+
+    .perspective-expression-editor__edit_area {
+        @default-text-color: var(--color, #666666);
+
+        background: var(--background-color, none);
+        border: 1px solid var(--inactive-color, #ccc);
+        box-sizing: border-box;
+        color: @default-text-color;
+        font-size: 12px;
+        display: block;
+        font-family: var(--interface-monospace--font-family, monospace);
+        height: 75px;
+        margin-top: 5px;
+        max-width: 250px;
+        min-height: 50px;
+        padding: 5px;
+        resize: auto;
+        outline: none;
+        overflow: auto;
+        white-space: pre-wrap;
+        width: 100%;
+
+        &:hover {
+            cursor: text;
+        }
+
+        .psp-expression__column_name {
+            font-family: var(--interface--font-family, @sans-serif-fonts);
+
+            // TODO: find a way to just use these styles instead of copying
+            // them from the row
+            &:before {
+                font-family: var(--interface-monospace--font-family, monospace);
+                position: relative;
+                display: inline-block;
+                // display: var(--name-before-display, none);
+                padding: var(--column_type--padding, 0px 5px);
+                min-width: 18px;
+                width: var(--column_type--width, auto);
+            }
+
+            &.integer:before,
+            &.float:before {
+                content: var(
+                    --float--column-type--content,
+                    var(--column-type--content, "123")
+                );
+                color: var(
+                    --float--column-type--color,
+                    var(--column-type--color, #016bc6)
+                );
+            }
+
+            &.string:before {
+                content: var(
+                    --string--column-type--content,
+                    var(--column-type--content, "abc")
+                );
+                color: var(
+                    --string--column-type--color,
+                    var(--column-type--color, #fe9292)
+                );
+            }
+
+            &.boolean:before {
+                content: var(
+                    --boolean--column-type--content,
+                    var(--column-type--content, "t/f")
+                );
+                color: var(
+                    --boolean--column-type--color,
+                    var(--column-type--color, #999999)
+                );
+            }
+
+            &.date:before {
+                content: var(
+                    --date--column-type--content,
+                    var(--column-type--content, "mdy")
+                );
+                color: var(
+                    --date--column-type--color,
+                    var(--column-type--color, #999999)
+                );
+            }
+
+            &.datetime:before {
+                content: var(
+                    --datetime--column-type--content,
+                    var(--column-type--content, "mdy")
+                );
+                color: var(
+                    --datetime--column-type--color,
+                    var(--column-type--color, #999999)
+                );
+            }
+        }
+
+        .psp-expression__function {
+            color: var(--expression--function-color, rgb(231, 131, 64));
+        }
+
+        .psp-expression__operator {
+            color: var(--expression--operator-color, rgb(100, 100, 100));
+        }
+
+        .psp-expression__suggestion {
+            color: lightgray;
+            text-decoration: underline;
+        }
+
+        .psp-expression__errored {
+            font-weight: 700;
+            color: var(--expression--error-color, rgb(250, 51, 51));
+            text-decoration: underline dotted var(--expression--error-color, rgb(250, 51, 51));
+        }
+    }
+}

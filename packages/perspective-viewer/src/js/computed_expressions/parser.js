@@ -7,56 +7,10 @@
  *
  */
 import {CstParser} from "chevrotain";
-import {
-    vocabulary,
-    Comma,
-    ColumnName,
-    As,
-    LeftParen,
-    RightParen,
-    Sqrt,
-    Pow2,
-    Abs,
-    Invert,
-    Log,
-    Exp,
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Pow,
-    PercentOf,
-    Equals,
-    NotEquals,
-    GreaterThan,
-    LessThan,
-    Length,
-    Is,
-    Lowercase,
-    Uppercase,
-    ConcatComma,
-    ConcatSpace,
-    Bin1000th,
-    Bin1000,
-    Bin100th,
-    Bin100,
-    Bin10th,
-    Bin10,
-    HourOfDay,
-    DayOfWeek,
-    MonthOfYear,
-    SecondBucket,
-    MinuteBucket,
-    HourBucket,
-    DayBucket,
-    WeekBucket,
-    MonthBucket,
-    YearBucket
-} from "./lexer";
 import {PerspectiveParserErrorMessage} from "./error";
 
 export class ComputedExpressionColumnParser extends CstParser {
-    constructor() {
+    constructor(vocabulary) {
         super(vocabulary, {
             errorMessageProvider: PerspectiveParserErrorMessage
         });
@@ -98,79 +52,79 @@ export class ComputedExpressionColumnParser extends CstParser {
 
         this.RULE("FunctionComputedColumn", () => {
             this.SUBRULE(this.Function);
-            this.CONSUME(LeftParen);
+            this.CONSUME(vocabulary["leftParen"]);
             this.AT_LEAST_ONE_SEP({
-                SEP: Comma,
+                SEP: vocabulary["comma"],
                 DEF: () => {
                     this.SUBRULE(this.ColumnName);
                 }
             });
-            this.CONSUME(RightParen);
+            this.CONSUME(vocabulary["rightParen"]);
             this.OPTION(() => {
                 this.SUBRULE(this.As, {LABEL: "as"});
             });
         });
 
         this.RULE("ColumnName", () => {
-            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.CONSUME(ColumnName)}], {
+            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
                 ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
             });
         });
 
         this.RULE("TerminalColumnName", () => {
-            this.CONSUME(ColumnName);
+            this.CONSUME(vocabulary["columnName"]);
         });
 
         this.RULE("As", () => {
-            this.CONSUME(As);
+            this.CONSUME(vocabulary["as"]);
             this.SUBRULE(this.TerminalColumnName);
         });
 
         this.RULE("Function", () => {
             this.OR([
-                {ALT: () => this.CONSUME(Sqrt)},
-                {ALT: () => this.CONSUME(Pow2)},
-                {ALT: () => this.CONSUME(Abs)},
-                {ALT: () => this.CONSUME(Invert)},
-                {ALT: () => this.CONSUME(Log)},
-                {ALT: () => this.CONSUME(Exp)},
-                {ALT: () => this.CONSUME(Bin1000th)},
-                {ALT: () => this.CONSUME(Bin1000)},
-                {ALT: () => this.CONSUME(Bin100th)},
-                {ALT: () => this.CONSUME(Bin100)},
-                {ALT: () => this.CONSUME(Bin10th)},
-                {ALT: () => this.CONSUME(Bin10)},
-                {ALT: () => this.CONSUME(Length)},
-                {ALT: () => this.CONSUME(Uppercase)},
-                {ALT: () => this.CONSUME(Lowercase)},
-                {ALT: () => this.CONSUME(ConcatComma)},
-                {ALT: () => this.CONSUME(ConcatSpace)},
-                {ALT: () => this.CONSUME(HourOfDay)},
-                {ALT: () => this.CONSUME(DayOfWeek)},
-                {ALT: () => this.CONSUME(MonthOfYear)},
-                {ALT: () => this.CONSUME(SecondBucket)},
-                {ALT: () => this.CONSUME(MinuteBucket)},
-                {ALT: () => this.CONSUME(HourBucket)},
-                {ALT: () => this.CONSUME(DayBucket)},
-                {ALT: () => this.CONSUME(WeekBucket)},
-                {ALT: () => this.CONSUME(MonthBucket)},
-                {ALT: () => this.CONSUME(YearBucket)}
+                {ALT: () => this.CONSUME(vocabulary["sqrt"])},
+                {ALT: () => this.CONSUME(vocabulary["pow2"])},
+                {ALT: () => this.CONSUME(vocabulary["abs"])},
+                {ALT: () => this.CONSUME(vocabulary["invert"])},
+                {ALT: () => this.CONSUME(vocabulary["log"])},
+                {ALT: () => this.CONSUME(vocabulary["exp"])},
+                {ALT: () => this.CONSUME(vocabulary["bin1000th"])},
+                {ALT: () => this.CONSUME(vocabulary["bin1000"])},
+                {ALT: () => this.CONSUME(vocabulary["bin100th"])},
+                {ALT: () => this.CONSUME(vocabulary["bin100"])},
+                {ALT: () => this.CONSUME(vocabulary["bin10th"])},
+                {ALT: () => this.CONSUME(vocabulary["bin10"])},
+                {ALT: () => this.CONSUME(vocabulary["length"])},
+                {ALT: () => this.CONSUME(vocabulary["uppercase"])},
+                {ALT: () => this.CONSUME(vocabulary["lowercase"])},
+                {ALT: () => this.CONSUME(vocabulary["concat_comma"])},
+                {ALT: () => this.CONSUME(vocabulary["concat_space"])},
+                {ALT: () => this.CONSUME(vocabulary["hour_of_day"])},
+                {ALT: () => this.CONSUME(vocabulary["day_of_week"])},
+                {ALT: () => this.CONSUME(vocabulary["month_of_year"])},
+                {ALT: () => this.CONSUME(vocabulary["second_bucket"])},
+                {ALT: () => this.CONSUME(vocabulary["minute_bucket"])},
+                {ALT: () => this.CONSUME(vocabulary["hour_bucket"])},
+                {ALT: () => this.CONSUME(vocabulary["day_bucket"])},
+                {ALT: () => this.CONSUME(vocabulary["week_bucket"])},
+                {ALT: () => this.CONSUME(vocabulary["month_bucket"])},
+                {ALT: () => this.CONSUME(vocabulary["year_bucket"])}
             ]);
         });
 
         this.RULE("Operator", () => {
             this.OR([
-                {ALT: () => this.CONSUME(Add)},
-                {ALT: () => this.CONSUME(Subtract)},
-                {ALT: () => this.CONSUME(Multiply)},
-                {ALT: () => this.CONSUME(Divide)},
-                {ALT: () => this.CONSUME(Pow)},
-                {ALT: () => this.CONSUME(PercentOf)},
-                {ALT: () => this.CONSUME(Equals)},
-                {ALT: () => this.CONSUME(NotEquals)},
-                {ALT: () => this.CONSUME(GreaterThan)},
-                {ALT: () => this.CONSUME(LessThan)},
-                {ALT: () => this.CONSUME(Is)}
+                {ALT: () => this.CONSUME(vocabulary["add"])},
+                {ALT: () => this.CONSUME(vocabulary["subtract"])},
+                {ALT: () => this.CONSUME(vocabulary["multiply"])},
+                {ALT: () => this.CONSUME(vocabulary["divide"])},
+                {ALT: () => this.CONSUME(vocabulary["pow"])},
+                {ALT: () => this.CONSUME(vocabulary["percent_of"])},
+                {ALT: () => this.CONSUME(vocabulary["equals"])},
+                {ALT: () => this.CONSUME(vocabulary["not_equals"])},
+                {ALT: () => this.CONSUME(vocabulary["greater_than"])},
+                {ALT: () => this.CONSUME(vocabulary["less_than"])},
+                {ALT: () => this.CONSUME(vocabulary["is"])}
             ]);
         });
 
@@ -179,9 +133,9 @@ export class ComputedExpressionColumnParser extends CstParser {
          * and resolve to this.Expression.
          */
         this.RULE("ParentheticalExpression", () => {
-            this.CONSUME(LeftParen);
+            this.CONSUME(vocabulary["leftParen"]);
             this.SUBRULE(this.Expression);
-            this.CONSUME(RightParen);
+            this.CONSUME(vocabulary["rightParen"]);
         });
 
         this.performSelfAnalysis();
