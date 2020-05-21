@@ -137,7 +137,7 @@ jobs:
       displayName: 'Verify that Perspective is not installed'
 
     # Install the manylinux wheel
-    - bash: python -m pip install --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/dist/*_$(artifact_name).whl
+    - bash: python -m pip install --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Install from wheel'
 
@@ -268,10 +268,12 @@ jobs:
     # Start a new virtual environment for the Perspective wheel, so as to
     # isolate it from previously installed dependencies
     - bash: python -m pip install virtualenv && python -m virtualenv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python2'))
       displayName: "Create virtualenv (Python 2)"
       
     # Use venv for python3
     - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], ''))
       displayName: "Create virtualenv (Python 3)"
 
     - bash: source ./temp_venv/bin/activate
@@ -281,7 +283,7 @@ jobs:
     - bash: "python -c 'from __future__ import print_function\ntry: import perspective; print(perspective.is_libpsp())\nexcept:print(\"Perspective not installed\")'"
       displayName: 'Verify that Perspective is not installed'
 
-    # Install the manylinux wheel
+    # Install the mac wheel
     - bash: python -m pip install --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
       displayName: 'Install from wheel'
 
