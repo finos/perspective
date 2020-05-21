@@ -56,7 +56,7 @@ public:
      * @param row_count
      * @param op
      */
-    void init(t_data_table& data_table, std::uint32_t row_count, const t_op op);
+    void init(t_data_table& data_table, std::uint32_t row_count, const t_op op, const t_uindex port_id);
 
     /**
      * @brief The size of the underlying `t_data_table`, i.e. a row count
@@ -121,6 +121,23 @@ public:
      * @param id
      */
     void reset_gnode(t_uindex id);
+
+    /**
+     * @brief Create a `t_port` on `m_gnode`, which allows updates and removes
+     * to be processed on a specific port. Returns a `t_uindex` containing the
+     * id of the port.
+     * 
+     * @return t_uindex the ID of the port, which can be passed into `update`
+     * and `delete` methods in Javascript or Python. 
+     */
+    t_uindex make_port();
+
+    /**
+     * @brief Given a port ID, remove the input port associated with the ID.
+     * 
+     * @param port_id 
+     */
+    void remove_port(t_uindex port_id);
 
     /**
      * @brief The offset determines where we begin to write data into the Table. 

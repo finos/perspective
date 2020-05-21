@@ -201,7 +201,6 @@ class _PerspectiveDateValidator(object):
         if has_separators:
             try:
                 parsed = parse(s)
-                print(parsed)
                 if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
                     dtype = t_dtype.DTYPE_DATE
                 else:

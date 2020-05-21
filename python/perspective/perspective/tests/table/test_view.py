@@ -602,7 +602,7 @@ class TestView(object):
     def test_view_on_update(self, sentinel):
         s = sentinel(False)
 
-        def callback():
+        def callback(port_id):
             s.set(True)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -615,10 +615,10 @@ class TestView(object):
     def test_view_on_update_multiple_callback(self, sentinel):
         s = sentinel(0)
 
-        def callback():
+        def callback(port_id):
             s.set(s.get() + 1)
 
-        def callback1():
+        def callback1(port_id):
             s.set(s.get() - 1)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -657,10 +657,10 @@ class TestView(object):
         # make sure that callbacks on views get filtered
         s = sentinel(0)
 
-        def cb1():
+        def cb1(port_id):
             s.set(s.get() + 1)
 
-        def cb2():
+        def cb2(port_id):
             s.set(s.get() + 2)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -677,10 +677,10 @@ class TestView(object):
     def test_view_delete_full_cleanup(self, sentinel):
         s = sentinel(0)
 
-        def cb1():
+        def cb1(port_id):
             s.set(s.get() + 1)
 
-        def cb2():
+        def cb2(port_id):
             s.set(s.get() + 2)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -699,10 +699,10 @@ class TestView(object):
     def test_view_remove_update(self, sentinel):
         s = sentinel(0)
 
-        def cb1():
+        def cb1(port_id):
             s.set(s.get() + 1)
 
-        def cb2():
+        def cb2(port_id):
             s.set(s.get() + 2)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -717,10 +717,10 @@ class TestView(object):
     def test_view_remove_multiple_update(self, sentinel):
         s = sentinel(0)
 
-        def cb1():
+        def cb1(port_id):
             s.set(s.get() + 1)
 
-        def cb2():
+        def cb2(port_id):
             s.set(s.get() + 2)
 
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -743,7 +743,7 @@ class TestView(object):
             "b": [6]
         }
 
-        def cb1(delta):
+        def cb1(port_id, delta):
             compare_delta(delta, update_data)
 
         tbl = Table(data)
@@ -758,7 +758,7 @@ class TestView(object):
             "b": [6]
         }
 
-        def cb1(delta):
+        def cb1(port_id, delta):
             compare_delta(delta, {
                 "a": [9, 5],
                 "b": [12, 6]
@@ -781,7 +781,7 @@ class TestView(object):
             "b": [6]
         }
 
-        def cb1(delta):
+        def cb1(port_id, delta):
             compare_delta(delta, {
                 "2|a": [1, None],
                 "2|b": [2, None],
@@ -810,7 +810,7 @@ class TestView(object):
             "b": [6]
         }
 
-        def cb1(delta):
+        def cb1(port_id, delta):
             compare_delta(delta, {
                 "2|a": [1, None],
                 "2|b": [2, None],

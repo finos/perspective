@@ -1,0 +1,76 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <script src="http://localhost:8080/perspective-viewer.js"></script>
+    <script src="http://localhost:8080/perspective-viewer-hypergrid.js"></script>
+    <script src="http://localhost:8080/perspective-viewer-d3fc.js"></script>
+    <script src="http://localhost:8080/perspective.js"></script>
+
+    <link rel='stylesheet' href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css">
+
+    <style>
+        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
+    </style>
+
+</head>
+
+<body>
+
+    <perspective-viewer id="viewer" editable></perspective-viewer>
+
+    <script>
+
+        window.addEventListener('WebComponentsReady', async function() {
+            const viewer = document.getElementById('viewer');
+            const websocket = perspective.websocket("ws://localhost:8888/websocket");
+            const worker = perspective.shared_worker();
+
+            const server_table = websocket.open_table('data_source_one');
+            const server_view = websocket.open_view("view_one");
+            const arrow = await server_view.to_arrow();
+            const client_table = worker.table(arrow, {index: "Row ID"});
+            const client_view = client_table.view();// client -> server
+
+            await viewer.load(client_table);
+
+            const client_edit_port = await viewer.getEditPort();
+            const server_edit_port = await server_table.make_port();
+
+            // When the client updates, if the update comes through the edit
+            // port then forward it to the server.
+            client_view.on_update(updated => {
+                if (updated.port_id === client_edit_port) {
+                    server_table.update(updated.delta, {
+                        port_id: server_edit_port
+                    });
+                }
+            }, {mode: "row"});
+
+            // If the server updates, and the edit is not coming from the
+            // server edit port, then synchronize state with the client.
+            server_view.on_update(updated => {
+                if (updated.port_id !== server_edit_port) {
+                    client_table.update(updated.delta); // any port, we dont care
+                }
+            }, {mode: "row"});
+
+        });
+
+    </script>
+
+</body>
+
+</html>

@@ -39,12 +39,12 @@ module.exports = perspective => {
                 });
 
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: "HELLO", lowercase: "hello"},
                             {x: 3, y: "WORLD", lowercase: "world"}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
@@ -75,8 +75,8 @@ module.exports = perspective => {
                     ]
                 });
                 view.on_update(
-                    function(new_data) {
-                        expect(new_data).toEqual([
+                    function(updated) {
+                        expect(updated.delta).toEqual([
                             {x: 1, y: "string1", z: false, upper: "STRING1"},
                             {x: 2, y: "string2", z: true, upper: "STRING2"}
                         ]);
@@ -112,7 +112,7 @@ module.exports = perspective => {
                 });
 
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const full = await view.to_columns();
                         const expected = [
                             {x: 1, y: "HELLO", lowercase: "hello"},
@@ -123,7 +123,7 @@ module.exports = perspective => {
                             y: ["HELLO", "B", "WORLD", "D"],
                             lowercase: ["hello", "b", "world", "d"]
                         });
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
@@ -151,7 +151,7 @@ module.exports = perspective => {
                 });
 
                 self.view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const full = await self.view.to_columns();
                         const expected = [
                             {x: 1, y: null, lowercase: null},
@@ -162,7 +162,7 @@ module.exports = perspective => {
                             y: ["A", "B", "C", "D", null, null],
                             lowercase: ["a", "b", "c", "d", null, null]
                         });
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await self.view.delete();
                         await table.delete();
                         done();
@@ -192,13 +192,13 @@ module.exports = perspective => {
                 });
 
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {lowercase: 6, x: 14, y: 6},
                             {x: 1, y: 1, lowercase: 1},
                             {x: 3, y: 1, lowercase: 1}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
@@ -236,7 +236,7 @@ module.exports = perspective => {
                 });
 
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: null, lowercase: null},
                             {x: 3, y: null, lowercase: null}
@@ -247,7 +247,7 @@ module.exports = perspective => {
                             y: ["A", "B", "C", "D", null, null],
                             lowercase: ["a", "b", "c", "d", null, null]
                         });
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
@@ -290,7 +290,7 @@ module.exports = perspective => {
                 });
 
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: "HELLO", lowercase: "hello"},
                             {x: 3, y: "WORLD", lowercase: "world"}
@@ -301,14 +301,14 @@ module.exports = perspective => {
                             y: ["HELLO", "B", "WORLD", "D"],
                             lowercase: ["hello", "b", "world", "d"]
                         });
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                     },
                     {mode: "row"}
                 );
 
                 view2.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: "HELLO", length: 5},
                             {x: 3, y: "WORLD", length: 5}
@@ -319,7 +319,7 @@ module.exports = perspective => {
                             y: ["HELLO", "B", "WORLD", "D"],
                             length: [5, 1, 5, 1]
                         });
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view2.delete();
                         await table.delete();
                         done();
@@ -355,12 +355,12 @@ module.exports = perspective => {
                 });
 
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: "abc"},
                             {x: 3, y: "def"}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         await view2.delete();
                         await view.delete();
                         await table.delete();

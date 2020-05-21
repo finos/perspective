@@ -24,6 +24,7 @@
 #include <perspective/computed.h>
 #include <perspective/computed_column_map.h>
 #include <perspective/computed_function.h>
+#include <tsl/ordered_map.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -51,6 +52,21 @@ class t_ctx_grouped_pkey;
 #define PSP_GNODE_VERIFY_TABLE(X)
 #endif
 
+/**
+ * @brief The struct returned from `_process_table`, which contains a
+ * pointer to the flattened and processed `t_data_table`, and a boolean showing
+ * whether the user's `on_update` callbacks should be called, i.e. whether the 
+ * update contained new data or not.
+ * 
+ * Given that `_process_table` may be called multiple times, as is `_process`,
+ * `t_update_task` will accumulate the values of `m_should_notify_userspace`
+ * over multiple calls and only consider an update a no-op if all values of
+ * `m_should_notify_userspace` are false.
+ */
+struct PERSPECTIVE_EXPORT t_process_table_result {
+    std::shared_ptr<t_data_table> m_flattened_data_table;
+    bool m_should_notify_userspace;
+};
 class PERSPECTIVE_EXPORT t_gnode {
 public:
     /**
@@ -77,11 +93,40 @@ public:
     void init();
     void reset();
 
-    // send data to input port with at index idx
-    // schema should match port schema
-    void _send(t_uindex idx, const t_data_table& fragments);
-    void _send_and_process(const t_data_table& fragments);
-    void _process();
+    /**
+     * @brief Send a t_data_table with a schema that matches the gnode's
+     * input schema to the input port at `port_id`.
+     * 
+     * @param port_id 
+     * @param fragments 
+     */
+    void send(t_uindex port_id, const t_data_table& fragments);
+
+    /**
+     * @brief Given a port_id, call `process_table` on the port's data table,
+     * reconciling all queued calls to `update` and `remove` on that port.
+     * Returns a boolean indicating whether the update was valid and whether
+     * contexts were notified.
+     * 
+     * @param port_id 
+     */
+    bool process(t_uindex port_id);
+
+    /**
+     * @brief Create a new input port, store it in `m_input_ports`, and
+     * return the integer ID that references the new port.
+     * 
+     * @return t_uindex 
+     */
+    t_uindex make_input_port();
+
+    /**
+     * @brief Given a port ID, remove the input port that belongs to that
+     * input ID and clean up its associated table.
+     * 
+     * @param port_id 
+     */
+    void remove_input_port(t_uindex port_id);
 
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
     void _unregister_context(const std::string& name);
@@ -91,11 +136,14 @@ public:
 
     std::shared_ptr<t_data_table> get_table_sptr();
 
-    t_data_table* _get_otable(t_uindex portidx);
-    t_data_table* _get_itable(t_uindex portidx);
+    t_data_table* _get_otable(t_uindex port_id);
+    t_data_table* _get_itable(t_uindex port_id);
 
     t_schema get_output_schema() const;
     const t_schema& get_state_input_schema() const;
+
+    t_uindex num_input_ports() const;
+    t_uindex num_output_ports() const;
 
     std::vector<t_pivot> get_pivots() const;
     std::vector<t_stree*> get_trees();
@@ -105,6 +153,7 @@ public:
 
     void release_inputs();
     void release_outputs();
+
     std::vector<std::string> get_registered_contexts() const;
     std::vector<std::string> get_contexts_last_updated() const;
 
@@ -305,9 +354,9 @@ private:
      * @brief Process the input data table by flattening it, calculating
      * transitional values, and returning a new masked version.
      * 
-     * @return std::shared_ptr<t_data_table> 
+     * @return t_process_table_result
      */
-    std::shared_ptr<t_data_table> _process_table();
+    t_process_table_result _process_table(t_uindex port_id);
 
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
@@ -324,11 +373,19 @@ private:
     t_computed_column_map m_computed_column_map;
 
     bool m_init;
-    std::vector<std::shared_ptr<t_port>> m_iports;
+    t_uindex m_id;
+
+    // Input ports mapped by integer id
+    tsl::ordered_map<t_uindex, std::shared_ptr<t_port>> m_input_ports;
+
+    // Input port IDs are sequential, starting from 0
+    t_uindex m_last_input_port_id;
+
+    // Output ports stored sequentially in a vector, keyed by the
+    // `t_gnode_port` enum.
     std::vector<std::shared_ptr<t_port>> m_oports;
     std::map<std::string, t_ctx_handle> m_contexts;
     std::shared_ptr<t_gstate> m_gstate;
-    t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::vector<t_custom_column> m_custom_columns;
     std::function<void()> m_pool_cleanup;

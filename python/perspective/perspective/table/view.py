@@ -190,10 +190,12 @@ class View(object):
         called on the parent :class:`~perspective.Table`.
 
         Multiple callbacks can be set through calling ``on_update`` multiple
-        times, and will be called in the order they are set.  Callback must be a
-        callable function that takes exactly 0 or 1 parameter, depending on
-        whether `on_update` is called with `mode="rows"`. A `RuntimeError` will
-        be thrown if the callback has mis-configured parameters.
+        times, and will be called in the order they are set. Callback must be a
+        callable function that takes exactly 1 or 2 parameters, depending on
+        whether `on_update` is called with `mode="rows"`. The first parameter is
+        always `port_id`, an :obj:`int` that indicates which input port the
+        update comes from. A `RuntimeError` will be thrown if the callback
+        has mis-configured parameters.
 
         Args:
             callback (:obj:`callable`): a callable function reference that will
@@ -203,11 +205,11 @@ class View(object):
                 Defaults to "none".
 
         Examples:
-            >>> def updater():
-            ...     print("Update fired!")
+            >>> def updater(port_id):
+            ...     print("Update fired on port", port_id)
             >>> view.on_update(updater)
             >>> table.update({"a": [1]})'
-            >>> Update fired!
+            >>> Update fired on port 0
         '''
         self._table._state_manager.call_process(self._table._table.get_id())
         mode = mode or "none"
@@ -224,6 +226,7 @@ class View(object):
 
         wrapped_callback = partial(
             self._wrapped_on_update_callback, mode=mode, callback=callback)
+
         self._callbacks.add_callback({
             "name": self._name,
             "orig_callback": callback,
@@ -484,16 +487,20 @@ class View(object):
         from the view.
         '''
         mode = kwargs["mode"]
+        port_id = kwargs["port_id"]
         cache = kwargs["cache"]
         callback = kwargs["callback"]
 
+        if cache.get(port_id) is None:
+            cache[port_id] = {}
+
         if mode == "cell":
-            if cache.get("step_delta") is None:
+            if cache[port_id].get("step_delta") is None:
                 raise NotImplementedError("not implemented get_step_delta")
-            callback(cache["step_delta"])
+            callback(port_id, cache["step_delta"])
         elif mode == "row":
-            if cache.get("row_delta") is None:
+            if cache[port_id].get("row_delta") is None:
                 cache["row_delta"] = self._get_row_delta()
-            callback(cache["row_delta"])
+            callback(port_id, cache["row_delta"])
         else:
-            callback()
+            callback(port_id)

@@ -51,10 +51,8 @@ const match_column_name = function(string, start_offset) {
     column_name_regex_pattern.lastIndex = start_offset;
     const result = column_name_regex_pattern.exec(string);
 
-    if (result !== null) {
-        const full_match = result[0];
-        const quotes_removed = full_match.substr(1, full_match.length - 2);
-        result.payload = quotes_removed;
+    if (result !== null && result.length === 3) {
+        result.payload = result[2]; // 2nd capture group is in-between quotes
     }
 
     return result;
