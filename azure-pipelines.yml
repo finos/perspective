@@ -156,7 +156,7 @@ jobs:
     - task: PublishPipelineArtifact@1
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
+        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
         artifactName: '$(artifact_name)'
 
 - job: 'Windows'
