@@ -137,7 +137,7 @@ jobs:
       displayName: 'Verify that Perspective is not installed'
 
     # Install the manylinux wheel
-    - bash: python -m pip install --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
+    - bash: python -m pip install -vv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Install from wheel'
 
@@ -201,7 +201,7 @@ jobs:
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/libs"
 
 
-- job: 'Mac'
+- job: 'Mac 10.14'
   pool:
     vmImage: 'macos-10.14'
 
@@ -210,12 +210,12 @@ jobs:
       Python27:
         python.version: '2.7'
         python_flag: '--python2'
-        artifact_name: 'cp27-cp27m-macosx_10_13_x86_64'
+        artifact_name: 'cp27-cp27m-macosx_10_14_x86_64'
 
       Python37:
         python.version: '3.7'
         python_flag: ''
-        artifact_name: 'cp37-cp37m-macosx_10_13_x86_64'
+        artifact_name: 'cp37-cp37m-macosx_10_14_x86_64'
 
   steps:
     - task: UsePythonVersion@0
@@ -284,7 +284,103 @@ jobs:
       displayName: 'Verify that Perspective is not installed'
 
     # Install the mac wheel
-    - bash: python -m pip install --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
+    - bash: python -m pip install -vv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
+      displayName: 'Install from wheel'
+
+    # Make sure that the binaries are valid and can be imported
+    - bash: "python -c 'from __future__ import print_function\nimport perspective; print(perspective.is_libpsp())'"
+      displayName: 'Verify successful installation'
+
+    # Save the artifact to Azure storage
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
+        artifactName: '$(artifact_name)'
+
+- job: 'Mac 10.15'
+  pool:
+    vmImage: 'macos-10.15'
+
+  strategy:
+    matrix:
+      Python27:
+        python.version: '2.7'
+        python_flag: '--python2'
+        artifact_name: 'cp27-cp27m-macosx_10_15_x86_64'
+
+      Python37:
+        python.version: '3.7'
+        python_flag: ''
+        artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
+
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
+
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
+
+    - script: |
+        brew install boost
+      displayName: "System deps"
+
+    - script: |
+        which python
+        python --version
+        which python$(python.version)
+      displayName: "Which python"
+
+    - script: |
+        python -m pip install delocate wheel numpy pyarrow==0.15.1
+      displayName: "Python deps"
+
+    - script: npm install -g yarn
+      displayName: "Install Yarn"
+
+    - script: yarn
+      displayName: 'Install Deps'
+
+    - script: yarn build_python --ci $(python_flag)
+      displayName: 'build'
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: 'python/perspective/python_junit.xml'
+        testRunTitle: 'Publish test results for Python $(python.version)'
+
+    - task: PublishCodeCoverageResults@1
+      inputs: 
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+
+    # Build a python wheel for Mac 10.14
+    - bash: yarn _wheel_python --ci $(python_flag) --platform osx
+      displayName: 'Build wheel'
+
+    # Start a new virtual environment for the Perspective wheel, so as to
+    # isolate it from previously installed dependencies
+    - bash: python -m pip install virtualenv && python -m virtualenv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python2'))
+      displayName: "Create virtualenv (Python 2)"
+      
+    # Use venv for python3
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], ''))
+      displayName: "Create virtualenv (Python 3)"
+
+    - bash: source ./temp_venv/bin/activate
+      displayName: "Activate virtualenv"
+    
+    # Make sure that Perspective is not installed
+    - bash: "python -c 'from __future__ import print_function\ntry: import perspective; print(perspective.is_libpsp())\nexcept:print(\"Perspective not installed\")'"
+      displayName: 'Verify that Perspective is not installed'
+
+    # Install the mac wheel
+    - bash: python -m pip install -vv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/dist/*.whl
       displayName: 'Install from wheel'
 
     # Make sure that the binaries are valid and can be imported
