@@ -61,13 +61,6 @@ export class DatagridViewModel extends DatagridViewEventModel {
      */
     clear() {
         this._sticky_container.innerHTML = "<table></table>";
-        if (this._render_element) {
-            if (this._render_element !== this.table_model.table.parentElement) {
-                this._render_element.appendChild(this._sticky_container);
-            }
-        } else {
-            this.appendChild(this.table_model.table);
-        }
     }
 
     reset_viewport() {
@@ -78,19 +71,19 @@ export class DatagridViewModel extends DatagridViewEventModel {
     }
 
     reset_size() {
-        this._container_size = undefined;
+        this._invalid_schema = true;
     }
 
     reset_scroll() {
         this._column_sizes.indices = [];
-        this._scroll_container.scrollTop = 0;
-        this._scroll_container.scrollLeft = 0;
+        this.scrollTop = 0;
+        this.scrollLeft = 0;
         this.reset_viewport();
     }
 
-    async set_view(view) {
+    async set_view(table, view) {
         const config = await view.get_config();
-        const table_schema = await this._render_element.table.schema();
+        const table_schema = await table.schema();
         const schema = await view.schema();
         const column_paths = await view.column_paths();
         this._invalid_schema = true;
@@ -99,21 +92,14 @@ export class DatagridViewModel extends DatagridViewEventModel {
         return options;
     }
 
-    set_element(_render_element) {
-        if (_render_element) {
-            this._render_element = _render_element;
-        }
-        this._virtual_scrolling_disabled = _render_element.hasAttribute("disable-virtual-datagrid");
+    set_element(virtual_scrolling_disabled = false) {
+        this._virtual_scrolling_disabled = virtual_scrolling_disabled;
         this.create_shadow_dom();
         this._column_sizes = {auto: {}, override: {}, indices: []};
         this.table_model = new DatagridTableViewModel(this._table_clip, this._column_sizes, this._sticky_container);
         if (!this.table_model) return;
-        if (this._render_element) {
-            if (this._render_element !== this.table_model.table.parentElement) {
-                this._render_element.appendChild(this._sticky_container);
-            }
-        } else {
-            this.appendChild(this.table_model.table);
+        if (this !== this._sticky_container.parentElement) {
+            this.appendChild(this._sticky_container);
         }
     }
 

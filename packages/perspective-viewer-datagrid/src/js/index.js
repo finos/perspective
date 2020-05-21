@@ -25,20 +25,20 @@ function get_or_create_datagrid(element, div) {
     let datagrid;
     if (!VIEWER_MAP.has(div)) {
         datagrid = document.createElement("perspective-datagrid");
-        datagrid.appendChild(document.createElement("slot"));
-        datagrid.set_element(element);
+        datagrid.set_element(element.hasAttribute("disable-virtual-datagrid"));
         datagrid.register_listeners();
         div.innerHTML = "";
-        div.appendChild(datagrid);
+        div.appendChild(document.createElement("slot"));
+        element.appendChild(datagrid);
         VIEWER_MAP.set(div, datagrid);
     } else {
         datagrid = VIEWER_MAP.get(div);
-    }
-
-    if (!datagrid.isConnected) {
-        datagrid.clear();
-        div.innerHTML = "";
-        div.appendChild(datagrid);
+        if (!datagrid.isConnected) {
+            datagrid.clear();
+            div.innerHTML = "";
+            div.appendChild(document.createElement("slot"));
+            element.appendChild(datagrid);
+        }
     }
 
     return datagrid;
@@ -65,7 +65,7 @@ class DatagridPlugin {
 
     static async create(div, view) {
         const datagrid = get_or_create_datagrid(this, div);
-        const options = await datagrid.set_view(view);
+        const options = await datagrid.set_view(this.table, view);
         if (this._plugin_config) {
             datagrid.restore(this._plugin_config);
             delete this._plugin_config;
