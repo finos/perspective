@@ -136,8 +136,13 @@ jobs:
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Verify that Perspective is not installed'
 
+    # Check which tags are supported
+    - bash: python -m pip install wheel && python -c "from __future__ import print_function; import wheel.pep425tags as w; print(w.get_supported(archive_root=''))"
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Check supported wheel tags'
+
     # Install the manylinux wheel
-    - bash: python -m pip install -vv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
+    - bash: python -m pip install -vvv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Install from wheel'
 
