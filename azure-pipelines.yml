@@ -201,7 +201,7 @@ jobs:
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/libs"
 
 
-- job: 'Mac 10.14'
+- job: 'MacOS_Mojave'
   pool:
     vmImage: 'macos-10.14'
 
@@ -297,7 +297,7 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
         artifactName: '$(artifact_name)'
 
-- job: 'Mac 10.15'
+- job: 'MacOS_Catalina'
   pool:
     vmImage: 'macos-10.15'
 

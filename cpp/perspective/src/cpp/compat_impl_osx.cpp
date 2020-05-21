@@ -100,11 +100,16 @@ map_file_write(const std::string& fname, t_uindex size, t_rfmapping& out) {
 
 std::int64_t
 psp_curtime() {
-    struct timespec t;
-    std::int32_t rcode = clock_gettime(CLOCK_MONOTONIC, &t);
-    PSP_VERBOSE_ASSERT(rcode, == 0, "Failure in clock_gettime");
-    std::int64_t ns = t.tv_nsec + t.tv_sec * 1000000000;
-    return ns;
+    // CLOCK_MONOTONIC and clock_gettime are not implemented in OSX < 10.12,
+    // and it breaks builds on conda-forge. Because this method is only called
+    // in logging and trace functions that are not called in the codebase,
+    // deprecate this method for OSX and return 0.
+
+    // struct timespec t;
+    // std::int32_t rcode = clock_gettime(CLOCK_MONOTONIC, &t);
+    // PSP_VERBOSE_ASSERT(rcode, == 0, "Failure in clock_gettime");
+    // std::int64_t ns = t.tv_nsec + t.tv_sec * 1000000000;
+    return 0;
 }
 
 std::int64_t
