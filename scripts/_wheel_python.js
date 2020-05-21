@@ -9,15 +9,22 @@
 
 const {execute, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
 const fs = require("fs-extra");
+const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_PY2 = getarg("--python2");
 const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
-const IMAGE = python_image(getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "", PYTHON);
+const IMAGE = IS_DOCKER ? python_image(getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "", PYTHON) : "";
+const PLATFORM = getarg("--platform");
 
 /**
  * Using Perspective's docker images, create a wheel built for the image
  * architecture and output it to the local filesystem.
  */
 try {
+    // Determine the platform - either `manylinux` or `osx`
+    if (!PLATFORM || !["manylinux", "osx"].includes(PLATFORM)) {
+        throw new Error(`Invalid platform ${PLATFORM} - Supported platforms are "manylinux" and "osx"`);
+    }
+
     console.log("Copying assets to `dist` folder");
     const dist = resolve`${__dirname}/../python/perspective/dist`;
     const cpp = resolve`${__dirname}/../cpp/perspective`;
@@ -43,9 +50,26 @@ try {
     }
 
     // Create a wheel
-    cmd = cmd + `${PYTHON} setup.py bdist_wheel`;
-    console.log(`Building wheel for \`perspective-python\` using ${IMAGE} in Docker`);
-    execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd} && auditwheel -v show ./dist/*.whl && auditwheel -v repair ./dist/*.whl"`;
+    cmd += `${PYTHON} setup.py bdist_wheel`;
+
+    if (PLATFORM === "manylinux") {
+        // Use auditwheel on Linux
+        cmd += "&& auditwheel -v show ./dist/*.whl && auditwheel -v repair ./dist/*.whl";
+    } else if (PLATFORM === "osx") {
+        // Use delocate on MacOS
+        cmd += "&& delocate-listdeps --all ./dist/*.whl && delocate-wheel -v ./dist/*.whl";
+    } else {
+        throw new Error("Unsupported platform specified for wheel build.");
+    }
+
+    if (IS_DOCKER) {
+        console.log(`Building wheel for \`perspective-python\` for platform \`${PLATFORM}\` using image \`${IMAGE}\` in Docker`);
+        execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd}"`;
+    } else {
+        console.log(`Building wheel for \`perspective-python\` for platform \`${PLATFORM}\``);
+        const python_path = resolve`${__dirname}/../python/perspective`;
+        execute`cd ${python_path} && ${cmd}`;
+    }
 } catch (e) {
     console.error(e.message);
     process.exit(1);
