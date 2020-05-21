@@ -388,7 +388,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         if (this._virtual_scrolling_disabled) {
             this._container_size = {width: Infinity, height: Infinity};
         } else {
-            this._container_size = (!this._invalid_schema && this._container_size) || {
+            this._container_size = (!this._invalid_schema && !invalid_viewport && this._container_size) || {
                 width: this._table_clip.offsetWidth,
                 height: this._table_clip.offsetHeight
             };

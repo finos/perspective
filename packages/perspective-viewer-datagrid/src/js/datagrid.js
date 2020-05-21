@@ -70,10 +70,6 @@ export class DatagridViewModel extends DatagridViewEventModel {
         this._end_col = undefined;
     }
 
-    reset_size() {
-        this._invalid_schema = true;
-    }
-
     reset_scroll() {
         this._column_sizes.indices = [];
         this.scrollTop = 0;
