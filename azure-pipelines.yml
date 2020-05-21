@@ -141,14 +141,15 @@ jobs:
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Check supported wheel tags'
 
-    # Install the manylinux wheel
+    # Install the manylinux wheel - Python 2 on azure does not support the
+    # manylinux2010 platform tag, so only attempt to install on Python 3.
     - bash: python -m pip install -vvv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
       displayName: 'Install from wheel'
 
     # Make sure that the binaries are valid and can be imported
     - bash: "python -c 'from __future__ import print_function\nimport perspective; print(perspective.is_libpsp())'"
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
       displayName: 'Verify successful installation'
 
     # Save the artifact to Azure storage
