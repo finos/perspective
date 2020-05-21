@@ -107,8 +107,9 @@ t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table) {
     {
         std::lock_guard<std::mutex> lg(m_mtx);
         m_data_remaining.store(true);
+
         if (m_gnodes[gnode_id]) {
-            m_gnodes[gnode_id]->_send(port_id, table);
+            m_gnodes[gnode_id]->send(port_id, table);
         }
 
         if (t_env::log_progress()) {
@@ -204,12 +205,12 @@ t_pool::set_update_delegate(t_val ud) {
 #endif
 
 void
-t_pool::notify_userspace() {
+t_pool::notify_userspace(t_uindex port_id) {
     #if defined PSP_ENABLE_WASM
-        m_update_delegate.call<void>("_update_callback");
+        m_update_delegate.call<void>("_update_callback", port_id);
     #elif PSP_ENABLE_PYTHON
         if (!m_update_delegate.is_none()) {
-            m_update_delegate.attr("_update_callback")();
+            m_update_delegate.attr("_update_callback")(port_id);
         }
     #endif
 }
@@ -313,30 +314,6 @@ t_pool::epoch() const {
 void
 t_pool::inc_epoch() {
     ++m_epoch;
-}
-
-void
-t_pool::flush() {
-    std::lock_guard<std::mutex> lg(m_mtx);
-    if (!m_data_remaining.load())
-        return;
-
-    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx) {
-        if (m_gnodes[idx]) {
-            t_update_task task(*this);
-            task.run(idx);
-        }
-    }
-}
-
-void
-t_pool::flush(t_uindex gnode_id) {
-    std::lock_guard<std::mutex> lg(m_mtx);
-    auto work_to_do = m_data_remaining.load();
-    if (work_to_do) {
-        t_update_task task(*this);
-        task.run(gnode_id);
-    }
 }
 
 std::vector<t_uindex>

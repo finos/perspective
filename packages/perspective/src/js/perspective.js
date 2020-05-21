@@ -85,12 +85,14 @@ export default function(Module) {
      * @param {boolean} is_update - true if we are updating an already-created
      * table
      * @param {boolean} is_arrow - true if the dataset is in the Arrow format
+     * @param {Number} port_id - an integer indicating the internal `t_port`
+     * which should receive this update.
      *
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow) {
-        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow);
+    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, port_id) {
+        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow, port_id);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -765,12 +767,14 @@ export default function(Module) {
      * the {@link module:perspective~view}'s underlying table emits an update,
      * this callback will be invoked with the aggregated row deltas.
      *
-     * @param {function} callback A callback function invoked on update.  The
-     * parameter to this callback is dependent on the `mode` parameter:
-     *     - "none" (default): The callback is invoked without an argument.
-     *     - "cell": The callback is invoked with the new data for each updated
-     *           cell, serialized to JSON format.
-     *     - "row": The callback is invoked with an Arrow of the updated rows.
+     * @param {function} callback A callback function invoked on update, which
+     * receives an object with two keys: `port_id`, indicating which port the
+     * update was triggered on, and `delta`, whose value is dependent on the
+     * `mode` parameter:
+     *     - "none" (default): `delta` is `undefined`.
+     *     - "cell": `delta` is the new data for each updated cell, serialized
+     *          to JSON format.
+     *     - "row": `delta` is an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
         _call_process(this.table.get_id());
@@ -786,28 +790,40 @@ export default function(Module) {
         this.callbacks.push({
             view: this,
             orig_callback: callback,
-            callback: async cache => {
+            callback: async (port_id, cache) => {
+                // Cache prevents repeated calls to expensive delta functions
+                // for on_update callbacks triggered sequentially from the same
+                // update delta.
+                if (cache[port_id] === undefined) {
+                    cache[port_id] = {};
+                }
+
+                let updated = {port_id};
+
                 switch (mode) {
                     case "cell":
                         {
-                            if (cache.step_delta === undefined) {
-                                cache.step_delta = await this._get_step_delta();
+                            if (cache[port_id]["step_delta"] === undefined) {
+                                cache[port_id]["step_delta"] = await this._get_step_delta();
                             }
-                            callback(cache.step_delta);
+                            updated.delta = cache[port_id]["step_delta"];
                         }
                         break;
                     case "row":
                         {
-                            if (cache.row_delta === undefined) {
-                                cache.row_delta = await this._get_row_delta();
+                            if (cache[port_id]["row_delta"] === undefined) {
+                                cache[port_id]["row_delta"] = await this._get_row_delta();
                             }
-                            callback(cache.row_delta);
+                            updated.delta = cache[port_id]["row_delta"];
                         }
                         break;
-                    default: {
-                        callback();
-                    }
+                    default:
+                        break;
                 }
+
+                // Call the callback with the updated object containing
+                // `port_id` and `delta`.
+                callback(updated);
             }
         });
     };
@@ -991,10 +1007,18 @@ export default function(Module) {
         return this._Table.get_pool();
     };
 
-    table.prototype._update_callback = function() {
+    table.prototype.make_port = function() {
+        return this._Table.make_port();
+    };
+
+    table.prototype.remove_port = function() {
+        this._Table.remove_port();
+    };
+
+    table.prototype._update_callback = function(port_id) {
         let cache = {};
         for (let e in this.callbacks) {
-            this.callbacks[e].callback(cache);
+            this.callbacks[e].callback(port_id, cache);
         }
     };
 
@@ -1345,7 +1369,10 @@ export default function(Module) {
      *
      * @see {@link module:perspective~table}
      */
-    table.prototype.update = function(data) {
+    table.prototype.update = function(data, options) {
+        options = options || {};
+        options.port_id = options.port_id || 0;
+
         let pdata;
         let cols = this.columns();
         let schema = this._Table.get_schema();
@@ -1402,7 +1429,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1419,7 +1446,9 @@ export default function(Module) {
      *
      * @see {@link module:perspective~table}
      */
-    table.prototype.remove = function(data) {
+    table.prototype.remove = function(data, options) {
+        options = options || {};
+        options.port_id = options.port_id || 0;
         let pdata;
         let cols = this.columns();
         let schema = this._Table.get_schema();
@@ -1442,7 +1471,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1586,7 +1615,8 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow);
+                // Always create new tables using port 0
+                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, 0);
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {

@@ -20,10 +20,6 @@ public:
     t_update_task(t_pool& pool);
     virtual void run();
 
-    // Only callable if GIL is already held
-    // And mutex is already held
-    virtual void run(t_uindex gnode_id);
-
 private:
     t_pool& m_pool;
 };

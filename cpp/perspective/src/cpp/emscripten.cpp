@@ -1020,7 +1020,8 @@ namespace binding {
         const std::string& index,
         t_op op,
         bool is_update,
-        bool is_arrow) {
+        bool is_arrow,
+        t_uindex port_id) {
         bool table_initialized = has_value(table);
         std::shared_ptr<t_pool> pool;
         std::shared_ptr<Table> tbl;
@@ -1163,7 +1164,7 @@ namespace binding {
         }
 
         // calculate offset, limit, and set the gnode
-        tbl->init(data_table, row_count, op);
+        tbl->init(data_table, row_count, op, port_id);
         return tbl;
     }
 
@@ -1629,6 +1630,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_computed_schema", &Table::get_computed_schema)
         .function("unregister_gnode", &Table::unregister_gnode)
         .function("reset_gnode", &Table::reset_gnode)
+        .function("make_port", &Table::make_port)
+        .function("remove_port", &Table::remove_port)
         .function("get_id", &Table::get_id)
         .function("get_pool", &Table::get_pool)
         .function("get_gnode", &Table::get_gnode);

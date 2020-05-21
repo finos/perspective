@@ -40,6 +40,8 @@ class PERSPECTIVE_EXPORT t_pool {
     typedef std::pair<t_uindex, std::string> t_ctx_id;
 
 public:
+    PSP_NON_COPYABLE(t_pool);
+
     t_pool();
     t_uindex register_gnode(t_gnode* node);
 
@@ -55,8 +57,13 @@ public:
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
 #endif
 
-    void notify_userspace();
-    PSP_NON_COPYABLE(t_pool);
+    /**
+     * @brief Call the binding language's `update_callback` method,
+     * set at initialize time.
+     * 
+     * @param port_id 
+     */
+    void notify_userspace(t_uindex port_id);
 
     ~t_pool();
 
@@ -81,8 +88,6 @@ public:
 
     t_uindex epoch() const;
     void inc_epoch();
-    void flush();
-    void flush(t_uindex gnode_id);
     std::vector<t_uindex> get_gnodes_last_updated();
     t_gnode* get_gnode(t_uindex gnode_id);
 

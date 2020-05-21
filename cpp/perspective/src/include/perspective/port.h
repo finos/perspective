@@ -35,6 +35,7 @@ public:
 
     void release();
     void release_or_clear();
+    void clear();
 
 private:
     // t_port_mode m_mode;

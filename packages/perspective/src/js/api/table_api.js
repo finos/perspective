@@ -40,7 +40,12 @@ export function table(worker, data, options) {
                 options: options || {}
             };
             this._worker.post(msg);
-            data.on_update(this.update, {mode: "row"});
+            data.on_update(
+                updated => {
+                    this.update(updated.delta);
+                },
+                {mode: "row"}
+            );
         });
     } else {
         var msg = {
@@ -76,6 +81,9 @@ table.prototype.view = function(config) {
 
 // Dispatch table methods that do not create new objects (getters, setters etc.)
 // to the queue for processing.
+table.prototype.make_port = async_queue("make_port", "table_method");
+
+table.prototype.remove_port = async_queue("remove_port", "table_method");
 
 table.prototype.compute = async_queue("compute", "table_method");
 
@@ -105,13 +113,13 @@ table.prototype.remove = async_queue("remove", "table_method");
 
 table.prototype.remove_delete = unsubscribe("remove_delete", "table_method", true);
 
-table.prototype.update = function(data) {
+table.prototype.update = function(data, options) {
     return new Promise((resolve, reject) => {
         var msg = {
             name: this._name,
             cmd: "table_method",
             method: "update",
-            args: [data]
+            args: [data, options || {}]
         };
         this._worker.post(msg, resolve, reject, false);
     });

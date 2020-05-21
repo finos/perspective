@@ -32,7 +32,7 @@ Table::Table(
     }
 
 void
-Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
+Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op, const t_uindex port_id) {
     /**
      * For the Table to be initialized correctly, make sure that the operation and index columns are
      * processed before the new offset is calculated. Calculating the offset before the `process_op_column`
@@ -49,7 +49,7 @@ Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
     }
 
     PSP_VERBOSE_ASSERT(m_gnode_set, "gnode is not set!");
-    m_pool->send(m_gnode->get_id(), 0, data_table);
+    m_pool->send(m_gnode->get_id(), port_id, data_table);
 
     m_init = true;
 }
@@ -195,6 +195,20 @@ Table::reset_gnode(t_uindex id) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_gnode* gnode = m_pool->get_gnode(id);
     gnode->reset();
+}
+
+t_uindex
+Table::make_port() {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    PSP_VERBOSE_ASSERT(m_gnode_set, "Cannot make input port on a gnode that does not exist.");
+    return m_gnode->make_input_port();
+}
+
+void
+Table::remove_port(t_uindex port_id) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    PSP_VERBOSE_ASSERT(m_gnode_set, "Cannot remove input port on a gnode that does not exist.");
+    m_gnode->remove_input_port(port_id);
 }
 
 void
