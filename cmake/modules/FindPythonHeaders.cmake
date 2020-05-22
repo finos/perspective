@@ -251,7 +251,7 @@ mark_as_advanced(
 # cache entries because they are meant to specify the location of a single
 # library. We now set the variables listed by the documentation for this
 # module.
-set(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
+set(Python_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
 unset(PYTHON_FOUND)
 
 # Restore CMAKE_FIND_FRAMEWORK
@@ -264,5 +264,5 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonHeaders
-                                  REQUIRED_VARS PYTHON_INCLUDE_DIRS
+                                  REQUIRED_VARS Python_INCLUDE_DIRS
                                   VERSION_VAR PYTHONLIBS_VERSION_STRING)
