@@ -221,15 +221,15 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-
-    keywords='analytics tools plotting',
+    platforms="Linux, Mac OS X, Windows",
+    keywords=['Jupyter', 'Jupyterlab', 'Widgets', 'IPython', 'Streaming', 'Data', 'Analytics', 'Plotting'],
     packages=find_packages(),
     include_package_data=True,
     data_files=[
         ('share/jupyter/nbextensions/finos-perspective-jupyterlab', [
             'finos-perspective-jupyterlab/nbextension/static/extension.js',
             'finos-perspective-jupyterlab/nbextension/static/index.js',
-            'ipydafinos-perspective-jupyterlabgred3/nbextension/static/index.js.map',
+            'finos-perspective-jupyterlabgred3/nbextension/static/index.js.map',
         ]),
         ('etc/jupyter/nbconfig/notebook.d', ['finos-perspective-jupyterlab.json'])
     ],
