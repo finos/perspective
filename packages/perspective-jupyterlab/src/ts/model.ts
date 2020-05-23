@@ -7,6 +7,8 @@
  *
  */
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import {DOMWidgetModel, ISerializers} from "@jupyter-widgets/base";
 import {PERSPECTIVE_VERSION} from "./version";
 

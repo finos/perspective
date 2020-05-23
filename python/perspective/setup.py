@@ -21,6 +21,11 @@ import platform
 import sys
 import subprocess
 from shutil import rmtree
+from jupyter_packaging import (
+    create_cmdclass, install_npm, ensure_targets,
+    combine_commands, ensure_python, get_version
+)
+
 try:
     from shutil import which
     CPU_COUNT = os.cpu_count()
@@ -33,11 +38,19 @@ except ImportError:
     import multiprocessing
     CPU_COUNT = multiprocessing.cpu_count()
 
-here = os.path.abspath(os.path.dirname(__file__))
+# need py2.7 or py3.7+
+if sys.version_info.minor < 7:
+    raise Exception("Requires Python 2.7/3.7 or later")
 
+# Setup some helper variables
+here = os.path.abspath(os.path.dirname(__file__))
+jshere = os.path.abspath(os.path.join(here, '..', '..', 'packages', 'perspective-jupyterlab'))
+
+# read description from local readme
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# required packages
 requires = [
     'ipywidgets>=7.5.1',
     'future>=0.16.0',
@@ -49,12 +62,7 @@ requires = [
     'traitlets>=4.3.2',
 ]
 
-if sys.version_info.major < 3:
-    requires.append("backports.shutil-which")
-
-if sys.version_info.minor < 7:
-    raise Exception("Requires Python 2.7/3.7 or later")
-
+# required packages to dev/run tests
 requires_dev = [
     'Faker>=1.0.0',
     'flake8>=3.7.8',
@@ -68,27 +76,16 @@ requires_dev = [
     'sphinx-markdown-builder>=0.5.2',
 ] + requires
 
-
-def get_version(file, name='__version__'):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
-    """
-    path = os.path.realpath(file)
-    version_ns = {}
-    with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
-
-
+# read version from bumpversion managed file
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
-
+# Extension class for running our cmake build
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir='dist'):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
-
+# Extension class for running our cmake build
 class PSPBuild(build_ext):
     def run(self):
         self.run_cmake()
@@ -165,16 +162,44 @@ class PSPBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 
+# Helper to ensure all the necessary files are sdist'ed
 class PSPCheckSDist(sdist):
     def run(self):
         self.run_check()
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
-        for file in ('CMakeLists.txt', 'cmake', 'src'):
+        for file in ('CMakeLists.txt', 'cmake', 'src', 'perspective/static'):
             path = os.path.abspath(os.path.join(here, 'dist', file))
             if not os.path.exists(path):
                 raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
+
+# Files for lab/notebook extension
+package_data_spec = {
+    "finos-perspective-jupyterlab": [
+        'nbextension/static/*.*js*',
+        'labextension/*.tgz'
+    ]
+}
+
+# Files for lab/notebook extension
+data_files_spec = [
+    ('share/jupyter/nbextensions/',os.path.join(here, "perspective", 'nbextension', 'static'), '*.js*'),
+    ('share/jupyter/lab/extensions', os.path.join(here, "perspective", 'labextension'), '*.tgz'),
+    ('etc/jupyter/nbconfig/notebook.d' , here, 'finos-perspective-python.json')
+]
+
+# Create a command class to ensure js files are installed
+cmdclass = create_cmdclass('ensure_js', package_data_spec=package_data_spec, data_files_spec=data_files_spec)
+cmdclass['ensure_js'] = combine_commands(
+    ensure_targets([
+        os.path.join(jshere, 'lib', 'index.js'),
+        os.path.join(jshere, 'lib', 'labextension.js'),
+        os.path.join(jshere, 'lib', 'extension.js'),
+    ]),
+)
+cmdclass['build_ext'] = PSPBuild
+cmdclass['sdist'] = PSPCheckSDist
 
 
 setup(
@@ -200,11 +225,19 @@ setup(
     keywords='analytics tools plotting',
     packages=find_packages(),
     include_package_data=True,
+    data_files=[
+        ('share/jupyter/nbextensions/finos-perspective-jupyterlab', [
+            'finos-perspective-jupyterlab/nbextension/static/extension.js',
+            'finos-perspective-jupyterlab/nbextension/static/index.js',
+            'ipydafinos-perspective-jupyterlabgred3/nbextension/static/index.js.map',
+        ]),
+        ('etc/jupyter/nbconfig/notebook.d', ['finos-perspective-jupyterlab.json'])
+    ],
     zip_safe=False,
     install_requires=requires,
     extras_require={
         'dev': requires_dev,
     },
     ext_modules=[PSPExtension('perspective')],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=cmdclass,
 )

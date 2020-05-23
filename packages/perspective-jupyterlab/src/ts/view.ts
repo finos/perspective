@@ -6,6 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+/* eslint-disable @typescript-eslint/camelcase */
+
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 
@@ -20,6 +23,7 @@ export class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveJupyterWidget; // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
     _createElement(tagName: string) {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),

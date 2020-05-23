@@ -109,17 +109,6 @@ export class PerspectiveJSONFactory extends ABCWidgetFactory<IDocumentWidget<Per
 }
 
 /**
- * The perspective extension for files
- */
-export const perspectiveRenderers: JupyterFrontEndPlugin<void> = {
-    activate: activate,
-    id: "@finos/perspective-jupyterlab:renderers",
-    requires: [],
-    optional: [ILayoutRestorer, IThemeManager],
-    autoStart: true
-};
-
-/**
  * Activate cssviewer extension for CSV files
  */
 function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeManager: IThemeManager | null): void {
@@ -209,3 +198,14 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         themeManager.themeChanged.connect(updateThemes);
     }
 }
+
+/**
+ * The perspective extension for files
+ */
+export const perspectiveRenderers: JupyterFrontEndPlugin<void> = {
+    activate: activate,
+    id: "@finos/perspective-jupyterlab:renderers",
+    requires: [],
+    optional: [ILayoutRestorer, IThemeManager],
+    autoStart: true
+};

@@ -31,7 +31,11 @@
         "build": "npm-run-all -p build:*",
         "build:jupyterlab": "webpack --color --config src/config/plugin.config.js",
         "build:lumino": "webpack --color --config src/config/webpack.config.js",
-        "clean": "rimraf dist",
+        "build:labdist": "npm-run-all build:jupyterlab clean:labdist && mkdirp ../../python/perspective/perspective/labdist && cd ../../python/perspective/perspective/labdist && npm pack ../../../packages/perspective-jupyterlab/",
+        "clean": "npm-run-all -p clean:*",
+        "clean:build": "rimraf dist",
+        "clean:labdist": "rimraf ../../python/perspective/perspective/labdist",
+        "clean:nbextension": "../../python/perspective/perspective/nbextension/static/",
         "version": "yarn build"
     },
     "dependencies": {
@@ -58,6 +62,6 @@
         "typescript": "^3.7.4"
     },
     "jupyterlab": {
-        "extension": "dist/index.js"
+        "extension": "dist/labextension.js"
     }
 }
