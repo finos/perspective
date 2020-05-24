@@ -250,9 +250,9 @@ setup(
     include_package_data=True,
     data_files=[
         ('share/jupyter/nbextensions/finos-perspective-jupyterlab', [
-            'finos-perspective-jupyterlab/nbextension/static/extension.js',
-            'finos-perspective-jupyterlab/nbextension/static/index.js',
-            'finos-perspective-jupyterlabgred3/nbextension/static/index.js.map',
+            'perspective/nbextension/static/extension.js',
+            'perspective/nbextension/static/index.js',
+            'perspective/nbextension/static/index.js.map',
         ]),
         ('etc/jupyter/nbconfig/notebook.d', ['finos-perspective-jupyterlab.json'])
     ],
