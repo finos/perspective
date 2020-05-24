@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-datagrid",
-    "version": "0.4.8",
+    "version": "0.5.0",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective-viewer-datagrid.js",
     "module": "dist/cjs/perspective-viewer-datagrid.js",
@@ -39,13 +39,13 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.4.8",
-        "@finos/perspective-viewer": "^0.4.8",
+        "@finos/perspective": "^0.5.0",
+        "@finos/perspective-viewer": "^0.5.0",
         "core-js": "^3.6.4",
         "superscript-number": "^1.0.0"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.4.8",
-        "@finos/perspective-webpack-plugin": "^0.4.8"
+        "@finos/perspective-test": "^0.5.0",
+        "@finos/perspective-webpack-plugin": "^0.5.0"
     }
 }
