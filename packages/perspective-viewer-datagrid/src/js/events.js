@@ -22,10 +22,10 @@ import {getCellConfig} from "./utils";
  */
 export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
     register_listeners() {
-        this._scroll_container.addEventListener("scroll", this._on_scroll.bind(this), {passive: false});
-        this._scroll_container.addEventListener("mousewheel", this._on_mousewheel.bind(this), {passive: false});
-        this._sticky_container.addEventListener("mousedown", this._on_click.bind(this));
-        this._sticky_container.addEventListener("dblclick", this._on_dblclick.bind(this));
+        this.addEventListener("scroll", this._on_scroll.bind(this), {passive: false});
+        this.addEventListener("mousewheel", this._on_mousewheel.bind(this), {passive: false});
+        this.addEventListener("mousedown", this._on_click.bind(this));
+        this.addEventListener("dblclick", this._on_dblclick.bind(this));
     }
 
     /**
@@ -36,7 +36,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         event.stopPropagation();
         event.returnValue = false;
         await this.draw();
-        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-scroll"));
+        this.dispatchEvent(new CustomEvent("perspective-datagrid-scroll"));
     }
 
     /**
@@ -52,11 +52,11 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         }
         event.preventDefault();
         event.returnValue = false;
-        const {offsetWidth, offsetHeight, scrollTop, scrollLeft} = this._scroll_container;
+        const {offsetWidth, offsetHeight, scrollTop, scrollLeft} = this;
         const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - offsetHeight);
         const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - offsetWidth);
-        this._scroll_container.scrollTop = Math.min(total_scroll_height, scrollTop + event.deltaY);
-        this._scroll_container.scrollLeft = Math.min(total_scroll_width, scrollLeft + event.deltaX);
+        this.scrollTop = Math.min(total_scroll_height, scrollTop + event.deltaY);
+        this.scrollLeft = Math.min(total_scroll_width, scrollLeft + event.deltaX);
         this._on_scroll(event);
     }
 
@@ -124,8 +124,8 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             this._on_resize_column(event, element, metadata);
         } else if (metadata?.is_column_header) {
             await this._on_sort(event, metadata);
-        } else {
-            await this._on_select(metadata);
+        } else if (this.parentElement.hasAttribute("selectable")) {
+            await this._on_row_select(metadata);
         }
     }
 
@@ -185,6 +185,32 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
             }
         }
     }
+    /**
+     * Get the id of the selected row
+     *
+     * @memberof DatagridVirtualTableViewModel
+     */
+    _get_selected() {
+        return this._selected_id;
+    }
+    /**
+     * sets the selected row to the `selected_id`. The row for the id
+     * will be highlighted if it's in the viewport
+     *
+     * @param {*} selected_id
+     * @memberof DatagridVirtualTableViewModel
+     */
+    _set_selected(selected_id) {
+        this._selected_id = selected_id;
+    }
+    /**
+     * Clears selected row
+     *
+     * @memberof DatagridVirtualTableViewModel
+     */
+    _clear_selected() {
+        delete this._selected_id;
+    }
 
     /**
      * Datagrid event which handles row selection.
@@ -193,24 +219,20 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
-    async _on_select(metadata) {
-        if (!this._render_element.hasAttribute("selectable")) {
-            return;
-        }
-
+    async _on_row_select(metadata) {
         const is_deselect = isEqual(metadata.id, this._selected_id);
         let filters = [];
         if (is_deselect) {
-            this._selected_id = undefined;
+            this._clear_selected();
             await this.draw({invalid_viewport: true});
         } else {
-            this._selected_id = metadata.id;
+            this._set_selected(metadata.id);
             await this.draw({invalid_viewport: true});
             filters = await getCellConfig(this._view_cache, metadata.ridx, metadata.cidx);
             filters = filters.config.filters;
         }
 
-        this._render_element.dispatchEvent(
+        this.dispatchEvent(
             new CustomEvent("perspective-select", {
                 bubbles: true,
                 composed: true,
@@ -264,7 +286,7 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
         const current_idx = sort.findIndex(x => x[0] === metadata.column_name);
         if (current_idx > -1) {
             const sort_dir = sort[current_idx][1];
-            const new_sort = this._render_element._increment_sort(sort_dir, false, event.altKey);
+            const new_sort = this.parentElement._increment_sort(sort_dir, false, event.altKey);
             sort[current_idx] = [metadata.column_name, new_sort];
         } else {
             let sort_dir = event.altKey ? "asc abs" : "asc";
@@ -275,6 +297,6 @@ export class DatagridViewEventModel extends DatagridVirtualTableViewModel {
                 sort = [new_sort];
             }
         }
-        this._render_element.setAttribute("sort", JSON.stringify(sort));
+        this.parentElement.setAttribute("sort", JSON.stringify(sort));
     }
 }

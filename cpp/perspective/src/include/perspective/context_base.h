@@ -56,6 +56,7 @@ public:
     const t_config& get_config() const;
     t_config& get_config();
     std::vector<t_pivot> get_pivots() const;
+    t_schema get_schema() const;
 
     bool get_feature_state(t_ctx_feature feature) const;
 
@@ -161,6 +162,12 @@ template <typename DERIVED_T>
 std::vector<t_pivot>
 t_ctxbase<DERIVED_T>::get_pivots() const {
     return m_config.get_pivots();
+}
+
+template <typename DERIVED_T>
+t_schema
+t_ctxbase<DERIVED_T>::get_schema() const {
+    return m_schema;
 }
 
 template <typename DERIVED_T>

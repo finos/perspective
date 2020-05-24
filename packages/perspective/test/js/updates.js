@@ -17,13 +17,6 @@ var data = [
     {x: 4, y: "d", z: false}
 ];
 
-let computed_data = [
-    {x: 1, y: 2},
-    {x: 2, y: 4},
-    {x: 3, y: 6},
-    {x: 4, y: 8}
-];
-
 var col_data = {
     x: [1, 2, 3, 4],
     y: ["a", "b", "c", "d"],
@@ -210,6 +203,16 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("`update()` should increment `table.size()` without a view created", async function() {
+            const table = perspective.table(data);
+            expect(await table.size()).toEqual(4);
+            table.update(data);
+            expect(await table.size()).toEqual(8);
+            table.update(data);
+            expect(await table.size()).toEqual(12);
+            table.delete();
+        });
+
         it("`update()` unbound to table", async function() {
             var table = perspective.table(meta);
             var updater = table.update;
@@ -250,29 +253,6 @@ module.exports = perspective => {
             expect(result).toEqual(data);
             view.delete();
             table.delete();
-        });
-    });
-
-    describe("Computed column updates", function() {
-        it("String computed column of arity 1", async function() {
-            var table = perspective.table(data);
-
-            let table2 = table.add_computed([
-                {
-                    column: "yes/no",
-                    type: "string",
-                    func: z => (z === true ? "yes" : "no"),
-                    inputs: ["z"]
-                }
-            ]);
-            table2.update(data);
-            let view2 = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
-            let result = await view2.to_json();
-            let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
-            expect(result).toEqual(expected);
-            view2.delete();
-            table.delete();
-            table2.delete();
         });
     });
 
@@ -435,8 +415,8 @@ module.exports = perspective => {
             var table = perspective.table(meta);
             var view = table.view();
             view.on_update(
-                function(new_data) {
-                    expect(new_data).toEqual(data);
+                function(updated) {
+                    expect(updated.delta).toEqual(data);
                     view.delete();
                     table.delete();
                     done();
@@ -452,9 +432,9 @@ module.exports = perspective => {
             table.update(data);
             var ran = false;
             view.on_update(
-                function(new_data) {
+                function(updated) {
                     if (!ran) {
-                        expect(new_data).toEqual(data);
+                        expect(updated.delta).toEqual(data);
                         ran = true;
                         view.delete();
                         table.delete();
@@ -472,8 +452,8 @@ module.exports = perspective => {
             var view1 = table1.view();
             var view2 = table2.view();
             view1.on_update(
-                async function(x) {
-                    table2.update(x);
+                async function(updated) {
+                    table2.update(updated.delta);
                     let result = await view2.to_json();
                     expect(result).toEqual(data);
                     view1.delete();
@@ -496,8 +476,8 @@ module.exports = perspective => {
             table1.update(data);
             table2.update(data);
             view1.on_update(
-                async function(x) {
-                    table2.update(x);
+                async function(updated) {
+                    table2.update(updated.delta);
                     let result = await view2.to_json();
                     expect(result).toEqual(data.concat(data));
                     view1.delete();
@@ -542,6 +522,23 @@ module.exports = perspective => {
             view.delete();
             table.delete();
             done();
+        });
+
+        it("`on_update()` that calls operations on the table should not recurse", function(done) {
+            var table = perspective.table(meta);
+            var view = table.view();
+            view.on_update(async function(updated) {
+                expect(updated.port_id).toEqual(0);
+                const json = await view.to_json();
+                // Not checking for correctness, literally just to assert
+                // that the `process()` call triggered by `to_json` will not
+                // infinitely recurse.
+                expect(json).toEqual(await view.to_json());
+                view.delete();
+                table.delete();
+                done();
+            });
+            table.update(data);
         });
     });
 
@@ -776,8 +773,8 @@ module.exports = perspective => {
             var view = table.view();
             table.update(data);
             view.on_update(
-                async function(new_data) {
-                    expect(data_2).toEqual(new_data);
+                async function(updated) {
+                    expect(data_2).toEqual(updated.delta);
                     let json = await view.to_json();
                     expect(json).toEqual(data.slice(0, 2).concat(data_2));
                     view.delete();
@@ -794,8 +791,8 @@ module.exports = perspective => {
             var view = table.view();
             table.update(data);
             view.on_update(
-                async function(new_data) {
-                    expect(data_2).toEqual(new_data);
+                async function(updated) {
+                    expect(data_2).toEqual(updated.delta);
                     let json = await view.to_json();
                     expect(json).toEqual(data.slice(0, 2).concat(data_2));
                     view.delete();
@@ -846,8 +843,8 @@ module.exports = perspective => {
             var view = table.view();
             table.update(data);
             view.on_update(
-                async function(new_data) {
-                    expect(new_data).toEqual(expected.slice(0, 2));
+                async function(updated) {
+                    expect(updated.delta).toEqual(expected.slice(0, 2));
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
                     view.delete();
@@ -876,8 +873,8 @@ module.exports = perspective => {
             var view = table.view();
             table.update(col_data);
             view.on_update(
-                async function(new_data) {
-                    expect(new_data).toEqual(expected.slice(0, 2));
+                async function(updated) {
+                    expect(updated.delta).toEqual(expected.slice(0, 2));
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
                     view.delete();
@@ -887,6 +884,94 @@ module.exports = perspective => {
                 {mode: "cell"}
             );
             table.update(partial);
+        });
+
+        it("Partial column oriented update with new pkey", async function(done) {
+            const data = {
+                x: [0, 1, null, 2, 3],
+                y: ["a", "b", "c", "d", "e"]
+            };
+            const table = perspective.table(data, {index: "x"});
+            const view = table.view();
+            const result = await view.to_columns();
+
+            expect(result).toEqual({
+                x: [null, 0, 1, 2, 3], // null before 0
+                y: ["c", "a", "b", "d", "e"]
+            });
+
+            const expected = {
+                x: [null, 0, 1, 2, 3, 4],
+                y: ["c", "a", "b", "d", "e", "f"]
+            };
+
+            view.on_update(
+                async function(updated) {
+                    expect(updated.delta).toEqual([
+                        {
+                            x: 4,
+                            y: "f"
+                        }
+                    ]);
+                    const result2 = await view.to_columns();
+                    expect(result2).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+
+            table.update({
+                x: [4],
+                y: ["f"]
+            });
+        });
+
+        it("Partial column oriented update with new pkey, missing columns", async function(done) {
+            const data = {
+                x: [0, 1, null, 2, 3],
+                y: ["a", "b", "c", "d", "e"],
+                z: [true, false, true, false, true]
+            };
+            const table = perspective.table(data, {index: "x"});
+            const view = table.view();
+            const result = await view.to_columns();
+
+            expect(result).toEqual({
+                x: [null, 0, 1, 2, 3], // null before 0
+                y: ["c", "a", "b", "d", "e"],
+                z: [true, true, false, false, true]
+            });
+
+            const expected = {
+                x: [null, 0, 1, 2, 3, 4],
+                y: ["c", "a", "b", "d", "e", "f"],
+                z: [true, true, false, false, true, null]
+            };
+
+            view.on_update(
+                async function(updated) {
+                    expect(updated.delta).toEqual([
+                        {
+                            x: 4,
+                            y: "f",
+                            z: null
+                        }
+                    ]);
+                    const result2 = await view.to_columns();
+                    expect(result2).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+
+            table.update({
+                x: [4],
+                y: ["f"]
+            });
         });
 
         it("partial column oriented update with entire columns missing", function(done) {
@@ -905,8 +990,8 @@ module.exports = perspective => {
             var view = table.view();
             table.update(col_data);
             view.on_update(
-                async function(new_data) {
-                    expect(new_data).toEqual(expected.slice(0, 2));
+                async function(updated) {
+                    expect(updated.delta).toEqual(expected.slice(0, 2));
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
                     view.delete();
@@ -1088,312 +1173,6 @@ module.exports = perspective => {
             expect(result2).toEqual(result.slice(1, 3));
             view.delete();
             table.delete();
-        });
-    });
-
-    describe("computed updates", function() {
-        it("partial update on column from schema", async function() {
-            let table = perspective.table({x: "integer", y: "integer"});
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "integer",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-            table2.update(computed_data);
-            table2.update([
-                {__INDEX__: 0, x: 10},
-                {__INDEX__: 2, x: 10}
-            ]);
-            let view = table2.view();
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 10, y: 2, multiply: 20},
-                {x: 2, y: 4, multiply: 8},
-                {x: 10, y: 6, multiply: 60},
-                {x: 4, y: 8, multiply: 32}
-            ]);
-        });
-
-        it("partial update on single computed source column", async function() {
-            let table = perspective.table(computed_data);
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-            table2.update([{__INDEX__: 0, x: 10}]);
-            let view = table2.view();
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 10, y: 2, multiply: 20},
-                {x: 2, y: 4, multiply: 8},
-                {x: 3, y: 6, multiply: 18},
-                {x: 4, y: 8, multiply: 32}
-            ]);
-        });
-
-        it("partial update on non-contiguous computed source columns", async function() {
-            let table = perspective.table(computed_data);
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-            table2.update([
-                {__INDEX__: 0, x: 1, y: 10},
-                {__INDEX__: 2, x: 3, y: 20}
-            ]);
-            let view = table2.view();
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 1, y: 10, multiply: 10},
-                {x: 2, y: 4, multiply: 8},
-                {x: 3, y: 20, multiply: 60},
-                {x: 4, y: 8, multiply: 32}
-            ]);
-        });
-
-        it("partial update on non-contiguous computed source columns, indexed table", async function() {
-            let table = perspective.table(computed_data, {index: "x"});
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-            table2.update([
-                {x: 1, y: 10},
-                {x: 3, y: 20}
-            ]);
-            let view = table2.view();
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 1, y: 10, multiply: 10},
-                {x: 2, y: 4, multiply: 8},
-                {x: 3, y: 20, multiply: 60},
-                {x: 4, y: 8, multiply: 32}
-            ]);
-        });
-
-        it("multiple partial update on single computed source column", async function() {
-            let table = perspective.table(computed_data);
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            table2.update([
-                {__INDEX__: 0, x: 10},
-                {__INDEX__: 2, x: 10}
-            ]);
-            table2.update([
-                {__INDEX__: 0, x: 20},
-                {__INDEX__: 2, x: 20}
-            ]);
-            table2.update([
-                {__INDEX__: 0, x: 30},
-                {__INDEX__: 2, x: 30}
-            ]);
-
-            let view = table2.view();
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {x: 30, y: 2, multiply: 60},
-                {x: 2, y: 4, multiply: 8},
-                {x: 30, y: 6, multiply: 180},
-                {x: 4, y: 8, multiply: 32}
-            ]);
-        });
-
-        it("multiple computed columns with updates on source columns", async function() {
-            let table = perspective.table(computed_data);
-
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table3 = table2.add_computed([
-                {
-                    column: "add",
-                    type: "float",
-                    func: (a, b) => a + b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            table3.update([
-                {__INDEX__: 0, x: 5},
-                {__INDEX__: 2, x: 10}
-            ]);
-
-            let view = table2.view({
-                columns: ["add", "multiply"]
-            });
-
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 7, multiply: 10},
-                {add: 6, multiply: 8},
-                {add: 16, multiply: 60},
-                {add: 12, multiply: 32}
-            ]);
-        });
-
-        it("maintain previous computed columns when creating new ones", async function() {
-            let table = perspective.table(computed_data);
-
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table3 = table2.add_computed([
-                {
-                    column: "add",
-                    type: "float",
-                    func: (a, b) => a + b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table4 = table3.add_computed([
-                {
-                    column: "subtract",
-                    type: "float",
-                    func: (a, b) => a - b,
-                    inputs: ["y", "x"]
-                }
-            ]);
-
-            let view = table4.view({
-                columns: ["add", "subtract", "multiply"]
-            });
-
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 3, subtract: 1, multiply: 2},
-                {add: 6, subtract: 2, multiply: 8},
-                {add: 9, subtract: 3, multiply: 18},
-                {add: 12, subtract: 4, multiply: 32}
-            ]);
-        });
-
-        it("propagate updates to all computed columns", async function() {
-            let table = perspective.table(computed_data, {index: "x"});
-
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table3 = table2.add_computed([
-                {
-                    column: "add",
-                    type: "float",
-                    func: (a, b) => a + b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table4 = table3.add_computed([
-                {
-                    column: "subtract",
-                    type: "float",
-                    func: (a, b) => a - b,
-                    inputs: ["y", "x"]
-                }
-            ]);
-
-            table4.update({x: [1, 2, 3, 4], y: [1, 2, 3, 4]});
-
-            let view = table4.view({
-                columns: ["add", "subtract", "multiply"]
-            });
-
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 2, subtract: 0, multiply: 1},
-                {add: 4, subtract: 0, multiply: 4},
-                {add: 6, subtract: 0, multiply: 9},
-                {add: 8, subtract: 0, multiply: 16}
-            ]);
-        });
-
-        it("propagate appends to all computed columns", async function() {
-            let table = perspective.table(computed_data);
-
-            let table2 = table.add_computed([
-                {
-                    column: "multiply",
-                    type: "float",
-                    func: (a, b) => a * b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table3 = table2.add_computed([
-                {
-                    column: "add",
-                    type: "float",
-                    func: (a, b) => a + b,
-                    inputs: ["x", "y"]
-                }
-            ]);
-
-            let table4 = table3.add_computed([
-                {
-                    column: "subtract",
-                    type: "float",
-                    func: (a, b) => a - b,
-                    inputs: ["y", "x"]
-                }
-            ]);
-
-            table4.update({x: [1, 2, 3, 4], y: [1, 2, 3, 4]});
-
-            let view = table4.view({
-                columns: ["add", "subtract", "multiply"]
-            });
-
-            let json = await view.to_json();
-            expect(json).toEqual([
-                {add: 3, subtract: 1, multiply: 2},
-                {add: 6, subtract: 2, multiply: 8},
-                {add: 9, subtract: 3, multiply: 18},
-                {add: 12, subtract: 4, multiply: 32},
-                {add: 2, subtract: 0, multiply: 1},
-                {add: 4, subtract: 0, multiply: 4},
-                {add: 6, subtract: 0, multiply: 9},
-                {add: 8, subtract: 0, multiply: 16}
-            ]);
         });
     });
 

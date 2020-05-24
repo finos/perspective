@@ -53,6 +53,7 @@ commonly used when processing data:
 - `numpy.ndarray`
 - `numpy.ndarray`
 - `bytes` (encoding an Apache Arrow)
+- `objects` (either extracting a repr or via reference)
 
 A `Table` is created in a similar fashion to its Javascript equivalent:
 
@@ -119,6 +120,7 @@ A schema can be created with the following types:
 - `datetime.date`
 - `datetime.datetime`
 - `str` (and `unicode` in Python 2)
+- `object`
 
 Once the `Table` has been created with a schema, however, Perspective will cast
 the data that it ingests to conform with the schema. This allows for a lot of
@@ -133,6 +135,17 @@ objects will have its type inferred as `datetime`, which allows it to be updated
 with any of the datetime types that were just mentioned. Thus, Perspective is
 aware of the basic type primitives that it supports, but agnostic towards the
 actual Python `type` of the data that it receives.
+
+Type inference can also leverage python converters, e.g. `__int__`, `__float__`, etc.
+
+Additionally, when loading a custom object into perspective, there are several options:
+
+- Perspective will default to `str` column type and call the objects' `__repr__` method
+- You can customize how perspective extracts data from your objects by implementing
+  - `_psp_repr_`: Since `__repr__` can only return strings, this lets you return other values
+  - `_psp_dtype_`: perpspective will look at this to determine how to cast your objects' repr
+  - if you use `object` in schema, or have `_psp_dtype_` return `object`, we will store a reference
+  to your object as an unsigned 64 bit integer (e.g. a pointer)
 
 #### Time Zone Handling
 

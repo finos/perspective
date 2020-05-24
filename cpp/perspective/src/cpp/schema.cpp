@@ -61,19 +61,29 @@ t_schema::get_colidx(const std::string& colname) const {
     auto iter = m_colidx_map.find(colname);
     if (iter == m_colidx_map.end()) {
         std::stringstream ss;
-        ss << "Could not find column `" << colname 
-           << "` in the schema." << std::endl;
+        ss << "Could not find column index for `" << colname 
+           << "` as it does not exist in the schema." << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
     return iter->second;
 }
+
+t_uindex
+t_schema::get_colidx_safe(const std::string& colname) const {
+    auto iter = m_colidx_map.find(colname);
+    if (iter == m_colidx_map.end()) {
+        return -1;
+    }
+    return iter->second;
+}
+
 
 t_dtype
 t_schema::get_dtype(const std::string& colname) const {
     auto iter = m_coldt_map.find(colname);
     if (iter == m_coldt_map.end()) {
         std::stringstream ss;
-        ss << "Could not get type for column `" << colname 
+        ss << "Could not get dtype for column `" << colname 
            << "` as it does not exist in the schema." << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }

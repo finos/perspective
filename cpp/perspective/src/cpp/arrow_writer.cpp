@@ -144,7 +144,9 @@ namespace arrow {
                 t_date val = scalar.get<t_date>();
                 // years are signed, while month/days are unsigned
                 date::year year {val.year()};
-                date::month month {static_cast<std::uint32_t>(val.month())};
+                // Increment month by 1, as date::month is [1-12] but
+                // t_date::month() is [0-11]
+                date::month month {static_cast<std::uint32_t>(val.month() + 1)};
                 date::day day {static_cast<std::uint32_t>(val.day())}; 
                 date::year_month_day ymd(year, month, day);
                 date::sys_days days_since_epoch = ymd;

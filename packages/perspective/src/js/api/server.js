@@ -99,16 +99,6 @@ export class Server {
                     }
                 }
                 break;
-            case "add_computed":
-                let table = this._tables[msg.original];
-                let computed = msg.computed;
-                // rehydrate computed column functions
-                for (let i = 0; i < computed.length; ++i) {
-                    let column = computed[i];
-                    eval("column.func = " + column.func);
-                }
-                this._tables[msg.name] = table.add_computed(computed);
-                break;
             case "table_generate":
                 let g;
                 eval("g = " + msg.args);
@@ -163,7 +153,8 @@ export class Server {
                         // post transferable data for arrow
                         if (msg.args && msg.args[0]) {
                             if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
-                                this.post(result, [ev]);
+                                // actual arrow is in the `delta`
+                                this.post(result, [ev.delta]);
                                 return;
                             }
                         }

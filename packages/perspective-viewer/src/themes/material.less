@@ -26,6 +26,7 @@ perspective-viewer, .perspective-viewer-material {
 .perspective-viewer-material-base() {
     font-family: "Open Sans";
 
+    --interface--font-family: "Open Sans";
     --interface-monospace--font-family: "Roboto Mono";
     --inactive-column-selector--content: "\E835";
     --active-column-selector--content: "\E834";
@@ -72,8 +73,14 @@ perspective-viewer, .perspective-viewer-material {
     --column-drop-label--display: inline-block;
 
     --column-container--margin: 24px 0px 0px 0px;
+
+    // "New Column" icon
     --column-add--font-family: "Material Icons";
     --column-add--before: "add";
+
+    // close "New Column" icon
+    --column-close--font-family: "Material Icons";
+    --column-close--before: "close";
 
     --column_type--padding: 0px 0px 0px 0px;
     --column_type--width: 25px;

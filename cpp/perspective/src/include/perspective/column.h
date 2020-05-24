@@ -22,6 +22,7 @@
 #include <cmath>
 #include <tsl/hopscotch_map.h>
 
+
 /*
 TODO -
 1. Implement implicit typepunning based on cardinality.
@@ -115,6 +116,15 @@ public:
 
     void reserve(t_uindex idx);
 
+    //object storage
+    template <typename T>
+    void object_copied(std::uint64_t ptr) const;
+    void notify_object_copied(std::uint64_t ptr) const;
+
+    template <typename T>
+    void object_cleared(std::uint64_t ptr) const;
+    void notify_object_cleared(std::uint64_t ptr) const;
+
     const t_lstore& data_lstore() const;
 
     t_uindex size() const;
@@ -143,6 +153,7 @@ public:
     void append(const t_column& other);
 
     void clear();
+    void clear_objects();
 
     template <typename VEC_T>
     void fill(VEC_T& vec, const t_uindex* bidx, const t_uindex* eidx) const;
@@ -193,10 +204,6 @@ public:
     void _rebuild_map();
 
     void borrow_vocabulary(const t_column& o);
-
-#ifdef PSP_ENABLE_PYTHON
-    py::array _as_numpy();
-#endif
 
 private:
     t_dtype m_dtype;
@@ -360,6 +367,13 @@ t_column::set_nth_body(t_uindex idx, DATA_T elem, t_status status) {
     }
 }
 
+//object storage, specialize only for std::uint64_t
+template <>
+void t_column::object_copied<std::uint64_t>(std::uint64_t ptr) const;
+
+template <>
+void t_column::object_cleared<std::uint64_t>(std::uint64_t ptr) const;
+
 template <typename DATA_T>
 void
 t_column::raw_fill(DATA_T v) {
@@ -384,6 +398,7 @@ template <typename DATA_T>
 void
 t_column::copy_helper(
     const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
+
     t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 

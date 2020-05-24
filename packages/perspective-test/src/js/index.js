@@ -85,6 +85,69 @@ async function get_new_page() {
         }, path);
     };
 
+    page.shadow_type = async function(content, ...path) {
+        await this.evaluate(
+            (content, path) => {
+                let elem = document;
+                while (path.length > 0) {
+                    if (elem.shadowRoot) {
+                        elem = elem.shadowRoot;
+                    }
+                    elem = elem.querySelector(path.shift());
+                }
+
+                elem.focus();
+
+                function triggerKeyEvent(key, eventType) {
+                    const keyEvent = new KeyboardEvent(eventType, {
+                        bubbles: true,
+                        cancelable: true,
+                        key: key
+                    });
+                    document.dispatchEvent(keyEvent);
+                }
+
+                function triggerInputEvent(element) {
+                    const event = new Event("input", {
+                        bubbles: true,
+                        cancelable: true
+                    });
+
+                    element.dispatchEvent(event);
+                }
+
+                for (let i = 0; i < content.length; i++) {
+                    const char = content[i];
+                    triggerKeyEvent(char, "keydown");
+                    triggerInputEvent(elem);
+                    triggerKeyEvent(char, "keyUp");
+                    elem.innerText += char;
+                }
+
+                if (elem.innerText !== content) {
+                    elem.innerText = content;
+                    triggerInputEvent(elem);
+                }
+            },
+            content,
+            path
+        );
+    };
+
+    page.shadow_focus = async function(...path) {
+        await this.evaluate(path => {
+            let elem = document;
+            while (path.length > 0) {
+                if (elem.shadowRoot) {
+                    elem = elem.shadowRoot;
+                }
+                elem = elem.querySelector(path.shift());
+            }
+
+            elem.focus();
+        }, path);
+    };
+
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
@@ -306,7 +369,17 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
 
                 // Move the mouse offscreen so prev tests dont get hover effects
                 await page.mouse.move(10000, 10000);
-                await body(page);
+                try {
+                    await body(page);
+                } catch (e) {
+                    if (process.env.PSP_PAUSE_ON_FAILURE) {
+                        if (!process.env.WRITE_TESTS) {
+                            private_console.error(`Failed ${name}, pausing`);
+                            await prompt(`Failed ${name}, pausing.  Press enter to continue ..`);
+                        }
+                    }
+                    throw e;
+                }
                 if (!preserve_hover) {
                     await page.mouse.move(10000, 10000);
                 }

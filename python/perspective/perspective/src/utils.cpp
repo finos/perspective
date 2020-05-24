@@ -82,6 +82,9 @@ t_dtype type_string_to_t_dtype(std::string value, std::string name){
     } else if (value == "timedelta64" || value == "time") {
         // cast time/timedelta to string to preserve units
         type = t_dtype::DTYPE_STR;
+    } else if (value == "object") {
+        // Python object, stored as PyObject * pointer
+        type = t_dtype::DTYPE_OBJECT;
     } else {
         CRITICAL("Unknown type '%s' for key '%s'", value, name);
     }
@@ -158,6 +161,17 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         case DTYPE_UINT64:
         case DTYPE_INT64: {
             return py::cast(scalar.to_int64());
+        }
+        case DTYPE_OBJECT: {
+            // Extract pointer
+            PyObject *ptr = static_cast<PyObject *>((void *)scalar.to_uint64());
+
+            // nullptr
+            if(!scalar.to_uint64()){
+                return py::none();
+            }
+            // Reconstruct python object
+            return py::cast<py::object>(ptr);
         }
         case DTYPE_NONE: {
             return py::none();

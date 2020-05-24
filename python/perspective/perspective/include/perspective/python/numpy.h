@@ -6,9 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
-#ifdef PSP_ENABLE_PYTHON
 #pragma once
+#ifdef PSP_ENABLE_PYTHON
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <perspective/first.h>
@@ -41,15 +40,13 @@ namespace numpy {
      */
     class PERSPECTIVE_BINDING_EXPORT NumpyLoader {
         public:
-            NumpyLoader(py::object accessor);
+            NumpyLoader(t_val accessor);
             ~NumpyLoader();
 
             /**
              * Initialize the Numpy loader by constructing the column names and data types arrays.
              */
             void init();
-
-            bool has_numeric_dtype() const;
 
             /**
              * Given `inferred_types` from Perspective, use the `m_types` array of numpy array dtypes and 
@@ -156,7 +153,7 @@ namespace numpy {
              * Defaults to false - is true when any array dtype is of int/float/bool.
              */
             bool m_has_numeric_dtype;
-            py::object m_accessor;
+            t_val m_accessor;
             std::vector<std::string> m_names;
             std::vector<t_dtype> m_types;
     };

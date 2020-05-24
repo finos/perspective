@@ -13,6 +13,7 @@
 #include <perspective/config.h>
 #include <perspective/raw_types.h>
 #include <perspective/scalar.h>
+#include <perspective/computed.h>
 #include <tsl/ordered_map.h>
 #include <tuple>
 
@@ -43,6 +44,7 @@ public:
         const std::vector<std::string>& columns,
         const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
+        const std::vector<t_computed_column_definition>& computed_columns,
         const std::string& filter_op,
         bool column_only);
 
@@ -52,7 +54,7 @@ public:
      *
      * @param schema
      */
-    void init(const t_schema& schema);
+    void init(std::shared_ptr<t_schema> schema);
 
     /**
      * @brief Add filter terms manually, as the filter term must be calculated from the value
@@ -84,6 +86,8 @@ public:
 
     std::vector<t_sortspec> get_col_sortspec() const;
 
+    std::vector<t_computed_column_definition> get_computed_columns() const;
+
     t_filter_op get_filter_op() const;
 
     bool is_column_only() const;
@@ -111,7 +115,7 @@ private:
      * @param schema
      * @return void
      */
-    void fill_aggspecs(const t_schema& schema);
+    void fill_aggspecs(std::shared_ptr<t_schema> schema);
 
     /**
      * @brief Fill the `m_fterm` vector with `t_fterm` objects which define the view's filters.
@@ -148,6 +152,7 @@ private:
     std::vector<std::string> m_columns;
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> m_filter;
     std::vector<std::vector<std::string>> m_sort;
+    std::vector<t_computed_column_definition> m_computed_columns;
 
     /**
      * @brief The ordered list of aggregate columns:

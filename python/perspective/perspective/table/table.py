@@ -11,10 +11,12 @@ from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
+from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
-from .libbinding import make_table, str_to_filter_op, t_filter_op, \
-                        t_op, t_dtype
+from .libbinding import make_table, get_table_computed_schema, \
+                        get_computed_functions, get_computation_input_types, \
+                        str_to_filter_op, t_filter_op, t_op, t_dtype
 
 
 class Table(object):
@@ -41,15 +43,20 @@ class Table(object):
         '''
         self._is_arrow = isinstance(data, (bytes, bytearray))
         if (self._is_arrow):
-            self._accessor = data
+            _accessor = data
         else:
-            self._accessor = _PerspectiveAccessor(data)
+            _accessor = _PerspectiveAccessor(data)
+
+        self._date_validator = _PerspectiveDateValidator()
 
         self._limit = limit or 4294967295
         self._index = index or ""
-        self._table = make_table(None, self._accessor, None, self._limit,
+
+        # Always create tables on port 0
+        self._table = make_table(None, _accessor, self._limit,
                                  self._index, t_op.OP_INSERT, False,
-                                 self._is_arrow)
+                                 self._is_arrow, 0)
+
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
         self._delete_callbacks = _PerspectiveCallBackCache()
@@ -63,9 +70,19 @@ class Table(object):
         # Each table always contains its own instance of state manager.
         self._state_manager = _PerspectiveStateManager()
 
+    def make_port(self):
+        '''Create a new input port on the underlying `gnode`, and return an
+        :obj:`int` containing the ID of the new input port.
+        '''
+        return self._table.make_port()
+
+    def remove_port(self, port_id):
+        '''Remove the specified port from the underlying `gnode`.'''
+        self._table.remove_port()
+
     def compute(self):
         '''Returns whether the computed column feature is enabled.'''
-        return False
+        return True
 
     def clear(self):
         '''Removes all the rows in the :class:`~perspective.Table`, but
@@ -87,6 +104,25 @@ class Table(object):
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
         self._state_manager.call_process(self._table.get_id())
+
+    def get_computed_functions(self):
+        """Returns a dict of computed function metadata, where each value is a
+        dict that contains the following metadata:
+            - name
+            - label
+            - pattern
+            - computed_function_name: the name of the computed function
+            - input_type: the data type of input columns ("float"/"integer" and
+            "date"/"datetime" are interchangable)
+            - return_type: the return type of its output column
+            - group: a category for the function
+            - num_params: the number of input parameters
+            - format_function: an anonymous function used for naming new columns
+        """
+        computed_functions = get_computed_functions()
+        for value in computed_functions.values():
+            value["num_params"] = int(value["num_params"])
+        return computed_functions
 
     def size(self):
         '''Returns the row count of the :class:`~perspective.Table`.'''
@@ -116,6 +152,61 @@ class Table(object):
                     schema[columns[i]] = _dtype_to_pythontype(types[i])
         return schema
 
+    def computed_schema(self, computed_columns=None, **kwargs):
+        '''Returns a schema containing the column names and data types of
+        the ``computed_columns`` argument.
+
+        If any column has invalid input columns or invalid types, they
+        will not be included in the output schema and a warning will be
+        logged.
+
+        Args:
+            computed_columns (:obj:`list`): A list of computed column
+                definitions to create a schema from.
+
+        Keyword Args:
+            as_string (:obj:`bool`): returns the data types as string
+                representations, if True
+        '''
+        schema = {}
+        if computed_columns is None or len(computed_columns) == 0:
+            return schema
+
+        s = get_table_computed_schema(self._table, computed_columns)
+        columns = s.columns()
+        types = s.types()
+        as_string = kwargs.pop("as_string", False)
+        for i in range(0, len(columns)):
+            if as_string:
+                schema[columns[i]] = _dtype_to_str(types[i])
+            else:
+                schema[columns[i]] = _dtype_to_pythontype(types[i])
+        return schema
+
+    def get_computation_input_types(self, computed_function_name=None, **kwargs):
+        '''Returns a list of accepted input types for the provided
+        ``computed_function_name``.
+
+        Args:
+            computed_function_name (:obj:`str`): A :obj:`str` computed function
+                name for which valid input types must be returned.
+
+        Keyword Args:
+            as_string (:obj:`bool`): returns the data types as string
+                representations, if True.
+        '''
+        new_types = []
+        if computed_function_name is None:
+            return new_types
+        types = get_computation_input_types(computed_function_name)
+        as_string = kwargs.pop("as_string", False)
+        for i in range(0, len(types)):
+            if as_string:
+                new_types.append(_dtype_to_str(types[i]))
+            else:
+                new_types.append(_dtype_to_pythontype(types[i]))
+        return new_types
+
     def columns(self, computed=False):
         '''Returns the column names of this :class:`~perspective.Table`.
 
@@ -128,16 +219,6 @@ class Table(object):
         '''
         return [name for name in self._table.get_schema().columns()
                 if name != "psp_okey"]
-
-    def computed_schema(self):
-        '''Returns a schema of computed columns added by the user.
-
-        Returns:
-            :obj:`dict`: a key-value mapping of column names to computed
-                columns. Each value is a dictionary that contains
-                ``column_name``, ``column_type``, and ``computation``.
-        '''
-        return {}
 
     def is_valid_filter(self, filter):
         '''Tests whether a given filter expression string is valid, e.g. that
@@ -166,13 +247,14 @@ class Table(object):
             return False
 
         schema = self.schema()
-        if (schema[filter[0]] == date or schema[filter[0]] == datetime):
+        in_schema = schema.get(filter[0], None)
+        if in_schema and (schema[filter[0]] == date or schema[filter[0]] == datetime):
             if isinstance(value, str):
-                value = self._accessor.date_validator().parse(value)
+                value = self._date_validator.parse(value)
 
         return value is not None
 
-    def update(self, data):
+    def update(self, data, port_id=0):
         '''Update the :class:`~perspective.Table` with new data.
 
         Updates on :class:`~perspective.Table` without an explicit ``index``
@@ -192,36 +274,45 @@ class Table(object):
             >>> tbl.view().to_dict()
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
         '''
+        if not port_id:
+            port_id = 0
+
         _is_arrow = isinstance(data, (bytes, bytearray))
 
         if (_is_arrow):
-            self._accessor = data
-            self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, True)
+            _accessor = data
+            self._table = make_table(self._table, _accessor, self._limit, self._index, t_op.OP_INSERT, True, True, port_id)
             self._state_manager.set_process(
                 self._table.get_pool(), self._table.get_id())
             return
 
         columns = self.columns()
         types = self._table.get_schema().types()
-        self._accessor = _PerspectiveAccessor(data)
-        self._accessor._names = columns + \
-            [name for name in self._accessor._names if name == "__INDEX__"]
-        self._accessor._types = types[:len(columns)]
+        _accessor = _PerspectiveAccessor(data)
+        _accessor._names = columns + \
+            [name for name in _accessor._names if name == "__INDEX__"]
+        _accessor._types = types[:len(columns)]
 
-        if "__INDEX__" in self._accessor._names:
+        if _accessor._is_numpy:
+            # Try to cast arrays to the Perspective dtype before they end up in
+            # the C++, thus allowing for int/floats to be copied when they are
+            # the same bit width
+            _accessor.try_cast_numpy_arrays()
+
+        if "__INDEX__" in _accessor._names:
             if self._index != "":
-                index_pos = self._accessor._names.index(self._index)
-                index_dtype = self._accessor._types[index_pos]
-                self._accessor._types.append(index_dtype)
+                index_pos = _accessor._names.index(self._index)
+                index_dtype = _accessor._types[index_pos]
+                _accessor._types.append(index_dtype)
             else:
-                self._accessor._types.append(t_dtype.DTYPE_INT32)
+                _accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, self._accessor, None, self._limit,
-                                 self._index, t_op.OP_INSERT, True, False)
+        self._table = make_table(self._table, _accessor, self._limit,
+                                 self._index, t_op.OP_INSERT, True, False, port_id)
         self._state_manager.set_process(
             self._table.get_pool(), self._table.get_id())
 
-    def remove(self, pkeys):
+    def remove(self, pkeys, port_id=0):
         '''Removes the rows with the primary keys specified in ``pkeys``.
 
         If the :class:`~perspective.Table` does not have an index, ``remove()``
@@ -241,15 +332,15 @@ class Table(object):
             return
         pkeys = list(map(lambda idx: {self._index: idx}, pkeys))
         types = [self._table.get_schema().get_dtype(self._index)]
-        self._accessor = _PerspectiveAccessor(pkeys)
-        self._accessor._names = [self._index]
-        self._accessor._types = types
-        t = make_table(self._table, self._accessor, None, self._limit,
-                       self._index, t_op.OP_DELETE, True, False)
+        _accessor = _PerspectiveAccessor(pkeys)
+        _accessor._names = [self._index]
+        _accessor._types = types
+        t = make_table(self._table, _accessor,  self._limit,
+                       self._index, t_op.OP_DELETE, True, False, port_id)
         self._state_manager.set_process(t.get_pool(), t.get_id())
 
     def view(self, columns=None, row_pivots=None, column_pivots=None,
-             aggregates=None, sort=None, filter=None):
+             aggregates=None, sort=None, filter=None, computed_columns=None):
         ''' Create a new :class:`~perspective.View` from this
         :class:`~perspective.Table` via the supplied keyword arguments.
 
@@ -286,9 +377,14 @@ class Table(object):
             >>> {"a": [1]}
         '''
         self._state_manager.call_process(self._table.get_id())
+
         config = {}
         if columns is None:
-            config["columns"] = self.columns()  # TODO: push into C++
+            config["columns"] = self.columns()
+            if computed_columns is not None:
+                # append all computed columns if columns are not specified
+                for col in computed_columns:
+                    config["columns"].append(col["column"])
         else:
             config["columns"] = columns
         if row_pivots is not None:
@@ -301,6 +397,9 @@ class Table(object):
             config["sort"] = sort
         if filter is not None:
             config["filter"] = filter
+        if computed_columns is not None:
+            config["computed_columns"] = computed_columns
+
         view = View(self, **config)
         self._views.append(view._name)
         return view
@@ -355,7 +454,15 @@ class Table(object):
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks.get_callbacks()]
 
-    def _update_callback(self):
+    def _update_callback(self, port_id):
+        """After `process` completes internally, this method is called by the
+        C++ with a `port_id`, indicating the port on which the update was
+        processed.
+
+        Arguments:
+            port_id (:obj:`int`): an int indicating which port the update
+            came from.
+        """
         cache = {}
         for callback in self._callbacks.get_callbacks():
-            callback["callback"](cache=cache)
+            callback["callback"](port_id=port_id, cache=cache)

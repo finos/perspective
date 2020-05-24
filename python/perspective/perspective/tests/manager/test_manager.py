@@ -7,6 +7,8 @@
 #
 
 import json
+import numpy as np
+import pyarrow as pa
 from functools import partial
 from pytest import raises
 from perspective import Table, PerspectiveError, PerspectiveManager
@@ -20,6 +22,7 @@ class TestPerspectiveManager(object):
         '''boilerplate callback to simulate a client's `post()` method.'''
         msg = json.loads(msg)
         assert msg["id"] is not None
+        print(msg)
 
     def validate_post(self, msg, expected=None):
         msg = json.loads(msg)
@@ -360,6 +363,27 @@ class TestPerspectiveManager(object):
         manager._process(to_dict_message, handle_to_dict)
         assert s.get() is True
 
+    def test_manager_to_dict_with_nan(self, util, sentinel):
+        data = util.make_arrow(["a"], [[1.5, np.nan, 2.5, np.nan]], types=[pa.float64()])
+        s = sentinel(False)
+
+        def handle_to_dict(msg):
+            s.set(True)
+            message = json.loads(msg)
+            assert message == {
+                "id": 2,
+                "error": "JSON serialization error: Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON."
+            }
+
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        manager._process(message, self.post)
+        to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
+        manager._process(to_dict_message, handle_to_dict)
+        assert s.get() is True
+
     def test_manager_create_view_and_update_table(self):
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
@@ -372,7 +396,7 @@ class TestPerspectiveManager(object):
     def test_manager_on_update(self, sentinel):
         s = sentinel(0)
 
-        def update_callback():
+        def update_callback(port_id):
             s.set(s.get() + 1)
 
         # create a table and view using manager
@@ -393,10 +417,81 @@ class TestPerspectiveManager(object):
         manager._process(update2, self.post)
         assert s.get() == 2
 
+    def test_manager_on_update_rows(self, sentinel):
+        s = sentinel(0)
+
+        def update_callback(port_id, delta):
+            table = Table(delta)
+            assert table.size() == 1
+            assert table.schema() == {
+                "a": int,
+                "b": str
+            }
+            table.delete()
+            s.set(s.get() + 1)
+
+        # create a table and view using manager
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        # hook into the created view and pass it the callback
+        view = manager._views["view1"]
+        view.on_update(update_callback, mode="row")
+
+        # call updates
+        update1 = {"id": 3, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}]}
+        update2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
+        assert s.get() == 2
+
+    def test_manager_on_update_rows_with_port_id(self, sentinel):
+        s = sentinel(0)
+
+        def update_callback(port_id, delta):
+            table = Table(delta)
+            assert table.size() == 1
+            assert table.schema() == {
+                "a": int,
+                "b": str
+            }
+            table.delete()
+            s.set(s.get() + 1)
+
+        # create a table and view using manager
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        # Get two ports on the table
+        make_port = {"id": 3, "name": "table1", "cmd": "table_method", "method": "make_port"}
+        make_port2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "make_port"}
+
+        manager._process(make_port, self.post)
+        manager._process(make_port2, self.post)
+
+        # hook into the created view and pass it the callback
+        view = manager._views["view1"]
+        view.on_update(update_callback, mode="row")
+
+        # call updates
+        update1 = {"id": 5, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}, {"port_id": 1}]}
+        update2 = {"id": 6, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}, {"port_id": 2}]}
+
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
+
+        assert s.get() == 2
+
     def test_manager_remove_update(self, sentinel):
         s = sentinel(0)
 
-        def update_callback():
+        def update_callback(port_id, delta):
             s.set(s.get() + 1)
 
         # create a table and view using manager

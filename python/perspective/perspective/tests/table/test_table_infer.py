@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import six
+from pytest import mark
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -183,5 +184,11 @@ class TestTableInfer(object):
 
     def test_table_datetime_infer_no_false_positive(self):
         data = {"a": [" . - / but clearly not a date"]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": str}
+
+    @mark.skip
+    def test_table_datetime_infer_from_string_with_time(self):
+        data = {"a": ["11:00 ABCD"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": str}

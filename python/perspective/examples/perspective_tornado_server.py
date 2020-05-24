@@ -31,7 +31,7 @@ def make_app():
     The front-end is able to look up the table using the name provided to `host_table`.
     '''
     MANAGER = PerspectiveManager()
-    TABLE = Table(pd.read_csv("superstore.csv"))
+    TABLE = Table(pd.read_csv(os.path.join(here, "superstore.csv")))
     MANAGER.host_table("data_source_one", TABLE)
     return tornado.web.Application([
         (r"/", MainHandler),

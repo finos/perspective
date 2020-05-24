@@ -31,7 +31,8 @@ def _dtype_to_pythontype(dtype):
         t_dtype.DTYPE_INT64: int,
         t_dtype.DTYPE_DATE: date,
         t_dtype.DTYPE_TIME: datetime,
-        t_dtype.DTYPE_STR: str
+        t_dtype.DTYPE_STR: str,
+        t_dtype.DTYPE_OBJECT: object,
     }
 
     return _extract_type(dtype, mapping)
@@ -51,7 +52,8 @@ def _dtype_to_str(dtype):
         t_dtype.DTYPE_INT64: "integer",
         t_dtype.DTYPE_DATE: "date",
         t_dtype.DTYPE_TIME: "datetime",
-        t_dtype.DTYPE_STR: "string"
+        t_dtype.DTYPE_STR: "string",
+        t_dtype.DTYPE_OBJECT: "object"
     }
 
     return _extract_type(dtype, mapping)
@@ -62,12 +64,13 @@ def _str_to_pythontype(typestring):
     Perspective type, i.e. from Perspective.js
     '''
     mapping = {
-        "integer": int,
-        "float": float,
         "boolean": bool,
-        "string": str,
+        "float": float,
+        "integer": int,
         "date": date,
-        "datetime": datetime
+        "datetime": datetime,
+        "string": str,
+        "object": object,
     }
 
     return _extract_type(typestring, mapping)

@@ -59,23 +59,8 @@ async function run_node_version(args, run_test) {
     return await js.run();
 }
 
-function new_host() {
-    return new Promise(
-        resolve =>
-            new perspective.WebSocketServer({
-                assets: ["build"],
-                port: 0,
-                on_start: function() {
-                    resolve(this);
-                }
-            })
-    );
-}
-
 exports.run = async function run(version, benchmark, ...cmdArgs) {
     const options = cmdArgs.splice(cmdArgs.length - 1, 1)[0];
-    const host = await new_host();
-    // const port = host._server.address().port;
 
     let benchmark_name = options.output || "benchmark";
 
@@ -108,7 +93,6 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
         await browser.close();
 
         console.log(`Benchmark suite has finished running - results are in ${benchmark_name}.html.`);
-        host.close();
     } else {
         bins = await run_node_version(cmdArgs, RUN_TEST);
     }

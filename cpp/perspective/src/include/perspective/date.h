@@ -27,7 +27,7 @@ static const std::int32_t CUMULATIVE_DAYS[2][13] = {
                                                                     */
 };
 
-// In terms of (non-tm based) inputs/outputs, t_time
+// In terms of (non-tm based) inputs/outputs, t_date
 // represents an instant in time as:
 // A year() since year 0AD.
 // A month() in the range [1..12].
@@ -47,6 +47,13 @@ public:
 
     t_date();
 
+    /**
+     * @brief Construct a new t_date from year, month, and day as integers.
+     * 
+     * @param year an integer representing the year
+     * @param month an integer from 0 - 11 representing the month
+     * @param day an integer representing the day
+     */
     t_date(std::int16_t year, std::int8_t month, std::int8_t day);
 
     void set_year_month_day(std::int16_t year, std::int8_t month, std::int8_t day);
@@ -79,8 +86,27 @@ public:
     friend bool operator>=(const t_date& a, const t_date& b);
     friend bool operator==(const t_date& a, const t_date& b);
     friend bool operator!=(const t_date& a, const t_date& b);
+
+    /**
+     * @brief Returns the year stored in the `t_date`.
+     * 
+     * @return std::int32_t 
+     */
     std::int32_t year() const;
+
+    /**
+     * @brief Returns the month stored in the `t_date` as an integer from
+     * 0 - 11.
+     * 
+     * @return std::int32_t 
+     */
     std::int32_t month() const;
+
+    /**
+     * @brief Returns the day stored in the `t_date`.
+     * 
+     * @return std::int32_t 
+     */
     std::int32_t day() const;
 
     std::string str() const;

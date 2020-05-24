@@ -97,7 +97,7 @@ class WebWorkerClient extends Client {
      */
     send(msg) {
         if (this._worker.transferable && msg.args && msg.args[0] instanceof ArrayBuffer) {
-            this._worker.postMessage(msg, msg.args);
+            this._worker.postMessage(msg, msg.args[0]);
         } else {
             this._worker.postMessage(msg);
         }

@@ -18,58 +18,30 @@
 #include <perspective/scalar.h>
 #include <perspective/rlookup.h>
 #include <perspective/computed_function.h>
+#include <perspective/exception.h>
 
 namespace perspective {
-
-/**
- * @brief The name for a single computed method. Names should be defined here,
- * and are unique for each method.
- */
-enum t_computed_function_name {
-    INVALID_COMPUTATION_METHOD,
-    ADD,
-    SUBTRACT,
-    MULTIPLY,
-    DIVIDE,
-    INVERT,
-    POW,
-    SQRT,
-    ABS,
-    PERCENT_A_OF_B,
-    EQUALS,
-    NOT_EQUALS,
-    GREATER_THAN,
-    LESS_THAN,
-    UPPERCASE,
-    LOWERCASE,
-    LENGTH,
-    IS,
-    CONCAT_SPACE,
-    CONCAT_COMMA,
-    BUCKET_10,
-    BUCKET_100,
-    BUCKET_1000,
-    BUCKET_0_1,
-    BUCKET_0_0_1,
-    BUCKET_0_0_0_1,
-    HOUR_OF_DAY,
-    DAY_OF_WEEK,
-    MONTH_OF_YEAR,
-    SECOND_BUCKET,
-    MINUTE_BUCKET,
-    HOUR_BUCKET,
-    DAY_BUCKET,
-    WEEK_BUCKET,
-    MONTH_BUCKET,
-    YEAR_BUCKET
-};
 
 /**
  * @brief Stores metadata for a single computation method.
  * 
  */
 struct PERSPECTIVE_EXPORT t_computation {
+
+    /**
+     * @brief Construct a new, invalid `t_computation` with `m_name` set to
+     * `INVALID_COMPUTED_FUNCTION`.
+     * 
+     */
+    t_computation();
     
+    /**
+     * @brief Construct a new, valid `t_computation`.
+     * 
+     * @param name 
+     * @param input_types 
+     * @param return_type 
+     */
     t_computation(
         t_computed_function_name name,
         const std::vector<t_dtype>& input_types,
@@ -82,6 +54,18 @@ struct PERSPECTIVE_EXPORT t_computation {
 };
 
 /**
+ * @brief A `t_computed_column_definition` is a tuple with four values:
+ * 
+ * - a string representing the name of the computed column
+ * - a `t_computed_function_name` that maps to the computation function
+ * - a vector of strings containing the names of input columns
+ * - a `t_computation` containing the input data types and return type
+ *
+ */
+typedef std::tuple<std::string, t_computed_function_name, std::vector<std::string>, t_computation> t_computed_column_definition;
+
+
+/**
  * @brief Stores static functions used for computed columns, and a string to
  * function pointer map 
  * 
@@ -91,7 +75,12 @@ public:
 
     /**
      * @brief Returns a `t_computation` object corresponding to the provided
-     * name and input types. Aborts if a method cannot be found.
+     * name and input types. 
+     * 
+     * If a valid computation cannot be found, a `t_computation` object with 
+     * `m_name` set to `INVALID_COMPUTED_FUNCTION` and `m_return_type` set to 
+     * `DTYPE_NONE`. This allows for error checking without invalidating the
+     * View or Table.
      * 
      * @param name 
      * @param input_types 
@@ -99,6 +88,18 @@ public:
      */
     static t_computation get_computation(
         t_computed_function_name name, const std::vector<t_dtype>& input_types);
+
+    /**
+     * @brief Given a computation, return the input dtypes it expects. For
+     * integer and float types, the type of the highest bit width is returned,
+     * and it should be assumed that the function accepts all integer/float
+     * types of lower bit widths.
+     * 
+     * @param name 
+     * @return std::vector<t_dtype> 
+     */
+    static std::vector<t_dtype> get_computation_input_types(
+        t_computed_function_name name);
         
     /**
      * @brief Given a `t_computation`, return the std::function that should be
@@ -142,9 +143,30 @@ public:
      */
     static void apply_computation(
         const std::vector<std::shared_ptr<t_column>>& table_columns,
-        const std::vector<std::shared_ptr<t_column>>& flattened_columns,
         std::shared_ptr<t_column> output_column,
-        const std::vector<t_rlookup>& row_indices,
+        t_computation computation);
+
+    /**
+     * @brief Re-applies a computation on the output column, using two sets of
+     * input columns: `table_columns`, which refers to the table of `t_gstate`,
+     * and `flattened_columns`, which refers to the table that is produced as
+     * part of calling `Table.update`. Using `changed_rows`, this method
+     * reapplies the computation only on rows that have been changed.
+     * 
+     * This method should be called in `t_gnode::_process_table` in order to
+     * properly apply computed columns involving partial updates.
+     * 
+     * @param table_columns 
+     * @param flattened_columns 
+     * @param output_column 
+     * @param row_indices 
+     * @param method 
+     */
+    static void reapply_computation(
+        const std::vector<std::shared_ptr<t_column>>& table_columns,
+        const std::vector<std::shared_ptr<t_column>>& flattened_columns,
+        const std::vector<t_rlookup>& changed_rows,
+        std::shared_ptr<t_column> output_column,
         t_computation computation);
 
     /**
@@ -155,6 +177,8 @@ public:
     static void make_computations();
 
     static std::vector<t_computation> computations;
+
+    static std::map<std::string, std::map<std::string, std::string>> computed_functions;
 };
 
 } // end namespace perspective

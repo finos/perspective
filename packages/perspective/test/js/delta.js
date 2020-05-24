@@ -46,8 +46,8 @@ module.exports = perspective => {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();
             view.on_update(
-                function(new_data) {
-                    expect(new_data).toEqual([
+                function(updated) {
+                    expect(updated.delta).toEqual([
                         {x: 1, y: "string1", z: true},
                         {x: 2, y: "string2", z: false}
                     ]);
@@ -64,8 +64,8 @@ module.exports = perspective => {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();
             view.on_update(
-                function(new_data) {
-                    expect(new_data).toEqual([
+                function(updated) {
+                    expect(updated.delta).toEqual([
                         {x: 1, y: "string1", z: true},
                         {x: 4, y: "string2", z: false}
                     ]);
@@ -85,12 +85,12 @@ module.exports = perspective => {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view();
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: "string1", z: true},
                             {x: 2, y: "string2", z: false}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -104,12 +104,12 @@ module.exports = perspective => {
                 let table = perspective.table(data);
                 let view = table.view();
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: "string1", z: null},
                             {x: 2, y: "string2", z: null}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -123,12 +123,12 @@ module.exports = perspective => {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view();
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: null, z: true},
                             {x: 4, y: null, z: false}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -147,12 +147,12 @@ module.exports = perspective => {
                     sort: [["x", "desc"]]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 2, y: "string2", z: false},
                             {x: 1, y: "string1", z: true}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -166,9 +166,9 @@ module.exports = perspective => {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view();
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = partial_change_nonseq;
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -187,12 +187,12 @@ module.exports = perspective => {
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 1, y: 1, z: 1},
                             {x: 2, y: 1, z: 1}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -209,8 +209,8 @@ module.exports = perspective => {
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
-                    async function(delta) {
-                        await match_delta(perspective, delta, []);
+                    async function(updated) {
+                        await match_delta(perspective, updated.delta, []);
                         view.delete();
                         table.delete();
                         done();
@@ -228,13 +228,13 @@ module.exports = perspective => {
                 });
                 console.log(await view.schema());
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const expected = [
                             {x: 13, y: 6, z: 3},
                             {x: 1, y: 1, z: 1},
                             {x: 2, y: 1, z: 1}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -251,10 +251,10 @@ module.exports = perspective => {
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         // underlying data changes, but only total aggregate row is affected
                         const expected = [{x: 10, y: 3, z: 2}];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -274,13 +274,13 @@ module.exports = perspective => {
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
                         const expected = [
                             {x: 1, y: 1, z: 1},
                             {x: 4, y: 1, z: 1}
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -299,13 +299,13 @@ module.exports = perspective => {
                     column_pivots: ["x"]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const json = await view.to_json();
                         json.map(d => {
                             delete d["__ROW_PATH__"];
                         });
                         const expected = json.slice(0, 3);
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -322,13 +322,13 @@ module.exports = perspective => {
                     column_pivots: ["z"]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const json = await view.to_json();
                         json.map(d => {
                             delete d["__ROW_PATH__"];
                         });
                         const expected = json.slice(0, 3);
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -345,13 +345,13 @@ module.exports = perspective => {
                     column_pivots: ["z"]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const json = await view.to_json();
                         json.map(d => {
                             delete d["__ROW_PATH__"];
                         });
                         const expected = [json[0], json[3], json[4]];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -369,8 +369,8 @@ module.exports = perspective => {
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
-                    async function(delta) {
-                        await match_delta(perspective, delta, []);
+                    async function(updated) {
+                        await match_delta(perspective, updated.delta, []);
                         view.delete();
                         table.delete();
                         done();
@@ -387,13 +387,13 @@ module.exports = perspective => {
                     column_pivots: ["x"]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const json = await view.to_json();
                         json.map(d => {
                             delete d["__ROW_PATH__"];
                         });
                         const expected = json.slice(0, 3);
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -412,14 +412,14 @@ module.exports = perspective => {
                     columns: ["x", "y", "z"]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         // underlying data changes, but only total aggregate row is affected
                         const expected = await view.to_json();
                         expected.splice(3, 1);
                         expected.map(d => {
                             delete d["__ROW_PATH__"];
                         });
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -441,14 +441,14 @@ module.exports = perspective => {
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
                         const json = await view.to_json();
                         json.map(d => {
                             delete d["__ROW_PATH__"];
                         });
                         const expected = [json[3], json[4]];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -464,14 +464,14 @@ module.exports = perspective => {
                     column_pivots: ["x"]
                 });
                 view.on_update(
-                    async function(delta) {
+                    async function(updated) {
                         const json = await view.to_json();
                         const expected = [
                             {"1|x": 1, "1|y": "string1", "1|z": false, "2|x": 2, "2|y": "b", "2|z": false, "3|x": 3, "3|y": "c", "3|z": true, "4|x": 4, "4|y": "string2", "4|z": true},
                             json[0],
                             json[3]
                         ];
-                        await match_delta(perspective, delta, expected);
+                        await match_delta(perspective, updated.delta, expected);
                         view.delete();
                         table.delete();
                         done();

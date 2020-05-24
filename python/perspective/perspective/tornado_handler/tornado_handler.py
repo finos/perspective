@@ -54,6 +54,10 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         self._session = self._manager.new_session()
         self._check_origin = kwargs.pop("check_origin", False)
 
+        # Trigger special flow when receiving an ArrayBuffer/binary
+        self._is_transferable = False
+        self._is_transferable_pre_message = None
+
         if self._manager is None:
             raise PerspectiveError("A `PerspectiveManager` instance must be provided to the tornado handler!")
 
@@ -75,7 +79,36 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         '''
         if message == "heartbeat":
             return
-        message = json.loads(message)
+
+        # The message is an ArrayBuffer, and it needs to be combined with the
+        # previous message to reconsitute metadata before going into
+        # PerspectiveManager
+        if self._is_transferable:
+            full_message = self._is_transferable_pre_message
+            full_message.pop("is_transferable")
+
+            # `message` is the binary
+            new_args = [message]
+
+            if (len(full_message["args"]) > 1):
+                # append additional args
+                new_args += full_message["args"][1:]
+
+            full_message["args"] = new_args
+            message = full_message
+
+            self._is_transferable = False
+            self._is_transferable_pre_message = None
+        else:
+            message = json.loads(message)
+
+            if message.get("is_transferable", None):
+                # cache the message and wait for the ArrayBuffer that will
+                # follow immediately after.
+                self._is_transferable_pre_message = message
+                self._is_transferable = True
+                return
+
         self._session.process(message, self.post)
 
     def post(self, message, binary=False):

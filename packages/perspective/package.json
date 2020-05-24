@@ -1,9 +1,10 @@
 {
     "name": "@finos/perspective",
-    "version": "0.4.7",
+    "version": "0.5.0",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective.node.js",
     "unpkg": "dist/umd/perspective.js",
+    "jsdelivr": "dist/umd/perspective.js",
     "browser": "dist/umd/perspective.inline.js",
     "module": "dist/umd/perspective.inline.js",
     "publishConfig": {
@@ -56,14 +57,15 @@
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "flatbuffers": "^1.10.2",
+        "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
-        "papaparse": "^4.3.6",
+        "papaparse": "^5.2.0",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.4.6"
+        "@finos/perspective-webpack-plugin": "^0.5.0"
     }
 }

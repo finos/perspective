@@ -6,7 +6,7 @@ import logging
 import tornado.websocket
 import tornado.web
 import tornado.ioloop
-from datetime import datetime
+from datetime import date, datetime
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
@@ -34,7 +34,8 @@ def data_source():
             "high": (random.random() * 105 + random.randint(1, 3)) * modifier,
             "low": (random.random() * 85 + random.randint(1, 3)) * modifier,
             "close": (random.random() * 90 + random.randint(1, 3)) * modifier,
-            "lastUpdate": datetime.now()
+            "lastUpdate": datetime.now(),
+            "date": date.today()
         })
     return rows
 
@@ -55,6 +56,7 @@ def make_app():
         "low": float,
         "close": float,
         "lastUpdate": datetime,
+        "date": date
     }, limit=2500)
 
     # Track the table with the name "data_source_one", which will be used in

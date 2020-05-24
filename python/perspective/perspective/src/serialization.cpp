@@ -21,19 +21,6 @@ namespace binding {
  *
  * Data serialization
  */
-
-template <>
-t_val
-get_column_data(std::shared_ptr<t_data_table> table, const std::string& colname) {
-    py::array arr = py::array();
-    // TODO
-    // auto col = table->get_column(colname);
-    // for (auto idx = 0; idx < col->size(); ++idx) {
-    //     arr[idx] = py::cast(col->get_scalar(idx));
-    // }
-    return arr;
-}
-
 template <typename CTX_T>
 std::shared_ptr<t_data_slice<CTX_T>>
 get_data_slice(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,

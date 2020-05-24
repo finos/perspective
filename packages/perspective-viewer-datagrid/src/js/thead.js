@@ -131,7 +131,8 @@ export class DatagridHeaderViewModel extends ViewModel {
                 th = this._draw_group_th(this._offset_cache, d, column_name, sort_dir);
 
                 // Update the group header's metadata such that each group
-                // header has the same metadata coordinates of its rightmost column.
+                // header has the same metadata coordinates of its rightmost
+                // column.
                 const metadata = this._draw_th(alias || column_path, column_name, type, th);
                 metadata.vcidx = vcidx;
                 metadata.cidx = cidx;

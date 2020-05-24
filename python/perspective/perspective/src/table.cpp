@@ -26,8 +26,8 @@ namespace binding {
  * Table API
  */
 
-std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_val computed,
-        std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow) {
+std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
+        std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow, t_uindex port_id) {
     bool table_initialized = !table.is_none();
     std::shared_ptr<t_pool> pool;
     std::shared_ptr<Table> tbl;
@@ -62,7 +62,8 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
 
         // Always use the `Table` column names and data types on update.
         if (table_initialized && is_update) {
-            auto schema = gnode->get_output_schema();
+            auto gnode_output_schema = gnode->get_output_schema();
+            auto schema = gnode_output_schema.drop({"psp_okey"});
             column_names = schema.columns();
             data_types = schema.types();
 
@@ -97,7 +98,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
                 }
             }
             // Make sure promoted types are used to construct data table
-            auto new_schema = gnode->get_output_schema();
+            auto new_schema = gnode->get_output_schema().drop({"psp_okey"});
             data_types = new_schema.types();
         } else {
             column_names = arrow_loader.names();
@@ -186,23 +187,11 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
     }
 
-     if (!computed.is_none()) {
-        // TODO
-        // re-add computed columns after update, delete, etc.
-        // table_add_computed_column(data_table, computed);
-     }
-
     // calculate offset, limit, and set the gnode
-    tbl->init(data_table, row_count, op);
+    tbl->init(data_table, row_count, op, port_id);
 
     //pool->_process();
     return tbl;
-}
-
-std::shared_ptr<Table>
-make_computed_table_py(std::shared_ptr<Table> table, t_val computed) {
-    // TODO
-    return table;
 }
 
 } //namespace binding

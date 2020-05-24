@@ -17,9 +17,8 @@ namespace numpy {
 
     const std::vector<std::string> NumpyLoader::DATE_UNITS = {"[D]", "[W]", "[M]", "[Y]"};
 
-    NumpyLoader::NumpyLoader(py::object accessor)
+    NumpyLoader::NumpyLoader(t_val accessor)
         : m_init(false)
-        , m_has_numeric_dtype(false)
         , m_accessor(accessor) {}
 
     NumpyLoader::~NumpyLoader() {}
@@ -29,12 +28,6 @@ namespace numpy {
         m_names = make_names();
         m_types = make_types();
         m_init = true;
-    }
-
-    bool
-    NumpyLoader::has_numeric_dtype() const {
-        PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-        return m_has_numeric_dtype;
     }
 
     std::vector<t_dtype> 
@@ -393,6 +386,7 @@ namespace numpy {
             }
 
             auto date_components = item.cast<std::map<std::string, std::int32_t>>();
+            // date_components["month"] should be [0-11]
             t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);
             col->set_nth(i, dt);
         }

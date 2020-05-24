@@ -36,7 +36,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.body.querySelector("perspective-workspace");
                             workspace.tables.set("superstore", window.__TABLE__);
                         });
-                        await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {wait_for_update: false, timeout: 30000}
                 );
@@ -54,7 +54,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.body.querySelector("perspective-workspace");
                             workspace.tables.set("superstore", window.__TABLE__);
                         });
-                        await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {wait_for_update: false, timeout: 30000}
                 );
@@ -72,7 +72,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.body.querySelector("perspective-workspace");
                             workspace.tables.set("superstore", window.__TABLE__);
                         });
-                        await page.waitForSelector("perspective-workspace > perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {wait_for_update: false, timeout: 30000}
                 );

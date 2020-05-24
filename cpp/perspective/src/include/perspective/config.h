@@ -12,10 +12,10 @@
 #include <perspective/base.h>
 #include <perspective/exports.h>
 #include <perspective/aggspec.h>
-#include <perspective/schema.h>
-#include <perspective/config.h>
-#include <perspective/pivot.h>
+#include <perspective/computed.h>
 #include <perspective/filter.h>
+#include <perspective/pivot.h>
+#include <perspective/schema.h>
 #include <perspective/sort_specification.h>
 
 namespace perspective {
@@ -54,8 +54,11 @@ public:
      * @param combiner
      * @param fterms specifications for filtering down the context
      */
-    t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+    t_config(
+        const std::vector<std::string>& detail_columns,
+        const std::vector<t_fterm>& fterms,
+        t_filter_op combiner,
+        const std::vector<t_computed_column_definition>& computed_columns);
 
     /**
      * @brief Construct a new config for a `t_ctx1` object, which has 1 or more `row_pivot`s
@@ -67,8 +70,10 @@ public:
      * @param fterms
      */
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+        const std::vector<t_aggspec>& aggregates,
+        const std::vector<t_fterm>& fterms,
+        t_filter_op combiner,
+        const std::vector<t_computed_column_definition>& computed_columns);
 
     /**
      * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
@@ -82,9 +87,14 @@ public:
      * @param fterms
      * @param column_only
      */
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
+    t_config(
+        const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& col_pivots,
+        const std::vector<t_aggspec>& aggregates,
+        const t_totals totals,
+        const std::vector<t_fterm>& fterms,
+        t_filter_op combiner,
+        const std::vector<t_computed_column_definition>& computed_columns,
         bool column_only);
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
@@ -105,6 +115,14 @@ public:
     t_config(const std::vector<std::string>& detail_columns);
 
     t_config();
+    
+    /**
+     * @brief For each column in the config's `detail_columns` (i.e. visible
+     * columns), add it to the internal map tracking column indices.
+     * 
+     * @param detail_columns 
+     */
+    void setup(const std::vector<std::string>& detail_columns);
 
     void setup(const std::vector<std::string>& detail_columns,
         const std::vector<std::string>& sort_pivot,
@@ -146,6 +164,10 @@ public:
 
     const std::vector<t_fterm>& get_fterms() const;
 
+    // TOOD: const vec&?
+    std::vector<t_computed_column_definition>
+    get_computed_columns() const;
+
     t_totals get_totals() const;
 
     t_filter_op get_combiner() const;
@@ -182,8 +204,9 @@ private:
     bool m_has_pkey_agg;
     // t_uindex m_row_expand_depth;
     // t_uindex m_col_expand_depth;
-    t_filter_op m_combiner;
     std::vector<t_fterm> m_fterms;
+    t_filter_op m_combiner;
+    std::vector<t_computed_column_definition> m_computed_columns;
     std::string m_parent_pkey_column;
     std::string m_child_pkey_column;
     std::string m_grouping_label_column;

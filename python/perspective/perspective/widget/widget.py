@@ -184,7 +184,12 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             ...     aggregates={"a": "avg"},
             ...     row_pivots=["a"],
             ...     sort=[["b", "desc"]],
-            ...     filter=[["a", ">", 1]])
+            ...     filter=[["a", ">", 1]],
+            ...     computed_columns=[{
+            ...         "column": "sqrt(a)",
+            ...         "computed_function_name": "sqrt",
+            ...         "inputs": ["a"]
+            ...     }])
         '''
         self._displayed = False
         self.on_displayed(self._on_display)

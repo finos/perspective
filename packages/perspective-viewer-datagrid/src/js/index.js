@@ -25,20 +25,20 @@ function get_or_create_datagrid(element, div) {
     let datagrid;
     if (!VIEWER_MAP.has(div)) {
         datagrid = document.createElement("perspective-datagrid");
-        datagrid.appendChild(document.createElement("slot"));
-        datagrid.set_element(element);
+        datagrid.set_element(element.hasAttribute("disable-virtual-datagrid"));
         datagrid.register_listeners();
         div.innerHTML = "";
-        div.appendChild(datagrid);
+        div.appendChild(document.createElement("slot"));
+        element.appendChild(datagrid);
         VIEWER_MAP.set(div, datagrid);
     } else {
         datagrid = VIEWER_MAP.get(div);
-    }
-
-    if (!datagrid.isConnected) {
-        datagrid.clear();
-        div.innerHTML = "";
-        div.appendChild(datagrid);
+        if (!datagrid.isConnected) {
+            datagrid.clear();
+            div.innerHTML = "";
+            div.appendChild(document.createElement("slot"));
+            element.appendChild(datagrid);
+        }
     }
 
     return datagrid;
@@ -65,15 +65,41 @@ class DatagridPlugin {
 
     static async create(div, view) {
         const datagrid = get_or_create_datagrid(this, div);
-        const options = await datagrid.set_view(view);
+        const options = await datagrid.set_view(this.table, view);
+        if (this._plugin_config) {
+            datagrid.restore(this._plugin_config);
+            delete this._plugin_config;
+        }
         await datagrid.draw(options);
     }
 
     static async resize() {
         if (this.view && VIEWER_MAP.has(this._datavis)) {
             const datagrid = VIEWER_MAP.get(this._datavis);
-            datagrid.reset_size();
             await datagrid.draw({invalid_viewport: true});
+        }
+    }
+
+    static delete() {
+        if (this.view && VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            datagrid.clear();
+        }
+    }
+
+    static save() {
+        if (this.view && VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            return datagrid.save();
+        }
+    }
+
+    static restore(config) {
+        if (this.view && VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            datagrid.restore(config);
+        } else {
+            this._plugin_config = config;
         }
     }
 }

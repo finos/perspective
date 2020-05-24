@@ -98,6 +98,9 @@ t_aggspec::agg_str() const {
         case AGGTYPE_SUM_ABS: {
             return "sum_abs";
         } break;
+        case AGGTYPE_ABS_SUM: {
+            return "abs_sum";
+        } break;
         case AGGTYPE_MUL: {
             return "mul";
         } break;
@@ -261,7 +264,7 @@ t_aggspec::get_inv_mode() const {
 std::vector<std::string>
 t_aggspec::get_input_depnames() const {
     std::vector<std::string> rval;
-    for (const auto d : m_dependencies) {
+    for (const auto & d : m_dependencies) {
         rval.push_back(d.name());
     }
     return rval;
@@ -270,7 +273,7 @@ t_aggspec::get_input_depnames() const {
 std::vector<std::string>
 t_aggspec::get_output_depnames() const {
     std::vector<std::string> rval;
-    for (const auto d : m_dependencies) {
+    for (const auto & d: m_dependencies) {
         rval.push_back(d.name());
     }
     return rval;
@@ -281,6 +284,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
     switch (agg()) {
         case AGGTYPE_SUM:
         case AGGTYPE_SUM_ABS:
+        case AGGTYPE_ABS_SUM:
         case AGGTYPE_PCT_SUM_PARENT:
         case AGGTYPE_PCT_SUM_GRAND_TOTAL:
         case AGGTYPE_MUL:

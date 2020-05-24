@@ -9,18 +9,17 @@
 
 @row-height: 19px;
 
-perspective-viewer > div {
-    position: absolute;
-    overflow: hidden;
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+perspective-viewer > perspective-datagrid {
+    padding: 12px;
 }
 
 
-perspective-viewer, :host {
-    
+perspective-datagrid, :host {
+
+    div[tabindex] {
+        outline: none;
+    }
+
     th {
         text-align: center;
     }
@@ -84,10 +83,8 @@ perspective-viewer, :host {
         border-bottom: 1px solid #ddd;
     }
 
-
-
     th {
-    position: relative;
+        position: relative;
     }
 
     tr td span.pd-tree-group {
@@ -195,5 +192,23 @@ perspective-viewer, :host {
         top: 0;
         right: 0;
         cursor: col-resize;
+    }
+
+    &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.3);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: rgba(0,0,0,0);
+    }
+
+    &::-webkit-scrollbar-corner {
+        background-color: rgba(0,0,0,0);
     }
 }

@@ -39,6 +39,7 @@ class ViewConfig(object):
         self._columns = self._config.get('columns', [])
         self._sort = self._config.get('sort', [])
         self._filter = self._config.get('filter', [])
+        self._computed_columns = self._config.get('computed_columns', [])
         self._filter_op = self._config.get('filter_op', "and")
         self.row_pivot_depth = self._config.get("row_pivot_depth", None)
         self.column_pivot_depth = self._config.get("column_pivot_depth", None)
@@ -93,6 +94,9 @@ class ViewConfig(object):
                 `list`s
         '''
         return self._sort
+
+    def get_computed_columns(self):
+        return self._computed_columns
 
     def get_filter(self):
         '''The columns that should be filtered.

@@ -76,20 +76,18 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
             <style>
                 ${CONTAINER_STYLE + MATERIAL_STYLE}
             </style>
-            <div class="pd-scroll-container">
-                <div class="pd-virtual-panel">${this._virtual_scrolling_disabled && slot}</div>
-                <div class="pd-scroll-table-clip">${this._virtual_scrolling_disabled || slot}</div>
-                <div style="position: absolute; visibility: hidden;"></div>
-            </div>
+            <div class="pd-virtual-panel">${this._virtual_scrolling_disabled ? slot : ""}</div>
+            <div class="pd-scroll-table-clip">${this._virtual_scrolling_disabled ? "" : slot}</div>
+            <div style="position: absolute; visibility: hidden;"></div>
         `;
 
-        const stick_container = document.createElement("div");
-        const [, scroll_container] = this.shadowRoot.children;
-        const [virtual_panel, table_clip, table_staging] = scroll_container.children;
-        this._sticky_container = stick_container;
+        const sticky_container = document.createElement("div");
+        sticky_container.setAttribute("tabindex", "0");
+        this.setAttribute("tabindex", "0");
+        const [, virtual_panel, table_clip, table_staging] = this.shadowRoot.children;
+        this._sticky_container = sticky_container;
         this._table_clip = table_clip;
         this._table_staging = table_staging;
-        this._scroll_container = scroll_container;
         this._virtual_panel = virtual_panel;
     }
 
@@ -154,13 +152,13 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         const {height} = this._container_size;
         const row_height = this._column_sizes.row_height || 19;
         const header_levels = this._view_cache.config.column_pivots.length + 1;
-        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this._scroll_container.offsetHeight);
-        const percent_scroll = this._scroll_container.scrollTop / total_scroll_height;
-        const virtual_panel_row_height = Math.floor(height / row_height);
+        const total_scroll_height = Math.max(1, this._virtual_panel.offsetHeight - this.offsetHeight);
+        const percent_scroll = this.scrollTop / total_scroll_height;
+        const virtual_panel_row_height = height / row_height;
         const relative_nrows = !reset_scroll_position ? this._nrows || 0 : nrows;
         const scroll_rows = Math.max(0, relative_nrows + (header_levels - virtual_panel_row_height));
-        let start_row = Math.round(scroll_rows * percent_scroll);
-        let end_row = start_row + virtual_panel_row_height;
+        let start_row = Math.ceil(scroll_rows * percent_scroll);
+        let end_row = start_row + virtual_panel_row_height + 1;
         return {start_row, end_row};
     }
 
@@ -174,7 +172,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _calculate_column_range() {
         const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._container_size.width);
-        const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
+        const percent_left = this.scrollLeft / total_scroll_width;
         const max_scroll_column = this._max_scroll_column() + 0.5;
         let start_col = Math.floor(max_scroll_column * percent_left);
         let end_col = start_col + (this.table_model.num_columns() || 1) + 1;
@@ -258,6 +256,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * @memberof DatagridVirtualTableViewModel
      */
     _swap_in(args) {
+        this.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {bubbles: true, detail: this}));
         if (!this._virtual_scrolling_disabled) {
             if (this._needs_swap(args)) {
                 if (this._sticky_container === this.table_model.table.parentElement) {
@@ -270,7 +269,6 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
                 }
             }
         }
-        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-before-update", {bubbles: true, detail: this}));
     }
 
     /**
@@ -284,7 +282,7 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         if (!this._virtual_scrolling_disabled && this._needs_swap(args)) {
             this._sticky_container.replaceChild(this.table_model.table, this._sticky_container.children[0]);
         }
-        this._render_element.dispatchEvent(new CustomEvent("perspective-datagrid-after-update", {bubbles: true, detail: this}));
+        this.dispatchEvent(new CustomEvent("perspective-datagrid-after-update", {bubbles: true, detail: this}));
     }
 
     /**
@@ -295,18 +293,22 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _update_virtual_panel_width(invalid_schema) {
         if (invalid_schema) {
-            const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._container_size.width);
-            const percent_left = this._scroll_container.scrollLeft / total_scroll_width;
-            const max_scroll_column = this._max_scroll_column();
-            let cidx = 0,
-                virtual_width = 0;
-            while (cidx < max_scroll_column) {
-                virtual_width += this._column_sizes.indices[cidx] || 60;
-                cidx++;
+            if (this._virtual_scrolling_disabled) {
+                this._virtual_panel.style.width = this._column_sizes.indices.reduce((x, y) => x + y, 0) + "px";
+            } else {
+                const total_scroll_width = Math.max(1, this._virtual_panel.offsetWidth - this._container_size.width);
+                const percent_left = this.scrollLeft / total_scroll_width;
+                const max_scroll_column = this._max_scroll_column();
+                let cidx = 0,
+                    virtual_width = 0;
+                while (cidx < max_scroll_column) {
+                    virtual_width += this._column_sizes.indices[cidx] || 60;
+                    cidx++;
+                }
+                const panel_width = this._container_size.width + virtual_width;
+                this._virtual_panel.style.width = panel_width + "px";
+                this.scrollLeft = percent_left * virtual_width;
             }
-            const panel_width = this._container_size.width + virtual_width;
-            this._virtual_panel.style.width = panel_width + "px";
-            this._scroll_container.scrollLeft = percent_left * virtual_width;
         }
     }
 
@@ -318,7 +320,15 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      */
     _update_virtual_panel_height(nrows) {
         const {row_height = 19} = this._column_sizes;
-        const virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height);
+        const header_height = this.table_model.header.cells.length * row_height;
+        let virtual_panel_px_size;
+        if (this._virtual_scrolling_disabled) {
+            virtual_panel_px_size = nrows * row_height + header_height;
+        } else {
+            const {height} = this._container_size;
+            const zoom_factor = this.offsetHeight / (height - header_height);
+            virtual_panel_px_size = Math.min(BROWSER_MAX_HEIGHT, nrows * row_height * zoom_factor);
+        }
         this._virtual_panel.style.height = `${virtual_panel_px_size}px`;
     }
 
@@ -353,7 +363,10 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
      * to `draw()` will be for the same viewport and will not actually cause
      * a render.
      *
-     * @param {*} [options={reset_scroll_position = false, preserve_width = false, invalid_viewport = false}]
+     * @param {*} [options]
+     * @param {boolean} [options.reset_scroll_position=false]
+     * @param {boolean} [options.preserve_width=false]
+     * @param {boolean} [options.invalid_viewport=false]
      * @returns
      * @memberof DatagridVirtualTableViewModel
      */
@@ -375,9 +388,9 @@ export class DatagridVirtualTableViewModel extends HTMLElement {
         if (this._virtual_scrolling_disabled) {
             this._container_size = {width: Infinity, height: Infinity};
         } else {
-            this._container_size = (!this._invalid_schema && this._container_size) || {
-                width: this._sticky_container.offsetWidth,
-                height: this._sticky_container.offsetHeight
+            this._container_size = (!this._invalid_schema && !invalid_viewport && this._container_size) || {
+                width: this._table_clip.offsetWidth,
+                height: this._table_clip.offsetHeight
             };
         }
 

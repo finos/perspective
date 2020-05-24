@@ -9,8 +9,6 @@
 
 import {DomElement} from "../../../src/js/viewer/dom_element";
 
-jest.mock("../../../src/less/computed_column.less", () => jest.fn());
-
 describe(DomElement, () => {
     describe("._autocomplete_choices", () => {
         let dom_element, json_choices;

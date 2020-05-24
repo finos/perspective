@@ -481,7 +481,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         widget.title.className += " linked";
         if (this._linkedViewers.indexOf(widget.viewer) === -1) {
             this._linkedViewers.push(widget.viewer);
-            // if this is the first linked viewer, make viewers with row-pivots selectable
+            // if this is the first linked viewer, make viewers with
+            // row-pivots selectable
             if (this._linkedViewers.length === 1) {
                 this.getAllWidgets().forEach(widget => {
                     const config = widget.viewer.save();

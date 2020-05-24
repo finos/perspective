@@ -8,15 +8,18 @@
  */
 
 const fs = require("fs");
-const {execute} = require("./script_utils.js");
+const {execute, resolve} = require("./script_utils.js");
 
 try {
-    if (fs.existsSync("node_modules/puppeteer")) {
+    const puppeteer_path = resolve`${__dirname}/../node_modules/puppeteer`;
+    const puppeter_disabled_path = resolve`${__dirname}/../node_modules/puppeteer.disabled`;
+
+    if (fs.existsSync(puppeteer_path)) {
         console.log("Switching Puppeteer from LOCAL to DOCKER");
-        fs.renameSync("node_modules/puppeteer", "node_modules/puppeteer.disabled");
-    } else if (fs.existsSync("node_modules/puppeteer.disabled")) {
+        fs.renameSync(puppeteer_path, puppeter_disabled_path);
+    } else if (fs.existsSync(puppeter_disabled_path)) {
         console.log("Switching Puppeteer from DOCKER to LOCAL");
-        fs.renameSync("node_modules/puppeteer.disabled", "node_modules/puppeteer");
+        fs.renameSync(puppeter_disabled_path, puppeteer_path);
     } else {
         console.log("Switching Puppeteer from DOCKER to LOCAL");
         console.log("LOCAL Puppeteer not found in node_modules, installing...");

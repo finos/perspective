@@ -217,12 +217,14 @@ if (PSP_WASM_BUILD)
 		--bind \
 		--source-map-base ./build/ \
 		--memory-init-file 0 \
+		-Wall \
 		-s NO_EXIT_RUNTIME=1 \
 		-s NO_FILESYSTEM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
 		-s MODULARIZE=1 \
 		-s EXPORT_NAME=\"load_perspective\" \
 		-s EXPORT_ES6=1 \
+		-s MAXIMUM_MEMORY=-1 \
 		-s USE_ES6_IMPORT_META=0 \
 		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
@@ -243,8 +245,7 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
-			-s WASM_OBJECT_FILES=0 \
-			--llvm-lto 3 \
+			-flto \
 			--closure 1 \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
@@ -286,12 +287,31 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASMJS_MODE_FLAGS "")
 
 	if(PSP_CPP_BUILD)
-		# filesystem not required for Python, as we link to prebuilt arrow shared library
+		if (WIN32)
+			# BOOST_ROOT has been removed on Windows VMs in Azure:
+			#
+			# - https://github.com/actions/virtual-environments/issues/687
+			# - https://github.com/actions/virtual-environments/issues/319
+			# 
+			# `BOOST_ROOT` must be set in the environment, and policy CMP0074
+			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
+			cmake_policy(SET CMP0074 NEW)
+
+			if(DEFINED(ENV{BOOST_ROOT}))
+				set(Boost_NO_BOOST_CMAKE TRUE)
+
+				message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_INCLUDEDIR: $ENV{BOOST_INCLUDEDIR} ${ColorReset}")
+				message(WARNING "${Cyan}BOOST_LIBRARYDIR: $ENV{BOOST_LIBRARYDIR} ${ColorReset}")
+			endif()
+
+		endif()
+		# Filesystem required for Python build
 		find_package(Boost COMPONENTS filesystem)
 		if(NOT Boost_FOUND)
-			message("${Red}Boost could not be located${ColorReset}")
+			message("${Red}Boost filesystem could not be located${ColorReset}")
 		else()
-			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+			message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
 		endif()
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
@@ -309,6 +329,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
 		endforeach(warning)
+		# When linking against Boost on Azure, bcrypt fails to link:
+		# - https://github.com/microsoft/vcpkg/issues/4481
+		# - https://github.com/boostorg/uuid/issues/68
+		#add_definitions("-DBOOST_UUID_FORCE_AUTO_LINK")
 	else()
 		include_directories("/usr/local/include")
 	endif()
@@ -446,6 +470,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
 	${PSP_CPP_SRC}/src/cpp/computed.cpp
+	${PSP_CPP_SRC}/src/cpp/computed_column_map.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_function.cpp
 	${PSP_CPP_SRC}/src/cpp/config.cpp
 	${PSP_CPP_SRC}/src/cpp/context_base.cpp
@@ -511,8 +536,13 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/vocab.cpp
 	)
 
-set (PYTHON_SOURCE_FILES
+set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
+	${PSP_PYTHON_SRC}/src/column.cpp
+	)
+
+set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
+	${PSP_PYTHON_SRC}/src/computed.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
 	${PSP_PYTHON_SRC}/src/fill.cpp
 	${PSP_PYTHON_SRC}/src/numpy.cpp
@@ -566,8 +596,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 		# Python extra targets #
 		########################
-		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
-		add_library(binding SHARED ${PYTHON_SOURCE_FILES})
+		add_library(psp SHARED ${PYTHON_SOURCE_FILES})
+		add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
 
 		include_directories(${PSP_PYTHON_SRC}/include)
 
@@ -627,7 +657,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		########################
 	else()
-		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
+		add_library(psp SHARED ${SOURCE_FILES})
 		target_link_libraries(psp arrow)
 		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 	endif()

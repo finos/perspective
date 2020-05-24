@@ -7,6 +7,8 @@
 #
 
 import os.path
+import numpy as np
+import pandas as pd
 import pyarrow as pa
 from datetime import date, datetime
 from perspective.table import Table
@@ -35,23 +37,37 @@ class TestTableArrow(object):
         with open(DATE32_ARROW, mode='rb') as file:  # b is important -> binary
             tbl = Table(file.read())
             assert tbl.schema() == {
-                "a": date,
-                "b": date,
-                "c": date,
-                "d": date
+                "jan-2019": date,
+                "feb-2020": date,
+                "mar-2019": date,
+                "apr-2020": date
             }
-            assert tbl.size() == 29
+            assert tbl.size() == 31
+            view = tbl.view()
+            assert view.to_columns() == {
+                "jan-2019": [datetime(2019, 1, i) for i in range(1, 32)],
+                "feb-2020": [datetime(2020, 2, i) for i in range(1, 30)] + [None, None],
+                "mar-2019": [datetime(2019, 3, i) for i in range(1, 32)],
+                "apr-2020": [datetime(2020, 4, i) for i in range(1, 31)] + [None]
+            }
 
     def test_table_arrow_loads_date64_file(self):
         with open(DATE64_ARROW, mode='rb') as file:  # b is important -> binary
             tbl = Table(file.read())
             assert tbl.schema() == {
-                "a": date,
-                "b": date,
-                "c": date,
-                "d": date
+                "jan-2019": date,
+                "feb-2020": date,
+                "mar-2019": date,
+                "apr-2020": date
             }
-            assert tbl.size() == 29
+            assert tbl.size() == 31
+            view = tbl.view()
+            assert view.to_columns() == {
+                "jan-2019": [datetime(2019, 1, i) for i in range(1, 32)],
+                "feb-2020": [datetime(2020, 2, i) for i in range(1, 30)] + [None, None],
+                "mar-2019": [datetime(2019, 3, i) for i in range(1, 32)],
+                "apr-2020": [datetime(2020, 4, i) for i in range(1, 31)] + [None]
+            }
 
     def test_table_arrow_loads_dict_file(self):
         with open(DICT_ARROW, mode='rb') as file:  # b is important -> binary
@@ -487,3 +503,33 @@ class TestTableArrow(object):
             "a": ["a", "b", "b", None],
             "b": ["x", "y", None, "z"]
         }
+
+    def test_table_arrow_loads_arrow_from_df_with_nan(self):
+        data = pd.DataFrame({
+            "a": [1.5, 2.5, np.nan, 3.5, 4.5, np.nan, np.nan, np.nan]
+        })
+
+        arrow_table = pa.Table.from_pandas(data)
+
+        assert arrow_table["a"].null_count == 4
+
+        # write arrow to stream
+        stream = pa.BufferOutputStream()
+        writer = pa.RecordBatchStreamWriter(
+            stream, arrow_table.schema, use_legacy_format=False)
+        writer.write_table(arrow_table)
+        arrow = stream.getvalue().to_pybytes()
+
+        # load
+        tbl = Table(arrow)
+        assert tbl.size() == 8
+
+        # check types
+        assert tbl.schema() == {
+            "a": float
+        }
+
+        # check nans
+        json = tbl.view().to_columns()
+
+        assert json["a"] == [1.5, 2.5, None, 3.5, 4.5, None, None, None]
