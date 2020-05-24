@@ -217,14 +217,19 @@ data_files_spec = [
 ]
 
 # Create a command class to ensure js files are installed
-cmdclass = create_cmdclass('ensure_js', package_data_spec=package_data_spec, data_files_spec=data_files_spec)
-cmdclass['ensure_js'] = combine_commands(
-    ensure_targets([
-        os.path.join(here, 'perspective', 'nbextension', 'static', 'index.js'),
-        os.path.join(here, 'perspective', 'nbextension', 'static', 'labextension.js'),
-        os.path.join(here, 'perspective', 'nbextension', 'static', 'extension.js'),
-    ]),
-)
+if not os.environ.get('PERSPECTIVE_CI_SKIPJS'):
+    cmdclass = create_cmdclass('ensure_js', package_data_spec=package_data_spec, data_files_spec=data_files_spec)
+    cmdclass['ensure_js'] = combine_commands(
+        ensure_targets([
+            os.path.join(here, 'perspective', 'nbextension', 'static', 'index.js'),
+            os.path.join(here, 'perspective', 'nbextension', 'static', 'labextension.js'),
+            os.path.join(here, 'perspective', 'nbextension', 'static', 'extension.js'),
+        ]),
+    )
+else:
+    # these files might be missing or rearranged during CI, so ignore
+    cmdclass = {}
+
 cmdclass['build_ext'] = PSPBuild
 cmdclass['sdist'] = PSPCheckSDist
 

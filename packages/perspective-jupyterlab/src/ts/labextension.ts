@@ -15,8 +15,8 @@ export * from "./widget";
 /* css */
 import "!!style-loader!css-loader!less-loader!../less/index.less";
 
-import "@finos/perspective-viewer-hypergrid";
-import "@finos/perspective-viewer-highcharts";
+import "@finos/perspective-viewer-d3fc";
+import "@finos/perspective-viewer-datagrid";
 
 import {JupyterFrontEndPlugin} from "@jupyterlab/application";
 import {perspectiveRenderers} from "./renderer";

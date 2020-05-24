@@ -231,6 +231,10 @@ exports.docker = function docker(image = "puppeteer") {
         env_vars += bash` -ePSP_MANYLINUX=1 `;
     }
 
+    if (IS_CI) {
+        env_vars += bash` -ePERSPECTIVE_CI_SKIPJS=1 `;
+    }
+
     let ret = bash`docker run \
         ${flags} \
         ${env_vars} \

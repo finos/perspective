@@ -37,8 +37,8 @@ try {
     if (IS_CI) {
         if (IS_PY2)
             // shutil_which is required in setup.py
-            cmd = bash`${PYTHON} -m pip install backports.shutil_which &&`;
-        else cmd = bash``;
+            cmd = bash`${PYTHON} -m pip install -U setuptools wheel jupyter_packaging backports.shutil_which &&`;
+        else cmd = bash`${PYTHON} -m pip install -U setuptools wheel jupyter_packaging &&`;
 
         cmd =
             cmd +
