@@ -170,6 +170,10 @@ def _check_cpp_files():
 
 
 def _check_js_files():
+    if os.environ.get('PERSPECTIVE_CI_SKIPJS'):
+        print('skipping js file check in ci')
+        return
+
     if not os.path.exists(os.path.join(here, 'perspective', 'labextension', 'finos-perspective-jupyterlab-{}.tgz'.format(version))):
         raise Exception("JupyterLab extension pack is missing!\nMust run `yarn build` or `yarn _js_for_dist` before building sdist so js files are installed")
 
@@ -207,7 +211,7 @@ package_data_spec = {
 
 # Files for lab/notebook extension
 data_files_spec = [
-    ('share/jupyter/nbextensions/',os.path.join(here, "perspective", 'nbextension', 'static'), '*.js*'),
+    ('share/jupyter/nbextensions/finos-perspective-jupyterlab',os.path.join(here, "perspective", 'nbextension', 'static'), '*.js*'),
     ('share/jupyter/lab/extensions', os.path.join(here, "perspective", 'labextension'), '*.tgz'),
     ('etc/jupyter/nbconfig/notebook.d' , here, 'finos-perspective-python.json')
 ]

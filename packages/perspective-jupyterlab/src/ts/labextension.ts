@@ -6,6 +6,17 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+export * from "./client";
+export * from "./model";
+export * from "./version";
+export * from "./view";
+export * from "./widget";
+
+/* css */
+import "!!style-loader!css-loader!less-loader!../less/index.less";
+
+import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-highcharts";
 
 import {JupyterFrontEndPlugin} from "@jupyterlab/application";
 import {perspectiveRenderers} from "./renderer";

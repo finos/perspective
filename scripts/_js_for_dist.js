@@ -55,5 +55,10 @@ try {
     rimraf.sync("package");
 } catch (e) {
     console.error(e.message);
-    process.exit(1);
+    if (process.env.PERSPECTIVE_JS_SKIPJS) {
+        console.log("Allowing JS bundling to fail in CI (files might have changed)");
+        process.exit(0);
+    } else {
+        process.exit(1);
+    }
 }

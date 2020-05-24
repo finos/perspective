@@ -95,11 +95,14 @@ jobs:
 
     - bash: yarn _js_for_dist
       displayName: 'Copy JS dependencies into python package'
+      env:
+        PERSPECTIVE_CI_SKIPJS: 1
 
     - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
       displayName: 'build'
       env:
         PSP_DOCKER: 1
+        PERSPECTIVE_CI_SKIPJS: 1
 
     - task: PublishTestResults@2
       condition: succeededOrFailed()
@@ -191,6 +194,8 @@ jobs:
 
     - bash: yarn _js_for_dist
       displayName: 'Copy JS dependencies into python package'
+      env:
+        PERSPECTIVE_CI_SKIPJS: 1
 
     - script: yarn build_python  --ci $(python_flag)
       displayName: 'build'
@@ -200,6 +205,7 @@ jobs:
         BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/"
         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/include"
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/libs"
+        PERSPECTIVE_CI_SKIPJS: 1
 
 
 - job: 'Mac'
@@ -248,9 +254,13 @@ jobs:
 
     - bash: yarn _js_for_dist
       displayName: 'Copy JS dependencies into python package'
+      env:
+        PERSPECTIVE_CI_SKIPJS: 1
 
     - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
+      env:
+        PERSPECTIVE_CI_SKIPJS: 1
 
     - task: PublishTestResults@2
       condition: succeededOrFailed()
