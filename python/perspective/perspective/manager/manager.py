@@ -249,7 +249,7 @@ class PerspectiveManager(object):
 
                 # defer to callbacks
                 if msg["cmd"] == "table_method" and msg["method"] == "update":
-                    self._update_handlers(self, msg)
+                    self._update_handlers(msg)
 
                 if msg["method"].startswith("to_"):
                     # to_format takes dictionary of options

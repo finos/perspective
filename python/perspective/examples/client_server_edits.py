@@ -27,6 +27,13 @@ class MainHandler(tornado.web.RequestHandler):
 here = os.path.abspath(os.path.dirname(__file__))
 
 
+def received(msg):
+    print("Received a new edit from frontend:")
+    print(msg['name'],
+          msg['cmd'],
+          msg['method'])
+
+
 def make_app():
     # Create an instance of `PerspectiveManager` and a table.
     MANAGER = PerspectiveManager()
@@ -39,6 +46,8 @@ def make_app():
     MANAGER.host_table("data_source_one", TABLE)
     MANAGER.host_view("view_one", TABLE.view())
 
+    MANAGER.on_update(received)
+
     return tornado.web.Application([
         (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
@@ -48,7 +57,7 @@ def make_app():
 
 if __name__ == "__main__":
     app = make_app()
-    app.listen(8888)
-    logging.critical("Listening on http://localhost:8888")
+    app.listen(8080)
+    logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
     loop.start()
