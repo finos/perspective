@@ -201,23 +201,32 @@ class PSPCheckBDist(bdist_wheel):
         _check_js_files()
 
 
-# Files for lab/notebook extension
-package_data_spec = {
-    "perspective": [
-        'nbextension/static/*.*js*',
-        'labextension/*.tgz'
-    ]
-}
-
-# Files for lab/notebook extension
-data_files_spec = [
-    ('share/jupyter/nbextensions/finos-perspective-jupyterlab',os.path.join(here, "perspective", 'nbextension', 'static'), '*.js*'),
-    ('share/jupyter/lab/extensions', os.path.join(here, "perspective", 'labextension'), '*.tgz'),
-    ('etc/jupyter/nbconfig/notebook.d' , here, 'finos-perspective-python.json')
-]
-
 # Create a command class to ensure js files are installed
 if not os.environ.get('PERSPECTIVE_CI_SKIPJS'):
+    # Files for lab/notebook extension
+    package_data_spec = {
+        "perspective": [
+            'nbextension/static/*.*js*',
+            'labextension/*.tgz'
+        ]
+    }
+
+    # Files for lab/notebook extension
+    data_files_spec = [
+        ('share/jupyter/nbextensions/finos-perspective-jupyterlab',os.path.join(here, "perspective", 'nbextension', 'static'), '*.js*'),
+        ('share/jupyter/lab/extensions', os.path.join(here, "perspective", 'labextension'), '*.tgz'),
+        ('etc/jupyter/nbconfig/notebook.d' , here, 'finos-perspective-python.json')
+    ]
+
+    data_files = [
+            ('share/jupyter/nbextensions/finos-perspective-jupyterlab', [
+                'perspective/nbextension/static/extension.js',
+                'perspective/nbextension/static/index.js',
+                'perspective/nbextension/static/labextension.js',
+            ]),
+            ('etc/jupyter/nbconfig/notebook.d', ['finos-perspective-jupyterlab.json'])
+        ]
+
     cmdclass = create_cmdclass('ensure_js', package_data_spec=package_data_spec, data_files_spec=data_files_spec)
     cmdclass['ensure_js'] = combine_commands(
         ensure_targets([
@@ -229,9 +238,11 @@ if not os.environ.get('PERSPECTIVE_CI_SKIPJS'):
 else:
     # these files might be missing or rearranged during CI, so ignore
     cmdclass = {}
+    data_files = []
 
 cmdclass['build_ext'] = PSPBuild
 cmdclass['sdist'] = PSPCheckSDist
+cmdclass['bdist_wheel'] = PSPCheckBDist
 
 
 setup(
@@ -257,14 +268,7 @@ setup(
     keywords=['Jupyter', 'Jupyterlab', 'Widgets', 'IPython', 'Streaming', 'Data', 'Analytics', 'Plotting'],
     packages=find_packages(),
     include_package_data=True,
-    data_files=[
-        ('share/jupyter/nbextensions/finos-perspective-jupyterlab', [
-            'perspective/nbextension/static/extension.js',
-            'perspective/nbextension/static/index.js',
-            'perspective/nbextension/static/labextension.js',
-        ]),
-        ('etc/jupyter/nbconfig/notebook.d', ['finos-perspective-jupyterlab.json'])
-    ],
+    data_files=data_files,
     zip_safe=False,
     install_requires=requires,
     extras_require={
