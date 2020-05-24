@@ -252,7 +252,7 @@ setup(
         ('share/jupyter/nbextensions/finos-perspective-jupyterlab', [
             'perspective/nbextension/static/extension.js',
             'perspective/nbextension/static/index.js',
-            'perspective/nbextension/static/index.js.map',
+            'perspective/nbextension/static/labextension.js',
         ]),
         ('etc/jupyter/nbconfig/notebook.d', ['finos-perspective-jupyterlab.json'])
     ],
