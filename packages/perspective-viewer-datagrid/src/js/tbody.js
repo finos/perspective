@@ -16,15 +16,18 @@ import {ViewModel} from "./view_model";
  * @class DatagridBodyViewModel
  */
 export class DatagridBodyViewModel extends ViewModel {
-    _draw_td(ridx, val, id, is_open, {cidx, column_name, type}, {selected_id, depth, ridx_offset, cidx_offset}) {
+    _draw_td(ridx, val, id, is_open, {cidx, column_name, type, first_col}, {selected_id, depth, ridx_offset, cidx_offset}) {
         const {tr, row_container} = this._get_row(ridx);
-        if (selected_id !== false) {
+
+        const td = this._get_cell("td", row_container, cidx, tr);
+        td.className = `pd-${type}`;
+        if (first_col && selected_id !== undefined) {
             const is_selected = isEqual(id, selected_id);
             const is_sub_selected = !is_selected && isEqual(id?.slice(0, selected_id?.length), selected_id);
             tr.classList.toggle("pd-selected", !!id && is_selected);
             tr.classList.toggle("pd-sub-selected", !!id && is_sub_selected);
         }
-        const td = this._get_cell("td", row_container, cidx, tr);
+
         const metadata = this._get_or_create_metadata(td);
         metadata.id = id;
         metadata.cidx = cidx + cidx_offset;
@@ -32,7 +35,6 @@ export class DatagridBodyViewModel extends ViewModel {
         metadata.column = column_name;
         metadata.size_key = `${column_name}|${type}`;
         metadata.ridx = ridx + ridx_offset;
-        td.className = `pd-${type}`;
         const override_width = this._column_sizes.override[metadata.size_key];
         if (override_width) {
             const auto_width = this._column_sizes.auto[metadata.size_key];
