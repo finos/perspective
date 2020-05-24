@@ -93,6 +93,9 @@ jobs:
     - bash: yarn
       displayName: 'Install Deps'
 
+    - bash: yarn _js_for_dist
+      displayName: 'Copy JS dependencies into python package'
+
     - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
       displayName: 'build'
       env:
@@ -186,6 +189,9 @@ jobs:
     - script: yarn
       displayName: 'Install Deps'
 
+    - bash: yarn _js_for_dist
+      displayName: 'Copy JS dependencies into python package'
+
     - script: yarn build_python  --ci $(python_flag)
       displayName: 'build'
       env:
@@ -239,6 +245,9 @@ jobs:
 
     - script: yarn
       displayName: 'Install Deps'
+
+    - bash: yarn _js_for_dist
+      displayName: 'Copy JS dependencies into python package'
 
     - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
