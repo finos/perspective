@@ -28,9 +28,7 @@ module.exports = [
     {
         // bundle for the jupyterlab
         mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
-        entry: {
-            index: "./src/ts/labextension.ts"
-        },
+        entry: "./src/ts/labextension.ts",
         resolve: {
             extensions: [".ts", ".js"]
         },

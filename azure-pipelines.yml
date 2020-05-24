@@ -121,6 +121,7 @@ jobs:
       displayName: 'Build wheel'
       env:
         PSP_DOCKER: 1
+        PERSPECTIVE_CI_SKIPJS: 1
 
     # Start a new virtual environment for the Perspective wheel, so as to
     # isolate it from previously installed dependencies
