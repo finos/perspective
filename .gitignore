@@ -168,3 +168,5 @@ darwin.interactive.json
 junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
+python/perspective/perspective/labextension
+python/perspective/perspective/nbextension

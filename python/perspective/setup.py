@@ -199,7 +199,7 @@ class PSPCheckBDist(bdist_wheel):
 
 # Files for lab/notebook extension
 package_data_spec = {
-    "finos-perspective-jupyterlab": [
+    "perspective": [
         'nbextension/static/*.*js*',
         'labextension/*.tgz'
     ]
