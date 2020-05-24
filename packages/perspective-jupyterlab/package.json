@@ -31,11 +31,12 @@
         "build": "npm-run-all -p build:*",
         "build:jupyterlab": "webpack --color --config src/config/plugin.config.js",
         "build:lumino": "webpack --color --config src/config/webpack.config.js",
-        "build:labdist": "npm-run-all build:jupyterlab clean:labdist && mkdirp ../../python/perspective/perspective/labdist && cd ../../python/perspective/perspective/labdist && npm pack ../../../packages/perspective-jupyterlab/",
+        "build:nbextension": "npm-run-all build:jupyterlab clean:labextension && mkdirp ../../python/perspective/perspective/nbextension/static && cpx \"dist/*.js\" \"../../python/perspective/perspective/nbextension/static/\"",
+        "build:labextension": "npm-run-all build:jupyterlab clean:labextension && mkdirp ../../python/perspective/perspective/labextension && cd ../../python/perspective/perspective/labextension && npm pack ../../../../packages/perspective-jupyterlab/",
         "clean": "npm-run-all -p clean:*",
-        "clean:build": "rimraf dist",
-        "clean:labdist": "rimraf ../../python/perspective/perspective/labdist",
-        "clean:nbextension": "../../python/perspective/perspective/nbextension/static/",
+        "clean:build": "rimraf \"dist\"",
+        "clean:labextension": "rimraf \"../../python/perspective/perspective/labextension\"",
+        "clean:nbextension": "rimrar \"../../python/perspective/perspective/nbextension/static/\"",
         "version": "yarn build"
     },
     "dependencies": {
@@ -58,6 +59,7 @@
         "isomorphic-fetch": "^2.2.1",
         "jest-transform-css": "^2.0.0",
         "source-map-support": "^0.5.9",
+        "tar": "^6.0.2",
         "ts-jest": "^24.1.0",
         "typescript": "^3.7.4"
     },

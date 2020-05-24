@@ -30,7 +30,15 @@ try {
         clean`cpp/perspective/obj`;
     }
     if (process.env.PSP_PROJECT === "python") {
-        clean("cpp/perspective/obj", "cpp/perspective/cppbuild", "python/perspective/dist", "python/perspective/build", "python/perspective/perspective_python.egg-info");
+        clean(
+            "cpp/perspective/obj",
+            "cpp/perspective/cppbuild",
+            "python/perspective/dist",
+            "python/perspective/build",
+            "python/perspective/perspective_python.egg-info",
+            "python/perspective/perspective/labextension",
+            "python/perspective/perspective/nbextension"
+        );
         return;
     }
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {

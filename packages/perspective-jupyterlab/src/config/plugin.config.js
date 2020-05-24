@@ -71,7 +71,7 @@ module.exports = [
         },
         output: {
             filename: "extension.js",
-            path: path.resolve(__dirname, "..", "..", "python", "perspective", "perspective", "static"),
+            path: path.resolve(__dirname, "../../dist"),
             libraryTarget: "amd"
         }
     },
@@ -104,7 +104,7 @@ module.exports = [
         },
         output: {
             filename: "index.js",
-            path: path.resolve(__dirname, "dist"),
+            path: path.resolve(__dirname, "../../dist"),
             libraryTarget: "amd",
             library: "@finos/perspective-jupyterlab",
             publicPath: "https://unpkg.com/@finos/perspective-jupyterlab@" + packagejson.version + "/dist/"

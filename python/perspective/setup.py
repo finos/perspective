@@ -9,6 +9,7 @@ from __future__ import print_function
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
+from wheel.bdist_wheel import bdist_wheel
 from distutils.version import LooseVersion
 from distutils import sysconfig
 from codecs import open
@@ -44,7 +45,6 @@ if sys.version_info.minor < 7:
 
 # Setup some helper variables
 here = os.path.abspath(os.path.dirname(__file__))
-jshere = os.path.abspath(os.path.join(here, '..', '..', 'packages', 'perspective-jupyterlab'))
 
 # read description from local readme
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -162,6 +162,21 @@ class PSPBuild(build_ext):
         print()  # Add an empty line for cleaner output
 
 
+def _check_cpp_files():
+    for file in ('CMakeLists.txt', 'cmake', 'src'):
+        path = os.path.abspath(os.path.join(here, 'dist', file))
+        if not os.path.exists(path):
+            raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake/c++ files are installed".format(path))
+
+
+def _check_js_files():
+    if not os.path.exists(os.path.join(here, 'perspective', 'labextension', 'finos-perspective-jupyterlab-{}.tgz'.format(version))):
+        raise Exception("JupyterLab extension pack is missing!\nMust run `yarn build` or `yarn _js_for_dist` before building sdist so js files are installed")
+
+    if not os.path.exists(os.path.join(here, 'perspective', 'nbextension', 'static', 'index.js')) or \
+        not os.path.exists(os.path.join(here, 'perspective', 'nbextension', 'static', 'extension.js')):
+        raise Exception("JupyterLab extension pack is missing!\nMust run `yarn build` or `yarn _js_for_dist` before building sdist so js files are installed")
+
 # Helper to ensure all the necessary files are sdist'ed
 class PSPCheckSDist(sdist):
     def run(self):
@@ -169,10 +184,18 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
-        for file in ('CMakeLists.txt', 'cmake', 'src', 'perspective/static'):
-            path = os.path.abspath(os.path.join(here, 'dist', file))
-            if not os.path.exists(path):
-                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
+        _check_cpp_files()
+        _check_js_files()
+
+# Helper to ensure all the necessary files are bdist'ed
+class PSPCheckBDist(bdist_wheel):
+    def run(self):
+        self.run_check()
+        super(PSPCheckBDist, self).run()
+
+    def run_check(self):
+        _check_js_files()
+
 
 # Files for lab/notebook extension
 package_data_spec = {
@@ -193,9 +216,9 @@ data_files_spec = [
 cmdclass = create_cmdclass('ensure_js', package_data_spec=package_data_spec, data_files_spec=data_files_spec)
 cmdclass['ensure_js'] = combine_commands(
     ensure_targets([
-        os.path.join(jshere, 'lib', 'index.js'),
-        os.path.join(jshere, 'lib', 'labextension.js'),
-        os.path.join(jshere, 'lib', 'extension.js'),
+        os.path.join(here, 'perspective', 'nbextension', 'static', 'index.js'),
+        os.path.join(here, 'perspective', 'nbextension', 'static', 'labextension.js'),
+        os.path.join(here, 'perspective', 'nbextension', 'static', 'extension.js'),
     ]),
 )
 cmdclass['build_ext'] = PSPBuild
