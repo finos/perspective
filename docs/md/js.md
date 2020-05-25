@@ -94,7 +94,8 @@ different visualization on load or transform the dataset, use the viewer's attri
   id="view1"
   plugin="xy_scatter"
   columns='["Sales", "Profits"]'
-  row_pivots='["State", "City"]'>
+  row_pivots='["State", "City"]'
+>
 </perspective-viewer>
 ```
 
@@ -122,14 +123,14 @@ and must be imported individually.
 
 Perspective offers these plugin modules:
 
-- `@finos/perspective-viewer-d3fc`  
+- `@finos/perspective-viewer-datagrid`  
   A custom high-performance data-grid component based on HTML `<table>`.
 
 - `@finos/perspective-viewer-d3fc`  
   A `<perspective-viewer>` plugin for the [d3fc](https://d3fc.io) charting
   library.
 
-Also available are these legacy modules;  though no longer under development,
+Also available are these legacy modules; though no longer under development,
 they are compatible with perspective versions < 1.0.0:
 
 - `@finos/perspective-viewer-hypergrid`  
@@ -157,6 +158,7 @@ modules. Some basic guidelines to help you decide what is most appropriate for
 your project:
 
 - For Perspective as a simple, browser-based data visualization widget, import:
+
   - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
   - `@finos/perspective-viewer-datagrid` for data grids
   - `@finos/perspective-viewer-d3fc` for charting
@@ -165,6 +167,7 @@ your project:
 
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
+
   - `@finos/perspective`, as detailed [here](#perspective-library)
 
 - For more complex cases, such as
@@ -192,15 +195,15 @@ It exports Perspective's data interfaces:
 
 `@finos/perspective` also exports process management functions such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in node.js). See the [API documentation](/obj/perspective.html) for a complete 
+(in node.js). See the [API documentation](/obj/perspective.html) for a complete
 reference on all exported methods.
 
-This module is a dependency of `@finos/perspective-viewer`, and is not needed if 
+This module is a dependency of `@finos/perspective-viewer`, and is not needed if
 you only intend to use `<perspective-viewer>` to visualize simple data.
 
 ### Importing in the browser
 
-`perspective` can be imported as an ES6 module and/or `require` syntax if you're 
+`perspective` can be imported as an ES6 module and/or `require` syntax if you're
 using a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
 
 ```javascript
@@ -225,7 +228,7 @@ const perspective = require("@finos/perspective");
 
 Once imported, you'll need to instantiate a `perspective` engine via the
 `worker()` method. This will create a new WebWorker (browser) or
-Process (Node.js), and load the WebAssembly binary; all calculation and data 
+Process (Node.js), and load the WebAssembly binary; all calculation and data
 accumulation will occur in this separate process.
 
 ```javascript
@@ -267,7 +270,7 @@ const table1 = worker.table(data);
 ```
 
 `table()`s are columnar data structures, and each column must have a single
-type. When passing data directly to the `table()` constructor, the type of each 
+type. When passing data directly to the `table()` constructor, the type of each
 column is inferred automatically.
 
 Perspective supports the following types:
@@ -297,7 +300,7 @@ var schema = {
 const table2 = worker.table(schema);
 ```
 
-Once instatiated, a `table()` can be updated with new data via the `update()` 
+Once instatiated, a `table()` can be updated with new data via the `update()`
 method:
 
 ```javascript
@@ -382,7 +385,7 @@ table.update([{x: 3, y: "Just Y"}]);
 
 #### Deleting rows with `remove()`
 
-Rows can be removed entirely from a `table()` with `index` set. Call the 
+Rows can be removed entirely from a `table()` with `index` set. Call the
 `remove()` method with a list of the `index` values to be removed:
 
 ```javascript
@@ -614,7 +617,7 @@ import "@finos/perspective-viewer/themes/material-dense.dark.css";
 import "@finos/perspective-viewer/themes/vaporwave.css";
 ```
 
-***Note that importing multiple themes may override each other***
+**_Note that importing multiple themes may override each other_**
 
 Alternatively, you may use `all-themes.css`, which exposes all available
 themes as CSS classes. This allows you to trivially apply different themes
@@ -631,11 +634,17 @@ import "@finos/perspective-viewer/themes/all-themes.css";
 _*index.html*_
 
 ```html
-<perspective-viewer class='perspective-viewer-material'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-material-dark'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-material-dense'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-material-dense-dark'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-vaporwave'></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material"></perspective-viewer>
+<perspective-viewer
+  class="perspective-viewer-material-dark"
+></perspective-viewer>
+<perspective-viewer
+  class="perspective-viewer-material-dense"
+></perspective-viewer>
+<perspective-viewer
+  class="perspective-viewer-material-dense-dark"
+></perspective-viewer>
+<perspective-viewer class="perspective-viewer-vaporwave"></perspective-viewer>
 ```
 
 If you choose not to bundle the themes yourself, they are available through
@@ -644,7 +653,10 @@ the [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 These can be directly linked in your HTML:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css"/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css"
+/>
 ```
 
 ### Loading data into `<perspective-viewer>`
@@ -813,22 +825,22 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-    window.addEventListener('WebComponentsReady', async function() {
-        // Create a client that expects a Perspective server
-        // to accept connections at the specified URL.
-        const websocket = perspective.websocket("ws://localhost:8888/websocket");
+  window.addEventListener("WebComponentsReady", async function () {
+    // Create a client that expects a Perspective server
+    // to accept connections at the specified URL.
+    const websocket = perspective.websocket("ws://localhost:8888/websocket");
 
-        /* `table` is a proxy for the `Table` we created on the server.
+    /* `table` is a proxy for the `Table` we created on the server.
 
         All operations that are possible through the Javascript API are possible
         on the Python API as well, thus calling `view()`, `schema()`, `update()`
         etc. on `const table` will pass those operations to the Python `Table`,
         execute the commands, and return the result back to Javascript.*/
-        const table = websocket.open_table('data_source_one');
+    const table = websocket.open_table("data_source_one");
 
-        // Load this in the `<perspective-viewer>`.
-        document.getElementById('viewer').load(table);
-    });
+    // Load this in the `<perspective-viewer>`.
+    document.getElementById("viewer").load(table);
+  });
 </script>
 ```
 

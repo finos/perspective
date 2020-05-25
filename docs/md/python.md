@@ -56,7 +56,6 @@ commonly used when processing data:
 
 - `pandas.DataFrame`
 - `numpy.ndarray`
-- `numpy.ndarray`
 - `bytes` (encoding an Apache Arrow)
 - `objects` (either extracting a repr or via reference)
 
@@ -95,7 +94,7 @@ arrays, make sure that your dataset contains only NumPy arrays, and not a
 mixture of arrays and Python lists — this will raise an exception. Numpy
 structured/record arrays are parsed according to their field name and dtype.
 
-`Table` can aslo be constructed from `pandas.DataFrame` and `pandas.Series`
+`Table` can also be constructed from `pandas.DataFrame` and `pandas.Series`
 objects. Because Perspective is designed for applying its own transformations on
 top of a flat dataset, dataframes that are passed in will be flattened and have
 its `index` treated as another column (through the
@@ -333,22 +332,22 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-    window.addEventListener('WebComponentsReady', async function() {
-        // Create a client that expects a Perspective server
-        // to accept connections at the specified URL.
-        const websocket = perspective.websocket("ws://localhost:8888/websocket");
+  window.addEventListener("WebComponentsReady", async function () {
+    // Create a client that expects a Perspective server
+    // to accept connections at the specified URL.
+    const websocket = perspective.websocket("ws://localhost:8888/websocket");
 
-        /* `table` is a proxy for the `Table` we created on the server.
+    /* `table` is a proxy for the `Table` we created on the server.
 
         All operations that are possible through the Javascript API are possible
         on the Python API as well, thus calling `view()`, `schema()`, `update()`
         etc. on `const table` will pass those operations to the Python `Table`,
         execute the commands, and return the result back to Javascript.*/
-        const table = websocket.open_table('data_source_one');
+    const table = websocket.open_table("data_source_one");
 
-        // Load this in the `<perspective-viewer>`.
-        document.getElementById('viewer').load(table);
-    });
+    // Load this in the `<perspective-viewer>`.
+    document.getElementById("viewer").load(table);
+  });
 </script>
 ```
 
@@ -377,7 +376,7 @@ MANAGER.host_view("view_one", VIEW)
 # Continue with Tornado setup
 ```
 
-Changes to the client code are also minimal. Use `open_view` instead of 
+Changes to the client code are also minimal. Use `open_view` instead of
 `open_table`:
 
 ```javascript
