@@ -273,7 +273,7 @@ the `build/` directory of every package which supports benchmarks, as well as a
 `results.json` file in the `bench/results/`, which can be checked in to GIT with
 your changes to preserve them for future comparison.
 
-```javascript
+```bash
 yarn bench
 ```
 
