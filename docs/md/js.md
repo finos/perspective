@@ -17,6 +17,9 @@ This document offers an overview of the Javascript library, providing:
 For understanding Perspective's core concepts and vocabulary, see the
 [Conceptual Overview](/docs/md/concepts.html).
 
+For example code, see the [examples directory](https://github.com/finos/perspective/tree/master/examples)
+on GitHub.
+
 ## Quick Start
 
 First, make sure that Perspective [is installed](/docs/md/installation.html),
