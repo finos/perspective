@@ -617,7 +617,7 @@ import "@finos/perspective-viewer/themes/material-dense.dark.css";
 import "@finos/perspective-viewer/themes/vaporwave.css";
 ```
 
-**_Note that importing multiple themes may override each other_**
+***Note that importing multiple themes may override each other***
 
 Alternatively, you may use `all-themes.css`, which exposes all available
 themes as CSS classes. This allows you to trivially apply different themes
@@ -635,15 +635,9 @@ _*index.html*_
 
 ```html
 <perspective-viewer class="perspective-viewer-material"></perspective-viewer>
-<perspective-viewer
-  class="perspective-viewer-material-dark"
-></perspective-viewer>
-<perspective-viewer
-  class="perspective-viewer-material-dense"
-></perspective-viewer>
-<perspective-viewer
-  class="perspective-viewer-material-dense-dark"
-></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material-dark"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material-dense"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material-dense-dark"></perspective-viewer>
 <perspective-viewer class="perspective-viewer-vaporwave"></perspective-viewer>
 ```
 
