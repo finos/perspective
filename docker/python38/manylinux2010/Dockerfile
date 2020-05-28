@@ -19,8 +19,8 @@ RUN rm -fr /opt/cmake/bin/cpack
 RUN ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 RUN ln -s /opt/cmake/bin/ctest /usr/local/bin/ctest
 
-RUN rm -rf /opt/python/cp38-cp38m/bin/auditwheel
-RUN cp -arf /opt/python/cp38-cp38m/* /usr/local/
+RUN rm -rf /opt/python/cp38-cp38/bin/auditwheel
+RUN cp -arf /opt/python/cp38-cp38/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
 RUN python3 -m pip install pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
 

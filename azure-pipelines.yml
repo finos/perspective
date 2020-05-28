@@ -95,17 +95,17 @@ jobs:
         python.version: '3.8'
         python_flag: ''
         manylinux_flag: ''
-        artifact_name: 'cp38-cp38m'
+        artifact_name: 'cp38-cp38'
       Python38ManyLinux2010:
         python.version: '3.8'
         python_flag: ''
         manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp38-cp38m-manylinux2010'
+        artifact_name: 'cp38-cp38-manylinux2010'
       Python38ManyLinux2014:
         python.version: '3.8'
         python_flag: ''
         manylinux_flag: '--manylinux2014'
-        artifact_name: 'cp38-cp38m-manylinux2014'
+        artifact_name: 'cp38-cp38-manylinux2014'
 
   steps:
     - task: UsePythonVersion@0

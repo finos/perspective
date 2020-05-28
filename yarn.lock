@@ -1073,109 +1073,6 @@
     "@d3fc/d3fc-rebind" "^5.0.10"
     d3-array "^1.0.0"
 
-"@finos/perspective-viewer-d3fc@^0.4.4", "@finos/perspective-viewer-d3fc@^0.4.7":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective-viewer-d3fc/-/perspective-viewer-d3fc-0.4.8.tgz#e99bc37365ccce489e2649c5b3fa34b111ba294d"
-  integrity sha512-DydKfEy5V2pfR1vJwfSKRf/xDQM3FG+f99Dl2HhTC5T6PQEe2CaIYEILE/fhAzGvDkWcS/66bkPY52OoPCiktQ==
-  dependencies:
-    "@finos/perspective" "^0.4.8"
-    "@finos/perspective-viewer" "^0.4.8"
-    babel-runtime "^6.26.0"
-    chroma-js "^1.3.4"
-    core-js "^3.6.4"
-    d3 "^5.7.0"
-    d3-svg-legend "^2.25.6"
-    d3fc "14.0.40"
-    gradient-parser "0.1.5"
-
-"@finos/perspective-viewer-datagrid@^0.4.7":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective-viewer-datagrid/-/perspective-viewer-datagrid-0.4.8.tgz#b37476a8ea6aa6369d3d6391bbacf6370328e72f"
-  integrity sha512-ntWwhzcNdLpL9iqserpQOzL8+Hkk6tD7qTeWFnQGKzmHeyfNMvQvvBa7OLI5CNLG2LM1yTsZ8nQ9UgPEVWZ9rg==
-  dependencies:
-    "@finos/perspective" "^0.4.8"
-    "@finos/perspective-viewer" "^0.4.8"
-    core-js "^3.6.4"
-    superscript-number "^1.0.0"
-
-"@finos/perspective-viewer-hypergrid@^0.4.4":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective-viewer-hypergrid/-/perspective-viewer-hypergrid-0.4.8.tgz#cc74bc9fed30b84375f5110e0d91855b19c29abe"
-  integrity sha512-+K5F/esh5h6de0mQE4gYq3b/SgQ3KP/9f98y4qFGg1NC9+jgHT5A9ION/mJRp9jQ+j3Epju+V5x5TslF0Ee+6Q==
-  dependencies:
-    "@babel/runtime" "^7.8.4"
-    "@finos/perspective" "^0.4.8"
-    "@finos/perspective-viewer" "^0.4.8"
-    core-js "^3.6.4"
-    datasaur-local "3.0.0"
-    faux-hypergrid "3.2.5"
-    fin-hypergrid-grouped-header-plugin "^1.2.4"
-    lodash "^4.17.4"
-    rectangular "1.0.1"
-    superscript-number "^1.0.0"
-
-"@finos/perspective-viewer@^0.4.4", "@finos/perspective-viewer@^0.4.7", "@finos/perspective-viewer@^0.4.8":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective-viewer/-/perspective-viewer-0.4.8.tgz#79fb644662ce8b990819eea7528f67faa9a803e0"
-  integrity sha512-jYAe6y7UJ63QaDauGbWlirWcWoAd3s23ec+0FsqMbx+8AxZD4tQWk7lNxzQIwvXRuYonKaziQ6pofvAnPhWOBQ==
-  dependencies:
-    "@babel/runtime" "^7.8.4"
-    "@finos/perspective" "^0.4.8"
-    "@types/react" "^16.9.17"
-    "@webcomponents/shadycss" "^1.5.2"
-    "@webcomponents/webcomponentsjs" "~2.0.4"
-    awesomplete "^1.1.2"
-    core-js "^3.6.4"
-    d3-array "^1.2.1"
-    detectie "1.0.0"
-    lit-html "^1.1.2"
-    lodash "^4.17.4"
-    mobile-drag-drop "^2.3.0-rc.2"
-
-"@finos/perspective-webpack-plugin@^0.4.4", "@finos/perspective-webpack-plugin@^0.4.6":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective-webpack-plugin/-/perspective-webpack-plugin-0.4.8.tgz#754a49677c3566d0657a3420fd898d62511a8de1"
-  integrity sha512-YVB1HTeUJK1qwqRSLEuXbiEFPAhxHvHfLbzFFbscNpJR33971Yx99hSapKBKa+FHCkxfwPuEMm8CCh9lX8FaLA==
-  dependencies:
-    "@webpack-contrib/schema-utils" "^1.0.0-beta.0"
-    acorn "^6.1.1"
-    source-map-loader "^0.2.4"
-    string-replace-loader "^2.1.1"
-    tslib "^1.9.3"
-    worker-loader "^2.0.0"
-
-"@finos/perspective-workspace@^0.4.4", "@finos/perspective-workspace@^0.4.7":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective-workspace/-/perspective-workspace-0.4.8.tgz#baf54d457d047ebf6906f6c95e220a4abbd7706d"
-  integrity sha512-IusjNk8EOpfjisNW76X2F/v8PdZMOYUzHsFsZkh4OtdNTNk5DGSqXKDN+0D7GujjL6wljKPHtiAvvc2nu1TPoQ==
-  dependencies:
-    "@finos/perspective-viewer" "^0.4.8"
-    "@lumino/algorithm" "^1.2.0"
-    "@lumino/commands" "^1.7.2"
-    "@lumino/domutils" "^1.1.4"
-    "@lumino/messaging" "^1.3.0"
-    "@lumino/virtualdom" "^1.2.0"
-    "@lumino/widgets" "^1.9.3"
-    core-js "^3.6.4"
-    lodash "^4.17.4"
-
-"@finos/perspective@^0.4.4", "@finos/perspective@^0.4.7", "@finos/perspective@^0.4.8":
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/@finos/perspective/-/perspective-0.4.8.tgz#a6fde87c4e0c0e06a6701f6fcf910e166a708f81"
-  integrity sha512-pxHxbhTEEw0JHIPTlBf2bl9WDLC4LPjRUkQnj9lENvajUnFy4QjhlO+fJ/uWR9wRixHMq4YeuWzIZMzxXbrNfQ==
-  dependencies:
-    "@babel/runtime" "^7.8.4"
-    core-js "^3.6.4"
-    d3-array "^1.2.1"
-    detectie "1.0.0"
-    flatbuffers "^1.10.2"
-    lodash "^4.17.4"
-    moment "^2.19.1"
-    papaparse "^4.3.6"
-    text-encoding-utf-8 "^1.0.2"
-    tslib "^1.9.3"
-    ws "^6.1.2"
-
 "@fortawesome/fontawesome-free@^5.12.0":
   version "5.12.1"
   resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-5.12.1.tgz#2a98fea9fbb8a606ddc79a4680034e9d5591c550"
@@ -11145,11 +11042,6 @@ pako@~1.0.5:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.10.tgz#4328badb5086a426aa90f541977d4955da5c9732"
   integrity sha512-0DTvPVU3ed8+HNXOu5Bs+o//Mbdj9VNQMUOe9oKCwh8l0GNwpTDMKCWbRjgtD291AWnkAgkqA/LOnQS8AmS1tw==
-
-papaparse@^4.3.6:
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/papaparse/-/papaparse-4.6.3.tgz#742e5eaaa97fa6c7e1358d2934d8f18f44aee781"
-  integrity sha512-LRq7BrHC2kHPBYSD50aKuw/B/dGcg29omyJbKWY3KsYUZU69RKwaBHu13jGmCYBtOc4odsLCrFyk6imfyNubJQ==
 
 papaparse@^5.2.0:
   version "5.2.0"
