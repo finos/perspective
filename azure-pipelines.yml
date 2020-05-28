@@ -63,17 +63,17 @@ jobs:
         artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
       Python36:
         python.version: '3.6'
-        python_flag: ''
+        python_flag: '--python36'
         manylinux_flag: ''
         artifact_name: 'cp36-cp36m'
       Python36ManyLinux2010:
         python.version: '3.6'
-        python_flag: ''
+        python_flag: '--python36'
         manylinux_flag: '--manylinux2010'
         artifact_name: 'cp36-cp36m-manylinux2010_x86_64'
       Python36ManyLinux2014:
         python.version: '3.6'
-        python_flag: ''
+        python_flag: '--python36'
         manylinux_flag: '--manylinux2014'
         artifact_name: 'cp36-cp36m-manylinux2014_x86_64'
       Python37:
@@ -93,17 +93,17 @@ jobs:
         artifact_name: 'cp37-cp37m-manylinux2014_x86_64'
       Python38:
         python.version: '3.8'
-        python_flag: ''
+        python_flag: '--python38'
         manylinux_flag: ''
         artifact_name: 'cp38-cp38'
       Python38ManyLinux2010:
         python.version: '3.8'
-        python_flag: ''
+        python_flag: '--python38'
         manylinux_flag: '--manylinux2010'
         artifact_name: 'cp38-cp38-manylinux2010_x86_64'
       Python38ManyLinux2014:
         python.version: '3.8'
-        python_flag: ''
+        python_flag: '--python38'
         manylinux_flag: '--manylinux2014'
         artifact_name: 'cp38-cp38-manylinux2014_x86_64'
 
@@ -197,13 +197,13 @@ jobs:
     matrix:
       Python36:
         python.version: '3.6'
-        python_flag: ''
+        python_flag: '--python36'
       Python37:
         python.version: '3.7'
         python_flag: ''
       Python38:
         python.version: '3.8'
-        python_flag: ''
+        python_flag: '--python38'
 
   steps:
     - task: UsePythonVersion@0
@@ -362,7 +362,7 @@ jobs:
 
       Python36:
         python.version: '3.6'
-        python_flag: ''
+        python_flag: '--python36'
         artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
 
       Python37:
@@ -372,7 +372,7 @@ jobs:
 
       Python38:
         python.version: '3.8'
-        python_flag: ''
+        python_flag: '--python38'
         artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
 
   steps:
