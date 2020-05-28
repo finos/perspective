@@ -119,7 +119,7 @@ and must be imported individually.
 
 Perspective offers these plugin modules:
 
-- `@finos/perspective-viewer-d3fc`  
+- `@finos/perspective-viewer-datagrid`  
   A custom high-performance data-grid component based on HTML `<table>`.
 
 - `@finos/perspective-viewer-d3fc`  
