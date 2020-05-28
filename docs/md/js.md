@@ -884,9 +884,17 @@ Similarly, `view()` updates instigated either through the Attribute API or
 through user interaction will fire a `perspective-config-update` event:
 
 ```javascript
-elem.addEventListener("perspective-config-update", function() {
+elem.addEventListener("perspective-config-update", function(event) {
   var config = elem.save();
   console.log("The view() config has changed to " + JSON.stringify(config));
+});
+```
+
+Once an update has finished, a `perspective-update-complete` DOM event is fired.
+
+```javascript
+elem.addEventListener("perspective-update-complete", function(event) {
+  console.log("Update is now complete");
 });
 ```
 
@@ -909,3 +917,4 @@ elem.addEventListener("perspective-click", function(event) {
   elem.restore(config);
 });
 ```
+
