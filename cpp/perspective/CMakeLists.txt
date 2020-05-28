@@ -45,21 +45,26 @@ function (psp_build_dep name cmake_file)
 		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
 	else()
 		configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
+
 		execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 			RESULT_VARIABLE result
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+
 		if(result)
 			message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
 		endif()
+
 		execute_process(COMMAND ${CMAKE_COMMAND} --build .
 			RESULT_VARIABLE result
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+
 		if(result)
 			message(FATAL_ERROR "Build step for ${name} failed: ${result}")
 		endif()
 	endif()
 
 	if(${name} STREQUAL arrow)
+		# Overwrite arrow's CMakeLists with our custom, minimal one
 		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
 		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/config.h ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ COPYONLY)
 		add_subdirectory(${CMAKE_BINARY_DIR}/arrow-src/cpp/
@@ -67,6 +72,17 @@ function (psp_build_dep name cmake_file)
 			EXCLUDE_FROM_ALL)
 
 		include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/)
+	elseif (${name} STREQUAL date)
+		# Overwrite date.h's CMakeLists with our custom one, as `CMAKE_ARGS` in
+		# the `.in.txt`s do not work properly.
+		configure_file(${PSP_CMAKE_MODULE_PATH}/date/CMakeLists.txt ${CMAKE_BINARY_DIR}/date-src COPYONLY)
+		add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
+			${CMAKE_BINARY_DIR}/${name}-build
+			EXCLUDE_FROM_ALL)
+
+		include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
+		include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
+		include_directories(${CMAKE_BINARY_DIR}/${name}-src)
 	else()
 		add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
 			${CMAKE_BINARY_DIR}/${name}-build
@@ -565,6 +581,9 @@ if (PSP_WASM_BUILD)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	target_link_libraries(psp arrow)
 
+	# Link against `tz`, because it isn't header-only like `date`
+	target_link_libraries(psp tz)
+
 	add_executable(perspective.async src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
@@ -635,7 +654,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 
 		target_link_libraries(psp tbb)
+
+		# Link against `tz`, because it isn't header-only like `date`
+		target_link_libraries(psp tz)
+
 		target_link_libraries(binding tbb)
+		target_link_libraries(binding tz)
 
 		target_link_libraries(binding psp)
 

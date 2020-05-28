@@ -18,6 +18,7 @@
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
 #include <date/date.h>
+#include <date/tz.h>
 
 namespace perspective {
 

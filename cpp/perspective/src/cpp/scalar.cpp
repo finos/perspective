@@ -679,9 +679,22 @@ t_tscalar::to_string(bool for_expr) const {
             return ss.str();
         } break;
         case DTYPE_TIME: {
+            // Convert a millisecond UTC timestamp to a formatted datestring in
+            // local time, as all datetimes exported to the user happens in
+            // local time and not UTC.
             std::chrono::milliseconds timestamp(to_int64());
             date::sys_time<std::chrono::milliseconds> ts(timestamp);
-            ss << date::format("%Y-%m-%d %H:%M:%S", ts);
+
+            // Get the current timezone as set by the `TZ` envvar
+            const char* env_tz = getenv("TZ");
+
+            if (env_tz != nullptr) {
+                ss << date::format("%Y-%m-%d %H:%M:%S %Z", date::make_zoned(env_tz, ts));
+            } else {
+                // use current_zone() if not found
+                ss << date::format("%Y-%m-%d %H:%M:%S %Z", date::make_zoned(date::current_zone(), ts));
+            }
+
             return ss.str();
         } break;
         case DTYPE_STR: {

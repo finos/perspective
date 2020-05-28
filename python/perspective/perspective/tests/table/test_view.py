@@ -320,13 +320,33 @@ class TestView(object):
         order = ["__ROW_PATH__", "a", "c"]
         assert view.column_paths() == order
 
-    def test_view_column_pivot_datetime_names(self):
+    # row and column pivot paths
+    def test_view_row_pivot_datetime_row_paths_are_same_as_data(self):
+        """Tests row paths for datetimes in UTC. Timezone-related tests are
+        in the `test_table_datetime` file."""
+        data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"])
+
+        data = view.to_dict()
+
+        for rp in data["__ROW_PATH__"]:
+            if len(rp) > 0:
+                assert rp[0] == "2019-07-11 12:30:00.000 UTC"
+
+        assert tbl.view().to_dict() == {
+            "a": [datetime(2019, 7, 11, 12, 30)], "b": [1]
+        }
+
+    def test_view_column_pivot_datetime_names_utc(self):
+        """Tests column paths for datetimes in UTC. Timezone-related tests are
+        in the `test_table_datetime` file."""
         data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}
         tbl = Table(data)
         view = tbl.view(column_pivots=["a"])
-        cols = list(view.to_dict().keys())
+        cols = view.column_paths()
         for col in cols:
-            assert col in ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
+            assert col in ["2019-07-11 12:30:00.000 UTC|a", "2019-07-11 12:30:00.000 UTC|b"]
 
     # aggregate
 
@@ -365,7 +385,7 @@ class TestView(object):
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 1},
-            {"__ROW_PATH__": ["2019-10-01 11:30:00.000"], "a": 1}
+            {"__ROW_PATH__": ["2019-10-01 11:30:00.000 UTC"], "a": 1}
         ]
 
     def test_view_aggregate_datetime_leading_zeroes(self):
@@ -377,7 +397,7 @@ class TestView(object):
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 1},
-            {"__ROW_PATH__": ["2019-01-01 05:05:05.000"], "a": 1}
+            {"__ROW_PATH__": ["2019-01-01 05:05:05.000 UTC"], "a": 1}
         ]
 
     def test_view_aggregate_multiple_columns(self):

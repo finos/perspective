@@ -1016,6 +1016,90 @@ if os.name != 'nt':
 
             assert table.view().to_dict()["a"] == [d.astimezone(ACT).replace(tzinfo=None) for d in data["a"]]
 
+    class TestTableDateTimeRowColumnPaths(object):
+        """Assert correctness of row and column paths in different timezones."""
+        def setup_method(self):
+            # To make sure that local times are not changed, set timezone to EST
+            os.environ["TZ"] = "US/Eastern"
+            time.tzset()
+
+        def teardown_method(self):
+            # Set timezone to UTC, always
+            os.environ["TZ"] = "UTC"
+            time.tzset()
+
+        def test_table_row_pivot_datetime_row_path_local_time_preserved_as_is(self):
+            """Make sure that string datetimes generated in Python are in
+            local time and not UTC."""
+            data = {
+                "a": LOCAL_DATETIMES,
+                "b": [i for i in range(len(LOCAL_DATETIMES))]
+            }
+
+            table = Table(data)
+
+            view = table.view(row_pivots=["a"])
+            assert view.to_columns() == {
+                "__ROW_PATH__": [
+                    [],
+                    ['2019-01-11 00:10:20.000 EST'],
+                    ['2019-01-11 11:10:20.000 EST'],
+                    ['2019-01-11 19:10:20.000 EST'],
+                ],
+                "a": [3, 1, 1, 1],
+                "b": [3, 0, 1, 2]
+            }
+
+        def test_table_row_pivot_datetime_row_path_UTC(self):
+            """Make sure that string datetimes generated in Python are in
+            UTC if the timezone is UTC."""
+            os.environ["TZ"] = "UTC"
+            time.tzset()
+
+            data = {
+                "a": LOCAL_DATETIMES,
+                "b": [i for i in range(len(LOCAL_DATETIMES))]
+            }
+
+            table = Table(data)
+
+            view = table.view(row_pivots=["a"])
+            assert view.to_columns() == {
+                "__ROW_PATH__": [
+                    [],
+                    ['2019-01-11 00:10:20.000 UTC'],
+                    ['2019-01-11 11:10:20.000 UTC'],
+                    ['2019-01-11 19:10:20.000 UTC'],
+                ],
+                "a": [3, 1, 1, 1],
+                "b": [3, 0, 1, 2]
+            }
+
+        def test_table_row_pivot_datetime_row_path_CST(self):
+            """Make sure that string datetimes generated in Python are in
+            CST if the timezone is CST."""
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            data = {
+                "a": LOCAL_DATETIMES,
+                "b": [i for i in range(len(LOCAL_DATETIMES))]
+            }
+
+            table = Table(data)
+
+            view = table.view(row_pivots=["a"])
+            assert view.to_columns() == {
+                "__ROW_PATH__": [
+                    [],
+                    ['2019-01-11 00:10:20.000 CST'],
+                    ['2019-01-11 11:10:20.000 CST'],
+                    ['2019-01-11 19:10:20.000 CST'],
+                ],
+                "a": [3, 1, 1, 1],
+                "b": [3, 0, 1, 2]
+            }
+
 
 class TestTableDateTimePivots(object):
 
