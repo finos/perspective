@@ -326,7 +326,19 @@ jobs:
     # Use venv for python3
     - bash: python -m venv ./temp_venv
       condition: and(succeeded(), eq(variables['python_flag'], ''))
-      displayName: "Create virtualenv (Python 3)"
+      displayName: "Create virtualenv (Python 3.7)"
+
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python36'))
+      displayName: "Create virtualenv (Python 3.6)"
+
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python37'))
+      displayName: "Create virtualenv (Python 3.7)"
+
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python38'))
+      displayName: "Create virtualenv (Python 3.8)"
 
     - bash: source ./temp_venv/bin/activate
       displayName: "Activate virtualenv"
@@ -432,7 +444,22 @@ jobs:
     # Use venv for python3
     - bash: python -m venv ./temp_venv
       condition: and(succeeded(), eq(variables['python_flag'], ''))
-      displayName: "Create virtualenv (Python 3)"
+      displayName: "Create virtualenv (Python 3.7)"
+
+    # Use venv for python3
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python36'))
+      displayName: "Create virtualenv (Python 3.6)"
+
+    # Use venv for python3
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python37'))
+      displayName: "Create virtualenv (Python 3.7)"
+
+    # Use venv for python3
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), eq(variables['python_flag'], '--python38'))
+      displayName: "Create virtualenv (Python 3.8)"
 
     - bash: source ./temp_venv/bin/activate
       displayName: "Activate virtualenv"
