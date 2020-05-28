@@ -95,11 +95,11 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * Sets this `perspective.table.view`'s `sort` property, an array of column
+     * Sets this `perspective.table.view`'s `sort` property, an Array of column
      * names.
      *
      * @kind member
-     * @type {array<string>} Array of arrays tuples of column name and
+     * @type {Array<String>} Array of arrays tuples of column name and
      * direction, where the possible values are "asc", "desc", "asc abs", "desc
      * abs" and "none".
      * @fires PerspectiveViewer#perspective-config-update
@@ -148,7 +148,8 @@ class PerspectiveViewer extends ActionElement {
      * The set of visible columns.
      *
      * @kind member
-     * @param {array} columns An array of strings, the names of visible columns.
+     * @type {Array<String>}
+     * @param {Array} columns An Array of strings, the names of visible columns.
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
@@ -176,10 +177,15 @@ class PerspectiveViewer extends ActionElement {
     /* eslint-disable max-len */
 
     /**
-     * The set of visible columns.
+     * Sets new computed columns for the viewer.
      *
      * @kind member
-     * @param {array} computed-columns An array of computed column objects
+     * @type {Array<Object>}
+     * @param {Array<Object>} computed-columns An Array of computed column objects,
+     * which have three properties: `name`, a column name for the new column,
+     * `computed_function_name`, a String representing the computed function to
+     * apply, and `inputs`, an Array of String column names to be used as
+     * inputs to the computation.
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
@@ -270,7 +276,8 @@ class PerspectiveViewer extends ActionElement {
      * The set of column aggregate configurations.
      *
      * @kind member
-     * @param {object} aggregates A dictionary whose keys are column names, and
+     * @type {Object}
+     * @param {Object} aggregates A dictionary whose keys are column names, and
      * values are valid aggregations. The `aggregates` attribute works as an
      * override; in lieu of a key for a column supplied by the developers, a
      * default will be selected and reflected to the attribute based on the
@@ -307,11 +314,11 @@ class PerspectiveViewer extends ActionElement {
      * The set of column filter configurations.
      *
      * @kind member
-     * @type {array} filters An array of filter config objects. A filter config
-     * object is an array of three elements: * The column name. * The filter
-     * operation as a string. See
+     * @type {Array<Array>} filters An Array of filter configs. A filter
+     * config is an Array of three elements: * The column name. * The filter
+     * operation as a String. See
      * {@link perspective/src/js/config/constants.js} * The filter argument, as
-     * a string, float or Array<string> as the filter operation demands.
+     * a String, float or Array<String> as the filter operation demands.
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let filters = [
@@ -366,7 +373,7 @@ class PerspectiveViewer extends ActionElement {
      * Sets the currently selected plugin, via its `name` field, and removes
      * any children the previous plugin may have left behind in the light DOM.
      *
-     * @type {string}
+     * @type {String}
      * @fires PerspectiveViewer#perspective-config-update
      */
     set plugin(v) {
@@ -433,7 +440,7 @@ class PerspectiveViewer extends ActionElement {
      * Sets this `perspective.table.view`'s `row_pivots` property.
      *
      * @kind member
-     * @type {array<string>} Array of column names
+     * @type {Array<String>} Array of column names
      * @fires PerspectiveViewer#perspective-config-update
      */
     @array_attribute
@@ -462,7 +469,7 @@ class PerspectiveViewer extends ActionElement {
      * ultimately up to the plugin as to whether editing is implemented).
      *
      * @kind member
-     * @type {boolean} Is this viewer editable?
+     * @type {Boolean} Is this viewer editable?
      * @fires PerspectiveViewer#perspective-config-update
      */
     set editable(x) {
@@ -484,7 +491,7 @@ class PerspectiveViewer extends ActionElement {
      * render framerate.
      *
      * @kind member
-     * @type {integer|string} The throttle rate - milliseconds (integer), or the
+     * @type {Number|String} The throttle rate - milliseconds (integer), or the
      * enum "adaptive" for a dynamic throttle based on render time.
      * @example
      * <!-- Only draws at most 1 frame/sec. -->
@@ -506,7 +513,7 @@ class PerspectiveViewer extends ActionElement {
      * ultimately up to the plugin as to whether selectable is implemented).
      *
      * @kind member
-     * @type {boolean} Is this viewer editable?
+     * @type {Boolean} Is this viewer editable?
      * @fires PerspectiveViewer#perspective-config-update
      */
     set selectable(x) {
@@ -657,9 +664,9 @@ class PerspectiveViewer extends ActionElement {
      * user state).  This (or the underlying `perspective.table`'s equivalent
      * method) must be called in order for its memory to be reclaimed.
      *
-     * @param {boolean} delete_table Should a delete call also be made to the
+     * @param {Boolean} delete_table Should a delete call also be made to the
      * underlying `table()`.
-     * @returns {Promise<boolean>} Whether or not this call resulted in the
+     * @returns {Promise<Boolean>} Whether or not this call resulted in the
      * underlying `perspective.table` actually being deleted.
      */
     delete(delete_table = true) {
@@ -713,7 +720,7 @@ class PerspectiveViewer extends ActionElement {
      * Restore this element to a state as generated by a reciprocal call to
      * `save` or `serialize`.
      *
-     * @param {object|string} config returned by `save` or `serialize`.
+     * @param {Object|String} config returned by `save` or `serialize`.
      * @returns {Promise<void>} A promise which resolves when the changes have
      * been applied.
      */
@@ -793,7 +800,7 @@ class PerspectiveViewer extends ActionElement {
     /**
      * Download this element's data as a CSV file.
      *
-     * @param {boolean} [flat=false] Whether to use the element's current view
+     * @param {Boolean} [flat=false] Whether to use the element's current view
      * config, or to use a default "flat" view.
      * @memberof PerspectiveViewer
      */
@@ -876,11 +883,11 @@ class PerspectiveViewer extends ActionElement {
  *
  * @event module:perspective_viewer~PerspectiveViewer#perspective-click
  * @type {object}
- * @property {array} column_names - Includes a list of column names.
+ * @property {Array} column_names - Includes a list of column names.
  * @property {object} config - Contains a property `filters` that can be applied
  * to a `<perspective-viewer>` through the use of `restore()` updating it to
  * show the filtered subset of data..
- * @property {array} row - Includes the data row.
+ * @property {Array} row - Includes the data row.
  */
 
 /**
@@ -888,7 +895,7 @@ class PerspectiveViewer extends ActionElement {
  * been modified, by the user or otherwise.
  *
  * @event module:perspective_viewer~PerspectiveViewer#perspective-config-update
- * @type {string}
+ * @type {String}
  */
 
 /**
@@ -896,5 +903,5 @@ class PerspectiveViewer extends ActionElement {
  * updated, including every invocation of `load` and `update`.
  *
  * @event module:perspective_viewer~PerspectiveViewer#perspective-view-update
- * @type {string}
+ * @type {String}
  */
