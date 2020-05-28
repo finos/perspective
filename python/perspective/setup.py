@@ -52,8 +52,9 @@ requires = [
 if sys.version_info.major < 3:
     requires.append("backports.shutil-which")
 
-if sys.version_info.minor < 7:
-    raise Exception("Requires Python 2.7/3.7 or later")
+if (sys.version_info.major == 2 and sys.version_info.minor < 7) or 
+   (sys.version_info.major == 3 and sys.version_info.minor < 6):
+    raise Exception("Requires Python 2.7/3.6 or later")
 
 requires_dev = [
     'Faker>=1.0.0',

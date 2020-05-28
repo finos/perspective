@@ -10,7 +10,7 @@ const {execute, docker, resolve, getarg, python_image} = require("./script_utils
 
 const VERBOSE = getarg("--debug");
 const IS_PY2 = getarg("--python2");
-const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
+const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6": "python3.7";
 const IMAGE = python_image(getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "", PYTHON);
 
 try {
