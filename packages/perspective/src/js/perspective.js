@@ -194,15 +194,24 @@ export default function(Module) {
     };
 
     /**
-     * How many pivoted sides does this view have?
+     * How many pivoted sides does this {@link module:perspective~view} have?
      *
      * @private
-     * @returns {number} sides The number of sides of this `View`.
+     * @returns {number} sides The number of sides of this
+     * {@link module:perspective~view}.
      */
     view.prototype.sides = function() {
         return this._View.sides();
     };
 
+    /**
+     * Counts hidden columns in the {@link module:perspective~view}. A hidden
+     * column is a column used as a sort column, but not shown in the view.
+     *
+     * @private
+     * @returns {number} sides The number of hidden columns in this
+     * {@link module:perspective~view}.
+     */
     view.prototype._num_hidden = function() {
         // Count hidden columns.
         let hidden = 0;
@@ -236,12 +245,20 @@ export default function(Module) {
     };
 
     /**
-     * The schema of this {@link module:perspective~view}. A schema is an
-     * Object, the keys of which are the columns of this
+     * The schema of this {@link module:perspective~view}.
+     *
+     * A schema is an Object, the keys of which are the columns of this
      * {@link module:perspective~view}, and the values are their string type
      * names. If this {@link module:perspective~view} is aggregated, theses will
      * be the aggregated types; otherwise these types will be the same as the
-     * columns in the underlying {@link module:perspective~table}
+     * columns in the underlying {@link module:perspective~table}.
+     *
+     * @example
+     * // Create a view
+     * const view = table.view({
+     *      columns: ["a", "b"]
+     * });
+     * const schema = await view.schema(); // {a: "float", b: "string"}
      *
      * @async
      *
@@ -264,12 +281,24 @@ export default function(Module) {
 
     /**
      * The computed column schema of this {@link module:perspective~view},
-     * containing only user-created computed columns. A schema is an Object, the
-     * keys of which are the columns of this {@link module:perspective~view},
-     * and the values are their string type names. If this
-     * {@link module:perspective~view} is aggregated, theses will be the
-     * aggregated types; otherwise these types will be the same as the columns
-     * in the underlying {@link module:perspective~table}
+     * containing only user-created computed columns.
+     *
+     * A schema is an Object, the keys of which are the columns of this
+     * {@link module:perspective~view}, and the values are their string type
+     * names. If this {@link module:perspective~view} is aggregated, these will
+     * be the aggregated types; otherwise these types will be the same as the
+     * columns in the underlying {@link module:perspective~table}.
+     *
+     * @example
+     * // Create a view with computed columns
+     * const view = table.view({
+     *      computed_columns: [{
+     *          name: "x + y",
+     *          computed_function_name: "+",
+     *          inputs: ["x", "y"]
+     *      }]
+     * });
+     * const computed_schema = await view.computed_schema(); // {x: "float"}
      *
      * @async
      *
@@ -300,6 +329,8 @@ export default function(Module) {
      *
      * A column path shows the columns that a given cell belongs to after pivots
      * are applied.
+     *
+     * @returns {Array<String>} an Array of Strings containing the column paths.
      */
     view.prototype.column_paths = function() {
         return extract_vector_scalar(this._View.column_paths()).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
@@ -763,9 +794,19 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link module:perspective~view}.  Whenever
+     * Register a callback with this {@link module:perspective~view}. Whenever
      * the {@link module:perspective~view}'s underlying table emits an update,
-     * this callback will be invoked with the aggregated row deltas.
+     * this callback will be invoked with an object containing `port_id`,
+     * indicating which port the update fired on, and optionally `delta`, which
+     * is the new data that was updated for each cell or each row.
+     *
+     * @example
+     * // Attach an `on_update` callback
+     * view.on_update(updated => console.log(updated.port_id));
+     *
+     * @example
+     * // `on_update` with row deltas
+     * view.on_update(updated => console.log(updated.delta), {mode: "row"});
      *
      * @param {function} callback A callback function invoked on update, which
      * receives an object with two keys: `port_id`, indicating which port the
@@ -842,6 +883,12 @@ export default function(Module) {
         return a;
     }
 
+    /*
+     * Unregister a previously registered update callback with this
+     * {@link module:perspective~view}.
+     *
+     * @param {function} callback A update callback function to be removed
+     */
     view.prototype.remove_update = function(callback) {
         _call_process(this.table.get_id());
         const total = this.callbacks.length;

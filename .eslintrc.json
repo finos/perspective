@@ -1,6 +1,7 @@
 {
     "parser": "babel-eslint",
     "plugins": [
+        "markdown",
         "prettier"
     ],
     "env": {
@@ -42,6 +43,14 @@
                 "ignoreTrailingComments": true
             }]
         }    
+    }, {
+        "files": ["**/*.md"],
+        "rules": {
+            "no-undef": "off",
+            "no-unused-vars": "off",
+            "no-console": "off",
+            "padded-blocks": "off"
+        }
     }],
     "rules": {
         "prettier/prettier": ["error", {

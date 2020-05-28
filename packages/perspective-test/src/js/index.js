@@ -369,7 +369,17 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
 
                 // Move the mouse offscreen so prev tests dont get hover effects
                 await page.mouse.move(10000, 10000);
-                await body(page);
+                try {
+                    await body(page);
+                } catch (e) {
+                    if (process.env.PSP_PAUSE_ON_FAILURE) {
+                        if (!process.env.WRITE_TESTS) {
+                            private_console.error(`Failed ${name}, pausing`);
+                            await prompt(`Failed ${name}, pausing.  Press enter to continue ..`);
+                        }
+                    }
+                    throw e;
+                }
                 if (!preserve_hover) {
                     await page.mouse.move(10000, 10000);
                 }

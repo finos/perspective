@@ -42,12 +42,12 @@ Perspective's additional assets, and is easy to set up in your `webpack.config`:
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
-  entry: "./in.js",
-  output: {
-    filename: "out.js",
-    path: "build"
-  },
-  plugins: [new PerspectivePlugin()]
+    entry: "./in.js",
+    output: {
+        filename: "out.js",
+        path: "build"
+    },
+    plugins: [new PerspectivePlugin()]
 };
 ```
 
@@ -74,8 +74,8 @@ Once added to your page, you can access the Javascript API through the
 
 ```javascript
 const worker = perspective.worker();
-const table = worker.table({ A: [1, 2, 3] });
-const view = table.view({ sort: [["A", "desc"]] });
+const table = worker.table({A: [1, 2, 3]});
+const view = table.view({sort: [["A", "desc"]]});
 ```
 
 Or create a `<perspective-viewer>` in HTML:

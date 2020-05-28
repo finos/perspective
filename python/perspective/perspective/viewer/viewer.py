@@ -69,10 +69,11 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 each dict containing ``column``, a new computed column name,
                 ``computed_function_name``, a string computed function name,
                 and ``inputs``, a list of input column names.
-            plugin (`str`/`perspective.Plugin`): Which plugin to select by
+            plugin (:obj:`str`/:obj:`perspective.Plugin`): Which plugin to select by
                 default.
-            plugin_config (`dict`): Custom config for all plugins by name.
-            dark (`bool`): Whether to invert the colors.
+            plugin_config (:obj:`dict`): Custom config for all plugins by name.
+            editable (:obj:`bool`): Whether to allow editability using the grid.
+            dark (:obj:`bool`): Whether to invert the colors.
 
         Examples:
             >>> viewer = PerspectiveViewer(
@@ -110,38 +111,38 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
     @property
     def table(self):
-        '''Returns the `perspective.Table` under management by the viewer.'''
+        '''Returns the ``perspective.Table`` under management by the viewer.'''
         return self.manager.get_table(self.table_name)
 
     @property
     def view(self):
-        '''Returns the `perspective.View` currently shown by the viewer.
+        '''Returns the ``perspective.View`` currently shown by the viewer.
 
         This property changes every time the viewer configuration changes.'''
         return self.manager.get_view(self.view_name)
 
     def load(self, table_or_data, **options):
-        '''Given a `perspective.Table` or data that can be handled by
-        `perspective.Table`, pass it to the viewer.
+        '''Given a ``perspective.Table`` or data that can be handled by
+        ``perspective.Table``, pass it to the viewer.
 
-        `load()` resets the state of the viewer.  If a `perspective.Table`
-        is passed into `table_or_data`, `**options` is ignored as the options
-        already set on the `Table` take precedence.  If data is passed in, a
-        `perspective.Table` is automatically created by this function, and the
-        options passed to `**config` are extended to the new Table.
+        ``load()`` resets the state of the viewer.  If a ``perspective.Table``
+        is passed into ``table_or_data``, ``**options`` is ignored as the options
+        already set on the ``Table`` take precedence.  If data is passed in, a
+        ``perspective.Table`` is automatically created by this function, and the
+        options passed to ``**config`` are extended to the new Table.
 
         Args:
-            table_or_data (`Table`|`dict`|`list`|`pandas.DataFrame`): a
+            table_or_data (:obj:`Table`|:obj:`dict`|:obj:`list`|`pandas.DataFrame`): a
                 `perspective.Table` instance or a dataset to be displayed
                 in the viewer.
 
         Keyword Arguments:
-            name (`str`): An optional name to reference the table by so it can
+            name (:obj:`str`): An optional name to reference the table by so it can
                 be accessed from the front-end. If not provided, a name will
                 be generated.
-            index (`str`): A column name to be used as the primary key.
+            index (:obj:`str`): A column name to be used as the primary key.
                 Ignored if a `Table` is supplied.
-            limit (`int`): A upper limit on the number of rows in the Table.
+            limit (:obj:`int`): A upper limit on the number of rows in the Table.
                 Cannot be set at the same time as `index`, ignored if a `Table`
                 is passed in.
 
@@ -178,13 +179,13 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         affected by whether an index is set on the underlying table.
 
         Args:
-            data (`dict`|`list`|`pandas.DataFrame`): the update data for the
+            data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): the update data for the
                 table.
         '''
         self.table.update(data)
 
     def clear(self):
-        '''Clears the rows of this viewer's `Table`.'''
+        '''Clears the rows of this viewer's ``Table``.'''
         if self.table is not None:
             self.table.clear()
 
@@ -192,7 +193,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         '''Replaces the rows of this viewer's `Table` with new data.
 
         Args:
-            data (`dict`|`list`|`pandas.DataFrame`): new data to set into the
+            data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): new data to set into the
                 table - must conform to the table's schema.
         '''
         if self.table is not None:
@@ -234,11 +235,11 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
     def delete(self, delete_table=True):
         '''Delete the Viewer's data and clears its internal state. If
-        `delete_table` is True, the underlying `perspective.Table` and all
-        associated `View`s will be deleted.
+        ``delete_table`` is True, the underlying `perspective.Table` and all
+        associated ``View`` objects will be deleted.
 
         Args:
-            delete_table (bool) : whether the underlying `Table` will be
+            delete_table (:obj:`bool`) : whether the underlying `Table` will be
                 deleted. Defaults to True.
         '''
         if self.view:
@@ -258,7 +259,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     def _new_view(self):
         '''Create a new View, and assign its name to the viewer.  Do not call
         this function - it will be called automatically when the state of the
-        viewer changes.  There should only be one View associated with the
+        viewer changes. There should only be one View associated with the
         Viewer at any given time - when a new View is created, the old one
         is destroyed.
         '''

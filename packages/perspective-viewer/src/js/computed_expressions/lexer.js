@@ -37,7 +37,7 @@ export const UpperLowerCaseTokenType = createToken({
 });
 
 // Create tokens for column names and computed function names
-const column_name_regex_pattern = /(["'])(.*?[^\\])\1/y;
+export const COLUMN_NAME_REGEX_PATTERN = /(["'])(.*?[^\\])\1/y;
 
 /**
  * Given a string from which to extract a column name, extract the column name
@@ -48,8 +48,8 @@ const column_name_regex_pattern = /(["'])(.*?[^\\])\1/y;
  * @param {Number} start_offset
  */
 const match_column_name = function(string, start_offset) {
-    column_name_regex_pattern.lastIndex = start_offset;
-    const result = column_name_regex_pattern.exec(string);
+    COLUMN_NAME_REGEX_PATTERN.lastIndex = start_offset;
+    const result = COLUMN_NAME_REGEX_PATTERN.exec(string);
 
     if (result !== null && result.length === 3) {
         result.payload = result[2]; // 2nd capture group is in-between quotes

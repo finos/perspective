@@ -258,12 +258,22 @@ exports.python_image = function python_image(image = "", python = "") {
             return "python2";
         }
     } else if (python == "python3.8") {
-        throw "Python 3.8 not implemented yet";
+        if (image == "manylinux2010" || image == "manylinux2014") {
+            return `python38_${image}`;
+        } else {
+            return "python38";
+        }
+    } else if (python == "python3.6") {
+        if (image == "manylinux2010" || image == "manylinux2014") {
+            return `python36_${image}`;
+        } else {
+            return "python36";
+        }
     } else {
         if (image == "manylinux2010" || image == "manylinux2014") {
-            return `python3_${image}`;
+            return `python37_${image}`;
         } else {
-            return "python3";
+            return "python37";
         }
     }
 };

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0] (2020-05-24)
+
+#### Added
+  * [#983](https://github.com/finos/perspective/pull/983) Expression-based Computed Columns ([@sc1f](https://github.com/sc1f))
+  * [#1052](https://github.com/finos/perspective/pull/1052) Autocomplete ([@sc1f](https://github.com/sc1f))
+  * [#1043](https://github.com/finos/perspective/pull/1043) Implement Client/Server Editing ([@sc1f](https://github.com/sc1f))
+  * [#975](https://github.com/finos/perspective/pull/975) Reference python objects directly in perspective tables ([@timkpaine](https://github.com/timkpaine))
+
+#### Internal
+  * [#1043](https://github.com/finos/perspective/pull/1043) Implement Client/Server Editing ([@sc1f](https://github.com/sc1f))
+  * [#1028](https://github.com/finos/perspective/pull/1028) Fix minor bugs in Perspective datetime + NaN handling ([@sc1f](https://github.com/sc1f))
+  * [#1022](https://github.com/finos/perspective/pull/1022) Fix flapping `perspective-workspace` tests ([@texodus](https://github.com/texodus))
+
 ## [0.4.7] (2020-04-06)
 
 #### Added
