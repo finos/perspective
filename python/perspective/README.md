@@ -33,10 +33,10 @@ For Linux and Windows, source distributions are available from `PyPi`. For prope
 
 ### Dependencies
 
-`pyarrow==0.15.1` is a build dependency and **must be installed before installing Perspective**:
+`pyarrow==0.16.0` is a build dependency and **must be installed before installing Perspective**:
 
 ```bash
-pip install pyarrow==0.15.1
+pip install pyarrow==0.16.0
 ```
 
 All other dependencies (Python and C++) will be installed as part of the `pip install` process.

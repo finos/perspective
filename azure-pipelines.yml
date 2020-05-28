@@ -224,7 +224,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install numpy pyarrow==0.15.1
+        python -m pip install numpy pyarrow==0.16.0
       displayName: "Python deps"
 
     - script: npm install -g yarn
@@ -256,7 +256,7 @@ jobs:
 
       Python36:
         python.version: '3.6'
-        python_flag: ''
+        python_flag: '--python36'
         artifact_name: 'cp36-cp36m-macosx_10_14_x86_64'
 
       Python37:
@@ -266,7 +266,7 @@ jobs:
 
       Python38:
         python.version: '3.8'
-        python_flag: ''
+        python_flag: '--python38'
         artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
 
   steps:
@@ -290,7 +290,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install delocate wheel numpy pyarrow==0.15.1
+        python -m pip install delocate wheel numpy pyarrow==0.16.0
       displayName: "Python deps"
 
     - script: npm install -g yarn
@@ -396,7 +396,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install delocate wheel numpy pyarrow==0.15.1
+        python -m pip install delocate wheel numpy pyarrow==0.16.0
       displayName: "Python deps"
 
     - script: npm install -g yarn
