@@ -26,7 +26,7 @@ clean: ## clean the repository
 	find . -name "*.a"  | xargs rm -rf
 
 labextension: install ## enable labextension
-	jupyter labextension install @jpmorganchase/perspective-jupyterlab
+	jupyter labextension install @finos/perspective-jupyterlab
 
 install:  ## install to site-packages
 	python3 -m pip install .
