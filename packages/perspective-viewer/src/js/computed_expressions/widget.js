@@ -15,7 +15,7 @@ import template from "../../html/computed_expression_widget.html";
 
 import style from "../../less/computed_expression_widget.less";
 
-import {ColumnNameTokenType, FunctionTokenType, OperatorTokenType, clean_tokens} from "./lexer";
+import {ColumnNameTokenType, FunctionTokenType, OperatorTokenType, clean_tokens, COLUMN_NAME_REGEX_PATTERN} from "./lexer";
 import {ComputedExpressionAutocompleteSuggestion} from "./computed_expression_parser";
 import {tokenMatcher} from "chevrotain";
 
@@ -407,7 +407,7 @@ class ComputedExpressionWidget extends HTMLElement {
             // FIXME: clean up this affront against all things good
             const last_word = old_value.substring(old_value.lastIndexOf(" ")).trim();
             const last_word_is_column_name = /["'].*[^'"]/.test(last_word) || last_word === '"' || last_word === "'";
-            const new_is_column_name = /(["'])(?<column_name>.*?[^\\])\1/y.test(new_value);
+            const new_is_column_name = COLUMN_NAME_REGEX_PATTERN.test(new_value);
 
             if (last_word_is_column_name && new_is_column_name) {
                 let last_word_idx = old_value.lastIndexOf(last_word);
