@@ -70,7 +70,7 @@ const schema = {
     d: "datetime",
     e: "boolean",
     f: "string"
-}
+};
 ```
 
 Because Perspective is built in multiple languages, data types are
@@ -123,7 +123,7 @@ To create a `Table` with a `limit`, provide the `limit` property with an integer
 indicating the `limit`:
 
 ```javascript
-const table = perspective.table(data, {limit: 1000})
+const table = perspective.table(data, {limit: 1000});
 ```
 
 `limit` cannot be used in conjunction with `index`.
@@ -140,7 +140,7 @@ To create an indexed `Table`, provide the `index` property with a string column
 name to be used as an index:
 
 ```javascript
-const table = perspective.table(data, {index: "a"})
+const table = perspective.table(data, {index: "a"});
 ```
 
 An indexed `Table` allows for in-place _updates_ whenever a new rows shares an
@@ -171,15 +171,18 @@ using the `index` to determine which rows to update:
 
 ```javascript
 // Create an indexed table
-const table = perspective.table({
-    "id": [1, 2, 3, 4],
-    "name": ["a", "b", "c", "d"]
-}, {index: "id"});
+const table = perspective.table(
+    {
+        id: [1, 2, 3, 4],
+        name: ["a", "b", "c", "d"]
+    },
+    {index: "id"}
+);
 
 // Update rows with primary key `1` and `4`
 table.update({
-    "id": [1, 4],
-    "name": ["x", "y"]
+    id: [1, 4],
+    name: ["x", "y"]
 });
 ```
 
@@ -195,10 +198,13 @@ An indexed `Table` can also have rows removed by primary key:
 
 ```javascript
 // Create an indexed table
-const table = perspective.table({
-    "id": [1, 2, 3, 4],
-    "name": ["a", "b", "c", "d"]
-}, {index: "id"});
+const table = perspective.table(
+    {
+        id: [1, 2, 3, 4],
+        name: ["a", "b", "c", "d"]
+    },
+    {index: "id"}
+);
 
 // Remove rows with primary key `1` and `4`
 table.remove([1, 4]);
@@ -240,8 +246,8 @@ instance via the `view()` method with a set of
 
 ```javascript
 const table = perspective.table({
-    "id": [1, 2, 3, 4],
-    "name": ["a", "b", "c", "d"]
+    id: [1, 2, 3, 4],
+    name: ["a", "b", "c", "d"]
 });
 
 // Create a view showing just the `name` column.
@@ -249,8 +255,11 @@ const view = table.view({
     columns: ["name"]
 });
 
-// Now you have a `View`!  Get your data!
-const json = await view.to_json();
+// Now you have a `View`!  Get your data using ES6 async/await:
+const json = async () => await view.to_json();
+
+// or using the Promise API
+view.to_arrow().then(arrow => console.log(arrow));
 
 // Delete the Query!
 view.delete();

@@ -17,6 +17,9 @@ This document offers an overview of the Javascript library, providing:
 For understanding Perspective's core concepts and vocabulary, see the
 [Conceptual Overview](/docs/md/concepts.html).
 
+For example code, see the [examples directory](https://github.com/finos/perspective/tree/master/examples)
+on GitHub.
+
 ## Quick Start
 
 First, make sure that Perspective [is installed](/docs/md/installation.html),
@@ -76,8 +79,8 @@ handle everything for you:
 ```javascript
 // Assume that new ticks are delivered via websocket
 websocket.onmessage = function(event) {
-  viewer.update(event.data);
-}
+    viewer.update(event.data);
+};
 ```
 
 ### Configuring `perspective-viewer`
@@ -91,7 +94,8 @@ different visualization on load or transform the dataset, use the viewer's attri
   id="view1"
   plugin="xy_scatter"
   columns='["Sales", "Profits"]'
-  row_pivots='["State", "City"]'>
+  row_pivots='["State", "City"]'
+>
 </perspective-viewer>
 ```
 
@@ -126,7 +130,7 @@ Perspective offers these plugin modules:
   A `<perspective-viewer>` plugin for the [d3fc](https://d3fc.io) charting
   library.
 
-Also available are these legacy modules;  though no longer under development,
+Also available are these legacy modules; though no longer under development,
 they are compatible with perspective versions < 1.0.0:
 
 - `@finos/perspective-viewer-hypergrid`  
@@ -154,6 +158,7 @@ modules. Some basic guidelines to help you decide what is most appropriate for
 your project:
 
 - For Perspective as a simple, browser-based data visualization widget, import:
+
   - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
   - `@finos/perspective-viewer-datagrid` for data grids
   - `@finos/perspective-viewer-d3fc` for charting
@@ -162,6 +167,7 @@ your project:
 
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
+
   - `@finos/perspective`, as detailed [here](#perspective-library)
 
 - For more complex cases, such as
@@ -189,15 +195,15 @@ It exports Perspective's data interfaces:
 
 `@finos/perspective` also exports process management functions such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in node.js). See the [API documentation](/obj/perspective.html) for a complete 
+(in node.js). See the [API documentation](/obj/perspective.html) for a complete
 reference on all exported methods.
 
-This module is a dependency of `@finos/perspective-viewer`, and is not needed if 
+This module is a dependency of `@finos/perspective-viewer`, and is not needed if
 you only intend to use `<perspective-viewer>` to visualize simple data.
 
 ### Importing in the browser
 
-`perspective` can be imported as an ES6 module and/or `require` syntax if you're 
+`perspective` can be imported as an ES6 module and/or `require` syntax if you're
 using a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
 
 ```javascript
@@ -222,7 +228,7 @@ const perspective = require("@finos/perspective");
 
 Once imported, you'll need to instantiate a `perspective` engine via the
 `worker()` method. This will create a new WebWorker (browser) or
-Process (Node.js), and load the WebAssembly binary; all calculation and data 
+Process (Node.js), and load the WebAssembly binary; all calculation and data
 accumulation will occur in this separate process.
 
 ```javascript
@@ -254,17 +260,17 @@ to the table via its `update()` method.
 ```javascript
 // With data (also works with strings in CSV format)
 var data = [
-  { x: 1, y: "a", z: true },
-  { x: 2, y: "b", z: false },
-  { x: 3, y: "c", z: true },
-  { x: 4, y: "d", z: false }
+    {x: 1, y: "a", z: true},
+    {x: 2, y: "b", z: false},
+    {x: 3, y: "c", z: true},
+    {x: 4, y: "d", z: false}
 ];
 
 const table1 = worker.table(data);
 ```
 
 `table()`s are columnar data structures, and each column must have a single
-type. When passing data directly to the `table()` constructor, the type of each 
+type. When passing data directly to the `table()` constructor, the type of each
 column is inferred automatically.
 
 Perspective supports the following types:
@@ -286,21 +292,21 @@ In these cases, create a `table()` with a _schema_:
 ```javascript
 // With a schema
 var schema = {
-  x: "integer",
-  y: "string",
-  z: "boolean"
+    x: "integer",
+    y: "string",
+    z: "boolean"
 };
 
 const table2 = worker.table(schema);
 ```
 
-Once instatiated, a `table()` can be updated with new data via the `update()` 
+Once instatiated, a `table()` can be updated with new data via the `update()`
 method:
 
 ```javascript
 // Add a new row to each table
-table1.update([{ x: 5, y: "e", z: true }]);
-table2.update([{ x: 5, y: "e", z: true }]);
+table1.update([{x: 5, y: "e", z: true}]);
+table2.update([{x: 5, y: "e", z: true}]);
 ```
 
 New data is appended by default. In-place updates can be enabled through the
@@ -314,10 +320,13 @@ table:
 
 ```javascript
 // Use the 'x' column as a primary key
-const table3 = worker.table({
-  x: [1, 2, 3, 4],
-  y: ["a", "b", "c", "d"]
-}, { index: "x" });
+const table3 = worker.table(
+    {
+        x: [1, 2, 3, 4],
+        y: ["a", "b", "c", "d"]
+    },
+    {index: "x"}
+);
 ```
 
 If an index is set, the `update()` method uses the index to _replace_ or
@@ -326,15 +335,15 @@ _append_ rows:
 ```javascript
 // Replace the values at index 1 and 4
 table3.update({
-  x: [1, 4],
-  y: ["new1", "new2"]
+    x: [1, 4],
+    y: ["new1", "new2"]
 });
 
 // append these rows, as the value in `x` is not an existing primary key
 table3.update({
-  x: [5, 6],
-  y: ["e", "f"]
-})
+    x: [5, 6],
+    y: ["e", "f"]
+});
 ```
 
 #### Row limits via `limit`
@@ -345,7 +354,7 @@ rows.
 
 ```javascript
 // Keep only the most recent 1000 rows
-const table3 = worker.table(data, { limit: 1000 });
+const table3 = worker.table(data, {limit: 1000});
 ```
 
 Appended rows that exceed the `limit` overwrite old rows starting at position 0.
@@ -360,7 +369,7 @@ on a `table()` with `index` applied:
 
 ```javascript
 // Unsets the 'y' column for row 3
-table.update([{ x: 3, y: null }]);
+table.update([{x: 3, y: null}]);
 ```
 
 #### Partial row updates via `undefined`
@@ -371,12 +380,12 @@ Missing keys, or keys with values set to `undefined`, will be omitted from
 
 ```javascript
 // Only updates the 'y' column for row 3, leaving the 'z' column alone
-table.update([{ x: 3, y: "Just Y" }]);
+table.update([{x: 3, y: "Just Y"}]);
 ```
 
 #### Deleting rows with `remove()`
 
-Rows can be removed entirely from a `table()` with `index` set. Call the 
+Rows can be removed entirely from a `table()` with `index` set. Call the
 `remove()` method with a list of the `index` values to be removed:
 
 ```javascript
@@ -395,10 +404,10 @@ configuration object:
 const table = worker.table(data);
 
 const view = table.view({
-  columns: ["Sales"],
-  aggregates: { Sales: "sum" },
-  row_pivot: ["Region", "Country"],
-  filter: [["Category", "in", ["Furniture", "Technology"]]]
+    columns: ["Sales"],
+    aggregates: {Sales: "sum"},
+    row_pivot: ["Region", "Country"],
+    filter: [["Category", "in", ["Furniture", "Technology"]]]
 });
 ```
 
@@ -423,10 +432,12 @@ view.to_csv().then(csv => console.log(csv));
 view.to_arrow().then(arrow => console.log(arrow));
 
 // Via ES6 await/async
-console.log(await view.to_json());
-console.log(await view.to_columns());
-console.log(await view.to_csv());
-console.log(await view.to_arrow());
+async function print_data() {
+    console.log(await view.to_json());
+    console.log(await view.to_columns());
+    console.log(await view.to_csv());
+    console.log(await view.to_arrow());
+}
 ```
 
 ### Deleting a `table()` or `view()`
@@ -461,17 +472,17 @@ const worker2 = perspective.worker();
 
 // Create a `table and `view` on `worker1`.
 const table = worker1.table(data);
-const view = table.view({ filter: [["State", "==", "Texas"]] });
+const view = table.view({filter: [["State", "==", "Texas"]]});
 
 // Create a table from `view` in `worker2`
 const table2 = worker2.table(view);
-const view2 = table2.view({ filter: [["City", "==", "Austin"]] });
+const view2 = table2.view({filter: [["City", "==", "Austin"]]});
 
 //  Both `view1` and `view2` are updated.
-table.update([{ State: "Texas", City: "Austin" }]);
+table.update([{State: "Texas", City: "Austin"}]);
 
 //  Only `view1` is updated.
-table.update([{ State: "Texas", City: "San Antonio" }]);
+table.update([{State: "Texas", City: "San Antonio"}]);
 ```
 
 This is especially useful for piping together `perspective` data from
@@ -497,18 +508,18 @@ configuration object to the `worker()` constructor on initialization.
 
 ```javascript
 module.exports = {
-  types: {
-    string: {
-      aggregate: "dominant"
-    },
-    float: {
-      format: {
-        style: "decimal",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }
+    types: {
+        string: {
+            aggregate: "dominant"
+        },
+        float: {
+            format: {
+                style: "decimal",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        }
     }
-  }
 };
 ```
 
@@ -520,9 +531,9 @@ First, add a new type and declare its base in your `perspective.config.js`:
 
 ```javascript
 module.exports = {
-  types: {
-    price: { type: "float" }
-  }
+    types: {
+        price: {type: "float"}
+    }
 };
 ```
 
@@ -530,8 +541,8 @@ Perspective will not infer these types for you, so you'll need to create your
 table [from a schema](#loading-data-with-table) to use them:
 
 ```javascript
-const table = worker.table({ volume: "integer", price: "price" });
-table.update([{ volume: 10, price: 100.75 }]);
+const table = worker.table({volume: "integer", price: "price"});
+table.update([{volume: 10, price: 100.75}]);
 ```
 
 #### Formatting data types
@@ -541,17 +552,17 @@ Default and user-created types can be styled using the `format` key in
 
 ```javascript
 module.exports = {
-  types: {
-    price: {
-      type: float,
-      format: {
-        style: "decimal",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }
+    types: {
+        price: {
+            type: float,
+            format: {
+                style: "decimal",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        }
     }
-  }
-}
+};
 ```
 
 ## `perspective-viewer` web component
@@ -623,11 +634,11 @@ import "@finos/perspective-viewer/themes/all-themes.css";
 _*index.html*_
 
 ```html
-<perspective-viewer class='perspective-viewer-material'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-material-dark'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-material-dense'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-material-dense-dark'></perspective-viewer>
-<perspective-viewer class='perspective-viewer-vaporwave'></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material-dark"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material-dense"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material-dense-dark"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-vaporwave"></perspective-viewer>
 ```
 
 If you choose not to bundle the themes yourself, they are available through
@@ -636,7 +647,10 @@ the [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 These can be directly linked in your HTML:
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css"/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css"
+/>
 ```
 
 ### Loading data into `<perspective-viewer>`
@@ -652,18 +666,18 @@ has loaded:
 
 ```javascript
 document.addEventListener("WebComponentsReady", function() {
-  var data = [
-    { x: 1, y: "a", z: true },
-    { x: 2, y: "b", z: false },
-    { x: 3, y: "c", z: true },
-    { x: 4, y: "d", z: false }
-  ];
+    var data = [
+        {x: 1, y: "a", z: true},
+        {x: 2, y: "b", z: false},
+        {x: 3, y: "c", z: true},
+        {x: 4, y: "d", z: false}
+    ];
 
-  var viewer = document.getElementById("view1");
-  viewer.load(data);
+    var viewer = document.getElementById("view1");
+    viewer.load(data);
 
-  // Add new row
-  viewer.update([{ x: 5, y: "e", z: true }]);
+    // Add new row
+    viewer.update([{x: 5, y: "e", z: true}]);
 });
 ```
 
@@ -706,7 +720,7 @@ view1.load(table);
 view2.load(table);
 
 // Both `view1` and `view2` will reflect this update
-table.update([{ x: 5, y: "e", z: true }]);
+table.update([{x: 5, y: "e", z: true}]);
 ```
 
 ### Remote Perspective via `WebSocketServer()` and Node.js
@@ -720,13 +734,13 @@ footprint.
 In Node.js:
 
 ```javascript
-const { WebSocketServer, table } = require("@finos/perspective");
+const {WebSocketServer, table} = require("@finos/perspective");
 const fs = require("fs");
 
 // Start a WS/HTTP host on port 8080.  The `assets` property allows
 // the `WebSocketServer()` to also serves the file structure rooted in this
 // module's directory.
-const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
+const host = new WebSocketServer({assets: [__dirname], port: 8080});
 
 // Read an arrow file from the file system and load it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
@@ -734,7 +748,7 @@ const tbl = table(arr);
 host.host_table("table_one", tbl);
 
 // Or host a view
-const view = tbl.view({ filter: [["State", "==", "Texas"]] });
+const view = tbl.view({filter: [["State", "==", "Texas"]]});
 host.host_view("view_one", view);
 ```
 
@@ -744,9 +758,7 @@ In the browser:
 const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
-const websocket = perspective.websocket(
-  window.location.origin.replace("http", "ws")
-);
+const websocket = perspective.websocket(window.location.origin.replace("http", "ws"));
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
 // live on the server.
@@ -807,22 +819,22 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-    window.addEventListener('WebComponentsReady', async function() {
-        // Create a client that expects a Perspective server
-        // to accept connections at the specified URL.
-        const websocket = perspective.websocket("ws://localhost:8888/websocket");
+  window.addEventListener("WebComponentsReady", async function () {
+    // Create a client that expects a Perspective server
+    // to accept connections at the specified URL.
+    const websocket = perspective.websocket("ws://localhost:8888/websocket");
 
-        /* `table` is a proxy for the `Table` we created on the server.
+    /* `table` is a proxy for the `Table` we created on the server.
 
         All operations that are possible through the Javascript API are possible
         on the Python API as well, thus calling `view()`, `schema()`, `update()`
         etc. on `const table` will pass those operations to the Python `Table`,
         execute the commands, and return the result back to Javascript.*/
-        const table = websocket.open_table('data_source_one');
+    const table = websocket.open_table("data_source_one");
 
-        // Load this in the `<perspective-viewer>`.
-        document.getElementById('viewer').load(table);
-    });
+    // Load this in the `<perspective-viewer>`.
+    document.getElementById("viewer").load(table);
+  });
 </script>
 ```
 
@@ -885,8 +897,8 @@ through user interaction will fire a `perspective-config-update` event:
 
 ```javascript
 elem.addEventListener("perspective-config-update", function(event) {
-  var config = elem.save();
-  console.log("The view() config has changed to " + JSON.stringify(config));
+    var config = elem.save();
+    console.log("The view() config has changed to " + JSON.stringify(config));
 });
 ```
 
@@ -913,8 +925,8 @@ property returns the associated row data.
 
 ```javascript
 elem.addEventListener("perspective-click", function(event) {
-  var config = event.detail.config;
-  elem.restore(config);
+    var config = event.detail.config;
+    elem.restore(config);
 });
 ```
 

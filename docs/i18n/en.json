@@ -8,9 +8,6 @@
       "blog/2018-10-01-v0.2.0-release": {
         "title": "0.2.0 Release"
       },
-      "blog/2018-10-08-nyc-citibike-analysis-1": {
-        "title": "NYC Citibike Analytics in Real-Time, Part 1"
-      },
       "blog/2019-06-10-v0.3.0-release": {
         "title": "0.3.0 Release"
       },
@@ -34,6 +31,9 @@
       },
       "md/styles": {
         "title": "CSS Styles"
+      },
+      "node_modules/react/README": {
+        "title": "node_modules/react/README"
       },
       "obj/perspective-python": {
         "title": "perspective-python API"

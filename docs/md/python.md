@@ -31,8 +31,10 @@ The `perspective` module exports several tools:
 - `Table`, the table constructor for Perspective, which implements the `table`
   and `view` API in the same manner as the Javascript library.
 - `PerspectiveWidget` the JupyterLab widget for interactive visualization.
-- `PerspectiveManager` the session manager for shared server deployment, with a
-  reference implementation in [Tornado](https://www.tornadoweb.org/).
+- `PerspectiveTornadoHandler`, an integration with [Tornado](https://www.tornadoweb.org/)
+that interfaces seamlessly with `<perspective-viewer>` in Javascript.
+- `PerspectiveManager` the session manager for a shared server deployment of
+`perspective-python`.
 
 This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
@@ -42,6 +44,9 @@ For an understanding of Perspective's core concepts, see the
 [Conceptual Overview](/docs/md/concepts.html). For API documentation, see the
 [Python API](/docs/obj/perspective-python.html).
 
+For example code, see the [Python examples directory](https://github.com/finos/perspective/tree/master/python/perspective/examples)
+on GitHub.
+
 ## `Table`
 
 A `Table` can be created from a dataset or a schema, the specifics of which are
@@ -50,7 +55,6 @@ guide. In Python, however, Perspective supports additional data types that are
 commonly used when processing data:
 
 - `pandas.DataFrame`
-- `numpy.ndarray`
 - `numpy.ndarray`
 - `bytes` (encoding an Apache Arrow)
 - `objects` (either extracting a repr or via reference)
@@ -90,12 +94,14 @@ arrays, make sure that your dataset contains only NumPy arrays, and not a
 mixture of arrays and Python lists — this will raise an exception. Numpy
 structured/record arrays are parsed according to their field name and dtype.
 
-`Table` can aslo be constructed from `pandas.DataFrame` and `pandas.Series`
+`Table` can also be constructed from `pandas.DataFrame` and `pandas.Series`
 objects. Because Perspective is designed for applying its own transformations on
 top of a flat dataset, dataframes that are passed in will be flattened and have
 its `index` treated as another column (through the
 [`reset_index()`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html)
-method). If the dataframe does not have an index set, an integer-typed column
+method).
+
+If the dataframe does not have an index set, an integer-typed column
 named `"index"` is created. If you want to preserve the indexing behavior of the
 dataframe passed into Perspective, simply create the `Table` with
 `index="index"` as a keyword argument. This tells Perspective to once again
@@ -138,30 +144,41 @@ actual Python `type` of the data that it receives.
 
 Type inference can also leverage python converters, e.g. `__int__`, `__float__`, etc.
 
-Additionally, when loading a custom object into perspective, there are several options:
+#### Loading Custom Objects
 
-- Perspective will default to `str` column type and call the objects' `__repr__` method
-- You can customize how perspective extracts data from your objects by implementing
-  - `_psp_repr_`: Since `__repr__` can only return strings, this lets you return other values
-  - `_psp_dtype_`: perpspective will look at this to determine how to cast your objects' repr
-  - if you use `object` in schema, or have `_psp_dtype_` return `object`, we will store a reference
-  to your object as an unsigned 64 bit integer (e.g. a pointer)
+Custom objects can also be loaded into Perspective by using `object` in the schema, or
+implementing `_psp_repr_` to return `object`. Perspective stores a reference
+to your object as an unsigned 64-bit integer (e.g. a pointer), and uses  `__repr__`
+(or `_psp_repr` if implemented) to represent the object.
+
+You can customize how perspective extracts data from your objects by implementing these
+two methods into your object:
+
+- `_psp_repr_`: Since `__repr__` can only return strings, this lets you return other values
+- `_psp_dtype_`: perpspective will look at this to determine how to cast your objects' repr.
 
 #### Time Zone Handling
 
 When passing in `datetime` objects, Perspective checks the `tzinfo` attribute
-to see if a time zone is set. Objects with an unset `tzinfo` attribute are
-treated as local time, and do not undergo any time zone conversion. Objects with
-the `tzinfo` attribute set will be _converted into UTC_ before being stored in
+to see if a time zone is set. For more details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
+of `perspective-python` semantics around time zone handling.
+
+##### Naive Datetimes
+
+Objects with an unset `tzinfo` attribute (naive datetimes) are treated as _local time_, and do not undergo any time zone conversion.
+
+##### Aware Datetimes
+
+Objects with the `tzinfo` attribute set (aware datetimes) will be _converted into UTC_ before being stored in
 Perspective, and they will be _serialized as local time_.
+
+##### Pandas Timestamps
 
 `pandas.Timestamp` objects stored in a `pandas.DataFrame` are _always_ treated
 as UTC times, and will be converted to local time when serialized to the user.
+
 To treat a `Timestamp` in a `DataFrame` as local time, use `tz_localize` or
 `tz_convert` to provide the `Timestamp` with a time zone.
-
-For more details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
-of Perspective's semantics around time zone handling.
 
 ### Callbacks and Events
 
@@ -170,19 +187,32 @@ set—simply call `on_update` or `on_delete` with a reference to a function or a
 lambda without any parameters:
 
 ```python
-def callback():
+def update_callback():
     print("Updated!")
-view.on_update(callback)
-view.on_delete(lambda: print("Updated again!"))
+
+# set the update callback
+view.on_update(update_callback)
+
+
+def delete_callback():
+    print("Deleted!")
+
+# set the delete callback
+view.on_delete(delete_callback)
+
+# set a lambda as a callback
+view.on_delete(lambda: print("Deleted x2!"))
 ```
 
 If the callback is a named reference to a function, it can be removed with
-`remove_update` or `remove_delete`. Callbacks defined with a lambda function
-cannot be removed, as lambda functions have no identifier.
+`remove_update` or `remove_delete`:
 
 ```python
-view.remove_update(callback)
+view.remove_update(update_callback)
+view.remove_delete(delete_callback)
 ```
+
+Callbacks defined with a lambda function cannot be removed, as lambda functions have no identifier.
 
 ## `PerspectiveManager`
 
@@ -199,13 +229,13 @@ using a websocket API.
 
 `PerspectiveManager` has the ability to "host" `perspective.Table` and
 `perspective.View` instances. Hosted tables/views can have their methods
-called from other sources than the user, i.e. by a `perspective-viewer` running
-in Javascript over the network, interfacing with `perspective-python` through
+called from other sources than the Python server, i.e. by a `perspective-viewer` running
+in a Javascript client over the network, interfacing with `perspective-python` through
 the websocket API.
 
-The user has full control of all hosted `Table` and `View` instances, and can
-call any API method on hosted instances. This makes it extremely easy to
-stream data to a hosted `Table` using `.update()`:
+The server has full control of all hosted `Table` and `View`
+instances, and can call any public API method on hosted instances. This makes
+it extremely easy to stream data to a hosted `Table` using `.update()`:
 
 ```python
 manager = PerspectiveManager()
@@ -215,6 +245,18 @@ manager.host_table("data_source", table)
 for i in range(10):
     # updates continue to propagate automatically
     table.update(new_data)
+```
+
+In situations where clients should only be able to view the table and
+not modify it through `update`, `delete`, etc., initialize the `PerspectiveManager`
+with `lock=True`, or call the `lock()` method on a manager instance:
+
+```python
+# lock prevents clients from calling methods that may mutate the state
+# of the table.
+manager = PerspectiveManager(lock=True)
+table = Table(data)
+manager.host_table("data_source", table)
 ```
 
 A `PerspectiveManager` instance can host as many `Table`s and `View`s as
@@ -290,22 +332,22 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-    window.addEventListener('WebComponentsReady', async function() {
-        // Create a client that expects a Perspective server
-        // to accept connections at the specified URL.
-        const websocket = perspective.websocket("ws://localhost:8888/websocket");
+  window.addEventListener("WebComponentsReady", async function () {
+    // Create a client that expects a Perspective server
+    // to accept connections at the specified URL.
+    const websocket = perspective.websocket("ws://localhost:8888/websocket");
 
-        /* `table` is a proxy for the `Table` we created on the server.
+    /* `table` is a proxy for the `Table` we created on the server.
 
         All operations that are possible through the Javascript API are possible
         on the Python API as well, thus calling `view()`, `schema()`, `update()`
         etc. on `const table` will pass those operations to the Python `Table`,
         execute the commands, and return the result back to Javascript.*/
-        const table = websocket.open_table('data_source_one');
+    const table = websocket.open_table("data_source_one");
 
-        // Load this in the `<perspective-viewer>`.
-        document.getElementById('viewer').load(table);
-    });
+    // Load this in the `<perspective-viewer>`.
+    document.getElementById("viewer").load(table);
+  });
 </script>
 ```
 
@@ -334,7 +376,7 @@ MANAGER.host_view("view_one", VIEW)
 # Continue with Tornado setup
 ```
 
-Changes to the client code are also minimal. Use `open_view` instead of 
+Changes to the client code are also minimal. Use `open_view` instead of
 `open_table`:
 
 ```javascript

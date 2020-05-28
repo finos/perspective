@@ -69,17 +69,18 @@ class PerspectiveManager(object):
         self._lock = lock
 
     def lock(self):
-        """Block messages that can mutate the state of `Table`s and `View`s
-        under management.
+        """Block messages that can mutate the state of :obj:`~perspective.Table`
+         and :obj:`~perspective.View` objects under management.
 
-        All `PerspectiveManager`s exposed over the internet should be locked to
-        prevent content from being mutated by clients.
+        All ``PerspectiveManager`` objects exposed over the internet should be
+        locked to prevent content from being mutated by clients.
         """
         self._lock = True
 
     def unlock(self):
-        """Unblock messages that can mutate the state of `Table`s and `View`s
-        under management."""
+        """Unblock messages that can mutate the state of
+        :obj:`~perspective.Table` and :obj:`~perspective.View` objects under
+        management."""
         self._lock = False
 
     def host(self, item, name=None):
@@ -93,7 +94,7 @@ class PerspectiveManager(object):
 
         Keyword Args:
             name (:obj:`str`) : an optional name to allow retrieval through
-                `get_table` or `get_view`. A name will be generated if not
+                ``get_table`` or ``get_view``. A name will be generated if not
                 provided.
         """
         name = name or gen_name()
@@ -111,7 +112,8 @@ class PerspectiveManager(object):
 
         If a function for `queue_process` is defined (i.e., by
         :obj:`~perspective.PerspectiveTornadoHandler`), bind the function to
-        `Table` and have it call the manager's version of `queue_process`.
+        :obj:`~perspective.Table` and have it call the manager's version of
+        `queue_process`.
         '''
         if self._queue_process_callback is not None:
             # always bind the callback to the table's state manager
@@ -138,11 +140,11 @@ class PerspectiveManager(object):
         return PerspectiveSession(self)
 
     def _set_queue_process(self, func):
-        """For each table under management, bind `func` to the table's state
-        manager and to run whenever `queue_process` is called.
+        """For each table under management, bind :obj:`func` to the table's state
+        manager and to run whenever ``queue_process`` is called.
 
         After this method is called, future Tables hosted on this manager
-        instance will call the same `queue_process` callback.
+        instance will call the same ``queue_process`` callback.
         """
         self._queue_process_callback = func
         for table in self._tables.values():

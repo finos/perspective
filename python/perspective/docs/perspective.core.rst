@@ -24,6 +24,16 @@ PerspectiveWidget
    :show-inheritance:
    :exclude-members: random
 
+PerspectiveTornadoHandler
+=========================
+
+``PerspectiveTornadoHandler`` is a ready-made Perspective server that interfaces seamlessly with
+``@finos/perspective-viewer`` in Javascript.
+
+.. automodule:: perspective.tornado_handler.tornado_handler
+   :members:
+   :show-inheritance:
+
 PerspectiveManager
 ==================
 
