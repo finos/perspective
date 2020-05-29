@@ -25,6 +25,8 @@
 #include <chrono>
 #include <date/date.h>
 
+namespace apachearrow = arrow;
+
 namespace perspective {
 namespace arrow {
 
@@ -64,7 +66,7 @@ namespace arrow {
      * @param offset 
      * @param stride 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<apachearrow::Array>
     boolean_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -81,7 +83,7 @@ namespace arrow {
      * @param offset 
      * @param stride 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<apachearrow::Array>
     date_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -97,7 +99,7 @@ namespace arrow {
      * @param offset 
      * @param stride 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<apachearrow::Array>
     timestamp_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -111,9 +113,9 @@ namespace arrow {
      * @param data 
      * @param offset 
      * @param stride 
-     * @return std::shared_ptr<::arrow::Array> 
+     * @return std::shared_ptr<apachearrow::Array> 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<apachearrow::Array>
     string_col_to_dictionary_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -130,17 +132,17 @@ namespace arrow {
      * @param data 
      * @param offset 
      * @param stride 
-     * @return std::shared_ptr<::arrow::Array> 
+     * @return std::shared_ptr<apachearrow::Array> 
      */
     template <typename ArrowDataType, typename ArrowValueType>
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<apachearrow::Array>
     numeric_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
         std::int32_t stride,
         t_get_data_extents extents) {
         // NumericBuilder encompasses the most types (int/float/datetime)
-        ::arrow::NumericBuilder<ArrowDataType> array_builder;
+        apachearrow::NumericBuilder<ArrowDataType> array_builder;
         auto reserve_status = array_builder.Reserve(
             extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
@@ -163,8 +165,8 @@ namespace arrow {
         
         // Point to base `arrow::Array` instead of derived, so we don't have to
         // template the caller.
-        std::shared_ptr<::arrow::Array> array;
-        ::arrow::Status status = array_builder.Finish(&array);
+        std::shared_ptr<apachearrow::Array> array;
+        apachearrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
             PSP_COMPLAIN_AND_ABORT(status.message());
         }

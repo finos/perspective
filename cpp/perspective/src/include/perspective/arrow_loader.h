@@ -24,7 +24,6 @@
 
 namespace apachearrow = arrow;
 
-
 namespace perspective {
 namespace arrow {
 
