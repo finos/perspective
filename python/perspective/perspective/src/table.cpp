@@ -20,7 +20,8 @@
 
 namespace perspective {
 namespace binding {
-
+    namespace apachearrow = arrow;
+    using namespace perspective::arrow;
 /******************************************************************************
  *
  * Table API
