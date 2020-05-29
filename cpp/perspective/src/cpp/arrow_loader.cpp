@@ -10,10 +10,9 @@
 #include <perspective/arrow_loader.h>
 
 
-using namespace perspective;
-
 namespace perspective {
 namespace arrow {
+    using namespace perspective;
 
     ArrowLoader::ArrowLoader() {}
     ArrowLoader::~ArrowLoader() {}
