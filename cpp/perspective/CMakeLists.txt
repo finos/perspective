@@ -72,17 +72,6 @@ function (psp_build_dep name cmake_file)
 			EXCLUDE_FROM_ALL)
 
 		include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/)
-	elseif (${name} STREQUAL date)
-		# Overwrite date.h's CMakeLists with our custom one, as `CMAKE_ARGS` in
-		# the `.in.txt`s do not work properly.
-		configure_file(${PSP_CMAKE_MODULE_PATH}/date/CMakeLists.txt ${CMAKE_BINARY_DIR}/date-src COPYONLY)
-		add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
-			${CMAKE_BINARY_DIR}/${name}-build
-			EXCLUDE_FROM_ALL)
-
-		include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
-		include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
-		include_directories(${CMAKE_BINARY_DIR}/${name}-src)
 	else()
 		add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
 			${CMAKE_BINARY_DIR}/${name}-build
@@ -581,9 +570,6 @@ if (PSP_WASM_BUILD)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	target_link_libraries(psp arrow)
 
-	# Link against `tz`, because it isn't header-only like `date`
-	target_link_libraries(psp tz)
-
 	add_executable(perspective.async src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
@@ -655,11 +641,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 		target_link_libraries(psp tbb)
 
-		# Link against `tz`, because it isn't header-only like `date`
-		target_link_libraries(psp tz)
-
 		target_link_libraries(binding tbb)
-		target_link_libraries(binding tz)
 
 		target_link_libraries(binding psp)
 

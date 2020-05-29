@@ -5,7 +5,7 @@ project(date-download NONE)
 include(ExternalProject)
 ExternalProject_Add(date
   GIT_REPOSITORY    https://github.com/HowardHinnant/date.git
-  GIT_TAG           v2.4.1
+  GIT_TAG           master
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/date-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/date-build"
   CONFIGURE_COMMAND ""

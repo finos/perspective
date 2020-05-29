@@ -684,18 +684,17 @@ t_tscalar::to_string(bool for_expr) const {
             // local time and not UTC.
             std::chrono::milliseconds timestamp(to_int64());
             date::sys_time<std::chrono::milliseconds> ts(timestamp);
+            std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+            std::tm* t = std::localtime(&temp);
 
-            // // Get the current timezone as set by the `TZ` envvar
-            // const char* env_tz = std::getenv("TZ");
+            // use a mix of std::put_time and date::format to properly
+            // represent datetimes to millisecond precision
+            ss << std::put_time(t, "%Y-%m-%d %H:%M:"); // ymd h:m
 
-            // if (!env_tz) {
-            //     ss << date::format("%Y-%m-%d %H:%M:%S %Z", date::make_zoned(env_tz, ts));
-            // } else {
-            //     // use current_zone() if not found
-            //     ss << date::format("%Y-%m-%d %H:%M:%S %Z", date::make_zoned(date::current_zone(), ts));
-            // }
-
-            ss << date::format("%Y-%m-%d %H:%M:%S %Z", date::make_zoned(date::current_zone(), ts));
+            // TODO: we currently can't print out millisecond precision, but
+            // we need to.
+            ss << date::format("%S", ts); // represent second and millisecond
+            ss << std::put_time(t, " %Z"); // timezone
 
             return ss.str();
         } break;

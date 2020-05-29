@@ -24,7 +24,6 @@
 
 #include <chrono>
 #include <date/date.h>
-#include <date/tz.h>
 
 namespace perspective {
 namespace arrow {
