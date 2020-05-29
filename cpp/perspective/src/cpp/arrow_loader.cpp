@@ -10,6 +10,7 @@
 #include <perspective/arrow_loader.h>
 
 
+
 namespace perspective {
 namespace arrow {
     using namespace perspective;
@@ -58,17 +59,17 @@ namespace arrow {
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
         ::arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
         if (std::memcmp("ARROW1", (const void *)ptr, 6) == 0) {
-            std::shared_ptr<::arrow::ipc::RecordBatchFileReader> batch_reader;
-            ::arrow::Status status = ::arrow::ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
+            std::shared_ptr<apachearrow::ipc::RecordBatchFileReader> batch_reader;
+            apachearrow::Status status = apachearrow::ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
             if (!status.ok()) {
                 std::stringstream ss;
                 ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             } else {
-                std::vector<std::shared_ptr<::arrow::RecordBatch>> batches;
+                std::vector<std::shared_ptr<apachearrow::RecordBatch>> batches;
                 auto num_batches = batch_reader->num_record_batches();
                 for (int i = 0; i < num_batches; ++i) {
-                    std::shared_ptr<::arrow::RecordBatch> chunk;
+                    std::shared_ptr<apachearrow::RecordBatch> chunk;
                     status = batch_reader->ReadRecordBatch(i, &chunk);
                     if (!status.ok()) {
                         PSP_COMPLAIN_AND_ABORT(
@@ -76,7 +77,7 @@ namespace arrow {
                     }
                     batches.push_back(chunk);
                 }
-                status = ::arrow::Table::FromRecordBatches(batches, &m_table);
+                status = apachearrow::Table::FromRecordBatches(batches, &m_table);
                 if (!status.ok()) {
                     std::stringstream ss;
                     ss << "Failed to create Table from RecordBatches: "
@@ -85,8 +86,8 @@ namespace arrow {
                 };
             };
         } else {
-            std::shared_ptr<::arrow::ipc::RecordBatchReader> batch_reader;
-            ::arrow::Status status = ::arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
+            std::shared_ptr<apachearrow::ipc::RecordBatchReader> batch_reader;
+            apachearrow::Status status = apachearrow::ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
             if (!status.ok()) {
                 std::stringstream ss;
                 ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
@@ -114,8 +115,8 @@ namespace arrow {
     ArrowLoader::fill_table(t_data_table& tbl, const std::string& index, std::uint32_t offset,
         std::uint32_t limit, bool is_update) {
         bool implicit_index = false;
-        std::shared_ptr<::arrow::Schema> schema = m_table->schema();
-        std::vector<std::shared_ptr<::arrow::Field>> fields = schema->fields();
+        std::shared_ptr<apachearrow::Schema> schema = m_table->schema();
+        std::vector<std::shared_ptr<apachearrow::Field>> fields = schema->fields();
 
         for (long unsigned int cidx = 0; cidx < m_names.size(); ++cidx) {
             auto name = m_names[cidx];
@@ -156,7 +157,7 @@ namespace arrow {
 
     template <typename T, typename V>
     void
-    iter_col_copy(std::shared_ptr<t_column> dest, std::shared_ptr<::arrow::Array> src,
+    iter_col_copy(std::shared_ptr<t_column> dest, std::shared_ptr<apachearrow::Array> src,
         const int64_t offset, const int64_t len) {
         std::shared_ptr<T> scol = std::static_pointer_cast<T>(src);
         const typename T::value_type* vals = scol->raw_values();
@@ -166,13 +167,13 @@ namespace arrow {
     }
 
     void
-    copy_array(std::shared_ptr<t_column> dest, std::shared_ptr<::arrow::Array> src,
+    copy_array(std::shared_ptr<t_column> dest, std::shared_ptr<apachearrow::Array> src,
         const int64_t offset, const int64_t len) {
         switch (src->type()->id()) {
             case ::arrow::DictionaryType::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::DictionaryArray>(src);
-                std::shared_ptr<::arrow::StringArray> dict
-                    = std::static_pointer_cast<::arrow::StringArray>(scol->dictionary());
+                auto scol = std::static_pointer_cast<apachearrow::DictionaryArray>(src);
+                std::shared_ptr<apachearrow::StringArray> dict
+                    = std::static_pointer_cast<apachearrow::StringArray>(scol->dictionary());
                 const int32_t* offsets = dict->raw_value_offsets();
                 const uint8_t* values = dict->value_data()->data();
                 const std::uint64_t dsize = dict->length();
@@ -188,17 +189,17 @@ namespace arrow {
                 }
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
-                    case ::arrow::Int8Type::type_id: {
-                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);
+                    case apachearrow::Int8Type::type_id: {
+                        iter_col_copy<apachearrow::Int8Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    case ::arrow::Int16Type::type_id: {
-                        iter_col_copy<::arrow::Int16Array, t_uindex>(dest, indices, offset, len);
+                    case apachearrow::Int16Type::type_id: {
+                        iter_col_copy<apachearrow::Int16Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    case ::arrow::Int32Type::type_id: {
-                        iter_col_copy<::arrow::Int32Array, t_uindex>(dest, indices, offset, len);
+                    case apachearrow::Int32Type::type_id: {
+                        iter_col_copy<apachearrow::Int32Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    case ::arrow::Int64Type::type_id: {
-                         iter_col_copy<::arrow::Int64Array, t_uindex>(dest, indices, offset, len);
+                    case apachearrow::Int64Type::type_id: {
+                         iter_col_copy<apachearrow::Int64Array, t_uindex>(dest, indices, offset, len);
                     } break;
                     default:
                         std::stringstream ss;
@@ -207,10 +208,10 @@ namespace arrow {
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                 }
             } break;
-            case ::arrow::BinaryType::type_id:
-            case ::arrow::StringType::type_id: {
-                std::shared_ptr<::arrow::StringArray> scol
-                    = std::static_pointer_cast<::arrow::StringArray>(src);
+            case apachearrow::BinaryType::type_id:
+            case apachearrow::StringType::type_id: {
+                std::shared_ptr<apachearrow::StringArray> scol
+                    = std::static_pointer_cast<apachearrow::StringArray>(src);
                 const int32_t* offsets = scol->raw_value_offsets();
                 const uint8_t* values = scol->value_data()->data();
 
@@ -223,60 +224,60 @@ namespace arrow {
                     dest->set_nth(offset + i, elem);
                 }
             } break;
-            case ::arrow::Int8Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::Int8Array>(src);
+            case apachearrow::Int8Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::Int8Array>(src);
                 std::memcpy(dest->get_nth<std::int8_t>(offset), (void*)scol->raw_values(), len);
             } break;
-            case ::arrow::UInt8Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::UInt8Array>(src);
+            case apachearrow::UInt8Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::UInt8Array>(src);
                 std::memcpy(dest->get_nth<std::uint8_t>(offset), (void*)scol->raw_values(), len);
             } break;
-            case ::arrow::Int16Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::Int16Array>(src);
+            case apachearrow::Int16Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::Int16Array>(src);
                 std::memcpy(dest->get_nth<std::int16_t>(offset), (void*)scol->raw_values(), len * 2);
             } break;
-            case ::arrow::UInt16Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::UInt16Array>(src);
+            case apachearrow::UInt16Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::UInt16Array>(src);
                 std::memcpy(dest->get_nth<std::uint16_t>(offset), (void*)scol->raw_values(), len * 2);
             } break;
-            case ::arrow::Int32Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::Int32Array>(src);
+            case apachearrow::Int32Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::Int32Array>(src);
                 std::memcpy(dest->get_nth<std::int32_t>(offset), (void*)scol->raw_values(), len * 4);
             } break;
-            case ::arrow::UInt32Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::UInt32Array>(src);
+            case apachearrow::UInt32Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::UInt32Array>(src);
                 std::memcpy(dest->get_nth<std::uint32_t>(offset), (void*)scol->raw_values(), len * 4);
             } break;
-            case ::arrow::Int64Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::Int64Array>(src);
+            case apachearrow::Int64Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::Int64Array>(src);
                 std::memcpy(dest->get_nth<std::int64_t>(offset), (void*)scol->raw_values(), len * 8);
             } break;
-            case ::arrow::UInt64Type::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::UInt64Array>(src);
+            case apachearrow::UInt64Type::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::UInt64Array>(src);
                 std::memcpy(dest->get_nth<std::uint64_t>(offset), (void*)scol->raw_values(), len * 8);
             } break;
-            case ::arrow::TimestampType::type_id: {
-                std::shared_ptr<::arrow::TimestampType> tunit
-                    = std::static_pointer_cast<::arrow::TimestampType>(src->type());
-                auto scol = std::static_pointer_cast<::arrow::TimestampArray>(src);
+            case apachearrow::TimestampType::type_id: {
+                std::shared_ptr<apachearrow::TimestampType> tunit
+                    = std::static_pointer_cast<apachearrow::TimestampType>(src->type());
+                auto scol = std::static_pointer_cast<apachearrow::TimestampArray>(src);
                 switch (tunit->unit()) {
-                    case ::arrow::TimeUnit::MILLI: {
+                    case apachearrow::TimeUnit::MILLI: {
                         std::memcpy(
                             dest->get_nth<double>(offset), (void*)scol->raw_values(), len * 8);
                     } break;
-                    case ::arrow::TimeUnit::NANO: {
+                    case apachearrow::TimeUnit::NANO: {
                         const int64_t* vals = scol->raw_values();
                         for (uint32_t i = 0; i < len; i++) {
                             dest->set_nth<int64_t>(offset + i, vals[i] / 1000000);
                         }
                     } break;
-                    case ::arrow::TimeUnit::MICRO: {
+                    case apachearrow::TimeUnit::MICRO: {
                         const int64_t* vals = scol->raw_values();
                         for (uint32_t i = 0; i < len; i++) {
                             dest->set_nth<int64_t>(offset + i, vals[i] / 1000);
                         }
                     } break;
-                    case ::arrow::TimeUnit::SECOND: {
+                    case apachearrow::TimeUnit::SECOND: {
                         const int64_t* vals = scol->raw_values();
                         for (uint32_t i = 0; i < len; i++) {
                             dest->set_nth<int64_t>(offset + i, vals[i] * 1000);
@@ -284,10 +285,10 @@ namespace arrow {
                     } break;
                 }
             } break;
-            case ::arrow::Date64Type::type_id: {
-                std::shared_ptr<::arrow::Date64Type> date_type
-                    = std::static_pointer_cast<::arrow::Date64Type>(src->type());
-                auto scol = std::static_pointer_cast<::arrow::Date64Array>(src);
+            case apachearrow::Date64Type::type_id: {
+                std::shared_ptr<apachearrow::Date64Type> date_type
+                    = std::static_pointer_cast<apachearrow::Date64Type>(src->type());
+                auto scol = std::static_pointer_cast<apachearrow::Date64Array>(src);
                 const int64_t* vals = scol->raw_values();
                 for (uint32_t i = 0; i < len; i++) {
                     std::chrono::milliseconds timestamp(vals[i]);
@@ -301,10 +302,10 @@ namespace arrow {
                     dest->set_nth(offset + i, t_date(year, month - 1, day));
                 }
             } break;
-            case ::arrow::Date32Type::type_id: {
-                std::shared_ptr<::arrow::Date32Type> date_type
-                    = std::static_pointer_cast<::arrow::Date32Type>(src->type());
-                auto scol = std::static_pointer_cast<::arrow::Date32Array>(src);
+            case apachearrow::Date32Type::type_id: {
+                std::shared_ptr<apachearrow::Date32Type> date_type
+                    = std::static_pointer_cast<apachearrow::Date32Type>(src->type());
+                auto scol = std::static_pointer_cast<apachearrow::Date32Array>(src);
                 const int32_t* vals = scol->raw_values();
                 for (uint32_t i = 0; i < len; i++) {
                     date::days days{vals[i]};
@@ -320,27 +321,27 @@ namespace arrow {
                     dest->set_nth(offset + i, t_date(year, month - 1, day));
                 }
             } break;
-            case ::arrow::FloatType::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::FloatArray>(src);
+            case apachearrow::FloatType::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::FloatArray>(src);
                 std::memcpy(dest->get_nth<float>(offset), (void*)scol->raw_values(), len * 4);
             } break;
-            case ::arrow::DoubleType::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::DoubleArray>(src);
+            case apachearrow::DoubleType::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::DoubleArray>(src);
                 std::memcpy(dest->get_nth<double>(offset), (void*)scol->raw_values(), len * 8);
             } break;
-            case ::arrow::Decimal128Type::type_id:
-            case ::arrow::DecimalType::type_id: {
-                std::shared_ptr<::arrow::Decimal128Array> scol = std::static_pointer_cast<::arrow::DecimalArray>(src);
-                auto vals = (::arrow::Decimal128 *)scol->raw_values();
+            case apachearrow::Decimal128Type::type_id:
+            case apachearrow::DecimalType::type_id: {
+                std::shared_ptr<apachearrow::Decimal128Array> scol = std::static_pointer_cast<apachearrow::DecimalArray>(src);
+                auto vals = (apachearrow::Decimal128 *)scol->raw_values();
                 for (uint32_t i = 0; i < len; ++i) {
-                    ::arrow::Status status = vals[i].ToInteger(dest->get_nth<int64_t>(offset + i));
+                    apachearrow::Status status = vals[i].ToInteger(dest->get_nth<int64_t>(offset + i));
                     if (!status.ok()) {
                         PSP_COMPLAIN_AND_ABORT("Could not write Decimal to column: " + status.message());
                     };
                 }
             } break;
-            case ::arrow::BooleanType::type_id: {
-                auto scol = std::static_pointer_cast<::arrow::BooleanArray>(src);
+            case apachearrow::BooleanType::type_id: {
+                auto scol = std::static_pointer_cast<apachearrow::BooleanArray>(src);
                 const uint8_t* null_bitmap = scol->values()->data();
                 for (uint32_t i = 0; i < len; ++i) {
                     std::uint8_t elem = null_bitmap[i / 8];
@@ -362,10 +363,10 @@ namespace arrow {
         const std::string& name, std::int32_t cidx, t_dtype type, std::string& raw_type,
         bool is_update) {
         int64_t offset = 0;
-        std::shared_ptr<::arrow::ChunkedArray> carray = m_table->GetColumnByName(name);
+        std::shared_ptr<apachearrow::ChunkedArray> carray = m_table->GetColumnByName(name);
 
         for(auto i = 0; i < carray->num_chunks(); ++i) {
-            std::shared_ptr<::arrow::Array> array = carray->chunk(i);
+            std::shared_ptr<apachearrow::Array> array = carray->chunk(i);
             int64_t len = array->length();
         
             copy_array(col, array, offset, len);
