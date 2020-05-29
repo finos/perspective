@@ -527,14 +527,13 @@ t_tscalar hour_of_day<DTYPE_TIME>(t_tscalar x) {
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    date::sys_days days = date::floor<date::days>(ts);
+    // Use localtime so that the hour of day is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Subtract the day-precision `time_point` from the datetime-precision one
-    auto time_of_day = date::make_time(ts - days);
-
-    // Get the hour from the resulting `time_point`
-    rval.set(static_cast<std::int64_t>(time_of_day.hours().count()));
+    // Get the hour from the resulting `std::tm`
+    rval.set(static_cast<std::int64_t>(t->tm_hour));
     return rval;
 }
 

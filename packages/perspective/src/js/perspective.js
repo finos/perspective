@@ -293,7 +293,7 @@ export default function(Module) {
      * // Create a view with computed columns
      * const view = table.view({
      *      computed_columns: [{
-     *          name: "x + y",
+     *          column: "x + y",
      *          computed_function_name: "+",
      *          inputs: ["x", "y"]
      *      }]

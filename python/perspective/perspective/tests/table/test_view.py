@@ -332,7 +332,7 @@ class TestView(object):
 
         for rp in data["__ROW_PATH__"]:
             if len(rp) > 0:
-                assert rp[0] == "2019-07-11 12:30:00.000 UTC"
+                assert rp[0] in ("2019-07-11 12:30:00.000 UTC", "2019-07-11 12:30:00.000 Coordinated Universal Time")
 
         assert tbl.view().to_dict() == {
             "a": [datetime(2019, 7, 11, 12, 30)], "b": [1]
@@ -346,7 +346,12 @@ class TestView(object):
         view = tbl.view(column_pivots=["a"])
         cols = view.column_paths()
         for col in cols:
-            assert col in ["2019-07-11 12:30:00.000 UTC|a", "2019-07-11 12:30:00.000 UTC|b"]
+            assert col in [
+                "2019-07-11 12:30:00.000 UTC|a",
+                "2019-07-11 12:30:00.000 UTC|b",
+                "2019-07-11 12:30:00.000 Coordinated Universal Time|a",
+                "2019-07-11 12:30:00.000 Coordinated Universal Time|b"
+            ]
 
     # aggregate
 
@@ -383,10 +388,9 @@ class TestView(object):
             aggregates={"a": "distinct count"},
             row_pivots=["a"]
         )
-        assert view.to_records() == [
-            {"__ROW_PATH__": [], "a": 1},
-            {"__ROW_PATH__": ["2019-10-01 11:30:00.000 UTC"], "a": 1}
-        ]
+        output = view.to_records()
+        row_path = output[1]["__ROW_PATH__"][0]
+        assert row_path in ("2019-10-01 11:30:00.000 UTC", "2019-10-01 11:30:00.000 Coordinated Universal Time")
 
     def test_view_aggregate_datetime_leading_zeroes(self):
         data = [{"a": datetime(2019, 1, 1, 5, 5, 5)}, {"a": datetime(2019, 1, 1, 5, 5, 5)}]
@@ -395,10 +399,9 @@ class TestView(object):
             aggregates={"a": "distinct count"},
             row_pivots=["a"]
         )
-        assert view.to_records() == [
-            {"__ROW_PATH__": [], "a": 1},
-            {"__ROW_PATH__": ["2019-01-01 05:05:05.000 UTC"], "a": 1}
-        ]
+        output = view.to_records()
+        row_path = output[1]["__ROW_PATH__"][0]
+        assert row_path in ("2019-01-01 05:05:05.000 UTC", "2019-01-01 05:05:05.000 Coordinated Universal Time")
 
     def test_view_aggregate_multiple_columns(self):
         data = [

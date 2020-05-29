@@ -1028,7 +1028,7 @@ if os.name != 'nt':
             os.environ["TZ"] = "UTC"
             time.tzset()
 
-        def test_table_row_pivot_datetime_row_path_local_time_preserved_as_is(self):
+        def test_table_row_pivot_datetime_row_path_local_time_EST(self):
             """Make sure that string datetimes generated in Python are in
             local time and not UTC."""
             data = {
@@ -1052,7 +1052,11 @@ if os.name != 'nt':
 
         def test_table_row_pivot_datetime_row_path_UTC(self):
             """Make sure that string datetimes generated in Python are in
-            UTC if the timezone is UTC."""
+            UTC if the timezone is UTC.
+            
+            Set the timezone before creating the table so that the local
+            datetime is in the intended timezone, as this test asserts that
+            paths in the same timezone are not edited to UTC."""
             os.environ["TZ"] = "UTC"
             time.tzset()
 
@@ -1100,6 +1104,97 @@ if os.name != 'nt':
                 "b": [3, 0, 1, 2]
             }
 
+        def test_table_row_pivot_datetime_row_path_PST(self):
+            """Make sure that string datetimes generated in Python are in
+            CST if the timezone is CST."""
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            data = {
+                "a": LOCAL_DATETIMES,
+                "b": [i for i in range(len(LOCAL_DATETIMES))]
+            }
+
+            table = Table(data)
+
+            view = table.view(row_pivots=["a"])
+            assert view.to_columns() == {
+                "__ROW_PATH__": [
+                    [],
+                    ['2019-01-11 00:10:20.000 PST'],
+                    ['2019-01-11 11:10:20.000 PST'],
+                    ['2019-01-11 19:10:20.000 PST'],
+                ],
+                "a": [3, 1, 1, 1],
+                "b": [3, 0, 1, 2]
+            }
+
+    class TestTableDateTimeComputedColumns(object):
+        """Assert correctness of datetime-related computed columns in
+        different timezones."""
+        def setup_method(self):
+            # To make sure that local times are not changed, set timezone to EST
+            os.environ["TZ"] = "US/Eastern"
+            time.tzset()
+
+        def teardown_method(self):
+            # Set timezone to UTC, always
+            os.environ["TZ"] = "UTC"
+            time.tzset()
+
+        def test_table_hour_of_day_in_EST(object):
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "hour_of_day"
+            }]
+
+            data = {
+                "a": LOCAL_DATETIMES
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [0, 11, 19]
+
+        def test_table_hour_of_day_in_CST(object):
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "hour_of_day"
+            }]
+
+            data = {
+                "a": LOCAL_DATETIMES
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [0, 11, 19]
+
+        def test_table_hour_of_day_in_PST(object):
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "hour_of_day"
+            }]
+
+            data = {
+                "a": LOCAL_DATETIMES
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [0, 11, 19]
 
 class TestTableDateTimePivots(object):
 
