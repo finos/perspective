@@ -9,10 +9,10 @@
 
 #include <perspective/arrow_writer.h>
 
-using namespace perspective;
 
 namespace perspective {
 namespace arrow {
+    using namespace perspective;
 
     // TODO: unsure about efficacy of these functions when get<T> exists
     template <>
