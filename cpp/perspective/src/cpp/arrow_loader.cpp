@@ -11,7 +11,6 @@
 
 
 using namespace perspective;
-using namespace ::arrow;
 
 namespace perspective {
 namespace arrow {
@@ -58,19 +57,19 @@ namespace arrow {
 
     void
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
-        io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
+        ::arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
         if (std::memcmp("ARROW1", (const void *)ptr, 6) == 0) {
-            std::shared_ptr<ipc::RecordBatchFileReader> batch_reader;
-            ::arrow::Status status = ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
+            std::shared_ptr<::arrow::ipc::RecordBatchFileReader> batch_reader;
+            ::arrow::Status status = ::arrow::ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
             if (!status.ok()) {
                 std::stringstream ss;
                 ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             } else {
-                std::vector<std::shared_ptr<RecordBatch>> batches;
+                std::vector<std::shared_ptr<::arrow::RecordBatch>> batches;
                 auto num_batches = batch_reader->num_record_batches();
                 for (int i = 0; i < num_batches; ++i) {
-                    std::shared_ptr<RecordBatch> chunk;
+                    std::shared_ptr<::arrow::RecordBatch> chunk;
                     status = batch_reader->ReadRecordBatch(i, &chunk);
                     if (!status.ok()) {
                         PSP_COMPLAIN_AND_ABORT(
@@ -87,8 +86,8 @@ namespace arrow {
                 };
             };
         } else {
-            std::shared_ptr<ipc::RecordBatchReader> batch_reader;
-            ::arrow::Status status = ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
+            std::shared_ptr<::arrow::ipc::RecordBatchReader> batch_reader;
+            ::arrow::Status status = ::arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
             if (!status.ok()) {
                 std::stringstream ss;
                 ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
@@ -103,8 +102,8 @@ namespace arrow {
             }
         }
 
-        std::shared_ptr<Schema> schema = m_table->schema();
-        std::vector<std::shared_ptr<Field>> fields = schema->fields();
+        std::shared_ptr<::arrow::Schema> schema = m_table->schema();
+        std::vector<std::shared_ptr<::arrow::Field>> fields = schema->fields();
 
         for (auto field : fields) {
             m_names.push_back(field->name());
@@ -116,8 +115,8 @@ namespace arrow {
     ArrowLoader::fill_table(t_data_table& tbl, const std::string& index, std::uint32_t offset,
         std::uint32_t limit, bool is_update) {
         bool implicit_index = false;
-        std::shared_ptr<Schema> schema = m_table->schema();
-        std::vector<std::shared_ptr<Field>> fields = schema->fields();
+        std::shared_ptr<::arrow::Schema> schema = m_table->schema();
+        std::vector<std::shared_ptr<::arrow::Field>> fields = schema->fields();
 
         for (long unsigned int cidx = 0; cidx < m_names.size(); ++cidx) {
             auto name = m_names[cidx];
