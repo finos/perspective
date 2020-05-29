@@ -13,8 +13,6 @@
 #include <perspective/binding.h>
 #include <perspective/python/base.h>
 
-namespace apachearrow = arrow;
-
 namespace perspective {
 namespace binding {
 
