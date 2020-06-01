@@ -1196,6 +1196,64 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == [0, 11, 19]
 
+        def test_table_month_of_year_edge_in_EST(object):
+            """Make sure edge cases are fixed for month of year - if a local
+            time converted to UTC is in the next month, the month of year
+            computation needs to be in local time."""
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_of_year"
+            }]
+
+            data = {
+                "a": [datetime(2020, 1, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == ["01 January"]
+
+        def test_table_month_of_year_edge_in_CST(object):
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_of_year"
+            }]
+
+            data = {
+                "a": [datetime(2020, 1, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == ["01 January"]
+
+        def test_table_month_of_year_edge_in_PST(object):
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_of_year"
+            }]
+
+            data = {
+                "a": [datetime(2020, 1, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == ["01 January"]
+
+
 class TestTableDateTimePivots(object):
 
     def test_table_row_pivot_date_correct(self):

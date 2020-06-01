@@ -870,14 +870,13 @@ void month_of_year<DTYPE_TIME>(
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Use localtime so that the hour of day is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Cast the `time_point` to contain year/month/day
-    auto ymd = date::year_month_day(days);
-
-    // Get the month as an integer from 0 to 11
-    auto month = (ymd.month() -  date::January).count();
+    // Get the hour from the resulting `std::tm`
+    auto month = t->tm_mon;
 
     // Get the month string and write into the output column
     std::string month_of_year = months_of_year[month];
