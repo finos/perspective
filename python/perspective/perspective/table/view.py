@@ -192,7 +192,7 @@ class View(object):
         Multiple callbacks can be set through calling ``on_update`` multiple
         times, and will be called in the order they are set. Callback must be a
         callable function that takes exactly 1 or 2 parameters, depending on
-        whether `on_update` is called with `mode="rows"`. The first parameter is
+        whether `on_update` is called with `mode="row"`. The first parameter is
         always `port_id`, an :obj:`int` that indicates which input port the
         update comes from. A `RuntimeError` will be thrown if the callback
         has mis-configured parameters.
@@ -200,7 +200,7 @@ class View(object):
         Args:
             callback (:obj:`callable`): a callable function reference that will
                 be called when :func:`perspective.Table.update()` is called.
-            mode (:obj:`str`): if set to "rows", the callback will be passed
+            mode (:obj:`str`): if set to "row", the callback will be passed
                 an Arrow-serialized dataset of the rows that were updated.
                 Defaults to "none".
 

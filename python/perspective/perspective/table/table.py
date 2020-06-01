@@ -108,16 +108,18 @@ class Table(object):
     def get_computed_functions(self):
         """Returns a dict of computed function metadata, where each value is a
         dict that contains the following metadata:
-            - name
-            - label
-            - pattern
-            - computed_function_name: the name of the computed function
-            - input_type: the data type of input columns ("float"/"integer" and
-            "date"/"datetime" are interchangable)
-            - return_type: the return type of its output column
-            - group: a category for the function
-            - num_params: the number of input parameters
-            - format_function: an anonymous function used for naming new columns
+
+        - name
+        - label
+        - pattern
+        - computed_function_name: the name of the computed function
+        - input_type: the data type of input columns ("float"/"integer" and
+        "date"/"datetime" are interchangable)
+        - return_type: the return type of its output column
+        - group: a category for the function
+        - num_params: the number of input parameters
+        - format_function: an anonymous function used for naming new columns
+
         """
         computed_functions = get_computed_functions()
         for value in computed_functions.values():

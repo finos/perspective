@@ -27,6 +27,9 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     with `IOLoop.current()` in order to defer expensive operations until the
     next free iteration of the event loop.
 
+    To keep the websocket connection alive, set your Tornado application's
+    ``websocket_ping_interval`` configuration variable.
+
     Examples:
         >>> MANAGER = PerspectiveManager()
         >>> MANAGER.host_table("data_source_one", Table(
@@ -69,13 +72,20 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
         '''Returns whether the handler allows requests from origins outside
         of the host URL.
+
+        Args:
+            origin (:obj"`bool`): a boolean that indicates whether requests
+                outside of the host URL should be accepted. If :obj:`True`, request
+                URLs will not be validated and all requests will be allowed.
+                Defaults to :obj:`False`.
         '''
         return self._check_origin
 
     def on_message(self, message):
-        '''When the websocket receives a message, send it to the `process`
-        method of the `PerspectiveManager` with a reference to the `post`
-        callback.
+        '''When the websocket receives a message, send it to the :obj:`process`
+        method of the `PerspectiveManager` with a reference to the :obj:`post`
+        callback. Contains special logic to handle passing :obj:`ArrayBuffer`
+        objects over the wire from JS to Python, and vice-versa.
         '''
         if message == "heartbeat":
             return
@@ -116,7 +126,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         JSON and send it to the client.
 
         Args:
-            message (str): a JSON-serialized string containing a message to the
+            message (:obj:`str`): a JSON-serialized string containing a message to the
                 front-end `perspective-viewer`.
         '''
         self.write_message(message, binary)
