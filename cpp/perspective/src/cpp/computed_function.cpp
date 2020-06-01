@@ -830,14 +830,14 @@ void day_of_week<DTYPE_TIME>(
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Use localtime so that the hour of day is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Find the weekday and write it to the output column
-    auto weekday = date::year_month_weekday(days).weekday_indexed().weekday();
-
+    // Get the weekday from the resulting `std::tm`
     output_column->set_nth(
-        idx, days_of_week[(weekday - date::Sunday).count()]);
+        idx, days_of_week[t->tm_wday]);
 }
 
 template <>
@@ -875,12 +875,11 @@ void month_of_year<DTYPE_TIME>(
     std::time_t temp = std::chrono::system_clock::to_time_t(ts);
     std::tm* t = std::localtime(&temp);
 
-    // Get the hour from the resulting `std::tm`
+    // Get the month from the resulting `std::tm`
     auto month = t->tm_mon;
 
     // Get the month string and write into the output column
-    std::string month_of_year = months_of_year[month];
-    output_column->set_nth(idx, month_of_year);
+    output_column->set_nth(idx, months_of_year[month]);
 }
 
 } // end namespace computed_function
