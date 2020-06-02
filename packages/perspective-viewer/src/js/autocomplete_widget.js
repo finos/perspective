@@ -219,7 +219,6 @@ class PerspectiveAutocompleteWidget extends HTMLElement {
         if (idx > -1 && children.length > 0) {
             children[idx].setAttribute("aria-selected", "true");
             children[idx].scrollIntoView({
-                behavior: "smooth",
                 block: "nearest"
             });
 
