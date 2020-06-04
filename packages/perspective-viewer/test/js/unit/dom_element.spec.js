@@ -17,13 +17,14 @@ describe(DomElement, () => {
             dom_element = new DomElement();
             json_choices = [
                 {__ROW_PATH__: [], foo: 2},
+                {__ROW_PATH__: [undefined], foo: 25},
                 {__ROW_PATH__: [null], foo: 25},
                 {__ROW_PATH__: ["somestring"], foo: 3},
                 {__ROW_PATH__: ["otherstring"], foo: 3}
             ];
         });
 
-        test("the first value and null values are filtered out", () => {
+        test("the first value, null values, and undefined values are filtered out", () => {
             expect(dom_element._autocomplete_choices(json_choices)).toEqual([["somestring"], ["otherstring"]]);
         });
     });

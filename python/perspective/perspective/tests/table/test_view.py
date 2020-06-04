@@ -236,6 +236,20 @@ class TestView(object):
         assert view.num_columns() == 0
         assert view.to_records() == [{}, {}]
 
+    def test_view_no_columns_pivoted(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], columns=[])
+        assert view.num_columns() == 0
+        assert view.to_records() == [
+            {
+                "__ROW_PATH__": []
+            }, {
+                "__ROW_PATH__": ["1"]
+            }, {
+                "__ROW_PATH__": ["3"]
+            }]
+
     def test_view_specific_column(self):
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)

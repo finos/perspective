@@ -656,7 +656,7 @@ class TestTablePandas(object):
     # Timestamps
 
     def test_table_pandas_timestamp_to_datetime(self):
-        data = [pd.Timestamp(2019, 7, 11, 12, 30, 5), None, pd.Timestamp(2019, 7, 11, 13, 30, 5), None]
+        data = [pd.Timestamp("2019-07-11 12:30:05"), None, pd.Timestamp("2019-07-11 13:30:05"), None]
         df = pd.DataFrame({
             "a": data
         })
@@ -664,7 +664,7 @@ class TestTablePandas(object):
         assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
 
     def test_table_pandas_timestamp_explicit_dtype(self):
-        data = [pd.Timestamp(2019, 7, 11, 12, 30, 5), None, pd.Timestamp(2019, 7, 11, 13, 30, 5), None]
+        data = [pd.Timestamp("2019-07-11 12:30:05"), None, pd.Timestamp("2019-07-11 13:30:05"), None]
         df = pd.DataFrame({
             "a": np.array(data, dtype="datetime64[ns]")
         })
@@ -672,12 +672,12 @@ class TestTablePandas(object):
         assert table.view().to_dict()["a"] == [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
 
     def test_table_pandas_update_datetime_with_timestamp(self):
-        data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        data = [pd.Timestamp("2019-07-11 12:30:05"), None, pd.Timestamp("2019-07-11 13:30:05"), None]
         df = pd.DataFrame({
             "a": data
         })
         df2 = pd.DataFrame({
-            "a": [pd.Timestamp(2019, 7, 11, 12, 30, 5), None, pd.Timestamp(2019, 7, 11, 13, 30, 5), None]
+            "a": data
         })
         table = Table(df)
         table.update(df2)

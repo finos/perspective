@@ -521,7 +521,7 @@ export class DomElement extends PerspectiveElement {
         const choices = [];
         for (let i = 1; i < json.length; i++) {
             const row_path = json[i].__ROW_PATH__;
-            if (Array.isArray(row_path) && row_path.length > 0) {
+            if (Array.isArray(row_path) && row_path.length > 0 && row_path[0]) {
                 choices.push(row_path[0]);
             }
         }

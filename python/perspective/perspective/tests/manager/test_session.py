@@ -83,11 +83,12 @@ class TestPerspectiveSession(object):
             session.process(msg, self.post)
 
         manager_views = list(manager._views.keys())
-        assert manager_views == ["view" + str(i) for i in range(5)]
+        for key in ["view" + str(i) for i in range(5)]:
+            assert key in manager_views
 
-        for i in range(len(manager_views)):
-            view = manager.get_view(manager_views[i])
-            assert view._client_id == sessions[i].client_id
+        for i, session in enumerate(sessions):
+            view = manager.get_view("view" + str(i))
+            assert view._client_id == session.client_id
 
         # arbitrarily do an update
         random_session_id = random.randint(0, 4)
@@ -179,11 +180,12 @@ class TestPerspectiveSession(object):
             session.process(msg, self.post)
 
         manager_views = list(manager._views.keys())
-        assert manager_views == ["view" + str(i) for i in range(5)]
+        for key in ["view" + str(i) for i in range(5)]:
+            assert key in manager_views
 
-        for i in range(len(manager_views)):
-            view = manager.get_view(manager_views[i])
-            assert view._client_id == sessions[i].client_id
+        for i, session in enumerate(sessions):
+            view = manager.get_view("view" + str(i))
+            assert view._client_id == session.client_id
 
         def callback(updated):
             assert updated["port_id"] == 0

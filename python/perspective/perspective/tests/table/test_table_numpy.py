@@ -237,28 +237,34 @@ class TestTableNumpy(object):
         }
 
     def test_table_np_datetime(self):
-        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=np.datetime64)}
+        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype="datetime64[ns]"), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype="datetime64[ns]")}
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
             "a": datetime,
             "b": datetime
         }
-        assert tbl.view().to_numpy() == data
+        assert tbl.view().to_numpy() == {
+            "a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=object),
+            "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)
+        }
 
     def test_table_np_datetime_mixed_dtype(self):
-        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=np.datetime64), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)}
+        data = {"a": np.array([datetime(2019, 7, 11, 12, 13)], dtype="datetime64[ns]"), "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)}
         tbl = Table(data)
         assert tbl.size() == 1
         assert tbl.schema() == {
             "a": datetime,
             "b": datetime
         }
-        assert tbl.view().to_numpy() == data
+        assert tbl.view().to_numpy() == {
+            "a": np.array([datetime(2019, 7, 11, 12, 13)], dtype=object),
+            "b": np.array([datetime(2019, 7, 11, 12, 14)], dtype=object)
+        }
 
     def test_table_np_datetime_default(self):
         tbl = Table({
-            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=np.datetime64)
+            "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype="datetime64[ns]")
         })
 
         assert tbl.view().to_dict() == {
