@@ -95,7 +95,8 @@ export class DomElement extends PerspectiveElement {
             row.setAttribute("filter", filter);
 
             if (type === "string") {
-                const view = this._table.view({row_pivots: [name], aggregates: {}});
+                // Get all unique values for the column
+                const view = this._table.view({row_pivots: [name], columns: []});
                 view.to_json().then(json => {
                     row.choices(this._autocomplete_choices(json));
                 });
@@ -517,9 +518,13 @@ export class DomElement extends PerspectiveElement {
     }
 
     _autocomplete_choices(json) {
-        return json
-            .slice(1, json.length)
-            .map(x => x.__ROW_PATH__)
-            .filter(x => (Array.isArray(x) ? x.filter(v => !!v).length > 0 : !!x));
+        const choices = [];
+        for (let i = 1; i < json.length; i++) {
+            const row_path = json[i].__ROW_PATH__;
+            if (Array.isArray(row_path) && row_path.length > 0) {
+                choices.push(row_path[0]);
+            }
+        }
+        return choices;
     }
 }
