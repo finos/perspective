@@ -11,7 +11,7 @@ import numpy
 from calendar import timegm
 from datetime import date, datetime
 from dateutil.parser import parse
-from dateutil.tz import UTC
+from pytz import UTC
 from pandas import Period
 from re import search
 from time import mktime
