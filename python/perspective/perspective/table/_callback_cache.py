@@ -23,10 +23,38 @@ class _PerspectiveCallBackCache(object):
         '''
         if not callable(condition):
             raise ValueError("callback filter condition must be a callable function!")
-        self._callbacks = [callback for callback in self._callbacks if condition(callback) is True]
+        self._callbacks = [callback for callback in self._callbacks if condition(callback) is False]
+
+    def pop_callbacks(self, callback_id):
+        """Removes and returns a list of callbacks with the given
+        `callback_id`.
+
+        Args:
+            callback_id (:obj:`str`) an id that identifies the callback.
+
+        Returns:
+            :obj:`list` a list of dicts containing the callbacks that were
+                removed.
+        """
+        popped = []
+        new_callbacks = []
+
+        for callback in self._callbacks:
+            if callback["callback_id"] == callback_id:
+                popped.append(callback)
+            else:
+                new_callbacks.append(callback)
+
+        return popped
 
     def get_callbacks(self):
         return self._callbacks
+
+    def __iter__(self):
+        return iter(self._callbacks)
+
+    def __len__(self):
+        return len(self._callbacks)
 
     def __repr__(self):
         return str(self._callbacks)

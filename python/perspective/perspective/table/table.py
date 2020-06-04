@@ -441,7 +441,7 @@ class Table(object):
         if not callable(callback):
             return ValueError(
                 "remove_delete callback should be a callable function!")
-        self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
+        self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
 
     def delete(self):
         '''Delete this :class:`~perspective.Table` and clean up associated
@@ -454,7 +454,7 @@ class Table(object):
                 "- call delete() on each view, and try again.")
         self._state_manager.remove_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
-        [cb() for cb in self._delete_callbacks.get_callbacks()]
+        [cb() for cb in self._delete_callbacks]
 
     def _update_callback(self, port_id):
         """After `process` completes internally, this method is called by the
@@ -466,5 +466,5 @@ class Table(object):
             came from.
         """
         cache = {}
-        for callback in self._callbacks.get_callbacks():
+        for callback in self._callbacks:
             callback["callback"](port_id=port_id, cache=cache)

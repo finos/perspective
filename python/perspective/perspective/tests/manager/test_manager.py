@@ -23,8 +23,8 @@ class TestPerspectiveManager(object):
     def post(self, msg):
         '''boilerplate callback to simulate a client's `post()` method.'''
         msg = json.loads(msg)
+        print("self.post:", msg)
         assert msg["id"] is not None
-        print(msg)
 
     def validate_post(self, msg, expected=None):
         msg = json.loads(msg)
@@ -581,6 +581,238 @@ class TestPerspectiveManager(object):
         manager._process(update2, self.post)
         assert s.get() == 0
 
+    def test_manager_on_update_through_wire_API(self, sentinel):
+        s = sentinel(0)
+
+        # create a table and view using manager
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        def callback(updated):
+            assert updated["port_id"] == 0
+            s.set(s.get() + 100)
+
+        # simulate a client that holds callbacks by id
+        callbacks = {
+            3: callback
+        }
+
+        def post_update(msg):
+            # when `on_update` is triggered, this callback gets the message
+            # and has to decide which callback to trigger.
+            message = json.loads(msg)
+            assert message["id"] is not None
+            if message["id"] == 3:
+                # trigger callback
+                assert message["data"] == {
+                    "port_id": 0
+                }
+                callbacks[message["id"]](message["data"])
+
+        # hook into the created view and pass it the callback
+        make_on_update = {"id": 3, "name": "view1", "cmd": "view_method", "subscribe": True, "method": "on_update", "callback_id": "callback_1"}
+        manager._process(make_on_update, post_update)
+
+        # call updates
+        update1 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}]}
+        update2 = {"id": 5, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
+        assert s.get() == 200
+
+    def test_manager_on_update_rows_through_wire_API(self, sentinel):
+        s = sentinel(0)
+
+        # create a table and view using manager
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        def callback(delta):
+            table = Table(delta)
+            assert table.size() == 1
+            assert table.schema() == {
+                "a": int,
+                "b": str
+            }
+            table.delete()
+            s.set(s.get() + 100)
+
+        # simulate a client that holds callbacks by id
+        callbacks = {
+            3: callback
+        }
+
+        def post_update(msg, binary=False):
+            # when `on_update` is triggered, this callback gets the message
+            # and has to decide which callback to trigger.
+            if binary:
+                # trigger callback - "msg" here is binary
+                callbacks[3](msg)
+                return
+
+            message = json.loads(msg)
+            assert message["id"] is not None
+            if message["id"] == 3:
+                # wait for transferable
+                assert message["data"]["port_id"] == 0
+                return
+
+        # hook into the created view and pass it the callback
+        make_on_update = {
+            "id": 3,
+            "name": "view1",
+            "cmd": "view_method",
+            "subscribe": True,
+            "method": "on_update",
+            "callback_id": "callback_1",
+            "args": [{"mode": "row"}]
+        }
+        manager._process(make_on_update, post_update)
+
+        # call updates
+        update1 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}]}
+        update2 = {"id": 5, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
+        assert s.get() == 200
+
+    def test_manager_on_update_rows_with_port_id_through_wire_API(self, sentinel):
+        s = sentinel(0)
+
+        def update_callback(port_id, delta):
+            table = Table(delta)
+            assert table.size() == 1
+            assert table.schema() == {
+                "a": int,
+                "b": str
+            }
+            table.delete()
+            s.set(s.get() + 1)
+
+        # create a table and view using manager
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        # Get two ports on the table
+        make_port = {"id": 3, "name": "table1", "cmd": "table_method", "method": "make_port"}
+        make_port2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "make_port"}
+
+        manager._process(make_port, self.post)
+        manager._process(make_port2, self.post)
+
+        # define an update callback
+        def callback(delta):
+            table = Table(delta)
+            assert table.size() == 1
+            assert table.schema() == {
+                "a": int,
+                "b": str
+            }
+            table.delete()
+            s.set(s.get() + 100)
+
+        # simulate a client that holds callbacks by id
+        callbacks = {
+            3: callback
+        }
+
+        def post_update(msg, binary=False):
+            # when `on_update` is triggered, this callback gets the message
+            # and has to decide which callback to trigger.
+            if binary:
+                # trigger callback - "msg" here is binary
+                callbacks[3](msg)
+                return
+
+            message = json.loads(msg)
+
+            assert message["id"] is not None
+
+            if message["id"] == 3:
+                # wait for transferable
+                assert message["data"]["port_id"] in (1, 2)
+                return
+
+        # hook into the created view and pass it the callback
+        make_on_update = {
+            "id": 5,
+            "name": "view1",
+            "cmd": "view_method",
+            "subscribe": True,
+            "method": "on_update",
+            "callback_id": "callback_1",
+            "args": [{"mode": "row"}]
+        }
+        manager._process(make_on_update, post_update)
+
+        # call updates
+        update1 = {"id": 6, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}, {"port_id": 1}]}
+        update2 = {"id": 7, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}, {"port_id": 2}]}
+
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
+
+        assert s.get() == 200
+
+    def test_manager_remove_update_through_wire_API(self, sentinel):
+        s = sentinel(0)
+
+        def update_callback(port_id, delta):
+            s.set(s.get() + 1)
+
+        # create a table and view using manager
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        def callback(updated):
+            assert updated["port_id"] == 0
+            s.set(s.get() + 100)
+
+        # simulate a client that holds callbacks by id
+        callbacks = {
+            3: callback
+        }
+
+        def post_update(msg):
+            # when `on_update` is triggered, this callback gets the message
+            # and has to decide which callback to trigger.
+            message = json.loads(msg)
+            assert message["id"] is not None
+            if message["id"] == 3:
+                # trigger callback
+                assert message["data"] == {
+                    "port_id": 0
+                }
+                callbacks[message["id"]](message["data"])
+
+        # create an on_update callback
+        make_on_update = {"id": 3, "name": "view1", "cmd": "view_method", "subscribe": True, "method": "on_update", "callback_id": "callback_1"}
+        manager._process(make_on_update, post_update)
+
+        # call updates
+        update1 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}]}
+        manager._process(update1, self.post)
+
+        # remove update callback
+        remove_on_update = {"id": 5, "name": "view1", "cmd": "view_method", "subscribe": True, "method": "remove_update", "callback_id": "callback_1"}
+        manager._process(remove_on_update, self.post)
+
+        update2 = {"id": 6, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
+        manager._process(update2, self.post)
+        assert s.get() == 100
+
     def test_manager_delete_view(self):
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager()
@@ -590,6 +822,51 @@ class TestPerspectiveManager(object):
         delete_view = {"id": 3, "name": "view1", "cmd": "view_method", "method": "delete"}
         manager._process(delete_view, self.post)
         assert len(manager._views) == 0
+
+    def test_manager_on_delete_view(self, sentinel):
+        s = sentinel(False)
+
+        def delete_callback():
+            s.set(True)
+
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        view = manager.get_view("view1")
+        view.on_delete(delete_callback)
+
+        delete_view = {"id": 3, "name": "view1", "cmd": "view_method", "method": "delete"}
+
+        manager._process(delete_view, self.post)
+
+        assert len(manager._views) == 0
+        assert s.get() is True
+
+    def test_manager_remove_delete_view(self, sentinel):
+        s = sentinel(False)
+
+        def delete_callback():
+            s.set(True)
+
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager._process(make_view, self.post)
+
+        view = manager.get_view("view1")
+        view.on_delete(delete_callback)
+        view.remove_delete(delete_callback)
+
+        delete_view = {"id": 3, "name": "view1", "cmd": "view_method", "method": "delete"}
+
+        manager._process(delete_view, self.post)
+
+        assert len(manager._views) == 0
+        assert s.get() is False
 
     def test_manager_set_queue_process(self, sentinel):
         s = sentinel(0)

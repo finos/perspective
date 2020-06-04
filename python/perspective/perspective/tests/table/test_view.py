@@ -753,7 +753,7 @@ class TestView(object):
         view.on_update(cb2)
         view.on_update(cb1)
         view.remove_update(cb1)
-        assert len(view._callbacks.get_callbacks()) == 1
+        assert len(view._callbacks) == 1
         tbl.update(data)
         assert s.get() == 2
 

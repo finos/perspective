@@ -10,7 +10,6 @@ import random
 import string
 from functools import partial
 from ..core.exception import PerspectiveError
-from ..table._callback_cache import _PerspectiveCallBackCache
 from ..table import Table
 from ..table.view import View
 from .session import PerspectiveSession
@@ -26,15 +25,16 @@ class PerspectiveManager(_PerspectiveManagerInternal):
     server side.
 
     The core functionality resides in `process()`, which receives
-    JSON-serialized messages from a client (usually `perspective-viewer` in the
-    browser), executes the commands in the message, and returns the results of
-    those commands back to the `post_callback`.  The manager cannot create
-    tables or views - use `host_table` or `host_view` to pass Table/View
-    instances to the manager.  Because Perspective is designed to be used in a
+    JSON-serialized messages from a client (implemented by `perspective-viewer`
+    in the browser), executes the commands in the message, and returns the
+    results of those commands back to the `post_callback`. Table/View instances
+    should be passed to the manager using `host_table` or `host_view` - this
+    allows server code to call Table/View APIs natively instead of proxying
+    them through the Manager. Because Perspective is designed to be used in a
     shared context, i.e. multiple clients all accessing the same `Table`,
     PerspectiveManager comes with the context of `sessions` - an
     encapsulation of the actions and resources used by a single connection
-    to Perspective.
+    to Perspective, which can be cleaned up after the connection is closed.
 
     - When a client connects, for example through a websocket, a new session
         should be spawned using `new_session()`.
@@ -43,11 +43,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
     '''
 
     def __init__(self, lock=False):
-        self._tables = {}
-        self._views = {}
-        self._callback_cache = _PerspectiveCallBackCache()
-        self._queue_process_callback = None
-        self._lock = lock
+        super(PerspectiveManager, self).__init__(lock=lock)
 
     def lock(self):
         """Block messages that can mutate the state of :obj:`~perspective.Table`

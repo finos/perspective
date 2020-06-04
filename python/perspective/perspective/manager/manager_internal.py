@@ -12,6 +12,7 @@ import json
 from functools import partial
 from ..core.exception import PerspectiveError
 from ..table import Table, PerspectiveCppError
+from ..table._callback_cache import _PerspectiveCallBackCache
 from ..table._date_validator import _PerspectiveDateValidator
 
 _date_validator = _PerspectiveDateValidator()
@@ -35,6 +36,13 @@ class _PerspectiveManagerInternal(object):
     # `locked` mode, i.e. its tables and views made immutable from remote
     # modification.
     LOCKED_COMMANDS = ["table", "update", "remove", "replace", "clear"]
+
+    def __init__(self, lock=False):
+        self._tables = {}
+        self._views = {}
+        self._callback_cache = _PerspectiveCallBackCache()
+        self._queue_process_callback = None
+        self._lock = lock
 
     def _process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective
@@ -187,9 +195,12 @@ class _PerspectiveManagerInternal(object):
                         "name": msg.get("name", None)
                     })
             elif callback_id is not None:
-                # remove the callback with `callback_id`
-                self._callback_cache.remove_callbacks(
-                    lambda cb: cb["callback_id"] != callback_id)
+                # pop the callback from the cache of the manager, and
+                # remove each of them from the underlying table or view
+                popped_callbacks = self._callback_cache.pop_callbacks(callback_id)
+
+                for callback in popped_callbacks:
+                    getattr(table_or_view, method)(callback["callback"])
             if callback is not None:
                 # call the underlying method on the Table or View, and apply
                 # the dictionary of kwargs that is passed through.

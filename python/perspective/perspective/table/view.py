@@ -255,7 +255,7 @@ class View(object):
         self._table._state_manager.call_process(self._table._table.get_id())
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
-        self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] != callback)
+        self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] == callback)
 
     def on_delete(self, callback):
         '''Set a callback to be run when the :func:`perspective.View.delete()`
@@ -292,8 +292,8 @@ class View(object):
         self._table._state_manager.remove_process(self._table._table.get_id())
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
-        self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)
-        [cb() for cb in self._delete_callbacks.get_callbacks()]
+        self._callbacks.remove_callbacks(lambda cb: cb["name"] == self._name)
+        [cb() for cb in self._delete_callbacks]
 
     def remove_delete(self, callback):
         '''Remove the delete callback associated with this
@@ -318,7 +318,7 @@ class View(object):
         '''
         if not callable(callback):
             return ValueError("remove_delete callback should be a callable function!")
-        self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
+        self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
 
     def to_arrow(self, **kwargs):
         options = _parse_format_options(self, kwargs)
