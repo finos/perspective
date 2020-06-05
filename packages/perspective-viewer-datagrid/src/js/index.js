@@ -8,10 +8,11 @@
  */
 
 import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
-import {_start_profiling_loop} from "./utils";
-import {DatagridViewModel} from "./datagrid";
-import {VIEWER_MAP} from "./constants";
-import MATERIAL_STYLE from "../less/material.less";
+
+import "regular-table";
+import MATERIAL_STYLE from "regular-table/dist/less/material.less";
+
+const VIEWER_MAP = new WeakMap();
 
 /**
  * Initializes a new datagrid renderer if needed, or returns an existing one
@@ -24,9 +25,7 @@ import MATERIAL_STYLE from "../less/material.less";
 function get_or_create_datagrid(element, div) {
     let datagrid;
     if (!VIEWER_MAP.has(div)) {
-        datagrid = document.createElement("perspective-datagrid");
-        datagrid.set_element(element.hasAttribute("disable-virtual-datagrid"));
-        datagrid.register_listeners();
+        datagrid = document.createElement("regular-table");
         div.innerHTML = "";
         div.appendChild(document.createElement("slot"));
         element.appendChild(datagrid);
@@ -121,9 +120,6 @@ function _register_global_styles() {
  *
  */
 
-window.customElements.define("perspective-datagrid", DatagridViewModel);
-
 registerPlugin("datagrid", DatagridPlugin);
 
-_start_profiling_loop();
 _register_global_styles();
