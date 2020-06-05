@@ -11043,7 +11043,7 @@ pako@~1.0.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.10.tgz#4328badb5086a426aa90f541977d4955da5c9732"
   integrity sha512-0DTvPVU3ed8+HNXOu5Bs+o//Mbdj9VNQMUOe9oKCwh8l0GNwpTDMKCWbRjgtD291AWnkAgkqA/LOnQS8AmS1tw==
 
-papaparse@^5.2.0:
+papaparse@5.2.0, papaparse@^5.2.0:
   version "5.2.0"
   resolved "https://registry.npmjs.org/papaparse/-/papaparse-5.2.0.tgz#97976a1b135c46612773029153dc64995caa3b7b"
   integrity sha512-ylq1wgUSnagU+MKQtNeVqrPhZuMYBvOSL00DHycFTCxownF95gpLAk1HiHdUW77N8yxRq1qHXLdlIPyBSG9NSA==
@@ -12672,6 +12672,15 @@ regjsparser@^0.6.0:
   integrity sha512-RQ7YyokLiQBomUJuUG8iGVvkgOLxwyZM8k6d3q5SAXpg4r5TZJZigKFvC6PpD+qQ98bCDC5YelPeA3EucDoNeQ==
   dependencies:
     jsesc "~0.5.0"
+
+regular-table@=0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.0.2.tgz#53f9c5b96c0a4f1f3f1288808e53d5ec4237636e"
+  integrity sha512-r1ZsrN/4wepK5tkNBiG/PVbpPaVEQAaYJZKpOSsPIY1PW5gZqgm6Sf4c0ZlTWH3SLVX6uGffCFIIgARUoifyEA==
+  dependencies:
+    core-js "^3.6.4"
+    papaparse "5.2.0"
+    superscript-number "^1.0.0"
 
 relateurl@0.2.x:
   version "0.2.7"

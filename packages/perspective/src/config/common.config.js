@@ -13,8 +13,8 @@ function common({build_worker, no_minify, inline} = {}) {
             rules: [
                 {
                     test: /\.less$/,
-                    exclude: /node_modules/,
-                    use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
+                    exclude: /node_modules\/(?!regular-table)/,
+                    use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2, skipWarn: true}}, {loader: "less-loader"}]
                 },
                 {
                     test: /\.(html)$/,
