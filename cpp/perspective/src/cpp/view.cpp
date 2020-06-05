@@ -446,8 +446,8 @@ View<CTX_T>::data_slice_to_arrow(
     auto stride = data_slice->get_stride();
     auto names = data_slice->get_column_names();
 
-    std::vector<std::shared_ptr<::arrow::Array>> vectors;
-    std::vector<std::shared_ptr<::arrow::Field>> fields;
+    std::vector<std::shared_ptr<arrow::Array>> vectors;
+    std::vector<std::shared_ptr<arrow::Field>> fields;
 
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
@@ -460,67 +460,67 @@ View<CTX_T>::data_slice_to_arrow(
             name = col_path.at(col_path.size() - 1).to_string();
         }
 
-        std::shared_ptr<::arrow::Array> arr;
+        std::shared_ptr<arrow::Array> arr;
         switch (dtype) {
             case DTYPE_INT8: {
-                fields.push_back(::arrow::field(name, ::arrow::int8()));
-                arr = arrow::numeric_col_to_array<::arrow::Int8Type, std::int8_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::int8()));
+                arr = apachearrow::numeric_col_to_array<arrow::Int8Type, std::int8_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT8: {
-                fields.push_back(::arrow::field(name, ::arrow::uint8()));
-                arr = arrow::numeric_col_to_array<::arrow::UInt8Type, std::uint8_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::uint8()));
+                arr = apachearrow::numeric_col_to_array<arrow::UInt8Type, std::uint8_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_INT16: {
-                fields.push_back(::arrow::field(name, ::arrow::int16()));
-                arr = arrow::numeric_col_to_array<::arrow::Int16Type, std::int16_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::int16()));
+                arr = apachearrow::numeric_col_to_array<arrow::Int16Type, std::int16_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT16: {
-                fields.push_back(::arrow::field(name, ::arrow::uint16()));
-                arr = arrow::numeric_col_to_array<::arrow::UInt16Type, std::uint16_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::uint16()));
+                arr = apachearrow::numeric_col_to_array<arrow::UInt16Type, std::uint16_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_INT32: {
-                fields.push_back(::arrow::field(name, ::arrow::int32()));
-                arr = arrow::numeric_col_to_array<::arrow::Int32Type, std::int32_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::int32()));
+                arr = apachearrow::numeric_col_to_array<arrow::Int32Type, std::int32_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT32: {
-                fields.push_back(::arrow::field(name, ::arrow::uint32()));
-                arr = arrow::numeric_col_to_array<::arrow::UInt32Type, std::uint32_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::uint32()));
+                arr = apachearrow::numeric_col_to_array<arrow::UInt32Type, std::uint32_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_INT64: {
-                fields.push_back(::arrow::field(name, ::arrow::int64()));
-                arr = arrow::numeric_col_to_array<::arrow::Int64Type, std::int64_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::int64()));
+                arr = apachearrow::numeric_col_to_array<arrow::Int64Type, std::int64_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT64: {
-                fields.push_back(::arrow::field(name, ::arrow::uint64()));
-                arr = arrow::numeric_col_to_array<::arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::uint64()));
+                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_FLOAT32: {
-                fields.push_back(::arrow::field(name, ::arrow::float32()));
-                arr = arrow::numeric_col_to_array<::arrow::FloatType, float>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::float32()));
+                arr = apachearrow::numeric_col_to_array<arrow::FloatType, float>(slice, cidx, stride, extents);
             } break;
             case DTYPE_FLOAT64: {
-                fields.push_back(::arrow::field(name, ::arrow::float64()));
-                arr = arrow::numeric_col_to_array<::arrow::DoubleType, double>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::float64()));
+                arr = apachearrow::numeric_col_to_array<arrow::DoubleType, double>(slice, cidx, stride, extents);
             } break;
             case DTYPE_DATE: {
-                fields.push_back(::arrow::field(name, ::arrow::date32()));
-                arr = arrow::date_col_to_array(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::date32()));
+                arr = apachearrow::date_col_to_array(slice, cidx, stride, extents);
             } break;
             case DTYPE_TIME: {
-                fields.push_back(::arrow::field(name, ::arrow::timestamp(::arrow::TimeUnit::MILLI)));
-                arr = arrow::timestamp_col_to_array(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::timestamp(arrow::TimeUnit::MILLI)));
+                arr = apachearrow::timestamp_col_to_array(slice, cidx, stride, extents);
             } break;
             case DTYPE_BOOL: {
-                fields.push_back(::arrow::field(name, ::arrow::boolean()));
-                arr = arrow::boolean_col_to_array(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::boolean()));
+                arr = apachearrow::boolean_col_to_array(slice, cidx, stride, extents);
             } break;
             case DTYPE_STR: {
-                fields.push_back(::arrow::field(name, ::arrow::dictionary(::arrow::int32(), ::arrow::utf8())));
-                arr = arrow::string_col_to_dictionary_array(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::dictionary(arrow::int32(), arrow::utf8())));
+                arr = apachearrow::string_col_to_dictionary_array(slice, cidx, stride, extents);
             } break;
             case DTYPE_OBJECT: {
-                fields.push_back(::arrow::field(name, ::arrow::uint64()));
-                arr = arrow::numeric_col_to_array<::arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(name, arrow::uint64()));
+                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
             } break;
             default: {
                 std::stringstream ss;
@@ -534,10 +534,10 @@ View<CTX_T>::data_slice_to_arrow(
         vectors.push_back(arr);
     }
 
-    auto arrow_schema = ::arrow::schema(fields);
+    auto arrow_schema = arrow::schema(fields);
     auto num_rows = data_slice->num_rows();
-    std::shared_ptr<::arrow::RecordBatch> batches = 
-        ::arrow::RecordBatch::Make(arrow_schema, num_rows, vectors);
+    std::shared_ptr<arrow::RecordBatch> batches = 
+        arrow::RecordBatch::Make(arrow_schema, num_rows, vectors);
     auto valid = batches->Validate();
     if (!valid.ok()) {
         std::stringstream ss;
@@ -545,23 +545,23 @@ View<CTX_T>::data_slice_to_arrow(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
-    std::shared_ptr<::arrow::ResizableBuffer> buffer;
-    auto allocated = ::arrow::AllocateResizableBuffer(0, &buffer);
+    std::shared_ptr<arrow::ResizableBuffer> buffer;
+    auto allocated = arrow::AllocateResizableBuffer(0, &buffer);
     if (!allocated.ok()) {
         std::stringstream ss;
         ss << "Failed to allocate buffer: " << allocated.message() << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
     
-    ::arrow::io::BufferOutputStream sink(buffer);    
+    arrow::io::BufferOutputStream sink(buffer);    
     
-    auto options = ::arrow::ipc::IpcOptions::Defaults();
+    auto options = arrow::ipc::IpcOptions::Defaults();
     // options.allow_64bit = true;
     // options.write_legacy_ipc_format = true;
     // options.alignment = 64;
 
-    auto res = ::arrow::ipc::RecordBatchStreamWriter::Open(&sink, arrow_schema, options);
-    std::shared_ptr<::arrow::ipc::RecordBatchWriter> writer = *res;
+    auto res = arrow::ipc::RecordBatchStreamWriter::Open(&sink, arrow_schema, options);
+    std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;
 
     PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
     PSP_CHECK_ARROW_STATUS(writer->Close());
