@@ -228,12 +228,12 @@ class TestViewComputed(object):
             }]
         )
         assert view.to_columns() == {
-            "__ROW_PATH__": [[], ["6"], ["8"], ["10"], ["12"]],
+            "__ROW_PATH__": [[], [6], [8], [10], [12]],
             "a": [10, 1, 2, 3, 4],
             "b": [26, 5, 6, 7, 8],
             "computed": [36.0, 6.0, 8.0, 10.0, 12.0]
         }
-    
+
     def test_view_computed_with_column_pivots(self):
         table = Table({
             "a": [1, 2, 3, 4],

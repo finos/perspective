@@ -178,7 +178,7 @@ class TestPerspectiveManager(object):
         manager.host_table("table1", table)
         manager._process(message, self.post)
         assert manager._views["view1"].to_dict() == {
-            "__ROW_PATH__": [[], ["1"], ["2"], ["3"]],
+            "__ROW_PATH__": [[], [1], [2], [3]],
             "a": [6, 1, 2, 3],
             "b": [3, 1, 1, 1]
         }
@@ -190,7 +190,7 @@ class TestPerspectiveManager(object):
         manager.host_table("table1", table)
         manager._process(message, self.post)
         assert manager._views["view1"].to_dict() == {
-            "__ROW_PATH__": [[], ["1"], ["2"], ["3"]],
+            "__ROW_PATH__": [[], [1], [2], [3]],
             "a|a": [1, 1, None, None],
             "a|b": [1, 1, None, None],
             "b|a": [2, None, 2, None],

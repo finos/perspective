@@ -117,7 +117,7 @@ class TestToFormat(object):
             row_pivots=["a"]
         )
         assert view.to_records() == [
-            {"__ROW_PATH__": [], "a": 2, "b": 2}, {"__ROW_PATH__": ["1"], "a": 2, "b": 2}
+            {"__ROW_PATH__": [], "a": 2, "b": 2}, {"__ROW_PATH__": [1], "a": 2, "b": 2}
         ]
 
     def test_to_records_two(self):
@@ -129,7 +129,7 @@ class TestToFormat(object):
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
-            {"__ROW_PATH__": ["1"], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
+            {"__ROW_PATH__": [1], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
         ]
 
     def test_to_records_column_only(self):
@@ -218,7 +218,7 @@ class TestToFormat(object):
             row_pivots=["a"]
         )
         assert view.to_dict() == {
-            "__ROW_PATH__": [[], ["1"]],
+            "__ROW_PATH__": [[], [1]],
             "a": [2, 2],
             "b": [4, 4]
         }
@@ -231,7 +231,7 @@ class TestToFormat(object):
             column_pivots=["b"]
         )
         assert view.to_dict() == {
-            "__ROW_PATH__": [[], ["1"]],
+            "__ROW_PATH__": [[], [1]],
             "2|a": [2, 2],
             "2|b": [4, 4]
         }
@@ -254,7 +254,7 @@ class TestToFormat(object):
             row_pivots=["a"],
             columns=[]
         )
-        assert view.to_dict() == {"__ROW_PATH__": [[], ["1"]]}
+        assert view.to_dict() == {"__ROW_PATH__": [[], [1]]}
 
     def test_to_dict_two_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -265,7 +265,7 @@ class TestToFormat(object):
             columns=[]
         )
         assert view.to_dict() == {
-            "__ROW_PATH__": [[], ["1"]]
+            "__ROW_PATH__": [[], [1]]
         }
 
     def test_to_dict_column_only_no_columns(self):
@@ -343,7 +343,7 @@ class TestToFormat(object):
             row_pivots=["a"]
         )
         v = view.to_numpy()
-        assert np.array_equal(v["__ROW_PATH__"], [[], ["1"]])
+        assert np.array_equal(v["__ROW_PATH__"], [[], [1]])
         assert np.array_equal(v["a"], np.array([2, 2]))
         assert np.array_equal(v["b"], np.array([4, 4]))
 
@@ -355,7 +355,7 @@ class TestToFormat(object):
             column_pivots=["b"]
         )
         v = view.to_numpy()
-        assert np.array_equal(v["__ROW_PATH__"], [[], ["1"]])
+        assert np.array_equal(v["__ROW_PATH__"], [[], [1]])
         assert np.array_equal(v["2|a"], np.array([2, 2]))
         assert np.array_equal(v["2|b"], np.array([4, 4]))
 
@@ -421,8 +421,8 @@ class TestToFormat(object):
         )
         assert records == [
             {'__ROW_PATH__': [], 'a': 5, 'b': 7},
-            {'__ROW_PATH__': ['1.5'], 'a': 1.5, 'b': 2.5},
-            {'__ROW_PATH__': ['3.5'], 'a': 3.5, 'b': 4.5}
+            {'__ROW_PATH__': [1.5], 'a': 1.5, 'b': 2.5},
+            {'__ROW_PATH__': [3.5], 'a': 3.5, 'b': 4.5}
         ]
 
     def test_to_records_two_over_max_row(self):
@@ -437,8 +437,8 @@ class TestToFormat(object):
         )
         assert records == [
             {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': [1]},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': [3]}
         ]
 
     def test_to_records_start_row(self):
@@ -501,8 +501,8 @@ class TestToFormat(object):
         )
         assert records == [
             {'__ROW_PATH__': [], 'a': 5, 'b': 7},
-            {'__ROW_PATH__': ['1.5'], 'a': 1.5, 'b': 2.5},
-            {'__ROW_PATH__': ['3.5'], 'a': 3.5, 'b': 4.5}
+            {'__ROW_PATH__': [1.5], 'a': 1.5, 'b': 2.5},
+            {'__ROW_PATH__': [3.5], 'a': 3.5, 'b': 4.5}
         ]
 
     def test_to_records_two_over_max_col(self):
@@ -517,8 +517,8 @@ class TestToFormat(object):
         )
         assert records == [
             {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': [1]},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': [3]}
         ]
 
     def test_to_records_start_col(self):
@@ -552,8 +552,8 @@ class TestToFormat(object):
         )
         assert records == [
             {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': [1]},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': [3]}
         ]
 
     def test_to_records_start_col_end_col(self):
@@ -743,14 +743,14 @@ class TestToFormat(object):
         )
         if six.PY2:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__,a,b\r\n0,[],2,4\r\n1,[u'1'],2,4\r\n"
+                assert view.to_csv() == ",__ROW_PATH__,a,b\r\n0,[],2,4\r\n1,[1],2,4\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,[u'1'],2,4\n"
+                assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,[1],2,4\n"
         else:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__,a,b\r\n0,[],2,4\r\n1,['1'],2,4\r\n"
+                assert view.to_csv() == ",__ROW_PATH__,a,b\r\n0,[],2,4\r\n1,[1],2,4\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,['1'],2,4\n"
+                assert view.to_csv() == ",__ROW_PATH__,a,b\n0,[],2,4\n1,[1],2,4\n"
 
     def test_to_csv_two(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -761,14 +761,14 @@ class TestToFormat(object):
         )
         if six.PY2:
             if IS_WIN:
-                assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\r\n0,2,4,[]\r\n1,2,4,[u'1']\r\n"
+                assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\r\n0,2,4,[]\r\n1,2,4,[1]\r\n"
             else:
-                assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\n0,2,4,[]\n1,2,4,[u'1']\n"
+                assert view.to_csv() == ",2|a,2|b,__ROW_PATH__\n0,2,4,[]\n1,2,4,[1]\n"
         else:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\r\n0,[],2,4\r\n1,['1'],2,4\r\n"
+                assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\r\n0,[],2,4\r\n1,[1],2,4\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\n0,[],2,4\n1,['1'],2,4\n"
+                assert view.to_csv() == ",__ROW_PATH__,2|a,2|b\n0,[],2,4\n1,[1],2,4\n"
 
     def test_to_csv_column_only(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -790,14 +790,14 @@ class TestToFormat(object):
         )
         if six.PY2:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[u'1']\r\n"
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[1]\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[1]\n"
         else:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,['1']\r\n"
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[1]\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[1]\n"
 
     def test_to_csv_two_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -809,14 +809,14 @@ class TestToFormat(object):
         )
         if six.PY2:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[u'1']\r\n"
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[1]\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[u'1']\n"
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[1]\n"
         else:
             if IS_WIN:
-                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,['1']\r\n"
+                assert view.to_csv() == ",__ROW_PATH__\r\n0,[]\r\n1,[1]\r\n"
             else:
-                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,['1']\n"
+                assert view.to_csv() == ",__ROW_PATH__\n0,[]\n1,[1]\n"
 
     def test_to_csv_column_only_no_columns(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
@@ -862,7 +862,7 @@ class TestToFormat(object):
             '4.5|a': [3.5, None, 3.5],
             '4.5|b': [4.5, None, 4.5],
             '__INDEX__': [[], [], []],  # index needs to be the same length as each column
-            '__ROW_PATH__': [[], ['1.5'], ['3.5']]
+            '__ROW_PATH__': [[], [1.5], [3.5]]
         }
 
     def test_to_format_implicit_index_np(self):

@@ -11,7 +11,8 @@ from math import trunc
 from ._constants import COLUMN_SEPARATOR_STRING
 from .libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
     get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
-    get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
+    get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, \
+    get_pkeys_from_data_slice_two, scalar_to_py
 
 
 def _mod(a, b):
@@ -54,8 +55,7 @@ def to_format(options, view, output_format):
                 continue
             elif cidx == options["start_col"] and view._sides > 0:
                 if options["has_row_path"]:
-                    paths = [path.to_string(False) for path in row_path]
-                    paths.reverse()
+                    paths = [scalar_to_py(path, False, False) for path in reversed(row_path)]
                     if output_format == 'records':
                         data[-1]["__ROW_PATH__"] = paths
                     elif output_format in ('dict', 'numpy'):
