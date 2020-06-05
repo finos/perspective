@@ -13,6 +13,7 @@
 #include <perspective/date.h>
 #include <perspective/exports.h>
 #include <perspective/data_table.h>
+#include <perspective/last.h>
 
 #include <arrow/api.h>
 #include <arrow/util/decimal.h>

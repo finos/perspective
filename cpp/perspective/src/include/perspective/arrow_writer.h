@@ -15,6 +15,7 @@
 #include <perspective/scalar.h>
 #include <perspective/data_table.h>
 #include <perspective/get_data_extents.h>
+#include <perspective/last.h>
 
 #include <arrow/api.h>
 #include <arrow/util/decimal.h>
