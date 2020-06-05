@@ -11,7 +11,7 @@
 
 
 namespace perspective {
-namespace arrow {
+namespace apachearrow {
     using namespace perspective;
 
     // TODO: unsure about efficacy of these functions when get<T> exists
@@ -84,13 +84,13 @@ namespace arrow {
         return (ridx - extents.m_srow) * stride + (cidx - extents.m_scol);
     }
 
-    std::shared_ptr<apachearrow::Array>
+    std::shared_ptr<arrow::Array>
     boolean_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
         std::int32_t stride,
         t_get_data_extents extents) {
-        apachearrow::BooleanBuilder array_builder;
+        arrow::BooleanBuilder array_builder;
         auto reserve_status = array_builder.Reserve(
             extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
@@ -103,7 +103,7 @@ namespace arrow {
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             auto idx = get_idx(cidx, ridx, stride, extents);
             t_tscalar scalar = data.operator[](idx);
-            apachearrow::Status s;
+            arrow::Status s;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 array_builder.UnsafeAppend(get_scalar<bool>(scalar));
             } else {
@@ -111,21 +111,21 @@ namespace arrow {
             }
         }
         
-        std::shared_ptr<apachearrow::Array> array;
-        apachearrow::Status status = array_builder.Finish(&array);
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
             PSP_COMPLAIN_AND_ABORT("Could not serialize boolean column: " + status.message());
         }
         return array;
     }
 
-    std::shared_ptr<apachearrow::Array>
+    std::shared_ptr<arrow::Array>
     date_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
         std::int32_t stride,
         t_get_data_extents extents) {
-        apachearrow::Date32Builder array_builder;
+        arrow::Date32Builder array_builder;
         auto reserve_status = array_builder.Reserve(
             extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
@@ -155,23 +155,23 @@ namespace arrow {
             }
         }
         
-        std::shared_ptr<apachearrow::Array> array;
-        apachearrow::Status status = array_builder.Finish(&array);
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
             PSP_COMPLAIN_AND_ABORT("Could not serialize date column: " + status.message());
         }
         return array;
     }
 
-    std::shared_ptr<apachearrow::Array>
+    std::shared_ptr<arrow::Array>
     timestamp_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
         std::int32_t stride,
         t_get_data_extents extents) {
         // TimestampType requires parameters, so initialize them here
-        std::shared_ptr<apachearrow::DataType> type = apachearrow::timestamp(apachearrow::TimeUnit::MILLI);
-        apachearrow::TimestampBuilder array_builder(type, apachearrow::default_memory_pool());
+        std::shared_ptr<arrow::DataType> type = arrow::timestamp(arrow::TimeUnit::MILLI);
+        arrow::TimestampBuilder array_builder(type, arrow::default_memory_pool());
         auto reserve_status = array_builder.Reserve(extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
             std::stringstream ss;
@@ -190,15 +190,15 @@ namespace arrow {
             }
         }
         
-        std::shared_ptr<apachearrow::Array> array;
-        apachearrow::Status status = array_builder.Finish(&array);
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
             PSP_COMPLAIN_AND_ABORT("Could not serialize timestamp column: " + status.message());
         }
         return array;
     }
 
-    std::shared_ptr<apachearrow::Array>
+    std::shared_ptr<arrow::Array>
     string_col_to_dictionary_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -206,8 +206,8 @@ namespace arrow {
         t_get_data_extents extents) {
         t_vocab vocab;
         vocab.init(false);
-        apachearrow::Int32Builder indices_builder;
-        apachearrow::StringBuilder values_builder;
+        arrow::Int32Builder indices_builder;
+        arrow::StringBuilder values_builder;
         auto reserve_status = indices_builder.Reserve(extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
             std::stringstream ss;
@@ -230,7 +230,7 @@ namespace arrow {
         // get str out of vocab
         for (auto i = 0; i < vocab.get_vlenidx(); i++) {
             const char* str = vocab.unintern_c(i);
-            apachearrow::Status s = values_builder.Append(str, strlen(str));
+            arrow::Status s = values_builder.Append(str, strlen(str));
             if (!s.ok()) {
                 std::stringstream ss;
                 ss << "Could not append string to dictionary array: "
@@ -240,8 +240,8 @@ namespace arrow {
         }
 
         // Write dictionary indices
-        std::shared_ptr<apachearrow::Array> indices_array;
-        apachearrow::Status indices_status = indices_builder.Finish(&indices_array);
+        std::shared_ptr<arrow::Array> indices_array;
+        arrow::Status indices_status = indices_builder.Finish(&indices_array);
         if (!indices_status.ok()) {
             std::stringstream ss;
             ss << "Could not write indices for dictionary array: "
@@ -251,8 +251,8 @@ namespace arrow {
         }
 
         // Write dictionary values
-        std::shared_ptr<apachearrow::Array> values_array;
-        apachearrow::Status values_status = values_builder.Finish(&values_array);
+        std::shared_ptr<arrow::Array> values_array;
+        arrow::Status values_status = values_builder.Finish(&values_array);
         if (!values_status.ok()) {
             std::stringstream ss;
             ss << "Could not write values for dictionary array: "
@@ -261,10 +261,10 @@ namespace arrow {
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
         auto dictionary_type = 
-            apachearrow::dictionary(apachearrow::int32(), apachearrow::utf8());
+            arrow::dictionary(arrow::int32(), arrow::utf8());
 
-        std::shared_ptr<apachearrow::Array> dictionary_array;
-        PSP_CHECK_ARROW_STATUS(apachearrow::DictionaryArray::FromArrays(
+        std::shared_ptr<arrow::Array> dictionary_array;
+        PSP_CHECK_ARROW_STATUS(arrow::DictionaryArray::FromArrays(
             dictionary_type, indices_array, values_array, &dictionary_array));
         
         return dictionary_array;

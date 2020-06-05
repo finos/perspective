@@ -23,6 +23,12 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif // ifndex nominmax
+
+//https://bugs.python.org/issue24643
+#if _MSC_VER >= 1900
+  #undef timezone
+#endif
+
 #endif // win32
 
 #ifdef PSP_VERIFY
