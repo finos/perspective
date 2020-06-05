@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+from six import string_types
 import datetime
 import logging
 import json
@@ -56,7 +57,7 @@ class _PerspectiveManagerInternal(object):
                 parameters: `data` (str), and `binary` (bool), a kwarg that
                 specifies whether `data` is a binary string.
         '''
-        if isinstance(msg, str):
+        if isinstance(msg, string_types):
             if msg == "heartbeat":   # TODO fix this
                 return
             msg = json.loads(msg)

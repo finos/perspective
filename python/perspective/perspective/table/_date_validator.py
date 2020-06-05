@@ -37,7 +37,7 @@ def _normalize_timestamp(obj):
 class _PerspectiveDateValidator(object):
     '''Validate and parse dates using the `dateutil` package.'''
 
-    def parse(self, str):
+    def parse(self, datestring):
         '''Return a datetime.datetime object containing the parsed date, or
         None if the date is invalid.
 
@@ -49,14 +49,14 @@ class _PerspectiveDateValidator(object):
         `timezone` property set.
 
         Args:
-            str (str): the datestring to parse
+            datestring (:obj:`str`): the datestring to parse
 
         Returns:
             (:class:`datetime.date`/`datetime.datetime`/`None`): if parse is
                 successful.
         '''
         try:
-            return parse(str)
+            return parse(datestring)
         except (ValueError, OverflowError):
             return None
 
@@ -180,7 +180,7 @@ class _PerspectiveDateValidator(object):
         ms_timestamp = int(seconds_timestamp * 1000)
         return ms_timestamp
 
-    def format(self, s):
+    def format(self, datestring):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on
         the format of the parsed date.
 
@@ -189,18 +189,18 @@ class _PerspectiveDateValidator(object):
         to minimize false positives, i.e. do not parse dates without separators.
 
         Args:
-            str (str): the datestring to parse.
+            datestring (:obj:'str'): the datestring to parse.
         '''
-        if isinstance(s, (bytes, bytearray)):
-            s = s.decode("utf-8")
-        has_separators = bool(search(r"[/. -]", s))  # match commonly-used date separators
+        if isinstance(datestring, (bytes, bytearray)):
+            datestring = datestring.decode("utf-8")
+        has_separators = bool(search(r"[/. -]", datestring))  # match commonly-used date separators
         # match commonly-used date separators
 
         dtype = t_dtype.DTYPE_STR
 
         if has_separators:
             try:
-                parsed = parse(s)
+                parsed = parse(datestring)
                 if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
                     dtype = t_dtype.DTYPE_DATE
                 else:

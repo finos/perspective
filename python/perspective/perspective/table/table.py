@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+from six import string_types
 from datetime import date, datetime
 from .view import View
 from ._accessor import _PerspectiveAccessor
@@ -233,7 +234,7 @@ class Table(object):
         Returns:
             :obj:`bool`: Whether this filter is valid.
         '''
-        if isinstance(filter[1], str):
+        if isinstance(filter[1], string_types):
             filter_op = str_to_filter_op(filter[1])
         else:
             filter_op = filter[1]
@@ -251,7 +252,7 @@ class Table(object):
         schema = self.schema()
         in_schema = schema.get(filter[0], None)
         if in_schema and (schema[filter[0]] == date or schema[filter[0]] == datetime):
-            if isinstance(value, str):
+            if isinstance(value, string_types):
                 value = self._date_validator.parse(value)
 
         return value is not None

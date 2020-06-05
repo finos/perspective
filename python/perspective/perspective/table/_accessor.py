@@ -53,7 +53,7 @@ def _type_to_format(data_or_schema):
     elif isinstance(data_or_schema, dict):
         # schema or columns
         for v in data_or_schema.values():
-            if isinstance(v, type) or isinstance(v, str):
+            if isinstance(v, type) or isinstance(v, six.string_types):
                 # schema maps name -> type
                 return False, 2, list(data_or_schema.keys()), data_or_schema
             elif isinstance(v, list):
@@ -216,14 +216,14 @@ class _PerspectiveAccessor(object):
                     return str(val)
         elif dtype == t_dtype.DTYPE_DATE:
             # return datetime.date
-            if isinstance(val, str):
+            if isinstance(val, six.string_types):
                 parsed = self._date_validator.parse(val)
                 return self._date_validator.to_date_components(parsed)
             else:
                 return self._date_validator.to_date_components(val)
         elif dtype == t_dtype.DTYPE_TIME:
             # return unix timestamps for time
-            if isinstance(val, str):
+            if isinstance(val, six.string_types):
                 parsed = self._date_validator.parse(val)
                 return self._date_validator.to_timestamp(parsed)
             else:
