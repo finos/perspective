@@ -1039,7 +1039,7 @@ namespace binding {
 
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
-        arrow::ArrowLoader loader;
+        apachearrow::ArrowLoader loader;
         std::uintptr_t ptr;
 
         // Determine metadata

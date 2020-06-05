@@ -22,10 +22,8 @@
 #include <chrono>
 #include <date/date.h>
 
-namespace apachearrow = arrow;
-
 namespace perspective {
-namespace arrow {
+namespace apachearrow {
 
     class PERSPECTIVE_EXPORT ArrowLoader {
     public:
@@ -55,7 +53,7 @@ namespace arrow {
             std::string& raw_type,
             bool is_update);
 
-        std::shared_ptr<apachearrow::Table> m_table;
+        std::shared_ptr<arrow::Table> m_table;
         std::vector<std::string> m_names;
         std::vector<t_dtype> m_types;
     };
@@ -64,14 +62,14 @@ namespace arrow {
     void
     iter_col_copy(
         std::shared_ptr<t_column> dest,
-        std::shared_ptr<apachearrow::Array> src,
+        std::shared_ptr<arrow::Array> src,
         const int64_t offset,
         const int64_t len);
 
     void
     copy_array(
         std::shared_ptr<t_column> dest,
-        std::shared_ptr<apachearrow::Array> src,
+        std::shared_ptr<arrow::Array> src,
         const int64_t offset,
         const int64_t len);
 
