@@ -40,5 +40,13 @@ typedef py::object t_val;
 typedef t_val t_data_accessor;
 
 
+//https://bugs.python.org/issue24643
+#ifdef WIN32
+#if _MSC_VER >= 1900
+  #undef timezone
+#endif
+#endif // win32
+
+
 
 #endif
