@@ -194,6 +194,9 @@ class ComputedExpressionWidget extends HTMLElement {
             // share an instance of the parser throughout the viewer.
             this._parsed_expression = this._computed_expression_parser.parse(expression);
         } catch (e) {
+            // TODO: make sure autocomplete works for each step of the new
+            // expressions with associativity - it should actually decrease
+            // the amount of custom logic we need here.
             // Show autocomplete OR error, but not both
             this._clear_error();
             this._disable_save_button();
@@ -297,8 +300,6 @@ class ComputedExpressionWidget extends HTMLElement {
             this._set_error(message, this._error);
             return;
         }
-
-        console.log("Parsed:", this._parsed_expression);
 
         // Take the parsed expression and type check it on the viewer,
         // which will call `_type_check_expression()` with a computed_schema.

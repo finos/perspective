@@ -80,6 +80,28 @@ describe("Computed Expression Parser", function() {
         expect(parsed).toEqual(expected);
     });
 
+    it("Should parse an operator notation expression with left-to-right precedence", function() {
+        const expected = [
+            {
+                column: "exp(Discount)",
+                computed_function_name: "exp",
+                inputs: ["Discount"]
+            },
+            {
+                column: "(Sales * Profit)",
+                computed_function_name: "*",
+                inputs: ["Sales", "Profit"]
+            },
+            {
+                column: "((Sales * Profit) - exp(Discount))",
+                computed_function_name: "+",
+                inputs: ["(Sales * Profit)", "exp(Discount)"]
+            }
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" - exp("Discount")');
+        expect(parsed).toEqual(expected);
+    });
+
     it("Should parse an operator notation expression named with 'AS'", function() {
         const expected = [
             {
@@ -329,8 +351,8 @@ describe("Computed Expression Parser", function() {
         }
     });
 
-    it("Should throw when missing an operator", function() {
-        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toThrow();
+    it("Should not throw when missing an operator", function() {
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toEqual([]);
     });
 
     it("Should throw when parentheses are unmatched", function() {
