@@ -41,7 +41,7 @@ describe("Computed Expression Parser", function() {
         expect(parsed).toEqual(expected);
     });
 
-    it.skip("Should parse an operator notation expression with associativity", function() {
+    it("Should parse an operator notation expression with associativity", function() {
         const expected = [
             {
                 column: "(w + x)",
@@ -55,6 +55,28 @@ describe("Computed Expression Parser", function() {
             }
         ];
         const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" + "z"');
+        expect(parsed).toEqual(expected);
+    });
+
+    it("Should parse an operator notation expression with associativity and operator precedence", function() {
+        const expected = [
+            {
+                column: "(w * x)",
+                computed_function_name: "*",
+                inputs: ["w", "x"]
+            },
+            {
+                column: "(z / abc)",
+                computed_function_name: "/",
+                inputs: ["w", "abc"]
+            },
+            {
+                column: "((w * x) + (z / abc))",
+                computed_function_name: "+",
+                inputs: ["(w + x)", "(z / abc)"]
+            }
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" * "x" + "z" / "abc"');
         expect(parsed).toEqual(expected);
     });
 

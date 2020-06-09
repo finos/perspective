@@ -120,6 +120,8 @@ class PerspectiveComputedExpressionParser {
             throw new Error(message);
         }
 
+        console.log(cst);
+
         return this._visitor.visit(cst);
     }
 
@@ -343,13 +345,7 @@ class PerspectiveComputedExpressionParser {
             }
 
             Expression(ctx, computed_columns) {
-                if (ctx.OperatorComputedColumn) {
-                    this.visit(ctx.OperatorComputedColumn, computed_columns);
-                } else if (ctx.FunctionComputedColumn) {
-                    this.visit(ctx.FunctionComputedColumn, computed_columns);
-                } else {
-                    return;
-                }
+                return this.visit(ctx.OperatorComputedColumn, computed_columns);
             }
 
             /**
@@ -359,38 +355,151 @@ class PerspectiveComputedExpressionParser {
              * @param {*} ctx
              */
             OperatorComputedColumn(ctx, computed_columns) {
+                console.log("operator", ctx);
+                // TODO: collapse body
                 let left = this.visit(ctx.left, computed_columns);
 
-                if (typeof left === "undefined") {
-                    left = computed_columns[computed_columns.length - 1].column;
+                let final_column_name;
+
+                if (ctx.right) {
+                    let previous;
+
+                    ctx.right.forEach((rhs, idx) => {
+                        let operator = this.visit(ctx.Operator[idx]);
+
+                        if (!operator) {
+                            return;
+                        }
+
+                        let right = this.visit(rhs, computed_columns);
+
+                        // If there is a previous value, use it, otherwise use
+                        // the leftmost value. This enables expressions such as
+                        // a + b / c * d + e ... ad infinitum
+                        const left_hand = previous ? previous : left;
+
+                        console.log(left_hand, operator, right);
+
+                        // Use custom name if provided through `AS/as/As`
+                        const as = this.visit(ctx.as);
+                        const column_name = as ? as : COMPUTED_FUNCTION_FORMATTERS[operator](left_hand, right);
+
+                        computed_columns.push({
+                            column: column_name,
+                            computed_function_name: operator,
+                            inputs: [left_hand, right]
+                        });
+
+                        previous = column_name;
+                    });
+
+                    final_column_name = previous;
+                } else {
+                    // If there are no more right-hand tokens, return the
+                    // column name so it can be used as the tree traversal
+                    // goes upwards.
+                    final_column_name = left;
                 }
 
-                let operator = this.visit(ctx.Operator);
+                return final_column_name;
+            }
 
-                if (!operator) {
-                    return;
+            AdditionOperatorComputedColumn(ctx, computed_columns) {
+                console.log("addition", ctx);
+                let left = this.visit(ctx.left, computed_columns);
+
+                let final_column_name;
+
+                if (ctx.right) {
+                    let previous;
+
+                    ctx.right.forEach((rhs, idx) => {
+                        let operator = this.visit(ctx.Operator[idx]);
+
+                        if (!operator) {
+                            return;
+                        }
+
+                        let right = this.visit(rhs, computed_columns);
+
+                        // If there is a previous value, use it, otherwise use
+                        // the leftmost value. This enables expressions such as
+                        // a + b / c * d + e ... ad infinitum
+                        const left_hand = previous ? previous : left;
+
+                        console.log(left_hand, operator, right);
+
+                        // Use custom name if provided through `AS/as/As`
+                        const as = this.visit(ctx.as);
+                        const column_name = as ? as : COMPUTED_FUNCTION_FORMATTERS[operator](left_hand, right);
+
+                        computed_columns.push({
+                            column: column_name,
+                            computed_function_name: operator,
+                            inputs: [left_hand, right]
+                        });
+
+                        previous = column_name;
+                    });
+
+                    final_column_name = previous;
+                } else {
+                    // If there are no more right-hand tokens, return the
+                    // column name so it can be used as the tree traversal
+                    // goes upwards.
+                    final_column_name = left;
                 }
 
-                let right = this.visit(ctx.right, computed_columns);
+                return final_column_name;
+            }
 
-                if (typeof right === "undefined") {
-                    right = computed_columns[computed_columns.length - 1].column;
+            MultiplicationOperatorComputedColumn(ctx, computed_columns) {
+                console.log("multiply", ctx);
+                let left = this.visit(ctx.left, computed_columns);
+
+                let final_column_name;
+
+                if (ctx.right) {
+                    let previous;
+
+                    ctx.right.forEach((rhs, idx) => {
+                        let operator = this.visit(ctx.Operator[idx]);
+
+                        if (!operator) {
+                            return;
+                        }
+
+                        let right = this.visit(rhs, computed_columns);
+
+                        // If there is a previous value, use it, otherwise use
+                        // the leftmost value. This enables expressions such as
+                        // a + b / c * d + e ... ad infinitum
+                        const left_hand = previous ? previous : left;
+
+                        console.log(left_hand, operator, right);
+
+                        // Use custom name if provided through `AS/as/As`
+                        const as = this.visit(ctx.as);
+                        const column_name = as ? as : COMPUTED_FUNCTION_FORMATTERS[operator](left_hand, right);
+
+                        computed_columns.push({
+                            column: column_name,
+                            computed_function_name: operator,
+                            inputs: [left_hand, right]
+                        });
+
+                        previous = column_name;
+                    });
+
+                    final_column_name = previous;
+                } else {
+                    // If there are no more right-hand tokens, return the
+                    // column name so it can be used as the tree traversal
+                    // goes upwards.
+                    final_column_name = left;
                 }
 
-                let as = this.visit(ctx.as);
-
-                let column_name = COMPUTED_FUNCTION_FORMATTERS[operator](left, right);
-
-                // Use custom name if provided through `AS/as/As`
-                if (as) {
-                    column_name = as;
-                }
-
-                computed_columns.push({
-                    column: column_name,
-                    computed_function_name: operator,
-                    inputs: [left, right]
-                });
+                return final_column_name;
             }
 
             /**
@@ -419,11 +528,13 @@ class PerspectiveComputedExpressionParser {
 
                 const as = this.visit(ctx.as);
 
-                let column_name = COMPUTED_FUNCTION_FORMATTERS[fn](...input_columns);
+                let column_name;
 
                 // Use custom name if provided through `AS/as/As`
                 if (as) {
                     column_name = as;
+                } else {
+                    column_name = COMPUTED_FUNCTION_FORMATTERS[fn](...input_columns);
                 }
 
                 const computed = {
@@ -433,6 +544,9 @@ class PerspectiveComputedExpressionParser {
                 };
 
                 computed_columns.push(computed);
+
+                // Return the column name so it can be used up the chain
+                return column_name;
             }
 
             /**

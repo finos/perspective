@@ -20,28 +20,24 @@ export class ComputedExpressionColumnParser extends CstParser {
         });
 
         this.RULE("Expression", () => {
-            this.OR(
-                [
-                    {
-                        ALT: () => {
-                            this.SUBRULE(this.OperatorComputedColumn);
-                        }
-                    },
-                    {
-                        ALT: () => {
-                            this.SUBRULE(this.FunctionComputedColumn);
-                        }
-                    }
-                ],
-                {
-                    ERR_MSG: "Expected an expression of the form `x + y` or `func(x)`."
-                }
-            );
+            // Preserve operator precedence amongst mathematical operations
+            this.SUBRULE(this.AdditionOperatorComputedColumn);
         });
 
-        this.RULE("OperatorComputedColumn", () => {
+        this.RULE("AdditionOperatorComputedColumn", () => {
             this.SUBRULE(this.ColumnName, {LABEL: "left"});
-            this.AT_LEAST_ONE(() => {
+            this.MANY(() => {
+                this.SUBRULE(this.Operator);
+                this.SUBRULE2(this.MultiplicationOperatorComputedColumn, {LABEL: "right"});
+            });
+            this.OPTION(() => {
+                this.SUBRULE(this.As, {LABEL: "as"});
+            });
+        });
+
+        this.RULE("MultiplicationOperatorComputedColumn", () => {
+            this.SUBRULE(this.ColumnName, {LABEL: "left"});
+            this.MANY(() => {
                 this.SUBRULE(this.Operator);
                 this.SUBRULE2(this.ColumnName, {LABEL: "right"});
             });
@@ -49,6 +45,17 @@ export class ComputedExpressionColumnParser extends CstParser {
                 this.SUBRULE(this.As, {LABEL: "as"});
             });
         });
+
+        // this.RULE("OperatorComputedColumn", () => {
+        //     this.SUBRULE(this.ColumnName, {LABEL: "left"});
+        //     this.AT_LEAST_ONE(() => {
+        //         this.SUBRULE(this.Operator);
+        //         this.SUBRULE2(this.ColumnName, {LABEL: "right"});
+        //     });
+        //     this.OPTION(() => {
+        //         this.SUBRULE(this.As, {LABEL: "as"});
+        //     });
+        // });
 
         this.RULE("FunctionComputedColumn", () => {
             this.SUBRULE(this.Function);
@@ -66,7 +73,7 @@ export class ComputedExpressionColumnParser extends CstParser {
         });
 
         this.RULE("ColumnName", () => {
-            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
+            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.SUBRULE(this.FunctionComputedColumn)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
                 ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
             });
         });
