@@ -33,7 +33,7 @@
             "camelcase": "off",
             "@typescript-eslint/camelcase": "off"
 
-        }    
+        }
     }, {
         "files": ["**/test/**/*.js"],
         "rules": {
@@ -42,7 +42,7 @@
                 "comments": 200,
                 "ignoreTrailingComments": true
             }]
-        }    
+        }
     }, {
         "files": ["**/*.md"],
         "rules": {
@@ -64,6 +64,7 @@
             "ignoreTrailingComments": true
         }],
         "@typescript-eslint/camelcase": "off",
+        "linebreak-style": ["error","unix"],
         "camelcase": "off",
         "no-const-assign": "error",
         "no-this-before-super": "error",
