@@ -108,7 +108,8 @@ jobs:
         artifact_name: 'cp38-cp38-manylinux2014_x86_64'
 
   steps:
-    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), and(eq(variables['manylinux_flag'], ''), or(eq(variables['python_flag'], '--python2'), eq(variables['python_flag'], '')))) }}: # only build "official" if not a release
+    # only build "official" if not a release
+    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), and(eq(variables['manylinux_flag'], ''), or(eq(variables['python_flag'], '--python2'), eq(variables['python_flag'], '')))) }}:
 
       - task: UsePythonVersion@0
         inputs:
@@ -208,7 +209,9 @@ jobs:
         python_flag: '--python38'
 
   steps:
-    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}: # only build python37 if not a release
+    # only build python37 if not a release
+    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
+
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '$(python.version)'
@@ -273,7 +276,9 @@ jobs:
         artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
 
   steps:
-    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}: # only build python37 if not a release
+    # only build python37 if not a release
+    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
+
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '$(python.version)'
