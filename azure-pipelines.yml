@@ -56,141 +56,140 @@ jobs:
         python_flag: '--python2'
         manylinux_flag: ''
         artifact_name: 'cp27-cp27m'
-      Python27ManyLinux2010:
-        python.version: '2.7'
-        python_flag: '--python2'
-        manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
-      Python36:
-        python.version: '3.6'
-        python_flag: '--python36'
-        manylinux_flag: ''
-        artifact_name: 'cp36-cp36m'
-      Python36ManyLinux2010:
-        python.version: '3.6'
-        python_flag: '--python36'
-        manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp36-cp36m-manylinux2010_x86_64'
-      Python36ManyLinux2014:
-        python.version: '3.6'
-        python_flag: '--python36'
-        manylinux_flag: '--manylinux2014'
-        artifact_name: 'cp36-cp36m-manylinux2014_x86_64'
       Python37:
         python.version: '3.7'
         python_flag: ''
         manylinux_flag: ''
         artifact_name: 'cp37-cp37m'
-      Python37ManyLinux2010:
-        python.version: '3.7'
-        python_flag: ''
-        manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
-      Python37ManyLinux2014:
-        python.version: '3.7'
-        python_flag: ''
-        manylinux_flag: '--manylinux2014'
-        artifact_name: 'cp37-cp37m-manylinux2014_x86_64'
-      Python38:
-        python.version: '3.8'
-        python_flag: '--python38'
-        manylinux_flag: ''
-        artifact_name: 'cp38-cp38'
-      Python38ManyLinux2010:
-        python.version: '3.8'
-        python_flag: '--python38'
-        manylinux_flag: '--manylinux2010'
-        artifact_name: 'cp38-cp38-manylinux2010_x86_64'
-      Python38ManyLinux2014:
-        python.version: '3.8'
-        python_flag: '--python38'
-        manylinux_flag: '--manylinux2014'
-        artifact_name: 'cp38-cp38-manylinux2014_x86_64'
+        Python37ManyLinux2010:
+          python.version: '3.7'
+          python_flag: ''
+          manylinux_flag: '--manylinux2010'
+          artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
 
-  # only build "official" if not a release
-  - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), and(eq(variables['manylinux_flag'], ''), or(eq(variables['python_flag'], '--python2'), eq(variables['python_flag'], '')))) }}:
-    steps:
+      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+        Python27ManyLinux2010:
+          python.version: '2.7'
+          python_flag: '--python2'
+          manylinux_flag: '--manylinux2010'
+          artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
+        Python36:
+          python.version: '3.6'
+          python_flag: '--python36'
+          manylinux_flag: ''
+          artifact_name: 'cp36-cp36m'
+        Python36ManyLinux2010:
+          python.version: '3.6'
+          python_flag: '--python36'
+          manylinux_flag: '--manylinux2010'
+          artifact_name: 'cp36-cp36m-manylinux2010_x86_64'
+        Python36ManyLinux2014:
+          python.version: '3.6'
+          python_flag: '--python36'
+          manylinux_flag: '--manylinux2014'
+          artifact_name: 'cp36-cp36m-manylinux2014_x86_64'
+        Python37ManyLinux2014:
+          python.version: '3.7'
+          python_flag: ''
+          manylinux_flag: '--manylinux2014'
+          artifact_name: 'cp37-cp37m-manylinux2014_x86_64'
+        Python38:
+          python.version: '3.8'
+          python_flag: '--python38'
+          manylinux_flag: ''
+          artifact_name: 'cp38-cp38'
+        Python38ManyLinux2010:
+          python.version: '3.8'
+          python_flag: '--python38'
+          manylinux_flag: '--manylinux2010'
+          artifact_name: 'cp38-cp38-manylinux2010_x86_64'
+        Python38ManyLinux2014:
+          python.version: '3.8'
+          python_flag: '--python38'
+          manylinux_flag: '--manylinux2014'
+          artifact_name: 'cp38-cp38-manylinux2014_x86_64'
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: 'x64'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
 
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '12.x'
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
 
-      - bash: npm install -g yarn
-        displayName: "Install Yarn"
+    - bash: npm install -g yarn
+      displayName: "Install Yarn"
 
-      - bash: yarn
-        displayName: 'Install Deps'
+    - bash: yarn
+      displayName: 'Install Deps'
 
-      - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: 'build'
-        env:
-          PSP_DOCKER: 1
+    - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+      displayName: 'build'
+      env:
+        PSP_DOCKER: 1
 
-      - task: PublishTestResults@2
-        condition: succeededOrFailed()
-        inputs:
-          testResultsFiles: 'python/perspective/python_junit.xml'
-          testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: 'python/perspective/python_junit.xml'
+        testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
 
-      - task: PublishCodeCoverageResults@1
-        inputs: 
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+    - task: PublishCodeCoverageResults@1
+      inputs: 
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
-      # Build a python wheel for Manylinux
-      - bash: yarn _wheel_python --platform manylinux --ci $(python_flag) $(manylinux_flag)
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-        displayName: 'Build wheel'
-        env:
-          PSP_DOCKER: 1
+    # Build a python wheel for Manylinux
+    - bash: yarn _wheel_python --platform manylinux --ci $(python_flag) $(manylinux_flag)
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Build wheel'
+      env:
+        PSP_DOCKER: 1
 
-      # Start a new virtual environment for the Perspective wheel, so as to
-      # isolate it from previously installed dependencies
-      - bash: python -m pip install virtualenv && python -m virtualenv ./temp_venv
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], '--python2'))
-        displayName: "Create virtualenv (Python 2)"
-        
-      # Use venv for python3
-      - bash: python -m venv ./temp_venv
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
-        displayName: "Create virtualenv (Python 3)"
-
-      - bash: source ./temp_venv/bin/activate
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-        displayName: "Activate virtualenv"
+    # Start a new virtual environment for the Perspective wheel, so as to
+    # isolate it from previously installed dependencies
+    - bash: python -m pip install virtualenv && python -m virtualenv ./temp_venv
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], '--python2'))
+      displayName: "Create virtualenv (Python 2)"
       
-      # Make sure that Perspective is not installed
-      - bash: "python -c 'from __future__ import print_function\ntry: import perspective; print(perspective.is_libpsp())\nexcept:print(\"Perspective not installed\")'"
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-        displayName: 'Verify that Perspective is not installed'
+    # Use venv for python3
+    - bash: python -m venv ./temp_venv
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
+      displayName: "Create virtualenv (Python 3)"
 
-      # Check which tags are supported
-      - bash: python -m pip install wheel && python -c "from __future__ import print_function; import wheel.pep425tags as w; print(w.get_supported(archive_root=''))"
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-        displayName: 'Check supported wheel tags'
+    - bash: source ./temp_venv/bin/activate
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: "Activate virtualenv"
+    
+    # Make sure that Perspective is not installed
+    - bash: "python -c 'from __future__ import print_function\ntry: import perspective; print(perspective.is_libpsp())\nexcept:print(\"Perspective not installed\")'"
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Verify that Perspective is not installed'
 
-      # Install the manylinux wheel - Python 2 on azure does not support the
-      # manylinux2010 platform tag, so only attempt to install on Python 3.
-      - bash: python -m pip install -vvv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
-        displayName: 'Install from wheel'
+    # Check which tags are supported
+    - bash: python -m pip install wheel && python -c "from __future__ import print_function; import wheel.pep425tags as w; print(w.get_supported(archive_root=''))"
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      displayName: 'Check supported wheel tags'
 
-      # Make sure that the binaries are valid and can be imported
-      - bash: "python -c 'from __future__ import print_function\nimport perspective; print(perspective.is_libpsp())'"
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
-        displayName: 'Verify successful installation'
+    # Install the manylinux wheel - Python 2 on azure does not support the
+    # manylinux2010 platform tag, so only attempt to install on Python 3.
+    - bash: python -m pip install -vvv --force-reinstall $(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/*.whl
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
+      displayName: 'Install from wheel'
 
-      # Save the artifact to Azure storage
-      - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-        inputs:
-          targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
-          artifactName: '$(artifact_name)'
+    # Make sure that the binaries are valid and can be imported
+    - bash: "python -c 'from __future__ import print_function\nimport perspective; print(perspective.is_libpsp())'"
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), eq(variables['python_flag'], ''))
+      displayName: 'Verify successful installation'
+
+    # Save the artifact to Azure storage
+    - task: PublishPipelineArtifact@1
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
+        artifactName: '$(artifact_name)'
 
 - job: 'Windows'
   pool:
@@ -198,54 +197,53 @@ jobs:
 
   strategy:
     matrix:
-      Python36:
-        python.version: '3.6'
-        python_flag: '--python36'
       Python37:
         python.version: '3.7'
         python_flag: ''
-      Python38:
-        python.version: '3.8'
-        python_flag: '--python38'
+      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+        Python36:
+          python.version: '3.6'
+          python_flag: '--python36'
+        Python38:
+          python.version: '3.8'
+          python_flag: '--python38'
 
-  # only build python37 if not a release
-  - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
-    steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: 'x64'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
 
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '12.x'
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
 
-      - script: |
-          which python > python.txt
-          set /p PYTHON=<python.txt
-          ln -s %PYTHON% %PYTHON%$(python.version)
-          python --version
-          which python$(python.version)
-        displayName: "Which python"
+    - script: |
+        which python > python.txt
+        set /p PYTHON=<python.txt
+        ln -s %PYTHON% %PYTHON%$(python.version)
+        python --version
+        which python$(python.version)
+      displayName: "Which python"
 
-      - script: |
-          python -m pip install numpy pyarrow==0.16.0
-        displayName: "Python deps"
+    - script: |
+        python -m pip install numpy pyarrow==0.16.0
+      displayName: "Python deps"
 
-      - script: npm install -g yarn
-        displayName: "Install Yarn"
+    - script: npm install -g yarn
+      displayName: "Install Yarn"
 
-      - script: yarn
-        displayName: 'Install Deps'
+    - script: yarn
+      displayName: 'Install Deps'
 
-      - script: yarn build_python  --ci $(python_flag)
-        displayName: 'build'
-        env:
-          # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
-          # https://github.com/actions/virtual-environments/issues/687
-          BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/"
-          BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/include"
-          BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/libs"
+    - script: yarn build_python  --ci $(python_flag)
+      displayName: 'build'
+      env:
+        # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
+        # https://github.com/actions/virtual-environments/issues/687
+        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/"
+        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/include"
+        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/libs"
 
 
 - job: 'MacOS_Mojave'
@@ -254,29 +252,31 @@ jobs:
 
   strategy:
     matrix:
-      Python27:
-        python.version: '2.7'
-        python_flag: '--python2'
-        artifact_name: 'cp27-cp27m-macosx_10_14_x86_64'
-
-      Python36:
-        python.version: '3.6'
-        python_flag: '--python36'
-        artifact_name: 'cp36-cp36m-macosx_10_14_x86_64'
-
       Python37:
         python.version: '3.7'
         python_flag: ''
         artifact_name: 'cp37-cp37m-macosx_10_14_x86_64'
 
-      Python38:
-        python.version: '3.8'
-        python_flag: '--python38'
-        artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
+      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+        Python27:
+          python.version: '2.7'
+          python_flag: '--python2'
+          artifact_name: 'cp27-cp27m-macosx_10_14_x86_64'
 
-  # only build python37 if not a release
-  - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
-    steps:
+        Python36:
+          python.version: '3.6'
+          python_flag: '--python36'
+          artifact_name: 'cp36-cp36m-macosx_10_14_x86_64'
+
+        Python38:
+          python.version: '3.8'
+          python_flag: '--python38'
+          artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
+
+  steps:
+    # only build python37 if not a release
+    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
+
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '$(python.version)'
@@ -374,25 +374,27 @@ jobs:
 
   strategy:
     matrix:
+
       Python27:
         python.version: '2.7'
         python_flag: '--python2'
         artifact_name: 'cp27-cp27m-macosx_10_15_x86_64'
-
-      Python36:
-        python.version: '3.6'
-        python_flag: '--python36'
-        artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
 
       Python37:
         python.version: '3.7'
         python_flag: ''
         artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
 
-      Python38:
-        python.version: '3.8'
-        python_flag: '--python38'
-        artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
+      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+        Python36:
+          python.version: '3.6'
+          python_flag: '--python36'
+          artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
+  
+        Python38:
+          python.version: '3.8'
+          python_flag: '--python38'
+          artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
 
   steps:
     - task: UsePythonVersion@0
