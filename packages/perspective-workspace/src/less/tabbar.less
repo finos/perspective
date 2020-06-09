@@ -9,19 +9,18 @@
 
 @import "~@finos/perspective-viewer/src/less/variables.less";
 
-.p-TabBar-tabLabel{
+.p-TabBar-tabLabel {
     background-color: transparent;
     border: none;
     color: #666;
     cursor: pointer;
 }
 
-
-.p-TabBar-tabLabel[value='[untitled]']{
-    color: #ddd !important
+.p-TabBar-tabLabel[value="[untitled]"] {
+    color: #ddd !important;
 }
 
-.p-TabBar-tabLabel:focus{
+.p-TabBar-tabLabel:focus {
     outline: none;
     color: #666 !important;
     cursor: text;
@@ -43,10 +42,9 @@
     font-family: var(--settings--font-family, "Arial");
 }
 
-.p-TabBar-tab.p-mod-current.linked > .p-TabBar-tabConfigIcon:before{
-    color: #22a0ce;;
+.p-TabBar-tab.p-mod-current.linked > .p-TabBar-tabConfigIcon:before {
+    color: #22a0ce;
 }
-
 
 .p-TabBar-tab > .p-TabBar-tabConfigIcon {
     opacity: 0;
@@ -59,11 +57,13 @@
 }
 
 .p-mod-current {
-    .p-TabBar-tabConfigIcon, .p-TabBar-tabCloseIcon {
-        color: #CCC;
+    .p-TabBar-tabConfigIcon,
+    .p-TabBar-tabCloseIcon {
+        color: #ccc;
         transition: color 0.2s ease-out;
     }
-    .p-TabBar-tabConfigIcon:hover, .p-TabBar-tabCloseIcon:hover {
+    .p-TabBar-tabConfigIcon:hover,
+    .p-TabBar-tabCloseIcon:hover {
         color: #1a7da1;
         transition: color 0.2s ease-out;
     }
@@ -92,7 +92,6 @@
 .p-TabBar-tabLabel:empty::after {
     content: "[untitled]";
 }
-
 
 .divider {
     left: 14px;
@@ -129,10 +128,8 @@
     min-height: 24px !important;
 }
 
-
 @border-color: 1px solid #eaeaea;
 @night-border-color: 1px solid #ddd;
-
 
 .pfm-button-base {
     background: white !important;
@@ -171,10 +168,8 @@
     border-color: #eaeaea;
 }
 
-
-
- .p-TabBar-content > .p-TabBar-tab,
- .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+.p-TabBar-content > .p-TabBar-tab,
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
     background-color: #eee;
 }
 
@@ -182,8 +177,7 @@
     background-color: #ddd;
 }
 
- .condensed .p-TabBar-content {
-
+.condensed .p-TabBar-content {
     & > .p-TabBar-tab .p-TabBar-tabConfigIcon {
         display: none;
     }
@@ -199,8 +193,7 @@
     }
 }
 
-
- .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
     border-width: 1px !important;
     border-color: transparent;
     .p-TabBar-tabToolbar {
@@ -213,17 +206,16 @@
         right: 10px;
     }
     &:last-child:first-child .divider {
-       background: none;
-       transition: none;
-    }  
+        background: none;
+        transition: none;
+    }
 }
 
- .p-TabBar-content > .p-TabBar-tab.p-mod-current.perspective_updating {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.perspective_updating {
     .p-TabBar-tabConfigIcon {
         display: none;
     }
 
-    
     .p-TabBar-tabLoadingIcon {
         display: block;
     }
@@ -233,7 +225,7 @@
     background-color: transparent !important;
 }
 
- .p-TabBar-content > .p-TabBar-tab {
+.p-TabBar-content > .p-TabBar-tab {
     max-width: 100000px !important;
     flex: 0 1 100000px !important;
     background: none;
@@ -248,12 +240,12 @@
     transition: color 0.2s ease-out;
 }
 
- .p-TabBar-content > .p-TabBar-tab {
+.p-TabBar-content > .p-TabBar-tab {
     color: #ccc;
 }
 
 .p-TabBar-content > .p-TabBar-tab {
-    color: #CCC;
+    color: #ccc;
 }
 
 .p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
@@ -264,15 +256,15 @@
     color: #ccc;
 }
 
- .p-TabBar-content > .p-TabBar-tab.p-mod-current {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: #666;
 }
 
- .p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
+.p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
     white-space: nowrap !important;
 }
 
- .p-TabBar-tabLabel {
+.p-TabBar-tabLabel {
     font-family: "Open Sans";
     font-weight: 400;
     font-size: 12px;
@@ -281,7 +273,6 @@
     white-space: normal !important;
     word-break: break-all;
 }
-
 
 .p-TabBar-tabCloseIcon,
 .p-TabBar-tabConfigIcon {
@@ -299,13 +290,12 @@
     padding-right: 12px;
 }
 
-
 .bottom .p-TabBar-tab {
     flex-basis: 10000px !important;
     max-width: 10000px !important;
 }
 
- .p-TabBar-content > .p-TabBar-tab.p-mod-current {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: var(--detail-tabbar--color, #666) !important;
     border: var(--detail-tabbar--border, @border-color);
     background-color: var(--detail-tabbar--background-color, white);
@@ -321,13 +311,11 @@
     background-color: #ccc;
 }
 
-
-.perspective-workspace.context-menu * .p-TabBar.context-focus{
+.perspective-workspace.context-menu * .p-TabBar.context-focus {
     opacity: 1;
 }
 
-.perspective-workspace.context-menu  * .p-TabBar{
+.perspective-workspace.context-menu * .p-TabBar {
     opacity: 0.2;
     transition: opacity 0.2s ease-out;
 }
-
