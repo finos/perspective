@@ -61,11 +61,11 @@ jobs:
         python_flag: ''
         manylinux_flag: ''
         artifact_name: 'cp37-cp37m'
-        Python37ManyLinux2010:
-          python.version: '3.7'
-          python_flag: ''
-          manylinux_flag: '--manylinux2010'
-          artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
+      Python37ManyLinux2010:
+        python.version: '3.7'
+        python_flag: ''
+        manylinux_flag: '--manylinux2010'
+        artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
 
       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
         Python27ManyLinux2010:
