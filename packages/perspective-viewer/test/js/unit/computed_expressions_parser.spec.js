@@ -41,6 +41,23 @@ describe("Computed Expression Parser", function() {
         expect(parsed).toEqual(expected);
     });
 
+    it.skip("Should parse an operator notation expression with associativity", function() {
+        const expected = [
+            {
+                column: "(w + x)",
+                computed_function_name: "+",
+                inputs: ["w", "x"]
+            },
+            {
+                column: "((w + x) + z)",
+                computed_function_name: "+",
+                inputs: ["(w + x)", "z"]
+            }
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" + "z"');
+        expect(parsed).toEqual(expected);
+    });
+
     it("Should parse an operator notation expression named with 'AS'", function() {
         const expected = [
             {

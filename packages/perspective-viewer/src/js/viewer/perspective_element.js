@@ -182,10 +182,10 @@ export class PerspectiveElement extends StateElement {
 
         if (parsed_computed_columns.length === 0) {
             // Fallback for race condition on workspace - need to parse
-            // computed expressions, and assume that `parsed-computed-columns`
-            // will be set when the setAttribute callback fires
-            // *after* the table has been loaded.
+            // computed expressions and then set `parsed-computed-columns`
+            // so that future views can get the computed column.
             const computed_expressions = this._get_view_computed_columns();
+
             for (const expression of computed_expressions) {
                 if (typeof expression === "string") {
                     parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(expression));
@@ -195,9 +195,17 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        const computed_column_names = parsed_computed_columns.map(x => x.column);
         const computed_schema = await table.computed_schema(parsed_computed_columns);
 
+        // Validate the computed columns and make sure no invalid columns
+        // are present, as invalid columns can cause segfaults later on.
+        const validated = await this._validate_parsed_computed_columns(parsed_computed_columns, computed_schema);
+        parsed_computed_columns = validated;
+
+        // Update the viewer with the parsed computed columns
+        this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
+
+        const computed_column_names = parsed_computed_columns.map(x => x.column);
         cols = cols.concat(computed_column_names);
 
         if (!this.hasAttribute("columns")) {

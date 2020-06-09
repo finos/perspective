@@ -12,7 +12,6 @@
 #include <perspective/first.h>
 #include <perspective/column.h>
 #include <perspective/base.h>
-#include <perspective/python/column.h>
 #include <perspective/python/base.h>
 
 namespace perspective {

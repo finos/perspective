@@ -30,6 +30,7 @@
 #include <fstream>
 #include <boost/unordered_map.hpp>
 #include <perspective/portable.h>
+#include <stdlib.h>
 
 namespace perspective {
 

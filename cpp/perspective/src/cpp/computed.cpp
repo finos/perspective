@@ -1043,7 +1043,7 @@ t_computed_column::computed_functions = {
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
         {"format_function", "x => `hour_of_day(${x})`"},
-        {"help", "Returns the hour of day (0-23) in UTC for the datetime column."},
+        {"help", "Returns the hour of day (0-23) for the datetime column."},
         {"signature", "hour_of_day(x: Datetime): Number"}
     }},
     {"day_of_week", {
@@ -1056,7 +1056,7 @@ t_computed_column::computed_functions = {
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
         {"format_function", "x => `day_of_week(${x})`"},
-        {"help", "Returns the day of week in UTC for the datetime column."},
+        {"help", "Returns the day of week for the datetime column."},
         {"signature", "day_of_week(x: Datetime): String"}
     }},
     {"month_of_year", {
@@ -1069,7 +1069,7 @@ t_computed_column::computed_functions = {
         {"category", "FunctionTokenType"},
         {"num_params", "1"},
         {"format_function", "x => `month_of_year(${x})`"},
-        {"help", "Returns the month of year in UTC for the datetime column."},
+        {"help", "Returns the month of year for the datetime column."},
         {"signature", "month_of_year(x: Datetime): String"}
     }},
     {"second_bucket", {

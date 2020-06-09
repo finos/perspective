@@ -159,18 +159,18 @@ two methods into your object:
 
 #### Time Zone Handling
 
-When passing in `datetime` objects, Perspective checks the `tzinfo` attribute
-to see if a time zone is set. For more details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
-of `perspective-python` semantics around time zone handling.
+Columns with the `datetime` type are stored internally as UTC timestamps in milliseconds since epoch (Unix Time),
+and are serialized to the user as `datetime.datetime` objects in _local time_ according to the Python runtime.
 
-##### Naive Datetimes
+Both ["naive" and "aware" datetimes](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects) will be
+serialized to local time by Perspective, with the conversion determined by the `tzinfo` attribute:
 
-Objects with an unset `tzinfo` attribute (naive datetimes) are treated as _local time_, and do not undergo any time zone conversion.
+- "Naive" datetimes are assumed to be already in local time and are serialized as-is.
+- "Aware" datetimes will be converted to UTC from their original timezone, and then converted to local time
+from UTC.
 
-##### Aware Datetimes
-
-Objects with the `tzinfo` attribute set (aware datetimes) will be _converted into UTC_ before being stored in
-Perspective, and they will be _serialized as local time_.
+This behavior is consistent with Perspective's behavior in Javascript. For more details, see this
+in-depth [explanation](https://github.com/finos/perspective/pull/867) of `perspective-python` semantics around time zone handling.
 
 ##### Pandas Timestamps
 
