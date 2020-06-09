@@ -253,15 +253,10 @@ exports.python_image = function python_image(image = "", python = "") {
         if (image == "manylinux2014") {
             throw "Python2 not supported for manylinux2014";
         } else {
-            return "python2_manylinux2010";
+            return "manylinux2010";
         }
-    } else if (python == "python3.8") {
-        return `python38_${image}`;
-    } else if (python == "python3.6") {
-        return `python36_${image}`;
-    } else {
-        return `python37_${image}`;
     }
+    return `${image}`;
 };
 
 /*******************************************************************************
