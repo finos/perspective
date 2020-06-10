@@ -29,408 +29,442 @@ describe("Computed Expression Parser", function() {
         TABLE.delete();
     });
 
-    it("Should parse an operator notation expression", function() {
-        const expected = [
-            {
-                column: "(w + x)",
-                computed_function_name: "+",
-                inputs: ["w", "x"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with associativity", function() {
-        const expected = [
-            {
-                column: "(w + x)",
-                computed_function_name: "+",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "((w + x) + z)",
-                computed_function_name: "+",
-                inputs: ["(w + x)", "z"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" + "z"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with associativity and operator precedence", function() {
-        const expected = [
-            {
-                column: "(w * x)",
-                computed_function_name: "*",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "(z / abc)",
-                computed_function_name: "/",
-                inputs: ["z", "abc"]
-            },
-            {
-                column: "((w * x) + (z / abc))",
-                computed_function_name: "+",
-                inputs: ["(w * x)", "(z / abc)"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" * "x" + "z" / "abc"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with exponent precedence", function() {
-        const expected = [
-            {
-                column: "(Profit ^ Quantity)",
-                computed_function_name: "^",
-                inputs: ["Profit", "Quantity"]
-            },
-            {
-                column: "(Sales - (Profit ^ Quantity))",
-                computed_function_name: "-",
-                inputs: ["Sales", "(Profit ^ Quantity)"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" - "Profit" ^ "Quantity"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with left-to-right precedence", function() {
-        const expected = [
-            {
-                column: "(Sales * Profit)",
-                computed_function_name: "*",
-                inputs: ["Sales", "Profit"]
-            },
-            {
-                column: "exp(Discount)",
-                computed_function_name: "exp",
-                inputs: ["Discount"]
-            },
-            {
-                column: "((Sales * Profit) - exp(Discount))",
-                computed_function_name: "-",
-                inputs: ["(Sales * Profit)", "exp(Discount)"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" - exp("Discount")');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with left-to-right precedence, named with AS", function() {
-        const expected = [
-            {
-                column: "ABC",
-                computed_function_name: "*",
-                inputs: ["Sales", "Profit"]
-            },
-            {
-                column: "CBA",
-                computed_function_name: "exp",
-                inputs: ["Discount"]
-            },
-            {
-                column: "BBB",
-                computed_function_name: "-",
-                inputs: ["ABC", "CBA"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" as "ABC" - exp("Discount") as "CBA" as "BBB"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with left-to-right precedence and exponent, named with AS", function() {
-        const expected = [
-            {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
-            {column: "BBB", computed_function_name: "^", inputs: ["Profit", "CBA"]},
-            {column: "(Sales * BBB)", computed_function_name: "*", inputs: ["Sales", "BBB"]}
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" ^ exp("Discount") as "CBA" as "BBB"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it.skip("Should parse an operator notation expression with left-to-right precedence and exponent, all named with AS", () => {
-        const expected = [
-            {column: "ABC", computed_function_name: "*", inputs: ["Sales", "Profit"]},
-            {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
-            {column: "BBB", computed_function_name: "^", inputs: ["ABC", "CBA"]}
-        ];
-        // Currently parser cannot evaluate because it wants to do
-        // "Profit" as "ABC" ^ exp("Discount"), which is invalid syntax. It
-        // should evalute statements with "AS" almost as if parentheses
-        // have been applied. If you change * to ^, the statement works
-        // because precedence is correct - but following an operator of lower
-        // precedence with one of higher precedence, while using "AS", fails.
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" as "ABC" ^ exp("Discount") as "CBA" as "BBB"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression with left-to-right precedence and final result named with AS", function() {
-        const expected = [
-            {
-                column: "BBB",
-                computed_function_name: "^",
-                inputs: ["Profit", "Discount"]
-            },
-            {
-                column: "(Sales + BBB)",
-                computed_function_name: "+",
-                inputs: ["Sales", "BBB"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" + "Profit" ^ "Discount" as "BBB"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an operator notation expression named with 'AS'", function() {
-        const expected = [
-            {
-                column: "custom column name",
-                computed_function_name: "+",
-                inputs: ["w", "x"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" as "custom column name"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an recursive operator notation expression", function() {
-        const expected = [
-            {
-                column: "(w + x)",
-                computed_function_name: "+",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "(w - x)",
-                computed_function_name: "-",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "((w + x) * (w - x))",
-                computed_function_name: "*",
-                inputs: ["(w + x)", "(w - x)"]
-            },
-            {
-                column: "(w / ((w + x) * (w - x)))",
-                computed_function_name: "/",
-                inputs: ["w", "((w + x) * (w - x))"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x") * ("w" - "x"))');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse an recursive operator notation expression named with 'AS'", function() {
-        const expected = [
-            {
-                column: "sub1",
-                computed_function_name: "+",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "sub2",
-                computed_function_name: "-",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "sub3",
-                computed_function_name: "*",
-                inputs: ["sub1", "sub2"]
-            },
-            {
-                column: "final",
-                computed_function_name: "/",
-                inputs: ["w", "sub3"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x" as "sub1") * ("w" - "x" as "sub2") as "sub3") as "final"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse a function notation expression", function() {
-        const expected = [
-            {
-                column: "sqrt(x)",
-                computed_function_name: "sqrt",
-                inputs: ["x"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x")');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse a function notation expression named with 'AS'", function() {
-        const expected = [
-            {
-                column: "custom column name",
-                computed_function_name: "sqrt",
-                inputs: ["x"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x") as "custom column name"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse a recursive function notation expression", function() {
-        const expected = [
-            {
-                column: "(x ^ 2)",
-                computed_function_name: "pow2",
-                inputs: ["x"]
-            },
-            {
-                column: "sqrt((x ^ 2))",
-                computed_function_name: "sqrt",
-                inputs: ["(x ^ 2)"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x")))');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse a recursive function notation expression named with 'AS'", function() {
-        const expected = [
-            {
-                column: "first",
-                computed_function_name: "pow2",
-                inputs: ["x"]
-            },
-            {
-                column: "final",
-                computed_function_name: "sqrt",
-                inputs: ["first"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x") as "first")) as "final"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse a recursive function + operator notation expression named with 'AS'", function() {
-        const expected = [
-            {
-                column: "first",
-                computed_function_name: "+",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "second",
-                computed_function_name: "*",
-                inputs: ["x", "first"]
-            },
-            {
-                column: "final",
-                computed_function_name: "pow2",
-                inputs: ["second"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('pow2(("x" * ("w" + "x" as "first") as "second")) as "final"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse a recursive operator with inset function notation expression, named with 'AS'", function() {
-        const expected = [
-            {
-                column: "first",
-                computed_function_name: "+",
-                inputs: ["x", "w"]
-            },
-            {
-                column: "second",
-                computed_function_name: "sqrt",
-                inputs: ["first"]
-            },
-            {
-                column: "third",
-                computed_function_name: "/",
-                inputs: ["w", "x"]
-            },
-            {
-                column: "fourth",
-                computed_function_name: "pow2",
-                inputs: ["third"]
-            },
-            {
-                column: "final",
-                computed_function_name: "*",
-                inputs: ["second", "fourth"]
-            }
-        ];
-        const parsed = COMPUTED_EXPRESSION_PARSER.parse('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
-        expect(parsed).toEqual(expected);
-    });
-
-    it("Should parse all arity 1 functional operators", function() {
-        const functions = [
-            "abs",
-            "pow2",
-            "sqrt",
-            "invert",
-            "log",
-            "exp",
-            "bin10",
-            "bin100",
-            "bin1000",
-            "bin10th",
-            "bin100th",
-            "bin1000th",
-            "length",
-            "day_of_week",
-            "month_of_year",
-            "second_bucket",
-            "minute_bucket",
-            "hour_bucket",
-            "day_bucket",
-            "week_bucket",
-            "month_bucket",
-            "year_bucket"
-        ];
-
-        for (const f of functions) {
-            const expression = `${f}("column") as "alias"`;
-            const parsed = [
+    describe("Operator notation", () => {
+        it("Should parse an operator notation expression", function() {
+            const expected = [
                 {
-                    column: "alias",
-                    computed_function_name: f,
-                    inputs: ["column"]
+                    column: "(w + x)",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
                 }
             ];
-            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
-        }
-    });
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x"');
+            expect(parsed).toEqual(expected);
+        });
 
-    it("Should parse all arity 2 functional operators", function() {
-        const functions = ["concat_comma", "concat_space"];
-
-        for (const f of functions) {
-            const expression = `${f}("column", "column2") as "alias"`;
-            const parsed = [
+        it("Should parse an operator notation expression named with 'AS'", function() {
+            const expected = [
                 {
-                    column: "alias",
-                    computed_function_name: f,
-                    inputs: ["column", "column2"]
+                    column: "custom column name",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
                 }
             ];
-            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
-        }
-    });
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" as "custom column name"');
+            expect(parsed).toEqual(expected);
+        });
 
-    it("Should parse all arity 2 operators", function() {
-        const functions = ["+", "-", "/", "*", "^", "%", "==", "!=", ">", "<", "is"];
-
-        for (const f of functions) {
-            const expression = `"column" ${f} "column2" as "alias"`;
-            const parsed = [
+        it("Should parse an recursive operator notation expression", function() {
+            const expected = [
                 {
-                    column: "alias",
-                    computed_function_name: f,
-                    inputs: ["column", "column2"]
+                    column: "(w + x)",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "(w - x)",
+                    computed_function_name: "-",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "((w + x) * (w - x))",
+                    computed_function_name: "*",
+                    inputs: ["(w + x)", "(w - x)"]
+                },
+                {
+                    column: "(w / ((w + x) * (w - x)))",
+                    computed_function_name: "/",
+                    inputs: ["w", "((w + x) * (w - x))"]
                 }
             ];
-            expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
-        }
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x") * ("w" - "x"))');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an recursive operator notation expression named with 'AS'", function() {
+            const expected = [
+                {
+                    column: "sub1",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "sub2",
+                    computed_function_name: "-",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "sub3",
+                    computed_function_name: "*",
+                    inputs: ["sub1", "sub2"]
+                },
+                {
+                    column: "final",
+                    computed_function_name: "/",
+                    inputs: ["w", "sub3"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" / (("w" + "x" as "sub1") * ("w" - "x" as "sub2") as "sub3") as "final"');
+            expect(parsed).toEqual(expected);
+        });
+    });
+
+    describe("Operator notation with associativity/precedence", () => {
+        it("Should parse an operator notation expression with associativity", function() {
+            const expected = [
+                {
+                    column: "(w + x)",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "((w + x) + z)",
+                    computed_function_name: "+",
+                    inputs: ["(w + x)", "z"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" + "z"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with associativity and operator precedence", function() {
+            const expected = [
+                {
+                    column: "(w * x)",
+                    computed_function_name: "*",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "(z / abc)",
+                    computed_function_name: "/",
+                    inputs: ["z", "abc"]
+                },
+                {
+                    column: "((w * x) + (z / abc))",
+                    computed_function_name: "+",
+                    inputs: ["(w * x)", "(z / abc)"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" * "x" + "z" / "abc"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with exponent precedence", function() {
+            const expected = [
+                {
+                    column: "(Profit ^ Quantity)",
+                    computed_function_name: "^",
+                    inputs: ["Profit", "Quantity"]
+                },
+                {
+                    column: "(Sales - (Profit ^ Quantity))",
+                    computed_function_name: "-",
+                    inputs: ["Sales", "(Profit ^ Quantity)"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" - "Profit" ^ "Quantity"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with boolean precedence under all other operations", function() {
+            const expected = [
+                {
+                    column: "(x + y)",
+                    computed_function_name: "+",
+                    inputs: ["x", "y"]
+                },
+                {
+                    column: "(a - b)",
+                    computed_function_name: "-",
+                    inputs: ["a", "b"]
+                },
+                {
+                    column: "((x + y) > (a - b))",
+                    computed_function_name: ">",
+                    inputs: ["(x + y)", "(a - b)"]
+                }
+            ];
+            // Boolean comparators should compare the result of operations and
+            // have the lowest precedence.
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"x" + "y" > "a" - "b"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with left-to-right precedence", function() {
+            const expected = [
+                {
+                    column: "(Sales * Profit)",
+                    computed_function_name: "*",
+                    inputs: ["Sales", "Profit"]
+                },
+                {
+                    column: "exp(Discount)",
+                    computed_function_name: "exp",
+                    inputs: ["Discount"]
+                },
+                {
+                    column: "((Sales * Profit) - exp(Discount))",
+                    computed_function_name: "-",
+                    inputs: ["(Sales * Profit)", "exp(Discount)"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" - exp("Discount")');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with left-to-right precedence, named with AS", function() {
+            const expected = [
+                {
+                    column: "ABC",
+                    computed_function_name: "*",
+                    inputs: ["Sales", "Profit"]
+                },
+                {
+                    column: "CBA",
+                    computed_function_name: "exp",
+                    inputs: ["Discount"]
+                },
+                {
+                    column: "BBB",
+                    computed_function_name: "-",
+                    inputs: ["ABC", "CBA"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" as "ABC" - exp("Discount") as "CBA" as "BBB"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with left-to-right precedence and exponent, named with AS", function() {
+            const expected = [
+                {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
+                {column: "BBB", computed_function_name: "^", inputs: ["Profit", "CBA"]},
+                {column: "(Sales * BBB)", computed_function_name: "*", inputs: ["Sales", "BBB"]}
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" ^ exp("Discount") as "CBA" as "BBB"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it.skip("Should parse an operator notation expression with left-to-right precedence and exponent, all named with AS", () => {
+            const expected = [
+                {column: "ABC", computed_function_name: "*", inputs: ["Sales", "Profit"]},
+                {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
+                {column: "BBB", computed_function_name: "^", inputs: ["ABC", "CBA"]}
+            ];
+            // Currently parser cannot evaluate because it wants to do
+            // "Profit" as "ABC" ^ exp("Discount"), which is invalid syntax. It
+            // should evalute statements with "AS" almost as if parentheses
+            // have been applied. If you change * to ^, the statement works
+            // because precedence is correct - but following an operator of lower
+            // precedence with one of higher precedence, while using "AS", fails.
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" as "ABC" ^ exp("Discount") as "CBA" as "BBB"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with left-to-right precedence and final result named with AS", function() {
+            const expected = [
+                {
+                    column: "BBB",
+                    computed_function_name: "^",
+                    inputs: ["Profit", "Discount"]
+                },
+                {
+                    column: "(Sales + BBB)",
+                    computed_function_name: "+",
+                    inputs: ["Sales", "BBB"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" + "Profit" ^ "Discount" as "BBB"');
+            expect(parsed).toEqual(expected);
+        });
+    });
+
+    describe("Function notation", () => {
+        it("Should parse a function notation expression", function() {
+            const expected = [
+                {
+                    column: "sqrt(x)",
+                    computed_function_name: "sqrt",
+                    inputs: ["x"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x")');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse a function notation expression named with 'AS'", function() {
+            const expected = [
+                {
+                    column: "custom column name",
+                    computed_function_name: "sqrt",
+                    inputs: ["x"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x") as "custom column name"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse a recursive function notation expression", function() {
+            const expected = [
+                {
+                    column: "(x ^ 2)",
+                    computed_function_name: "pow2",
+                    inputs: ["x"]
+                },
+                {
+                    column: "sqrt((x ^ 2))",
+                    computed_function_name: "sqrt",
+                    inputs: ["(x ^ 2)"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x")))');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse a recursive function notation expression named with 'AS'", function() {
+            const expected = [
+                {
+                    column: "first",
+                    computed_function_name: "pow2",
+                    inputs: ["x"]
+                },
+                {
+                    column: "final",
+                    computed_function_name: "sqrt",
+                    inputs: ["first"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x") as "first")) as "final"');
+            expect(parsed).toEqual(expected);
+        });
+    });
+
+    describe("Mixed function/operator notation", () => {
+        it("Should parse a recursive function + operator notation expression named with 'AS'", function() {
+            const expected = [
+                {
+                    column: "first",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "second",
+                    computed_function_name: "*",
+                    inputs: ["x", "first"]
+                },
+                {
+                    column: "final",
+                    computed_function_name: "pow2",
+                    inputs: ["second"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('pow2(("x" * ("w" + "x" as "first") as "second")) as "final"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse a recursive operator with inset function notation expression, named with 'AS'", function() {
+            const expected = [
+                {
+                    column: "first",
+                    computed_function_name: "+",
+                    inputs: ["x", "w"]
+                },
+                {
+                    column: "second",
+                    computed_function_name: "sqrt",
+                    inputs: ["first"]
+                },
+                {
+                    column: "third",
+                    computed_function_name: "/",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "fourth",
+                    computed_function_name: "pow2",
+                    inputs: ["third"]
+                },
+                {
+                    column: "final",
+                    computed_function_name: "*",
+                    inputs: ["second", "fourth"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
+            expect(parsed).toEqual(expected);
+        });
+    });
+
+    describe("Operators and functions", () => {
+        it("Should parse all arity 1 functional operators", function() {
+            const functions = [
+                "abs",
+                "pow2",
+                "sqrt",
+                "invert",
+                "log",
+                "exp",
+                "bin10",
+                "bin100",
+                "bin1000",
+                "bin10th",
+                "bin100th",
+                "bin1000th",
+                "length",
+                "day_of_week",
+                "month_of_year",
+                "second_bucket",
+                "minute_bucket",
+                "hour_bucket",
+                "day_bucket",
+                "week_bucket",
+                "month_bucket",
+                "year_bucket"
+            ];
+
+            for (const f of functions) {
+                const expression = `${f}("column") as "alias"`;
+                const parsed = [
+                    {
+                        column: "alias",
+                        computed_function_name: f,
+                        inputs: ["column"]
+                    }
+                ];
+                expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
+            }
+        });
+
+        it("Should parse all arity 2 functional operators", function() {
+            const functions = ["concat_comma", "concat_space"];
+
+            for (const f of functions) {
+                const expression = `${f}("column", "column2") as "alias"`;
+                const parsed = [
+                    {
+                        column: "alias",
+                        computed_function_name: f,
+                        inputs: ["column", "column2"]
+                    }
+                ];
+                expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
+            }
+        });
+
+        it("Should parse all arity 2 operators", function() {
+            const functions = ["+", "-", "/", "*", "^", "%", "==", "!=", ">", "<", "is"];
+
+            for (const f of functions) {
+                const expression = `"column" ${f} "column2" as "alias"`;
+                const parsed = [
+                    {
+                        column: "alias",
+                        computed_function_name: f,
+                        inputs: ["column", "column2"]
+                    }
+                ];
+                expect(COMPUTED_EXPRESSION_PARSER.parse(expression)).toEqual(parsed);
+            }
+        });
     });
 
     it("Should throw when missing an operator", function() {
