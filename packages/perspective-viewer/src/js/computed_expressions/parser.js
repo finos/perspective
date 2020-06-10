@@ -82,9 +82,25 @@ export class ComputedExpressionColumnParser extends CstParser {
          * before the addition/generic operators - hence satisfying precedence.
          */
         this.RULE("MultiplicationOperatorComputedColumn", () => {
-            this.SUBRULE(this.ColumnName, {LABEL: "left"});
+            this.SUBRULE(this.ExponentOperatorComputedColumn, {LABEL: "left"});
             this.MANY(() => {
                 this.SUBRULE(this.MultiplicationOperator);
+                this.SUBRULE2(this.ExponentOperatorComputedColumn, {LABEL: "right"});
+                this.OPTION(() => {
+                    this.SUBRULE(this.As, {LABEL: "as"});
+                });
+            });
+        });
+
+        /**
+         * A computed column in `x ^ y` notation. Exponents are evaluated before
+         * multiplication/division and addition/subtraction, so it is defined
+         * after those rules to give itself precedence.
+         */
+        this.RULE("ExponentOperatorComputedColumn", () => {
+            this.SUBRULE(this.ColumnName, {LABEL: "left"});
+            this.MANY(() => {
+                this.SUBRULE(this.ExponentOperator);
                 this.SUBRULE2(this.ColumnName, {LABEL: "right"});
                 this.OPTION(() => {
                     this.SUBRULE(this.As, {LABEL: "as"});
@@ -101,6 +117,22 @@ export class ComputedExpressionColumnParser extends CstParser {
             this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.SUBRULE(this.FunctionComputedColumn)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
                 ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
             });
+        });
+
+        /**
+         * A special rule for column names used as alias after `as` to prevent
+         * further evaluation of possible expressions.
+         */
+        this.RULE("TerminalColumnName", () => {
+            this.CONSUME(vocabulary["columnName"]);
+        });
+
+        /**
+         * A rule for aliasing computed columns.
+         */
+        this.RULE("As", () => {
+            this.CONSUME(vocabulary["as"]);
+            this.SUBRULE(this.TerminalColumnName);
         });
 
         /**
@@ -123,22 +155,6 @@ export class ComputedExpressionColumnParser extends CstParser {
             this.OPTION(() => {
                 this.SUBRULE(this.As, {LABEL: "as"});
             });
-        });
-
-        /**
-         * A special rule for column names used as alias after `as` to prevent
-         * further evaluation of possible expressions.
-         */
-        this.RULE("TerminalColumnName", () => {
-            this.CONSUME(vocabulary["columnName"]);
-        });
-
-        /**
-         * A rule for aliasing computed columns.
-         */
-        this.RULE("As", () => {
-            this.CONSUME(vocabulary["as"]);
-            this.SUBRULE(this.TerminalColumnName);
         });
 
         this.RULE("Function", () => {
@@ -173,6 +189,11 @@ export class ComputedExpressionColumnParser extends CstParser {
             ]);
         });
 
+        /**
+         * Consume an addition or subtraction symbol. Rules for operators with
+         * defined precedence rules are separated from the general
+         * `Operator` rule.
+         */
         this.RULE("AdditionOperator", () => {
             this.OR([{ALT: () => this.CONSUME(vocabulary["add"])}, {ALT: () => this.CONSUME(vocabulary["subtract"])}]);
         });
@@ -181,13 +202,12 @@ export class ComputedExpressionColumnParser extends CstParser {
             this.OR([{ALT: () => this.CONSUME(vocabulary["multiply"])}, {ALT: () => this.CONSUME(vocabulary["divide"])}]);
         });
 
+        this.RULE("ExponentOperator", () => {
+            this.CONSUME(vocabulary["pow"]);
+        });
+
         this.RULE("Operator", () => {
             this.OR([
-                {ALT: () => this.CONSUME(vocabulary["add"])},
-                {ALT: () => this.CONSUME(vocabulary["subtract"])},
-                {ALT: () => this.CONSUME(vocabulary["multiply"])},
-                {ALT: () => this.CONSUME(vocabulary["divide"])},
-                {ALT: () => this.CONSUME(vocabulary["pow"])},
                 {ALT: () => this.CONSUME(vocabulary["percent_of"])},
                 {ALT: () => this.CONSUME(vocabulary["equals"])},
                 {ALT: () => this.CONSUME(vocabulary["not_equals"])},

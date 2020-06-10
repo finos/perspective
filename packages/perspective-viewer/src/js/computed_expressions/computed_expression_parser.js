@@ -442,6 +442,11 @@ class PerspectiveComputedExpressionParser {
                 return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
             }
 
+            ExponentOperatorComputedColumn(ctx, computed_columns) {
+                const get_operator = (ctx, idx) => this.visit(ctx.ExponentOperator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
+            }
+
             /**
              * Visit a single computed column in functional notation and
              * generate its specification.
@@ -525,14 +530,18 @@ class PerspectiveComputedExpressionParser {
                 }
             }
 
+            ExponentOperator(ctx) {
+                if (ctx.pow) {
+                    return ctx.pow[0].image;
+                }
+            }
+
             /**
              * Parse a single mathematical operator (+, -, *, /, %).
              * @param {*} ctx
              */
             Operator(ctx) {
-                if (ctx.pow) {
-                    return ctx.pow[0].image;
-                } else if (ctx.percent_of) {
+                if (ctx.percent_of) {
                     return ctx.percent_of[0].image;
                 } else if (ctx.equals) {
                     return ctx.equals[0].image;

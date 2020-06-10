@@ -68,37 +68,119 @@ describe("Computed Expression Parser", function() {
             {
                 column: "(z / abc)",
                 computed_function_name: "/",
-                inputs: ["w", "abc"]
+                inputs: ["z", "abc"]
             },
             {
                 column: "((w * x) + (z / abc))",
                 computed_function_name: "+",
-                inputs: ["(w + x)", "(z / abc)"]
+                inputs: ["(w * x)", "(z / abc)"]
             }
         ];
         const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" * "x" + "z" / "abc"');
         expect(parsed).toEqual(expected);
     });
 
-    it("Should parse an operator notation expression with left-to-right precedence", function() {
+    it("Should parse an operator notation expression with exponent precedence", function() {
         const expected = [
             {
-                column: "exp(Discount)",
-                computed_function_name: "exp",
-                inputs: ["Discount"]
+                column: "(Profit ^ Quantity)",
+                computed_function_name: "^",
+                inputs: ["Profit", "Quantity"]
             },
+            {
+                column: "(Sales - (Profit ^ Quantity))",
+                computed_function_name: "-",
+                inputs: ["Sales", "(Profit ^ Quantity)"]
+            }
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" - "Profit" ^ "Quantity"');
+        expect(parsed).toEqual(expected);
+    });
+
+    it("Should parse an operator notation expression with left-to-right precedence", function() {
+        const expected = [
             {
                 column: "(Sales * Profit)",
                 computed_function_name: "*",
                 inputs: ["Sales", "Profit"]
             },
             {
+                column: "exp(Discount)",
+                computed_function_name: "exp",
+                inputs: ["Discount"]
+            },
+            {
                 column: "((Sales * Profit) - exp(Discount))",
-                computed_function_name: "+",
+                computed_function_name: "-",
                 inputs: ["(Sales * Profit)", "exp(Discount)"]
             }
         ];
         const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" - exp("Discount")');
+        expect(parsed).toEqual(expected);
+    });
+
+    it("Should parse an operator notation expression with left-to-right precedence, named with AS", function() {
+        const expected = [
+            {
+                column: "ABC",
+                computed_function_name: "*",
+                inputs: ["Sales", "Profit"]
+            },
+            {
+                column: "CBA",
+                computed_function_name: "exp",
+                inputs: ["Discount"]
+            },
+            {
+                column: "BBB",
+                computed_function_name: "-",
+                inputs: ["ABC", "CBA"]
+            }
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" as "ABC" - exp("Discount") as "CBA" as "BBB"');
+        expect(parsed).toEqual(expected);
+    });
+
+    it("Should parse an operator notation expression with left-to-right precedence and exponent, named with AS", function() {
+        const expected = [
+            {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
+            {column: "BBB", computed_function_name: "^", inputs: ["Profit", "CBA"]},
+            {column: "(Sales * BBB)", computed_function_name: "*", inputs: ["Sales", "BBB"]}
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" ^ exp("Discount") as "CBA" as "BBB"');
+        expect(parsed).toEqual(expected);
+    });
+
+    it.skip("Should parse an operator notation expression with left-to-right precedence and exponent, all named with AS", () => {
+        const expected = [
+            {column: "ABC", computed_function_name: "*", inputs: ["Sales", "Profit"]},
+            {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
+            {column: "BBB", computed_function_name: "^", inputs: ["ABC", "CBA"]}
+        ];
+        // Currently parser cannot evaluate because it wants to do
+        // "Profit" as "ABC" ^ exp("Discount"), which is invalid syntax. It
+        // should evalute statements with "AS" almost as if parentheses
+        // have been applied. If you change * to ^, the statement works
+        // because precedence is correct - but following an operator of lower
+        // precedence with one of higher precedence, while using "AS", fails.
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" * "Profit" as "ABC" ^ exp("Discount") as "CBA" as "BBB"');
+        expect(parsed).toEqual(expected);
+    });
+
+    it("Should parse an operator notation expression with left-to-right precedence and final result named with AS", function() {
+        const expected = [
+            {
+                column: "BBB",
+                computed_function_name: "^",
+                inputs: ["Profit", "Discount"]
+            },
+            {
+                column: "(Sales + BBB)",
+                computed_function_name: "+",
+                inputs: ["Sales", "BBB"]
+            }
+        ];
+        const parsed = COMPUTED_EXPRESSION_PARSER.parse('"Sales" + "Profit" ^ "Discount" as "BBB"');
         expect(parsed).toEqual(expected);
     });
 
@@ -351,8 +433,8 @@ describe("Computed Expression Parser", function() {
         }
     });
 
-    it("Should not throw when missing an operator", function() {
-        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toEqual([]);
+    it("Should throw when missing an operator", function() {
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toThrow();
     });
 
     it("Should throw when parentheses are unmatched", function() {
@@ -361,5 +443,13 @@ describe("Computed Expression Parser", function() {
 
     it("Should throw when a token is unrecognized", function() {
         expect(() => COMPUTED_EXPRESSION_PARSER.parse("?")).toThrow();
+    });
+
+    it("Should throw when as is applied without an operator", function() {
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales" as "abc"')).toThrow();
+    });
+
+    it("Should throw when as is used after a column name without an operator", function() {
+        expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales" as "ABC" + "Profit" as "ABC"')).toThrow();
     });
 });
