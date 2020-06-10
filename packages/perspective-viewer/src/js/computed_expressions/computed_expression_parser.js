@@ -345,6 +345,7 @@ class PerspectiveComputedExpressionParser {
              */
             SuperExpression(ctx) {
                 let computed_columns = [];
+                console.log(ctx);
 
                 this.visit(ctx.Expression, computed_columns);
 
@@ -366,14 +367,15 @@ class PerspectiveComputedExpressionParser {
             }
 
             /**
-             * All operator-type computed columns share the same parsing
-             * logic.
+             * Common logic for parsing through a computed column in operator
+             * syntax, with `get_operator` returning an operator of the
+             * correct type, which is important for associativity.
              *
              * @param {*} ctx
-             * @param {Array[Object]} computed_columns an array of computed
-             * column definitions that are generated from this expression.
+             * @param {*} computed_columns
+             * @param {*} get_operator
              */
-            _VisitOperatorComputedColumn(ctx, computed_columns) {
+            _VisitOperatorComputedColumn(ctx, computed_columns, get_operator) {
                 let left = this.visit(ctx.left, computed_columns);
 
                 let final_column_name;
@@ -382,7 +384,7 @@ class PerspectiveComputedExpressionParser {
                     let previous;
 
                     ctx.right.forEach((rhs, idx) => {
-                        let operator = this.visit(ctx.Operator[idx]);
+                        let operator = get_operator(ctx, idx);
 
                         if (!operator) {
                             return;
@@ -426,15 +428,18 @@ class PerspectiveComputedExpressionParser {
              * @param {*} ctx
              */
             OperatorComputedColumn(ctx, computed_columns) {
-                return this._VisitOperatorComputedColumn(ctx, computed_columns);
+                const get_operator = (ctx, idx) => this.visit(ctx.Operator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
             }
 
             AdditionOperatorComputedColumn(ctx, computed_columns) {
-                return this._VisitOperatorComputedColumn(ctx, computed_columns);
+                const get_operator = (ctx, idx) => this.visit(ctx.AdditionOperator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
             }
 
             MultiplicationOperatorComputedColumn(ctx, computed_columns) {
-                return this._VisitOperatorComputedColumn(ctx, computed_columns);
+                const get_operator = (ctx, idx) => this.visit(ctx.MultiplicationOperator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
             }
 
             /**
@@ -504,20 +509,28 @@ class PerspectiveComputedExpressionParser {
                 return ctx.columnName[0].payload;
             }
 
+            AdditionOperator(ctx) {
+                if (ctx.add) {
+                    return ctx.add[0].image;
+                } else if (ctx.subtract) {
+                    return ctx.subtract[0].image;
+                }
+            }
+
+            MultiplicationOperator(ctx) {
+                if (ctx.multiply) {
+                    return ctx.multiply[0].image;
+                } else if (ctx.divide) {
+                    return ctx.divide[0].image;
+                }
+            }
+
             /**
              * Parse a single mathematical operator (+, -, *, /, %).
              * @param {*} ctx
              */
             Operator(ctx) {
-                if (ctx.add) {
-                    return ctx.add[0].image;
-                } else if (ctx.subtract) {
-                    return ctx.subtract[0].image;
-                } else if (ctx.multiply) {
-                    return ctx.multiply[0].image;
-                } else if (ctx.divide) {
-                    return ctx.divide[0].image;
-                } else if (ctx.pow) {
+                if (ctx.pow) {
                     return ctx.pow[0].image;
                 } else if (ctx.percent_of) {
                     return ctx.percent_of[0].image;

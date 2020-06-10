@@ -42,7 +42,7 @@ export class ComputedExpressionColumnParser extends CstParser {
          * it has lower precedence compared to the rules that are to follow.
          */
         this.RULE("OperatorComputedColumn", () => {
-            this.SUBRULE(this.ColumnName, {LABEL: "left"});
+            this.SUBRULE(this.AdditionOperatorComputedColumn, {LABEL: "left"});
 
             // 0...n operators and right-hand expressions are available here.
             // Though a single column name is syntactically valid, it does
@@ -66,9 +66,9 @@ export class ComputedExpressionColumnParser extends CstParser {
          * evaluator logic is the same.
          */
         this.RULE("AdditionOperatorComputedColumn", () => {
-            this.SUBRULE(this.ColumnName, {LABEL: "left"});
+            this.SUBRULE(this.MultiplicationOperatorComputedColumn, {LABEL: "left"});
             this.MANY(() => {
-                this.SUBRULE(this.Operator);
+                this.SUBRULE(this.AdditionOperator);
                 this.SUBRULE2(this.MultiplicationOperatorComputedColumn, {LABEL: "right"});
                 this.OPTION(() => {
                     this.SUBRULE(this.As, {LABEL: "as"});
@@ -84,11 +84,22 @@ export class ComputedExpressionColumnParser extends CstParser {
         this.RULE("MultiplicationOperatorComputedColumn", () => {
             this.SUBRULE(this.ColumnName, {LABEL: "left"});
             this.MANY(() => {
-                this.SUBRULE(this.Operator);
+                this.SUBRULE(this.MultiplicationOperator);
                 this.SUBRULE2(this.ColumnName, {LABEL: "right"});
                 this.OPTION(() => {
                     this.SUBRULE(this.As, {LABEL: "as"});
                 });
+            });
+        });
+
+        /**
+         * A column name, which can evaluate to a parenthetical expression,
+         * a functional column, or a literal column name - a string
+         * wrapped in double or single quotes.
+         */
+        this.RULE("ColumnName", () => {
+            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.SUBRULE(this.FunctionComputedColumn)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
+                ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
             });
         });
 
@@ -111,17 +122,6 @@ export class ComputedExpressionColumnParser extends CstParser {
             this.CONSUME(vocabulary["rightParen"]);
             this.OPTION(() => {
                 this.SUBRULE(this.As, {LABEL: "as"});
-            });
-        });
-
-        /**
-         * A column name, which can evalue to a parenthetical expression,
-         * a functional column, or a literal column name - a string
-         * wrapped in double or single quotes.
-         */
-        this.RULE("ColumnName", () => {
-            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.SUBRULE(this.FunctionComputedColumn)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
-                ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
             });
         });
 
@@ -171,6 +171,14 @@ export class ComputedExpressionColumnParser extends CstParser {
                 {ALT: () => this.CONSUME(vocabulary["month_bucket"])},
                 {ALT: () => this.CONSUME(vocabulary["year_bucket"])}
             ]);
+        });
+
+        this.RULE("AdditionOperator", () => {
+            this.OR([{ALT: () => this.CONSUME(vocabulary["add"])}, {ALT: () => this.CONSUME(vocabulary["subtract"])}]);
+        });
+
+        this.RULE("MultiplicationOperator", () => {
+            this.OR([{ALT: () => this.CONSUME(vocabulary["multiply"])}, {ALT: () => this.CONSUME(vocabulary["divide"])}]);
         });
 
         this.RULE("Operator", () => {
