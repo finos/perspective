@@ -460,15 +460,8 @@ class PerspectiveComputedExpressionParser {
                 // Functions have 1...n parameters
                 let input_columns = [];
 
-                for (const column_name of ctx.ColumnName) {
-                    let column = this.visit(column_name, computed_columns);
-                    if (typeof column === "undefined") {
-                        // Use the column immediately to the left, as that is
-                        // the name of the parsed column from the expression
-                        input_columns.push(computed_columns[computed_columns.length - 1].column);
-                    } else {
-                        input_columns.push(column);
-                    }
+                for (const param of ctx.param) {
+                    input_columns.push(this.visit(param, computed_columns));
                 }
 
                 // Use custom name if provided through `AS/as/As`me =

@@ -143,12 +143,12 @@ export class ComputedExpressionColumnParser extends CstParser {
             this.SUBRULE(this.Function);
             this.CONSUME(vocabulary["leftParen"]);
 
-            // TODO: allow functions to have arbitary expressions inside them
-            // without the use of parentheses
             this.AT_LEAST_ONE_SEP({
                 SEP: vocabulary["comma"],
                 DEF: () => {
-                    this.SUBRULE(this.ColumnName);
+                    // Allow for arbitary expressions inside functions without
+                    // use of parentheses.
+                    this.SUBRULE(this.Expression, {LABEL: "param"});
                 }
             });
             this.CONSUME(vocabulary["rightParen"]);

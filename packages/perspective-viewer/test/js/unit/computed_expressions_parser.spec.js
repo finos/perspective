@@ -320,6 +320,23 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
+        it("Should parse a recursive function notation expression without parentheses", function() {
+            const expected = [
+                {
+                    column: "(x ^ 2)",
+                    computed_function_name: "pow2",
+                    inputs: ["x"]
+                },
+                {
+                    column: "sqrt((x ^ 2))",
+                    computed_function_name: "sqrt",
+                    inputs: ["(x ^ 2)"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt(pow2("x"))');
+            expect(parsed).toEqual(expected);
+        });
+
         it("Should parse a recursive function notation expression named with 'AS'", function() {
             const expected = [
                 {
@@ -334,6 +351,23 @@ describe("Computed Expression Parser", function() {
                 }
             ];
             const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt((pow2("x") as "first")) as "final"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse a recursive function notation expression named with 'AS' without parentheses", function() {
+            const expected = [
+                {
+                    column: "first",
+                    computed_function_name: "pow2",
+                    inputs: ["x"]
+                },
+                {
+                    column: "final",
+                    computed_function_name: "sqrt",
+                    inputs: ["first"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt(pow2("x") as "first") as "final"');
             expect(parsed).toEqual(expected);
         });
     });
@@ -390,6 +424,62 @@ describe("Computed Expression Parser", function() {
                 }
             ];
             const parsed = COMPUTED_EXPRESSION_PARSER.parse('(sqrt(("x" + "w" as "first")) as "second") * (pow2(("w" / "x" as "third")) as "fourth") as "final"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator expression inside a function without parentheses", function() {
+            const expected = [
+                {
+                    column: "(x + y)",
+                    computed_function_name: "+",
+                    inputs: ["x", "y"]
+                },
+                {
+                    column: "sqrt((x + y))",
+                    computed_function_name: "sqrt",
+                    inputs: ["(x + y)"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x" + "y")');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator expression inside a function without parentheses, respecting all precedence rules", function() {
+            const expected = [
+                {
+                    column: "(z ^ a)",
+                    computed_function_name: "^",
+                    inputs: ["z", "a"]
+                },
+                {
+                    column: "(y * (z ^ a))",
+                    computed_function_name: "*",
+                    inputs: ["y", "(z ^ a)"]
+                },
+                {
+                    column: "(x + (y * (z ^ a)))",
+                    computed_function_name: "+",
+                    inputs: ["x", "(y * (z ^ a))"]
+                },
+                {
+                    column: "sqrt((x + (y * (z ^ a))))",
+                    computed_function_name: "sqrt",
+                    inputs: ["(x + (y * (z ^ a)))"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('sqrt("x" + "y" * "z" ^ "a")');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse arbitary operators and functions nested within each other", function() {
+            const expected = [
+                {column: "ABC", computed_function_name: "pow2", inputs: ["Sales"]},
+                {column: "(Row ID * Profit)", computed_function_name: "*", inputs: ["Row ID", "Profit"]},
+                {column: "sqrt((Row ID * Profit))", computed_function_name: "sqrt", inputs: ["(Row ID * Profit)"]},
+                {column: "(ABC * sqrt((Row ID * Profit)))", computed_function_name: "*", inputs: ["ABC", "sqrt((Row ID * Profit))"]},
+                {column: "exp((ABC * sqrt((Row ID * Profit))))", computed_function_name: "exp", inputs: ["(ABC * sqrt((Row ID * Profit)))"]}
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('exp(pow2("Sales") as "ABC" * sqrt("Row ID" * "Profit"))');
             expect(parsed).toEqual(expected);
         });
     });
