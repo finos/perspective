@@ -345,7 +345,6 @@ class PerspectiveComputedExpressionParser {
              */
             SuperExpression(ctx) {
                 let computed_columns = [];
-                console.log(ctx);
 
                 this.visit(ctx.Expression, computed_columns);
 

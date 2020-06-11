@@ -301,8 +301,6 @@ class ComputedExpressionWidget extends HTMLElement {
             return;
         }
 
-        console.log("Parsed", this._parsed_expression);
-
         // Take the parsed expression and type check it on the viewer,
         // which will call `_type_check_expression()` with a computed_schema.
         const event = new CustomEvent("perspective-computed-expression-type-check", {

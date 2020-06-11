@@ -30,7 +30,7 @@ const generator = function(length = 100, start = 0) {
     });
 };
 
-describe("Invariable computed expressions", function() {
+describe("Invariant computed expressions", function() {
     beforeAll(async () => {
         TABLE = perspective.table({
             a: [1, 2, 3]
@@ -199,7 +199,7 @@ describe("Invariable computed expressions", function() {
             return expected;
         });
 
-        jsc.property("x + y * z != (x + y) * z", generator(2, 2), async data => {
+        jsc.property("x + y * z != (x + y) * z", generator(100, 2), async data => {
             const table = perspective.table({
                 w: "float",
                 x: "float",
@@ -221,12 +221,157 @@ describe("Invariable computed expressions", function() {
 
             const result = await view.to_columns();
 
-            const expected = !array_equals(result["(x + (y * z))"], result["((x + y) * z)"]) && array_equals(result["final"], Array(2).fill(true));
+            const expected = !array_equals(result["(x + (y * z))"], result["((x + y) * z)"]) && array_equals(result["final"], Array(100).fill(true));
             view.delete();
             table.delete();
             return expected;
         });
     });
 
-    describe("Operator precedence", () => {});
+    describe("Operator precedence", () => {
+        jsc.property("w + x - y * z / w == w + x - ((y * z) / w)", generator(100, 2), async data => {
+            const table = perspective.table({
+                w: "float",
+                x: "float",
+                y: "float",
+                z: "float"
+            });
+
+            table.update(data);
+
+            const v1 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - "y" * "z" / "w"')
+            });
+
+            const r1 = await v1.to_columns();
+
+            const v2 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - (("y" * "z") / "w")')
+            });
+
+            const r2 = await v2.to_columns();
+
+            const expected = array_equals(r1["((w + x) - ((y * z) / w)"], r2["((w + x) - ((y * z) / w)"]);
+            v2.delete();
+            v1.delete();
+            table.delete();
+            return expected;
+        });
+
+        jsc.property("w + x * y ^ z == w + x * (y ^ z)", generator(100, 2), async data => {
+            const table = perspective.table({
+                w: "float",
+                x: "float",
+                y: "float",
+                z: "float"
+            });
+
+            table.update(data);
+
+            const v1 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - "y" * "z" / "w"')
+            });
+
+            const r1 = await v1.to_columns();
+
+            const v2 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - (("y" * "z") / "w")')
+            });
+
+            const r2 = await v2.to_columns();
+
+            const expected = array_equals(r1["((w + x) - ((y * z) / w)"], r2["((w + x) - ((y * z) / w)"]);
+            v2.delete();
+            v1.delete();
+            table.delete();
+            return expected;
+        });
+
+        jsc.property("w + x - pow2(y) * z == w + x - (pow2(y) * z)", generator(100, 2), async data => {
+            const table = perspective.table({
+                w: "float",
+                x: "float",
+                y: "float",
+                z: "float"
+            });
+
+            table.update(data);
+
+            const v1 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - pow2("y") * "z"')
+            });
+
+            const r1 = await v1.to_columns();
+
+            const v2 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - (pow2("y") * "z")')
+            });
+
+            const r2 = await v2.to_columns();
+
+            const expected = array_equals(r1["((w + x) - (pow2(y) * z))"], r2["((w + x) - (pow2(y) * z))"]);
+            v2.delete();
+            v1.delete();
+            table.delete();
+            return expected;
+        });
+
+        jsc.property("log(w + x - y * z / w) == log(w + x - ((y * z) / w))", generator(100, 2), async data => {
+            const table = perspective.table({
+                w: "float",
+                x: "float",
+                y: "float",
+                z: "float"
+            });
+
+            table.update(data);
+
+            const v1 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('log("w" + "x" - "y" * "z" / "w")')
+            });
+
+            const r1 = await v1.to_columns();
+
+            const v2 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('log("w" + "x" - (("y" * "z") / "w"))')
+            });
+
+            const r2 = await v2.to_columns();
+
+            const expected = array_equals(r1["log((w + x) - ((y * z) / w))"], r2["log((w + x) - ((y * z) / w))"]);
+            v2.delete();
+            v1.delete();
+            table.delete();
+            return expected;
+        });
+
+        jsc.property("w + x == y - z == (w + x) == (y - z)", generator(100, 2), async data => {
+            const table = perspective.table({
+                w: "float",
+                x: "float",
+                y: "float",
+                z: "float"
+            });
+
+            table.update(data);
+
+            const v1 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" == "y" - "z"')
+            });
+
+            const r1 = await v1.to_columns();
+
+            const v2 = table.view({
+                computed_columns: COMPUTED_EXPRESSION_PARSER.parse('("w" + "x") == ("y" - "z")')
+            });
+
+            const r2 = await v2.to_columns();
+
+            const expected = array_equals(r1["((w + x) == (y - z))"], r2["((w + x) == (y - z))"]);
+            v2.delete();
+            v1.delete();
+            table.delete();
+            return expected;
+        });
+    });
 });
