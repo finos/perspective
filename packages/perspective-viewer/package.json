@@ -70,6 +70,7 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.5.0",
-        "@finos/perspective-webpack-plugin": "^0.5.0"
+        "@finos/perspective-webpack-plugin": "^0.5.0",
+        "jsverify": "^0.8.4"
     }
 }

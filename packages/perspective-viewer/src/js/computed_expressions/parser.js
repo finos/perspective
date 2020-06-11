@@ -109,33 +109,6 @@ export class ComputedExpressionColumnParser extends CstParser {
         });
 
         /**
-         * A column name, which can evaluate to a parenthetical expression,
-         * a functional column, or a literal column name - a string
-         * wrapped in double or single quotes.
-         */
-        this.RULE("ColumnName", () => {
-            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.SUBRULE(this.FunctionComputedColumn)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
-                ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
-            });
-        });
-
-        /**
-         * A special rule for column names used as alias after `as` to prevent
-         * further evaluation of possible expressions.
-         */
-        this.RULE("TerminalColumnName", () => {
-            this.CONSUME(vocabulary["columnName"]);
-        });
-
-        /**
-         * A rule for aliasing computed columns.
-         */
-        this.RULE("As", () => {
-            this.CONSUME(vocabulary["as"]);
-            this.SUBRULE(this.TerminalColumnName);
-        });
-
-        /**
          * A computed column in `f(x)` notation. It is evaluated before all
          * operator computed columns.
          */
@@ -215,6 +188,38 @@ export class ComputedExpressionColumnParser extends CstParser {
                 {ALT: () => this.CONSUME(vocabulary["less_than"])},
                 {ALT: () => this.CONSUME(vocabulary["is"])}
             ]);
+        });
+
+        /**
+         * A special rule for column names used as alias after `as` to prevent
+         * further evaluation of possible expressions.
+         */
+        this.RULE("TerminalColumnName", () => {
+            this.CONSUME(vocabulary["columnName"]);
+        });
+
+        /**
+         * A rule for aliasing computed columns - placed at the top so that it
+         * is evaluated after everything else.
+         *
+         * TODO: make AS left evaluative by default: an expression like
+         * x + y + z as "abc" currently breaks to abc + z, when it should be
+         * x + abc.
+         */
+        this.RULE("As", () => {
+            this.CONSUME(vocabulary["as"]);
+            this.SUBRULE(this.TerminalColumnName);
+        });
+
+        /**
+         * A column name, which can evaluate to a parenthetical expression,
+         * a functional column, or a literal column name - a string
+         * wrapped in double or single quotes.
+         */
+        this.RULE("ColumnName", () => {
+            this.OR([{ALT: () => this.SUBRULE(this.ParentheticalExpression)}, {ALT: () => this.SUBRULE(this.FunctionComputedColumn)}, {ALT: () => this.CONSUME(vocabulary["columnName"])}], {
+                ERR_MSG: "Expected a column name (wrapped in double quotes) or a parenthesis-wrapped expression."
+            });
         });
 
         /**

@@ -398,7 +398,12 @@ class PerspectiveComputedExpressionParser {
                         const left_hand = previous ? previous : left;
 
                         // Use custom name if provided through `AS/as/As`
-                        const as = this.visit(ctx.as);
+                        let as;
+
+                        if (ctx.as && idx < ctx.as.length) {
+                            as = this.visit(ctx.as[idx]);
+                        }
+
                         const column_name = as ? as : COMPUTED_FUNCTION_FORMATTERS[operator](left_hand, right);
 
                         computed_columns.push({

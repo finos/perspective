@@ -127,6 +127,40 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
+        it.skip("Should parse an operator notation expression with associativity, named with 'as'", function() {
+            const expected = [
+                {
+                    column: "(w + x)",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "abc",
+                    computed_function_name: "+",
+                    inputs: ["(w + x)", "z"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" + "z" as "abc"');
+            expect(parsed).toEqual(expected);
+        });
+
+        it("Should parse an operator notation expression with associativity, named multiple times with 'as'", function() {
+            const expected = [
+                {
+                    column: "abc",
+                    computed_function_name: "+",
+                    inputs: ["w", "x"]
+                },
+                {
+                    column: "cba",
+                    computed_function_name: "+",
+                    inputs: ["abc", "z"]
+                }
+            ];
+            const parsed = COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" as "abc" + "z" as "cba"');
+            expect(parsed).toEqual(expected);
+        });
+
         it("Should parse an operator notation expression with associativity and operator precedence", function() {
             const expected = [
                 {

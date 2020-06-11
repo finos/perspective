@@ -57,7 +57,6 @@
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "flatbuffers": "^1.10.2",
-        "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
         "papaparse": "^5.2.0",
@@ -66,6 +65,7 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.5.0"
+        "@finos/perspective-webpack-plugin": "^0.5.0",
+        "jsverify": "^0.8.4"
     }
 }
