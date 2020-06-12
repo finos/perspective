@@ -181,6 +181,13 @@ utils.with_server({}, () => {
                 await page.shadow_type("day", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
             });
 
+            test.capture("Typing a column name followed by a partial function should not show autocomplete", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type("'Sales' a", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+            });
+
             test.capture("Pressing arrow down should select the next autocomplete item", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");

@@ -16,7 +16,7 @@ import {COMPUTED_EXPRESSION_PARSER} from "../../../src/js/computed_expressions/c
 
 let TABLE;
 
-describe("Computed Expression Parser", function() {
+describe("Computed Expression Parser", () => {
     beforeAll(async () => {
         TABLE = perspective.table({
             a: [1, 2, 3]
@@ -30,7 +30,7 @@ describe("Computed Expression Parser", function() {
     });
 
     describe("Operator notation", () => {
-        it("Should parse an operator notation expression", function() {
+        it("Should parse an operator notation expression", () => {
             const expected = [
                 {
                     column: "(w + x)",
@@ -42,7 +42,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression named with 'AS'", function() {
+        it("Should parse an operator notation expression named with 'AS'", () => {
             const expected = [
                 {
                     column: "custom column name",
@@ -54,7 +54,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an recursive operator notation expression", function() {
+        it("Should parse an recursive operator notation expression", () => {
             const expected = [
                 {
                     column: "(w + x)",
@@ -81,7 +81,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an recursive operator notation expression named with 'AS'", function() {
+        it("Should parse an recursive operator notation expression named with 'AS'", () => {
             const expected = [
                 {
                     column: "sub1",
@@ -110,7 +110,7 @@ describe("Computed Expression Parser", function() {
     });
 
     describe("Operator notation with associativity/precedence", () => {
-        it("Should parse an operator notation expression with associativity", function() {
+        it("Should parse an operator notation expression with associativity", () => {
             const expected = [
                 {
                     column: "(w + x)",
@@ -127,7 +127,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it.skip("Should parse an operator notation expression with associativity, named with 'as'", function() {
+        it.skip("Should parse an operator notation expression with associativity, named with 'as'", () => {
             const expected = [
                 {
                     column: "(w + x)",
@@ -144,7 +144,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with associativity, named multiple times with 'as'", function() {
+        it("Should parse an operator notation expression with associativity, named multiple times with 'as'", () => {
             const expected = [
                 {
                     column: "abc",
@@ -161,7 +161,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with associativity and operator precedence", function() {
+        it("Should parse an operator notation expression with associativity and operator precedence", () => {
             const expected = [
                 {
                     column: "(w * x)",
@@ -183,7 +183,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with exponent precedence", function() {
+        it("Should parse an operator notation expression with exponent precedence", () => {
             const expected = [
                 {
                     column: "(Profit ^ Quantity)",
@@ -200,7 +200,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with boolean precedence under all other operations", function() {
+        it("Should parse an operator notation expression with boolean precedence under all other operations", () => {
             const expected = [
                 {
                     column: "(x + y)",
@@ -224,7 +224,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with left-to-right precedence", function() {
+        it("Should parse an operator notation expression with left-to-right precedence", () => {
             const expected = [
                 {
                     column: "(Sales * Profit)",
@@ -246,7 +246,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with left-to-right precedence, named with AS", function() {
+        it("Should parse an operator notation expression with left-to-right precedence, named with AS", () => {
             const expected = [
                 {
                     column: "ABC",
@@ -268,7 +268,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with left-to-right precedence and exponent, named with AS", function() {
+        it("Should parse an operator notation expression with left-to-right precedence and exponent, named with AS", () => {
             const expected = [
                 {column: "CBA", computed_function_name: "exp", inputs: ["Discount"]},
                 {column: "BBB", computed_function_name: "^", inputs: ["Profit", "CBA"]},
@@ -294,7 +294,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator notation expression with left-to-right precedence and final result named with AS", function() {
+        it("Should parse an operator notation expression with left-to-right precedence and final result named with AS", () => {
             const expected = [
                 {
                     column: "BBB",
@@ -313,7 +313,7 @@ describe("Computed Expression Parser", function() {
     });
 
     describe("Function notation", () => {
-        it("Should parse a function notation expression", function() {
+        it("Should parse a function notation expression", () => {
             const expected = [
                 {
                     column: "sqrt(x)",
@@ -325,7 +325,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse a function notation expression named with 'AS'", function() {
+        it("Should parse a function notation expression named with 'AS'", () => {
             const expected = [
                 {
                     column: "custom column name",
@@ -337,7 +337,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse a recursive function notation expression", function() {
+        it("Should parse a recursive function notation expression", () => {
             const expected = [
                 {
                     column: "(x ^ 2)",
@@ -354,7 +354,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse a recursive function notation expression without parentheses", function() {
+        it("Should parse a recursive function notation expression without parentheses", () => {
             const expected = [
                 {
                     column: "(x ^ 2)",
@@ -371,7 +371,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse a recursive function notation expression named with 'AS'", function() {
+        it("Should parse a recursive function notation expression named with 'AS'", () => {
             const expected = [
                 {
                     column: "first",
@@ -388,7 +388,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse a recursive function notation expression named with 'AS' without parentheses", function() {
+        it("Should parse a recursive function notation expression named with 'AS' without parentheses", () => {
             const expected = [
                 {
                     column: "first",
@@ -407,7 +407,7 @@ describe("Computed Expression Parser", function() {
     });
 
     describe("Mixed function/operator notation", () => {
-        it("Should parse a recursive function + operator notation expression named with 'AS'", function() {
+        it("Should parse a recursive function + operator notation expression named with 'AS'", () => {
             const expected = [
                 {
                     column: "first",
@@ -429,7 +429,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse a recursive operator with inset function notation expression, named with 'AS'", function() {
+        it("Should parse a recursive operator with inset function notation expression, named with 'AS'", () => {
             const expected = [
                 {
                     column: "first",
@@ -461,7 +461,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator expression inside a function without parentheses", function() {
+        it("Should parse an operator expression inside a function without parentheses", () => {
             const expected = [
                 {
                     column: "(x + y)",
@@ -478,7 +478,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse an operator expression inside a function without parentheses, respecting all precedence rules", function() {
+        it("Should parse an operator expression inside a function without parentheses, respecting all precedence rules", () => {
             const expected = [
                 {
                     column: "(z ^ a)",
@@ -505,7 +505,7 @@ describe("Computed Expression Parser", function() {
             expect(parsed).toEqual(expected);
         });
 
-        it("Should parse arbitary operators and functions nested within each other", function() {
+        it("Should parse arbitary operators and functions nested within each other", () => {
             const expected = [
                 {column: "ABC", computed_function_name: "pow2", inputs: ["Sales"]},
                 {column: "(Row ID * Profit)", computed_function_name: "*", inputs: ["Row ID", "Profit"]},
@@ -519,7 +519,7 @@ describe("Computed Expression Parser", function() {
     });
 
     describe("Operators and functions", () => {
-        it("Should parse all arity 1 functional operators", function() {
+        it("Should parse all arity 1 functional operators", () => {
             const functions = [
                 "abs",
                 "pow2",
@@ -558,7 +558,7 @@ describe("Computed Expression Parser", function() {
             }
         });
 
-        it("Should parse all arity 2 functional operators", function() {
+        it("Should parse all arity 2 functional operators", () => {
             const functions = ["concat_comma", "concat_space"];
 
             for (const f of functions) {
@@ -574,7 +574,7 @@ describe("Computed Expression Parser", function() {
             }
         });
 
-        it("Should parse all arity 2 operators", function() {
+        it("Should parse all arity 2 operators", () => {
             const functions = ["+", "-", "/", "*", "^", "%", "==", "!=", ">", "<", "is"];
 
             for (const f of functions) {
@@ -591,23 +591,58 @@ describe("Computed Expression Parser", function() {
         });
     });
 
-    it("Should throw when missing an operator", function() {
+    describe("Autocomplete suggestions", () => {
+        it("Should suggest a partial function", () => {
+            const expression = "s";
+            const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result);
+            const expected = ["sqrt", "second_bucket", "abs", "uppercase", "lowercase", "concat_space"];
+
+            for (const suggestion of suggestions) {
+                expect(expected.includes(suggestion.pattern)).toBe(true);
+            }
+        });
+
+        it("Should suggest an operator after column name", () => {
+            const expression = '"Sales"';
+            const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result);
+            const expected = ["^", "*", "/", "+", "-", "%", "==", "!=", ">", "<", "is"];
+
+            for (const suggestion of suggestions) {
+                expect(expected.includes(suggestion.pattern)).toBe(true);
+            }
+        });
+
+        it("Should suggest a function with the correct type after a open function definition", () => {
+            const expression = "sqrt(";
+            const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result);
+            const expected = ["(", "", "/", "+", "-", "%", "==", "!=", ">", "<", "is"];
+
+            for (const suggestion of suggestions) {
+                expect(expected.includes(suggestion.pattern)).toBe(true);
+            }
+        });
+    });
+
+    it("Should throw when missing an operator", () => {
         expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales"')).toThrow();
     });
 
-    it("Should throw when parentheses are unmatched", function() {
+    it("Should throw when parentheses are unmatched", () => {
         expect(() => COMPUTED_EXPRESSION_PARSER.parse('"sqrt("Sales"')).toThrow();
     });
 
-    it("Should throw when a token is unrecognized", function() {
+    it("Should throw when a token is unrecognized", () => {
         expect(() => COMPUTED_EXPRESSION_PARSER.parse("?")).toThrow();
     });
 
-    it("Should throw when as is applied without an operator", function() {
+    it("Should throw when as is applied without an operator", () => {
         expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales" as "abc"')).toThrow();
     });
 
-    it("Should throw when as is used after a column name without an operator", function() {
+    it("Should throw when as is used after a column name without an operator", () => {
         expect(() => COMPUTED_EXPRESSION_PARSER.parse('"Sales" as "ABC" + "Profit" as "ABC"')).toThrow();
     });
 });

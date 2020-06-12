@@ -130,9 +130,11 @@ class PerspectiveComputedExpressionParser {
      *
      * @param {ILexingResult} lexer_result
      * @param {String} expression
+     * @param {Array[String]} input_types an array of data types by which to
+     * filter down the suggestions.
      * @returns {Array}
      */
-    get_autocomplete_suggestions(expression, lexer_result) {
+    get_autocomplete_suggestions(expression, lexer_result, input_types) {
         this._check_initialized();
         let initial_suggestions = this._parser.computeContentAssist("SuperExpression", []);
 
@@ -141,13 +143,20 @@ class PerspectiveComputedExpressionParser {
         }
 
         if (lexer_result.errors.length > 0) {
-            // Check if the last token is partial AND not a column name (not in
-            // quotes). If true, the suggest function names that match.
+            // Check if the last string fragment is partial AND not a
+            // column name (not in quotes). If true, the suggest function
+            // names that match.
             const partial_function = this.extract_partial_function(expression);
 
-            if (partial_function && partial_function.search(/["']$/) === -1) {
+            // If the last fragment is partial, check if the last parsed
+            // token is a column name, as we should not be sending suggestions
+            // for a partial function that immediately follows a column name,
+            // i.e. `"Sales" a`.
+            const last_column_token = this.get_last_token_with_types([ColumnName], lexer_result, 1);
+
+            if (partial_function && partial_function.search(/["']$/) === -1 && !last_column_token) {
                 // Remove open parenthesis and column name rule
-                const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
+                const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(1), input_types);
                 const exact_matches = [];
                 const fuzzy_matches = [];
 
@@ -170,8 +179,9 @@ class PerspectiveComputedExpressionParser {
 
         // Remove whitespace tokens
         lexer_result.tokens = clean_tokens(lexer_result.tokens);
-        const suggestions = this._parser.computeContentAssist("SuperExpression", lexer_result.tokens);
-        return this._apply_suggestion_metadata(suggestions);
+        let suggestions = this._apply_suggestion_metadata(this._parser.computeContentAssist("SuperExpression", lexer_result.tokens), input_types);
+
+        return suggestions;
     }
 
     /**
@@ -649,20 +659,21 @@ class PerspectiveComputedExpressionParser {
      * Given a list of suggestions, transform each suggestion into an object
      * with `label` and `value`.
      *
-     * @param {*} suggestions
+     * @param {Array} suggestions
+     * @param {Array[String]} input_types an array of input types as strings.
      */
-    _apply_suggestion_metadata(suggestions) {
+    _apply_suggestion_metadata(suggestions, input_types) {
         this._check_initialized();
         const suggestions_with_metadata = [];
 
-        for (const suggestion of suggestions) {
-            const token = suggestion.nextTokenType;
+        for (const s of suggestions) {
+            const token = s.nextTokenType;
 
             if (!token || !token.PATTERN.source) {
                 continue;
             }
 
-            const label = token.LABEL;
+            let label = token.LABEL;
             let pattern = token.PATTERN.source.replace(/\\/g, "");
             let value = pattern;
 
@@ -670,20 +681,35 @@ class PerspectiveComputedExpressionParser {
                 value = `${value}(`;
             } else if (tokenMatcher(token, OperatorTokenType)) {
                 value = `${value} `;
+            } else if (tokenMatcher(token, As)) {
+                value = "AS ";
+                label = "AS";
+                token.signature = "x + y AS new column";
+                token.help = "Creates a custom name for the computed column.";
             }
 
-            suggestions_with_metadata.push(
-                new ComputedExpressionAutocompleteSuggestion({
-                    label,
-                    value,
-                    pattern,
-                    signature: token.signature,
-                    help: token.help,
-                    input_types: token.input_types,
-                    return_type: token.return_type,
-                    num_params: token.num_params
-                })
-            );
+            const suggestion = new ComputedExpressionAutocompleteSuggestion({
+                label,
+                value,
+                pattern,
+                signature: token.signature,
+                help: token.help,
+                input_types: token.input_types,
+                return_type: token.return_type,
+                num_params: token.num_params
+            });
+
+            if (input_types && suggestion.input_types) {
+                // Filter on input type if present
+                for (const type of input_types) {
+                    if (suggestion.input_types.includes(type)) {
+                        suggestions_with_metadata.push(suggestion);
+                        break;
+                    }
+                }
+            } else {
+                suggestions_with_metadata.push(suggestion);
+            }
         }
 
         return suggestions_with_metadata;

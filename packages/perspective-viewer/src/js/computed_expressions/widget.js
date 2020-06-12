@@ -194,9 +194,6 @@ class ComputedExpressionWidget extends HTMLElement {
             // share an instance of the parser throughout the viewer.
             this._parsed_expression = this._computed_expression_parser.parse(expression);
         } catch (e) {
-            // TODO: make sure autocomplete works for each step of the new
-            // expressions with associativity - it should actually decrease
-            // the amount of custom logic we need here.
             // Show autocomplete OR error, but not both
             this._clear_error();
             this._disable_save_button();
@@ -228,9 +225,11 @@ class ComputedExpressionWidget extends HTMLElement {
             // autocomplete.
             const show_column_names = (has_name_fragments && !is_alias && !last_column_name && !last_paren) || last_operator;
 
+            // Get autocomplete suggestions from Chevrotain
+            let suggestions = [];
+
             if (show_column_names) {
                 let column_names;
-                let suggestions;
 
                 // check previous token to see if it is a function or operator
                 const last_function_or_operator = this._computed_expression_parser.get_last_token_with_types([FunctionTokenType, OperatorTokenType], lex_result);
@@ -238,13 +237,14 @@ class ComputedExpressionWidget extends HTMLElement {
                 if (last_function_or_operator) {
                     const input_types = last_function_or_operator.tokenType.input_types;
                     column_names = this._get_view_column_names_by_types(input_types);
+                    suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types);
                 } else {
                     // Show all column names
                     column_names = this._get_view_all_column_names();
                 }
 
                 // Convert list of names into objects with `label` and `value`
-                suggestions = this._make_column_name_suggestions(column_names);
+                let column_name_suggestions = this._make_column_name_suggestions(column_names);
 
                 // Filter down by `startsWith` and `contains`, putting the
                 // more exact matches first.
@@ -253,7 +253,7 @@ class ComputedExpressionWidget extends HTMLElement {
                     const exact_matches = [];
                     const fuzzy_matches = [];
 
-                    for (const suggestion of suggestions) {
+                    for (const suggestion of column_name_suggestions) {
                         const column_name = suggestion.label.toLowerCase();
                         const partial = fragment.toLowerCase();
 
@@ -264,18 +264,13 @@ class ComputedExpressionWidget extends HTMLElement {
                         }
                     }
 
-                    suggestions = exact_matches.concat(fuzzy_matches);
+                    column_name_suggestions = exact_matches.concat(fuzzy_matches);
                 }
 
-                if (last_operator) {
-                    // Make sure we have opening parenthesis if the last token
-                    // is an operator
-                    suggestions = [
-                        new ComputedExpressionAutocompleteSuggestion({
-                            label: "(",
-                            value: "("
-                        })
-                    ].concat(suggestions);
+                if (last_function_or_operator) {
+                    suggestions = suggestions.concat(column_name_suggestions);
+                } else {
+                    suggestions = column_name_suggestions;
                 }
 
                 // Render column names inside autocomplete
@@ -283,7 +278,7 @@ class ComputedExpressionWidget extends HTMLElement {
                 this._autocomplete.render(markup);
                 return;
             } else {
-                const suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result);
+                suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result);
                 if (suggestions.length > 0) {
                     // Show autocomplete and not error box
                     const markup = this.make_autocomplete_markup(suggestions);
