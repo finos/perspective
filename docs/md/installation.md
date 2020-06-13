@@ -24,7 +24,7 @@ $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/persp
 
 All uses of Perspective from NPM require the browser to have access to
 Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
-`.js` scripts. By default, Perspective [inlines](https://github.com/finos/perspective/pull/870)
+`.js` scripts. By default, Perspective <a href="https://github.com/finos/perspective/pull/870" target="_blank">inlines</a>
 these assets into the `.js` scripts, and delivers them in one file. This has no
 performance impact, but does increase asset load time. Any non-trivial application
 should make use of `@finos/perspective-webpack-plugin`, which automatically
@@ -54,10 +54,10 @@ module.exports = {
 ### From CDN
 
 Perspective can be loaded directly from
-[unpkg.com](https://unpkg.com/@finos/perspective-viewer), which is the easiest
+<a href="https://unpkg.com/@finos/perspective-viewer" target="_blank">unpkg.com</a>, which is the easiest
 way to get started with Perspective in the browser, and absolutely perfect
 for spinning up quick instances of `perspective-viewer`. An example is
-demonstrated in [`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
+demonstrated in <a href="https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html" target="_blank"><code>superstore-arrow.html</code></a>,
 which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
 
 Add these scripts to your `.html`'s `<head>` section:
@@ -98,7 +98,7 @@ Or create a `<perspective-viewer>` in HTML:
 
 You must wait for the document `WebComponentsReady` event to fire,
 which indicates that the provided
-[webcomponents.js polyfill](https://github.com/webcomponents/webcomponentsjs)
+<a href="https://github.com/webcomponents/webcomponentsjs" target="_blank">webcomponents.js polyfill</a>
 has loaded.
 
 This makes it extremely easy to spin up Perspective locally without depending
@@ -108,7 +108,7 @@ Perspective into your application's bundled scripts using `NPM` and `Webpack`.
 ## Python
 
 `perspective-python` contains full bindings to the Perspective API, a JupyterLab
-widget, and a [Tornado](http://www.tornadoweb.org/en/stable/) WebSocket handler
+widget, and a <a href="http://www.tornadoweb.org/en/stable/" target="_blank">Tornado</a> WebSocket handler
 that allows you to host Perspective using server-side Python.
 
 In addition to supporting row/columnar formats of data using `dict` and `list`,
@@ -141,8 +141,8 @@ jupyter labextension install @finos/perspective-jupyterlab
 ## From source
 
 For hackers, contributors, and masochists, Perspective can be installed directly
-from source available on [Github](https://github.com/finos/perspective). Doing
+from source available on <a href="https://github.com/finos/perspective" target="_blank">Github</a>. Doing
 so is quite a bit more complex than a standard pure Javascript NPM package, so
 if you're not looking to hack on Perspective itself, you are likely better off
 choosing the CDN or NPM methods above. See the
-[developer docs](development.html) for details.
+<a href="development.html" target="_blank">developer docs</a> for details.

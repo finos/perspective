@@ -15,18 +15,18 @@ This document offers an overview of the Javascript library, providing:
 - Details about Perspective's various features
 
 For understanding Perspective's core concepts and vocabulary, see the
-[Conceptual Overview](/docs/md/concepts.html).
+<a href="https://perspective.finos.org/docs/md/concepts.html" target="_blank">Conceptual Overview</a>.
 
-For example code, see the [examples directory](https://github.com/finos/perspective/tree/master/examples)
+For example code, see the <a href="https://github.com/finos/perspective/tree/master/examples" target="_blank">examples directory</a>
 on GitHub.
 
 ## Quick Start
 
-First, make sure that Perspective [is installed](/docs/md/installation.html),
+First, make sure that Perspective <a href="https://perspective.finos.org/docs/md/installation.html" target="_blank">is installed</a>,
 and that you have the library accessible through your Javascript bundler.
 
 If Perspective was added using a script tag, see the
-[From CDN](/docs/md/installation.html#from-cdn) section of the installation
+<a href="https://perspective.finos.org/docs/md/installation.html#from-cdn" target="_blank">From CDN</a> section of the installation
 notes for a quick example.
 
 ### Importing `perspective-viewer`
@@ -45,7 +45,7 @@ their data, while `perspective-viewer-datagrid` and `perspective-viewer-d3fc`
 provide fast, flexible grid and chart visualization plugins, respectively.
 
 These modules register the `<perspective-viewer>`
-[Web Component](https://www.webcomponents.org/introduction) for use within
+<a href="https://www.webcomponents.org/introduction" target="_blank">Web Component</a> for use within
 your application's HTML:
 
 ```html
@@ -100,7 +100,7 @@ different visualization on load or transform the dataset, use the viewer's attri
 ```
 
 For more details about the full attribute API, see the
-[`<perspective-viewer>`](/js.html#setting--reading-viewer-configuration-via-attributes)section of this user guide.
+<a href="https://perspective.finos.org/js.html#setting--reading-viewer-configuration-via-attributes" target="_blank"><code>&lt;perspective-viewer&gt;</code></a>section of this user guide.
 
 ## Module Structure
 
@@ -113,12 +113,12 @@ which modules they need for their specific use case. The main modules are:
 
 - `@finos/perspective-viewer`  
   A user-configurable visualization widget, bundled as a
-  [Web Component](https://www.webcomponents.org/introduction). This module
+  <a href="https://www.webcomponents.org/introduction" target="_blank">Web Component</a>. This module
   includes the core data engine module as a dependency.
 
 `<perspective-viewer>` by itself only implements a trivial debug renderer, which
 prints the currently configured `view()` as a CSV. Plugin modules for popular
-Javascript libraries such as [d3fc](https://d3fc.io/) are packaged separately
+Javascript libraries such as <a href="https://d3fc.io/" target="_blank">d3fc</a> are packaged separately
 and must be imported individually.
 
 Perspective offers these plugin modules:
@@ -127,7 +127,7 @@ Perspective offers these plugin modules:
   A custom high-performance data-grid component based on HTML `<table>`.
 
 - `@finos/perspective-viewer-d3fc`  
-  A `<perspective-viewer>` plugin for the [d3fc](https://d3fc.io) charting
+  A `<perspective-viewer>` plugin for the <a href="https://d3fc.io" target="_blank">d3fc</a> charting
   library.
 
 Also available are these legacy modules; though no longer under development,
@@ -135,13 +135,13 @@ they are compatible with perspective versions < 1.0.0:
 
 - `@finos/perspective-viewer-hypergrid`  
   A `<perspective-viewer>` plugin for
-  [Hypergrid](https://github.com/fin-hypergrid/core).
+  <a href="https://github.com/fin-hypergrid/core" target="_blank">Hypergrid</a>.
 
 - `@finos/perspective-viewer-highcharts`  
   A `<perspective-viewer>` plugin for
-  [HighCharts](https://github.com/highcharts/highcharts). This plugin has a
+  <a href="https://github.com/highcharts/highcharts" target="_blank">HighCharts</a>. This plugin has a
   dependency on Highcharts'
-  [mixed commercial license](https://creativecommons.org/licenses/by-nc/3.0/),
+  <a href="https://creativecommons.org/licenses/by-nc/3.0/" target="_blank">mixed commercial license</a>,
   and is no longer under active development.
 
 When imported after `@finos/perspective-viewer`, the plugin modules will
@@ -159,7 +159,7 @@ your project:
 
 - For Perspective as a simple, browser-based data visualization widget, import:
 
-  - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
+  - `@finos/perspective-viewer`, detailed <a href="https://perspective.finos.org/docs/md/js.html#perspective-viewer-web-component">here</a>
   - `@finos/perspective-viewer-datagrid` for data grids
   - `@finos/perspective-viewer-d3fc` for charting
   - The core data engine `@finos/perspective` is a dependency of these packages
@@ -168,12 +168,12 @@ your project:
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
 
-  - `@finos/perspective`, as detailed [here](#perspective-library)
+  - `@finos/perspective`, as detailed <a href="https://perspective.finos.org/docs/md/js.html#perspective-library" target="_blank">here</a>
 
 - For more complex cases, such as
-  [sharing tables between viewers](#sharing-a-table-between-multiple-perspective-viewers)
+  <a href="https://perspective.finos.org/docs/md/js.html#sharing-a-table-between-multiple-perspective-viewers" target="_blank">sharing tables between viewers</a>
   and
-  [binding a viewer to a remote view in Node.js](#remote-perspective-via-workerhost), you will likely need all Perspective modules.
+  <a href="https://perspective.finos.org/docs/md/js.html#remote-perspective-via-workerhost" target="_blank">binding a viewer to a remote view in Node.js</a>, you will likely need all Perspective modules.
 
 ## `perspective` library
 
@@ -195,7 +195,7 @@ It exports Perspective's data interfaces:
 
 `@finos/perspective` also exports process management functions such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in node.js). See the [API documentation](/obj/perspective.html) for a complete
+(in node.js). See the <a href="https://perspective.finos.org/obj/perspective.html" target="_blank">API documentation</a> for a complete
 reference on all exported methods.
 
 This module is a dependency of `@finos/perspective-viewer`, and is not needed if
@@ -218,7 +218,7 @@ const perspective = require("@finos/perspective");
 
 `@finos/perspective` also comes with a pre-built bundle which exports the global
 `perspective` module name in vanilla Javascript, when e.g. importing
-[via a CDN](/docs/md/installation.html#from-cdn).
+<a href="https://perspective.finos.org/docs/md/installation.html#from-cdn" target="_blank">via a CDN</a>.
 
 ```html
 <script src="perspective.js"></script>
@@ -416,7 +416,7 @@ Perspective conserves memory by relying on a single `table()` to power
 multiple `view()`s concurrently.
 
 For a detailed description of the `view()`'s configuration object, see the
-[API documentation](/docs/obj/perspective.html).
+<a href="https://perspective.finos.org/docs/obj/perspective.html" target="_blank">API documentation</a>.
 
 #### Serializing data using `to_*()`
 
@@ -494,14 +494,14 @@ different contexts, such as streaming a server-side `view()` in Node.js into a
 For ease of configuration synchronization between the Node.js, WebWorker and
 Browser, Perspective supports configuration statically.
 
-You may override Perspective's [default settings](https://github.com/finos/perspective/blob/master/packages/perspective/src/js/config/settings.js)
+You may override Perspective's <a href="https://github.com/finos/perspective/blob/master/packages/perspective/src/js/config/settings.js" target="_blank">default settings</a>
 via a `perspective.config.js` or `perspective.config.json` file in your
 project's root or parent path, or via the `"perspective"` key in your project's
 `package.json`.
 
 Note that, while in Node.js this config file is read at runtime, for the browser
 this file must be read at compile time (handled automatically via
-[`@finos/perspective-webpack-plugin`](https://github.com/finos/perspective/tree/master/packages/perspective-webpack-plugin)).
+<a href="https://github.com/finos/perspective/tree/master/packages/perspective-webpack-plugin" target="_blank"><code>@finos/perspective-webpack-plugin</code></a>).
 
 Thus, to update it you must either rebuild your code, or supply the JSON
 configuration object to the `worker()` constructor on initialization.
@@ -538,7 +538,7 @@ module.exports = {
 ```
 
 Perspective will not infer these types for you, so you'll need to create your
-table [from a schema](#loading-data-with-table) to use them:
+table <a href="https://perspective.finos.org/docs/md/js.html#loading-data-with-table" target="_blank">from a schema</a> to use them:
 
 ```javascript
 const table = worker.table({volume: "integer", price: "price"});
@@ -642,7 +642,7 @@ _*index.html*_
 ```
 
 If you choose not to bundle the themes yourself, they are available through
-the [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
+the <a href="https://unpkg.com/@finos/perspective-viewer/dist/umd/" target="_blank">unpkg.com</a>.
 
 These can be directly linked in your HTML:
 
@@ -661,7 +661,7 @@ Javascript with JSON, CSV, or an `ArrayBuffer` in the Apache Arrow format.
 If `perspective-viewer` is imported via an inline `<script>` tag, you must wait
 for the document `WebComponentsReady` event to fire, which indicates that the
 provided
-[webcomponents.js polyfill](https://github.com/webcomponents/webcomponentsjs)
+<a href="https://github.com/webcomponents/webcomponentsjs" target="_blank">webcomponents.js polyfill</a>
 has loaded:
 
 ```javascript
@@ -781,7 +781,7 @@ it is over a Web Socket.
 and `perspective-viewer` libraries. Similar to `WebsocketServer` in Node.js,
 `perspective-python` runs on the server without any memory limits, reducing
 resource usage in the browser. For more detailed documentation on the Python
-API, see the [Python user guide](/docs/md/python.html) or the [Python API documentation](/docs/obj/perspective-python.html).
+API, see the <a href="https://perspective.finos.org/docs/md/python.html" target="_blank">Python user guide</a> or the <a href="https://perspective.finos.org/docs/obj/perspective-python.html" target="_blank">Python API documentation</a>.
 
 The simplest implementation uses Tornado as a websocket server in Python,
 hosting an endpoint at which a `table()` can be accessed:
@@ -851,7 +851,7 @@ configuration property.
 For example, this HTML will apply `row_pivot` and `filter` configuration to the
 initial `view()` created when data is loaded via the `load()` method, as well
 as set the UI controls to reflect this config. See the
-[full Attribute API documentation](/docs/obj/perspective-viewer.html)
+<a href="https://perspective.finos.org/docs/obj/perspective-viewer.html" target="_blank">full Attribute API documentation</a
 for a full description of the available attributes.
 
 ```html

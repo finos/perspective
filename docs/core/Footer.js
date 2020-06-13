@@ -28,12 +28,12 @@ class Footer extends React.Component {
                     </a>
                     <div>
                         <h5>Docs</h5>
-                        <a href={"/docs/md/installation.html"}>Installation</a>
-                        <a href={"/docs/md/js.html"}>Javascript User Guide</a>
-                        <a href={"/docs/md/python.html"}>Python User Guide</a>
-                        <a href={"/docs/obj/perspective.html"}>Perspective API</a>
-                        <a href={"/docs/obj/perspective-viewer.html"}>Perspective Viewer API</a>
-                        <a href={"/docs/obj/perspective-python-table.html"}>Perspective Python API</a>
+                        <a href={"/docs/md/installation.html"} target="_blank">Installation</a>
+                        <a href={"/docs/md/js.html"} target="_blank">Javascript User Guide</a>
+                        <a href={"/docs/md/python.html"} target="_blank">Python User Guide</a>
+                        <a href={"/docs/obj/perspective.html"} target="_blank">Perspective API</a>
+                        <a href={"/docs/obj/perspective-viewer.html"} target="_blank">Perspective Viewer API</a>
+                        <a href={"/docs/obj/perspective-python-table.html"} target="_blank">Perspective Python API</a>
                     </div>
                     {/* <div>
             <h5>Community</h5>
@@ -56,8 +56,8 @@ class Footer extends React.Component {
           </div> */}
                     <div>
                         <h5>More</h5>
-                        <a href={this.props.config.baseUrl + "blog"}>Blog</a>
-                        <a href="https://github.com/finos/perspective/">GitHub</a>
+                        <a href={this.props.config.baseUrl + "blog"} target="_blank">Blog</a>
+                        <a href="https://github.com/finos/perspective/" target="_blank">GitHub</a>
                         <a
                             className="github-button"
                             href={this.props.config.repoUrl}

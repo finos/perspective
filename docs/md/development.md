@@ -14,10 +14,10 @@ sure the newcomer experience is as straightforward as possible, but some things
 might not work the way you're used to!
 
 Perspective is organized as a
-[monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md),
-and uses [lerna](https://lernajs.io/) to manage dependencies. The
+<a href="https://github.com/babel/babel/blob/master/doc/design/monorepo.md" target="_blank">monorepo</a>,
+and uses <a href="https://lernajs.io/" target="_blank">lerna</a> to manage dependencies. The
 `@finos/perspective` modules has an additional, unmanaged dependency—the
-[Emscripten](https://github.com/kripken/emscripten) compiler, which is used to
+<a href="https://github.com/kripken/emscripten" target="_blank">Emscripten</a> compiler, which is used to
 compile the core C++ engine to WebAssembly, and must be installed independently.
 
 This guide provides instructions for both the Javascript and Python libraries.
@@ -49,7 +49,7 @@ yarn start simple
 
 #### Docker
 
-[Docker](https://docs.docker.com/install/) images with pre-built development
+<a href="https://docs.docker.com/install/" target="_blank">Docker</a> images with pre-built development
 environments are provided for the Javascript and Python libraries.
 
 To build Perspective using Docker, select the option in `yarn setup`.
@@ -62,21 +62,21 @@ built from source:
 - Boost (version 1.67)
 - CMake (version 3.15.4 or higher)
 - TBB
-- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+- <a href="https://google.github.io/flatbuffers/flatbuffers_guide_building.html" target="_blank">Flatbuffers</a>
 
 ### `Perspective.js`
 
 To build the Javascript library, which includes WebAssembly compilation,
-[Emscripten](https://github.com/kripken/emscripten) and its prerequisites are
+<a href="https://github.com/kripken/emscripten" target="_blank">Emscripten</a> and its prerequisites are
 required. A Docker image is provided with the correct environment and
 prerequisites.
 
 #### Building via EMSDK
 
 To build using local Emscripten,
-[install](https://emscripten.org/docs/getting_started/downloads.html) the
+<a href="https://emscripten.org/docs/getting_started/downloads.html" target="_blank">install</a> the
 Emscripten SDK, then activate and export the latest `emsdk` environment via
-[`emsdk_env.sh`](https://github.com/juj/emsdk):
+<a href="https://github.com/juj/emsdk" target="_blank"><code>emsdk_env.sh</code></a>:
 
 ```bash
 source emsdk/emsdk_env.sh
@@ -120,7 +120,7 @@ yarn build --python2
 ### MacOS/OSX specific instructions
 
 Installing and activating the latest
-[Emscripten SDK](https://github.com/kripken/emscripten):
+<a href="https://github.com/kripken/emscripten" target="_blank">Emscripten SDK</a>:
 
 ```bash
 ./emsdk install latest
@@ -150,7 +150,7 @@ brew install python2
 
 You need to use bash in order to build Perspective packages. To successfully
 build on Windows 10, enable
-[Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+<a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10" target="_blank">Windows Subsystem for Linux</a>
 (WSL) and install the linux distribution of your choice.
 
 Create symbolic links to easily access Windows directories and projects modified
@@ -163,13 +163,13 @@ prerequisite tools.
 ### Ubuntu/Debian
 
 When installing Emscripten, make sure to follow
-[Linux specific instructions](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux).
+<a href="http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux" target="_blank">Linux specific instructions</a>.
 
 On Ubuntu, cmake will mistakenly resolve the system headers in `/usr/include`
 rather than the emscripten supplied versions. You can resolve this by moving
 `boost` and `flatbuffers` dependencies to somewhere other than `/usr/include` -
 into perspective's own `src` dir, for example (as per
-[here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html)).
+<a href="http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html" target="_blank">here</a>).
 
 ```bash
 apt-get install libboost-all-dev
@@ -203,13 +203,13 @@ yarn test -t 'button test (A|B)'
 
 The Javascript test suite is composed of two sections: a Node.js test which
 asserts behavior of the `@finos/perspective` library, and a suite of
-[Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests which
+<a href="https://developers.google.com/web/tools/puppeteer/" target="_blank">Puppeteer</a> tests which
 assert the behavior of the rest of the UI facing packages. For the latter,
 you'll need Docker installed, as these tests use a Puppeteer and Chrome build
 installed in a Docker container.
 
 The Puppeteer/UI tests are a form of
-[characterization tests](https://en.wikipedia.org/wiki/Characterization_test)
+<a href="https://en.wikipedia.org/wiki/Characterization_test" target="_blank">characterization tests</a>
 which use screenshots to compare current and previous behavior of
 `<perspective-viewer>` and its plugins. The results of the each comparison are
 stored in each package's `test/results/results.json` file, and the screenshots

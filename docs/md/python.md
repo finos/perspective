@@ -4,15 +4,15 @@ title: Python User Guide
 ---
 
 Perspective for Python uses the exact same C++ data engine used by the
-[WebAssembly version](https://perspective.finos.org/docs/md/js.html). The
+<a href="https://perspective.finos.org/docs/md/js.html" target="_blank">WebAssembly version</a>. The
 library consists of many of the same abstractions and API as in Javascript,
-as well as Python-specific data loading support for [NumPy](https://numpy.org/),
-[Pandas](https://pandas.pydata.org/) (and
-[Apache Arrow](https://arrow.apache.org/), as in Javascript).
+as well as Python-specific data loading support for <a href="https://numpy.org/" target="_blank">NumPy</a>,
+<a href="https://pandas.pydata.org/" target="_blank">Pandas</a> (and
+<a href="https://arrow.apache.org/" target="_blank">Apache Arrow</a>, as in Javascript).
 
 Additionally, `perspective-python` provides a session manager suitable for
 integration into server systems such as
-[Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html), which
+<a href="https://www.tornadoweb.org/en/stable/websocket.html" target="_blank">Tornado websockets</a>, which
 allows fully _virtual_ Perspective tables to be interacted with by multiple
 `<perspective-viewer>` in a Web Browser.
 
@@ -22,7 +22,7 @@ instant-load after they've been manifest on the server (at the expense of
 network latency on UI interaction).
 
 The included `PerspectiveWidget` allows running such a viewer in
-[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/) in either server or
+<a href="https://jupyterlab.readthedocs.io/en/stable/" target="_blank">JupyterLab</a> in either server or
 client (via WebAssembly) mode, and the included `PerspectiveTornadoHandler`
 makes it simple to extend a Tornado server with virtual Perspective support.
 
@@ -31,7 +31,7 @@ The `perspective` module exports several tools:
 - `Table`, the table constructor for Perspective, which implements the `table`
   and `view` API in the same manner as the Javascript library.
 - `PerspectiveWidget` the JupyterLab widget for interactive visualization.
-- `PerspectiveTornadoHandler`, an integration with [Tornado](https://www.tornadoweb.org/)
+- `PerspectiveTornadoHandler`, an integration with <a href="https://www.tornadoweb.org/" target="_blank">Tornado</a>
 that interfaces seamlessly with `<perspective-viewer>` in Javascript.
 - `PerspectiveManager` the session manager for a shared server deployment of
 `perspective-python`.
@@ -44,7 +44,7 @@ For an understanding of Perspective's core concepts, see the
 [Conceptual Overview](/docs/md/concepts.html). For API documentation, see the
 [Python API](/docs/obj/perspective-python.html).
 
-For example code, see the [Python examples directory](https://github.com/finos/perspective/tree/master/python/perspective/examples)
+For example code, see the <a href="https://github.com/finos/perspective/tree/master/python/perspective/examples" target="_blank">Python examples directory</a>
 on GitHub.
 
 ## `Table`
@@ -98,7 +98,7 @@ structured/record arrays are parsed according to their field name and dtype.
 objects. Because Perspective is designed for applying its own transformations on
 top of a flat dataset, dataframes that are passed in will be flattened and have
 its `index` treated as another column (through the
-[`reset_index()`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html)
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html" target="_blank"><code>reset_index()</code></a>
 method).
 
 If the dataframe does not have an index set, an integer-typed column
@@ -162,7 +162,7 @@ two methods into your object:
 Columns with the `datetime` type are stored internally as UTC timestamps in milliseconds since epoch (Unix Time),
 and are serialized to the user as `datetime.datetime` objects in _local time_ according to the Python runtime.
 
-Both ["naive" and "aware" datetimes](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects) will be
+Both <a href="https://docs.python.org/3/library/datetime.html#aware-and-naive-objects" target="_blank">&quot;naive&quot; and &quot;aware&quot; datetimes</a> will be
 serialized to local time by Perspective, with the conversion determined by the `tzinfo` attribute:
 
 - "Naive" datetimes are assumed to be already in local time and are serialized as-is.
@@ -170,7 +170,7 @@ serialized to local time by Perspective, with the conversion determined by the `
 from UTC.
 
 This behavior is consistent with Perspective's behavior in Javascript. For more details, see this
-in-depth [explanation](https://github.com/finos/perspective/pull/867) of `perspective-python` semantics around time zone handling.
+in-depth <a href="https://github.com/finos/perspective/pull/867" target="_blank">explanation</a> of `perspective-python` semantics around time zone handling.
 
 ##### Pandas Timestamps
 
@@ -427,11 +427,11 @@ As well as keyword arguments specific to `PerspectiveWidget` itself:
 Several Enums are provided to make lookup of specific plugin types, aggregate
 types, etc. much easier:
 
-- [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py)
+- <a href="https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py" target="_blank"><code>Aggregate</code></a>
   : aggregate operations
-- [`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py)
+- <a href="https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py" target="_blank"><code>Sort</code></a>
   : sort directions
-- [`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py)
+- <a href="https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py" target="_blank"><code>Plugin</code></a>
   : plugins (grid/chart types, etc.)
 
 These can be used as replacements to string values in the API:
@@ -606,7 +606,7 @@ app = tornado.web.Application([
 Optionally, the configuration object can also include `check_origin`, a boolean
 that determines whether the websocket accepts requests from origins other than
 where the server is hosted. See
-[Tornado docs](https://www.tornadoweb.org/en/stable/websocket.html#tornado.websocket.WebSocketHandler.check_origin)
+<a href="https://www.tornadoweb.org/en/stable/websocket.html#tornado.websocket.WebSocketHandler.check_origin" target="_blank">Tornado docs</a>
 for more details.
 
 ### Javascript setup
@@ -650,6 +650,6 @@ general suffers when the dataset itself is too large to download to the client
 in full.
 
 The Python runtime does not suffer from memory limitations, utilizes
-[TBB](https://github.com/intel/tbb) for threading and parallel processing, and
+<a href="https://github.com/intel/tbb" target="_blank">TBB</a> for threading and parallel processing, and
 generates architecture optimized code, which currently makes it more suitable as
 a server-side runtime than `node.js`.

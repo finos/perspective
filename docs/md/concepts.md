@@ -221,7 +221,7 @@ binding language's garbage collector (Javascript, Python etc.)
 
 The `Table`'s `delete` method guarantees the cleanup of all resources associated
 with a `Table`, which is _especially important_ in Javascript, as the JS garbage
-collector [cannot automatically clean up](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management)
+collector <a href="https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management" target="_blank">cannot automatically clean up</a>
 objects created in C++ through Emscripten.
 
 It is best practice to explicitly `delete` any `Table`s when they are no longer
@@ -242,7 +242,7 @@ callback which should be removed and no longer called by Perspective.
 The View is Perspective's query and serialization interface. It represents a
 query on the `Table`'s dataset and is always created from an existing `Table`
 instance via the `view()` method with a set of
-[`View` configuration parameters](https://perspective.finos.org/docs/obj/perspective.html#module_perspective..table+view):
+<a href="https://perspective.finos.org/docs/obj/perspective.html#module_perspective..table+view" target="_blank"><code>View</code> configuration parameters</a>:
 
 ```javascript
 const table = perspective.table({
