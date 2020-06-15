@@ -15,7 +15,7 @@ import template from "../../html/computed_expression_widget.html";
 
 import style from "../../less/computed_expression_widget.less";
 
-import {ColumnNameTokenType, FunctionTokenType, OperatorTokenType, COLUMN_NAME_REGEX_PATTERN, RightParen, As} from "./lexer";
+import {FunctionTokenType, OperatorTokenType, COLUMN_NAME_REGEX_PATTERN, RightParen, As, ColumnName, Whitespace} from "./lexer";
 import {ComputedExpressionAutocompleteSuggestion} from "./computed_expression_parser";
 import {tokenMatcher} from "chevrotain";
 
@@ -101,30 +101,67 @@ class ComputedExpressionWidget extends HTMLElement {
     render_expression(expression) {
         const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
-        if (lex_result.errors.length > 0) {
-            return `<span class="psp-expression__errored">${expression}</span>`;
+        // Track a sorted array of integer offsets into the expression, and
+        // a map of offsets to tokens. This allows us to render errors (which
+        // aren't in the list of parsed tokens) inline with valid tokens.
+        let offsets = [];
+        let token_map = {};
+
+        for (const token of lex_result.tokens) {
+            token_map[token.startOffset] = token;
+            offsets.push(token.startOffset);
         }
+
+        for (const error of lex_result.errors) {
+            token_map[error.offset] = error;
+            offsets.push(error.offset);
+        }
+
+        offsets = offsets.sort((a, b) => a - b);
 
         const output = [];
         const names = this._get_view_all_column_names();
 
-        for (const token of lex_result.tokens) {
-            let class_name = "fragment";
-            let content = token.image;
-            if (tokenMatcher(token, FunctionTokenType)) {
-                class_name = "function";
-            } else if (tokenMatcher(token, OperatorTokenType)) {
-                class_name = "operator";
-            } else if (tokenMatcher(token, ColumnNameTokenType)) {
-                const column_name = token.payload;
-                const exists = names.includes(column_name);
+        // track the last non-whitespace token
+        let last_token;
 
-                if (!exists) {
-                    class_name = "errored";
-                } else {
-                    class_name = `column_name ${this._get_type(column_name)}`;
+        for (const offset of offsets) {
+            const token = token_map[offset];
+
+            // errors have `message` set, whereas valid tokens do not
+            const is_error = token.message;
+
+            let content = "";
+            let class_name = "fragment";
+
+            if (is_error) {
+                // grab the full text of the error
+                content = expression.slice(token.offset, token.offset + token.length);
+                class_name = "errored";
+            } else {
+                content = token.image;
+
+                if (tokenMatcher(token, FunctionTokenType)) {
+                    class_name = "function";
+                } else if (tokenMatcher(token, OperatorTokenType)) {
+                    class_name = "operator";
+                } else if (tokenMatcher(token, ColumnName)) {
+                    const column_name = token.payload;
+                    const exists = names.includes(column_name);
+                    class_name = `column_name ${exists ? this._get_type(column_name) : ""}`;
+
+                    // only mark as red if the column is not an alias AND does
+                    // not exist in the dataset.
+                    if ((!exists && !last_token) || (!exists && last_token && !tokenMatcher(last_token, As))) {
+                        class_name = "errored";
+                    }
+                }
+
+                if (!tokenMatcher(token, Whitespace)) {
+                    last_token = token;
                 }
             }
+
             output.push(`<span class="psp-expression__${class_name}">${content}</span>`);
         }
 
@@ -209,7 +246,7 @@ class ComputedExpressionWidget extends HTMLElement {
                 // Check if the last token is a column name - if so, don't show
                 // autocomplete as we don't want to show autocomplete after a
                 // completed column name.
-                const is_column_name = tokenMatcher(last_token, ColumnNameTokenType);
+                const is_column_name = tokenMatcher(last_token, ColumnName);
 
                 // Don't show if last token is a parenthesis, as that indicates
                 // a closed logical block.
@@ -246,6 +283,8 @@ class ComputedExpressionWidget extends HTMLElement {
                 let column_names;
 
                 if (last_function_or_operator) {
+                    // create a list of function/operator suggestions followed
+                    // by column names of the correct input type.
                     column_names = this._get_view_column_names_by_types(input_types);
                     suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types);
                 } else {

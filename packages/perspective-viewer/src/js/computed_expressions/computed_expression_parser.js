@@ -156,7 +156,7 @@ class PerspectiveComputedExpressionParser {
             const is_column_name = last_token && tokenMatcher(last_token, ColumnName);
 
             if (partial_function && partial_function.search(/["']$/) === -1 && !is_column_name) {
-                // Remove open parenthesis and column name rule
+                // Remove open parenthesis
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(1), input_types);
                 const exact_matches = [];
                 const fuzzy_matches = [];
