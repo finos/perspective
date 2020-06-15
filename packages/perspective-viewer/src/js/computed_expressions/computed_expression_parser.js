@@ -152,9 +152,10 @@ class PerspectiveComputedExpressionParser {
             // token is a column name, as we should not be sending suggestions
             // for a partial function that immediately follows a column name,
             // i.e. `"Sales" a`.
-            const last_column_token = this.get_last_token_with_types([ColumnName], lexer_result, 1);
+            const last_token = this.get_last_token(lexer_result);
+            const is_column_name = last_token && tokenMatcher(last_token, ColumnName);
 
-            if (partial_function && partial_function.search(/["']$/) === -1 && !last_column_token) {
+            if (partial_function && partial_function.search(/["']$/) === -1 && !is_column_name) {
                 // Remove open parenthesis and column name rule
                 const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(1), input_types);
                 const exact_matches = [];
@@ -208,6 +209,20 @@ class PerspectiveComputedExpressionParser {
     }
 
     /**
+     * Return the last non-whitespace token from a lexer result, or undefined
+     * if there are no non-whitespace tokens or no tokens at all.
+     *
+     * @param {ILexingResult} lexer_result
+     */
+    get_last_token(lexer_result) {
+        const tokens = clean_tokens(lexer_result.tokens);
+        const last_idx = tokens.length - 1;
+        if (last_idx >= 0) {
+            return tokens[last_idx];
+        }
+    }
+
+    /**
      * Look backwards through a list of tokens, checking whether each token is
      * of a type in the `types` array, stopping after `limit` tokens.
      * Whitespace tokens are removed from the token list before the search.
@@ -235,8 +250,8 @@ class PerspectiveComputedExpressionParser {
 
     /**
      * Look backwards through a list of tokens, checking whether each token is
-     * of a type in the `types` array, stopping after `limit` tokens.
-     * Whitespace tokens are removed from the token list before the search.
+     * of the specific `name`, stopping after `limit` tokens. Whitespace tokens
+     * are removed from the token list before the search.
      *
      * @param {String} name A string name of a token to match.
      * @param {ILexingResult} lexer_result A result from the lexer, containing
@@ -700,9 +715,12 @@ class PerspectiveComputedExpressionParser {
             });
 
             if (input_types && suggestion.input_types) {
-                // Filter on input type if present
+                // Return suggestions that have the same input type AND
+                // the return type is in the input types array - this prevents
+                // expressions such as `uppercase(length(` from being
+                // suggested, as `length` takes a string but returns an int.
                 for (const type of input_types) {
-                    if (suggestion.input_types.includes(type)) {
+                    if (suggestion.input_types.includes(type) && suggestion.input_types.includes(suggestion.return_type)) {
                         suggestions_with_metadata.push(suggestion);
                         break;
                     }
