@@ -617,8 +617,19 @@ describe("Computed Expression Parser", () => {
         it("Should suggest functions with the same input type & return type after a open function definition, integer and float", () => {
             const expression = "sqrt(";
             const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
-            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["float", "integer"]);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["float", "integer"], true);
             const expected = ["(", "sqrt", "pow2", "abs", "invert", "log", "exp", "bin1000th", "bin1000", "bin100th", "bin100", "bin10th", "bin10"];
+
+            for (const suggestion of suggestions) {
+                expect(expected.includes(suggestion.pattern)).toBe(true);
+            }
+        });
+
+        it("Should suggest operators with the same input type after a open function definition and column name, integer and float", () => {
+            const expression = "sqrt('Sales'";
+            const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["float", "integer"]);
+            const expected = ["^", "*", "/", "+", "-", "%", ",", ")", "==", "!=", ">", "<"];
 
             for (const suggestion of suggestions) {
                 expect(expected.includes(suggestion.pattern)).toBe(true);
@@ -628,8 +639,19 @@ describe("Computed Expression Parser", () => {
         it("Should suggest operators with the same input type & return type after a open function definition and column name, integer and float", () => {
             const expression = "sqrt('Sales'";
             const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
-            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["float", "integer"]);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["float", "integer"], true);
             const expected = ["^", "*", "/", "+", "-", "%", ",", ")"];
+
+            for (const suggestion of suggestions) {
+                expect(expected.includes(suggestion.pattern)).toBe(true);
+            }
+        });
+
+        it("Should suggest a function with the same input type after a open function definition, date and datetime", () => {
+            const expression = "day_bucket(";
+            const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["datetime", "date"], true);
+            const expected = ["(", "hour_of_day", "day_of_week", "month_of_year", "second_bucket", "minute_bucket", "hour_bucket", "day_bucket", "week_bucket", "month_bucket", "year_bucket"];
 
             for (const suggestion of suggestions) {
                 expect(expected.includes(suggestion.pattern)).toBe(true);
@@ -639,8 +661,19 @@ describe("Computed Expression Parser", () => {
         it("Should suggest a function with the same input type & return type after a open function definition, date and datetime", () => {
             const expression = "day_bucket(";
             const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
-            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["datetime", "date"]);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["datetime", "date"], true);
             const expected = ["(", "second_bucket", "minute_bucket", "hour_bucket", "day_bucket", "week_bucket", "month_bucket", "year_bucket"];
+
+            for (const suggestion of suggestions) {
+                expect(expected.includes(suggestion.pattern)).toBe(true);
+            }
+        });
+
+        it("Should suggest a function with the same input type after a open function definition, string", () => {
+            const expression = "concat_comma(";
+            const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["string"]);
+            const expected = ["(", "length", "uppercase", "lowercase", "concat_comma", "concat_space"];
 
             for (const suggestion of suggestions) {
                 expect(expected.includes(suggestion.pattern)).toBe(true);
@@ -650,7 +683,7 @@ describe("Computed Expression Parser", () => {
         it("Should suggest a function with the same input type & return type after a open function definition, string", () => {
             const expression = "concat_comma(";
             const lexer_result = COMPUTED_EXPRESSION_PARSER._lexer.tokenize(expression);
-            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["string"]);
+            const suggestions = COMPUTED_EXPRESSION_PARSER.get_autocomplete_suggestions(expression, lexer_result, ["string"], true);
             // no `length` as that returns an int
             const expected = ["(", "uppercase", "lowercase", "concat_comma", "concat_space"];
 

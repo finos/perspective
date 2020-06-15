@@ -269,7 +269,7 @@ class ComputedExpressionWidget extends HTMLElement {
             let suggestions = [];
 
             // Filter down those suggestions by an input type, if possible
-            let input_types;
+            let input_types, match_types;
 
             // Go to the last function or operator token - not necessarily the
             // last token, and get the input types from it.
@@ -277,7 +277,15 @@ class ComputedExpressionWidget extends HTMLElement {
 
             if (last_function_or_operator) {
                 input_types = last_function_or_operator.tokenType.input_types;
+                match_types = true;
+            } else if (last_token && tokenMatcher(last_token, ColumnName)) {
+                // get functions and operators that take the column type
+                // as input, but don't check whether return types match
+                input_types = [this._get_type(last_token.payload)];
+                match_types = false;
             }
+
+            suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types, match_types);
 
             if (show_column_names) {
                 let column_names;
@@ -286,7 +294,6 @@ class ComputedExpressionWidget extends HTMLElement {
                     // create a list of function/operator suggestions followed
                     // by column names of the correct input type.
                     column_names = this._get_view_column_names_by_types(input_types);
-                    suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types);
                 } else {
                     // Show all column names
                     column_names = this._get_view_all_column_names();
@@ -327,8 +334,6 @@ class ComputedExpressionWidget extends HTMLElement {
                 this._autocomplete.render(markup);
                 return;
             } else {
-                suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types);
-
                 if (suggestions.length > 0) {
                     // Show autocomplete and not error box
                     const markup = this.make_autocomplete_markup(suggestions);

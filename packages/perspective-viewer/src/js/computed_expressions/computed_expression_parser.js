@@ -132,9 +132,11 @@ class PerspectiveComputedExpressionParser {
      * @param {String} expression
      * @param {Array[String]} input_types an array of data types by which to
      * filter down the suggestions.
+     * @param {Boolean} match_types whether suggestions should have matching
+     * input and return types.
      * @returns {Array}
      */
-    get_autocomplete_suggestions(expression, lexer_result, input_types) {
+    get_autocomplete_suggestions(expression, lexer_result, input_types, match_types) {
         this._check_initialized();
         let initial_suggestions = this._parser.computeContentAssist("SuperExpression", []);
 
@@ -180,9 +182,8 @@ class PerspectiveComputedExpressionParser {
 
         // Remove whitespace tokens
         lexer_result.tokens = clean_tokens(lexer_result.tokens);
-        let suggestions = this._apply_suggestion_metadata(this._parser.computeContentAssist("SuperExpression", lexer_result.tokens), input_types);
-
-        return suggestions;
+        const suggestions = this._parser.computeContentAssist("SuperExpression", lexer_result.tokens);
+        return this._apply_suggestion_metadata(suggestions, input_types, match_types);
     }
 
     /**
@@ -676,9 +677,12 @@ class PerspectiveComputedExpressionParser {
      *
      * @param {Array} suggestions
      * @param {Array[String]} input_types an array of input types as strings.
+     * @param {Boolean} match_types whether the return type and input types
+     * of suggestions should match
      */
-    _apply_suggestion_metadata(suggestions, input_types) {
+    _apply_suggestion_metadata(suggestions, input_types, match_types) {
         this._check_initialized();
+        match_types = match_types || false;
         const suggestions_with_metadata = [];
 
         for (const s of suggestions) {
@@ -720,7 +724,9 @@ class PerspectiveComputedExpressionParser {
                 // expressions such as `uppercase(length(` from being
                 // suggested, as `length` takes a string but returns an int.
                 for (const type of input_types) {
-                    if (suggestion.input_types.includes(type) && suggestion.input_types.includes(suggestion.return_type)) {
+                    const correct_input_type = suggestion.input_types.includes(type);
+
+                    if (correct_input_type && (match_types ? suggestion.input_types.includes(suggestion.return_type) : true)) {
                         suggestions_with_metadata.push(suggestion);
                         break;
                     }
