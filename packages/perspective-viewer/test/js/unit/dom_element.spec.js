@@ -25,7 +25,7 @@ describe(DomElement, () => {
         });
 
         test("the first value, null values, and undefined values are filtered out", () => {
-            expect(dom_element._autocomplete_choices(json_choices)).toEqual([["somestring"], ["otherstring"]]);
+            expect(dom_element._autocomplete_choices(json_choices)).toEqual(["somestring", "otherstring"]);
         });
     });
 });
