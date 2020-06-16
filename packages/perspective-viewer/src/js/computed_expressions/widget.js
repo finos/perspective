@@ -99,6 +99,8 @@ class ComputedExpressionWidget extends HTMLElement {
      * @param {String} expression
      */
     render_expression(expression) {
+        // Call `tokenize()` and not `lex()`, as `lex` cleans whitespace
+        // tokens and we need whitespace tokens to render the expressions.
         const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
         // Track a sorted array of integer offsets into the expression, and
@@ -231,7 +233,10 @@ class ComputedExpressionWidget extends HTMLElement {
             // Show autocomplete OR error, but not both
             this._clear_error();
             this._disable_save_button();
-            const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
+
+            // Generate a list of tokens from the expression, cleaning out
+            // whitespace tokens and without throwing any errors.
+            const lex_result = this._computed_expression_parser.lex(expression);
 
             // Check if the expression has a fragment of a column name,
             // i.e. if it's been opened with a quote but not closed
@@ -271,8 +276,8 @@ class ComputedExpressionWidget extends HTMLElement {
             // Filter down those suggestions by an input type, if possible
             let input_types, match_types;
 
-            // Go to the last function or operator token - not necessarily the
-            // last token, and get the input types from it.
+            // Go to the last function or operator token present in the
+            // entire expression, and use it to calculate input types.
             const last_function_or_operator = this._computed_expression_parser.get_last_token_with_types([FunctionTokenType, OperatorTokenType], lex_result);
 
             if (last_function_or_operator) {
@@ -478,7 +483,7 @@ class ComputedExpressionWidget extends HTMLElement {
 
                 this._expression_editor._edit_area.innerText = final_value;
             } else {
-                if (!last_word_is_column_name && (last_word[last_word.length - 1] === '"' || last_word[last_word.length - 1] === '"')) {
+                if (!last_word_is_column_name && (last_word[last_word.length - 1] === '"' || last_word[last_word.length - 1] === "'")) {
                     // Remove the last quote in strings like `pow2("
                     const stripped_last = this._expression_editor._edit_area.innerText.substring(0, this._expression_editor._edit_area.innerText.length - 1);
                     this._expression_editor._edit_area.innerText = stripped_last;

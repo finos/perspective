@@ -89,11 +89,6 @@ class PerspectiveComputedExpressionParser {
         this._check_initialized();
         const result = this._lexer.tokenize(expression);
 
-        if (result.errors.length > 0) {
-            let message = result.errors[0].message;
-            throw new Error(message);
-        }
-
         // Remove whitespace tokens
         result.tokens = clean_tokens(result.tokens);
 
@@ -109,6 +104,11 @@ class PerspectiveComputedExpressionParser {
     parse(expression) {
         this._check_initialized();
         const lex_result = this.lex(expression);
+
+        if (lex_result.errors.length > 0) {
+            let message = lex_result.errors[0].message;
+            throw new Error(message);
+        }
 
         // calling `parser.input` resets state.
         this._parser.input = lex_result.tokens;
@@ -210,13 +210,13 @@ class PerspectiveComputedExpressionParser {
     }
 
     /**
-     * Return the last non-whitespace token from a lexer result, or undefined
-     * if there are no non-whitespace tokens or no tokens at all.
+     * Return the last token from a lexer result, or undefined if there are no
+     * tokens at all. Whitespace tokens are NOT removed before search.
      *
      * @param {ILexingResult} lexer_result
      */
     get_last_token(lexer_result) {
-        const tokens = clean_tokens(lexer_result.tokens);
+        const tokens = lexer_result.tokens;
         const last_idx = tokens.length - 1;
         if (last_idx >= 0) {
             return tokens[last_idx];
@@ -226,7 +226,7 @@ class PerspectiveComputedExpressionParser {
     /**
      * Look backwards through a list of tokens, checking whether each token is
      * of a type in the `types` array, stopping after `limit` tokens.
-     * Whitespace tokens are removed from the token list before the search.
+     * Whitespace tokens are NOT removed before search.
      *
      * @param {Array{TokenType}} types An array of token types to look through.
      * @param {ILexingResult} lexer_result A result from the lexer, containing
@@ -236,7 +236,7 @@ class PerspectiveComputedExpressionParser {
      * undefined, search all tokens.
      */
     get_last_token_with_types(types, lexer_result, limit) {
-        const tokens = clean_tokens(lexer_result.tokens);
+        const tokens = lexer_result.tokens;
         if (!limit || limit <= 0 || limit >= tokens.length) {
             limit = tokens.length;
         }
@@ -245,30 +245,6 @@ class PerspectiveComputedExpressionParser {
                 if (tokenMatcher(tokens[i], type)) {
                     return tokens[i];
                 }
-            }
-        }
-    }
-
-    /**
-     * Look backwards through a list of tokens, checking whether each token is
-     * of the specific `name`, stopping after `limit` tokens. Whitespace tokens
-     * are removed from the token list before the search.
-     *
-     * @param {String} name A string name of a token to match.
-     * @param {ILexingResult} lexer_result A result from the lexer, containing
-     * valid tokens and errors.
-     * @param {Number} limit the number of tokens to search through before
-     * exiting or returning a valid result. If limit > tokens.length or is
-     * undefined, search all tokens.
-     */
-    get_last_token_with_name(name, lexer_result, limit) {
-        const tokens = clean_tokens(lexer_result.tokens);
-        if (!limit || limit <= 0 || limit >= tokens.length) {
-            limit = tokens.length;
-        }
-        for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
-            if (tokens[i].tokenType.name === name) {
-                return tokens[i];
             }
         }
     }
