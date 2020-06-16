@@ -6,53 +6,82 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {execute, docker, resolve, getarg, python_image} = require("./script_utils.js");
+const {bash, execute, docker, resolve, getarg, python_image} = require("./script_utils.js");
 
+let PYTHON = getarg("--python2") ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
+
+const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");
-const IS_PY2 = getarg("--python2");
-const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
 const IS_DOCKER = process.env.PSP_DOCKER;
 
-let IMAGE = "manylinux2014";
+let IMAGE = "manylinux2010";
 
 if (IS_DOCKER) {
     // defaults to 2010
     let MANYLINUX_VERSION = "manylinux2010";
     if (!IS_PY2) {
         // switch to 2014 only on python3
-        MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "manylinux2014";
+        MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "";
     }
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
-try {
-    // dependencies need to be installed for test_python:table and
-    // test_python:node
+let python_path;
+
+if (IS_DOCKER) {
+    python_path = "python/perspective";
+} else {
+    // When running locally, tests need to run in UTC and not the machine's
+    // local timezone.
+    process.env.TZ = "UTC";
+    python_path = resolve`${__dirname}/../python/perspective`;
+}
+
+/**
+ * Run `pytest` for client mode PerspectiveWidget, which need to be on a
+ * separate runtime from the other Python tests.
+ */
+const pytest_client_mode = IS_DOCKER => {
     if (IS_DOCKER) {
-        execute`${docker(IMAGE)} bash -c "cd \
+        return bash`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : "-v"} --noconftest 
             perspective/tests/client"`;
-
-        execute`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} perspective
-            --ignore=perspective/tests/client 
-            --cov=perspective"`;
     } else {
-        const python_path = resolve`${__dirname}/../python/perspective`;
-        // Tests for client mode (when C++ assets are not present) require
-        // a new runtime.
-        process.env.TZ = "UTC";
-        execute`cd ${python_path} && ${PYTHON} -m pytest \
+        return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : "-v"} --noconftest 
             perspective/tests/client`;
-
-        execute`cd ${python_path} && ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} perspective
-            --ignore=perspective/tests/client
-            --cov=perspective`;
     }
+};
+
+/**
+ * Run `pytest` for the `perspective-python` library.
+ */
+const pytest = IS_DOCKER => {
+    if (IS_DOCKER) {
+        return bash`${docker(IMAGE)} bash -c "cd \
+            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv" : "-v"} perspective \
+            --ignore=perspective/tests/client \
+            --cov=perspective"`;
+    } else {
+        return bash`cd ${python_path} && ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv" : "-v"} perspective \
+            --ignore=perspective/tests/client \
+            ${COVERAGE ? "--cov=perspective" : ""}`;
+    }
+};
+
+// Check that the `PYTHON` command is valid, else default to `python`.
+try {
+    execute`${PYTHON} --version`;
+} catch (e) {
+    PYTHON = "python";
+}
+
+try {
+    execute(pytest_client_mode(IS_DOCKER));
+    execute(pytest(IS_DOCKER));
 } catch (e) {
     console.log(e.message);
     process.exit(1);
