@@ -7,7 +7,7 @@
  *
  */
 
-const {execute, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
+const {execute, execute_throw, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
 const fs = require("fs-extra");
 
 const IS_PY2 = getarg("--python2");
@@ -31,8 +31,9 @@ const IS_INSTALL = getarg("--install");
 
 // Check that the `PYTHON` command is valid, else default to `python`.
 try {
-    execute`${PYTHON} --version`;
+    execute_throw`${PYTHON} --version`;
 } catch (e) {
+    console.warn(`\`${PYTHON}\` not found - using \`python\` instead.`);
     PYTHON = "python";
 }
 

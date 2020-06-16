@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {bash, execute, docker, resolve, getarg, python_image} = require("./script_utils.js");
+const {bash, execute, execute_throw, docker, resolve, getarg, python_image} = require("./script_utils.js");
 
 let PYTHON = getarg("--python2") ? "python2" : getarg("--python38") ? "python3.8" : "python3.7";
 
@@ -74,8 +74,9 @@ const pytest = IS_DOCKER => {
 
 // Check that the `PYTHON` command is valid, else default to `python`.
 try {
-    execute`${PYTHON} --version`;
+    execute_throw`${PYTHON} --version`;
 } catch (e) {
+    console.warn(`\`${PYTHON}\` not found - using \`python\` instead.`);
     PYTHON = "python";
 }
 
