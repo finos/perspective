@@ -687,14 +687,21 @@ t_tscalar::to_string(bool for_expr) const {
             std::time_t temp = std::chrono::system_clock::to_time_t(ts);
             std::tm* t = std::localtime(&temp);
 
-            // use a mix of std::put_time and date::format to properly
-            // represent datetimes to millisecond precision
-            ss << std::put_time(t, "%Y-%m-%d %H:%M:"); // ymd h:m
-
-            // TODO: we currently can't print out millisecond precision, but
-            // we need to.
-            ss << date::format("%S", ts); // represent second and millisecond
-            ss << std::put_time(t, " %Z"); // timezone
+            // use a mix of strftime and date::format
+            // TODO: should print out millisecond precision
+            std::string buffer;
+            buffer.resize(80);
+            
+            // write y-m-d h:m in local time into buffer, and if successful
+            // write the rest of the date, otherwise print the date in UTC.
+            std::size_t len = strftime(&buffer[0], sizeof(buffer), "%Y-%m-%d %H:%M:", t);
+            if (len > 0) {
+                buffer.resize(len);
+                ss << buffer;
+                ss << date::format("%S", ts); // represent second and millisecond
+            } else {
+                ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
+            }
 
             return ss.str();
         } break;

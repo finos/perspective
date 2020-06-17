@@ -358,13 +358,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(column_pivots=["a"])
         cols = view.column_paths()
-        for col in cols:
-            assert col in [
-                "2019-07-11 12:30:00.000 UTC|a",
-                "2019-07-11 12:30:00.000 UTC|b",
-                "2019-07-11 12:30:00.000 Coordinated Universal Time|a",
-                "2019-07-11 12:30:00.000 Coordinated Universal Time|b"
-            ]
+        assert cols == ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
 
     # aggregate
 
