@@ -236,6 +236,26 @@ if os.name != 'nt':
                 datetime(1969, 12, 31, 19, 0)
             ]
 
+        def test_table_datetime_max(self):
+            data = {
+                "a": [datetime.max]
+            }
+            table = Table(data)
+
+            # lol - result is converted from UTC to EST (local time)
+            assert table.view().to_dict()["a"] == [
+                datetime(9999, 12, 31, 18, 59, 59)
+            ]
+
+        def test_table_datetime_max_df(self):
+            data = pd.DataFrame({
+                "a": [datetime.max]
+            })
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(9999, 12, 31, 18, 59, 59)
+            ]
+
     class TestTableDateTimeUTCToLocal(object):
 
         def teardown_method(self):

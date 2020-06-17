@@ -620,6 +620,7 @@ t_tscalar::to_string(bool for_expr) const {
         return std::string("null");
 
     std::stringstream ss;
+
     switch (m_type) {
         case DTYPE_NONE: {
             return std::string("");
@@ -636,7 +637,9 @@ t_tscalar::to_string(bool for_expr) const {
             ss << get<std::int16_t>();
             return ss.str();
         } break;
+        case DTYPE_OBJECT:
         case DTYPE_UINT64: {
+            // treat object pointers as unsigned 64 bit ints
             ss << get<std::uint64_t>();
             return ss.str();
         } break;
@@ -700,7 +703,7 @@ t_tscalar::to_string(bool for_expr) const {
                 ss << buffer;
                 ss << date::format("%S", ts); // represent second and millisecond
             } else {
-                ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
+                ss << "obviously wrong";//date::format("%Y-%m-%d %H:%M:%S UTC", ts);
             }
 
             return ss.str();

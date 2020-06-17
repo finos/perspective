@@ -122,7 +122,25 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
                  * Before datetimes are loaded into Perspective, if they are
                  * time zone aware, they must be converted into UTC.
                  */
-                auto ms = std::chrono::milliseconds(scalar.to_int64());
+                auto i64 = scalar.to_int64();
+
+                // check for datetime >= 10000-01-01 00:00:00
+                if (i64 >= 253402318800000) {
+                    // Python has a max year of 9999 - Perspective is able to
+                    // store POSIX timestamps above Python's `datetime.max`,
+                    // but it cannot be converted back out to Python so it is
+                    // functionally useless. Instead, truncate the offending
+                    // date and return `datetime.max`.
+                    std::stringstream ss;
+                    ss << "Python cannot display dates above `datetime.max` - timestamp `";
+                    ss << i64;
+                    ss << "` will be truncated to `datetime.max`.";
+                    ss << std::endl;
+                    std::cerr << ss.str();
+                    i64 = 253402300799000;
+                }
+
+                auto ms = std::chrono::milliseconds(i64);
                 auto time_point = std::chrono::time_point<std::chrono::system_clock>(ms);
                 /**
                  * Pybind converts std::time_point to local time, and the
