@@ -697,7 +697,7 @@ t_tscalar::to_string(bool for_expr) const {
             
             // write y-m-d h:m in local time into buffer, and if successful
             // write the rest of the date, otherwise print the date in UTC.
-            std::size_t len = strftime(&buffer[0], sizeof(buffer), "%Y-%m-%d %H:%M:", t);
+            std::size_t len = strftime(&buffer[0], buffer.size(), "%Y-%m-%d %H:%M:", t);
             if (len > 0) {
                 buffer.resize(len);
                 ss << buffer;
