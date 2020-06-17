@@ -703,6 +703,7 @@ t_tscalar::to_string(bool for_expr) const {
                 ss << buffer;
                 ss << date::format("%S", ts); // represent second and millisecond
             } else {
+                std::cout << to_int64() << " failed strftime" << std::endl;
                 ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
             }
 
