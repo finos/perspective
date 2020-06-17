@@ -703,7 +703,7 @@ t_tscalar::to_string(bool for_expr) const {
                 ss << buffer;
                 ss << date::format("%S", ts); // represent second and millisecond
             } else {
-                ss << "obviously wrong";//date::format("%Y-%m-%d %H:%M:%S UTC", ts);
+                ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
             }
 
             return ss.str();

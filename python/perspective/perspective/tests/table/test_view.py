@@ -360,6 +360,24 @@ class TestView(object):
         cols = view.column_paths()
         assert cols == ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
 
+    def test_view_column_pivot_datetime_names_min(self):
+        """Tests column paths for datetimes in UTC. Timezone-related tests are
+        in the `test_table_datetime` file."""
+        data = {"a": [datetime.min], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        cols = view.column_paths()
+        assert cols == ["1970-01-01 00:00:00.000|a", "1970-01-01 00:00:00.000|b"]
+
+    def test_view_column_pivot_datetime_names_max(self):
+        """Tests column paths for datetimes in UTC. Timezone-related tests are
+        in the `test_table_datetime` file."""
+        data = {"a": [datetime.max], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        cols = view.column_paths()
+        assert cols == ["10000-01-01 00:00:00.000|a", "10000-01-01 00:00:00.000|b"]
+
     # aggregate
 
     def test_view_aggregate_int(self):
