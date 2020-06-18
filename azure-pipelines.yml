@@ -192,7 +192,6 @@ jobs:
         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
 
-
 - job: 'MacOS_Mojave'
   pool:
     vmImage: 'macos-10.14'
