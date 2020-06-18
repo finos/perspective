@@ -691,9 +691,8 @@ t_tscalar::to_string(bool for_expr) const {
             std::tm* t = std::localtime(&temp);
 
             // use a mix of strftime and date::format
-            // TODO: should print out millisecond precision
             std::string buffer;
-            buffer.resize(80);
+            buffer.resize(64);
             
             // write y-m-d h:m in local time into buffer, and if successful
             // write the rest of the date, otherwise print the date in UTC.
@@ -703,7 +702,7 @@ t_tscalar::to_string(bool for_expr) const {
                 ss << buffer;
                 ss << date::format("%S", ts); // represent second and millisecond
             } else {
-                std::cout << to_int64() << " failed strftime" << std::endl;
+                std::cerr << to_int64() << " failed strftime" << std::endl;
                 ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
             }
 

@@ -311,7 +311,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 	endif()
 
-	# WASM and Python builds 
 	find_package(Boost REQUIRED)
 	if(NOT Boost_FOUND)
 		message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")

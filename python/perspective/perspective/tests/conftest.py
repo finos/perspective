@@ -66,6 +66,7 @@ class Util:
             stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
+        writer.close()
         return stream.getvalue().to_pybytes()
 
     @staticmethod
@@ -106,6 +107,7 @@ class Util:
             stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
+        writer.close()
         return stream.getvalue().to_pybytes()
 
     @staticmethod
