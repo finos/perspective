@@ -189,22 +189,34 @@ namespace apachearrow {
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
                     case arrow::Int8Type::type_id: {
-                        iter_col_copy<arrow::Int8Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);                    } break;
+                    case ::arrow::UInt8Type::type_id: {
+                        iter_col_copy<::arrow::UInt8Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    case arrow::Int16Type::type_id: {
-                        iter_col_copy<arrow::Int16Array, t_uindex>(dest, indices, offset, len);
+                    case ::arrow::Int16Type::type_id: {
+                        iter_col_copy<::arrow::Int16Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    case arrow::Int32Type::type_id: {
-                        iter_col_copy<arrow::Int32Array, t_uindex>(dest, indices, offset, len);
+                    case ::arrow::UInt16Type::type_id: {
+                        iter_col_copy<::arrow::UInt16Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    case arrow::Int64Type::type_id: {
-                         iter_col_copy<arrow::Int64Array, t_uindex>(dest, indices, offset, len);
+                    case ::arrow::Int32Type::type_id: {
+                        iter_col_copy<::arrow::Int32Array, t_uindex>(dest, indices, offset, len);
                     } break;
-                    default:
+                    case ::arrow::UInt32Type::type_id: {
+                        iter_col_copy<::arrow::UInt32Array, t_uindex>(dest, indices, offset, len);
+                    } break;
+                    case ::arrow::Int64Type::type_id: {
+                        iter_col_copy<::arrow::Int64Array, t_uindex>(dest, indices, offset, len);
+                    } break;
+                    case ::arrow::UInt64Type::type_id: {
+                        iter_col_copy<::arrow::UInt64Array, t_uindex>(dest, indices, offset, len);
+                    } break;
+                    default: {
                         std::stringstream ss;
                         ss << "Could not copy dictionary array indices of type'" 
                            << indices->type()->name() << "'" << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
+                    }
                 }
             } break;
             case arrow::BinaryType::type_id:
@@ -357,6 +369,45 @@ namespace apachearrow {
         }
     }
 
+    // Defines the full matrix of type interactions between arrow arrays and
+    // schema-defined tables.
+    #define FILL_COLUMN_ITER(ARRAY_TYPE) \
+        switch (column_dtype) { \
+            case DTYPE_INT8: { \
+                iter_col_copy<ARRAY_TYPE, std::int8_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_UINT8: { \
+                iter_col_copy<ARRAY_TYPE, std::uint8_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_INT16: { \
+                iter_col_copy<ARRAY_TYPE, std::int16_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_UINT16: { \
+                iter_col_copy<ARRAY_TYPE, std::uint16_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_INT32: { \
+                iter_col_copy<ARRAY_TYPE, std::int32_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_UINT32: { \
+                iter_col_copy<ARRAY_TYPE, std::uint32_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_INT64: { \
+                iter_col_copy<ARRAY_TYPE, std::int64_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_UINT64: { \
+                iter_col_copy<ARRAY_TYPE, std::uint64_t>(col, array, offset, len); \
+            } break; \
+            case DTYPE_FLOAT32: { \
+                iter_col_copy<ARRAY_TYPE, float>(col, array, offset, len); \
+            } break; \
+            case DTYPE_FLOAT64: { \
+                iter_col_copy<ARRAY_TYPE, double>(col, array, offset, len); \
+            } break; \
+            default: { \
+                PSP_COMPLAIN_AND_ABORT("Could not fill arrow column iteratively due to mismatched types."); \
+            } \
+        } \
+
     void
     ArrowLoader::fill_column(t_data_table& tbl, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type, std::string& raw_type,
@@ -367,8 +418,56 @@ namespace apachearrow {
         for(auto i = 0; i < carray->num_chunks(); ++i) {
             std::shared_ptr<arrow::Array> array = carray->chunk(i);
             int64_t len = array->length();
-        
-            copy_array(col, array, offset, len);
+
+            // If the Arrow array schema is different from the data table
+            // schema, iteratively fill.
+            t_dtype column_dtype = col->get_dtype();
+
+            // `type`: arrow array dtype converted to `t_dtype`
+            // `column_dtype`: dtype of the `t_column`
+            if (type != column_dtype) {
+                switch (type) {
+                    case DTYPE_INT8: {
+                        FILL_COLUMN_ITER(::arrow::Int8Array);
+                    } break;
+                    case DTYPE_UINT8: {
+                        FILL_COLUMN_ITER(::arrow::UInt8Array);
+                    } break;
+                    case DTYPE_INT16: {
+                        FILL_COLUMN_ITER(::arrow::Int16Array);
+                    } break;
+                    case DTYPE_UINT16: {
+                        FILL_COLUMN_ITER(::arrow::UInt16Array);
+                    } break;
+                    case DTYPE_INT32: {
+                        FILL_COLUMN_ITER(::arrow::Int32Array);
+                    } break;
+                    case DTYPE_UINT32: {
+                        FILL_COLUMN_ITER(::arrow::UInt32Array);
+                    } break;
+                    case DTYPE_INT64: {
+                        FILL_COLUMN_ITER(::arrow::Int64Array);
+                    } break;
+                    case DTYPE_UINT64: {
+                        FILL_COLUMN_ITER(::arrow::UInt64Array);
+                    } break;
+                    case DTYPE_FLOAT32: {
+                        FILL_COLUMN_ITER(::arrow::FloatArray);
+                    } break;
+                    case DTYPE_FLOAT64: {
+                        FILL_COLUMN_ITER(::arrow::DoubleArray);
+                    } break;
+                    default: {
+                        std::stringstream ss;
+                        ss << "Could not fill column `" << name << "` with "
+                           << "t_dtype: `" << get_dtype_descr(column_dtype) << "`, "
+                           << "array type: `" << get_dtype_descr(type) << std::endl;
+                        PSP_COMPLAIN_AND_ABORT(ss.str());
+                    };
+                }
+            } else {
+                copy_array(col, array, offset, len);
+            }
 
             // Fill validity bitmap
             std::int64_t null_count = array->null_count();

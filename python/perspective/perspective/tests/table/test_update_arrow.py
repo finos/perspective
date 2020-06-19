@@ -10,8 +10,9 @@ import os
 import random
 import uuid
 import pyarrow as pa
+import pandas as pd
+import numpy as np
 from datetime import date, datetime
-from pytest import mark
 from perspective.table import Table
 
 SOURCE_STREAM_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
@@ -89,6 +90,427 @@ class TestUpdateArrow(object):
                 "a": ["abc", "def", "def", None, "abc", None, "update1", "update2"],
                 "b": ["klm", "hij", None, "hij", "klm", "update3", None, "update4"]
             }
+
+    # update int schema with int
+
+    def test_update_arrow_update_int_schema_with_uint8(self, util):
+        array = [random.randint(0, 127) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint8)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint8()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_uint16(self, util):
+        array = [random.randint(0, 32767) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint16)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint16()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_uint32(self, util):
+        array = [random.randint(0, 2000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint32)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_uint64(self, util):
+        array = [random.randint(0, 20000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint64)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_int8(self, util):
+        array = [random.randint(-127, 127) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int8)
+        })
+
+        schema = pa.schema({
+            "a": pa.int8()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_int16(self, util):
+        array = [random.randint(-32767, 32767) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int16)
+        })
+
+        schema = pa.schema({
+            "a": pa.int16()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_int32(self, util):
+        array = [random.randint(-2000000, 2000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int32)
+        })
+
+        schema = pa.schema({
+            "a": pa.int32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_int_schema_with_int64(self, util):
+        array = [random.randint(-20000000, 20000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int64)
+        })
+
+        schema = pa.schema({
+            "a": pa.int64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == [x * 1.0 for x in array]
+
+    # updating float schema with int
+
+    def test_update_arrow_update_float_schema_with_uint8(self, util):
+        array = [random.randint(0, 127) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint8)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint8()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_uint16(self, util):
+        array = [random.randint(0, 32767) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint16)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint16()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_uint32(self, util):
+        array = [random.randint(0, 2000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint32)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_uint64(self, util):
+        array = [random.randint(0, 20000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.uint64)
+        })
+
+        schema = pa.schema({
+            "a": pa.uint64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_int8(self, util):
+        array = [random.randint(-127, 127) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int8)
+        })
+
+        schema = pa.schema({
+            "a": pa.int8()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_int16(self, util):
+        array = [random.randint(-32767, 32767) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int16)
+        })
+
+        schema = pa.schema({
+            "a": pa.int16()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_int32(self, util):
+        array = [random.randint(-2000000, 2000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int32)
+        })
+
+        schema = pa.schema({
+            "a": pa.int32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_int64(self, util):
+        array = [random.randint(-20000000, 20000000) for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.int64)
+        })
+
+        schema = pa.schema({
+            "a": pa.int64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    # updating int schema with float
+    def test_update_arrow_update_int_schema_with_float32(self, util):
+        array = [random.randint(-2000000, 2000000) * 0.5 for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.float32)
+        })
+
+        schema = pa.schema({
+            "a": pa.float32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == [int(x) for x in array]
+
+    def test_update_arrow_update_float_schema_with_float64(self, util):
+        array = [random.randint(-20000000, 20000000) * random.random() for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.float64)
+        })
+
+        schema = pa.schema({
+            "a": pa.float64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": int
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == [int(x) for x in array]
+
+    # updating float schema with float
+
+    def test_update_arrow_update_float_schema_with_float32(self, util):
+        array = [random.randint(-2000000, 2000000) * 0.5 for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.float32)
+        })
+
+        schema = pa.schema({
+            "a": pa.float32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    def test_update_arrow_update_float_schema_with_float64(self, util):
+        array = [random.randint(-20000000, 20000000) * random.random() for i in range(100)]
+        data = pd.DataFrame({
+            "a": np.array(array, dtype=np.float64)
+        })
+
+        schema = pa.schema({
+            "a": pa.float64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+        tbl = Table({
+            "a": float
+        })
+        tbl.update(arrow)
+        assert tbl.view().to_dict()["a"] == array
+
+    # updating date schema
+
+    def test_update_arrow_update_date_schema_with_date32(self, util):
+        array = [date(2019, 2, i) for i in range(1, 11)]
+        data = pd.DataFrame({
+            "a": array
+        })
+
+        schema = pa.schema({
+            "a": pa.date32()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+
+        tbl = Table({
+            "a": date
+        })
+
+        tbl.update(arrow)
+
+        assert tbl.view().to_dict()["a"] == [datetime(2019, 2, i) for i in range(1, 11)]
+
+    def test_update_arrow_update_date_schema_with_date64(self, util):
+        array = [date(2019, 2, i) for i in range(1, 11)]
+        data = pd.DataFrame({
+            "a": array
+        })
+
+        schema = pa.schema({
+            "a": pa.date64()
+        })
+
+        arrow = util.make_arrow_from_pandas(data, schema)
+
+        tbl = Table({
+            "a": date
+        })
+
+        tbl.update(arrow)
+
+        assert tbl.view().to_dict()["a"] == [datetime(2019, 2, i) for i in range(1, 11)]
+
+    def test_update_arrow_update_datetime_schema_with_timestamp(self, util):
+        data = [
+            [datetime(2019, 2, i, 9) for i in range(1, 11)],
+            [datetime(2019, 2, i, 10) for i in range(1, 11)],
+            [datetime(2019, 2, i, 11) for i in range(1, 11)],
+            [datetime(2019, 2, i, 12) for i in range(1, 11)]
+        ]
+
+        arrow_data = util.make_arrow(
+            names, data, types=[
+                pa.timestamp("s"),
+                pa.timestamp("ms"),
+                pa.timestamp("us"),
+                pa.timestamp("ns"),
+            ]
+        )
+
+        tbl = Table({
+            "a": datetime,
+            "b": datetime,
+            "c": datetime,
+            "d": datetime,
+        })
+        tbl.update(arrow_data)
+        assert tbl.size() == 10
+        assert tbl.view().to_dict() == {
+            "a": data[0],
+            "b": data[1],
+            "c": data[2],
+            "d": data[3]
+        }
 
     # streams
 
