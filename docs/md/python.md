@@ -402,7 +402,7 @@ Additionally, when created with `client=true` as a keyword argument to
 `__init__`, it can be used without accessing the built C++ binary.
 
 Similar to the viewer API, `PerspectiveWidget` takes keyword arguments that
-transform the `View` under ownsership:
+transform the `View` under ownership:
 
 - `plugin`
 - `row_pivots`
