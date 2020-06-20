@@ -169,14 +169,14 @@ const FeatureCallout = props => (
     <Container padding={["bottom", "top"]} background="dark">
         <h2>Features</h2>
         <MarkdownBlock background="dark">
-            A fast, memory efficient streaming pivot engine written principally in C++ and compiled to WebAssembly via the [emscripten](https://github.com/kripken/emscripten) compiler.
+            A fast, memory efficient streaming pivot engine written principally in C++ and compiled to WebAssembly via the <a href="https://github.com/kripken/emscripten" target="_blank">emscripten</a> compiler.
         </MarkdownBlock>
         <MarkdownBlock>
-            An embeddable, framework-agnostic configuration UI, based on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for responsiveness at high frequency.
+            An embeddable, framework-agnostic configuration UI, based on <a href="https://www.webcomponents.org/" target="_blank">Web Components</a>, and a WebWorker engine host for responsiveness at high frequency.
         </MarkdownBlock>
-        <MarkdownBlock>A customizable HTML Data Grid plugin, and a Charts plugin built on [D3FC](https://d3fc.io/).</MarkdownBlock>
+        <MarkdownBlock>A customizable HTML Data Grid plugin, and a Charts plugin built on <a href="https://d3fc.io/" target="_blank">D3FC</a>.</MarkdownBlock>
         <MarkdownBlock>Integration with Jupyterlab, both natively in a Python kernel, and as a notebook Widget.</MarkdownBlock>
-        <MarkdownBlock>Cross-language streaming & virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).</MarkdownBlock>
+        <MarkdownBlock>Cross-language streaming & virtualization to the browser via <a href="https://arrow.apache.org/" target="_blank">Apache Arrow</a>.</MarkdownBlock>
         <MarkdownBlock>Runtimes for the browser, Python, and Node.js.</MarkdownBlock>
     </Container>
 );
@@ -187,14 +187,14 @@ Perspective is an <i>interactive</i> visualization component for <i>large</i>, <
 datasets. Originally developed for J.P. Morgan's trading business,  Perspective
 makes it simple to build real-time & user configurable analytics entirely in the
 browser, or in concert with Python and/or
-[Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+<a href="https://jupyterlab.readthedocs.io/en/stable/" target="_blank">Jupyterlab</a>.
 Use it to create reports, dashboards, notebooks and applications, with static
-data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
-- A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow]().
-- A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
-- A customizable HTML Data Grid plugin, and a Chart plugin built on [D3FC](https://d3fc.io/).
-- Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/), both natively in a Python kernel, and as a notebook Widget.
-- Cross-language streaming and/or virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).
+data or streaming updates via <a href="https://arrow.apache.org/" target="_blank">Apache Arrow</a>.
+- A fast, memory efficient streaming query engine, written in C++ and compiled to <a href="https://webassembly.org/" target="_blank">WebAssembly</a>, with read/write/stream support for <a href="https://arrow.apache.org/" target="_blank">Apache Arrow</a>.
+- A framework-agnostic query configuration UI component, based on <a href="https://www.webcomponents.org/" target="_blank">Web Components</a>, and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
+- A customizable HTML Data Grid plugin, and a Chart plugin built on <a href="https://d3fc.io/" target="_blank">D3FC</a>.
+- Integration with <a href="https://jupyterlab.readthedocs.io/en/stable/" target="_blank">Jupyterlab</a>, both natively in a Python kernel, and as a notebook Widget.
+- Cross-language streaming and/or virtualization to the browser via <a href="https://arrow.apache.org/" target="_blank">Apache Arrow</a>.
 - Runtimes for the browser, Python, and Node.js.
 `;
 
@@ -215,7 +215,7 @@ const GETTING_STARTED_TEXT = `
 \`\`\`bash
 $ yarn add --dev @finos/perspective-cli
 \`\`\`
-2. Run a test server on a CSV, JSON or [Apache Arrow](https://arrow.apache.org/):
+2. Run a test server on a CSV, JSON or <a href="https://arrow.apache.org/" target="_blank">Apache Arrow</a>:
 \`\`\`bash
 $ yarn perspective host < superstore.arrow
 Listening on port 8080
