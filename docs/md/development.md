@@ -211,7 +211,7 @@ installed in a Docker container.
 The Puppeteer/UI tests are a form of
 [characterization tests](https://en.wikipedia.org/wiki/Characterization_test)
 which use screenshots to compare current and previous behavior of
-`<perspective-viewer>` and its plugins. The results of  each comparison are
+`<perspective-viewer>` and its plugins. The results of each comparison are
 stored in each package's `test/results/results.json` file, and the screenshots
 themselves are stored in the package's `screenshots/` directory, though only the
 former should be checked into GIT. When a test in these suites fails, a
