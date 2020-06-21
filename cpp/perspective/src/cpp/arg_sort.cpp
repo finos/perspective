@@ -15,6 +15,7 @@
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #endif
+using namespace std;
 namespace perspective {
 
 void
@@ -24,7 +25,7 @@ argsort(std::vector<t_index>& output, const t_multisorter& sorter) {
     // Output should be the same size is v
     for (t_index i = 0, loop_end = output.size(); i != loop_end; ++i)
         output[i] = i;
-    std::sort(output.begin(), output.end(), sorter);
+    stable_sort(output.begin(), output.end(), sorter);
 }
 
 t_argsort_comparator::t_argsort_comparator(
@@ -67,7 +68,7 @@ simple_argsort(
         output[i] = i;
     t_argsort_comparator cmp(v, sort_type);
 
-    std::sort(output.begin(), output.end(), cmp);
+    stable_sort(output.begin(), output.end(), cmp);
 }
 
 } // namespace perspective
