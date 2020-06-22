@@ -47,15 +47,15 @@ of PYTHON_LIBRARIES.
 
 # Use the executable's path as a hint
 set(_Python_LIBRARY_PATH_HINT)
-if(IS_ABSOLUTE "${PYTHON_EXECUTABLE}")
+if(IS_ABSOLUTE "${Python_EXECUTABLE}")
   if(WIN32)
-    get_filename_component(_Python_PREFIX "${PYTHON_EXECUTABLE}" PATH)
+    get_filename_component(_Python_PREFIX "${Python_EXECUTABLE}" PATH)
     if(_Python_PREFIX)
       set(_Python_LIBRARY_PATH_HINT ${_Python_PREFIX}/libs)
     endif()
     unset(_Python_PREFIX)
   else()
-    get_filename_component(_Python_PREFIX "${PYTHON_EXECUTABLE}" PATH)
+    get_filename_component(_Python_PREFIX "${Python_EXECUTABLE}" PATH)
     get_filename_component(_Python_PREFIX "${_Python_PREFIX}" PATH)
     if(_Python_PREFIX)
       set(_Python_LIBRARY_PATH_HINT ${_Python_PREFIX}/lib)
@@ -128,9 +128,9 @@ if (CMAKE_SIZEOF_VOID_P)
   math (EXPR _PYTHON_ARCH "${CMAKE_SIZEOF_VOID_P} * 8")
   set (_PYTHON_ARCH2 _PYTHON_PREFIX_ARCH})
 else()
-  if (PYTHON_EXECUTABLE)
+  if (Python_EXECUTABLE)
     # determine interpreter architecture
-    execute_process (COMMAND "${PYTHON_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
+    execute_process (COMMAND "${Python_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
                      RESULT_VARIABLE _PYTHON_RESULT
                      OUTPUT_VARIABLE _PYTHON_IS64BIT
                      ERROR_VARIABLE _PYTHON_IS64BIT)

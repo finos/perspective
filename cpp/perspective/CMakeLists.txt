@@ -355,11 +355,30 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# so we use a custom FindPythonHeaders that is the same as the
 			# default, but ignores when the python libraries can't be found.
 			message("${Red}Manylinux build has no python shared libraries${ColorReset}")
-			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
+
+			# Use FindPython3 and FindPython2, as it allows us to specify paths
+			# to the right interpreter/libraries when multiple python versions
+			# are installed.
+			if (PSP_PYTHON_VERSION MATCHES "3")
+				# Python_EXECUTABLE is always set by setup.py
+				set(Python3_EXECUTABLE ${Python_EXECUTABLE})
+				find_package( Python3 ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
+			else()
+				set(Python2_EXECUTABLE ${Python_EXECUTABLE})
+				find_package( Python2 ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
+			endif()
+			find_package( PythonInterp REQUIRED )
+			#find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
 			find_package( PythonHeaders ${PSP_PYTHON_VERSION} REQUIRED)
 		else()
 			message("${Cyan}Use python shared libraries${ColorReset}")
-			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
+			if (PSP_PYTHON_VERSION MATCHES "3")
+				set(Python3_EXECUTABLE ${Python_EXECUTABLE})
+				find_package( Python3 ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development )
+			else()
+				set(Python2_EXECUTABLE ${Python_EXECUTABLE})
+				find_package( Python2 ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development )
+			endif()
 			link_directories( ${Python_LIBRARY_DIRS} )
 		endif()
 		message("${Cyan}Using Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")

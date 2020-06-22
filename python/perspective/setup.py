@@ -116,14 +116,18 @@ class PSPBuild(build_ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cfg = 'Debug' if self.debug else 'Release'
 
+        PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         cmake_args = [
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join(extdir, 'perspective', 'table')).replace('\\', '/'),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
-            '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
-            '-DPYTHON_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
+            '-DPSP_PYTHON_VERSION={}'.format(PYTHON_VERSION),
+            '-DPython_ADDITIONAL_VERSIONS={}'.format(PYTHON_VERSION),
+            '-DPython_FIND_VERSION={}'.format(PYTHON_VERSION),
+            '-DPython_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
             '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX).replace('\\', '/'),
             '-DPython_ROOT={}'.format(sysconfig.PREFIX).replace('\\', '/'),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')).replace('\\', '/'),

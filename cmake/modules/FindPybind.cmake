@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-if(NOT PYTHON_EXECUTABLE)
+if(NOT Python_EXECUTABLE)
   if(PyArrow_FIND_QUIETLY)
     find_package( PythonInterp 3.7 REQUIRED )
   else()
@@ -14,20 +14,20 @@ if(NOT PYTHON_EXECUTABLE)
   endif()
 endif()
 
-if (PYTHON_EXECUTABLE)
+if (Python_EXECUTABLE)
   # Find out the include path
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${Python_EXECUTABLE}" -c
             "from __future__ import print_function\ntry: import pybind11; print(pybind11.get_include(), end='')\nexcept:pass"
             OUTPUT_VARIABLE __pybind_path)
 
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${Python_EXECUTABLE}" -c
             "from __future__ import print_function\ntry: import pybind11; print('.'.join(int(x) for x in pybind11.version_info), end='')\nexcept:pass"
             OUTPUT_VARIABLE __pybind_version)
 elseif(__pybind_out)
   message(STATUS "Python executable not found.")
-endif(PYTHON_EXECUTABLE)
+endif(Python_EXECUTABLE)
 
 find_path(PYTHON_PYBIND_INCLUDE_DIR pybind11/pybind11.h
   HINTS "${__pybind_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
