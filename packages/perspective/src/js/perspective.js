@@ -293,7 +293,7 @@ export default function(Module) {
      * // Create a view with computed columns
      * const view = table.view({
      *      computed_columns: [{
-     *          name: "x + y",
+     *          column: "x + y",
      *          computed_function_name: "+",
      *          inputs: ["x", "y"]
      *      }]
@@ -887,6 +887,11 @@ export default function(Module) {
      * Unregister a previously registered update callback with this
      * {@link module:perspective~view}.
      *
+     * @example
+     * // remove an `on_update` callback
+     * const callback = updated => console.log(updated);
+     * view.remove_update(callback);
+     *
      * @param {function} callback A update callback function to be removed
      */
     view.prototype.remove_update = function(callback) {
@@ -901,6 +906,10 @@ export default function(Module) {
      * the {@link module:perspective~view} is deleted, this callback will be
      * invoked.
      *
+     * @example
+     * // attach an `on_delete` callback
+     * view.on_delete(() => console.log("Deleted!"));
+     *
      * @param {function} callback A callback function invoked on delete.
      */
     view.prototype.on_delete = function(callback) {
@@ -910,6 +919,11 @@ export default function(Module) {
     /**
      * Unregister a previously registered delete callback with this
      * {@link module:perspective~view}.
+     *
+     * @example
+     * // remove an `on_delete` callback
+     * const callback = () => console.log("Deleted!")
+     * view.remove_delete(callback);
      *
      * @param {function} callback A delete callback function to be removed
      */

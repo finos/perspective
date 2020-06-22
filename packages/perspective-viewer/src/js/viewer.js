@@ -182,16 +182,16 @@ class PerspectiveViewer extends ActionElement {
      * @kind member
      * @type {Array<Object>}
      * @param {Array<Object>} computed-columns An Array of computed column objects,
-     * which have three properties: `name`, a column name for the new column,
+     * which have three properties: `column`, a column name for the new column,
      * `computed_function_name`, a String representing the computed function to
      * apply, and `inputs`, an Array of String column names to be used as
      * inputs to the computation.
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
+     * elem.setAttribute('computed-columns', JSON.stringify([{column: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer computed-columns="[{name:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
+     * <perspective-viewer computed-columns="[{column:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
      */
     @array_attribute
     "computed-columns"(computed_columns) {

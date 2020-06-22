@@ -1,53 +1,63 @@
 @border-color: 1px solid #eaeaea;
 
 .workspace-master-widget {
-   --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
+    --settings-button--content: var(
+        --open-settings-button--content,
+        "\1F527"
+    ) !important;
 }
 
 .workspace-master-widget[settings] {
-   --settings-button--content: var(--close-settings-button--content, "\1F527") !important;;
+    --settings-button--content: var(
+        --close-settings-button--content,
+        "\1F527"
+    ) !important;
 }
 
 .workspace-detail-widget.widget-maximize {
-   --settings-button--content: var(--open-settings-button--content, "\1F527") !important;
+    --settings-button--content: var(
+        --open-settings-button--content,
+        "\1F527"
+    ) !important;
 }
 
 .workspace-detail-widget.widget-maximize[settings] {
-   --settings-button--content: var(--close-settings-button--content, "\1F527") !important;
+    --settings-button--content: var(
+        --close-settings-button--content,
+        "\1F527"
+    ) !important;
 }
 
-
 .p-DockPanel-widget {
-   border: @border-color;
-   border-width: 0px !important;
-   min-width: 300px;
-   min-height: 200px;
+    border: @border-color;
+    border-width: 0px !important;
+    min-width: 300px;
+    min-height: 200px;
 }
 
 .workspace-detail-widget {
-   --settings-button--content: "" !important;
-   --plugin--border: 1px solid #eaeaea;
+    --settings-button--content: "" !important;
+    --plugin--border: 1px solid #eaeaea;
 }
 
-.context-menu > perspective-viewer.context-focus{
-   opacity: 1;
-
+.context-menu > perspective-viewer.context-focus {
+    opacity: 1;
 }
 
 .context-menu > perspective-viewer {
-   opacity: 0.2;
+    opacity: 0.2;
 }
 
 perspective-viewer {
-   flex: 1;
-   position: relative;
-   display: block;
-   align-items: center;
-   justify-content: center;
-   flex-direction: column;
-   width: 100%;
-   height: 100%;
-   overflow: visible !important;
-   font-family: "Open Sans", Arial, sans-serif;
-   transition: opacity 0.2s ease-out;
- }
+    flex: 1;
+    position: relative;
+    display: block;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: visible !important;
+    font-family: "Open Sans", Arial, sans-serif;
+    transition: opacity 0.2s ease-out;
+}

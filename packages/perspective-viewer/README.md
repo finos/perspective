@@ -166,7 +166,7 @@ Sets new computed columns for the viewer.
 **Params**
 
 - computed-columns <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - An Array of computed column objects,
-which have three properties: `name`, a column name for the new column,
+which have three properties: `column`, a column name for the new column,
 `computed_function_name`, a String representing the computed function to
 apply, and `inputs`, an Array of String column names to be used as
 inputs to the computation.
@@ -174,11 +174,11 @@ inputs to the computation.
 **Example** *(via Javascript DOM)*  
 ```js
 let elem = document.getElementById('my_viewer');
-elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
+elem.setAttribute('computed-columns', JSON.stringify([{column: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer computed-columns="[{name:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
+<perspective-viewer computed-columns="[{column:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
 ```
 
 * * *

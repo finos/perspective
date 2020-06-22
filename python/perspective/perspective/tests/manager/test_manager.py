@@ -7,8 +7,10 @@
 #
 
 import json
+import time
 import numpy as np
 import pyarrow as pa
+from datetime import datetime
 from functools import partial
 from pytest import raises
 from perspective import Table, PerspectiveError, PerspectiveManager
@@ -378,6 +380,72 @@ class TestPerspectiveManager(object):
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
         table = Table(data)
+        manager.host_table("table1", table)
+        manager._process(message, self.post)
+        to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
+        manager._process(to_dict_message, handle_to_dict)
+        assert s.get() is True
+
+    def test_manager_to_dict_unix_timestamps(self, sentinel):
+        """The conversion from `datetime` to a Unix timestamp should not
+        alter the timestamp in any way if both are in local time."""
+        s = sentinel(False)
+
+        timestamp_data = {
+            "a": [1580515140000]
+        }
+
+        schema = {
+            "a": datetime
+        }
+
+        def handle_to_dict(msg):
+            s.set(True)
+            message = json.loads(msg)
+            assert message["data"] == timestamp_data
+
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager = PerspectiveManager()
+
+        table = Table(schema)
+        table.update(timestamp_data)
+
+        manager.host_table("table1", table)
+        manager._process(message, self.post)
+        to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
+        manager._process(to_dict_message, handle_to_dict)
+        assert s.get() is True
+
+    def test_manager_to_dict_unix_timestamps_from_datetime(self, sentinel):
+        """The conversion from `datetime` to a Unix timestamp should not
+        alter the timestamp in any way if both are in local time."""
+        s = sentinel(False)
+
+        timestamp_data = {
+            "a": [1580515140000]
+        }
+
+        schema = {
+            "a": datetime
+        }
+
+        def handle_to_dict(msg):
+            s.set(True)
+            message = json.loads(msg)
+
+            assert message["data"] == timestamp_data
+
+            # convert back
+            ts = datetime.fromtimestamp(message["data"]["a"][0] / 1000)
+
+            assert ts == datetime(2020, 1, 31, 23, 59)
+
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager = PerspectiveManager()
+
+        table = Table(schema)
+        table.update(timestamp_data)
+
         manager.host_table("table1", table)
         manager._process(message, self.post)
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}

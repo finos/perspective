@@ -679,9 +679,23 @@ t_tscalar::to_string(bool for_expr) const {
             return ss.str();
         } break;
         case DTYPE_TIME: {
+            // Convert a millisecond UTC timestamp to a formatted datestring in
+            // local time, as all datetimes exported to the user happens in
+            // local time and not UTC.
             std::chrono::milliseconds timestamp(to_int64());
             date::sys_time<std::chrono::milliseconds> ts(timestamp);
-            ss << date::format("%Y-%m-%d %H:%M:%S", ts);
+            std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+            std::tm* t = std::localtime(&temp);
+
+            // use a mix of std::put_time and date::format to properly
+            // represent datetimes to millisecond precision
+            ss << std::put_time(t, "%Y-%m-%d %H:%M:"); // ymd h:m
+
+            // TODO: we currently can't print out millisecond precision, but
+            // we need to.
+            ss << date::format("%S", ts); // represent second and millisecond
+            ss << std::put_time(t, " %Z"); // timezone
+
             return ss.str();
         } break;
         case DTYPE_STR: {

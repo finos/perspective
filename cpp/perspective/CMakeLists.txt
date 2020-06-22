@@ -45,21 +45,26 @@ function (psp_build_dep name cmake_file)
 		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
 	else()
 		configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
+
 		execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 			RESULT_VARIABLE result
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+
 		if(result)
 			message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
 		endif()
+
 		execute_process(COMMAND ${CMAKE_COMMAND} --build .
 			RESULT_VARIABLE result
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+
 		if(result)
 			message(FATAL_ERROR "Build step for ${name} failed: ${result}")
 		endif()
 	endif()
 
 	if(${name} STREQUAL arrow)
+		# Overwrite arrow's CMakeLists with our custom, minimal one
 		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
 		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/config.h ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ COPYONLY)
 		add_subdirectory(${CMAKE_BINARY_DIR}/arrow-src/cpp/
@@ -297,7 +302,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
 			cmake_policy(SET CMP0074 NEW)
 
-			if(DEFINED(ENV{BOOST_ROOT}))
+			if(DEFINED (ENV{BOOST_ROOT}))
 				set(Boost_NO_BOOST_CMAKE TRUE)
 
 				message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
@@ -635,6 +640,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 
 		target_link_libraries(psp tbb)
+
 		target_link_libraries(binding tbb)
 
 		target_link_libraries(binding psp)

@@ -527,14 +527,13 @@ t_tscalar hour_of_day<DTYPE_TIME>(t_tscalar x) {
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    date::sys_days days = date::floor<date::days>(ts);
+    // Use localtime so that the hour of day is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Subtract the day-precision `time_point` from the datetime-precision one
-    auto time_of_day = date::make_time(ts - days);
-
-    // Get the hour from the resulting `time_point`
-    rval.set(static_cast<std::int64_t>(time_of_day.hours().count()));
+    // Get the hour from the resulting `std::tm`
+    rval.set(static_cast<std::int64_t>(t->tm_hour));
     return rval;
 }
 
@@ -831,14 +830,14 @@ void day_of_week<DTYPE_TIME>(
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Use localtime so that the hour of day is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Find the weekday and write it to the output column
-    auto weekday = date::year_month_weekday(days).weekday_indexed().weekday();
-
+    // Get the weekday from the resulting `std::tm`
     output_column->set_nth(
-        idx, days_of_week[(weekday - date::Sunday).count()]);
+        idx, days_of_week[t->tm_wday]);
 }
 
 template <>
@@ -871,18 +870,16 @@ void month_of_year<DTYPE_TIME>(
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Use localtime so that the hour of day is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Cast the `time_point` to contain year/month/day
-    auto ymd = date::year_month_day(days);
-
-    // Get the month as an integer from 0 to 11
-    auto month = (ymd.month() -  date::January).count();
+    // Get the month from the resulting `std::tm`
+    auto month = t->tm_mon;
 
     // Get the month string and write into the output column
-    std::string month_of_year = months_of_year[month];
-    output_column->set_nth(idx, month_of_year);
+    output_column->set_nth(idx, months_of_year[month]);
 }
 
 } // end namespace computed_function
