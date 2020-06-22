@@ -213,7 +213,8 @@
         }
 
         #active_columns {
-            &.one_lock, &.two_lock {
+            &.one_lock,
+            &.two_lock {
                 perspective-row:first-child {
                     --active--color: #ccc;
                     --is_visible--cursor: normal;
@@ -221,7 +222,7 @@
             }
 
             &.two_lock {
-                 perspective-row:nth-child(2) {
+                perspective-row:nth-child(2) {
                     --active--color: #ccc;
                     --is_visible--cursor: normal;
                 }
@@ -230,8 +231,8 @@
 
         #active_columns {
             perspective-row:only-child {
-                --active--color: #ccc; 
-                --is_visible--cursor: normal;   
+                --active--color: #ccc;
+                --is_visible--cursor: normal;
             }
         }
 

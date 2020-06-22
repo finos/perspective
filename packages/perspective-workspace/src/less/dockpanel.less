@@ -7,7 +7,7 @@
  *
  */
 
- .p-DockPanel {
+.p-DockPanel {
     overflow: visible !important;
     position: absolute;
     background-color: var(--detail--background-color, transparent);
@@ -27,25 +27,31 @@
     background-color: #eee;
 }
 
-.perspective-scroll-panel::-webkit-scrollbar-corner  {
+.perspective-scroll-panel::-webkit-scrollbar-corner {
     background-color: #eee;
 }
 
 .perspective-scroll-panel::-webkit-scrollbar-thumb {
-  background-color: #aaa;
-  //outline: 1px solid #666;
-  height: 0.8em;
-  width: 0.8em;
-  border: 8px solid #eee;
-  border-left-width: 0px;
-  border-top-width: 0px;
+    background-color: #aaa;
+    //outline: 1px solid #666;
+    height: 0.8em;
+    width: 0.8em;
+    border: 8px solid #eee;
+    border-left-width: 0px;
+    border-top-width: 0px;
 }
 
-.p-DockPanel.ew, .p-DockPanel.ew .p-Widget,.p-SplitPanel.ew, .p-SplitPanel.ew .p-Widget {
+.p-DockPanel.ew,
+.p-DockPanel.ew .p-Widget,
+.p-SplitPanel.ew,
+.p-SplitPanel.ew .p-Widget {
     cursor: ew-resize !important;
 }
 
-.p-DockPanel.ns, .p-DockPanel.ns .p-Widget, .p-SplitPanel.ns, .p-SplitPanel.ns .p-Widget {
+.p-DockPanel.ns,
+.p-DockPanel.ns .p-Widget,
+.p-SplitPanel.ns,
+.p-SplitPanel.ns .p-Widget {
     cursor: ns-resize !important;
 }
 
@@ -53,16 +59,17 @@
     min-width: 300px;
 }
 
-.p-DockPanel.resizing ::slotted(perspective-viewer), .p-SplitPanel.resizing ::slotted(perspective-viewer) {
+.p-DockPanel.resizing ::slotted(perspective-viewer),
+.p-SplitPanel.resizing ::slotted(perspective-viewer) {
     pointer-events: none;
 }
 
 .widget-blur ::slotted(perspective-viewer) {
     opacity: 0.5;
 }
- 
+
 .p-DockPanel-handle.resizing {
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .perspective-scroll-panel {
@@ -71,9 +78,7 @@
 
 .p-Panel {
     min-height: 100%;
-
 }
-
 
 .p-DockPanel-handle {
     background-color: none;

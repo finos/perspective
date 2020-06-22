@@ -302,7 +302,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
 			cmake_policy(SET CMP0074 NEW)
 
-			if(DEFINED(ENV{BOOST_ROOT}))
+			if(DEFINED (ENV{BOOST_ROOT}))
 				set(Boost_NO_BOOST_CMAKE TRUE)
 
 				message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
