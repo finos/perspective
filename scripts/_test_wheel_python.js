@@ -64,14 +64,24 @@ try {
     // Create a wheel
     cmd += `${PYTHON} setup.py bdist_wheel`;
 
+    const wheelhouse = resolve`${__dirname}/../python/perspective/wheelhouse`;
+
     if (PLATFORM === "manylinux") {
         // Use auditwheel on Linux
-        cmd += "&& auditwheel -v show ./dist/*.whl && auditwheel -v repair -L .lib ./dist/*.whl";
+        cmd += `&& auditwheel -v show ./dist/*.whl && auditwheel -v repair -L .lib ./dist/*.whl -w ${wheelhouse}`;
     } else if (PLATFORM === "osx") {
         // Use delocate on MacOS
-        cmd += "&& delocate-listdeps --all ./dist/*.whl && delocate-wheel -v ./dist/*.whl";
+        cmd += `&& delocate-listdeps --all ./dist/*.whl && delocate-wheel -v ./dist/*.whl -w ${wheelhouse}`;
     } else {
         throw new Error("Unsupported platform specified for wheel build.");
+    }
+
+    // create a virtualenv and source it
+    if (!IS_PY2) {
+        cmd += ` && python -m venv ./temp_venv && source ./temp_venv/bin/activate && \
+            echo which python && \
+            python -m pip install --force-reinstall ${wheelhouse}/*.whl && \
+            python -c 'import perspective;print(perspective.is_libpsp())'`;
     }
 
     if (IS_DOCKER) {

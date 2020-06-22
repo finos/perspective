@@ -211,5 +211,5 @@ setup(
         'dev': requires_dev,
     },
     ext_modules=[PSPExtension('perspective')],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist)
 )
