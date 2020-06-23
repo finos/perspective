@@ -77,12 +77,12 @@ try {
     }
 
     // create a virtualenv and source it
-    if (!IS_PY2) {
-        cmd += ` && python -m venv ./temp_venv && source ./temp_venv/bin/activate && \
-            echo which python && \
-            python -m pip install --force-reinstall ${wheelhouse}/*.whl && \
-            python -c 'import perspective;print(perspective.is_libpsp())'`;
-    }
+    // if (!IS_PY2) {
+    //     cmd += ` && python -m venv ./temp_venv && source ./temp_venv/bin/activate && \
+    //         echo which python && \
+    //         python -m pip install --force-reinstall ${wheelhouse}/*.whl && \
+    //         python -c 'import perspective;print(perspective.is_libpsp())'`;
+    // }
 
     if (IS_DOCKER) {
         console.log(`Building wheel for \`perspective-python\` for platform \`${PLATFORM}\` using image \`${IMAGE}\` in Docker`);

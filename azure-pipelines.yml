@@ -123,7 +123,7 @@ jobs:
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
     # Build a python wheel for Manylinux
-    - bash: yarn _test_wheel_python --platform manylinux --ci $(python_flag) $(manylinux_flag)
+    - bash: yarn _wheel_python --platform manylinux --ci $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Build and Test Wheel'
       env:
