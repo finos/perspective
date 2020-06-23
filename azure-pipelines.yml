@@ -125,7 +125,7 @@ jobs:
     # Build a python wheel for Manylinux
     - bash: yarn _wheel_python --platform manylinux --ci $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      displayName: 'Build and Test Wheel'
+      displayName: 'Build Manylinux Wheel'
       env:
         PSP_DOCKER: 1
 
