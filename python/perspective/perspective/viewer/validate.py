@@ -127,7 +127,7 @@ def validate_computed_columns(computed_columns):
 
     if isinstance(computed_columns, list):
         for c in computed_columns:
-            if not isinstance(c, dict) and not isinstance(c, str):
+            if not isinstance(c, dict) and not isinstance(c, string_types):
                 raise PerspectiveError('`computed_columns` kwarg must be a list of dicts or strings!')
             if isinstance(c, dict):
                 keys = c.keys()

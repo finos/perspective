@@ -41,7 +41,7 @@ def make_null_mask(array):
 
         if not is_object_or_string_dtype:
             if is_datetime_dtype:
-                invalid = invalid or np.isnat(item)
+                invalid = invalid or str(item) == "NaT"
             else:
                 invalid = invalid or np.isnan(item)
 

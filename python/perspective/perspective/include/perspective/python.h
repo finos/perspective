@@ -382,6 +382,7 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_computation_input_types", &get_computation_input_types);
     m.def("get_computed_functions", &get_computed_functions);
     m.def("make_computations", &make_computations);
+    m.def("scalar_to_py", &scalar_to_py);
 }
 
 #endif

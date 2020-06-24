@@ -509,7 +509,7 @@ class TestTableArrow(object):
             "a": [1.5, 2.5, np.nan, 3.5, 4.5, np.nan, np.nan, np.nan]
         })
 
-        arrow_table = pa.Table.from_pandas(data)
+        arrow_table = pa.Table.from_pandas(data, preserve_index=False)
 
         assert arrow_table["a"].null_count == 4
 

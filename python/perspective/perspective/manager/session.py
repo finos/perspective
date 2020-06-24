@@ -44,11 +44,11 @@ class PerspectiveSession(object):
 
     def _clear_callbacks(self):
         # remove all callbacks from the view's cache
-        for cb in self.manager._callback_cache.get_callbacks():
+        for cb in self.manager._callback_cache:
             if cb["client_id"] == self.client_id:
                 view = self.manager.get_view(cb["name"])
                 if view:
                     view.remove_update(cb["callback"])
         # remove all callbacks from the manager's cache
         self.manager._callback_cache.remove_callbacks(
-            lambda cb: cb["client_id"] != self.client_id)
+            lambda cb: cb["client_id"] == self.client_id)
