@@ -15,6 +15,7 @@
 #include <perspective/scalar.h>
 #include <perspective/data_table.h>
 #include <perspective/get_data_extents.h>
+#include <perspective/last.h>
 
 #include <arrow/api.h>
 #include <arrow/util/decimal.h>
@@ -26,7 +27,7 @@
 #include <date/date.h>
 
 namespace perspective {
-namespace arrow {
+namespace apachearrow {
 
     /**
      * @brief Return a value from a `t_scalar` cast to `T`.
@@ -64,7 +65,7 @@ namespace arrow {
      * @param offset 
      * @param stride 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<arrow::Array>
     boolean_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -81,7 +82,7 @@ namespace arrow {
      * @param offset 
      * @param stride 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<arrow::Array>
     date_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -97,7 +98,7 @@ namespace arrow {
      * @param offset 
      * @param stride 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<arrow::Array>
     timestamp_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -111,9 +112,9 @@ namespace arrow {
      * @param data 
      * @param offset 
      * @param stride 
-     * @return std::shared_ptr<::arrow::Array> 
+     * @return std::shared_ptr<arrow::Array> 
      */
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<arrow::Array>
     string_col_to_dictionary_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
@@ -130,17 +131,17 @@ namespace arrow {
      * @param data 
      * @param offset 
      * @param stride 
-     * @return std::shared_ptr<::arrow::Array> 
+     * @return std::shared_ptr<arrow::Array> 
      */
     template <typename ArrowDataType, typename ArrowValueType>
-    std::shared_ptr<::arrow::Array>
+    std::shared_ptr<arrow::Array>
     numeric_col_to_array(
         const std::vector<t_tscalar>& data,
         std::int32_t cidx,
         std::int32_t stride,
         t_get_data_extents extents) {
         // NumericBuilder encompasses the most types (int/float/datetime)
-        ::arrow::NumericBuilder<ArrowDataType> array_builder;
+        arrow::NumericBuilder<ArrowDataType> array_builder;
         auto reserve_status = array_builder.Reserve(
             extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
@@ -163,8 +164,8 @@ namespace arrow {
         
         // Point to base `arrow::Array` instead of derived, so we don't have to
         // template the caller.
-        std::shared_ptr<::arrow::Array> array;
-        ::arrow::Status status = array_builder.Finish(&array);
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
             PSP_COMPLAIN_AND_ABORT(status.message());
         }

@@ -12,7 +12,7 @@ if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
 endif()
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
-set(PSP_ARROW_VERSION 0.15.1)
+set(PSP_ARROW_VERSION 0.16.0)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
     set(MACOS OFF)
@@ -347,6 +347,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# PYTHON BINDINGS BUILD #
 		#########################
 		include_directories("${PSP_PYTHON_SRC}/perspective/include")
+
+		# Set CMP0094 to NEW - find the first version that matches constraints,
+		# instead of the latest version installed.
+		cmake_policy(SET CMP0094 NEW)
+
 		if(MANYLINUX)
 			# Manylinux docker images have no shared libraries
 			# The instead use a statically built python.
@@ -362,7 +367,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
 			link_directories( ${Python_LIBRARY_DIRS} )
 		endif()
-		message("${Cyan}Using python ${PYTHON_INCLUDE_DIRS} ${Python_LIBRARIES} ${ColorReset}")
+		message("${Cyan}Using Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")
 		include_directories( ${Python_INCLUDE_DIRS} )
 
         # already found from before
@@ -407,7 +412,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 
-		find_package(PyArrow 0.15.1 REQUIRED)
+		find_package(PyArrow 0.16.0 REQUIRED)
 
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
@@ -640,7 +645,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 
 		target_link_libraries(psp tbb)
-
 		target_link_libraries(binding tbb)
 
 		target_link_libraries(binding psp)
@@ -679,8 +683,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_definitions(psp PRIVATE WIN32=1)
 		target_compile_definitions(psp PRIVATE _WIN32=1)
 	endif()
-
-	target_link_libraries(psp tbb)
 endif()
 
 ########

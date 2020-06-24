@@ -34,9 +34,9 @@ if __name__ == "__main__":
     if not venv_handler._is_activated:
         venv_handler.activate_virtualenv()
 
-    print("Installing pyarrow==0.15.1")
+    print("Installing pyarrow==0.16.0")
     subprocess.check_output(
-        "yes | python3 -m pip install pyarrow==0.15.1", shell=True)
+        "yes | python3 -m pip install pyarrow==0.16.0", shell=True)
 
     for version in VERSIONS[1:]:
         print("Installing perspective-python=={}".format(version))

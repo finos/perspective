@@ -13,7 +13,9 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_primitive.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_union.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/concatenate.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/dict_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/diff.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/validate.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/buffer.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compare.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/extension_type.cc
@@ -51,7 +53,6 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/interfaces.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/memory.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/readahead.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/testing/util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/basic_decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_util.cc

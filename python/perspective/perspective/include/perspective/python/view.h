@@ -12,6 +12,11 @@
 #include <perspective/base.h>
 #include <perspective/binding.h>
 #include <perspective/python/base.h>
+#include <perspective/python/utils.h>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
 
 namespace perspective {
 namespace binding {

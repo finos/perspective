@@ -250,22 +250,13 @@ exports.docker = function docker(image = "puppeteer") {
 exports.python_image = function python_image(image = "", python = "") {
     console.log(`-- Getting image for image: '${image}' and python: '${python}'`);
     if (python == "python2") {
-        if (image == "manylinux2010") {
-            return "python2_manylinux2010";
-        } else if (image == "manylinux2014") {
+        if (image == "manylinux2014") {
             throw "Python2 not supported for manylinux2014";
         } else {
-            return "python2";
-        }
-    } else if (python == "python3.8") {
-        throw "Python 3.8 not implemented yet";
-    } else {
-        if (image == "manylinux2010" || image == "manylinux2014") {
-            return `python3_${image}`;
-        } else {
-            return "python3";
+            return "manylinux2010";
         }
     }
+    return `${image}`;
 };
 
 /*******************************************************************************

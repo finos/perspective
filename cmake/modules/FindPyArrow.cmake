@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-if(NOT PYTHON_EXECUTABLE)
+if(NOT Python_EXECUTABLE)
   if(PyArrow_FIND_QUIETLY)
     find_package( PythonInterp 3.7 REQUIRED )
   else()
@@ -16,32 +16,32 @@ if(NOT PYTHON_EXECUTABLE)
   endif()
 endif()
 
-if (PYTHON_EXECUTABLE)
+if (Python_EXECUTABLE)
   # Find out the include path
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${Python_EXECUTABLE}" -c
             "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_include(), end='')\nexcept:pass"
             OUTPUT_VARIABLE __pyarrow_path)
   # And the lib dirs
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${Python_EXECUTABLE}" -c
             "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_library_dirs()[0], end='')\nexcept:pass"
     OUTPUT_VARIABLE __pyarrow_library_dirs)
 
   # And the lib dirs
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${Python_EXECUTABLE}" -c
             "from __future__ import print_function\ntry: import pyarrow; print(' '.join(pyarrow.get_libraries()), end='')\nexcept:pass"
     OUTPUT_VARIABLE __pyarrow_libraries)
 
   # And the version
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND "${Python_EXECUTABLE}" -c
             "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.__version__, end='')\nexcept:pass"
     OUTPUT_VARIABLE __pyarrow_version)
 elseif(__pyarrow_out)
   message(STATUS "Python executable not found.")
-endif(PYTHON_EXECUTABLE)
+endif(Python_EXECUTABLE)
 
 find_path(PYTHON_PYARROW_INCLUDE_DIR arrow/python/api.h
   HINTS "${__pyarrow_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
@@ -55,13 +55,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(PYTHON_PYARROW_LIBRARIES ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY})
 elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
   # Link against pre-built libarrow on MacOS
-  set(PYTHON_PYARROW_PYTHON_SHARED_LIBRARY ${PYTHON_PYARROW_LIBRARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow_python.15.dylib)
-  set(PYTHON_PYARROW_ARROW_SHARED_LIBRARY ${PYTHON_PYARROW_LIBRARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow.15.dylib)
+  set(PYTHON_PYARROW_PYTHON_SHARED_LIBRARY ${PYTHON_PYARROW_LIBRARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow_python.16.dylib)
+  set(PYTHON_PYARROW_ARROW_SHARED_LIBRARY ${PYTHON_PYARROW_LIBRARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow.16.dylib)
   set(PYTHON_PYARROW_LIBRARIES ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY})
 else()
   # linux
-  set(PYTHON_PYARROW_PYTHON_SHARED_LIBRARY ${CMAKE_SHARED_LIBRARY_PREFIX}arrow_python${CMAKE_SHARED_LIBRARY_SUFFIX}.15)
-  set(PYTHON_PYARROW_ARROW_SHARED_LIBRARY ${CMAKE_SHARED_LIBRARY_PREFIX}arrow${CMAKE_SHARED_LIBRARY_SUFFIX}.15)
+  set(PYTHON_PYARROW_PYTHON_SHARED_LIBRARY ${CMAKE_SHARED_LIBRARY_PREFIX}arrow_python${CMAKE_SHARED_LIBRARY_SUFFIX}.16)
+  set(PYTHON_PYARROW_ARROW_SHARED_LIBRARY ${CMAKE_SHARED_LIBRARY_PREFIX}arrow${CMAKE_SHARED_LIBRARY_SUFFIX}.16)
   set(PYTHON_PYARROW_LIBRARIES ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY})
 endif()
 

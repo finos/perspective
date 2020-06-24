@@ -20,6 +20,7 @@
 
 namespace perspective {
 namespace binding {
+    using namespace perspective::apachearrow;
 
 /******************************************************************************
  *
@@ -45,7 +46,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
 
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
-    arrow::ArrowLoader arrow_loader;
+    ArrowLoader arrow_loader;
     numpy::NumpyLoader numpy_loader(accessor);
 
     // don't call `is_numpy` on an arrow binary

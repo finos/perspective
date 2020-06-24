@@ -43,7 +43,7 @@ requires = [
     'future>=0.16.0',
     'numpy>=1.13.1',
     'pandas>=0.22.0',
-    'pyarrow==0.15.1',
+    'pyarrow==0.16.0',
     'python-dateutil>=2.8.0',
     'six>=1.11.0',
     'traitlets>=4.3.2',
@@ -52,8 +52,9 @@ requires = [
 if sys.version_info.major < 3:
     requires.append("backports.shutil-which")
 
-if sys.version_info.minor < 7:
-    raise Exception("Requires Python 2.7/3.7 or later")
+if (sys.version_info.major == 2 and sys.version_info.minor < 7) or \
+   (sys.version_info.major == 3 and sys.version_info.minor < 6):
+    raise Exception("Requires Python 2.7/3.6 or later")
 
 requires_dev = [
     'Faker>=1.0.0',
@@ -115,14 +116,18 @@ class PSPBuild(build_ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cfg = 'Debug' if self.debug else 'Release'
 
+        PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         cmake_args = [
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join(extdir, 'perspective', 'table')).replace('\\', '/'),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
             '-DPSP_PYTHON_BUILD=1',
-            '-DPSP_PYTHON_VERSION={}'.format(platform.python_version()),
-            '-DPYTHON_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
+            '-DPSP_PYTHON_VERSION={}'.format(PYTHON_VERSION),
+            '-DPython_ADDITIONAL_VERSIONS={}'.format(PYTHON_VERSION),
+            '-DPython_FIND_VERSION={}'.format(PYTHON_VERSION),
+            '-DPython_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
             '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX).replace('\\', '/'),
             '-DPython_ROOT={}'.format(sysconfig.PREFIX).replace('\\', '/'),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')).replace('\\', '/'),
@@ -206,5 +211,5 @@ setup(
         'dev': requires_dev,
     },
     ext_modules=[PSPExtension('perspective')],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist)
 )

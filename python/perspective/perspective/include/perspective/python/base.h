@@ -39,6 +39,4 @@ namespace py = pybind11;
 typedef py::object t_val;
 typedef t_val t_data_accessor;
 
-
-
 #endif
