@@ -459,7 +459,7 @@ export const clean_tokens = function(tokens) {
     const cleaned_tokens = [];
 
     for (const token of tokens) {
-        if (token.tokenType.name !== "whitespace") {
+        if (!tokenMatcher(token, Whitespace)) {
             cleaned_tokens.push(token);
         }
     }

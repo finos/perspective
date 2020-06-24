@@ -73,9 +73,9 @@ class PerspectiveComputedExpressionParser {
         this._metadata = metadata;
 
         // Initialize lexer, parser, and visitor
-        this._construct_lexer();
-        this._construct_parser();
-        this._construct_visitor();
+        this._lexer = this._construct_lexer();
+        this._parser = this._construct_parser();
+        this._visitor = this._construct_visitor();
 
         this.is_initialized = true;
     }
@@ -88,11 +88,6 @@ class PerspectiveComputedExpressionParser {
     lex(expression) {
         this._check_initialized();
         const result = this._lexer.tokenize(expression);
-
-        if (result.errors.length > 0) {
-            let message = result.errors[0].message;
-            throw new Error(message);
-        }
 
         // Remove whitespace tokens
         result.tokens = clean_tokens(result.tokens);
@@ -109,6 +104,11 @@ class PerspectiveComputedExpressionParser {
     parse(expression) {
         this._check_initialized();
         const lex_result = this.lex(expression);
+
+        if (lex_result.errors.length > 0) {
+            let message = lex_result.errors[0].message;
+            throw new Error(message);
+        }
 
         // calling `parser.input` resets state.
         this._parser.input = lex_result.tokens;
@@ -130,9 +130,13 @@ class PerspectiveComputedExpressionParser {
      *
      * @param {ILexingResult} lexer_result
      * @param {String} expression
+     * @param {Array[String]} input_types an array of data types by which to
+     * filter down the suggestions.
+     * @param {Boolean} match_types whether suggestions should have matching
+     * input and return types.
      * @returns {Array}
      */
-    get_autocomplete_suggestions(expression, lexer_result) {
+    get_autocomplete_suggestions(expression, lexer_result, input_types, match_types) {
         this._check_initialized();
         let initial_suggestions = this._parser.computeContentAssist("SuperExpression", []);
 
@@ -141,13 +145,21 @@ class PerspectiveComputedExpressionParser {
         }
 
         if (lexer_result.errors.length > 0) {
-            // Check if the last token is partial AND not a column name (not in
-            // quotes). If true, the suggest function names that match.
+            // Check if the last string fragment is partial AND not a
+            // column name (not in quotes). If true, the suggest function
+            // names that match.
             const partial_function = this.extract_partial_function(expression);
 
-            if (partial_function && partial_function.search(/["']$/) === -1) {
-                // Remove open parenthesis and column name rule
-                const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(2));
+            // If the last fragment is partial, check if the last parsed
+            // token is a column name, as we should not be sending suggestions
+            // for a partial function that immediately follows a column name,
+            // i.e. `"Sales" a`.
+            const last_token = this.get_last_token(lexer_result);
+            const is_column_name = last_token && tokenMatcher(last_token, ColumnName);
+
+            if (partial_function && partial_function.search(/["']$/) === -1 && !is_column_name) {
+                // Remove open parenthesis
+                const suggestions = this._apply_suggestion_metadata(initial_suggestions.slice(1), input_types);
                 const exact_matches = [];
                 const fuzzy_matches = [];
 
@@ -171,7 +183,7 @@ class PerspectiveComputedExpressionParser {
         // Remove whitespace tokens
         lexer_result.tokens = clean_tokens(lexer_result.tokens);
         const suggestions = this._parser.computeContentAssist("SuperExpression", lexer_result.tokens);
-        return this._apply_suggestion_metadata(suggestions);
+        return this._apply_suggestion_metadata(suggestions, input_types, match_types);
     }
 
     /**
@@ -198,9 +210,23 @@ class PerspectiveComputedExpressionParser {
     }
 
     /**
+     * Return the last token from a lexer result, or undefined if there are no
+     * tokens at all. Whitespace tokens are NOT removed before search.
+     *
+     * @param {ILexingResult} lexer_result
+     */
+    get_last_token(lexer_result) {
+        const tokens = lexer_result.tokens;
+        const last_idx = tokens.length - 1;
+        if (last_idx >= 0) {
+            return tokens[last_idx];
+        }
+    }
+
+    /**
      * Look backwards through a list of tokens, checking whether each token is
      * of a type in the `types` array, stopping after `limit` tokens.
-     * Whitespace tokens are removed from the token list before the search.
+     * Whitespace tokens are NOT removed before search.
      *
      * @param {Array{TokenType}} types An array of token types to look through.
      * @param {ILexingResult} lexer_result A result from the lexer, containing
@@ -210,7 +236,7 @@ class PerspectiveComputedExpressionParser {
      * undefined, search all tokens.
      */
     get_last_token_with_types(types, lexer_result, limit) {
-        const tokens = clean_tokens(lexer_result.tokens);
+        const tokens = lexer_result.tokens;
         if (!limit || limit <= 0 || limit >= tokens.length) {
             limit = tokens.length;
         }
@@ -219,30 +245,6 @@ class PerspectiveComputedExpressionParser {
                 if (tokenMatcher(tokens[i], type)) {
                     return tokens[i];
                 }
-            }
-        }
-    }
-
-    /**
-     * Look backwards through a list of tokens, checking whether each token is
-     * of a type in the `types` array, stopping after `limit` tokens.
-     * Whitespace tokens are removed from the token list before the search.
-     *
-     * @param {String} name A string name of a token to match.
-     * @param {ILexingResult} lexer_result A result from the lexer, containing
-     * valid tokens and errors.
-     * @param {Number} limit the number of tokens to search through before
-     * exiting or returning a valid result. If limit > tokens.length or is
-     * undefined, search all tokens.
-     */
-    get_last_token_with_name(name, lexer_result, limit) {
-        const tokens = clean_tokens(lexer_result.tokens);
-        if (!limit || limit <= 0 || limit >= tokens.length) {
-            limit = tokens.length;
-        }
-        for (let i = tokens.length - 1; i >= tokens.length - limit; i--) {
-            if (tokens[i].tokenType.name === name) {
-                return tokens[i];
             }
         }
     }
@@ -278,7 +280,7 @@ class PerspectiveComputedExpressionParser {
         this._tokens.push(UpperLowerCaseTokenType);
         this._vocabulary[UpperLowerCaseTokenType.name] = UpperLowerCaseTokenType;
 
-        this._lexer = new Lexer(this._tokens, {
+        return new Lexer(this._tokens, {
             errorMessageProvider: PerspectiveLexerErrorMessage
         });
     }
@@ -319,7 +321,7 @@ class PerspectiveComputedExpressionParser {
      * Construct a singleton parser instance that will be reused.
      */
     _construct_parser() {
-        this._parser = new ComputedExpressionColumnParser(this._vocabulary);
+        return new ComputedExpressionColumnParser(this._vocabulary);
     }
 
     /**
@@ -336,20 +338,93 @@ class PerspectiveComputedExpressionParser {
                 this.validateVisitor();
             }
 
+            /**
+             * Given a parsed expression, visit each node and return an array
+             * of computed column specifications representing the recursive
+             * tree-walk of all computed columns and their dependencies.
+             *
+             * @param {*} ctx
+             */
             SuperExpression(ctx) {
                 let computed_columns = [];
+
                 this.visit(ctx.Expression, computed_columns);
+
+                // An expression may be syntactically valid but does not
+                // generate new computed columns, i.e. the expression '"Sales"',
+                // which is syntactically valid but does not have enough
+                // information to generate a computed column. In the future
+                // when each column is editable as an expression by default,
+                // this will not be an issue.
+                if (computed_columns.length === 0) {
+                    throw new Error("Expression did not generate any computed columns");
+                }
+
                 return computed_columns;
             }
 
             Expression(ctx, computed_columns) {
-                if (ctx.OperatorComputedColumn) {
-                    this.visit(ctx.OperatorComputedColumn, computed_columns);
-                } else if (ctx.FunctionComputedColumn) {
-                    this.visit(ctx.FunctionComputedColumn, computed_columns);
+                return this.visit(ctx.OperatorComputedColumn, computed_columns);
+            }
+
+            /**
+             * Common logic for parsing through a computed column in operator
+             * syntax, with `get_operator` returning an operator of the
+             * correct type, which is important for associativity.
+             *
+             * @param {*} ctx
+             * @param {*} computed_columns
+             * @param {*} get_operator
+             */
+            _VisitOperatorComputedColumn(ctx, computed_columns, get_operator) {
+                let left = this.visit(ctx.left, computed_columns);
+
+                let final_column_name;
+
+                if (ctx.right) {
+                    let previous;
+
+                    ctx.right.forEach((rhs, idx) => {
+                        let operator = get_operator(ctx, idx);
+
+                        if (!operator) {
+                            return;
+                        }
+
+                        let right = this.visit(rhs, computed_columns);
+
+                        // If there is a previous value, use it, otherwise use
+                        // the leftmost value. This enables expressions such as
+                        // a + b / c * d + e ... ad infinitum
+                        const left_hand = previous ? previous : left;
+
+                        // Use custom name if provided through `AS/as/As`
+                        let as;
+
+                        if (ctx.as && idx < ctx.as.length) {
+                            as = this.visit(ctx.as[idx]);
+                        }
+
+                        const column_name = as ? as : COMPUTED_FUNCTION_FORMATTERS[operator](left_hand, right);
+
+                        computed_columns.push({
+                            column: column_name,
+                            computed_function_name: operator,
+                            inputs: [left_hand, right]
+                        });
+
+                        previous = column_name;
+                    });
+
+                    final_column_name = previous;
                 } else {
-                    return;
+                    // If there are no more right-hand tokens, return the
+                    // column name so it can be used as the tree traversal
+                    // goes upwards.
+                    final_column_name = left;
                 }
+
+                return final_column_name;
             }
 
             /**
@@ -359,38 +434,23 @@ class PerspectiveComputedExpressionParser {
              * @param {*} ctx
              */
             OperatorComputedColumn(ctx, computed_columns) {
-                let left = this.visit(ctx.left, computed_columns);
+                const get_operator = (ctx, idx) => this.visit(ctx.Operator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
+            }
 
-                if (typeof left === "undefined") {
-                    left = computed_columns[computed_columns.length - 1].column;
-                }
+            AdditionOperatorComputedColumn(ctx, computed_columns) {
+                const get_operator = (ctx, idx) => this.visit(ctx.AdditionOperator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
+            }
 
-                let operator = this.visit(ctx.Operator);
+            MultiplicationOperatorComputedColumn(ctx, computed_columns) {
+                const get_operator = (ctx, idx) => this.visit(ctx.MultiplicationOperator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
+            }
 
-                if (!operator) {
-                    return;
-                }
-
-                let right = this.visit(ctx.right, computed_columns);
-
-                if (typeof right === "undefined") {
-                    right = computed_columns[computed_columns.length - 1].column;
-                }
-
-                let as = this.visit(ctx.as);
-
-                let column_name = COMPUTED_FUNCTION_FORMATTERS[operator](left, right);
-
-                // Use custom name if provided through `AS/as/As`
-                if (as) {
-                    column_name = as;
-                }
-
-                computed_columns.push({
-                    column: column_name,
-                    computed_function_name: operator,
-                    inputs: [left, right]
-                });
+            ExponentOperatorComputedColumn(ctx, computed_columns) {
+                const get_operator = (ctx, idx) => this.visit(ctx.ExponentOperator[idx]);
+                return this._VisitOperatorComputedColumn(ctx, computed_columns, get_operator);
             }
 
             /**
@@ -406,25 +466,13 @@ class PerspectiveComputedExpressionParser {
                 // Functions have 1...n parameters
                 let input_columns = [];
 
-                for (const column_name of ctx.ColumnName) {
-                    let column = this.visit(column_name, computed_columns);
-                    if (typeof column === "undefined") {
-                        // Use the column immediately to the left, as that is
-                        // the name of the parsed column from the expression
-                        input_columns.push(computed_columns[computed_columns.length - 1].column);
-                    } else {
-                        input_columns.push(column);
-                    }
+                for (const param of ctx.param) {
+                    input_columns.push(this.visit(param, computed_columns));
                 }
 
+                // Use custom name if provided through `AS/as/As`me =
                 const as = this.visit(ctx.as);
-
-                let column_name = COMPUTED_FUNCTION_FORMATTERS[fn](...input_columns);
-
-                // Use custom name if provided through `AS/as/As`
-                if (as) {
-                    column_name = as;
-                }
+                const column_name = as ? as : COMPUTED_FUNCTION_FORMATTERS[fn](...input_columns);
 
                 const computed = {
                     column: column_name,
@@ -433,6 +481,9 @@ class PerspectiveComputedExpressionParser {
                 };
 
                 computed_columns.push(computed);
+
+                // Return the column name so it can be used up the chain
+                return column_name;
             }
 
             /**
@@ -445,6 +496,8 @@ class PerspectiveComputedExpressionParser {
                 // string without quotes.
                 if (ctx.ParentheticalExpression) {
                     return this.visit(ctx.ParentheticalExpression, computed_columns);
+                } else if (ctx.FunctionComputedColumn) {
+                    return this.visit(ctx.FunctionComputedColumn, computed_columns);
                 } else {
                     return ctx.columnName[0].payload;
                 }
@@ -460,22 +513,34 @@ class PerspectiveComputedExpressionParser {
                 return ctx.columnName[0].payload;
             }
 
+            AdditionOperator(ctx) {
+                if (ctx.add) {
+                    return ctx.add[0].image;
+                } else if (ctx.subtract) {
+                    return ctx.subtract[0].image;
+                }
+            }
+
+            MultiplicationOperator(ctx) {
+                if (ctx.multiply) {
+                    return ctx.multiply[0].image;
+                } else if (ctx.divide) {
+                    return ctx.divide[0].image;
+                }
+            }
+
+            ExponentOperator(ctx) {
+                if (ctx.pow) {
+                    return ctx.pow[0].image;
+                }
+            }
+
             /**
              * Parse a single mathematical operator (+, -, *, /, %).
              * @param {*} ctx
              */
             Operator(ctx) {
-                if (ctx.add) {
-                    return ctx.add[0].image;
-                } else if (ctx.subtract) {
-                    return ctx.subtract[0].image;
-                } else if (ctx.multiply) {
-                    return ctx.multiply[0].image;
-                } else if (ctx.divide) {
-                    return ctx.divide[0].image;
-                } else if (ctx.pow) {
-                    return ctx.pow[0].image;
-                } else if (ctx.percent_of) {
+                if (ctx.percent_of) {
                     return ctx.percent_of[0].image;
                 } else if (ctx.equals) {
                     return ctx.equals[0].image;
@@ -579,27 +644,31 @@ class PerspectiveComputedExpressionParser {
             }
         }
 
-        this._visitor = new ComputedExpressionColumnVisitor();
+        return new ComputedExpressionColumnVisitor();
     }
 
     /**
      * Given a list of suggestions, transform each suggestion into an object
      * with `label` and `value`.
      *
-     * @param {*} suggestions
+     * @param {Array} suggestions
+     * @param {Array[String]} input_types an array of input types as strings.
+     * @param {Boolean} match_types whether the return type and input types
+     * of suggestions should match
      */
-    _apply_suggestion_metadata(suggestions) {
+    _apply_suggestion_metadata(suggestions, input_types, match_types) {
         this._check_initialized();
+        match_types = match_types || false;
         const suggestions_with_metadata = [];
 
-        for (const suggestion of suggestions) {
-            const token = suggestion.nextTokenType;
+        for (const s of suggestions) {
+            const token = s.nextTokenType;
 
             if (!token || !token.PATTERN.source) {
                 continue;
             }
 
-            const label = token.LABEL;
+            let label = token.LABEL;
             let pattern = token.PATTERN.source.replace(/\\/g, "");
             let value = pattern;
 
@@ -607,20 +676,40 @@ class PerspectiveComputedExpressionParser {
                 value = `${value}(`;
             } else if (tokenMatcher(token, OperatorTokenType)) {
                 value = `${value} `;
+            } else if (tokenMatcher(token, As)) {
+                value = "AS ";
+                label = "AS";
+                token.signature = "x + y AS new column";
+                token.help = "Creates a custom name for the computed column.";
             }
 
-            suggestions_with_metadata.push(
-                new ComputedExpressionAutocompleteSuggestion({
-                    label,
-                    value,
-                    pattern,
-                    signature: token.signature,
-                    help: token.help,
-                    input_types: token.input_types,
-                    return_type: token.return_type,
-                    num_params: token.num_params
-                })
-            );
+            const suggestion = new ComputedExpressionAutocompleteSuggestion({
+                label,
+                value,
+                pattern,
+                signature: token.signature,
+                help: token.help,
+                input_types: token.input_types,
+                return_type: token.return_type,
+                num_params: token.num_params
+            });
+
+            if (input_types && suggestion.input_types) {
+                // Return suggestions that have the same input type AND
+                // the return type is in the input types array - this prevents
+                // expressions such as `uppercase(length(` from being
+                // suggested, as `length` takes a string but returns an int.
+                for (const type of input_types) {
+                    const correct_input_type = suggestion.input_types.includes(type);
+
+                    if (correct_input_type && (match_types ? suggestion.input_types.includes(suggestion.return_type) : true)) {
+                        suggestions_with_metadata.push(suggestion);
+                        break;
+                    }
+                }
+            } else {
+                suggestions_with_metadata.push(suggestion);
+            }
         }
 
         return suggestions_with_metadata;
