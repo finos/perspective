@@ -15,7 +15,6 @@ namespace perspective {
 t_tscalar
 extract_aggregate(
     const t_aggspec& aggspec, const t_column* aggcol, t_uindex ridx, t_index pridx) {
-    static std::string non_unique("-");
 
     switch (aggspec.agg()) {
         case AGGTYPE_PCT_SUM_PARENT: {
@@ -77,7 +76,7 @@ extract_aggregate(
             t_tscalar rval = aggcol->get_scalar(ridx);
             if (!rval.is_valid()) {
                 t_tscalar rv;
-                rv.set(non_unique.c_str());
+                rv.set(t_none());
                 return rv;
             }
             return rval;
