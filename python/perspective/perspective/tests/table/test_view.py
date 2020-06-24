@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from perspective.table import Table
 from datetime import date, datetime
+from pytest import mark
 
 
 def compare_delta(received, expected):
@@ -358,13 +359,26 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(column_pivots=["a"])
         cols = view.column_paths()
-        for col in cols:
-            assert col in [
-                "2019-07-11 12:30:00.000 UTC|a",
-                "2019-07-11 12:30:00.000 UTC|b",
-                "2019-07-11 12:30:00.000 Coordinated Universal Time|a",
-                "2019-07-11 12:30:00.000 Coordinated Universal Time|b"
-            ]
+        assert cols == ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
+
+    def test_view_column_pivot_datetime_names_min(self):
+        """Tests column paths for datetimes in UTC. Timezone-related tests are
+        in the `test_table_datetime` file."""
+        data = {"a": [datetime.min], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        cols = view.column_paths()
+        assert cols == ["1970-01-01 00:00:00.000|a", "1970-01-01 00:00:00.000|b"]
+
+    @mark.skip
+    def test_view_column_pivot_datetime_names_max(self):
+        """Tests column paths for datetimes in UTC. Timezone-related tests are
+        in the `test_table_datetime` file."""
+        data = {"a": [datetime.max], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        cols = view.column_paths()
+        assert cols == ["10000-01-01 00:00:00.000|a", "10000-01-01 00:00:00.000|b"]
 
     # aggregate
 

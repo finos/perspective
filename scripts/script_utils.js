@@ -63,6 +63,13 @@ const execute = cmd => {
     }
 };
 
+const execute_throw = cmd => {
+    if (process.argv.indexOf("--debug") > -1) {
+        console.log(`$ ${cmd}`);
+    }
+    execSync(cmd, {stdio: "inherit"});
+};
+
 /*******************************************************************************
  *
  * Public
@@ -157,8 +164,9 @@ const bash = (exports.bash = function bash(strings, ...args) {
 });
 
 /**
- * Just like `bash, but executes the command immediately.  Will log if the
- * `--debug` flag is used to build.
+ * Just like `bash, but executes the command immediately. Will log if the
+ * `--debug` flag is used to build. If an error is encountered, it is logged
+ * and the child process will exit with error code 1.
  *
  * @param {string} expression a bash command to be templated.
  * @returns {string} A command with the missing argument's flags removed.
@@ -166,6 +174,17 @@ const bash = (exports.bash = function bash(strings, ...args) {
  * execute`run -t${1} -u"${undefined}" task`;
  */
 exports.execute = (strings, ...args) => execute(Array.isArray(strings) ? bash(strings, ...args) : strings);
+
+/**
+ * Just like `execute`, except it throws anddoes not exit the child process
+ * if the command throws an error.
+ *
+ * @param {string} expression a bash command to be templated.
+ * @returns {string} A command with the missing argument's flags removed.
+ * @example
+ * execute`run -t${1} -u"${undefined}" task`;
+ */
+exports.execute_throw = (strings, ...args) => execute_throw(Array.isArray(strings) ? bash(strings, ...args) : strings);
 
 /**
  * Returns the value after this command-line flag, or `true` if it is the last

@@ -129,6 +129,7 @@ endif()
 if (NOT DEFINED PSP_PYTHON_BUILD)
 	set(PSP_PYTHON_BUILD OFF)
 elseif(PSP_PYTHON_BUILD)
+	# PSP_PYTHON_BUILD will always run PSP_CPP_BUILD
 	set(PSP_CPP_BUILD ON)
 	if(NOT DEFINED PSP_PYTHON_VERSION)
 		set(PSP_PYTHON_VERSION 3.7)
@@ -210,12 +211,13 @@ if (PSP_WASM_BUILD)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 	list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
+	# Assumes that Boost includes will be in this folder.
 	include_directories("/usr/local/include" SYSTEM)
 
-    # Include this docker-only directory
+    # Include this docker-only directory.
 	include_directories("/boost_includes")
 
-    # bundle rapidjson for wasm build
+    # Build Rapidjson as it is used in the minimal arrow to be built later.
 	psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 
 	set(EXTENDED_FLAGS " \
@@ -258,9 +260,6 @@ if (PSP_WASM_BUILD)
 
 	set(ASYNC_MODE_FLAGS "-s -s BINARYEN_ASYNC_COMPILATION=1 -s WASM=1")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
-	#####################
-	# VANILLA CPP BUILD #
-	#####################
 	if(WIN32)
 		if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 			set(OPT_FLAGS " \
@@ -291,42 +290,39 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASYNC_MODE_FLAGS "")
 	set(ASMJS_MODE_FLAGS "")
 
-	if(PSP_CPP_BUILD)
-		if (WIN32)
-			# BOOST_ROOT has been removed on Windows VMs in Azure:
-			#
-			# - https://github.com/actions/virtual-environments/issues/687
-			# - https://github.com/actions/virtual-environments/issues/319
-			# 
-			# `BOOST_ROOT` must be set in the environment, and policy CMP0074
-			# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
-			cmake_policy(SET CMP0074 NEW)
+	if (WIN32)
+		# BOOST_ROOT has been removed on Windows VMs in Azure:
+		#
+		# - https://github.com/actions/virtual-environments/issues/687
+		# - https://github.com/actions/virtual-environments/issues/319
+		# 
+		# `BOOST_ROOT` must be set in the environment, and policy CMP0074
+		# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
+		cmake_policy(SET CMP0074 NEW)
 
-			if(DEFINED (ENV{BOOST_ROOT}))
-				set(Boost_NO_BOOST_CMAKE TRUE)
+		if(DEFINED ENV{BOOST_ROOT})
+			set(Boost_NO_BOOST_CMAKE TRUE)
 
-				message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
-				message(WARNING "${Cyan}BOOST_INCLUDEDIR: $ENV{BOOST_INCLUDEDIR} ${ColorReset}")
-				message(WARNING "${Cyan}BOOST_LIBRARYDIR: $ENV{BOOST_LIBRARYDIR} ${ColorReset}")
-			endif()
-
+			message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
+			message(WARNING "${Cyan}BOOST_INCLUDEDIR: $ENV{BOOST_INCLUDEDIR} ${ColorReset}")
+			message(WARNING "${Cyan}BOOST_LIBRARYDIR: $ENV{BOOST_LIBRARYDIR} ${ColorReset}")
 		endif()
-		# Filesystem required for Python build
-		find_package(Boost COMPONENTS filesystem)
-		if(NOT Boost_FOUND)
-			message("${Red}Boost filesystem could not be located${ColorReset}")
-		else()
-			message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-		endif()
+	endif()
+
+	find_package(Boost REQUIRED)
+	if(NOT Boost_FOUND)
+		message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
+	else()
+		message(WARNING "${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
 
 	find_package(TBB)
 	if(NOT TBB_FOUND)
-		message("${Red}TBB could not be located${ColorReset}")
+		message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
 		psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
 	else()
-		message("${Cyan}Found tbb in ${TBB_INCLUDE_DIRS} ${TBB_LIBRARY_DIRS} ${ColorReset}")
+		message("${Cyan}Found TBB: TBB_INCLUDE_DIRS - ${TBB_INCLUDE_DIRS}, TBB_LIBRARY_DIRS - ${TBB_LIBRARY_DIRS} ${ColorReset}")
 		include_directories( ${TBB_INCLUDE_DIRS} )
 	endif()
 
@@ -370,17 +366,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		message("${Cyan}Using Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")
 		include_directories( ${Python_INCLUDE_DIRS} )
 
-        # already found from before
-		find_package(Boost)
-
 		if(MACOS)
 			# on mac, use the vanilla pybind11 finder
 			find_package(pybind11)
 			if(pybind11_FOUND)
-				# Homebrew install pybind11
+				# Found PyBind installed by Homebrew
 				set(PYTHON_PYBIND_FOUND pybind11_FOUND)
 			else()
-				# see if python installed pybind11 is available
+				# Check if pip installed PyBind is available
 				find_package(Pybind)
 				if(PYTHON_PYBIND_FOUND)
 					# Need to add extra flags due to pybind weirness
@@ -390,13 +383,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			endif()
 
 		else()
-			# on linux or in docker, use our custom pybind finder to look 
-			# for just the python installed pybind
+			# On Linux/Docker, look for pip installed PyBind only
 			find_package(Pybind)
 		endif()
 
 		if(NOT PYTHON_PYBIND_FOUND)
-		    message("${Red}PyBind11 could not be located${ColorReset}")
+		    message("${Red}PyBind11 could not be located - building from external source${ColorReset}")
 			psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
 		else()
 		    message("${Cyan}Found PyBind11 in ${PYTHON_PYBIND_INCLUDE_DIR}${ColorReset}")
@@ -408,29 +400,29 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			message(FATAL_ERROR "${Red}Numpy could not be located${ColorReset}")
 		else()
 			message(WARNING "${Cyan}Numpy found: ${PYTHON_NUMPY_INCLUDE_DIR}${ColorReset}")
-
+			include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 		endif()
-		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 
 		find_package(PyArrow 0.16.0 REQUIRED)
 
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
-			message(WARNING "${Cyan}PyArrow found: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
+			message(WARNING "${Cyan}PyArrow found: PYTHON_PYARROW_INCLUDE_DIR - ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
 			message(WARNING "${Cyan}Using pre-built ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY} from: ${PYTHON_PYARROW_LIBRARY_DIR}${ColorReset}")
+			include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
+			link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
 		endif()
-		include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
-        link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
 		#####################
 	endif()
 endif()
 
+# Build header-only dependencies from external source
 psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
-# For all non-MacOS and non-linux builds, or if building WASM/CPP, build minimal arrow from source
+# For WASM/CPP build, build minimal arrow from source
 if (NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
@@ -618,9 +610,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			target_compile_definitions(binding PRIVATE WIN32=1)
 			target_compile_definitions(binding PRIVATE _WIN32=1)
 
-			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
-			target_link_libraries(binding ${Boost_FILESYSTEM_LIBRARY})
-
 			# .dll not importable
 			set_property(TARGET binding PROPERTY SUFFIX .pyd)
 		else()
@@ -668,8 +657,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 	else()
 		add_library(psp SHARED ${SOURCE_FILES})
+
+		# Link perspective against custom-built minimal arrow
 		target_link_libraries(psp arrow)
-		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 	endif()
 
 	if(PSP_CPP_BUILD_STRICT AND NOT WIN32)

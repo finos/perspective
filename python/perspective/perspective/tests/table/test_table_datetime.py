@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from datetime import date, datetime
 from dateutil import tz
+from pytest import mark
 from perspective.table import Table
 
 LOCAL_DATETIMES = [
@@ -234,6 +235,28 @@ if os.name != 'nt':
             table.update(data)
             assert table.view().to_dict()["a"] == [
                 datetime(1969, 12, 31, 19, 0)
+            ]
+
+        @mark.skip
+        def test_table_datetime_max(self):
+            data = {
+                "a": [datetime.max]
+            }
+            table = Table(data)
+
+            # lol - result is converted from UTC to EST (local time)
+            assert table.view().to_dict()["a"] == [
+                datetime(9999, 12, 31, 18, 59, 59)
+            ]
+
+        @mark.skip
+        def test_table_datetime_max_df(self):
+            data = pd.DataFrame({
+                "a": [datetime.max]
+            })
+            table = Table(data)
+            assert table.view().to_dict()["a"] == [
+                datetime(9999, 12, 31, 18, 59, 59)
             ]
 
     class TestTableDateTimeUTCToLocal(object):

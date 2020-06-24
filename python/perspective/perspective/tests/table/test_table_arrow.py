@@ -518,6 +518,7 @@ class TestTableArrow(object):
         writer = pa.RecordBatchStreamWriter(
             stream, arrow_table.schema, use_legacy_format=False)
         writer.write_table(arrow_table)
+        writer.close()
         arrow = stream.getvalue().to_pybytes()
 
         # load

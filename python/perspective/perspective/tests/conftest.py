@@ -66,6 +66,29 @@ class Util:
             stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
+        writer.close()
+        return stream.getvalue().to_pybytes()
+
+    @staticmethod
+    def make_arrow_from_pandas(df, schema=None, legacy=False):
+        """Create an arrow binary from a Pandas dataframe.
+
+        Args:
+            df (:obj:`pandas.DataFrame`)
+            schema (:obj:`pyarrow.Schema`)
+            legacy (bool): if True, use legacy IPC format (pre-pyarrow 0.15). Defaults to False.
+
+        Returns:
+            bytes : a bytes object containing the arrow-serialized output.
+        """
+        stream = pa.BufferOutputStream()
+        table = pa.Table.from_pandas(df, schema=schema)
+
+        writer = pa.RecordBatchStreamWriter(
+            stream, table.schema, use_legacy_format=legacy)
+
+        writer.write_table(table)
+        writer.close()
         return stream.getvalue().to_pybytes()
 
     @staticmethod
@@ -106,6 +129,7 @@ class Util:
             stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
+        writer.close()
         return stream.getvalue().to_pybytes()
 
     @staticmethod

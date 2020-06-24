@@ -620,6 +620,7 @@ t_tscalar::to_string(bool for_expr) const {
         return std::string("null");
 
     std::stringstream ss;
+
     switch (m_type) {
         case DTYPE_NONE: {
             return std::string("");
@@ -636,7 +637,9 @@ t_tscalar::to_string(bool for_expr) const {
             ss << get<std::int16_t>();
             return ss.str();
         } break;
+        case DTYPE_OBJECT:
         case DTYPE_UINT64: {
+            // treat object pointers as unsigned 64 bit ints
             ss << get<std::uint64_t>();
             return ss.str();
         } break;
@@ -687,14 +690,21 @@ t_tscalar::to_string(bool for_expr) const {
             std::time_t temp = std::chrono::system_clock::to_time_t(ts);
             std::tm* t = std::localtime(&temp);
 
-            // use a mix of std::put_time and date::format to properly
-            // represent datetimes to millisecond precision
-            ss << std::put_time(t, "%Y-%m-%d %H:%M:"); // ymd h:m
-
-            // TODO: we currently can't print out millisecond precision, but
-            // we need to.
-            ss << date::format("%S", ts); // represent second and millisecond
-            ss << std::put_time(t, " %Z"); // timezone
+            // use a mix of strftime and date::format
+            std::string buffer;
+            buffer.resize(64);
+            
+            // write y-m-d h:m in local time into buffer, and if successful
+            // write the rest of the date, otherwise print the date in UTC.
+            std::size_t len = strftime(&buffer[0], buffer.size(), "%Y-%m-%d %H:%M:", t);
+            if (len > 0) {
+                buffer.resize(len);
+                ss << buffer;
+                ss << date::format("%S", ts); // represent second and millisecond
+            } else {
+                std::cerr << to_int64() << " failed strftime" << std::endl;
+                ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
+            }
 
             return ss.str();
         } break;

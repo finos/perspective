@@ -190,8 +190,8 @@ t_computed_column::get_computed_function_1(t_computation computation) {
         case SUBTRACT: return computed_function::subtract<DTYPE>;              \
         case MULTIPLY: return computed_function::multiply<DTYPE>;              \
         case DIVIDE: return computed_function::divide<DTYPE>;                  \
-        case POW: return computed_function::pow<DTYPE>;                       \
-        case PERCENT_OF: return computed_function::percent_of<DTYPE>;      \
+        case POW: return computed_function::pow<DTYPE>;                        \
+        case PERCENT_OF: return computed_function::percent_of<DTYPE>;          \
         case EQUALS: return computed_function::equals<DTYPE>;                  \
         case NOT_EQUALS: return computed_function::not_equals<DTYPE>;          \
         case GREATER_THAN: return computed_function::greater_than<DTYPE>;      \
