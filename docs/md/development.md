@@ -211,10 +211,10 @@ installed in a Docker container.
 The Puppeteer/UI tests are a form of
 [characterization tests](https://en.wikipedia.org/wiki/Characterization_test)
 which use screenshots to compare current and previous behavior of
-`<perspective-viewer>` and its plugins. The results of the each comparison are
+`<perspective-viewer>` and its plugins. The results of each comparison are
 stored in each package's `test/results/results.json` file, and the screenshots
-themselves are stroed in the package's `screenshots/` directory, though only the
-former should be checked in to GIT. When a test in these suites fails, a
+themselves are stored in the package's `screenshots/` directory, though only the
+former should be checked into GIT. When a test in these suites fails, a
 `file.failed.png` and `file.diff.png` are also generated, showing the divergent
 screenshot and a contrast diff respectively, so you can verify that the changed
 behavior either does or does not reflect your patch. If you're confident that
@@ -282,7 +282,7 @@ that the benchmark suite will run, where `<NUMBER>` is an integer greater
 than 0. If `<NUMBER>` cannot be parsed, is 0, or is greater than the number of
 versions, the benchmark suite will run all previous versions of Perspective.
 
-The benchmarks report and `results.json` show a historgram of current
+The benchmarks report and `results.json` show a histogram of current
 performance, as well as that of the previous `results.json`. Running this should
 probably be standard practice after making a large change which may affect
 performance, but please create a baseline `results.json` entry for your test
