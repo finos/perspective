@@ -136,7 +136,7 @@ and even valid millisecond/seconds from epoch timestamps. Similarly, updating
 string columns with integer data will cause a cast to string, updating floats
 with ints cause a float cast, and etc.
 
-Type inferrence works similarly—a column that contains `pandas.Timestamp`
+Type inference works similarly—a column that contains `pandas.Timestamp`
 objects will have its type inferred as `datetime`, which allows it to be updated
 with any of the datetime types that were just mentioned. Thus, Perspective is
 aware of the basic type primitives that it supports, but agnostic towards the

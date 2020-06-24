@@ -51,7 +51,7 @@ dataset.
 The columns of a `Table` are _immutable after creation_, which means their names
 and data types cannot be changed after the `Table` has been created. Columns
 cannot be added or deleted after creation, but a `View` can be used to select
-an arbitary set of columns from the `Table`.
+an arbitrary set of columns from the `Table`.
 
 The immutability of columns and data types after creation is important, as it
 allows Perspective to operate quickly over a large dataset and accumulate data
@@ -74,7 +74,7 @@ const schema = {
 ```
 
 Because Perspective is built in multiple languages, data types are
-expressed with a common vocabulary of across all supported host languyages.
+expressed with a common vocabulary of across all supported host languages.
 These _String_ types are used to represent the data supported by Perspective:
 
 - `"integer"`: a 32-bit (or 64-bit depending on platform) integer
@@ -108,7 +108,7 @@ A `Table` can be initialized in two ways:
   empty.
 - With a dataset in a supported format;  in this case, a `schema` is inferred
   from the dataset's structure upon initialization.  Perspective supports a
-  variety of table-like data structures in Python and Javascript such as CSV, 
+  variety of table-like data structures in Python and Javascript such as CSV,
   `pandas.DataFrame` and JSON; see the language specific API documentation for
   a comprehensive list of supported formats.
 
@@ -132,7 +132,7 @@ const table = perspective.table(data, {limit: 1000});
 
 Initializing a `Table` with an `index` allows Perspective to treat a column as
 the primary key, allowing in-place updates of rows. Only a
-single column can be used as an `index`, and like other `Table` parameters, 
+single column can be used as an `index`, and like other `Table` parameters,
 cannot be changed or removed after the `Table` creation. A column of any type
 may be used as an `index`.
 
@@ -144,7 +144,7 @@ const table = perspective.table(data, {index: "a"});
 ```
 
 An indexed `Table` allows for in-place _updates_ whenever a new rows shares an
-`index` values with an existing row, _partial updates_ when such a row leaves 
+`index` values with an existing row, _partial updates_ when such a row leaves
 some column values `undefined`, and _removes_ to delete a row by `index`.
 
 ### `update()`

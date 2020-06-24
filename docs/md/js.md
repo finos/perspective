@@ -185,7 +185,7 @@ a nearly identical API.
 It exports Perspective's data interfaces:
 
 - `table()`: an interface over a single dataset, used to input static and
-  straming data into Perspective.
+  streaming data into Perspective.
   - In the browser, `table()`s live in a Web Worker to isolate their runtime
     from the renderer.
 - `view()`: a continuous query of a `table()`, used to read data and calculate
@@ -282,7 +282,7 @@ Perspective supports the following types:
 - datetime
 - string
 
-In some cases, the inferrence algorithm may not return exactly what you'd like.
+In some cases, the inference algorithm may not return exactly what you'd like.
 For example, a column may be interpreted as a `datetime` when you intended it to
 be a `string`, or a column may have no values at all (yet), as it will be
 updated with values from a real-time data source later on.
@@ -300,7 +300,7 @@ var schema = {
 const table2 = worker.table(schema);
 ```
 
-Once instatiated, a `table()` can be updated with new data via the `update()`
+Once instantiated, a `table()` can be updated with new data via the `update()`
 method:
 
 ```javascript
@@ -929,4 +929,3 @@ elem.addEventListener("perspective-click", function(event) {
     elem.restore(config);
 });
 ```
-
