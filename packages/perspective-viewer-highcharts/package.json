@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-highcharts",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Perspective.js",
     "main": "./dist/cjs/perspective-viewer-highcharts.js",
     "unpkg": "./dist/umd/perspective-viewer-highcharts.js",
@@ -50,8 +50,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.8.4",
-        "@finos/perspective": "^0.5.0",
-        "@finos/perspective-viewer": "^0.5.0",
+        "@finos/perspective": "^0.5.1",
+        "@finos/perspective-viewer": "^0.5.1",
         "chroma-js": "^1.3.4",
         "core-js": "^3.6.4",
         "detectie": "1.0.0",
@@ -61,7 +61,7 @@
         "highcharts-more": "^0.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.5.0",
+        "@finos/perspective-test": "^0.5.1",
         "@finos/perspective-webpack-plugin": "^0.5.0"
     }
 }

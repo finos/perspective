@@ -1,7 +1,7 @@
 {
     "name": "remote-express-typescript",
     "private": true,
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "An example of 2 Perspectives, one client and one server, streaming via Apache Arrow.",
     "scripts": {
         "start": "tsc && node dist/server.js"
@@ -9,10 +9,10 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.5.0",
-        "@finos/perspective-viewer": "^0.5.0",
-        "@finos/perspective-viewer-d3fc": "^0.5.0",
-        "@finos/perspective-viewer-datagrid": "^0.5.0"
+        "@finos/perspective": "^0.5.1",
+        "@finos/perspective-viewer": "^0.5.1",
+        "@finos/perspective-viewer-d3fc": "^0.5.1",
+        "@finos/perspective-viewer-datagrid": "^0.5.1"
     },
     "devDependencies": {
         "@types/express": "^4.17.3",

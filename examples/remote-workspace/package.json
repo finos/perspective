@@ -1,7 +1,7 @@
 {
     "name": "remote-workspace",
     "private": true,
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "An example app built using `@finos/perspective-workspace`.",
     "scripts": {
         "start:server": "webpack-dev-server --open",
@@ -11,11 +11,11 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.5.0",
-        "@finos/perspective-viewer": "^0.5.0",
-        "@finos/perspective-viewer-d3fc": "^0.5.0",
-        "@finos/perspective-viewer-datagrid": "^0.5.0",
-        "@finos/perspective-workspace": "^0.5.0"
+        "@finos/perspective": "^0.5.1",
+        "@finos/perspective-viewer": "^0.5.1",
+        "@finos/perspective-viewer-d3fc": "^0.5.1",
+        "@finos/perspective-viewer-datagrid": "^0.5.1",
+        "@finos/perspective-workspace": "^0.5.1"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.5.0",

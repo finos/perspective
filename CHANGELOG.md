@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.1] (2020-06-24)
+
+#### Added
+  * [#1090](https://github.com/finos/perspective/pull/1090) Computed expressions respect left-to-right associativity and operator precedence ([@sc1f](https://github.com/sc1f))
+  * [#1057](https://github.com/finos/perspective/pull/1057) Enable Manylinux wheel builds ([@sc1f](https://github.com/sc1f))
+
+#### Fixed
+  * [#1074](https://github.com/finos/perspective/pull/1074) Use local time for column/row headers and computed functions ([@sc1f](https://github.com/sc1f))
+  * [#1065](https://github.com/finos/perspective/pull/1065) Fix regression in regex for Firefox ([@sc1f](https://github.com/sc1f))
+  * [#1077](https://github.com/finos/perspective/pull/1077) Refactor manager internal API, speed up string filters in UI,  add manager API tests ([@sc1f](https://github.com/sc1f))
+  
+#### Internal
+  * [#1095](https://github.com/finos/perspective/pull/1095) Fix Windows build on Azure ([@sc1f](https://github.com/sc1f))
+  * [#1060](https://github.com/finos/perspective/pull/1060) Use `regular-table` ([@texodus](https://github.com/texodus))
+  * [#1091](https://github.com/finos/perspective/pull/1091) Cleans up CMakeLists & Python build scripts, fixes datetime string rendering ([@sc1f](https://github.com/sc1f))
+  * [#1046](https://github.com/finos/perspective/pull/1046) Remap lab extension command in makefile ([@timkpaine](https://github.com/timkpaine))
+  * [#1065](https://github.com/finos/perspective/pull/1065) Fix regression in regex for Firefox ([@sc1f](https://github.com/sc1f))
+  * [#1095](https://github.com/finos/perspective/pull/1095) Fix Windows build on Azure ([@sc1f](https://github.com/sc1f))
+  * [#1074](https://github.com/finos/perspective/pull/1074) Use local time for column/row headers and computed functions ([@sc1f](https://github.com/sc1f))
+
 ## [0.5.0] (2020-05-24)
 
 #### Added
