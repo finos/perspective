@@ -12,7 +12,7 @@ if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
 endif()
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
-set(PSP_ARROW_VERSION 0.16.0)
+set(PSP_ARROW_VERSION 0.15.1)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
     set(MACOS OFF)
@@ -403,7 +403,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 		endif()
 
-		find_package(PyArrow 0.16.0 REQUIRED)
+		find_package(PyArrow REQUIRED)
 
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
