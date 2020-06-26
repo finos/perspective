@@ -66,7 +66,7 @@ try {
         // `python/perspective/wheelhouse`.
         cmd += `&& ${PYTHON} -m auditwheel -v show ./dist/*.whl && ${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl`;
     } else if (IS_MACOS) {
-        cmd += " && mkdir -p ./wheelhouse && cp ./dist/*.whl ./wheelhouse";
+        cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
     }
 
     // TODO: MacOS wheel processed with delocate segfaults on
