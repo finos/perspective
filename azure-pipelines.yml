@@ -272,7 +272,7 @@ jobs:
           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
       # Build a python wheel for Mac 10.14
-      - bash: yarn _wheel_python --ci $(python_flag) --platform osx
+      - bash: yarn _wheel_python --ci $(python_flag) macos
         displayName: 'Build wheel'
 
       # Test the wheel
@@ -359,7 +359,7 @@ jobs:
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
     # Build a python wheel for Mac 10.14
-    - bash: yarn _wheel_python --ci $(python_flag) --platform osx
+    - bash: yarn _wheel_python --ci $(python_flag) --macos
       displayName: 'Build wheel'
 
     # Test the wheel

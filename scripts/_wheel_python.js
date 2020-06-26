@@ -7,7 +7,7 @@
  *
  */
 
-const {execute, execute_throw, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
+const {execute, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
 const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
@@ -53,9 +53,9 @@ try {
 
     if (IS_PY2) {
         // shutil_which is required in setup.py
-        cmd += bash`${PYTHON} -m pip install backports.shutil_which && `;
+        cmd = bash`${PYTHON} -m pip install backports.shutil_which && `;
     } else {
-        cmd += bash``;
+        cmd = bash``;
     }
 
     // Create a wheel
