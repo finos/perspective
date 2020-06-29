@@ -61,10 +61,15 @@ try {
     // Create a wheel
     cmd += `${PYTHON} setup.py bdist_wheel`;
 
-    if (MANYLINUX_VERSION && !IS_PY2) {
+    if (MANYLINUX_VERSION) {
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
-        cmd += `&& ${PYTHON} -m auditwheel -v show ./dist/*.whl && ${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl`;
+        let PYTHON_INTERPRETER = PYTHON;
+        if (IS_PY2) {
+            // Run auditwheel on python 3 against a python 2 wheel
+            PYTHON_INTERPRETER = "python3.7";
+        }
+        cmd += `&& ${PYTHON_INTERPRETER} -m auditwheel -v show ./dist/*.whl && ${PYTHON_INTERPRETER} -m auditwheel -v repair -L .lib ./dist/*.whl`;
     } else if (IS_MACOS) {
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
     }
