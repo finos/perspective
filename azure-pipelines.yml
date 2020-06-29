@@ -272,12 +272,11 @@ jobs:
           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
       # Build a python wheel for Mac 10.14
-      - bash: yarn _wheel_python --ci $(python_flag) macos
+      - bash: yarn _wheel_python --ci $(python_flag) --macos
         displayName: 'Build wheel'
 
       # Test the wheel
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag)
-        condition: and(succeeded(), ne(variables['python_flag'], '--python2'))
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
         displayName: 'Test Mac Wheel'
 
       # Save the artifact to Azure storage
@@ -363,8 +362,7 @@ jobs:
       displayName: 'Build wheel'
 
     # Test the wheel
-    - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag)
-      condition: and(succeeded(), ne(variables['python_flag'], '--python2'))
+    - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
       displayName: 'Test Mac Wheel'
 
     # Save the artifact to Azure storage
