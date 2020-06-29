@@ -131,12 +131,12 @@ jobs:
 
     # Test the wheel
     - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), ne(variables['python_flag'], '--python2'))
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       displayName: 'Test Manylinux Wheel'
 
     # Save the artifact to Azure storage
     - task: PublishPipelineArtifact@1
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''), ne(variables['python_flag'], '--python2'))
+      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
         artifactName: '$(artifact_name)'
