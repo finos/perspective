@@ -1,0 +1,81 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2018, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "~@finos/perspective-workspace/dist/theme/material.less";
+ 
+body {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.slider {
+  position: absolute;
+  width: 250px;
+  height: 10px;
+  overflow-x: hidden;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -125px;
+  margin-top: -5px;
+}
+
+.line {
+  position: absolute;
+  opacity: 0.4;
+  background: rgb(175, 175, 175);
+  width: 150%;
+  height: 5px;
+}
+
+.subline {
+  position: absolute;
+  background: rgb(153, 153, 153);
+  height: 5px;
+}
+
+.inc {
+  animation: increase 2s infinite;
+}
+
+.dec {
+  animation: decrease 2s 0.5s infinite;
+}
+
+@keyframes increase {
+  from {
+    left: -5%;
+    width: 5%;
+  }
+
+  to {
+    left: 130%;
+    width: 100%;
+  }
+}
+
+@keyframes decrease {
+  from {
+    left: -80%;
+    width: 80%;
+  }
+
+  to {
+    left: 110%;
+    width: 10%;
+  }
+}
