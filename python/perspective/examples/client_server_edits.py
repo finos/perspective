@@ -1,13 +1,11 @@
 import os
 import os.path
-import random
 import sys
 import logging
 import tornado.websocket
 import tornado.web
 import tornado.ioloop
 import pandas as pd
-from datetime import datetime
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler

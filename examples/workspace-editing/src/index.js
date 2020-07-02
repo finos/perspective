@@ -17,21 +17,35 @@ import "./index.less";
 
 const URL = "ws://localhost:8888/websocket";
 
+/**
+ * `perspective.websocket` allows Perspective in Javascript to access tables
+ * and views hosted on a remote server running `perspective.js` or
+ * `perspective-python`.
+ *
+ * The server implementation we will be working with in this example is in
+ * `/python/examples/client_server_editing.py`. For an example server
+ * in Javascript, see `/examples/remote-express`.
+ */
 const websocket = perspective.websocket(URL);
 const worker = perspective.shared_worker();
 
+/**
+ * `open_table` and `open_view` allow you to call API methods on remotely
+ * hosted Perspective tables and views, just as you would on a locally created
+ * table/view.
+ */
 const server_table = websocket.open_table("data_source_one");
 const server_view = websocket.open_view("view_one");
 
 // All viewers are based on the same table, which then feed edits back to a
-// table on the server.
+// table on the server with a schema.
 let table;
 
 // Keep track of an array of ports. Each new viewer instance creates a new
-// port. For code simplicity, we do not track ports by viewer name, although
-// it is trivial to do so, and the performance benefits of doing so would be
-// negligible, as the `n` in the O(n) search would be number of new viewers
-// created in one session.
+// port, which is identified by an integer `port_id`.
+//
+// For code simplicity, we do not track ports by viewer name. Although
+// it is trivial to do so, the performance benefits are negligible.
 const PORTS = [];
 
 /**
@@ -43,17 +57,27 @@ const PORTS = [];
  */
 const datasource = async function() {
     const load_start = performance.now();
+
+    // The API of the remote table/view are symmetric.
     const arrow = await server_view.to_arrow();
+
+    // Create a table in browser memory.
     const table = worker.table(arrow, {index: "Row ID"});
+
+    // Clears the progress bar and overlay - added for user experience.
     console.log(`Finished load in: ${performance.now() - load_start}`);
     const progress_bar = document.getElementById("progress");
     progress_bar.remove();
+
     return table;
 };
 
+/**
+ * After the viewers have been registered to the workspace, set up our
+ * `on_update` callbacks that will handle sending edits to the server
+ * and receiving updates from the server.
+ */
 const setup_handlers = async () => {
-    // Set up ports based on the viewer configuration - each viewer needs a
-    // unique port.
     const viewers = window.workspace.querySelectorAll("perspective-viewer");
     const client_table = viewers[0].table;
     const client_view = client_table.view();
@@ -69,9 +93,10 @@ const setup_handlers = async () => {
 
     // When the client updates, decide whether it is an edit or an update.
     // Edits come through any of the edit ports defined in `PORTS`, so allow
-    // those to propagate to the server. Updates back from the server, however,
-    // should not be sent `back` to the server (as it would create an infinite
-    // loop of updates).
+    // those to propagate to the server.
+    //
+    // Updates back from the server, however, should not be sent `back` to the
+    // server (as it would create an infinite loop of updates).
     client_view.on_update(
         updated => {
             const client_ports = Object.keys(PORTS).map(viewer => PORTS[viewer]);
@@ -128,6 +153,8 @@ window.addEventListener("load", async () => {
     // our custom on_update handlers.
     let setup_done = false;
 
+    // `workspace-layout-update` fires every time the layout changes, so we can
+    // use it to check if new viewers have been added.
     window.workspace.addEventListener("workspace-layout-update", async () => {
         if (!setup_done) {
             await setup_handlers();
@@ -137,9 +164,11 @@ window.addEventListener("load", async () => {
         }
     });
 
+    // Register the client-side table we just created.
     window.workspace.tables.set("datasource", table);
 
-    await window.workspace.restore({
+    // Give the workspace a layout to display.
+    window.workspace.restore({
         detail: {
             main: {
                 type: "split-area",
