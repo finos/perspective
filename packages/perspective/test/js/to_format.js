@@ -7,7 +7,7 @@
  *
  */
 
-var int_float_string_data = [
+const int_float_string_data = [
     {int: 1, float: 2.25, string: "a", datetime: new Date()},
     {int: 2, float: 3.5, string: "b", datetime: new Date()},
     {int: 3, float: 4.75, string: "c", datetime: new Date()},
@@ -31,6 +31,8 @@ module.exports = perspective => {
                 start_row: 5
             });
             expect(json).toEqual([]);
+            view.delete();
+            table.delete();
         });
 
         it("should filter out invalid start columns", async function() {
@@ -40,6 +42,8 @@ module.exports = perspective => {
                 start_col: 5
             });
             expect(json).toEqual([{}, {}, {}, {}]);
+            view.delete();
+            table.delete();
         });
 
         it("should respect start/end rows", async function() {
@@ -52,6 +56,8 @@ module.exports = perspective => {
             let comparator = int_float_string_data[2];
             comparator.datetime = +comparator.datetime;
             expect(json[0]).toEqual(comparator);
+            view.delete();
+            table.delete();
         });
 
         it("should respect end rows when larger than data size", async function() {
@@ -67,6 +73,8 @@ module.exports = perspective => {
                     return x;
                 })
             );
+            view.delete();
+            table.delete();
         });
 
         it("should respect start/end columns", async function() {
@@ -78,6 +86,87 @@ module.exports = perspective => {
             });
             let comparator = {string: int_float_string_data.map(d => d.string)};
             expect(json).toEqual(comparator);
+            view.delete();
+            table.delete();
+        });
+
+        it("should floor float start rows", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_row: 1.5
+            });
+            expect(json).toEqual(
+                int_float_string_data.slice(1).map(x => {
+                    x.datetime = +x.datetime;
+                    return x;
+                })
+            );
+            view.delete();
+            table.delete();
+        });
+
+        it("should ceil float end rows", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                end_row: 1.5
+            });
+            expect(json).toEqual(
+                // deep copy
+                JSON.parse(JSON.stringify(int_float_string_data))
+                    .slice(0, 2)
+                    .map(x => {
+                        x.datetime = +new Date(x.datetime);
+                        return x;
+                    })
+            );
+            view.delete();
+            table.delete();
+        });
+
+        it("should floor/ceil float start/end rows", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_row: 2.9,
+                end_row: 2.4
+            });
+            let comparator = int_float_string_data[2];
+            comparator.datetime = +comparator.datetime;
+            expect(json[0]).toEqual(comparator);
+            view.delete();
+            table.delete();
+        });
+
+        it("should ceil float end rows when larger than data size", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_row: 2,
+                end_row: 5.5
+            });
+            expect(json).toEqual(
+                int_float_string_data.slice(2).map(x => {
+                    x.datetime = +x.datetime;
+                    return x;
+                })
+            );
+            view.delete();
+            table.delete();
+        });
+
+        it("should floor/ceil float start/end columns", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_columns({
+                start_col: 2.6,
+                end_col: 2.4
+            });
+            let comparator = {string: int_float_string_data.map(d => d.string)};
+            expect(json).toEqual(comparator);
+            view.delete();
+            table.delete();
         });
 
         it("one-sided views should have row paths", async function() {
@@ -89,6 +178,8 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeDefined();
             }
+            view.delete();
+            table.delete();
         });
 
         it("one-sided views with start_col > 0 should have row paths", async function() {
@@ -100,6 +191,8 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeDefined();
             }
+            view.delete();
+            table.delete();
         });
 
         it("one-sided column-only views should not have row paths", async function() {
@@ -111,6 +204,8 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeUndefined();
             }
+            view.delete();
+            table.delete();
         });
 
         it("column-only views should not have header rows", async function() {
@@ -126,6 +221,8 @@ module.exports = perspective => {
                 {"1|x": 1, "1|y": "a", "2|x": null, "2|y": null},
                 {"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}
             ]);
+            view.delete();
+            table.delete();
         });
 
         it("column-only views should return correct windows of data", async function() {
@@ -140,6 +237,8 @@ module.exports = perspective => {
                 start_row: 1
             });
             expect(json).toEqual([{"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}]);
+            view.delete();
+            table.delete();
         });
 
         it("two-sided views should have row paths", async function() {
@@ -152,6 +251,8 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeDefined();
             }
+            view.delete();
+            table.delete();
         });
 
         it("two-sided views with start_col > 0 should have row paths", async function() {
@@ -164,6 +265,8 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeDefined();
             }
+            view.delete();
+            table.delete();
         });
 
         it("two-sided sorted views with start_col > 0 should have row paths", async function() {
@@ -177,6 +280,8 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeDefined();
             }
+            view.delete();
+            table.delete();
         });
     });
 
@@ -193,6 +298,8 @@ module.exports = perspective => {
             let name = Object.keys(json[0])[1];
             // make sure that number of separators = num of column pivots
             expect((name.match(/\|/g) || []).length).toEqual(2);
+            view.delete();
+            table.delete();
         });
 
         it("should return dates in native form by default", async function() {
@@ -227,6 +334,8 @@ module.exports = perspective => {
                 {__ROW_PATH__: [3], datetime: 1, float: 4.75, int: 3, string: 1},
                 {__ROW_PATH__: [4], datetime: 1, float: 5.25, int: 4, string: 1}
             ]);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -570,6 +679,8 @@ module.exports = perspective => {
                         index: true
                     });
                     expect(json).toEqual([{float: 2.25, __INDEX__: [0]}]);
+                    view.delete();
+                    table.delete();
                 });
 
                 it("should return correct pkey for float indexed table", async function() {
@@ -583,6 +694,8 @@ module.exports = perspective => {
                         index: true
                     });
                     expect(json).toEqual([{float: 2.25, __INDEX__: [2.25]}]);
+                    view.delete();
+                    table.delete();
                 });
 
                 it("should return correct pkey for string indexed table", async function() {
@@ -596,6 +709,8 @@ module.exports = perspective => {
                         index: true
                     });
                     expect(json).toEqual([{float: 2.25, __INDEX__: ["a"]}]);
+                    view.delete();
+                    table.delete();
                 });
 
                 it("should return correct pkey for date indexed table", async function() {
@@ -613,6 +728,8 @@ module.exports = perspective => {
                         index: true
                     });
                     expect(json).toEqual([{int: 2, datetime: data[1].datetime.getTime(), __INDEX__: [data[1].datetime.getTime()]}]);
+                    view.delete();
+                    table.delete();
                 });
 
                 it("should return correct pkey for all rows + columns on an unindexed table", async function() {
@@ -625,6 +742,8 @@ module.exports = perspective => {
                     for (let i = 0; i < json.length; i++) {
                         expect(json[i].__INDEX__).toEqual([i]);
                     }
+                    view.delete();
+                    table.delete();
                 });
 
                 it("should return correct pkey for all rows + columns on an indexed table", async function() {
@@ -638,6 +757,8 @@ module.exports = perspective => {
                     for (let i = 0; i < json.length; i++) {
                         expect(json[i].__INDEX__).toEqual([pkeys[i]]);
                     }
+                    view.delete();
+                    table.delete();
                 });
             });
         });
@@ -654,6 +775,8 @@ module.exports = perspective => {
 
                 // total row contains all pkeys for underlying rows; each aggregated row should have pkeys for the rows that belong to it
                 expect(json).toEqual(pivoted_output);
+                view.delete();
+                table.delete();
             });
         });
 

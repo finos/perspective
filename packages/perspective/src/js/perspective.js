@@ -364,10 +364,10 @@ export default function(Module) {
         const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col + psp_offset : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
 
         // Return the calculated values
-        options.start_row = start_row;
-        options.end_row = end_row;
-        options.start_col = start_col;
-        options.end_col = end_col;
+        options.start_row = Math.floor(start_row);
+        options.end_row = Math.ceil(end_row);
+        options.start_col = Math.floor(start_col);
+        options.end_col = Math.ceil(end_col);
 
         return options;
     };

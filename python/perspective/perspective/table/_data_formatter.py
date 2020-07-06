@@ -7,7 +7,7 @@
 #
 
 import numpy as np
-from math import trunc
+from math import floor, ceil, trunc
 from ._constants import COLUMN_SEPARATOR_STRING
 from .libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
     get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
@@ -137,10 +137,10 @@ def _parse_format_options(view, options):
     '''Given a user-provided options dictionary, extract the useful values.'''
     max_cols = view.num_columns() + (1 if view._sides > 0 else 0)
     return {
-        "start_row": max(options.get("start_row", 0), 0),
-        "end_row": min(options.get("end_row", view.num_rows()), view.num_rows()),
-        "start_col": max(options.get("start_col", 0), 0),
-        "end_col": min(options.get("end_col", max_cols) * (view._num_hidden_cols() + 1), max_cols),
+        "start_row": floor(max(options.get("start_row", 0), 0)),
+        "end_row": ceil(min(options.get("end_row", view.num_rows()), view.num_rows())),
+        "start_col": floor(max(options.get("start_col", 0), 0)),
+        "end_col": ceil(min(options.get("end_col", max_cols) * (view._num_hidden_cols() + 1), max_cols)),
         "index": options.get("index", False),
         "leaves_only": options.get("leaves_only", False),
         "has_row_path": view._sides > 0 and (not view._column_only)
