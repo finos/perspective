@@ -1390,7 +1390,6 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == [datetime(2020, 1, 31)]
 
-        @mark.skip
         def test_table_week_bucket_edge_in_EST(object):
             """Make sure edge cases are fixed for week_bucket - if a local
             time converted to UTC is in the next day, the week_bucket
@@ -1410,7 +1409,6 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == [datetime(2020, 1, 27)]
 
-        @mark.skip
         def test_table_week_bucket_edge_in_CST(object):
             os.environ["TZ"] = "US/Central"
             time.tzset()
@@ -1430,7 +1428,6 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == [datetime(2020, 1, 27)]
 
-        @mark.skip
         def test_table_week_bucket_edge_in_PST(object):
             os.environ["TZ"] = "US/Pacific"
             time.tzset()
@@ -1571,7 +1568,7 @@ if os.name != 'nt':
                 "column": "computed",
                 "computed_function_name": "year_bucket"
             }]
-  
+
             data = {
                 "a": [datetime(2019, 12, 31, 23, 59)]
             }

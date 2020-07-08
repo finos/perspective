@@ -681,21 +681,34 @@ t_tscalar week_bucket<DTYPE_TIME>(t_tscalar x) {
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Convert the timestamp to local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
+
+    // Take the ymd from the `tm`, now in local time, and create a
+    // date::year_month_day.
+    date::year year {1900 + t->tm_year};
+
+    // date::month is [1-12], whereas `std::tm::tm_mon` is [0-11]
+    date::month month {static_cast<std::uint32_t>(t->tm_mon) + 1};
+    date::day day {static_cast<std::uint32_t>(t->tm_mday)};
+    date::year_month_day ymd(year, month, day);
+
+    // Convert to a `sys_days` representing no. of days since epoch
+    date::sys_days days_since_epoch = ymd;
 
     // Subtract Sunday from the ymd to get the beginning of the last day
-    date::year_month_day ymd = days - (date::weekday{days} - date::Monday);
+    ymd = days_since_epoch - (date::weekday{days_since_epoch} - date::Monday);
 
     // Get the day of month and day of the week
-    std::int32_t year = static_cast<std::int32_t>(ymd.year());
+    std::int32_t year_int = static_cast<std::int32_t>(ymd.year());
 
     // date::month is [1-12], whereas `t_date.month()` is [0-11]
-    std::uint32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
-    std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
+    std::uint32_t month_int = static_cast<std::uint32_t>(ymd.month()) - 1;
+    std::uint32_t day_int = static_cast<std::uint32_t>(ymd.day());
 
     // Return the new `t_date`
-    t_date new_date = t_date(year, month, day);
+    t_date new_date = t_date(year_int, month_int, day_int);
     rval.set(new_date);
     return rval;
 }
