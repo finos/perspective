@@ -617,18 +617,20 @@ t_tscalar day_bucket<DTYPE_TIME>(t_tscalar x) {
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
     date::sys_time<std::chrono::milliseconds> ts(ms_timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Use localtime so that the day of week is consistent with all output
+    // datetimes, which are in local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
 
-    // Cast the `time_point` to contain year/month/day
-    auto ymd = date::year_month_day(days);
+    // Convert to a std::tm
+    std::tm* t = std::localtime(&temp);
 
     // Get the year and create a new `t_date`
-    std::int32_t year = static_cast<std::int32_t>(ymd.year());
+    std::int32_t year = static_cast<std::int32_t>(t->tm_year + 1900);
 
     // Month in `t_date` is [0-11]
-    std::int32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
-    std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
+    std::int32_t month = static_cast<std::uint32_t>(t->tm_mon);
+    std::uint32_t day = static_cast<std::uint32_t>(t->tm_mday);
+
     rval.set(t_date(year, month, day));
     return rval;
 }
