@@ -1562,6 +1562,63 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == [datetime(2020, 6, 1)]
 
+        def test_table_year_bucket_edge_in_EST(object):
+            """Make sure edge cases are fixed for year_bucket - if a local
+            time converted to UTC is in the next day, the year_bucket
+            computation needs to be in local time."""
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "year_bucket"
+            }]
+  
+            data = {
+                "a": [datetime(2019, 12, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2019, 1, 1)]
+
+        def test_table_year_bucket_edge_in_CST(object):
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "year_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2019, 12, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2019, 1, 1)]
+
+        def test_table_year_bucket_edge_in_PST(object):
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "year_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2019, 12, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2019, 1, 1)]
+
 
 class TestTableDateTimePivots(object):
 
