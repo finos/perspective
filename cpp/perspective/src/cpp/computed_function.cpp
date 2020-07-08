@@ -715,20 +715,18 @@ t_tscalar month_bucket<DTYPE_TIME>(t_tscalar x) {
     if (x.is_none() || !x.is_valid()) return rval;
 
     // Convert the int64 to a milliseconds duration timestamp
-    std::chrono::milliseconds timestamp(x.to_int64());
+    std::chrono::milliseconds ms_timestamp(x.to_int64());
 
     // Convert the timestamp to a `sys_time` (alias for `time_point`)
-    date::sys_time<std::chrono::milliseconds> ts(timestamp);
+    date::sys_time<std::chrono::milliseconds> ts(ms_timestamp);
 
-    // Create a copy of the timestamp with day precision
-    auto days = date::floor<date::days>(ts);
+    // Convert the timestamp to local time
+    std::time_t temp = std::chrono::system_clock::to_time_t(ts);
+    std::tm* t = std::localtime(&temp);
 
-    // Cast the `time_point` to contain year/month/day
-    auto ymd = date::year_month_day(days);
-
-    // Get the year and create a new `t_date`
-    std::int32_t year = static_cast<std::int32_t>(ymd.year());
-    std::int32_t month = static_cast<std::uint32_t>(ymd.month()) - 1;
+    // Use the `tm` to create the `t_date`
+    std::int32_t year = static_cast<std::int32_t>(t->tm_year + 1900);
+    std::int32_t month = static_cast<std::uint32_t>(t->tm_mon);
     rval.set(t_date(year, month, 1));
     return rval;
 }

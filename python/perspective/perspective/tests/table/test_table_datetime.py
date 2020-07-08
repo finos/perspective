@@ -1276,6 +1276,63 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == ["6 Friday"]
 
+        def test_table_month_of_year_edge_in_EST(object):
+            """Make sure edge cases are fixed for month of year - if a local
+            time converted to UTC is in the next month, the month of year
+            computation needs to be in local time."""
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_of_year"
+            }]
+
+            data = {
+                "a": [datetime(2020, 1, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == ["01 January"]
+
+        def test_table_month_of_year_edge_in_CST(object):
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_of_year"
+            }]
+
+            data = {
+                "a": [datetime(2020, 1, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == ["01 January"]
+
+        def test_table_month_of_year_edge_in_PST(object):
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_of_year"
+            }]
+
+            data = {
+                "a": [datetime(2020, 1, 31, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == ["01 January"]
+
         def test_table_day_bucket_edge_in_EST(object):
             """Make sure edge cases are fixed for day_bucket - if a local
             time converted to UTC is in the next day, the day_bucket
@@ -1333,62 +1390,177 @@ if os.name != 'nt':
             result = view.to_dict()
             assert result["computed"] == [datetime(2020, 1, 31)]
 
-        def test_table_month_of_year_edge_in_EST(object):
-            """Make sure edge cases are fixed for month of year - if a local
-            time converted to UTC is in the next month, the month of year
+        @mark.skip
+        def test_table_week_bucket_edge_in_EST(object):
+            """Make sure edge cases are fixed for week_bucket - if a local
+            time converted to UTC is in the next day, the week_bucket
             computation needs to be in local time."""
             computed_columns = [{
                 "inputs": ["a"],
                 "column": "computed",
-                "computed_function_name": "month_of_year"
+                "computed_function_name": "week_bucket"
             }]
 
             data = {
-                "a": [datetime(2020, 1, 31, 23, 59)]
+                "a": [datetime(2020, 2, 2, 23, 59)]
             }
 
             table = Table(data)
             view = table.view(computed_columns=computed_columns)
             result = view.to_dict()
-            assert result["computed"] == ["01 January"]
+            assert result["computed"] == [datetime(2020, 1, 27)]
 
-        def test_table_month_of_year_edge_in_CST(object):
+        @mark.skip
+        def test_table_week_bucket_edge_in_CST(object):
             os.environ["TZ"] = "US/Central"
             time.tzset()
 
             computed_columns = [{
                 "inputs": ["a"],
                 "column": "computed",
-                "computed_function_name": "month_of_year"
+                "computed_function_name": "week_bucket"
             }]
 
             data = {
-                "a": [datetime(2020, 1, 31, 23, 59)]
+                "a": [datetime(2020, 2, 2, 23, 59)]
             }
 
             table = Table(data)
             view = table.view(computed_columns=computed_columns)
             result = view.to_dict()
-            assert result["computed"] == ["01 January"]
+            assert result["computed"] == [datetime(2020, 1, 27)]
 
-        def test_table_month_of_year_edge_in_PST(object):
+        @mark.skip
+        def test_table_week_bucket_edge_in_PST(object):
             os.environ["TZ"] = "US/Pacific"
             time.tzset()
 
             computed_columns = [{
                 "inputs": ["a"],
                 "column": "computed",
-                "computed_function_name": "month_of_year"
+                "computed_function_name": "week_bucket"
             }]
 
             data = {
-                "a": [datetime(2020, 1, 31, 23, 59)]
+                "a": [datetime(2020, 2, 2, 23, 59)]
             }
 
             table = Table(data)
             view = table.view(computed_columns=computed_columns)
             result = view.to_dict()
-            assert result["computed"] == ["01 January"]
+            assert result["computed"] == [datetime(2020, 1, 27)]
+
+        def test_table_week_bucket_edge_flip_in_EST(object):
+            """Week bucket should flip backwards to last month."""
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "week_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2020, 3, 1, 12, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2020, 2, 24)]
+
+        def test_table_week_bucket_edge_flip_in_CST(object):
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "week_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2020, 3, 1, 12, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2020, 2, 24)]
+
+        def test_table_week_bucket_edge_flip_in_PST(object):
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "week_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2020, 3, 1, 12, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2020, 2, 24)]
+
+        def test_table_month_bucket_edge_in_EST(object):
+            """Make sure edge cases are fixed for month_bucket - if a local
+            time converted to UTC is in the next day, the month_bucket
+            computation needs to be in local time."""
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2020, 6, 30, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2020, 6, 1)]
+
+        def test_table_month_bucket_edge_in_CST(object):
+            os.environ["TZ"] = "US/Central"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2020, 6, 30, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2020, 6, 1)]
+
+        def test_table_month_bucket_edge_in_PST(object):
+            os.environ["TZ"] = "US/Pacific"
+            time.tzset()
+
+            computed_columns = [{
+                "inputs": ["a"],
+                "column": "computed",
+                "computed_function_name": "month_bucket"
+            }]
+
+            data = {
+                "a": [datetime(2020, 6, 30, 23, 59)]
+            }
+
+            table = Table(data)
+            view = table.view(computed_columns=computed_columns)
+            result = view.to_dict()
+            assert result["computed"] == [datetime(2020, 6, 1)]
 
 
 class TestTableDateTimePivots(object):
