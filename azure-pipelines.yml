@@ -369,7 +369,7 @@ jobs:
     - script: npm install -g yarn
       displayName: "Install Yarn"
 
-    - script: yarn
+    - script: yarn --network-timeout 600000
       displayName: 'Install Deps'
 
     - script: yarn build_python --ci $(python_flag)
