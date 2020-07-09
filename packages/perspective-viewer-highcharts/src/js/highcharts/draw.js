@@ -53,22 +53,35 @@ export const draw = (mode, set_config, restyle) =>
         const columns = config.columns;
         const real_columns = JSON.parse(this.getAttribute("columns"));
 
-        const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false)]);
+        const [view_schema, computed_schema, tschema] = await Promise.all([view.schema(false), view.computed_schema(false), this._table.schema(false)]);
         let element;
 
         if (task.cancelled) {
             return;
         }
 
+        /**
+         * Retrieve a tree axis column from the table and computed schemas,
+         * returning a String type or `undefined`.
+         * @param {*} column a column name
+         */
+        const get_tree_type = function(column) {
+            let type = tschema[column];
+            if (!type) {
+                type = computed_schema[column];
+            }
+            return type;
+        };
+
         let configs = [],
             xaxis_name = columns.length > 0 ? columns[0] : undefined,
-            xaxis_type = schema[xaxis_name],
+            xaxis_type = view_schema[xaxis_name],
             yaxis_name = columns.length > 1 ? columns[1] : undefined,
-            yaxis_type = schema[yaxis_name],
+            yaxis_type = view_schema[yaxis_name],
             xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
-            xtree_type = tschema[xtree_name],
+            xtree_type = get_tree_type(xtree_name),
             ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
-            ytree_type = tschema[ytree_name],
+            ytree_type = get_tree_type(ytree_name),
             num_aggregates = columns.length;
 
         try {
@@ -80,7 +93,7 @@ export const draw = (mode, set_config, restyle) =>
                     cols = await view.to_columns();
                 }
                 const config = (configs[0] = default_config.call(this, real_columns, mode));
-                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, real_columns, row_pivots, col_pivots);
+                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, view_schema, real_columns, row_pivots, col_pivots);
 
                 config.legend.floating = series.length <= 20;
                 config.legend.enabled = col_pivots.length > 0;
@@ -158,7 +171,7 @@ export const draw = (mode, set_config, restyle) =>
                     } else {
                         cols = await view.to_columns();
                     }
-                    s = await make_xy_column_data(cols, schema, columns, row_pivots, col_pivots);
+                    s = await make_xy_column_data(cols, view_schema, columns, row_pivots, col_pivots);
                 } else {
                     let js;
                     if (end_col || end_row) {
@@ -166,7 +179,7 @@ export const draw = (mode, set_config, restyle) =>
                     } else {
                         js = await view.to_json();
                     }
-                    s = await make_xy_data(js, schema, columns, row_pivots, col_pivots);
+                    s = await make_xy_data(js, view_schema, columns, row_pivots, col_pivots);
                 }
 
                 const series = s[0];
