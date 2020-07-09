@@ -48,6 +48,8 @@ function treemap(container, settings) {
         .each(function({split, data}) {
             const treemapSvg = d3.select(this);
 
+            console.log(split, data);
+
             if (!settings.treemaps[split]) settings.treemaps[split] = {};
 
             treemapSeries()

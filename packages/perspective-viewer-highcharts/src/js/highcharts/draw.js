@@ -63,7 +63,7 @@ export const draw = (mode, set_config, restyle) =>
         /**
          * Retrieve a tree axis column from the table and computed schemas,
          * returning a String type or `undefined`.
-         * @param {*} column a column name
+         * @param {String} column a column name
          */
         const get_tree_type = function(column) {
             let type = tschema[column];

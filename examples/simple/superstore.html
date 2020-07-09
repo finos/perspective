@@ -17,7 +17,6 @@
     <script src="perspective-viewer.js"></script>
     <script src="perspective-viewer-hypergrid.js"></script>
     <script src="perspective-viewer-datagrid.js"></script>
-    <script src="perspective-viewer-highcharts.js"></script>
     <script src="perspective-viewer-d3fc.js"></script>
 
     <script src="perspective.js"></script>
@@ -30,8 +29,9 @@
 
 <body>
 
-    <perspective-viewer plugin="y_line" row-pivots='["hour_bucket(Ship Date)"]'columns='["Sales",
-    "Profit"]' computed-columns='["hour_bucket(\"Ship Date\")"]'>
+    <perspective-viewer plugin="datagrid" row-pivots='["Region", "State",
+    "City"]' column-pivots='["Category", "Sub-Category"]' sort='[["Profit","desc"]]' columns='["Sales",
+    "Profit"]'>
 
     </perspective-viewer>
 

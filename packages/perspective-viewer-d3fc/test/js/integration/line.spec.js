@@ -20,6 +20,19 @@ utils.with_server({}, () => {
         "line.html",
         () => {
             simple_tests.default();
+
+            test.capture("Sets a category axis when pivoted by a computed datetime", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => element.setAttribute("computed-columns", JSON.stringify(["hour_bucket('Ship Date')"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["hour_bucket(Ship Date)"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("columns", '["State","Sales"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("aggregates", '{"State":"dominant","Sales":"sum"}'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );
