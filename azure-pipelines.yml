@@ -164,6 +164,10 @@ jobs:
         versionSpec: '12.x'
 
     - script: |
+        choco install tbb
+      displayName: "System deps"
+
+    - script: |
         which python > python.txt
         set /p PYTHON=<python.txt
         ln -s %PYTHON% %PYTHON%$(python.version)
@@ -233,7 +237,7 @@ jobs:
           versionSpec: '12.x'
 
       - script: |
-          brew install boost
+          brew install boost tbb
         displayName: "System deps"
 
       - script: |
@@ -353,7 +357,7 @@ jobs:
         versionSpec: '12.x'
 
     - script: |
-        brew install boost
+        brew install boost tbb
       displayName: "System deps"
 
     - script: |

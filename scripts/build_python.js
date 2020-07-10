@@ -93,7 +93,7 @@ try {
     } else if (IS_INSTALL) {
         cmd = `${PYTHON} -m pip install . --no-clean`;
     } else {
-        cmd = bash`${PYTHON} setup.py build -v`;
+        cmd = bash`${PYTHON} setup.py build -v && ${PYTHON} setup.py build_ext --inplace`;
     }
 
     if (IS_DOCKER) {
