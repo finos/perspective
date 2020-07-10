@@ -8,6 +8,7 @@
  */
 
 const node_perspective = require("../../dist/cjs/perspective.node.js");
+// const web_worker_perspective = require("../../dist/cjs/perspective.parallel.js");
 
 const RUNTIMES = {
     NODE: node_perspective
@@ -27,6 +28,7 @@ const pivot_nulls = require("./pivot_nulls.js");
 const computed_tests = require("./computed.js");
 const delete_tests = require("./delete.js");
 const port_tests = require("./ports.js");
+// const web_worker_tests = require("./web_worker.js");
 
 describe("perspective.js", function() {
     Object.keys(RUNTIMES).forEach(function(mode) {
@@ -47,4 +49,9 @@ describe("perspective.js", function() {
             port_tests(RUNTIMES[mode], mode);
         });
     });
+
+    // describe("Web Worker", function() {
+    //     // Test interaction with webworkers
+    //     web_worker_tests(web_worker_perspective);
+    // });
 });
