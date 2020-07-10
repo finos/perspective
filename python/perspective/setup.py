@@ -33,6 +33,22 @@ except ImportError:
     import multiprocessing
     CPU_COUNT = multiprocessing.cpu_count()
 
+try:
+    import numpy
+    numpy_includes = numpy.get_include()
+except ImportError:
+    print('Must install numpy prior to installing perspective!')
+    raise
+
+try:
+    import pyarrow
+    pyarrow_includes = pyarrow.get_include()
+    pyarrow_library_dirs = pyarrow.get_library_dirs()
+    pyarrow_libraries = pyarrow.get_libraries()
+except ImportError:
+    print('Must install pyarrow prior to installing perspective!')
+    raise
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -84,91 +100,142 @@ def get_version(file, name='__version__'):
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
 
-class PSPExtension(Extension):
-    def __init__(self, name, sourcedir='dist'):
-        Extension.__init__(self, name, sources=[])
-        self.sourcedir = os.path.abspath(sourcedir)
+sources = [ 
+	'dist/src/cpp/aggregate.cpp',
+	'dist/src/cpp/aggspec.cpp',
+	'dist/src/cpp/arg_sort.cpp',
+	'dist/src/cpp/arrow_loader.cpp',
+	'dist/src/cpp/arrow_writer.cpp',
+	'dist/src/cpp/base.cpp',
+	'dist/src/cpp/base_impl_linux.cpp',
+	'dist/src/cpp/base_impl_osx.cpp',
+	'dist/src/cpp/base_impl_wasm.cpp',
+	'dist/src/cpp/base_impl_win.cpp',
+	'dist/src/cpp/binding.cpp',
+	'dist/src/cpp/build_filter.cpp',
+	'dist/src/cpp/column.cpp',
+	'dist/src/cpp/comparators.cpp',
+	'dist/src/cpp/compat.cpp',
+	'dist/src/cpp/compat_impl_linux.cpp',
+	'dist/src/cpp/compat_impl_osx.cpp',
+	'dist/src/cpp/compat_impl_win.cpp',
+	'dist/src/cpp/computed.cpp',
+	'dist/src/cpp/computed_column_map.cpp',
+	'dist/src/cpp/computed_function.cpp',
+	'dist/src/cpp/config.cpp',
+	'dist/src/cpp/context_base.cpp',
+	'dist/src/cpp/context_grouped_pkey.cpp',
+	'dist/src/cpp/context_handle.cpp',
+	'dist/src/cpp/context_one.cpp',
+	'dist/src/cpp/context_two.cpp',
+	'dist/src/cpp/context_zero.cpp',
+	'dist/src/cpp/custom_column.cpp',
+	'dist/src/cpp/data.cpp',
+	'dist/src/cpp/data_slice.cpp',
+	'dist/src/cpp/data_table.cpp',
+	'dist/src/cpp/date.cpp',
+	'dist/src/cpp/dense_nodes.cpp',
+	'dist/src/cpp/dense_tree_context.cpp',
+	'dist/src/cpp/dense_tree.cpp',
+	'dist/src/cpp/dependency.cpp',
+	'dist/src/cpp/extract_aggregate.cpp',
+	'dist/src/cpp/filter.cpp',
+	'dist/src/cpp/flat_traversal.cpp',
+	'dist/src/cpp/get_data_extents.cpp',
+	'dist/src/cpp/gnode.cpp',
+	'dist/src/cpp/gnode_state.cpp',
+	'dist/src/cpp/histogram.cpp',
+	'dist/src/cpp/logtime.cpp',
+	'dist/src/cpp/mask.cpp',
+	'dist/src/cpp/min_max.cpp',
+	'dist/src/cpp/multi_sort.cpp',
+	'dist/src/cpp/none.cpp',
+	'dist/src/cpp/path.cpp',
+	'dist/src/cpp/pivot.cpp',
+	'dist/src/cpp/pool.cpp',
+	'dist/src/cpp/port.cpp',
+	'dist/src/cpp/process_state.cpp',
+	'dist/src/cpp/raii.cpp',
+	'dist/src/cpp/raii_impl_linux.cpp',
+	'dist/src/cpp/raii_impl_osx.cpp',
+	'dist/src/cpp/raii_impl_win.cpp',
+	'dist/src/cpp/range.cpp',
+	'dist/src/cpp/rlookup.cpp',
+	'dist/src/cpp/scalar.cpp',
+	'dist/src/cpp/schema_column.cpp',
+	'dist/src/cpp/schema.cpp',
+	'dist/src/cpp/slice.cpp',
+	'dist/src/cpp/sort_specification.cpp',
+	'dist/src/cpp/sparse_tree.cpp',
+	'dist/src/cpp/sparse_tree_node.cpp',
+	'dist/src/cpp/step_delta.cpp',
+	'dist/src/cpp/storage.cpp',
+	'dist/src/cpp/storage_impl_linux.cpp',
+	'dist/src/cpp/storage_impl_osx.cpp',
+	'dist/src/cpp/storage_impl_win.cpp',
+	'dist/src/cpp/sym_table.cpp',
+	'dist/src/cpp/table.cpp',
+	'dist/src/cpp/time.cpp',
+	'dist/src/cpp/traversal.cpp',
+	'dist/src/cpp/traversal_nodes.cpp',
+	'dist/src/cpp/tree_context_common.cpp',
+	'dist/src/cpp/utils.cpp',
+	'dist/src/cpp/update_task.cpp',
+	'dist/src/cpp/view.cpp',
+	'dist/src/cpp/view_config.cpp',
+	'dist/src/cpp/vocab.cpp',
 
+    # python-specific files
+	'perspective/src/column.cpp',
+]
 
-class PSPBuild(build_ext):
-    def run(self):
-        self.run_cmake()
+binding_sources = [
+	'perspective/src/accessor.cpp',
+	'perspective/src/computed.cpp',
+	'perspective/src/context.cpp',
+	'perspective/src/fill.cpp',
+	'perspective/src/numpy.cpp',
+	'perspective/src/python.cpp',
+	'perspective/src/serialization.cpp',
+	'perspective/src/table.cpp',
+	'perspective/src/utils.cpp',
+	'perspective/src/view.cpp',
+]
 
-    def run_cmake(self):
-        self.cmake_cmd = which('cmake')
-        try:
-            out = subprocess.check_output([self.cmake_cmd, '--version'])
-        except OSError:
-            raise RuntimeError(
-                "CMake must be installed to build the following extensions: " +
-                ", ".join(e.name for e in self.extensions))
-
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)',
-                                                   out.decode()).group(1))
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
-
-        for ext in self.extensions:
-            self.build_extension_cmake(ext)
-
-    def build_extension_cmake(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cfg = 'Debug' if self.debug else 'Release'
-
-        PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-
-        cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join(extdir, 'perspective', 'table')).replace('\\', '/'),
-            '-DCMAKE_BUILD_TYPE=' + cfg,
-            '-DPSP_CPP_BUILD=1',
-            '-DPSP_WASM_BUILD=0',
-            '-DPSP_PYTHON_BUILD=1',
-            '-DPSP_PYTHON_VERSION={}'.format(PYTHON_VERSION),
-            '-DPython_ADDITIONAL_VERSIONS={}'.format(PYTHON_VERSION),
-            '-DPython_FIND_VERSION={}'.format(PYTHON_VERSION),
-            '-DPython_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
-            '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX).replace('\\', '/'),
-            '-DPython_ROOT={}'.format(sysconfig.PREFIX).replace('\\', '/'),
-            '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')).replace('\\', '/'),
-            '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir).replace('\\', '/'),
-            '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, "..", 'perspective').replace('\\', '/'))
-        ]
-
-        build_args = ['--config', cfg]
-
-        if platform.system() == "Windows":
-            import distutils.msvccompiler as dm
-            msvc = {'12': 'Visual Studio 12 2013',
-                    '14': 'Visual Studio 14 2015',
-                    '14.1': 'Visual Studio 15 2017'}.get(dm.get_build_version(), 'Visual Studio 15 2017')
-
-            cmake_args.extend([
-                '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(
-                    cfg.upper(),
-                    extdir).replace('\\', '/'),
-                '-G', os.environ.get('PSP_GENERATOR', msvc)])
-
-            if sys.maxsize > 2**32:
-                # build 64 bit to match python
-                cmake_args += ['-A', 'x64']
-
-            build_args += ['--', '/m:{}'.format(CPU_COUNT), '/p:Configuration={}'.format(cfg)]
-        else:
-            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j2' if os.environ.get('DOCKER', '') else '-j{}'.format(CPU_COUNT)]
-
-        env = os.environ.copy()
-        env['PSP_ENABLE_PYTHON'] = '1'
-        env['OSX_DEPLOYMENT_TARGET'] = '10.9'
-        env["PYTHONPATH"] = os.path.sep.join((os.environ.get('PYTHONPATH', ''), os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))))
-
-        if not os.path.exists(self.build_temp):
-            os.makedirs(self.build_temp)
-        subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
-        subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
-        print()  # Add an empty line for cleaner output
-
+extensions = [
+    Extension('perspective.table.libpsp',
+              define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
+              include_dirs=[
+                            'perspective/include/',
+                            'dist/src/include/',
+                            'dist/third/date/include/',
+                            'dist/third/hopscotch/include/',
+                            'dist/third/ordered-map/include/',
+                            'dist/third/pybind11/include/',
+                            numpy_includes,
+                            pyarrow_includes,
+                            ],
+              libraries=pyarrow_libraries,
+              library_dirs=pyarrow_library_dirs,
+              extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
+              sources=sources),
+    Extension('perspective.table.libbinding',
+              define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
+              include_dirs=[
+                            'perspective/include/',
+                            'dist/src/include/',
+                            'dist/third/date/include/',
+                            'dist/third/hopscotch/include/',
+                            'dist/third/ordered-map/include/',
+                            'dist/third/pybind11/include/',
+                            numpy_includes,
+                            pyarrow_includes,
+                            ],
+              libraries=pyarrow_libraries,
+              library_dirs=pyarrow_library_dirs,
+              extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
+              sources=binding_sources)
+]
 
 class PSPCheckSDist(sdist):
     def run(self):
@@ -176,10 +243,10 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
-        for file in ('CMakeLists.txt', 'cmake', 'src'):
+        for file in ('src', 'third'):
             path = os.path.abspath(os.path.join(here, 'dist', file))
             if not os.path.exists(path):
-                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
+                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so c++ files are installed".format(path))
 
 
 setup(
@@ -210,6 +277,6 @@ setup(
     extras_require={
         'dev': requires_dev,
     },
-    ext_modules=[PSPExtension('perspective')],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist)
+    ext_modules=extensions,
+    cmdclass=dict(sdist=PSPCheckSDist)
 )

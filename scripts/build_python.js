@@ -9,6 +9,7 @@
 
 const {execute, execute_throw, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
 const fs = require("fs-extra");
+const rimraf = require("rimraf");
 
 const IS_PY2 = getarg("--python2");
 
@@ -39,17 +40,31 @@ try {
 
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
+    const third = resolve`${__dirname}/../cpp/perspective/third`;
     const cpp = resolve`${__dirname}/../cpp/perspective`;
     const lic = resolve`${__dirname}/../LICENSE`;
-    const cmake = resolve`${__dirname}/../cmake`;
-    const dcmake = resolve`${dist}/cmake`;
     const dlic = resolve`${dist}/LICENSE`;
     const obj = resolve`${dist}/obj`;
+
+    // clone third party deps
+    if (!fs.existsSync(third)) {
+        console.log("Cloning third party dependencies");
+        fs.mkdirpSync(third);
+        execute`git clone https://github.com/HowardHinnant/date.git ${third}/date`;
+        execute`git clone https://github.com/Tessil/hopscotch-map.git ${third}/hopscotch`;
+        execute`git clone https://github.com/Tessil/ordered-map.git ${third}/ordered-map`;
+        execute`git clone https://github.com/pybind/pybind11.git ${third}/pybind11`;
+
+        rimraf.sync(`${third}/date/.git`);
+        rimraf.sync(`${third}/hopscotch/.git`);
+        rimraf.sync(`${third}/ordered-map/.git`);
+        rimraf.sync(`${third}/pybind11/.git`);
+        console.log("Cloning third party dependencies...done!");
+    }
 
     fs.mkdirpSync(dist);
     fs.copySync(cpp, dist, {preserveTimestamps: true});
     fs.copySync(lic, dlic, {preserveTimestamps: true});
-    fs.copySync(cmake, dcmake, {preserveTimestamps: true});
     clean(obj);
 
     let cmd;

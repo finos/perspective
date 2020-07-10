@@ -133,6 +133,7 @@ packages/*/cjs
 cppbuild
 docsbuild
 .coverage
+cpp/perspective/third
 
 # docs generated
 docs/_build
