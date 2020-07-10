@@ -40,6 +40,7 @@ try {
 
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
+    const python = resolve`${__dirname}/../python/perspective/`;
     const third = resolve`${__dirname}/../cpp/perspective/third`;
     const cpp = resolve`${__dirname}/../cpp/perspective`;
     const lic = resolve`${__dirname}/../LICENSE`;

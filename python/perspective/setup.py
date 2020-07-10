@@ -7,31 +7,13 @@
 #
 from __future__ import print_function
 from setuptools import setup, find_packages, Extension
-from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
-from distutils.version import LooseVersion
-from distutils import sysconfig
 from codecs import open
 import io
-import logging
 import os
 import os.path
-import re
 import platform
 import sys
-import subprocess
-from shutil import rmtree
-try:
-    from shutil import which
-    CPU_COUNT = os.cpu_count()
-except ImportError:
-    # Python2
-    try:
-        from backports.shutil_which import which
-    except ImportError:
-        which = lambda x: x  # just rely on path
-    import multiprocessing
-    CPU_COUNT = multiprocessing.cpu_count()
 
 try:
     import numpy
@@ -100,142 +82,155 @@ def get_version(file, name='__version__'):
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
 
-sources = [ 
-	'dist/src/cpp/aggregate.cpp',
-	'dist/src/cpp/aggspec.cpp',
-	'dist/src/cpp/arg_sort.cpp',
-	'dist/src/cpp/arrow_loader.cpp',
-	'dist/src/cpp/arrow_writer.cpp',
-	'dist/src/cpp/base.cpp',
-	'dist/src/cpp/base_impl_linux.cpp',
-	'dist/src/cpp/base_impl_osx.cpp',
-	'dist/src/cpp/base_impl_wasm.cpp',
-	'dist/src/cpp/base_impl_win.cpp',
-	'dist/src/cpp/binding.cpp',
-	'dist/src/cpp/build_filter.cpp',
-	'dist/src/cpp/column.cpp',
-	'dist/src/cpp/comparators.cpp',
-	'dist/src/cpp/compat.cpp',
-	'dist/src/cpp/compat_impl_linux.cpp',
-	'dist/src/cpp/compat_impl_osx.cpp',
-	'dist/src/cpp/compat_impl_win.cpp',
-	'dist/src/cpp/computed.cpp',
-	'dist/src/cpp/computed_column_map.cpp',
-	'dist/src/cpp/computed_function.cpp',
-	'dist/src/cpp/config.cpp',
-	'dist/src/cpp/context_base.cpp',
-	'dist/src/cpp/context_grouped_pkey.cpp',
-	'dist/src/cpp/context_handle.cpp',
-	'dist/src/cpp/context_one.cpp',
-	'dist/src/cpp/context_two.cpp',
-	'dist/src/cpp/context_zero.cpp',
-	'dist/src/cpp/custom_column.cpp',
-	'dist/src/cpp/data.cpp',
-	'dist/src/cpp/data_slice.cpp',
-	'dist/src/cpp/data_table.cpp',
-	'dist/src/cpp/date.cpp',
-	'dist/src/cpp/dense_nodes.cpp',
-	'dist/src/cpp/dense_tree_context.cpp',
-	'dist/src/cpp/dense_tree.cpp',
-	'dist/src/cpp/dependency.cpp',
-	'dist/src/cpp/extract_aggregate.cpp',
-	'dist/src/cpp/filter.cpp',
-	'dist/src/cpp/flat_traversal.cpp',
-	'dist/src/cpp/get_data_extents.cpp',
-	'dist/src/cpp/gnode.cpp',
-	'dist/src/cpp/gnode_state.cpp',
-	'dist/src/cpp/histogram.cpp',
-	'dist/src/cpp/logtime.cpp',
-	'dist/src/cpp/mask.cpp',
-	'dist/src/cpp/min_max.cpp',
-	'dist/src/cpp/multi_sort.cpp',
-	'dist/src/cpp/none.cpp',
-	'dist/src/cpp/path.cpp',
-	'dist/src/cpp/pivot.cpp',
-	'dist/src/cpp/pool.cpp',
-	'dist/src/cpp/port.cpp',
-	'dist/src/cpp/process_state.cpp',
-	'dist/src/cpp/raii.cpp',
-	'dist/src/cpp/raii_impl_linux.cpp',
-	'dist/src/cpp/raii_impl_osx.cpp',
-	'dist/src/cpp/raii_impl_win.cpp',
-	'dist/src/cpp/range.cpp',
-	'dist/src/cpp/rlookup.cpp',
-	'dist/src/cpp/scalar.cpp',
-	'dist/src/cpp/schema_column.cpp',
-	'dist/src/cpp/schema.cpp',
-	'dist/src/cpp/slice.cpp',
-	'dist/src/cpp/sort_specification.cpp',
-	'dist/src/cpp/sparse_tree.cpp',
-	'dist/src/cpp/sparse_tree_node.cpp',
-	'dist/src/cpp/step_delta.cpp',
-	'dist/src/cpp/storage.cpp',
-	'dist/src/cpp/storage_impl_linux.cpp',
-	'dist/src/cpp/storage_impl_osx.cpp',
-	'dist/src/cpp/storage_impl_win.cpp',
-	'dist/src/cpp/sym_table.cpp',
-	'dist/src/cpp/table.cpp',
-	'dist/src/cpp/time.cpp',
-	'dist/src/cpp/traversal.cpp',
-	'dist/src/cpp/traversal_nodes.cpp',
-	'dist/src/cpp/tree_context_common.cpp',
-	'dist/src/cpp/utils.cpp',
-	'dist/src/cpp/update_task.cpp',
-	'dist/src/cpp/view.cpp',
-	'dist/src/cpp/view_config.cpp',
-	'dist/src/cpp/vocab.cpp',
+sources = [
+    'dist/src/cpp/aggregate.cpp',
+    'dist/src/cpp/aggspec.cpp',
+    'dist/src/cpp/arg_sort.cpp',
+    'dist/src/cpp/arrow_loader.cpp',
+    'dist/src/cpp/arrow_writer.cpp',
+    'dist/src/cpp/base.cpp',
+    'dist/src/cpp/base_impl_linux.cpp',
+    'dist/src/cpp/base_impl_osx.cpp',
+    'dist/src/cpp/base_impl_wasm.cpp',
+    'dist/src/cpp/base_impl_win.cpp',
+    'dist/src/cpp/binding.cpp',
+    'dist/src/cpp/build_filter.cpp',
+    'dist/src/cpp/column.cpp',
+    'dist/src/cpp/comparators.cpp',
+    'dist/src/cpp/compat.cpp',
+    'dist/src/cpp/compat_impl_linux.cpp',
+    'dist/src/cpp/compat_impl_osx.cpp',
+    'dist/src/cpp/compat_impl_win.cpp',
+    'dist/src/cpp/computed.cpp',
+    'dist/src/cpp/computed_column_map.cpp',
+    'dist/src/cpp/computed_function.cpp',
+    'dist/src/cpp/config.cpp',
+    'dist/src/cpp/context_base.cpp',
+    'dist/src/cpp/context_grouped_pkey.cpp',
+    'dist/src/cpp/context_handle.cpp',
+    'dist/src/cpp/context_one.cpp',
+    'dist/src/cpp/context_two.cpp',
+    'dist/src/cpp/context_zero.cpp',
+    'dist/src/cpp/custom_column.cpp',
+    'dist/src/cpp/data.cpp',
+    'dist/src/cpp/data_slice.cpp',
+    'dist/src/cpp/data_table.cpp',
+    'dist/src/cpp/date.cpp',
+    'dist/src/cpp/dense_nodes.cpp',
+    'dist/src/cpp/dense_tree_context.cpp',
+    'dist/src/cpp/dense_tree.cpp',
+    'dist/src/cpp/dependency.cpp',
+    'dist/src/cpp/extract_aggregate.cpp',
+    'dist/src/cpp/filter.cpp',
+    'dist/src/cpp/flat_traversal.cpp',
+    'dist/src/cpp/get_data_extents.cpp',
+    'dist/src/cpp/gnode.cpp',
+    'dist/src/cpp/gnode_state.cpp',
+    'dist/src/cpp/histogram.cpp',
+    'dist/src/cpp/logtime.cpp',
+    'dist/src/cpp/mask.cpp',
+    'dist/src/cpp/min_max.cpp',
+    'dist/src/cpp/multi_sort.cpp',
+    'dist/src/cpp/none.cpp',
+    'dist/src/cpp/path.cpp',
+    'dist/src/cpp/pivot.cpp',
+    'dist/src/cpp/pool.cpp',
+    'dist/src/cpp/port.cpp',
+    'dist/src/cpp/process_state.cpp',
+    'dist/src/cpp/raii.cpp',
+    'dist/src/cpp/raii_impl_linux.cpp',
+    'dist/src/cpp/raii_impl_osx.cpp',
+    'dist/src/cpp/raii_impl_win.cpp',
+    'dist/src/cpp/range.cpp',
+    'dist/src/cpp/rlookup.cpp',
+    'dist/src/cpp/scalar.cpp',
+    'dist/src/cpp/schema_column.cpp',
+    'dist/src/cpp/schema.cpp',
+    'dist/src/cpp/slice.cpp',
+    'dist/src/cpp/sort_specification.cpp',
+    'dist/src/cpp/sparse_tree.cpp',
+    'dist/src/cpp/sparse_tree_node.cpp',
+    'dist/src/cpp/step_delta.cpp',
+    'dist/src/cpp/storage.cpp',
+    'dist/src/cpp/storage_impl_linux.cpp',
+    'dist/src/cpp/storage_impl_osx.cpp',
+    'dist/src/cpp/storage_impl_win.cpp',
+    'dist/src/cpp/sym_table.cpp',
+    'dist/src/cpp/table.cpp',
+    'dist/src/cpp/time.cpp',
+    'dist/src/cpp/traversal.cpp',
+    'dist/src/cpp/traversal_nodes.cpp',
+    'dist/src/cpp/tree_context_common.cpp',
+    'dist/src/cpp/utils.cpp',
+    'dist/src/cpp/update_task.cpp',
+    'dist/src/cpp/view.cpp',
+    'dist/src/cpp/view_config.cpp',
+    'dist/src/cpp/vocab.cpp',
 
     # python-specific files
-	'perspective/src/column.cpp',
+    'perspective/src/column.cpp',
 ]
 
 binding_sources = [
-	'perspective/src/accessor.cpp',
-	'perspective/src/computed.cpp',
-	'perspective/src/context.cpp',
-	'perspective/src/fill.cpp',
-	'perspective/src/numpy.cpp',
-	'perspective/src/python.cpp',
-	'perspective/src/serialization.cpp',
-	'perspective/src/table.cpp',
-	'perspective/src/utils.cpp',
-	'perspective/src/view.cpp',
+    'perspective/src/accessor.cpp',
+    'perspective/src/computed.cpp',
+    'perspective/src/context.cpp',
+    'perspective/src/fill.cpp',
+    'perspective/src/numpy.cpp',
+    'perspective/src/python.cpp',
+    'perspective/src/serialization.cpp',
+    'perspective/src/table.cpp',
+    'perspective/src/utils.cpp',
+    'perspective/src/view.cpp',
 ]
+
+
+extra_link_args = []
+
+if platform.system() == 'Darwin':
+    extra_link_args.append('-Wl,-rpath,' + ';'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
+else:
+    extra_link_args.append('-Wl,-rpath,' + ';'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
 
 extensions = [
     Extension('perspective.table.libpsp',
               define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
               include_dirs=[
-                            'perspective/include/',
-                            'dist/src/include/',
-                            'dist/third/date/include/',
-                            'dist/third/hopscotch/include/',
-                            'dist/third/ordered-map/include/',
-                            'dist/third/pybind11/include/',
-                            numpy_includes,
-                            pyarrow_includes,
-                            ],
+                  'perspective/include/',
+                  'dist/src/include/',
+                  'dist/third/date/include/',
+                  'dist/third/hopscotch/include/',
+                  'dist/third/ordered-map/include/',
+                  'dist/third/pybind11/include/',
+                  numpy_includes,
+                  pyarrow_includes,
+              ],
               libraries=pyarrow_libraries,
               library_dirs=pyarrow_library_dirs,
+              runtime_library_dirs=pyarrow_library_dirs,
               extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
+              extra_link_args=extra_link_args,
               sources=sources),
     Extension('perspective.table.libbinding',
               define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
               include_dirs=[
-                            'perspective/include/',
-                            'dist/src/include/',
-                            'dist/third/date/include/',
-                            'dist/third/hopscotch/include/',
-                            'dist/third/ordered-map/include/',
-                            'dist/third/pybind11/include/',
-                            numpy_includes,
-                            pyarrow_includes,
-                            ],
+                  'perspective/include/',
+                  'dist/src/include/',
+                  'dist/third/date/include/',
+                  'dist/third/hopscotch/include/',
+                  'dist/third/ordered-map/include/',
+                  'dist/third/pybind11/include/',
+                  numpy_includes,
+                  pyarrow_includes,
+              ],
               libraries=pyarrow_libraries,
               library_dirs=pyarrow_library_dirs,
+              runtime_library_dirs=pyarrow_library_dirs,
               extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
+              extra_link_args=extra_link_args,
               sources=binding_sources)
 ]
+
 
 class PSPCheckSDist(sdist):
     def run(self):
