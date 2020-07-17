@@ -198,9 +198,9 @@ extra_compiler_args = []
 
 if os.name == 'nt':
     defines.append(('BOOST_WINDOWS', '1'))
-    extra_compiler_args.append('-std=c++1y')
-else:
     extra_compiler_args.append('/std:c++14')
+else:
+    extra_compiler_args.append('-std=c++1y')
 
 extensions = [
     Extension('perspective.table.libbinding',
