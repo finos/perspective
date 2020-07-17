@@ -164,7 +164,7 @@ jobs:
         versionSpec: '12.x'
 
     - script: |
-        choco install tbb -y
+        choco install tbb -y --allow-empty-checksums
       displayName: "System deps"
 
     - script: |
