@@ -197,7 +197,7 @@ defines = [('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG',
 extra_compiler_args = []
 
 if os.name == 'nt':
-    defines.append(('BOOST_WINDOWS', '1'))
+    defines.append(('BOOST_WINDOWS', '1'), ('WIN32', '1'), ('_WIN32', '1'))
     extra_compiler_args.append('/std:c++14')
 else:
     extra_compiler_args.append('-std=c++1y')
