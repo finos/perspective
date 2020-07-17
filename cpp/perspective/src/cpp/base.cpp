@@ -577,7 +577,7 @@ str_to_aggtype(const std::string& str) {
     } else if (str == "first by index" || str == "first") {
         return t_aggtype::AGGTYPE_FIRST;
     } else if (str == "last by index") {
-        return t_aggtype::AGGTYPE_LAST;
+        return t_aggtype::AGGTYPE_LAST_BY_INDEX;
     } else if (str == "py_agg") {
         return t_aggtype::AGGTYPE_PY_AGG;
     } else if (str == "and") {

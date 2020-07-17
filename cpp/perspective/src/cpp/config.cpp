@@ -183,7 +183,7 @@ t_config::setup(const std::vector<std::string>& detail_columns,
             case AGGTYPE_OR:
             case AGGTYPE_ANY:
             case AGGTYPE_FIRST:
-            case AGGTYPE_LAST:
+            case AGGTYPE_LAST_BY_INDEX:
             case AGGTYPE_MEAN:
             case AGGTYPE_WEIGHTED_MEAN:
             case AGGTYPE_UNIQUE:

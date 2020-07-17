@@ -140,8 +140,8 @@ t_aggspec::agg_str() const {
         case AGGTYPE_FIRST: {
             return "first";
         } break;
-        case AGGTYPE_LAST: {
-            return "last";
+        case AGGTYPE_LAST_BY_INDEX: {
+            return "last_by_index";
         } break;
         case AGGTYPE_PY_AGG: {
             return "py_agg";
@@ -297,7 +297,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_DOMINANT:
         case AGGTYPE_MEDIAN:
         case AGGTYPE_FIRST:
-        case AGGTYPE_LAST:
+        case AGGTYPE_LAST_BY_INDEX:
         case AGGTYPE_OR:
         case AGGTYPE_LAST_VALUE:
         case AGGTYPE_HIGH_WATER_MARK:
@@ -318,7 +318,6 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
             return mk_col_name_type_vec(name(), DTYPE_F64PAIR);
         }
         case AGGTYPE_WEIGHTED_MEAN: {
-
             return mk_col_name_type_vec(name(), DTYPE_F64PAIR);
         }
         case AGGTYPE_JOIN: {

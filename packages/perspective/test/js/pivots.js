@@ -131,6 +131,52 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("['z'], first by index with appends", async function() {
+            var table = perspective.table(data, {index: "y"});
+            var view = table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: "first by index"}
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 1},
+                {__ROW_PATH__: [false], x: 2},
+                {__ROW_PATH__: [true], x: 1}
+            ];
+            table.update({
+                x: [5],
+                y: ["e"],
+                z: [true]
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], first by index with partial updates", async function() {
+            var table = perspective.table(data, {index: "y"});
+            var view = table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: "first by index"}
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 5},
+                {__ROW_PATH__: [false], x: 2},
+                {__ROW_PATH__: [true], x: 5}
+            ];
+            table.update({
+                x: [5],
+                y: ["a"],
+                z: [true]
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], last by index", async function() {
             var table = perspective.table(data);
             var view = table.view({
@@ -144,6 +190,52 @@ module.exports = perspective => {
                 {__ROW_PATH__: [true], x: 3}
             ];
             let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], last by index with appends", async function() {
+            const table = perspective.table(data);
+            const view = table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: "last by index"}
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 5},
+                {__ROW_PATH__: [false], x: 4},
+                {__ROW_PATH__: [true], x: 5}
+            ];
+            table.update({
+                x: [5],
+                y: ["e"],
+                z: [true]
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], last by index with partial updates", async function() {
+            const table = perspective.table(data, {index: "y"});
+            const view = table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: "last by index"}
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 4},
+                {__ROW_PATH__: [false], x: 4},
+                {__ROW_PATH__: [true], x: 5}
+            ];
+            table.update({
+                x: [5],
+                y: ["c"],
+                z: [true]
+            });
+            const result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
             table.delete();

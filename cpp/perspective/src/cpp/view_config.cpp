@@ -185,8 +185,8 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             }
         }
 
-        if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST) {
-            dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
+        if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX) {
+            dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
             m_aggspecs.push_back(
                 t_aggspec(column, column, agg_type, dependencies, SORTTYPE_ASCENDING));
         } else {
