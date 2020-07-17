@@ -188,13 +188,11 @@ jobs:
     - script: yarn build_python  --ci $(python_flag)
       displayName: 'build'
       env:
-        # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
+        # Pass boost include into python distutils:
         # https://github.com/actions/virtual-environments/issues/687
         # 06/18/2020 - seems like boost got moved to `x86_64` inside
         # the boost folder, which broke builds for a bit.
-        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/"
-        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
-        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
+        CFLAGS: "-IC:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
 
 - job: 'MacOS_Mojave'
   pool:
