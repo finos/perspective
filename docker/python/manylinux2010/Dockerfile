@@ -7,7 +7,7 @@
 #
 
 FROM quay.io/pypa/manylinux2010_x86_64
-RUN yum -y install rapidjson-devel sudo wget
+RUN yum -y install rapidjson-devel sudo wget tbb-devel
 
 # Build new cmake
 RUN wget https://cmake.org/files/v3.15/cmake-3.15.4-Linux-x86_64.sh -q
@@ -25,7 +25,6 @@ RUN rm -rf /opt/python/cp27-cp27m/bin/auditwheel
 RUN rm -rf /opt/python/cp36-cp36m/bin/auditwheel
 RUN rm -rf /opt/python/cp37-cp37m/bin/auditwheel
 RUN rm -rf /opt/python/cp38-cp38/bin/auditwheel
-
 
 # Copy assets
 RUN cp -arf /opt/python/cp27-cp27m/* /usr/local/

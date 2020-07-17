@@ -7,7 +7,7 @@
 #
 
 FROM quay.io/pypa/manylinux2014_x86_64
-RUN yum -y install rapidjson-devel sudo wget
+RUN yum -y install rapidjson-devel sudo wget tbb-devel
 
 # Build new cmake
 RUN wget https://cmake.org/files/v3.15/cmake-3.15.4-Linux-x86_64.sh -q
