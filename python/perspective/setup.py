@@ -188,9 +188,9 @@ binding_sources = [
 extra_link_args = []
 
 if platform.system() == 'Darwin':
-    extra_link_args.append('-Wl,-rpath,'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
+    extra_link_args.append('-Wl,' + '-rpath,'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
 else:
-    extra_link_args.append('-Wl,-rpath,' + ';'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
+    extra_link_args.append('-Wl,' + '-rpath,'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
 
 extensions = [
     Extension('perspective.table.libpsp',

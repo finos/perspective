@@ -63,8 +63,8 @@ try {
 
         console.log("Extracting boost");
         tar.x({sync: true, file: `${third}/boost/boost.tgz`, cwd: `${third}/boost`});
-        console.log("Extracting boost...done!");
         rimraf.sync(`${third}/boost/boost.tgz`);
+        console.log("Extracting boost...done!");
     }
 
     if (!fs.existsSync(`${third}/date`)) {
@@ -97,8 +97,13 @@ try {
     console.log("Cloning third party dependencies...done!");
 
     fs.mkdirpSync(dist);
+    console.log("Copying C++ to python dist");
     fs.copySync(cpp, dist, {preserveTimestamps: true});
+    console.log("Copying C++ to python dist...done!");
+
+    console.log("Copying LICENSE to python dist");
     fs.copySync(lic, dlic, {preserveTimestamps: true});
+    console.log("Copying LICENSE to python dist...done!");
     clean(obj);
 
     let cmd;
