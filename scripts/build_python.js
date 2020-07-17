@@ -57,13 +57,14 @@ try {
         console.log("Downloading boost");
         fs.mkdirpSync(`${third}/boost`);
 
-        const file = fs.createWriteStream(`${third}/boost/boost.tgz`);
-        execute`curl -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -o ${third}/boost/boost.tgz`;
+        const tarball = resolve`${third}/boost/boost.tgz`;
+        const boostout = resolve`${third}/boost`;
+        execute`curl -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -o ${tarball}`;
         console.log("Downloading boost...done!");
 
         console.log("Extracting boost");
-        tar.x({sync: true, file: `${third}/boost/boost.tgz`, cwd: `${third}/boost`});
-        rimraf.sync(`${third}/boost/boost.tgz`);
+        tar.x({sync: true, file: `${tarball}`, cwd: `${boostout}`});
+        rimraf.sync(`${tarball}`);
         console.log("Extracting boost...done!");
     }
 

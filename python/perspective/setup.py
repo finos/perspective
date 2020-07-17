@@ -188,30 +188,11 @@ binding_sources = [
 extra_link_args = []
 
 if platform.system() == 'Darwin':
-    extra_link_args.append('-Wl,' + '-rpath,'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
+    extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
 else:
-    extra_link_args.append('-Wl,' + '-rpath,'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
+    extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
 
 extensions = [
-    Extension('perspective.table.libpsp',
-              define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
-              include_dirs=[
-                  'perspective/include/',
-                  'dist/src/include/',
-                  'dist/third/boost/boost_1_71_0/',
-                  'dist/third/date/include/',
-                  'dist/third/hopscotch/include/',
-                  'dist/third/ordered-map/include/',
-                  'dist/third/pybind11/include/',
-                  numpy_includes,
-                  pyarrow_includes,
-              ],
-              libraries=pyarrow_libraries,
-              library_dirs=pyarrow_library_dirs,
-              runtime_library_dirs=pyarrow_library_dirs,
-              extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
-              extra_link_args=extra_link_args,
-              sources=sources),
     Extension('perspective.table.libbinding',
               define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
               include_dirs=[
@@ -225,12 +206,12 @@ extensions = [
                   numpy_includes,
                   pyarrow_includes,
               ],
-              libraries=pyarrow_libraries,
+              libraries=pyarrow_libraries + ['tbb'],
               library_dirs=pyarrow_library_dirs,
               runtime_library_dirs=pyarrow_library_dirs,
               extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
               extra_link_args=extra_link_args,
-              sources=binding_sources)
+              sources=sources + binding_sources)
 ]
 
 
