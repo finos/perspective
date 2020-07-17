@@ -10,6 +10,7 @@
 const {execute, execute_throw, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
 const fs = require("fs-extra");
 const rimraf = require("rimraf");
+const tar = require("tar");
 
 const IS_PY2 = getarg("--python2");
 
@@ -40,7 +41,6 @@ try {
 
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
-    const python = resolve`${__dirname}/../python/perspective/`;
     const third = resolve`${__dirname}/../cpp/perspective/third`;
     const cpp = resolve`${__dirname}/../cpp/perspective`;
     const lic = resolve`${__dirname}/../LICENSE`;
@@ -48,20 +48,44 @@ try {
     const obj = resolve`${dist}/obj`;
 
     // clone third party deps
+    console.log("Cloning third party dependencies");
     if (!fs.existsSync(third)) {
-        console.log("Cloning third party dependencies");
         fs.mkdirpSync(third);
-        execute`git clone https://github.com/HowardHinnant/date.git ${third}/date`;
-        execute`git clone https://github.com/Tessil/hopscotch-map.git ${third}/hopscotch`;
-        execute`git clone https://github.com/Tessil/ordered-map.git ${third}/ordered-map`;
-        execute`git clone https://github.com/pybind/pybind11.git ${third}/pybind11`;
-
-        rimraf.sync(`${third}/date/.git`);
-        rimraf.sync(`${third}/hopscotch/.git`);
-        rimraf.sync(`${third}/ordered-map/.git`);
-        rimraf.sync(`${third}/pybind11/.git`);
-        console.log("Cloning third party dependencies...done!");
     }
+
+    if (!fs.existsSync(`${third}/boost`)) {
+        console.log("Cloning boost");
+        fs.mkdirpSync(`${third}/boost`);
+        execute`wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -O ${third}/boost/boost.tgz`;
+
+        tar.x({sync: true, file: `${third}/boost/boost.tgz`, cwd: `${third}/boost`});
+        rimraf.sync(`${third}/boost/boost.tgz`);
+    }
+
+    if (!fs.existsSync(`${third}/date`)) {
+        console.log("Cloning date");
+        execute`git clone https://github.com/HowardHinnant/date.git ${third}/date`;
+        rimraf.sync(`${third}/date/.git`);
+    }
+
+    if (!fs.existsSync(`${third}/hopscotch`)) {
+        console.log("Cloning hopscotch");
+        execute`git clone https://github.com/Tessil/hopscotch-map.git ${third}/hopscotch`;
+        rimraf.sync(`${third}/hopscotch/.git`);
+    }
+
+    if (!fs.existsSync(`${third}/ordered-map`)) {
+        console.log("Cloning ordered-map");
+        execute`git clone https://github.com/Tessil/ordered-map.git ${third}/ordered-map`;
+        rimraf.sync(`${third}/ordered-map/.git`);
+    }
+
+    if (!fs.existsSync(`${third}/pybind11`)) {
+        console.log("Cloning pybind11");
+        execute`git clone https://github.com/pybind/pybind11.git ${third}/pybind11`;
+        rimraf.sync(`${third}/pybind11/.git`);
+    }
+    console.log("Cloning third party dependencies...done!");
 
     fs.mkdirpSync(dist);
     fs.copySync(cpp, dist, {preserveTimestamps: true});

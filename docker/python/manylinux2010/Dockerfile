@@ -46,13 +46,7 @@ RUN python3.6 -m pip install --ignore-installed auditwheel
 RUN python3.7 -m pip install --ignore-installed auditwheel
 RUN python3.8 -m pip install --ignore-installed auditwheel
 
-# install boost
-RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
-RUN tar xfz boost_1_71_0.tar.gz
-# https://github.com/boostorg/build/issues/468
-RUN cd boost_1_71_0 && ./bootstrap.sh
-RUN cd boost_1_71_0 && ./b2 -j8 --with-program_options --with-filesystem --with-system install 
-
+# install pinned dependencies
 RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' git+https://chromium.googlesource.com/external/gyp
 RUN python3.6 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
 RUN python3.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
@@ -72,14 +66,3 @@ RUN yum install -y nodejs
 
 RUN npm install --global yarn
 RUN yarn --version
-
-# install flatbuffers
-RUN mkdir -p /usr/local \
-    && cd /usr/local \
-    && git clone https://github.com/google/flatbuffers.git \
-    && cd flatbuffers \
-    && cmake -G "Unix Makefiles" \
-    && make \
-    && cp -r /usr/local/flatbuffers/include/flatbuffers /usr/local/include \
-    && ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc \
-    && chmod +x /usr/local/flatbuffers/flatc

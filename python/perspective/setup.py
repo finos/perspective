@@ -198,6 +198,7 @@ extensions = [
               include_dirs=[
                   'perspective/include/',
                   'dist/src/include/',
+                  'dist/third/boost/boost_1_71_0/',
                   'dist/third/date/include/',
                   'dist/third/hopscotch/include/',
                   'dist/third/ordered-map/include/',
@@ -216,6 +217,7 @@ extensions = [
               include_dirs=[
                   'perspective/include/',
                   'dist/src/include/',
+                  'dist/third/boost/boost_1_71_0/',
                   'dist/third/date/include/',
                   'dist/third/hopscotch/include/',
                   'dist/third/ordered-map/include/',
