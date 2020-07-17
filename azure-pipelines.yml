@@ -193,6 +193,7 @@ jobs:
         # 06/18/2020 - seems like boost got moved to `x86_64` inside
         # the boost folder, which broke builds for a bit.
         CFLAGS: "-IC:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
+        CXXFLAGS: "-IC:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
 
 - job: 'MacOS_Mojave'
   pool:
