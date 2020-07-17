@@ -56,7 +56,9 @@ try {
     if (!fs.existsSync(`${third}/boost`)) {
         console.log("Cloning boost");
         fs.mkdirpSync(`${third}/boost`);
-        execute`wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -O ${third}/boost/boost.tgz`;
+
+        const file = fs.createWriteStream(`${third}/boost/boost.tgz`);
+        execute`curl -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -o ${third}/boost/boost.tgz`;
 
         tar.x({sync: true, file: `${third}/boost/boost.tgz`, cwd: `${third}/boost`});
         rimraf.sync(`${third}/boost/boost.tgz`);
