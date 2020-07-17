@@ -48,7 +48,7 @@ requires = [
 ]
 
 if sys.version_info.major < 3:
-    requires.append("backports.shutil-which")
+    requires.append("pathlib")
 
 if (sys.version_info.major == 2 and sys.version_info.minor < 7) or \
    (sys.version_info.major == 3 and sys.version_info.minor < 6):

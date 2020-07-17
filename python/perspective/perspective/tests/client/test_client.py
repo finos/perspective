@@ -7,27 +7,28 @@
 #
 
 import six
+import sys
 import os
 import numpy as np
 import pandas as pd
+import pathlib
 from datetime import date, datetime
 from functools import partial
 from types import MethodType
 
-if os.name == 'nt':
-    BINDING = 'libbinding.pyd'
-    PSP = 'libpsp.dll'
-else:
-    BINDING = 'libbinding.so'
-    PSP = 'libpsp.so'
-
 # rename libbinding.so and libpsp.so temporarily to ensure that client mode
 # works automatically when the C++ build fails.
 lib_path = os.path.join(os.path.dirname(__file__), "..", "..", "table")
-binding = os.path.join(lib_path, BINDING)
-psp = os.path.join(lib_path, PSP)
+
+if os.name == 'nt':
+    BINDING = 'libbinding*.pyd'
+else:
+    BINDING = 'libbinding*.so'
+
+
+
+binding = os.path.join(str(list(pathlib.Path(lib_path).glob(BINDING))[0]))
 new_binding = os.path.join(lib_path, "notlibbinding.so")
-new_psp = os.path.join(lib_path, "notlibpsp.so")
 
 
 def mock_post(self, msg, msg_id=None, assert_msg=None):
@@ -37,20 +38,14 @@ def mock_post(self, msg, msg_id=None, assert_msg=None):
 
 def setup_module():
     os.rename(binding, new_binding)
-    os.rename(psp, new_psp)
     assert os.path.exists(new_binding)
-    assert os.path.exists(new_psp)
     assert not os.path.exists(binding)
-    assert not os.path.exists(psp)
 
 
 def teardown_module():
     os.rename(new_binding, binding)
-    os.rename(new_psp, psp)
     assert os.path.exists(binding)
-    assert os.path.exists(psp)
     assert not os.path.exists(new_binding)
-    assert not os.path.exists(new_psp)
 
 
 class TestClient(object):
