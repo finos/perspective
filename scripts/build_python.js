@@ -54,13 +54,16 @@ try {
     }
 
     if (!fs.existsSync(`${third}/boost`)) {
-        console.log("Cloning boost");
+        console.log("Downloading boost");
         fs.mkdirpSync(`${third}/boost`);
 
         const file = fs.createWriteStream(`${third}/boost/boost.tgz`);
         execute`curl -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -o ${third}/boost/boost.tgz`;
+        console.log("Downloading boost...done!");
 
+        console.log("Extracting boost");
         tar.x({sync: true, file: `${third}/boost/boost.tgz`, cwd: `${third}/boost`});
+        console.log("Extracting boost...done!");
         rimraf.sync(`${third}/boost/boost.tgz`);
     }
 
@@ -68,24 +71,28 @@ try {
         console.log("Cloning date");
         execute`git clone https://github.com/HowardHinnant/date.git ${third}/date`;
         rimraf.sync(`${third}/date/.git`);
+        console.log("Cloning date...done!");
     }
 
     if (!fs.existsSync(`${third}/hopscotch`)) {
         console.log("Cloning hopscotch");
         execute`git clone https://github.com/Tessil/hopscotch-map.git ${third}/hopscotch`;
         rimraf.sync(`${third}/hopscotch/.git`);
+        console.log("Cloning hopscotch...done!");
     }
 
     if (!fs.existsSync(`${third}/ordered-map`)) {
         console.log("Cloning ordered-map");
         execute`git clone https://github.com/Tessil/ordered-map.git ${third}/ordered-map`;
         rimraf.sync(`${third}/ordered-map/.git`);
+        console.log("Cloning ordered-map...done!");
     }
 
     if (!fs.existsSync(`${third}/pybind11`)) {
         console.log("Cloning pybind11");
         execute`git clone https://github.com/pybind/pybind11.git ${third}/pybind11`;
         rimraf.sync(`${third}/pybind11/.git`);
+        console.log("Cloning pybind11...done!");
     }
     console.log("Cloning third party dependencies...done!");
 
