@@ -192,9 +192,19 @@ if platform.system() == 'Darwin':
 else:
     extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
 
+
+defines = [('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))]
+extra_compiler_args = []
+
+if os.name == 'nt':
+    defines.append(('BOOST_WINDOWS', '1'))
+    extra_compiler_args.append('-std=c++1y')
+else:
+    extra_compiler_args.append('/std:c++14')
+
 extensions = [
     Extension('perspective.table.libbinding',
-              define_macros=[('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))],
+              define_macros=defines,
               include_dirs=[
                   'perspective/include/',
                   'dist/src/include/',
@@ -209,7 +219,7 @@ extensions = [
               libraries=pyarrow_libraries + ['tbb'],
               library_dirs=pyarrow_library_dirs,
               runtime_library_dirs=pyarrow_library_dirs,
-              extra_compile_args=['-std=c++1y'] if os.name != 'nt' else ['/std:c++14'],
+              extra_compile_args=extra_compiler_args,
               extra_link_args=extra_link_args,
               sources=sources + binding_sources)
 ]
