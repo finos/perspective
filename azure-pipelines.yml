@@ -189,7 +189,7 @@ jobs:
     - script: yarn build_python  --ci $(python_flag)
       displayName: 'build'
       env:
-        CFLAGS: /IC:\ProgramData\chocolatey\lib\tbb\tools\include
+        CFLAGS: /IC:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\include\
 
 - job: 'MacOS_Mojave'
   pool:
