@@ -165,6 +165,7 @@ try {
         cmd =
             cmd +
             `${PYTHON} -m pip install -e .[dev] && \
+            ${PYTHON} setup.py build_ext --inplace && \
             ${PYTHON} -m flake8 perspective && echo OK && \
             ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
             ${PYTHON} -m pytest -vvv perspective \
