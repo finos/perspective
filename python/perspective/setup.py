@@ -15,13 +15,37 @@ import os.path
 import platform
 import sys
 
+# ******************************************** #
+# Get number of cores for numpy parallel build #
+# ******************************************** #
+try:
+    from shutil import which
+    CPU_COUNT = os.cpu_count()
+except ImportError:
+    # Python2
+    import multiprocessing
+    CPU_COUNT = multiprocessing.cpu_count()
+
+# *************************************** #
+# Numpy build path and compiler toolchain #
+# *************************************** #
 try:
     import numpy
     numpy_includes = numpy.get_include()
+
+    # enable numpy faster compiler
+    from numpy.distutils.ccompiler import CCompiler_compile
+    import distutils.ccompiler
+    distutils.ccompiler.CCompiler.compile = CCompiler_compile
+    os.environ['NPY_NUM_BUILD_JOBS'] = str(CPU_COUNT)
+
 except ImportError:
     print('Must install numpy prior to installing perspective!')
     raise
 
+# ****************** #
+# PyArrow build path #
+# ****************** #
 try:
     import pyarrow
     pyarrow_includes = pyarrow.get_include()
@@ -36,12 +60,15 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# ******************************** #
+# Requires and platform validation #
+# ******************************** #
 requires = [
     'ipywidgets>=7.5.1',
     'future>=0.16.0',
     'numpy>=1.13.1',
     'pandas>=0.22.0',
-    'pyarrow==0.16.0',
+    'pyarrow>=0.15.1,<0.17',
     'python-dateutil>=2.8.0',
     'six>=1.11.0',
     'traitlets>=4.3.2',
@@ -82,6 +109,9 @@ def get_version(file, name='__version__'):
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
 
+# *********** #
+# C++ sources #
+# *********** #
 sources = [
     'dist/src/cpp/aggregate.cpp',
     'dist/src/cpp/aggspec.cpp',
@@ -184,8 +214,10 @@ binding_sources = [
     'perspective/src/view.cpp',
 ]
 
-
-extra_link_args = []
+# **************************** #
+# Compiler and extension setup #
+# **************************** #
+extra_link_args = os.environ.get('LDFLAGS', '').split()
 
 if platform.system() == 'Darwin':
     extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
@@ -194,13 +226,18 @@ else:
 
 
 defines = [('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))]
-extra_compiler_args = []
+extra_compiler_args = os.environ.get('CFLAGS', '').split() + os.environ.get('CXXFLAGS', '').split()
+library_dirs = pyarrow_library_dirs
+libraries = pyarrow_libraries + ['tbb']
 
 if os.name == 'nt':
-    defines.extend([('BOOST_WINDOWS', '1'), ('WIN32', '1'), ('_WIN32', '1')])
+    defines.extend([('BOOST_WINDOWS', '1'), ('WIN32', '1'), ('_WIN32', '1'), ('PERSPECTIVE_EXPORTS', '1')])
     extra_compiler_args.append('/std:c++14')
+    extra_compiler_args.append('/MP')
+    runtime_library_dirs = []
 else:
     extra_compiler_args.append('-std=c++1y')
+    runtime_library_dirs = pyarrow_library_dirs
 
 extensions = [
     Extension('perspective.table.libbinding',
@@ -216,15 +253,17 @@ extensions = [
                   numpy_includes,
                   pyarrow_includes,
               ],
-              libraries=pyarrow_libraries + ['tbb'],
-              library_dirs=pyarrow_library_dirs,
-              runtime_library_dirs=pyarrow_library_dirs,
+              libraries=libraries,
+              library_dirs=library_dirs,
+              runtime_library_dirs=runtime_library_dirs,
               extra_compile_args=extra_compiler_args,
               extra_link_args=extra_link_args,
               sources=sources + binding_sources)
 ]
 
-
+# **************** #
+# SDist validation #
+# **************** #
 class PSPCheckSDist(sdist):
     def run(self):
         self.run_check()
@@ -237,6 +276,9 @@ class PSPCheckSDist(sdist):
                 raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so c++ files are installed".format(path))
 
 
+# ***** #
+# setup #
+# ***** #
 setup(
     name='perspective-python',
     version=version,
@@ -256,7 +298,6 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-
     keywords='analytics tools plotting',
     packages=find_packages(),
     include_package_data=True,

@@ -41,8 +41,22 @@ try {
 
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
+    const dist_src = resolve`${__dirname}/../python/perspective/dist/src`;
+    const dist_third = resolve`${__dirname}/../python/perspective/dist/third`;
+    const dist_third_boost = resolve`${__dirname}/../python/perspective/dist/third/boost`;
+    const dist_third_date = resolve`${__dirname}/../python/perspective/dist/third/date`;
+    const dist_third_hopscotch = resolve`${__dirname}/../python/perspective/dist/third/hopscotch`;
+    const dist_third_ordered_map = resolve`${__dirname}/../python/perspective/dist/third/ordered-map`;
+    const dist_third_pybind11 = resolve`${__dirname}/../python/perspective/dist/third/pybind11`;
+
     const third = resolve`${__dirname}/../cpp/perspective/third`;
-    const cpp = resolve`${__dirname}/../cpp/perspective`;
+    const third_boost = resolve`${__dirname}/../cpp/perspective/third/boost`;
+    const third_date = resolve`${__dirname}/../cpp/perspective/third/date`;
+    const third_hopscotch = resolve`${__dirname}/../cpp/perspective/third/hopscotch`;
+    const third_ordered_map = resolve`${__dirname}/../cpp/perspective/third/ordered-map`;
+    const third_pybind11 = resolve`${__dirname}/../cpp/perspective/third/pybind11`;
+
+    const cpp_src = resolve`${__dirname}/../cpp/perspective/src`;
     const lic = resolve`${__dirname}/../LICENSE`;
     const dlic = resolve`${dist}/LICENSE`;
     const obj = resolve`${dist}/obj`;
@@ -53,54 +67,88 @@ try {
         fs.mkdirpSync(third);
     }
 
-    if (!fs.existsSync(`${third}/boost`)) {
+    if (!fs.existsSync(third_boost)) {
         console.log("Downloading boost");
-        fs.mkdirpSync(`${third}/boost`);
+        fs.mkdirpSync(third_boost);
 
-        const tarball = resolve`${third}/boost/boost.tgz`;
-        const boostout = resolve`${third}/boost`;
+        const tarball = resolve`${third_boost}/boost.tgz`;
         execute`curl -L https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz -o ${tarball}`;
         console.log("Downloading boost...done!");
 
         console.log("Extracting boost");
-        tar.x({sync: true, file: `${tarball}`, cwd: `${boostout}`});
+        tar.x({sync: true, file: `${tarball}`, cwd: `${third_boost}`});
         rimraf.sync(`${tarball}`);
         console.log("Extracting boost...done!");
     }
 
-    if (!fs.existsSync(`${third}/date`)) {
+    if (!fs.existsSync(third_date)) {
         console.log("Cloning date");
-        execute`git clone https://github.com/HowardHinnant/date.git ${third}/date`;
-        rimraf.sync(`${third}/date/.git`);
+        execute`git clone https://github.com/HowardHinnant/date.git ${third_date}`;
+        rimraf.sync(`${third_date}/.git`);
         console.log("Cloning date...done!");
     }
 
-    if (!fs.existsSync(`${third}/hopscotch`)) {
+    if (!fs.existsSync(third_hopscotch)) {
         console.log("Cloning hopscotch");
-        execute`git clone https://github.com/Tessil/hopscotch-map.git ${third}/hopscotch`;
-        rimraf.sync(`${third}/hopscotch/.git`);
+        execute`git clone https://github.com/Tessil/hopscotch-map.git ${third_hopscotch}`;
+        rimraf.sync(`${third_hopscotch}/.git`);
         console.log("Cloning hopscotch...done!");
     }
 
-    if (!fs.existsSync(`${third}/ordered-map`)) {
+    if (!fs.existsSync(third_ordered_map)) {
         console.log("Cloning ordered-map");
-        execute`git clone https://github.com/Tessil/ordered-map.git ${third}/ordered-map`;
-        rimraf.sync(`${third}/ordered-map/.git`);
+        execute`git clone https://github.com/Tessil/ordered-map.git ${third_ordered_map}`;
+        rimraf.sync(`${third_ordered_map}/.git`);
         console.log("Cloning ordered-map...done!");
     }
 
-    if (!fs.existsSync(`${third}/pybind11`)) {
+    if (!fs.existsSync(third_pybind11)) {
         console.log("Cloning pybind11");
-        execute`git clone https://github.com/pybind/pybind11.git ${third}/pybind11`;
-        rimraf.sync(`${third}/pybind11/.git`);
+        execute`git clone https://github.com/pybind/pybind11.git ${third_pybind11}`;
+        rimraf.sync(`${third_pybind11}/.git`);
         console.log("Cloning pybind11...done!");
     }
     console.log("Cloning third party dependencies...done!");
 
     fs.mkdirpSync(dist);
+    fs.mkdirpSync(dist_src);
+    fs.mkdirpSync(dist_third);
+
     console.log("Copying C++ to python dist");
-    fs.copySync(cpp, dist, {preserveTimestamps: true});
+    fs.copySync(cpp_src, dist_src, {preserveTimestamps: true});
     console.log("Copying C++ to python dist...done!");
+
+    if (!fs.existsSync(dist_third_boost)) {
+        console.log("Copying boost to python dist");
+        fs.copySync(third_boost, dist_third_boost, {preserveTimestamps: true});
+        console.log("Copying boost to python dist...done!");
+    }
+
+    if (!fs.existsSync(dist_third_date)) {
+        console.log("Copying date to python dist");
+        fs.copySync(third_date, dist_third_date, {preserveTimestamps: true});
+        console.log("Copying date to python dist...done!");
+    }
+
+    if (!fs.existsSync(dist_third_hopscotch)) {
+        console.log("Copying hopscotch to python dist");
+        fs.copySync(third_hopscotch, dist_third_hopscotch, {preserveTimestamps: true});
+        console.log("Copying hopscotch to python dist...done!");
+    }
+
+    if (!fs.existsSync(dist_third_ordered_map)) {
+        console.log("Copying ordered-map to python dist");
+        fs.copySync(third_ordered_map, dist_third_ordered_map, {preserveTimestamps: true});
+        console.log("Copying ordered-map to python dist...done!");
+    }
+
+    if (!fs.existsSync(dist_third_pybind11)) {
+        console.log("Copying pybind11 to python dist");
+        fs.copySync(third_pybind11, dist_third_pybind11, {preserveTimestamps: true});
+        console.log("Copying pybind11 to python dist...done!");
+    }
+
+
 
     console.log("Copying LICENSE to python dist");
     fs.copySync(lic, dlic, {preserveTimestamps: true});

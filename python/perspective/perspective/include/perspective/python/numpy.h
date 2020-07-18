@@ -18,11 +18,7 @@
 #include <perspective/python/utils.h>
 
 #ifdef WIN32
-#ifndef PERSPECTIVE_EXPORTS
 #define PERSPECTIVE_BINDING_EXPORT __declspec(dllexport)
-#else
-#define PERSPECTIVE_BINDING_EXPORT __declspec(dllimport)
-#endif
 #else
 #define PERSPECTIVE_BINDING_EXPORT __attribute__((visibility("default")))
 #endif

@@ -190,6 +190,7 @@ jobs:
       displayName: 'build'
       env:
         CFLAGS: /IC:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\include\
+        LDFLAGS: /LIBPATH:C:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\lib\intel64\vc11\
 
 - job: 'MacOS_Mojave'
   pool:

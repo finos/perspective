@@ -61,8 +61,8 @@ built from source:
 
 - Boost (version 1.67)
 - CMake (version 3.15.4 or higher)
-- TBB
-- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+- TBB (when building python)
+- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html) (when building JS)
 
 ### `Perspective.js`
 
@@ -98,14 +98,29 @@ To build the Python library, navigate to the python source folder
 (`python/perspective`) and install the dependencies using `pip`:
 
 ```bash
-python3 -m pip install -r requirements.txt
-python3 -m pip install -r requirements-dev.txt
+python -m pip install numpy "pyarrow>=0.15.1,<0.17"
 ```
 
 Make sure that TBB is installed, as it is a system dependency:
 
+OS X
 ```bash
 brew install TBB
+```
+
+Debian
+```bash
+apt-get install libtbb-devel
+```
+
+RHEL
+```bash
+yum install tbb-devel
+```
+
+Windows
+```bash
+choco install tbb
 ```
 
 `perspective-python` supports Python 3.7 and upwards, as well as Python 2.7.17.
@@ -131,11 +146,16 @@ You'll also need the system dependencies noted earlier - installing them through
 Homebrew is the easiest way, especially as flatbuffers can be installed through
 `brew` without building from source:
 
+Javascript
 ```bash
-brew install boost@1.67
-brew install tbb
 brew install cmake
+brew install boost@1.67
 brew install flatbuffers
+```
+
+Python
+```bash
+brew install tbb
 ```
 
 If building the Python 2 version of the library, make sure your version of
@@ -148,7 +168,7 @@ brew install python2
 
 ### Windows 10 specific instructions
 
-You need to use bash in order to build Perspective packages. To successfully
+You need to use bash in order to build Perspective JS packages. To successfully
 build on Windows 10, enable
 [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 (WSL) and install the linux distribution of your choice.
