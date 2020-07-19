@@ -181,11 +181,11 @@ try {
             `${PYTHON} -m pip install -e .[dev] && \
             ${PYTHON} setup.py build_ext --inplace && \
             ${PYTHON} -m flake8 perspective && echo OK && \
-            ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
             ${PYTHON} -m pytest -vvv perspective \
             --ignore=perspective/tests/client \
             --junitxml=python_junit.xml --cov-report=xml --cov-branch \
-            --cov=perspective`;
+            --cov=perspective && \
+            ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client`;
         if (IMAGE == "python") {
             cmd =
                 cmd +
