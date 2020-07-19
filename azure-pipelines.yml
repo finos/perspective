@@ -186,12 +186,13 @@ jobs:
     - script: yarn
       displayName: 'Install Deps'
 
-    - script: yarn build_python  --ci $(python_flag)
+    - script: 
+        set PATH=C:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\bin\intel64\vc11;%PATH%
+        yarn build_python  --ci $(python_flag)
       displayName: 'build'
       env:
         CFLAGS: /IC:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\include\
         LDFLAGS: /LIBPATH:C:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\lib\intel64\vc11\
-        PATH:  C:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\bin\intel64\vc11;%PATH%
         
 - job: 'MacOS_Mojave'
   pool:
