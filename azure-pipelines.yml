@@ -191,7 +191,8 @@ jobs:
       env:
         CFLAGS: /IC:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\include\
         LDFLAGS: /LIBPATH:C:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\lib\intel64\vc11\
-
+        PATH:  C:\ProgramData\chocolatey\lib\tbb\tools\tbb41_20130314oss\bin\intel64\vc11;%PATH%
+        
 - job: 'MacOS_Mojave'
   pool:
     vmImage: 'macos-10.14'

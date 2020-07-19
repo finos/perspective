@@ -12,32 +12,19 @@ include perspective/table/*.so
 include perspective/table/*.dll
 include perspective/table/*.dylib
 
-
 graft perspective/tests
-
-# Documentation
-graft docs
-exclude docs/\#*
-
-# docs subdirs we want to skip
-prune docs/build
-prune docs/gh-pages
-prune docs/dist
 
 # don't ship benchmark
 prune bench
-
 
 # Use package.json for versioning
 include package.json
 
 # C++ build
-graft dist/cmake
 graft dist/src
+graft dist/third
 graft perspective/src
 graft perspective/include
-graft dist/test
-include dist/CMakeLists.txt
 
 # Patterns to exclude from any directory
 global-exclude *~

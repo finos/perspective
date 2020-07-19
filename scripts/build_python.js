@@ -17,6 +17,8 @@ const IS_PY2 = getarg("--python2");
 let PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
 let IMAGE = "manylinux2010";
 const IS_DOCKER = process.env.PSP_DOCKER;
+const PSP_SYSTEM_TBB = process.env.PSP_SYSTEM_TBB;
+
 
 if (IS_DOCKER) {
     // defaults to 2010
@@ -48,6 +50,7 @@ try {
     const dist_third_hopscotch = resolve`${__dirname}/../python/perspective/dist/third/hopscotch`;
     const dist_third_ordered_map = resolve`${__dirname}/../python/perspective/dist/third/ordered-map`;
     const dist_third_pybind11 = resolve`${__dirname}/../python/perspective/dist/third/pybind11`;
+    const dist_third_tbb = resolve`${__dirname}/../python/perspective/dist/third/tbb`;
 
     const third = resolve`${__dirname}/../cpp/perspective/third`;
     const third_boost = resolve`${__dirname}/../cpp/perspective/third/boost`;
@@ -55,6 +58,7 @@ try {
     const third_hopscotch = resolve`${__dirname}/../cpp/perspective/third/hopscotch`;
     const third_ordered_map = resolve`${__dirname}/../cpp/perspective/third/ordered-map`;
     const third_pybind11 = resolve`${__dirname}/../cpp/perspective/third/pybind11`;
+    const third_tbb = resolve`${__dirname}/../cpp/perspective/third/tbb`;
 
     const cpp_src = resolve`${__dirname}/../cpp/perspective/src`;
     const lic = resolve`${__dirname}/../LICENSE`;
@@ -108,6 +112,13 @@ try {
         rimraf.sync(`${third_pybind11}/.git`);
         console.log("Cloning pybind11...done!");
     }
+
+    if (!fs.existsSync(third_tbb)) {
+        console.log("Cloning tbb");
+        execute`git clone  https://github.com/wjakob/tbb.git ${third_tbb}`;
+        rimraf.sync(`${third_tbb}/.git`);
+        console.log("Cloning tbb...done!");
+    }
     console.log("Cloning third party dependencies...done!");
 
     fs.mkdirpSync(dist);
@@ -147,8 +158,11 @@ try {
         fs.copySync(third_pybind11, dist_third_pybind11, {preserveTimestamps: true});
         console.log("Copying pybind11 to python dist...done!");
     }
-
-
+    if (!fs.existsSync(dist_third_tbb)) {
+        console.log("Copying tbb to python dist");
+        fs.copySync(third_tbb, dist_third_tbb, {preserveTimestamps: true});
+        console.log("Copying tbb to python dist...done!");
+    }
 
     console.log("Copying LICENSE to python dist");
     fs.copySync(lic, dlic, {preserveTimestamps: true});

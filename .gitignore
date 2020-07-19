@@ -74,6 +74,7 @@ flycheck_*.el
 *.so
 *.dylib
 *.dll
+*.pyd
 
 # Fortran module files
 *.mod

@@ -7,6 +7,7 @@
 #
 from __future__ import print_function
 from setuptools import setup, find_packages, Extension
+from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 from codecs import open
 import io
@@ -14,12 +15,12 @@ import os
 import os.path
 import platform
 import sys
+import shutil
 
 # ******************************************** #
 # Get number of cores for numpy parallel build #
 # ******************************************** #
 try:
-    from shutil import which
     CPU_COUNT = os.cpu_count()
 except ImportError:
     # Python2
@@ -76,6 +77,10 @@ requires = [
 
 if sys.version_info.major < 3:
     requires.append("pathlib")
+
+if os.name == 'nt' and not os.environ.get('PSP_SYSTEM_TBB', '') == '1':
+    # helper to avoid dll fun
+    requires.append('tbb==2019.0')
 
 if (sys.version_info.major == 2 and sys.version_info.minor < 7) or \
    (sys.version_info.major == 3 and sys.version_info.minor < 6):
@@ -232,12 +237,13 @@ libraries = pyarrow_libraries + ['tbb']
 
 if os.name == 'nt':
     defines.extend([('BOOST_WINDOWS', '1'), ('WIN32', '1'), ('_WIN32', '1'), ('PERSPECTIVE_EXPORTS', '1')])
-    extra_compiler_args.append('/std:c++14')
-    extra_compiler_args.append('/MP')
+    extra_compiler_args.extend(['/std:c++14', '/MP'])
     runtime_library_dirs = []
+    extra_objects = []
 else:
     extra_compiler_args.append('-std=c++1y')
     runtime_library_dirs = pyarrow_library_dirs
+    extra_objects = []
 
 extensions = [
     Extension('perspective.table.libbinding',
@@ -258,6 +264,7 @@ extensions = [
               runtime_library_dirs=runtime_library_dirs,
               extra_compile_args=extra_compiler_args,
               extra_link_args=extra_link_args,
+              extra_objects=extra_objects,
               sources=sources + binding_sources)
 ]
 
@@ -275,6 +282,29 @@ class PSPCheckSDist(sdist):
             if not os.path.exists(path):
                 raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so c++ files are installed".format(path))
 
+
+# *********************** #
+# DLL utility for windows #
+# *********************** #
+if os.name == 'nt' and not os.environ.get('PSP_NO_DLL_COPY', '') == '1':
+    class PSPBuild(build_ext):
+        def run(self):
+            # Run the standard build
+            build_ext.run(self)
+
+            print('copying dlls into build')
+            self._copy_dlls()
+
+
+        def _copy_dlls(self):
+            import pathlib
+            import os.path
+
+            arrow_dlls = pathlib.Path(os.path.abspath(os.path.dirname(pyarrow.__file__))).glob("*.dll")
+            for file in arrow_dlls:
+                shutil.copy(str(file), os.path.join(os.path.dirname(self.get_ext_fullpath("perspective")), 'perspective', 'table').replace('\\', '/'))
+else:
+    PSPBuild = build_ext
 
 # ***** #
 # setup #
@@ -307,5 +337,5 @@ setup(
         'dev': requires_dev,
     },
     ext_modules=extensions,
-    cmdclass=dict(sdist=PSPCheckSDist)
+    cmdclass=dict(sdist=PSPCheckSDist, build_ext=PSPBuild)
 )
