@@ -20,7 +20,7 @@ import shutil
 # ******************************************** #
 # Get number of cores for numpy parallel build #
 # ******************************************** #
-if os.version_info.major == 3:
+if sys.version_info.major == 3:
     CPU_COUNT = os.cpu_count()
 else:
     # Python2
