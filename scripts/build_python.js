@@ -178,7 +178,7 @@ try {
 
         cmd =
             cmd +
-            `${PYTHON} -m pip install -e .[dev] && \
+            `${PYTHON} -m pip install -v -e .[dev] && \
             ${PYTHON} setup.py build_ext --inplace && \
             ${PYTHON} -m flake8 perspective && echo OK && \
             otool -L perspective/table/libbinding* && \
