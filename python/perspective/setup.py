@@ -32,6 +32,7 @@ else:
 # *************************************** #
 try:
     import numpy
+    print('using numpy from {}'.format(os.path.dirname(numpy.__file__)))
     numpy_includes = numpy.get_include()
 
     # enable numpy faster compiler
@@ -49,6 +50,7 @@ except ImportError:
 # ****************** #
 try:
     import pyarrow
+    print('using pyarrow from {}'.format(os.path.dirname(pyarrow.__file__)))
     pyarrow_includes = pyarrow.get_include()
     pyarrow_library_dirs = pyarrow.get_library_dirs()
     pyarrow_libraries = pyarrow.get_libraries()
@@ -225,9 +227,9 @@ binding_sources = [
 extra_link_args = os.environ.get('LDFLAGS', '').split()
 
 if platform.system() == 'Darwin':
-    extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(('@loader_path//../../pyarrow/', pyarrow_library_dirs[0])))
+    extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(['@loader_path//../../pyarrow/'] + pyarrow_library_dirs))
 else:
-    extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(('$ORIGIN//../../pyarrow/', pyarrow_library_dirs[0])))
+    extra_link_args.append('-Wl,-rpath,' + ',-rpath,'.join(['$ORIGIN//../../pyarrow/'] + pyarrow_library_dirs[0]))
 
 
 defines = [('PSP_ENABLE_PYTHON', '1'), ('PSP_DEBUG', os.environ.get('PSP_DEBUG', '0'))]
