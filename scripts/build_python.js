@@ -181,6 +181,7 @@ try {
             `${PYTHON} -m pip install -e .[dev] && \
             ${PYTHON} setup.py build_ext --inplace && \
             ${PYTHON} -m flake8 perspective && echo OK && \
+            otool -L perspective/table/libbinding* && \
             ${PYTHON} -m pytest -vvv perspective \
             --ignore=perspective/tests/client \
             --junitxml=python_junit.xml --cov-report=xml --cov-branch \

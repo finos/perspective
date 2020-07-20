@@ -20,9 +20,9 @@ import shutil
 # ******************************************** #
 # Get number of cores for numpy parallel build #
 # ******************************************** #
-try:
+if os.version_info.major == 3:
     CPU_COUNT = os.cpu_count()
-except ImportError:
+else:
     # Python2
     import multiprocessing
     CPU_COUNT = multiprocessing.cpu_count()
