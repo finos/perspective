@@ -1130,11 +1130,14 @@ namespace binding {
             offset = 0;
         }
 
-        // Create input schema - an input schema contains all columns to be displayed AND index + operation columns
+        // Create input schema - an input schema contains all columns to be
+        // displayed, as well as `__INDEX__` column
         t_schema input_schema(column_names, data_types);
 
         // strip implicit index, if present
-        auto implicit_index_it = std::find(column_names.begin(), column_names.end(), "__INDEX__");
+        auto implicit_index_it = std::find(
+            column_names.begin(), column_names.end(), "__INDEX__");
+
         if (implicit_index_it != column_names.end()) {
             auto idx = std::distance(column_names.begin(), implicit_index_it);
             // position of the column is at the same index in both vectors
@@ -1142,8 +1145,10 @@ namespace binding {
             data_types.erase(data_types.begin() + idx);
         }
 
-        // Create output schema - contains only columns to be displayed to the user
-        t_schema output_schema(column_names, data_types); // names + types might have been mutated at this point after implicit index removal
+        // Create output schema - contains only columns to be displayed to the
+        // user, as names and types may have been mutated after implicit
+        // index removal.
+        t_schema output_schema(column_names, data_types);
 
         std::uint32_t row_count = 0;
         if (is_arrow) {
@@ -1165,9 +1170,6 @@ namespace binding {
         if (is_arrow) {
             free((void *)ptr);
         }
-
-
-        std::cout << "output: " << data_table.get_schema() << std::endl;
 
         // calculate offset, limit, and set the gnode
         tbl->init(data_table, row_count, op, port_id);

@@ -126,11 +126,11 @@ namespace apachearrow {
             auto name = m_names[cidx];
             t_dtype type = m_types[cidx];
 
-            // if (input_schema.has_column(name)) {
-            //     type = input_schema.get_dtype(name);
-            // } else {
-            //     type = m_types[cidx];
-            // }
+            if (!input_schema.has_column(name)) {
+                // Skip columns that are defined in the arrow but not 
+                // in the Table's input schema.
+                continue;
+            }
 
             auto raw_type = fields[cidx]->type()->name();
 
@@ -160,6 +160,12 @@ namespace apachearrow {
                     okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
                 }
             } else {
+                if (!input_schema.has_column(index)) {
+                    std::stringstream ss;
+                    ss << "Specified index `" << index << "` is invalid as it does not appear in the Table." << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
+                }
+
                 tbl.clone_column(index, "psp_pkey");
                 tbl.clone_column(index, "psp_okey");
             }

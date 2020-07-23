@@ -392,16 +392,37 @@ module.exports = perspective => {
 
         it("schema constructor, then arrow update() with more columns than in the Table", async function() {
             const table = perspective.table({
-                a: "integer",
-                b: "float"
+                a: "integer"
             });
             const view = table.view();
             table.update(arrows.int_float_str_arrow.slice());
             expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
+                a: [1, 2, 3, 4]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor indexed, then arrow update() with more columns than in the Table", async function() {
+            const table = perspective.table(
+                {
+                    a: "integer",
+                    b: "float"
+                },
+                {
+                    index: "a"
+                }
+            );
+            const view = table.view();
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_update_arrow.slice());
+            expect(await table.size()).toBe(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
                 a: [1, 2, 3, 4],
-                b: [1.5, 2.5, 3.5, 4.5]
+                b: [100.5, 2.5, 3.5, 400.5]
             });
             view.delete();
             table.delete();
