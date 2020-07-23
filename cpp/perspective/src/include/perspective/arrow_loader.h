@@ -31,10 +31,28 @@ namespace apachearrow {
         ArrowLoader();
         ~ArrowLoader();
 
+        /**
+         * @brief Initialize the arrow loader with a pointer to a binary.
+         * 
+         * @param ptr 
+         */
         void initialize(uintptr_t ptr, std::uint32_t);
 
+        /**
+         * @brief Given an arrow binary and a data table, load the arrow into
+         * Perspective. If updating an existing table, use the `input_schema`
+         * of the table and respect it as much as possible.
+         * 
+         * @param tbl
+         * @param input_schema
+         * @param index
+         * @param offset
+         * @param limit
+         * @param is_update 
+         */
         void fill_table(
             t_data_table& tbl,
+            const t_schema& input_schema,
             const std::string& index,
             std::uint32_t offset,
             std::uint32_t limit, 

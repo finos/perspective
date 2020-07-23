@@ -366,7 +366,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("schema constructor, then indexed arrow `update()`", async function() {
+        it("schema constructor, then indexed arrow `update()`", async function() {
             const table = perspective.table(
                 {
                     a: "integer",
@@ -376,14 +376,32 @@ module.exports = perspective => {
                 {index: "a"}
             );
 
+            const view = table.view();
             table.update(arrows.int_float_str_arrow.slice());
             table.update(arrows.int_float_str_update_arrow.slice());
-            const view = table.view();
+            expect(await table.size()).toBe(4);
             const result = await view.to_columns();
             expect(result).toEqual({
                 a: [1, 2, 3, 4],
                 b: [100.5, 2.5, 3.5, 400.5],
                 c: ["x", "b", "c", "y"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow update() with more columns than in the Table", async function() {
+            const table = perspective.table({
+                a: "integer",
+                b: "float"
+            });
+            const view = table.view();
+            table.update(arrows.int_float_str_arrow.slice());
+            expect(await table.size()).toBe(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5]
             });
             view.delete();
             table.delete();

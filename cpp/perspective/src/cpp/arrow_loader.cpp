@@ -111,15 +111,27 @@ namespace apachearrow {
     }
 
     void
-    ArrowLoader::fill_table(t_data_table& tbl, const std::string& index, std::uint32_t offset,
-        std::uint32_t limit, bool is_update) {
+    ArrowLoader::fill_table(
+        t_data_table& tbl, 
+        const t_schema& input_schema,
+        const std::string& index,
+        std::uint32_t offset,
+        std::uint32_t limit,
+        bool is_update) {
         bool implicit_index = false;
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
         std::vector<std::shared_ptr<arrow::Field>> fields = schema->fields();
 
         for (long unsigned int cidx = 0; cidx < m_names.size(); ++cidx) {
             auto name = m_names[cidx];
-            auto type = m_types[cidx];
+            t_dtype type = m_types[cidx];
+
+            // if (input_schema.has_column(name)) {
+            //     type = input_schema.get_dtype(name);
+            // } else {
+            //     type = m_types[cidx];
+            // }
+
             auto raw_type = fields[cidx]->type()->name();
 
             if (name == "__INDEX__") {
@@ -189,7 +201,8 @@ namespace apachearrow {
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
                     case arrow::Int8Type::type_id: {
-                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);                    } break;
+                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);                    
+                    } break;
                     case ::arrow::UInt8Type::type_id: {
                         iter_col_copy<::arrow::UInt8Array, t_uindex>(dest, indices, offset, len);
                     } break;
