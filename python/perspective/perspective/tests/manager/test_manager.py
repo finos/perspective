@@ -315,6 +315,114 @@ class TestPerspectiveManager(object):
             "error": "`table_method.update` failed - access denied"
         }))
 
+    # schema
+
+    def test_manager_table_schema(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "data": {
+                "a": "integer",
+                "b": "string"
+            }
+        })
+
+        message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "schema", "args": [False]}
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, post_callback)
+
+    def test_manager_view_schema(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "data": {
+                "a": "integer",
+                "b": "integer"
+            }
+        })
+
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": [False]}
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view(row_pivots=["a"])
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, post_callback)
+
+    def test_manager_table_computed_schema(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "data": {
+                "abc": "float"
+            }
+        })
+
+        message = {
+            "id": 1,
+            "name": "table1",
+            "cmd": "table_method",
+            "method": "computed_schema",
+            "args": [
+                [
+                    {
+                        "column": "abc",
+                        "computed_function_name": "+",
+                        "inputs": ["a", "a"]
+                    }
+                ]
+            ]
+        }
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, post_callback)
+
+    def test_manager_table_get_computation_input_types(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "data": ["string"]
+        })
+
+        message = {
+            "id": 1,
+            "name": "table1",
+            "cmd": "table_method",
+            "method": "get_computation_input_types",
+            "args": ["concat_comma"]
+        }
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, post_callback)
+
+    def test_manager_view_computed_schema(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 1,
+            "data": {
+                "abc": "float"
+            }
+        })
+
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "computed_schema", "args": [False]}
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view(computed_columns=[
+            {
+                "column": "abc",
+                "computed_function_name": "+",
+                "inputs": ["a", "a"]
+            }
+        ])
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, post_callback)
+
     # serialization
 
     def test_manager_to_dict(self, sentinel):
@@ -812,6 +920,18 @@ class TestPerspectiveManager(object):
         update2 = {"id": 6, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
         manager._process(update2, self.post)
         assert s.get() == 100
+
+    def test_manager_delete_table_should_fail(self):
+        post_callback = partial(self.validate_post, expected={
+            "id": 2,
+            "error": "table.delete() cannot be called on a remote table, as the remote has full ownership."
+        })
+        make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
+        manager = PerspectiveManager()
+        manager._process(make_table, self.post)
+        delete_table = {"id": 2, "name": "table1", "cmd": "table_method", "method": "delete", "args": []}
+        manager._process(delete_table, post_callback)
+        assert len(manager._tables) == 1
 
     def test_manager_delete_view(self):
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}

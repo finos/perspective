@@ -1083,7 +1083,7 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_FIRST:
-            case AGGTYPE_LAST: {
+            case AGGTYPE_LAST_BY_INDEX: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 new_value.set(first_last_helper(nidx, spec, gstate));
                 dst->set_scalar(dst_ridx, new_value);

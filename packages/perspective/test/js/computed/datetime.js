@@ -1108,6 +1108,37 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Bucket (D), datetime at UTC edge", async function() {
+            const table = perspective.table({
+                a: "datetime"
+            });
+
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "computed",
+                        computed_function_name: "Bucket (D)",
+                        inputs: ["a"]
+                    }
+                ]
+            });
+
+            const schema = await view.schema();
+            expect(schema).toEqual({
+                a: "datetime",
+                computed: "date"
+            });
+
+            table.update({
+                a: [new Date(2020, 0, 15, 23, 30, 15), null, undefined, new Date(2020, 3, 29, 23, 30, 0), new Date(2020, 4, 30, 23, 30, 15)]
+            });
+
+            let result = await view.to_columns();
+            expect(result.computed.map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.day_bucket(x) : null)));
+            view.delete();
+            table.delete();
+        });
+
         it("Bucket (W), datetime", async function() {
             const table = perspective.table({
                 a: "datetime"

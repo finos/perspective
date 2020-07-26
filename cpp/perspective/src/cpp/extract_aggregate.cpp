@@ -54,9 +54,9 @@ extract_aggregate(
         case AGGTYPE_DOMINANT:
         case AGGTYPE_MEDIAN:
         case AGGTYPE_FIRST:
-        case AGGTYPE_LAST:
         case AGGTYPE_AND:
         case AGGTYPE_OR:
+        case AGGTYPE_LAST_BY_INDEX:
         case AGGTYPE_LAST_VALUE:
         case AGGTYPE_HIGH_WATER_MARK:
         case AGGTYPE_LOW_WATER_MARK:

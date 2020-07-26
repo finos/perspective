@@ -25,7 +25,7 @@
     "render_warning_render_warning_should_show_above_size_limit_": "54dacb0e820609b0630ebcbe0e7d08dc",
     "render_warning_dismissing_render_warning_should_trigger_render_": "a19460e94971e107754140056d0844fd",
     "render_warning_underlying_data_updates_should_not_trigger_rerender_if_warning_is_visible_": "de22dce000eb9bfafc85359c620a8365",
-    "__GIT_COMMIT__": "410648f3426fe2358cdf2a9a89424ed6cbe6122a",
+    "__GIT_COMMIT__": "3489c6ff9be69ae3ce887706b5837d5bfc0439ef",
     "line_shows_a_grid_without_any_settings_applied_": "daa48e26ee315f01377eaaf054088934",
     "line_pivots_by_a_row_": "47381fac3329abe680ee05457635ace4",
     "line_pivots_by_two_rows_": "f4938c42922f08a3af0741afc997d5e2",
@@ -90,5 +90,7 @@
     "heatmap_tooltip_tests_tooltip_shows_on_hover_": "d459cde6c4044d6d30cbddf8f6b069e7",
     "line_replaces_all_rows_": "fe3a3c6244530496bb997919399c2517",
     "line_tooltip_columns_work_with_extra_tooltip_columns": "db7238f748b0e2328971fe6c0cf16489",
-    "scatter_tooltip_tests_tooltip_columns_works_when_color_column_is_null": "4e89313f4b839af69b9ed78b5ccadedb"
+    "scatter_tooltip_tests_tooltip_columns_works_when_color_column_is_null": "4e89313f4b839af69b9ed78b5ccadedb",
+    "scatter_axis_tests_Sets_a_category_axis_when_category_is_a_computed_datetime": "915171a1db77a324aff824d01543686e",
+    "line_axis_tests_Sets_a_category_axis_when_category_is_a_computed_datetime": "b92993af73cc8106ffa57ebb6f7874d5"
 }

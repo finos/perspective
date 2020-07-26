@@ -119,39 +119,56 @@ class _PerspectiveManagerInternal(object):
                 self._process_subscribe(
                     msg, table_or_view, post_callback, client_id)
             else:
-                args = {}
+                # Decide how to dispatch the method
+                arguments = {}
+
                 if msg["method"] in ("schema", "computed_schema", "get_computation_input_types"):
-                    # make sure schema returns string types
-                    args["as_string"] = True
+                    # make sure schema returns string types through the
+                    # wire API. `as_string` is respected by both the table
+                    # and view's `schema` and `computed_schema` methods.
+                    arguments["as_string"] = True
                 elif msg["method"].startswith("to_"):
                     # parse options in `to_format` calls
                     for d in msg.get("args", []):
-                        args.update(d)
+                        arguments.update(d)
                 else:
-                    args = msg.get("args", [])
+                    # Otherwise, arguments are always passed as arrays of
+                    # individual arguments.
+                    arguments = msg.get("args", [])
 
-                if msg["method"] == "delete" and msg["cmd"] == "view_method":
-                    # views can be removed, but tables cannot
-                    self._views[msg["name"]].delete()
-                    self._views.pop(msg["name"], None)
-                    return
+                if msg["method"] == "delete":
+                    if msg["cmd"] == "view_method":
+                        # views can be removed, but tables cannot - intercept
+                        # calls to `delete` on the view and return.
+                        self._views[msg["name"]].delete()
+                        self._views.pop(msg["name"], None)
+                        return
+                    else:
+                        # Return an error when `table.delete()` is called
+                        # over the wire API.
+                        raise PerspectiveError("table.delete() cannot be called on a remote table, as the remote has full ownership.")
 
+                # Dispatch the method using the expected argument form
                 if msg["method"].startswith("to_"):
                     # to_format takes dictionary of options
-                    result = getattr(table_or_view, msg["method"])(**args)
+                    result = getattr(table_or_view, msg["method"])(**arguments)
                 elif msg["method"] in ("update", "remove"):
-                    # Apply first arg as position, then options dict as kwargs
-                    data = args[0]
+                    # Apply first arg as positional, then options dict as kwargs
+                    data = arguments[0]
                     options = {}
-                    if (len(args) > 1 and isinstance(args[1], dict)):
-                        options = args[1]
+                    if (len(arguments) > 1 and isinstance(arguments[1], dict)):
+                        options = arguments[1]
                     result = getattr(table_or_view, msg["method"])(data, **options)
-                elif msg["method"] in ("computed_schema", "get_computation_input_types"):
-                    # these methods take args and kwargs
-                    result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **args)
-                elif msg["method"] != "delete":
-                    # otherwise parse args as list
-                    result = getattr(table_or_view, msg["method"])(*args)
+                elif msg["cmd"] == "table_method" and msg["method"] in ("computed_schema", "get_computation_input_types"):
+                    # computed_schema on the table takes kwargs; computed
+                    # schema on the view takes args.
+                    result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **arguments)
+                else:
+                    # otherwise parse arguments as list
+                    result = getattr(table_or_view, msg["method"])(*arguments)
+
+                # result has been returned from Perspective, now deliver
+                # it back to the user.
                 if isinstance(result, bytes) and msg["method"] != "to_csv":
                     # return a binary to the client without JSON serialization,
                     # i.e. when we return an Arrow. If a method is added that

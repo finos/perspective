@@ -54,11 +54,24 @@ function drawChart(chart) {
             jsonp = view.to_json({leaves_only: true});
         }
 
-        let [tschema, schema, json, config] = await Promise.all([this._table.schema(false), view.schema(false), jsonp, view.get_config()]);
+        let [table_schema, computed_schema, view_schema, json, config] = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
 
         if (task.cancelled) {
             return;
         }
+
+        /**
+         * Retrieve a tree axis column from the table and computed schemas,
+         * returning a String type or `undefined`.
+         * @param {String} column a column name
+         */
+        const get_pivot_column_type = function(column) {
+            let type = table_schema[column];
+            if (!type) {
+                type = computed_schema[column];
+            }
+            return type;
+        };
 
         const {columns, row_pivots, column_pivots, filter} = config;
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
@@ -67,9 +80,9 @@ function drawChart(chart) {
 
         let settings = {
             realValues,
-            crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
-            mainValues: columns.map(a => ({name: a, type: schema[a]})),
-            splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),
+            crossValues: row_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
+            mainValues: columns.map(a => ({name: a, type: view_schema[a]})),
+            splitValues: column_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
             filter,
             data: mapped
         };
