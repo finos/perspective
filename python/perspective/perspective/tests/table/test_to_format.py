@@ -479,6 +479,44 @@ class TestToFormat(object):
         )
         assert records == []
 
+    def test_to_records_floor_start_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_row=1.5
+        )
+        assert records == [{"a": 3, "b": 4}]
+
+    def test_to_records_ceil_end_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            end_row=0.5
+        )
+        assert records == [{"a": 1, "b": 2}]
+
+    def test_to_records_floor_start_row_ceil_end_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_row=1.5,
+            end_row=1.5
+        )
+        assert records == [{"a": 3, "b": 4}]
+
+    def test_to_records_floor_start_row_ceil_end_row_equiv(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_row=1.5,
+            end_row=0.5
+        )
+        assert records == []
+
     # start_col/end_col
 
     def test_to_records_zero_over_max_col(self):
@@ -582,6 +620,58 @@ class TestToFormat(object):
             end_col=1
         )
         assert records == [{}, {}]
+
+    def test_to_records_floor_start_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=1.5
+        )
+        assert records == [{"b": 2}, {"b": 4}]
+
+    def test_to_records_ceil_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            end_col=1
+        )
+        assert records == [{"a": 1}, {"a": 3}]
+
+    def test_to_records_two_ceil_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"]
+        )
+        records = view.to_records(
+            end_row=12,
+            end_col=4.5
+        )
+        assert records == [
+            {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': [1]},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': [3]}
+        ]
+
+    def test_to_records_floor_start_col_ceil_end_col(self):
+        data = [{"a": 1, "b": 2, "c": 3}, {"a": 3, "b": 4, "c": 5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=1.5,
+            end_col=1.5
+        )
+        # start_col and end_col access columns at that index - dict key order not guaranteed in python2
+        if six.PY2:
+            # in this test, column c comes before b
+            assert records == [{"c": 3}, {"c": 5}]
+            # assert that in the general dataset, just to see if it holds true
+            assert view.to_records() == [{"a": 1, "c": 3, "b": 2}, {"a": 3, "c": 5, "b": 4}]
+        else:
+            assert records == [{"b": 2}, {"b": 4}]
 
     def test_to_dict_start_col_end_col(self):
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
