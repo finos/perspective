@@ -9,6 +9,11 @@
 
 const utils = require("@finos/perspective-test");
 const path = require("path");
+const arrows = require("./test_arrows.js");
+
+const arraybuffer_to_string = function(buf) {
+    return String.fromCharCode(...new Uint8Array(buf));
+};
 
 utils.with_server({}, () => {
     describe.page(
@@ -53,6 +58,60 @@ utils.with_server({}, () => {
                         schema
                     );
                     await page.waitForSelector("perspective-viewer:not([updating])");
+                },
+                {wait_for_update: false}
+            );
+
+            test.capture(
+                "When transferables are enabled, transfers an arrow in load.",
+                async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    const arrow = arrows.int_float_str_arrow.slice();
+                    const byte_length = await page.evaluate(
+                        async (viewer, data) => {
+                            const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
+                            viewer.load(arrow);
+                            // force _process to run - otherwise reading
+                            // bytelength will return the un-transfered arrow.
+                            await viewer.table.size();
+                            return arrow.byteLength;
+                        },
+                        viewer,
+                        arraybuffer_to_string(arrow)
+                    );
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    expect(byte_length).toBe(0);
+                },
+                {wait_for_update: false}
+            );
+
+            test.capture(
+                "When transferables are enabled, transfers an arrow in update.",
+                async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    const schema = {
+                        a: "integer",
+                        b: "float",
+                        c: "string"
+                    };
+                    const arrow = arrows.int_float_str_arrow.slice();
+                    console.log(arrow.byteLength);
+                    const byte_length = await page.evaluate(
+                        async (viewer, data, schema) => {
+                            viewer.load(schema);
+                            const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
+                            viewer.update(arrow);
+                            // force _process to run - otherwise reading
+                            // bytelength will return the un-transfered arrow.
+                            await viewer.table.size();
+                            return arrow.byteLength;
+                        },
+                        viewer,
+                        arraybuffer_to_string(arrow),
+                        schema
+                    );
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    expect(byte_length).toBe(0);
                 },
                 {wait_for_update: false}
             );
