@@ -366,6 +366,71 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it.skip("schema constructor, then indexed arrow dictionary `update()`", async function() {
+            const table = perspective.table(
+                {
+                    a: "string",
+                    b: "string"
+                },
+                {index: "a"}
+            );
+            table.update(arrows.dict_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            expect(size).toEqual(3);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [null, "abc", "def"],
+                b: ["hij", "klm", "hij"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("schema constructor, then indexed arrow dictionary `update()` with more columns than in schema", async function() {
+            const table = perspective.table(
+                {
+                    a: "string"
+                },
+                {index: "a"}
+            );
+            table.update(arrows.dict_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            console.log(await view.to_columns());
+            expect(size).toEqual(3);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [null, "abc", "def"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("schema constructor, then indexed arrow dictionary `update()` with less columns than in schema", async function() {
+            const table = perspective.table(
+                {
+                    a: "string",
+                    b: "string",
+                    x: "integer"
+                },
+                {index: "a"}
+            );
+            table.update(arrows.dict_arrow.slice());
+            const view = table.view();
+            const size = await table.size();
+            console.log(await view.to_columns());
+            expect(size).toEqual(3);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [null, "abc", "def"],
+                b: ["hij", "klm", "hij"],
+                x: [null, null, null]
+            });
+            view.delete();
+            table.delete();
+        });
+
         it("schema constructor, then indexed arrow `update()`", async function() {
             const table = perspective.table(
                 {
@@ -423,6 +488,50 @@ module.exports = perspective => {
             expect(result).toEqual({
                 a: [1, 2, 3, 4],
                 b: [100.5, 2.5, 3.5, 400.5]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor, then arrow update() with less columns than in the Table", async function() {
+            const table = perspective.table({
+                a: "integer",
+                x: "float",
+                y: "string"
+            });
+            const view = table.view();
+            table.update(arrows.int_float_str_arrow.slice());
+            expect(await table.size()).toBe(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                x: [null, null, null, null],
+                y: [null, null, null, null]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("schema constructor indexed, then arrow update() with less columns than in the Table", async function() {
+            const table = perspective.table(
+                {
+                    a: "integer",
+                    x: "float",
+                    y: "string"
+                },
+                {
+                    index: "a"
+                }
+            );
+            const view = table.view();
+            table.update(arrows.int_float_str_arrow.slice());
+            table.update(arrows.int_float_str_update_arrow.slice());
+            expect(await table.size()).toBe(4);
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                a: [1, 2, 3, 4],
+                x: [null, null, null, null],
+                y: [null, null, null, null]
             });
             view.delete();
             table.delete();

@@ -188,6 +188,10 @@ namespace apachearrow {
         const int64_t offset, const int64_t len) {
         switch (src->type()->id()) {
             case arrow::DictionaryType::type_id: {
+                // If there are duplicate values in the dictionary at different
+                // indices, i.e. [0 => a, 1 => b, 2 => a], tables with
+                // explicit indexes on a string column created from a dictionary
+                // array may have duplicate primary keys.
                 auto scol = std::static_pointer_cast<arrow::DictionaryArray>(src);
                 std::shared_ptr<arrow::StringArray> dict
                     = std::static_pointer_cast<arrow::StringArray>(scol->dictionary());
@@ -480,7 +484,7 @@ namespace apachearrow {
                         std::stringstream ss;
                         ss << "Could not fill column `" << name << "` with "
                            << "t_dtype: `" << get_dtype_descr(column_dtype) << "`, "
-                           << "array type: `" << get_dtype_descr(type) << std::endl;
+                           << "array type: `" << get_dtype_descr(type) << "`" << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                     };
                 }
