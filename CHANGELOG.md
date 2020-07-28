@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.2] (2020-07-28)
+
+#### Fixed
+  * [#1110](https://github.com/finos/perspective/pull/1110) slight UX change, dont
+  end with stack trace as it looks like it raised an error ([@timkpaine](https://github.com/timkpaine))
+  * [#1116](https://github.com/finos/perspective/pull/1116) Properly display computed axis on charts, use local time for all datetime functions ([@sc1f](https://github.com/sc1f))
+
+#### Internal
+  * [#1112](https://github.com/finos/perspective/pull/1112) Explicitly floor start row/col and ceil end row/col ([@sc1f](https://github.com/sc1f))
+  
 ## [0.5.1] (2020-06-24)
 
 #### Added
