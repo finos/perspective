@@ -12,7 +12,7 @@ import Highcharts from "highcharts";
 import style from "../../less/highcharts.less";
 import template from "../../html/highcharts.html";
 
-import {COLORS_10, COLORS_20} from "./externals.js";
+import {COLORS_10, COLORS_20} from "./base.js";
 import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";

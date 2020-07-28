@@ -6,16 +6,7 @@
     "unpkg": "./dist/umd/perspective-viewer-highcharts.js",
     "jsdelivr": "./dist/umd/perspective-viewer-highcharts.js",
     "browser": {
-        "heatmap": "./dist/esm/heatmap.js",
-        "sunburst": "./dist/esm/sunburst.js",
-        "treemap": "./dist/esm/treemap.js",
-        "x_bar": "./dist/esm/x_bar.js",
-        "xy_line": "./dist/esm/xy_line.js",
-        "xy_scatter": "./dist/esm/xy_scatter.js",
-        "y_area": "./dist/esm/y_area.js",
-        "y_bar": "./dist/esm/y_bar.js",
-        "y_line": "./dist/esm/y_line.js",
-        "y_scatter": "./dist/esm/y_scatter.js"
+        "lite": "./dist/cjs/perspective-viewer-highcharts-lite.js"
     },
     "module": "./dist/cjs/perspective-viewer-highcharts.js",
     "files": [
@@ -28,7 +19,8 @@
         "bench:run": "echo \"No Benchmarks\"",
         "prebuild": "mkdirp dist/esm",
         "build:babel": "cpx \"src/**/*\" dist && babel src/js --source-maps --out-dir dist/esm",
-        "build:webpack": "npm-run-all build:webpack:cjs build:webpack:umd",
+        "build:webpack": "npm-run-all build:webpack:lite build:webpack:cjs build:webpack:umd",
+        "build:webpack:lite": "webpack --color --config src/config/lite.config.js",
         "build:webpack:cjs": "webpack --color --config src/config/cjs.config.js",
         "build:webpack:umd": "webpack --color --config src/config/umd.config.js",
         "build": "npm-run-all --silent build:babel build:webpack",
@@ -56,12 +48,13 @@
         "core-js": "^3.6.4",
         "detectie": "1.0.0",
         "gradient-parser": "0.1.5",
-        "highcharts": "6.1.0",
-        "highcharts-grouped-categories": "1.1.2",
-        "highcharts-more": "^0.1.2"
+        "highcharts-grouped-categories": "1.1.2"
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.5.1",
         "@finos/perspective-webpack-plugin": "^0.5.0"
+    },
+    "peerDependencies": {
+        "highcharts": "6.1.0"
     }
 }

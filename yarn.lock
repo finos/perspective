@@ -7486,11 +7486,6 @@ highcharts-grouped-categories@1.1.2:
   resolved "https://registry.yarnpkg.com/highcharts-grouped-categories/-/highcharts-grouped-categories-1.1.2.tgz#93ba27d31389e46ce6da772be070eab22b7d3903"
   integrity sha1-k7on0xOJ5Gzm2ncr4HDqsit9OQM=
 
-highcharts-more@^0.1.2:
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/highcharts-more/-/highcharts-more-0.1.7.tgz#43cd6274cccba443166c94d4536d904bbabf9c77"
-  integrity sha1-Q81idMzLpEMWbJTUU22QS7q/nHc=
-
 highcharts@6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-6.1.0.tgz#115a6ee10ad36a53d9913f1030c6d46da16c7cb5"

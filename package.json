@@ -55,6 +55,7 @@
         "file-loader": "^2.0.0",
         "fs-extra": "^8.1.0",
         "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
+        "highcharts": "6.1.0",
         "html-loader": "^0.5.1",
         "html-loader-jest": "^0.2.1",
         "inquirer": "^7.0.0",
