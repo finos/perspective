@@ -82,14 +82,14 @@ Emscripten SDK, then activate and export the latest `emsdk` environment via
 source emsdk/emsdk_env.sh
 ```
 
-We currently use Emscripten version `1.38.47` — deviating from this specific
+We currently use Emscripten version `1.39.13` — deviating from this specific
 version of Emscripten can introduce various errors that are extremely difficult
 to debug.
 
 To install this specific version of Emscripten:
 
 ```bash
-./emsdk install 1.38.47
+./emsdk install 1.39.13
 ```
 
 ### `perspective-python`
