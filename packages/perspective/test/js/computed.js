@@ -20,7 +20,7 @@ module.exports = perspective => {
     numeric(perspective);
     string(perspective);
     datetime(perspective);
-    updates(perspective);
-    deltas(perspective);
-    invariant(perspective);
+    // updates(perspective);
+    // deltas(perspective);
+    // invariant(perspective);
 };

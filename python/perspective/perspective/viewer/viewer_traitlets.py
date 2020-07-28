@@ -31,7 +31,7 @@ class PerspectiveTraitlets(HasTraits):
     columns = List(default_value=[]).tag(sync=True)
     row_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True, o=True)
     column_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True)
-    aggregates = Dict(trait=Unicode(), default_value={}).tag(sync=True)
+    aggregates = Dict(default_value={}).tag(sync=True)
     sort = List(default_value=[]).tag(sync=True)
     filters = List(default_value=[]).tag(sync=True)
     computed_columns = List(default_value=[]).tag(sync=True)

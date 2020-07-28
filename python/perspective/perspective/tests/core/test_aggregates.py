@@ -22,6 +22,15 @@ class TestAggregates:
         widget = PerspectiveWidget(data, aggregates=aggs)
         assert widget.aggregates == aggs
 
+    def test_aggregates_widget_load_weighted_mean(self):
+        aggs = {
+            "a": Aggregate.AVG,
+            "b": ["weighted mean", "a"]
+        }
+        data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
+        widget = PerspectiveWidget(data, aggregates=aggs)
+        assert widget.aggregates == aggs
+
     def test_aggregates_widget_setattr(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data)

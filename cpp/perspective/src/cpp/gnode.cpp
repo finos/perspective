@@ -275,10 +275,27 @@ t_gnode::_process_table(t_uindex port_id) {
 
     // first update - master table is empty
     if (m_gstate->mapping_size() == 0) {
-        // Update context from state first - computes columns during update
-        _update_contexts_from_state(flattened);
-        m_gstate->update_master_table(flattened.get());
+        std::cout <<"BEFORE" <<std::endl;
+        flattened->pprint();
+
+        // Compute columns on flattened from all contexts, as `flattened`
+        // at this point does not have any computed columns on it. If we don't
+        // add computed columns, computed columns from a new context won't
+        // be calculated and stored in the gnode state master table.
+        _compute_all_columns({flattened});
+
+
+        std::cout <<"AFTER" <<std::endl;
+        flattened->pprint();
+
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
+
+        m_gstate->update_master_table(flattened.get());
+
+        // Update context from state after gnode state has been updated, as
+        // contexts obliquely read gnode state at various points.
+        _update_contexts_from_state(flattened);
+
         release_inputs();
         release_outputs();
 
@@ -589,8 +606,8 @@ t_gnode::process(t_uindex port_id) {
 
     if (result.m_flattened_data_table) {
         notify_contexts(*result.m_flattened_data_table);
-    } 
-    
+    }
+
     // Whether the user should be notified - False if process_table exited
     // early, True otherwise.
     return result.m_should_notify_userspace;
