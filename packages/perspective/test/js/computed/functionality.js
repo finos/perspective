@@ -85,6 +85,41 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Should be able to create chained computed columns in `view()` from schema, and updates propagate", async function() {
+            const table = perspective.table({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean"
+            });
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "int + float",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    },
+                    {
+                        column: "computed2",
+                        computed_function_name: "pow2",
+                        inputs: ["int + float"]
+                    }
+                ]
+            });
+
+            const result = await view.to_columns();
+            expect(result).toEqual({});
+
+            table.update(common.int_float_data);
+
+            const new_result = await view.to_columns();
+            expect(new_result["int + float"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            expect(new_result["computed2"]).toEqual([2.5, 4.5, 6.5, 8.5].map(x => Math.pow(x, 2)));
+
+            view.delete();
+            table.delete();
+        });
+
         it("Should be able to create multiple computed columns in `view()`", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
@@ -678,6 +713,31 @@ module.exports = perspective => {
             const result = await view.to_columns();
             expect(result["int + float"]).toEqual(undefined);
             expect(result["x"]).toEqual([1, 2, 3, 4]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should be able to row pivot on a non-computed column and get correct results.", async function() {
+            const table = perspective.table(common.int_float_data);
+            const view = table.view({
+                row_pivots: ["w"],
+                computed_columns: [
+                    {
+                        column: "int + float",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                __ROW_PATH__: [[], [1.5], [2.5], [3.5], [4.5]],
+                "int + float": [22, 2.5, 4.5, 6.5, 8.5],
+                w: [12, 1.5, 2.5, 3.5, 4.5],
+                x: [10, 1, 2, 3, 4],
+                y: [4, 1, 1, 1, 1],
+                z: [4, 1, 1, 1, 1]
+            });
             view.delete();
             table.delete();
         });

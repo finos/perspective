@@ -449,6 +449,28 @@ class TestView(object):
             {"__ROW_PATH__": ["a"], "y": 300 / 2}
         ]
 
+    def test_view_aggregate_mean_from_schema(self):
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": 2, "y": 100},
+            {"a": "a", "x": 3, "y": None}
+        ]
+        tbl = Table({
+            "a": str,
+            "x": int,
+            "y": float
+        })
+        view = tbl.view(
+            aggregates={"y": "mean"},
+            row_pivots=["a"],
+            columns=['y']
+        )
+        tbl.update(data)
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": 300 / 2},
+            {"__ROW_PATH__": ["a"], "y": 300 / 2}
+        ]
+
     def test_view_aggregate_weighted_mean(self):
         data = [
             {"a": "a", "x": 1, "y": 200},

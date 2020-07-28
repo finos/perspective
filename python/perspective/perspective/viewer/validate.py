@@ -68,7 +68,7 @@ def validate_aggregates(aggregates):
                 # Parse weighted mean aggregate in ["weighted mean", "COLUMN"]
                 if len(v) == 2 and v[0] == "weighted mean":
                     continue
-                raise PerspectiveError("Unrecognized aggregate in incorrect syntax for weighted mean: %s \Syntax should be: ['weighted mean', 'COLUMN']", v) 
+                raise PerspectiveError("Unrecognized aggregate in incorrect syntax for weighted mean: %s - Syntax should be: ['weighted mean', 'COLUMN']", v)
             else:
                 raise PerspectiveError('Cannot parse aggregation of type %s', str(type(v)))
         return aggregates
