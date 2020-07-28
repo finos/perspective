@@ -275,9 +275,14 @@ t_gnode::_process_table(t_uindex port_id) {
 
     // first update - master table is empty
     if (m_gstate->mapping_size() == 0) {
-        m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
+        // Compute columns here on the flattened table, as the flattened table
+        // does not have any of the computed columns that are stored on the
+        // gnode, i.e. from all created contexts.
+        _compute_all_columns({flattened});
 
         m_gstate->update_master_table(flattened.get());
+
+        m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
 
         // Update context from state after gnode state has been updated, as
         // contexts obliquely read gnode state at various points.
@@ -760,10 +765,12 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     bool should_update = m_gstate->mapping_size() > 0;
 
     // TODO: shift columns forward in cleanup, translate dead indices
-    std::shared_ptr<t_data_table> flattened;
+    std::shared_ptr<t_data_table> pkeyed_table;
 
     if (should_update) {
-        flattened = m_gstate->get_pkeyed_table();
+        // Will not have computed columns added in the context to be
+        // registered, but all previously computed columns.
+        pkeyed_table = m_gstate->get_pkeyed_table();
     }
 
     std::vector<t_computed_column_definition> computed_columns;
@@ -781,8 +788,8 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
                 // were added as part of this context. Do so separately from
                 // update_context_from_state, so that registration-specific logic
                 // is centralized in one place.
-                _compute_all_columns({flattened});
-                update_context_from_state<t_ctx2>(ctx, flattened);
+                _compute_all_columns({pkeyed_table});
+                update_context_from_state<t_ctx2>(ctx, pkeyed_table);
             }
         } break;
         case ONE_SIDED_CONTEXT: {
@@ -793,8 +800,8 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             m_computed_column_map.add_computed_columns(computed_columns);
 
             if (should_update) {
-                _compute_all_columns({flattened});
-                update_context_from_state<t_ctx1>(ctx, flattened);
+                _compute_all_columns({pkeyed_table});
+                update_context_from_state<t_ctx1>(ctx, pkeyed_table);
             }
         } break;
         case ZERO_SIDED_CONTEXT: {
@@ -805,8 +812,8 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             m_computed_column_map.add_computed_columns(computed_columns);
 
             if (should_update) {
-                _compute_all_columns({flattened});
-                update_context_from_state<t_ctx0>(ctx, flattened);
+                _compute_all_columns({pkeyed_table});
+                update_context_from_state<t_ctx0>(ctx, pkeyed_table);
             }
         } break;
         case GROUPED_PKEY_CONTEXT: {
@@ -817,8 +824,8 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             m_computed_column_map.add_computed_columns(computed_columns);
 
             if (should_update) {
-                _compute_all_columns({flattened});
-                update_context_from_state<t_ctx_grouped_pkey>(ctx, flattened);
+                _compute_all_columns({pkeyed_table});
+                update_context_from_state<t_ctx_grouped_pkey>(ctx, pkeyed_table);
             }
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
