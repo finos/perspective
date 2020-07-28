@@ -275,19 +275,6 @@ t_gnode::_process_table(t_uindex port_id) {
 
     // first update - master table is empty
     if (m_gstate->mapping_size() == 0) {
-        std::cout <<"BEFORE" <<std::endl;
-        flattened->pprint();
-
-        // Compute columns on flattened from all contexts, as `flattened`
-        // at this point does not have any computed columns on it. If we don't
-        // add computed columns, computed columns from a new context won't
-        // be calculated and stored in the gnode state master table.
-        _compute_all_columns({flattened});
-
-
-        std::cout <<"AFTER" <<std::endl;
-        flattened->pprint();
-
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
 
         m_gstate->update_master_table(flattened.get());
@@ -787,9 +774,16 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             t_ctx2* ctx = static_cast<t_ctx2*>(ptr_);
             ctx->reset();
             computed_columns = ctx->get_config().get_computed_columns();
-            m_computed_column_map.add_computed_columns(computed_columns);
-            if (should_update)
+            m_computed_column_map.add_computed_columns(computed_columns); 
+
+            if (should_update) {
+                // Compute all valid computed columns + new computed columns that
+                // were added as part of this context. Do so separately from
+                // update_context_from_state, so that registration-specific logic
+                // is centralized in one place.
+                _compute_all_columns({flattened});
                 update_context_from_state<t_ctx2>(ctx, flattened);
+            }
         } break;
         case ONE_SIDED_CONTEXT: {
             set_ctx_state<t_ctx1>(ptr_);
@@ -797,8 +791,11 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             ctx->reset();
             computed_columns = ctx->get_config().get_computed_columns();
             m_computed_column_map.add_computed_columns(computed_columns);
-            if (should_update)
+
+            if (should_update) {
+                _compute_all_columns({flattened});
                 update_context_from_state<t_ctx1>(ctx, flattened);
+            }
         } break;
         case ZERO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
@@ -806,8 +803,11 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             ctx->reset();
             computed_columns = ctx->get_config().get_computed_columns();
             m_computed_column_map.add_computed_columns(computed_columns);
-            if (should_update)
+
+            if (should_update) {
+                _compute_all_columns({flattened});
                 update_context_from_state<t_ctx0>(ctx, flattened);
+            }
         } break;
         case GROUPED_PKEY_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
@@ -815,8 +815,11 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             ctx->reset();
             computed_columns = ctx->get_config().get_computed_columns();
             m_computed_column_map.add_computed_columns(computed_columns);
-            if (should_update)
+
+            if (should_update) {
+                _compute_all_columns({flattened});
                 update_context_from_state<t_ctx_grouped_pkey>(ctx, flattened);
+            }
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
     }
