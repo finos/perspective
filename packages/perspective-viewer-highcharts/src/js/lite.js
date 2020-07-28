@@ -7,6 +7,5 @@
  *
  */
 
-import "./highcharts/externals.js";
 import register from "./highcharts/highcharts.js";
 register();

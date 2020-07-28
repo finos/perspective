@@ -138,11 +138,10 @@ they are compatible with perspective versions < 1.0.0:
   [Hypergrid](https://github.com/fin-hypergrid/core).
 
 - `@finos/perspective-viewer-highcharts`  
-  A `<perspective-viewer>` plugin for
+  [DEPRECATED] A `<perspective-viewer>` plugin for
   [HighCharts](https://github.com/highcharts/highcharts). This plugin has a
-  dependency on Highcharts'
-  [mixed commercial license](https://creativecommons.org/licenses/by-nc/3.0/),
-  and is no longer under active development.
+  `highcharts` as a peerDependency, and requires a
+  [mixed commercial license](https://shop.highsoft.com/).
 
 When imported after `@finos/perspective-viewer`, the plugin modules will
 register themselves automatically, and the renderers they export will be
@@ -906,7 +905,7 @@ Once an update has finished, a `perspective-update-complete` DOM event is fired.
 
 ```javascript
 elem.addEventListener("perspective-update-complete", function(event) {
-  console.log("Update is now complete");
+    console.log("Update is now complete");
 });
 ```
 
