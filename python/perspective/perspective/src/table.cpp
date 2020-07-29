@@ -177,7 +177,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         row_count = arrow_loader.row_count();
         data_table.extend(arrow_loader.row_count());
 
-        arrow_loader.fill_table(data_table, index, offset, limit, is_update);
+        arrow_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
     } else if (is_numpy) {
         row_count = numpy_loader.row_count();
         data_table.extend(row_count);

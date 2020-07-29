@@ -1039,7 +1039,7 @@ namespace binding {
 
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
-        apachearrow::ArrowLoader loader;
+        apachearrow::ArrowLoader arrow_loader;
         std::uintptr_t ptr;
 
         // Determine metadata
@@ -1061,7 +1061,7 @@ namespace binding {
             memoryView.call<void>("set", accessor);
 
             // Parse the arrow and get its metadata
-            loader.initialize(ptr, length);
+            arrow_loader.initialize(ptr, length);
             
             // Always use the `Table` column names and data types on up
             if (table_initialized && is_update) {
@@ -1077,10 +1077,12 @@ namespace binding {
                      * needs to be promoted to a 64-bit int/float if specified in
                      * the Arrow schema.
                      */
-                    std::vector<t_dtype> arrow_dtypes = loader.types();
+                    std::vector<t_dtype> arrow_dtypes = arrow_loader.types();
                     for (auto idx = 0; idx < column_names.size(); ++idx) {
                         const std::string& name = column_names[idx];
-                        bool can_retype = name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
+                        // Do not promote columns which are used as the index,
+                        // or if they are internal columns.
+                        bool can_retype = name != index && name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
                         bool is_32_bit = data_types[idx] == DTYPE_INT32 || data_types[idx] == DTYPE_FLOAT32;
                         if (can_retype && is_32_bit) {
                             t_dtype arrow_dtype = arrow_dtypes[idx];
@@ -1105,8 +1107,8 @@ namespace binding {
                     data_types = new_schema.types();
                 }
             } else {
-                column_names = loader.names();
-                data_types = loader.types();
+                column_names = arrow_loader.names();
+                data_types = arrow_loader.types();
             }
         } else if (is_update || is_delete) {
             t_val names = accessor["names"];
@@ -1128,11 +1130,14 @@ namespace binding {
             offset = 0;
         }
 
-        // Create input schema - an input schema contains all columns to be displayed AND index + operation columns
+        // Create input schema - an input schema contains all columns to be
+        // displayed, as well as `__INDEX__` column
         t_schema input_schema(column_names, data_types);
 
         // strip implicit index, if present
-        auto implicit_index_it = std::find(column_names.begin(), column_names.end(), "__INDEX__");
+        auto implicit_index_it = std::find(
+            column_names.begin(), column_names.end(), "__INDEX__");
+
         if (implicit_index_it != column_names.end()) {
             auto idx = std::distance(column_names.begin(), implicit_index_it);
             // position of the column is at the same index in both vectors
@@ -1140,12 +1145,14 @@ namespace binding {
             data_types.erase(data_types.begin() + idx);
         }
 
-        // Create output schema - contains only columns to be displayed to the user
-        t_schema output_schema(column_names, data_types); // names + types might have been mutated at this point after implicit index removal
+        // Create output schema - contains only columns to be displayed to the
+        // user, as names and types may have been mutated after implicit
+        // index removal.
+        t_schema output_schema(column_names, data_types);
 
         std::uint32_t row_count = 0;
         if (is_arrow) {
-            row_count = loader.row_count();
+            row_count = arrow_loader.row_count();
         } else {
             row_count = accessor["row_count"].as<std::int32_t>();
         }
@@ -1153,8 +1160,9 @@ namespace binding {
         t_data_table data_table(output_schema);
         data_table.init();
         data_table.extend(row_count);
+
         if (is_arrow) {
-            loader.fill_table(data_table, index, offset, limit, is_update);
+            arrow_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
         } else {
             _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
         }

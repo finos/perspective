@@ -95,7 +95,6 @@ utils.with_server({}, () => {
                         c: "string"
                     };
                     const arrow = arrows.int_float_str_arrow.slice();
-                    console.log(arrow.byteLength);
                     const byte_length = await page.evaluate(
                         async (viewer, data, schema) => {
                             viewer.load(schema);

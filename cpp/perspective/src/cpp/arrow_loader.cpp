@@ -111,15 +111,27 @@ namespace apachearrow {
     }
 
     void
-    ArrowLoader::fill_table(t_data_table& tbl, const std::string& index, std::uint32_t offset,
-        std::uint32_t limit, bool is_update) {
+    ArrowLoader::fill_table(
+        t_data_table& tbl, 
+        const t_schema& input_schema,
+        const std::string& index,
+        std::uint32_t offset,
+        std::uint32_t limit,
+        bool is_update) {
         bool implicit_index = false;
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
         std::vector<std::shared_ptr<arrow::Field>> fields = schema->fields();
 
         for (long unsigned int cidx = 0; cidx < m_names.size(); ++cidx) {
             auto name = m_names[cidx];
-            auto type = m_types[cidx];
+            t_dtype type = m_types[cidx];
+
+            if (!input_schema.has_column(name)) {
+                // Skip columns that are defined in the arrow but not 
+                // in the Table's input schema.
+                continue;
+            }
+
             auto raw_type = fields[cidx]->type()->name();
 
             if (name == "__INDEX__") {
@@ -148,6 +160,12 @@ namespace apachearrow {
                     okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
                 }
             } else {
+                if (!input_schema.has_column(index)) {
+                    std::stringstream ss;
+                    ss << "Specified index `" << index << "` is invalid as it does not appear in the Table." << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
+                }
+
                 tbl.clone_column(index, "psp_pkey");
                 tbl.clone_column(index, "psp_okey");
             }
@@ -170,6 +188,10 @@ namespace apachearrow {
         const int64_t offset, const int64_t len) {
         switch (src->type()->id()) {
             case arrow::DictionaryType::type_id: {
+                // If there are duplicate values in the dictionary at different
+                // indices, i.e. [0 => a, 1 => b, 2 => a], tables with
+                // explicit indexes on a string column created from a dictionary
+                // array may have duplicate primary keys.
                 auto scol = std::static_pointer_cast<arrow::DictionaryArray>(src);
                 std::shared_ptr<arrow::StringArray> dict
                     = std::static_pointer_cast<arrow::StringArray>(scol->dictionary());
@@ -189,7 +211,8 @@ namespace apachearrow {
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
                     case arrow::Int8Type::type_id: {
-                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);                    } break;
+                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);                    
+                    } break;
                     case ::arrow::UInt8Type::type_id: {
                         iter_col_copy<::arrow::UInt8Array, t_uindex>(dest, indices, offset, len);
                     } break;
@@ -461,7 +484,7 @@ namespace apachearrow {
                         std::stringstream ss;
                         ss << "Could not fill column `" << name << "` with "
                            << "t_dtype: `" << get_dtype_descr(column_dtype) << "`, "
-                           << "array type: `" << get_dtype_descr(type) << std::endl;
+                           << "array type: `" << get_dtype_descr(type) << "`" << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                     };
                 }

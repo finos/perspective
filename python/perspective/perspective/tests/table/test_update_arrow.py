@@ -13,6 +13,7 @@ import pyarrow as pa
 import pandas as pd
 import numpy as np
 from datetime import date, datetime
+from pytest import mark
 from perspective.table import Table
 
 SOURCE_STREAM_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "int_float_str.arrow")
@@ -89,6 +90,177 @@ class TestUpdateArrow(object):
             assert tbl.view().to_dict() == {
                 "a": ["abc", "def", "def", None, "abc", None, "update1", "update2"],
                 "b": ["klm", "hij", None, "hij", "klm", "update3", None, "update4"]
+            }
+
+    @mark.skip
+    def test_update_arrow_updates_dict_partial_file(self):
+        tbl = None
+
+        with open(DICT_ARROW, mode='rb') as src:
+            tbl = Table(src.read(), index="a")
+            tbl.update(src.read())
+            assert tbl.size() == 2
+
+        with open(DICT_UPDATE_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 4
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "update1", "update2"],
+                "b": ["klm", "hij", None, "update4"]
+            }
+
+    # update with file arrow with more columns than in schema
+
+    def test_update_arrow_updates_more_columns_stream_file(self):
+        tbl = Table({
+            "a": int,
+            "b": float,
+        })
+
+        with open(SOURCE_STREAM_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl.update(file.read())
+            assert tbl.size() == 4
+            assert tbl.schema() == {
+                "a": int,
+                "b": float
+            }
+
+        with open(SOURCE_FILE_ARROW, mode='rb') as file:
+            tbl.update(file.read())
+            assert tbl.size() == 8
+            assert tbl.view().to_dict() == {
+                "a": [1, 2, 3, 4] * 2,
+                "b": [1.5, 2.5, 3.5, 4.5] * 2
+            }
+
+    def test_update_arrow_partial_updates_more_columns_file(self):
+        tbl = Table({
+            "a": int,
+            "c": str
+        }, index="a")
+
+        with open(SOURCE_STREAM_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 4
+
+        with open(PARTIAL_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 4
+            assert tbl.view().to_dict() == {
+                "a": [1, 2, 3, 4],
+                "c": ["x", "b", "c", "y"]
+            }
+
+    def test_update_arrow_updates_dict_more_columns_file(self):
+        tbl = Table({
+            "a": str,
+        })
+
+        with open(DICT_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 5
+
+        with open(DICT_UPDATE_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 8
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "def", None, "abc", None, "update1", "update2"]
+            }
+
+    @mark.skip
+    def test_update_arrow_updates_dict_more_columns_partial_file(self):
+        tbl = Table({
+            "a": str
+        }, index="a")
+
+        with open(DICT_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 4
+
+        with open(DICT_UPDATE_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 4
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "update1", "update2"]
+            }
+
+    # update with file arrow with less columns than in schema
+
+    def test_update_arrow_updates_less_columns_stream_file(self):
+        tbl = Table({
+            "a": int,
+            "x": float,
+        })
+
+        with open(SOURCE_STREAM_ARROW, mode='rb') as file:  # b is important -> binary
+            tbl.update(file.read())
+            assert tbl.size() == 4
+            assert tbl.schema() == {
+                "a": int,
+                "x": float
+            }
+
+        with open(SOURCE_FILE_ARROW, mode='rb') as file:
+            tbl.update(file.read())
+            assert tbl.size() == 8
+            assert tbl.view().to_dict() == {
+                "a": [1, 2, 3, 4] * 2,
+                "x": [None for i in range(8)]
+            }
+
+    def test_update_arrow_partial_updates_less_columns_file(self):
+        tbl = Table({
+            "a": int,
+            "x": str
+        }, index="a")
+
+        with open(SOURCE_STREAM_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 4
+
+        with open(PARTIAL_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 4
+            assert tbl.view().to_dict() == {
+                "a": [1, 2, 3, 4],
+                "x": [None for i in range(4)]
+            }
+
+    def test_update_arrow_updates_dict_less_columns_file(self):
+        tbl = Table({
+            "a": str,
+            "x": str
+        })
+
+        with open(DICT_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 5
+
+        with open(DICT_UPDATE_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 8
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "def", None, "abc", None, "update1", "update2"],
+                "x": [None for i in range(8)]
+            }
+
+    @mark.skip
+    def test_update_arrow_updates_dict_less_columns_partial_file(self):
+        tbl = Table({
+            "a": str,
+            "x": str
+        }, index="a")
+
+        with open(DICT_ARROW, mode='rb') as src:
+            tbl.update(src.read())
+            assert tbl.size() == 4
+
+        with open(DICT_UPDATE_ARROW, mode='rb') as partial:
+            tbl.update(partial.read())
+            assert tbl.size() == 4
+            assert tbl.view().to_dict() == {
+                "a": ["abc", "def", "update1", "update2"],
+                "x": [None for i in range(4)]
             }
 
     # update int schema with int
@@ -385,7 +557,7 @@ class TestUpdateArrow(object):
         tbl.update(arrow)
         assert tbl.view().to_dict()["a"] == [int(x) for x in array]
 
-    def test_update_arrow_update_float_schema_with_float64(self, util):
+    def test_update_arrow_update_int_schema_with_float64(self, util):
         array = [random.randint(-20000000, 20000000) * random.random() for i in range(100)]
         data = pd.DataFrame({
             "a": np.array(array, dtype=np.float64)
@@ -665,6 +837,88 @@ class TestUpdateArrow(object):
         assert tbl.view().to_dict() == {
             "a": ["a", "b", "b", None],
             "b": ["x", "y", None, "z"]
+        }
+
+    def test_update_arrow_partial_updates_dictionary_stream(self, util):
+        data = [
+            ([0, 1, 1, None], ["a", "b"]),
+            ([0, 1, None, 2], ["x", "y", "z"])
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+
+        tbl = Table({
+            "a": str,
+            "b": str
+        }, index="a")
+
+        tbl.update(arrow_data)
+
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "a": [None, "a", "b"],
+            "b": ["z", "x", "y"]
+        }
+
+    @mark.skip
+    def test_update_arrow_partial_updates_dictionary_stream_duplicates(self, util):
+        """If there are duplicate values in the dictionary, primary keys
+        may be duplicated if the column is used as an index. Skip this test
+        for now - still looking for the best way to fix."""
+        data = [
+            ([0, 1, 1, None, 2], ["a", "b", "a"]),
+            ([0, 1, None, 2, 1], ["x", "y", "z"])
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+
+        tbl = Table({
+            "a": str,
+            "b": str
+        }, index="a")
+
+        tbl.update(arrow_data)
+
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "a": [None, "a", "b"],
+            "b": ["z", "x", "y"]
+        }
+
+    def test_update_arrow_partial_updates_more_columns_dictionary_stream(self, util):
+        data = [
+            ([0, 1, 1, None], ["a", "b"]),
+            ([0, 1, None, 2], ["x", "y", "z"])
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+
+        tbl = Table({
+            "a": str
+        }, index="a")
+
+        tbl.update(arrow_data)
+
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "a": [None, "a", "b"]
+        }
+
+    def test_update_arrow_partial_updates_less_columns_dictionary_stream(self, util):
+        data = [
+            ([0, 1, 1, None], ["a", "b"]),
+            ([0, 1, None, 2], ["x", "y", "z"])
+        ]
+        arrow_data = util.make_dictionary_arrow(["a", "b"], data)
+        tbl = Table({
+            "a": str,
+            "b": str,
+            "x": str
+        }, index="a")
+        tbl.update(arrow_data)
+
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "a": [None, "a", "b"],
+            "b": ["z", "x", "y"],
+            "x": [None, None, None]
         }
 
     def test_update_arrow_arbitary_order(self, util):
