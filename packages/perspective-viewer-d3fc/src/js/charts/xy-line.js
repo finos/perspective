@@ -13,15 +13,15 @@ import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanv
 import {pointData} from "../data/pointData";
 import {seriesColorsFromGroups} from "../series/seriesColors";
 import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
-import {symbolLegend} from "../legend/legend";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
+import {symbolLegend} from "../legend/legend";
 import {filterDataByGroup} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
-function xyScatter(container, settings) {
+function xyLine(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
     const useGroupColors = settings.realValues.length <= 2 || settings.realValues[2] === null;
@@ -93,17 +93,17 @@ function xyScatter(container, settings) {
     if (legend) container.call(legend);
 }
 
-xyScatter.plugin = {
-    type: "d3_xy_scatter",
-    name: "X/Y Scatter Chart",
+xyLine.plugin = {
+    type: "d3_xy_line",
+    name: "X/Y Line Chart",
     max_cells: 50000,
     max_columns: 50,
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"]
+        names: ["X Axis", "Y Axis"]
     },
     selectMode: "toggle"
 };
 
-export default xyScatter;
+export default xyLine;
