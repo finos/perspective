@@ -90,21 +90,6 @@ const PLUGINS = {
         max_columns: MAX_COLUMN_COUNT["line"]
     },
 
-    y_scatter: {
-        name: "Y Scatter Chart",
-        create: draw("y_scatter", true),
-        update: draw("y_scatter", false),
-        resize: resize,
-        initial: {
-            type: "number",
-            count: 1
-        },
-        selectMode: "select",
-        delete: delete_chart,
-        max_cells: MAX_CELL_COUNT["scatter"],
-        max_columns: MAX_COLUMN_COUNT["scatter"]
-    },
-
     y_area: {
         name: "Y Area Chart",
         create: draw("y_area", true),
@@ -131,6 +116,21 @@ const PLUGINS = {
             names: ["X Axis", "Y Axis", "Tooltip"]
         },
         selectMode: "toggle",
+        delete: delete_chart,
+        max_cells: MAX_CELL_COUNT["scatter"],
+        max_columns: MAX_COLUMN_COUNT["scatter"]
+    },
+
+    y_scatter: {
+        name: "Y Scatter Chart",
+        create: draw("y_scatter", true),
+        update: draw("y_scatter", false),
+        resize: resize,
+        initial: {
+            type: "number",
+            count: 1
+        },
+        selectMode: "select",
         delete: delete_chart,
         max_cells: MAX_CELL_COUNT["scatter"],
         max_columns: MAX_COLUMN_COUNT["scatter"]
