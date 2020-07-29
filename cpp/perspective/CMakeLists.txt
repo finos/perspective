@@ -613,6 +613,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# .dll not importable
 			set_property(TARGET binding PROPERTY SUFFIX .pyd)
 		elseif (MACOS)
+			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+
 			# Add a relative path to search for PyArrow - when Perspective is
 			# installed from a wheel, PyArrow may not be in the same directory
 			# as the PyArrow which was used to build the wheel.
