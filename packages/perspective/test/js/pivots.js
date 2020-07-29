@@ -95,6 +95,33 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("['z'], weighted mean on a table created from schema should return valid values after update", async function() {
+            const table = perspective.table({
+                x: "integer",
+                y: "integer",
+                z: "boolean"
+            });
+
+            const view = table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: ["weighted mean", "y"]}
+            });
+
+            const answer = [
+                {__ROW_PATH__: [], x: 2.8333333333333335},
+                {__ROW_PATH__: [false], x: 3.3333333333333335},
+                {__ROW_PATH__: [true], x: 2.3333333333333335}
+            ];
+
+            table.update(data2);
+
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], mean", async function() {
             var table = perspective.table(data);
             var view = table.view({
@@ -107,6 +134,31 @@ module.exports = perspective => {
                 {__ROW_PATH__: [false], x: 3},
                 {__ROW_PATH__: [true], x: 2}
             ];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], mean on a table created from schema should return valid values after update", async function() {
+            const table = perspective.table({
+                x: "integer",
+                y: "string",
+                z: "boolean"
+            });
+            const view = table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: "mean"}
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 2.5},
+                {__ROW_PATH__: [false], x: 3},
+                {__ROW_PATH__: [true], x: 2}
+            ];
+
+            table.update(data);
+
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();

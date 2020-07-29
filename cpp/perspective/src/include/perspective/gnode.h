@@ -464,17 +464,6 @@ t_gnode::update_context_from_state(
     if (flattened->size() == 0)
         return;
 
-    // Flattened won't have the computed columns if it didn't pass through the
-    // main body of `process_table`, i.e. creating a 1/2 sided context, so
-    // compute again here.
-    auto computed_columns = m_computed_column_map.m_computed_columns;
-
-    if (computed_columns.size() > 0) {
-        for (const auto& computed : computed_columns) {
-            _compute_column(computed.second, flattened);
-        }
-    }
-
     // Need to cast shared ptr to a const reference before passing to notify,
     // reference is valid as `notify` is not async
     const t_data_table& const_flattened = 
