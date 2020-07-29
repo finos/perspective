@@ -7,53 +7,14 @@
  *
  */
 
-/**
- * An Object for capturing details of the invoking script's origin.
- *
- * Returns
- * -------
- * An instance of a ScriptPath object.  Interesting methods on this object
- * include:
- *     fullPath : The complete path of this script.
- *     path : The path (no host).
- *     host : The host (no path).
- *     file : The file name itself.
- */
-function ScriptPath() {
-    var pathParts;
-    try {
-        throw new Error();
-    } catch (e) {
-        var stackLines = e.stack.split("\n");
-        var callerIndex = 0;
-        for (var i in stackLines) {
-            if (!stackLines[i].match(/http[s]?:\/\//)) continue;
-            callerIndex = Number(i);
-            break;
-        }
-        pathParts = stackLines[callerIndex].match(/((http[s]?:\/\/.+\/)([^\/]+\.(js|html))).*?:/);
-    }
+const {currentScript} = document;
 
-    this.fullPath = function() {
-        return pathParts ? pathParts[1] : typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
-    };
-    this.path = function() {
-        return pathParts ? pathParts[2] : typeof window !== "undefined" ? window.location.pathname : "";
-    };
-    this.host = function() {
-        var x = this.path().match(/.+?\/\/.+?\//);
-        return x ? x[0] : typeof window !== "undefined" ? window.location.hostname : "";
-    };
-    this.file = function() {
-        return pathParts ? pathParts[3] : "";
-    };
-}
-
-var __SCRIPT_PATH__ = new ScriptPath();
-
-module.exports.host = __SCRIPT_PATH__.host();
-
-module.exports.path = __SCRIPT_PATH__.path();
+module.exports.path = currentScript
+    ? currentScript.src
+          .split("/")
+          .slice(0, -1)
+          .join("/") + "/"
+    : "";
 
 module.exports.isCrossOrigin = function(webpackOrigin) {
     var inWebpack = !!(webpackOrigin && webpackOrigin.length);
@@ -68,7 +29,7 @@ module.exports.isCrossOrigin = function(webpackOrigin) {
             return true;
         }
     } else {
-        return window.location.origin !== module.exports.host.slice(0, window.location.origin.length);
+        return window.location.origin !== module.exports.path.slice(0, window.location.origin.length);
     }
 };
 
