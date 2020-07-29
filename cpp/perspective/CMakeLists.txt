@@ -612,8 +612,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 			# .dll not importable
 			set_property(TARGET binding PROPERTY SUFFIX .pyd)
-		else()
-			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+		elseif (MACOS)
 			# Add a relative path to search for PyArrow - when Perspective is
 			# installed from a wheel, PyArrow may not be in the same directory
 			# as the PyArrow which was used to build the wheel.
@@ -624,7 +623,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# will not delocate libarrow properly if it is in the rpath. 
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${PYTHON_PYARROW_LIBRARY_DIR})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${PYTHON_PYARROW_LIBRARY_DIR})
-		
+		else()
+			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
 
 		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})

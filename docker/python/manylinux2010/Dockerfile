@@ -41,15 +41,10 @@ RUN python3.6 -m pip install numpy scipy pybind11 cython codecov mock flake8 pyt
 RUN python3.7 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 RUN python3.8 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 
-# Force reinstall auditwheel from Git master, as it does not overwrite
-# rpaths - this was breaking manylinux wheels. Auditwheel is only for
-# python 3.5+.
-# https://github.com/pypa/auditwheel/pull/245#issuecomment-648132311
-RUN git clone https://github.com/pypa/auditwheel.git ./auditwheel \
-    && cd auditwheel \
-    && python3.6 -m pip install --ignore-installed . \
-    && python3.7 -m pip install --ignore-installed . \
-    && python3.8 -m pip install --ignore-installed .
+# Install Auditwheel - not available on Python 2
+RUN python3.6 -m pip install --ignore-installed auditwheel
+RUN python3.7 -m pip install --ignore-installed auditwheel
+RUN python3.8 -m pip install --ignore-installed auditwheel
 
 # install boost
 RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
