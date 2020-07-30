@@ -6,15 +6,14 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 import * as fc from "d3fc";
+import {transposeData} from "../data/transposeData";
 import {axisFactory} from "../axis/axisFactory";
-import {chartCanvasFactory} from "../axis/chartFactory";
-import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
-import {pointData} from "../data/pointData";
-import {seriesColorsFromGroups} from "../series/seriesColors";
-import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
-import {symbolLegend} from "../legend/legend";
+import {chartSvgFactory} from "../axis/chartFactory";
+import {lineSeries} from "../series/lineSeries";
+import {xySplitData} from "../data/xySplitData";
+import {seriesColors} from "../series/seriesColors";
 import {filterDataByGroup} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
@@ -22,49 +21,41 @@ import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
 function xyLine(container, settings) {
-    const data = pointData(settings, filterDataByGroup(settings));
-    const symbols = symbolTypeFromGroups(settings);
-    const useGroupColors = settings.realValues.length <= 2 || settings.realValues[2] === null;
-    let color = null;
-    let legend = null;
+    const data = transposeData(xySplitData(settings, filterDataByGroup(settings)));
 
-    if (useGroupColors) {
-        color = seriesColorsFromGroups(settings);
-
-        legend = symbolLegend()
-            .settings(settings)
-            .scale(symbols)
-            .color(useGroupColors ? color : null);
-    } else {
-        color = seriesColorRange(settings, data, "colorValue");
-        legend = colorRangeLegend().scale(color);
-    }
-
-    const size = settings.realValues[3] ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
+    const color = seriesColors(settings);
 
     const series = fc
-        .seriesCanvasMulti()
-        .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols)));
+        .seriesSvgRepeat()
+        .series(lineSeries(settings, color))
+        .orient("horizontal");
 
-    const axisDefault = () =>
-        axisFactory(settings)
-            .settingName("mainValues")
-            .paddingStrategy(hardLimitZeroPadding())
-            .pad([0.1, 0.1]);
+    const paddingStrategy = hardLimitZeroPadding()
+        .pad([0.1, 0.1])
+        .padUnit("percent");
 
-    const xAxis = axisDefault()
+    const xAxisFactory = axisFactory(settings)
+        .settingName("mainValues")
         .settingValue(settings.mainValues[0].name)
-        .valueName("x")(data);
-    const yAxis = axisDefault()
-        .orient("vertical")
-        .settingValue(settings.mainValues[1].name)
-        .valueName("y")(data);
+        .valueName("crossValue")
+        .paddingStrategy(paddingStrategy);
 
-    const chart = chartCanvasFactory(xAxis, yAxis)
+    const yAxisFactory = axisFactory(settings)
+        .settingName("mainValues")
+        .settingValue(settings.mainValues[1].name)
+        .valueName("mainValue")
+        .orient("vertical")
+        .paddingStrategy(paddingStrategy);
+
+    const yAxis = yAxisFactory(data);
+    const xAxis = xAxisFactory(data);
+
+    const plotSeries = withGridLines(series, settings).orient("vertical");
+
+    const chart = chartSvgFactory(xAxis, yAxis)
         .xLabel(settings.mainValues[0].name)
         .yLabel(settings.mainValues[1].name)
-        .plotArea(withGridLines(series, settings).canvas(true));
+        .plotArea(plotSeries);
 
     chart.xNice && chart.xNice();
     chart.yNice && chart.yNice();
@@ -73,24 +64,17 @@ function xyLine(container, settings) {
         .chart(chart)
         .settings(settings)
         .xScale(xAxis.scale)
-        .yScale(yAxis.scale)
-        .canvas(true);
+        .yScale(yAxis.scale);
 
     const toolTip = nearbyTip()
         .settings(settings)
-        .canvas(true)
         .xScale(xAxis.scale)
-        .xValueName("x")
-        .yValueName("y")
         .yScale(yAxis.scale)
-        .color(useGroupColors && color)
-        .size(size)
+        .color(color)
         .data(data);
 
-    // render
     container.datum(data).call(zoomChart);
     container.call(toolTip);
-    if (legend) container.call(legend);
 }
 
 xyLine.plugin = {

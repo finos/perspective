@@ -103,6 +103,7 @@ export const axisFactory = settings => {
         settingName = args[0];
         return _factory;
     };
+
     _factory.settingValue = (...args) => {
         if (!args.length) {
             return settingValue;
@@ -118,6 +119,7 @@ export const axisFactory = settings => {
         valueNames = [args[0]];
         return _factory;
     };
+
     _factory.valueNames = (...args) => {
         if (!args.length) {
             return valueNames;
