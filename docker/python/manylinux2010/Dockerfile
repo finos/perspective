@@ -41,8 +41,7 @@ RUN python3.6 -m pip install numpy scipy pybind11 cython codecov mock flake8 pyt
 RUN python3.7 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 RUN python3.8 -m pip install numpy scipy pybind11 cython codecov mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil
 
-# Force reinstall auditwheel
-RUN python2.7 -m pip install --ignore-installed auditwheel
+# Install Auditwheel - not available on Python 2
 RUN python3.6 -m pip install --ignore-installed auditwheel
 RUN python3.7 -m pip install --ignore-installed auditwheel
 RUN python3.8 -m pip install --ignore-installed auditwheel

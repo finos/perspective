@@ -159,26 +159,24 @@ two methods into your object:
 
 #### Time Zone Handling
 
-Columns with the `datetime` type are stored internally as UTC timestamps in milliseconds since epoch (Unix Time),
-and are serialized to the user as `datetime.datetime` objects in _local time_ according to the Python runtime.
+- ["Naive"](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects)
+  datetimes are assumed to be local time.
+- ["Aware"](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects)
+  datetimes use the timezone specified in the `tzinfo`.
 
-Both ["naive" and "aware" datetimes](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects) will be
-serialized to local time by Perspective, with the conversion determined by the `tzinfo` attribute:
+All `datetime` columns (regardless of input timezone) are output to the user as
+`datetime.datetime` objects in _local time_ according to the Python runtime.
 
-- "Naive" datetimes are assumed to be already in local time and are serialized as-is.
-- "Aware" datetimes will be converted to UTC from their original timezone, and then converted to local time
-from UTC.
-
-This behavior is consistent with Perspective's behavior in Javascript. For more details, see this
-in-depth [explanation](https://github.com/finos/perspective/pull/867) of `perspective-python` semantics around time zone handling.
+This behavior is consistent with Perspective's behavior in Javascript. For more
+details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
+of `perspective-python` semantics around time zone handling.
 
 ##### Pandas Timestamps
 
-`pandas.Timestamp` objects stored in a `pandas.DataFrame` are _always_ treated
-as UTC times, and will be converted to local time when serialized to the user.
-
-To treat a `Timestamp` in a `DataFrame` as local time, use `tz_localize` or
-`tz_convert` to provide the `Timestamp` with a time zone.
+- Naive `pandas.Timestamp` objects are _always_ treated as UTC times, and will
+  be converted to local time when output to the user.
+- Aware `pandas.Timestamp` objects use the timezone specified in `tzinfo`. Use
+  `tz_localize` or `tz_convert` to provide the `Timestamp` with a time zone.
 
 ### Callbacks and Events
 

@@ -49,9 +49,7 @@ find_path(PYTHON_PYARROW_INCLUDE_DIR arrow/python/api.h
 set(PYTHON_PYARROW_LIBRARY_DIR ${__pyarrow_library_dirs})
 
 # Figure out the major version for the .so/.dylibs
-message(${__pyarrow_version})
 string(REPLACE "." ";" PYARROW_VERSION_LIST ${__pyarrow_version})
-message(${PYARROW_VERSION_LIST})
 list(GET PYARROW_VERSION_LIST 0 PYARROW_VERSION_MAJOR)
 list(GET PYARROW_VERSION_LIST 1 PYARROW_VERSION_MINOR)
 list(GET PYARROW_VERSION_LIST 2 PYARROW_VERSION_PATCH)
