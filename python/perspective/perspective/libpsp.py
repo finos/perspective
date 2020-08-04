@@ -22,7 +22,15 @@ try:
     from .manager import *  # noqa: F401, F403
     from .tornado_handler import *  # noqa: F401, F403
     from .viewer import *  # noqa: F401, F403
-    from .table.libbinding import make_computations
+    from .table.libbinding import make_computations, _set_nthreads
+
+    def set_threadpool_size(nthreads):
+        """ Sets the size of the global Perspective thread pool, up to the
+        total number of available cores, which can be set explicity by
+        setting `nthreads` to `None`.
+        """
+        _set_nthreads(-1 if nthreads is None else nthreads)
+
     make_computations()
 except ImportError:
     __is_libpsp__ = False

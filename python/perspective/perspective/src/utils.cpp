@@ -13,10 +13,29 @@
 #include <perspective/python/base.h>
 #include <perspective/python/utils.h>
 
+#ifndef TBB_PREVIEW_GLOBAL_CONTROL
+#define TBB_PREVIEW_GLOBAL_CONTROL 1
+#endif
+
+#include <tbb/global_control.h>
+
 namespace perspective {
 namespace binding {
 
-t_dtype type_string_to_t_dtype(std::string value, std::string name){
+std::shared_ptr<tbb::global_control> control = 
+    std::make_shared<tbb::global_control>(
+        tbb::global_control::max_allowed_parallelism,
+        tbb::task_scheduler_init::default_num_threads()
+    );
+
+void _set_nthreads(int nthreads) {
+	control = std::make_shared<tbb::global_control>(
+        tbb::global_control::max_allowed_parallelism, 
+        nthreads == -1 ? tbb::task_scheduler_init::default_num_threads() : nthreads
+    );
+}
+
+t_dtype type_string_to_t_dtype(std::string value, std::string name) {
     auto type = t_dtype::DTYPE_STR;
 
     // TODO consider refactor
