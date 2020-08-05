@@ -363,7 +363,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
 			link_directories( ${Python_LIBRARY_DIRS} )
 		endif()
-		message("${Cyan}Using Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")
+		message("${Cyan}Using Python ${Python_VERSION}, \nPython_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, \nPython_LIBRARIES: ${Python_LIBRARIES}, \nPython_EXECUTABLE: ${Python_EXECUTABLE} ${ColorReset}")
 		include_directories( ${Python_INCLUDE_DIRS} )
 
 		if(MACOS)

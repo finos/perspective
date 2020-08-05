@@ -64,6 +64,7 @@ requires_dev = [
     'pytest>=4.3.0',
     'pytest-cov>=2.6.1',
     'pytest-check-links',
+    'pytest-tornado',
     'pytz>=2018.9',
     'Sphinx>=1.8.4',
     'sphinx-markdown-builder>=0.5.2',
