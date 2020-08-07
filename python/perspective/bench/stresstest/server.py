@@ -49,11 +49,11 @@ def make_app():
     MANAGER.host_table("table", TABLE)
     MANAGER.host_view("view", TABLE.view())
 
-    # Update with 50 rows every second
+    # Update with 50 rows every 5 seconds
     def updater():
         TABLE.update(get_data())
 
-    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=1)
+    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=5)
     callback.start()
 
     return tornado.web.Application([

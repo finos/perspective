@@ -17,7 +17,7 @@ from tornado import gen, ioloop, websocket
 
 class PerspectiveWebSocketClient(object):
 
-    def __init__(self, url):
+    def __init__(self, url, row_window=50, column_window=10):
         """Create a PerspectiveWebSocketClient that mimics a Perspective Viewer
         through the wire API.
 
@@ -44,16 +44,22 @@ class PerspectiveWebSocketClient(object):
         # The total number of messages that should be sent to the server on
         # every call to `self.run()`
         self.total_messages = 30
+
+        # How many rows and columns should be fetched each time - allows
+        # simulation of grid-like views and chart-like views
+        self.row_window = row_window
+        self.column_window = column_window
+
         self.cmds = ["table_method", "view_method"]
 
         # A list of views created by this client
-        self.views = ["view"]
+        self.view_name = None
 
         # A list of messages that can be decomposed into *args for
         # self._make_message
         self.table_methods = ["schema", "size"]
         self.table_methods_mutate = ["update"]
-        self.view_methods = ["schema", "computed_schema", "column_paths", "sides", "to_json", "to_columns"]
+        self.view_methods = ["schema", "computed_schema", "column_paths", "sides", "to_columns"]
 
         # `on_update` callbacks managed by this client
         self.callbacks = {}
@@ -77,22 +83,37 @@ class PerspectiveWebSocketClient(object):
         Perspective viewer in the front-end."""
         for i in range(self.total_messages):
             message = None
+
+            refresh_view = random.random() > 0.8
+
+            if refresh_view:
+                yield self.delete_view()
+                yield self.make_view()
+                continue
+
             cmd = "view_method" if random.random() > 0.5 else "table_method"
 
             if cmd == "view_method":
-                view_name = random.choice(self.views)
                 method = random.choice(self.view_methods)
                 args = []
 
                 if "to" in method:
+                    # simulate grid paging
+                    start_row = random.randint(0, 500)
+                    start_col = random.randint(0, len(self.column_names))
+                    _end = start_col + self.column_window
+                    end_col = _end if _end < len(self.column_names) else len(self.column_names)
+
                     args.append({
-                        "start_row": random.randint(0, 500),
-                        "end_row": random.randint(501, 1000)
+                        "start_row": start_row,
+                        "end_row": start_row + self.row_window,
+                        "start_col": start_col,
+                        "end_col": end_col
                     })
 
                 message = self._make_message(
                     cmd=cmd,
-                    name=view_name,
+                    name=self.view_name,
                     method=method,
                     args=args)
             else:
@@ -102,10 +123,10 @@ class PerspectiveWebSocketClient(object):
                     name="table",
                     method=method)
 
-            logging.info("Sending %s, id: %s", cmd, message["id"])
+            logging.info("Sending %s: %s, id: %s", cmd, method, message["id"])
             yield self.write_message(message)
 
-            # sort of simulate wait times between user actions
+            # sort of simulate wait times between each message
             if random.random() > 0.75:
                 wait_time = random.random()
                 logging.info("Waiting for %s", wait_time)
@@ -124,7 +145,7 @@ class PerspectiveWebSocketClient(object):
             """Internal run callback - always run one iteration, and then
             run until specified timeout."""
             if timeout:
-                yield self.run()
+                ioloop.IOLoop.current().add_callback(self.run)
 
                 end_time = datetime.now() + timeout
                 logging.info("Running until %s", end_time)
@@ -132,7 +153,7 @@ class PerspectiveWebSocketClient(object):
                 while datetime.now() <= end_time:
                     if random.random() > 0.8:
                         # inject more user actions at random
-                        yield self.run()
+                        ioloop.IOLoop.current().add_callback(self.run)
                     yield self.read_message()
 
                 # FIXME timeout does not prematurely exit - it waits for all
@@ -140,18 +161,19 @@ class PerspectiveWebSocketClient(object):
                 logging.critical("Exiting client: timed out at %s", end_time)
                 sys.exit(0)
             else:
-                yield self.run()
+                ioloop.IOLoop.current().add_callback(self.run)
 
                 logging.info("Running forever")
                 while True:
                     if random.random() > 0.8:
                         # inject more user actions at random
-                        yield self.run()
+                        ioloop.IOLoop.current().add_callback(self.run)
                     yield self.read_message()
 
         # Connect server and initialize schema and update callback
         yield self.connect()
         yield self.get_table_schema()
+        yield self.make_view()
         yield self.register_on_update()
 
         timeout_delta = None
@@ -163,7 +185,7 @@ class PerspectiveWebSocketClient(object):
             elif isinstance(timeout, timedelta):
                 timeout_delta = timeout
 
-        yield _run(self, timeout_delta)
+        ioloop.IOLoop.current().add_callback(_run, self, timeout_delta)
 
     @gen.coroutine
     def write_message(self, message):
@@ -183,6 +205,10 @@ class PerspectiveWebSocketClient(object):
     def read_message(self):
         """Read messages from the WebSocket server."""
         message = yield self.client.read_message()
+
+        if message is None:
+            raise websocket.WebSocketClosedError("The socket connection has closed!")
+
         try:
             response = self.parse_response(message)
             response_id = response["id"]
@@ -194,25 +220,22 @@ class PerspectiveWebSocketClient(object):
 
             assert "error" not in response
         except AssertionError:
-            logging.CRITICAL("Server returned error:", message)
+            logging.critical("Server returned error:", message)
 
     @gen.coroutine
-    def create_view(self):
+    def make_view(self):
         """Create a new view with a randomized config."""
         view_name = str(random.random())
 
         # 0/1/2 sided, 3 is column only
         sides = random.randint(0, 3)
 
-        column_range = {
-            "start": random.randint(0, len(self.column_names) - 1),
-            "end": random.randint(1, len(self.column_names)) - 1
-        }
+        start_col = random.randint(0, len(self.column_names) - 1)
+        end = random.randint(start_col, start_col + 5)
+        end_col = end if end < len(self.column_names) else len(self.column_names)
 
         config = {
-            "columns": self.column_names[
-                column_range["start"]:column_range["end"]
-            ]
+            "columns": self.column_names[start_col:end_col]
         }
 
         pivot_columns = \
@@ -225,10 +248,10 @@ class PerspectiveWebSocketClient(object):
             self.columns_by_type.get("float", [])
 
         if sides == 1:
-            config["row_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 3))]
+            config["row_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 2))]
         elif sides == 2:
-            config["row_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 3))]
-            config["column_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 2))]
+            config["row_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 2))]
+            config["column_pivots"] = [random.choice(pivot_columns)]
         elif sides == 3:
             config["column_pivots"] = [random.choice(pivot_columns)]
 
@@ -239,27 +262,26 @@ class PerspectiveWebSocketClient(object):
 
         message = self._make_view_message(view_name, config)
         yield self.write_message(message)
-        self.views.append(view_name)
+        self.view_name = view_name
 
     @gen.coroutine
-    def delete_view(self, name):
-        """Delete the view on the server with the given name."""
-        if name in self.views and name != "view":
-            message = self.make_message(
-                cmd="view_method",
-                name=name,
-                method="delete"
-            )
+    def delete_view(self):
+        """Delete the view that is managed by this client from the server."""
+        message = self._make_message(
+            cmd="view_method",
+            name=self.view_name,
+            method="delete"
+        )
 
-            # use the client directly because we don't care about the output
-            ioloop.IOLoop.current().add_callback(
-                self.client.write_message,
-                json.dumps(message)
-            )
+        # use the client directly because we don't care about the output
+        ioloop.IOLoop.current().add_callback(
+            self.client.write_message,
+            json.dumps(message)
+        )
 
-            self.message_id += 1
-            self.views.pop(name)
-            logging.debug("Deleted view: %s", name)
+        self.message_id += 1
+        logging.debug("Deleted view: %s", self.view_name)
+        self.view_name = None
 
     @gen.coroutine
     def get_table_schema(self):
@@ -283,16 +305,13 @@ class PerspectiveWebSocketClient(object):
         schema = parsed["data"]
 
         self.schema = schema
-        self.column_names = schema.keys()
+        self.column_names = list(schema.keys())
 
         for name in self.column_names:
             dtype = self.schema[name]
             if dtype not in self.columns_by_type:
                 self.columns_by_type[dtype] = []
             self.columns_by_type[dtype].append(name)
-
-        logging.debug("Table schema: %s", self.schema)
-        logging.debug("Table columns by type: %s", self.columns_by_type)
 
     @gen.coroutine
     def register_on_update(self):
@@ -307,14 +326,12 @@ class PerspectiveWebSocketClient(object):
             for i in range(5):
                 # non-mutating methods only
                 method = random.choice(("schema", "num_rows", "column_paths"))
-                view_name = random.choice(self.views)
-
                 message = self._make_message(
                     cmd="view_method",
-                    name=view_name,
+                    name=self.view_name,
                     method=method)
 
-                logging.info("Sending within on_update %s, id: %s", method, message["id"])
+                logging.info("Sending within on_update: %s, id: %s", method, message["id"])
                 yield self.write_message(message)
 
         # Store callbacks as they would be on the viewer - by message ID
