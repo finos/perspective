@@ -13,7 +13,7 @@ from concurrent.futures import ProcessPoolExecutor
 import tornado
 from tornado.ioloop import IOLoop
 
-from client import WebsocketClient
+from client import PerspectiveWebSocketClient
 from server import start
 
 
@@ -30,10 +30,11 @@ def run():
     # server.start()
     # server.join(15)
 
-    client = WebsocketClient("ws://127.0.0.1:{}/".format(8888))
+    client = PerspectiveWebSocketClient("ws://127.0.0.1:{}/".format(8888))
     yield client.connect()
     yield client.register_on_update()
     yield client.start()
+    yield client.run_forever()
 
 if __name__ == "__main__":
     loop = tornado.ioloop.IOLoop.current()

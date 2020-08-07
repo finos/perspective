@@ -8,16 +8,30 @@
 import random
 import logging
 import json
-from tornado import gen, websocket
+from tornado import gen, ioloop, locks, websocket
 
 
-class WebsocketClient(object):
+class PerspectiveWebSocketClient(object):
 
     def __init__(self, url):
+        """Create a PerspectiveWebSocketClient that mimics a Perspective Viewer
+        through the wire API.
+
+        Examples:
+            >>> @gen.coroutine
+            >>> def run_client(URL):
+            >>>     client = PerspectiveWebSocketClient(URL)
+            >>>     # Connect to the server and send the initialization message
+            >>>     yield client.connect()
+            >>>     # Register an on_update callback to handle new ticks
+            >>>     yield client.register_on_update()
+            >>>     # Run a set of messages
+            >>>     yield client.start()
+        """
         self.url = url
         self.client = None
         self.message_id = -1
-        self.total_messages = 25
+        self.total_message_batches = 15
         self.cmds = ["table_method", "view_method"]
         self.table_methods = ["schema", "size", "update"]
         self.table_methods_mutate = ["update"]
@@ -30,37 +44,61 @@ class WebsocketClient(object):
         """Create and maintain a websocket client to Perspective, initializing
         the connection with the `init` message."""
         self.client = yield websocket.websocket_connect(self.url)
-        yield self.write({"id": self.message_id, "cmd": "init"})
-        response = yield self.client.read_message()
-        assert json.loads(response) == {"id": -1, "data": None}
+        self.write_message({"id": self.message_id, "cmd": "init"})
 
     @gen.coroutine
-    def write(self, message):
-        """Wrap websocket.write_message to automatically increment the
-        message ID and coerce messages to JSON-serialized strings from
-        dicts."""
-        yield self.client.write_message(json.dumps(message))
+    def write_message(self, message):
+        """Wrap websocket.write_message to coerce messages to JSON-serialized
+        strings from dicts, and read the next message on the websocket."""
+        ioloop.IOLoop.current().add_callback(
+            self.client.write_message,
+            json.dumps(message)
+        )
         self.message_id += 1
+        yield self.read_message()
+
+    @gen.coroutine
+    def read_message(self):
+        """Read messages from the WebSocket server."""
+        message = yield self.client.read_message()
+        try:
+            response = self.parse_response(message)
+            print("Received", response["id"])
+
+            if response["id"] in self.callbacks:
+                # Call the on_update callback
+                ioloop.IOLoop.current().add_callback(self.callbacks[response["id"]], self)
+        except AssertionError:
+            logging.CRITICAL("Server returned error:", message)
 
     @gen.coroutine
     def start(self):
-        for i in range(self.total_messages):
+        """Run a batch of messages to the remote endpoint simulating the
+        actions of a Perspective viewer in the front-end."""
+        for i in range(self.total_message_batches):
             for method in self.view_methods:
                 args = []
+
                 if "to" in method:
                     args.append({
-                        "start_row": 0,
-                        "end_row": random.randint(1, 1000)
+                        "start_row": random.randint(0, 500),
+                        "end_row": random.randint(501, 1000)
                     })
-                yield self.write(self._make_message(cmd="view_method", name="view", method=method, args=args))
-                response = yield self.client.read_message()
-                try:
-                    response = self.parse_response(response)
-                    print("Received", response["id"])
-                    if response["id"] in self.callbacks:
-                        self.callbacks[response["id"]](self)
-                except AssertionError:
-                    logging.CRITICAL("failed:", response)
+
+                message = self._make_message(
+                    cmd="view_method",
+                    name="view",
+                    method=method,
+                    args=args)
+
+                print("sending", message["id"])
+                yield self.write_message(message)
+
+
+    @gen.coroutine
+    def run_forever(self):
+        while True:
+            yield self.read_message()
 
     @gen.coroutine
     def register_on_update(self):
@@ -69,15 +107,28 @@ class WebsocketClient(object):
         thereby calling back into the Tornado IOLoop on the server."""
         @gen.coroutine
         def on_update(self):
-            print("called!")
             for method in ("schema", "num_rows", "column_paths"):
-                yield self.write(self._make_message(cmd="view_method", name="view", method=method))
+                message = self._make_message(
+                    cmd="view_method",
+                    name="view",
+                    method=method)
+                print("sending_on_update", message["id"])
+                yield self.write_message(message)
 
         # Store callbacks as they would be on the viewer - by message ID
         self.callbacks[self.message_id] = on_update
 
         # send the message that registers on_update
-        yield self.write(self._make_message("view_method", "view", "on_update", subscribe=True, callback_id="callback_1"))
+        on_update_message = self._make_message(
+            "view_method",
+            "view",
+            "on_update",
+            subscribe=True,
+            callback_id="callback_1")
+
+        print(self.callbacks)
+
+        yield self.write_message(on_update_message)
 
     def parse_response(self, response):
         """Checks that the server has responded with a valid message, i.e. one
@@ -105,10 +156,12 @@ class WebsocketClient(object):
     def _make_view_message(self, message_id, name, config={}):
         """Returns a message that will create a view on the server with the
         given `name` and `config`."""
-        return {
+        message = {
             "id": self.message_id,
             "cmd": "view",
             "table_name": "table",
             "view_name": name,
             "config": config
         }
+
+        return message
