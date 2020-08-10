@@ -17,12 +17,14 @@ from tornado import gen, ioloop, websocket
 
 class PerspectiveWebSocketClient(object):
 
-    def __init__(self, url, row_window=50, column_window=10):
+    def __init__(self, url, client_id, results_table, row_window=50, column_window=10):
         """Create a PerspectiveWebSocketClient that mimics a Perspective Viewer
         through the wire API.
 
         Args:
             url (:obj:`str`)
+            client_id (:obj:`str`)
+            results_table (:obj:`perspective.Table`)
 
         Examples:
             >>> @gen.coroutine
@@ -36,7 +38,11 @@ class PerspectiveWebSocketClient(object):
             >>>     yield client.start()
         """
         self.url = url
+        self.client_id = client_id
+        self.results_table = results_table
         self.client = None
+
+        self.pending_messages = {}
 
         # Each message must have a unique integer ID
         self.message_id = -1
@@ -59,7 +65,8 @@ class PerspectiveWebSocketClient(object):
         # self._make_message
         self.table_methods = ["schema", "size"]
         self.table_methods_mutate = ["update"]
-        self.view_methods = ["schema", "computed_schema", "column_paths", "sides", "to_columns"]
+        self.view_methods = ["schema", "computed_schema", "column_paths", "sides", "to_columns", "to_json"]
+        self.view_method_iter = 0
 
         # `on_update` callbacks managed by this client
         self.callbacks = {}
@@ -94,7 +101,7 @@ class PerspectiveWebSocketClient(object):
             cmd = "view_method" if random.random() > 0.5 else "table_method"
 
             if cmd == "view_method":
-                method = random.choice(self.view_methods)
+                method = self.view_methods[self.view_method_iter]
                 args = []
 
                 if "to" in method:
@@ -110,6 +117,11 @@ class PerspectiveWebSocketClient(object):
                         "start_col": start_col,
                         "end_col": end_col
                     })
+
+                if self.view_method_iter < len(self.view_methods) - 1:
+                    self.view_method_iter += 1
+                else:
+                    self.view_method_iter = 0
 
                 message = self._make_message(
                     cmd=cmd,
@@ -127,10 +139,10 @@ class PerspectiveWebSocketClient(object):
             yield self.write_message(message)
 
             # sort of simulate wait times between each message
-            if random.random() > 0.75:
-                wait_time = random.random()
-                logging.info("Waiting for %s", wait_time)
-                yield gen.sleep(wait_time)
+            # if random.random() > 0.75:
+            #     wait_time = random.random()
+            #     logging.info("Waiting for %s", wait_time)
+            #     yield gen.sleep(wait_time)
 
     @gen.coroutine
     def run_until_timeout(self, timeout=None):
@@ -165,7 +177,7 @@ class PerspectiveWebSocketClient(object):
 
                 logging.info("Running forever")
                 while True:
-                    if random.random() > 0.8:
+                    if random.random() > 0.5:
                         # inject more user actions at random
                         ioloop.IOLoop.current().add_callback(self.run)
                     yield self.read_message()
@@ -191,14 +203,26 @@ class PerspectiveWebSocketClient(object):
     def write_message(self, message):
         """Wrap websocket.write_message to coerce messages to JSON-serialized
         strings from dicts, and read the next message on the websocket."""
+        meta = {}
+
+        # fill metadata
+        meta["client_id"] = self.client_id
+        meta["cmd"] = message.get("cmd", None)
+        meta["method"] = message.get("method", None)
+        meta["args"] = json.dumps(message.get("args", None))
+        meta["message_id"] = message.get("id", None)
+
         ioloop.IOLoop.current().add_callback(
             self.client.write_message,
             json.dumps(message)
         )
+
+        meta["send_timestamp"] = datetime.now()
         self.message_id += 1
 
         if message["cmd"] != "view":
             # view creation does not yield a response
+            self.pending_messages[message["id"]] = meta
             yield self.read_message()
 
     @gen.coroutine
@@ -213,10 +237,19 @@ class PerspectiveWebSocketClient(object):
             response = self.parse_response(message)
             response_id = response["id"]
             logging.info("Received id: %s", response_id)
+            meta = None
 
-            if response["id"] in self.callbacks:
+            if response_id in self.pending_messages:
+                meta = self.pending_messages[response_id]
+                meta["receive_timestamp"] = datetime.now()
+                meta["time_on_wire"] = (meta["receive_timestamp"] - meta["send_timestamp"]).microseconds
+                self.results_table.update([meta])
+                self.pending_messages.pop(response_id)
+
+            if response_id in self.callbacks:
+                pass
                 # Call the on_update callback
-                ioloop.IOLoop.current().add_callback(self.callbacks[response_id], self)
+                # ioloop.IOLoop.current().add_callback(self.callbacks[response_id], self)
 
             assert "error" not in response
         except AssertionError:
