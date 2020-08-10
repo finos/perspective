@@ -168,3 +168,4 @@ darwin.interactive.json
 junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
+python/perspective/bench/stresstest/*.arrow
