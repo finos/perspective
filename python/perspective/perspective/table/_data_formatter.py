@@ -9,7 +9,6 @@
 import numpy as np
 from math import floor, ceil, trunc
 from ._constants import COLUMN_SEPARATOR_STRING
-from ..core.exception import PerspectiveError
 from .libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
     get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
     get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, \
@@ -137,24 +136,11 @@ def _to_format_helper(view, options=None):
 def _parse_format_options(view, options):
     '''Given a user-provided options dictionary, extract the useful values.'''
     max_cols = view.num_columns() + (1 if view._sides > 0 else 0)
-    start_row = int(floor(max(options.get("start_row", 0), 0)))
-    end_row = int(ceil(min(options.get("end_row", view.num_rows()), view.num_rows())))
-    start_col = int(floor(max(options.get("start_col", 0), 0)))
-    end_col = int(ceil(min(options.get("end_col", max_cols) * (view._num_hidden_cols() + 1), max_cols)))
-
-    # Catch issues with start/end row and column, and raise a PerspectiveError
-
-    if start_row > end_row or start_col > end_col:
-        raise PerspectiveError("Start row/col cannot be larger than end row/col!")
-    elif start_row == end_row or start_col == end_col:
-        print(start_row, end_row, start_col, end_col)
-        raise PerspectiveError("Start row/col must be different from end row/col!")
-
     return {
-        "start_row": start_row,
-        "end_row": end_row,
-        "start_col": start_col,
-        "end_col": end_col,
+        "start_row": int(floor(max(options.get("start_row", 0), 0))),
+        "end_row": int(ceil(min(options.get("end_row", view.num_rows()), view.num_rows()))),
+        "start_col": int(floor(max(options.get("start_col", 0), 0))),
+        "end_col": int(ceil(min(options.get("end_col", max_cols) * (view._num_hidden_cols() + 1), max_cols))),
         "index": options.get("index", False),
         "leaves_only": options.get("leaves_only", False),
         "has_row_path": view._sides > 0 and (not view._column_only)

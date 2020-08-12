@@ -389,11 +389,27 @@ View<t_ctx2>::get_data(
         }
 
         cols = column_names(true, depth);
-        column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
-            column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size()));
+
+        // Filter down column indices by user-provided start/end columns
+        column_indices = std::vector<t_uindex>(
+            column_indices.begin() + start_col,
+            column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size())
+        );
+
+        t_uindex start_col_index = start_col;
+        t_uindex end_col_index = end_col;
+
+        // If start_col == end_col, then column_indices will be an empty
+        // vector. Only try to access the first and last elements if the
+        // vector is not empty. `get_data` correctly handles cases where
+        // start == end and start > end.
+        if (column_indices.size() > 0) {
+            start_col_index = column_indices.front();
+            end_col_index = column_indices.back() + 1;
+        }
 
         std::vector<t_tscalar> slice_with_headers = m_ctx->get_data(
-            start_row, end_row, column_indices.front(), column_indices.back() + 1);
+            start_row, end_row, start_col_index, end_col_index);
 
         auto iter = slice_with_headers.begin();
         while (iter != slice_with_headers.end()) {
