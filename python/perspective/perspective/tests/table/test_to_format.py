@@ -10,7 +10,6 @@ import os
 import numpy as np
 import pandas as pd
 import pytz
-from pytest import mark
 from io import StringIO
 from datetime import date, datetime
 from perspective.table import Table
@@ -529,6 +528,26 @@ class TestToFormat(object):
         )
         assert records == data
 
+    def test_to_records_zero_start_gt_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=2,
+            end_col=1
+        )
+        assert records == [{}, {}]
+
+    def test_to_records_zero_start_eq_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=1,
+            end_col=1
+        )
+        assert records == [{}, {}]
+
     def test_to_records_one_over_max_col(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
@@ -543,6 +562,42 @@ class TestToFormat(object):
             {'__ROW_PATH__': [1.5], 'a': 1.5, 'b': 2.5},
             {'__ROW_PATH__': [3.5], 'a': 3.5, 'b': 4.5}
         ]
+
+    def test_to_records_one_start_gt_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"]
+        )
+        records = view.to_records(
+            start_col=2,
+            end_col=1
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_one_start_gt_end_col_large(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"]
+        )
+        records = view.to_records(
+            start_col=20,
+            end_col=19
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_one_start_eq_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"]
+        )
+        records = view.to_records(
+            start_col=0,
+            end_col=0
+        )
+        assert records == [{}, {}, {}]
 
     def test_to_records_two_over_max_col(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -609,10 +664,36 @@ class TestToFormat(object):
         )
         assert records == [{}, {}, {}]
 
-    @mark.skip
+    def test_to_records_two_start_gt_end_col_large_overage(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=50,
+            end_col=49
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_two_start_end_col_equiv(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=5,
+            end_col=5
+        )
+        assert records == [{}, {}, {}]
+
+
     def test_to_records_two_sorted_start_gt_end_col(self):
-        """FIXME: behavior of sorted 2-sided view should be the same as
-        unsorted 2-sided view in test above."""
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
@@ -627,9 +708,7 @@ class TestToFormat(object):
         )
         assert records == [{}, {}, {}]
 
-    @mark.skip
     def test_to_records_two_sorted_start_gt_end_col_large_overage(self):
-        """FIXME: fails with ValueError: vector"""
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
@@ -673,6 +752,7 @@ class TestToFormat(object):
             end_col=2
         )
         assert records == [{"__ROW_PATH__": []}, {"__ROW_PATH__": [3]}, {"__ROW_PATH__": [1]}]
+        
 
     def test_to_records_two_sorted_start_end_col_equiv(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
