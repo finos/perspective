@@ -20,7 +20,7 @@ export function labelTransform(d, radius) {
 export function cropLabel(d, targetWidth) {
     let actualWidth = this.getBBox().width;
     if (actualWidth > targetWidth) {
-        let labelText = d.data.name;
+        let labelText = d.label;
         const textSelection = select(this);
         while (actualWidth > targetWidth) {
             labelText = labelText.substring(0, labelText.length - 1);

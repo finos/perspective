@@ -1,7 +1,7 @@
 {
     "candlestick_filter_by_a_single_instrument_": "f988ca6494d7a36bada09928cd1a544e",
     "candlestick_filter_to_date_range_": "8ca4da0a6229d4f9db4a845d5d415c20",
-    "__GIT_COMMIT__": "66c751c99ac69898969049e164e63bb368e877dd",
+    "__GIT_COMMIT__": "e5b6e347333d9d3d22138a25e0992728e07eb8a7",
     "ohlc_filter_by_a_single_instrument_": "0110fac1f2befac1b97a9d33f0022acf",
     "ohlc_filter_to_date_range_": "3ec466996be47e2c8df135a4303bf383",
     "scatter_shows_a_grid_without_any_settings_applied_": "8677946ab48f16a376c421500d59e6c0",
@@ -126,5 +126,7 @@
     "treemap_displays_visible_columns_": "62996aa87b1237b0be568a339a700bdf",
     "treemap_with_column_position_1_set_to_null_": "a2f594ff864fb673cde708e4533d8edc",
     "treemap_tooltip_columns_works": "9b3a44cc1b4b1d11cb8b635c850a0612",
-    "line_Sets_a_category_axis_when_pivoted_by_a_computed_datetime": "eb1c86dc44988ad9a65fdd5a335850b8"
+    "line_Sets_a_category_axis_when_pivoted_by_a_computed_datetime": "eb1c86dc44988ad9a65fdd5a335850b8",
+    "sunburst_sunburst_label_shows_formatted_date": "590f474e076fd49ce10eb5e97bfc66d3",
+    "treemap_treemap_label_shows_formatted_date": "6c39c766e14c64c28316137f5f1ff85b"
 }

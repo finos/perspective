@@ -44,7 +44,7 @@ export function sunburstSeries() {
             .select("text")
             .attr("fill-opacity", d => +labelVisible(d.current))
             .attr("transform", d => labelTransform(d.current, radius))
-            .text(d => d.data.name)
+            .text(d => d.label)
             .each(function(d) {
                 cropLabel.call(this, d, radius);
             });
