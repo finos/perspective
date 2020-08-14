@@ -6,9 +6,7 @@ about: Fixes a bug reported in our issues list 📕
 
 # Fix for {GITHUB_ISSUE_NUMBER} - {Describe your fix in a few words}
 
-## Description
-
-<!--- Describe your changes in detail - how does it solve the problem? Do you
+<!--- Describe your changes in detail. How does it fix the issue? Do you
 have any questions about your approach/places for future improvement? -->
 
 ## Testing

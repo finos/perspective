@@ -6,15 +6,6 @@ about: Adds a new feature to Perspective 🙂!
 
 # {Describe your feature addition in a few words}
 
-## Description
-
-<!--- Check one box below. If you are unsure as to whether your feature changes
-are breaking, tag a core contributor: @texodus, @timkpaine, @sc1f or leave a
-comment. --->
-
-- [ ] Breaking feature
-- [ ] Non-breaking feature
-
 <!--- Describe your feature addition and all changes you've made in detail.
 
 - What was the motivation for the feature change?
@@ -24,6 +15,14 @@ comment. --->
 - Do you have any questions about your approach/places for future improvement?
 
 -->
+
+<!--- Check one box below. If you are unsure as to whether your feature changes
+are breaking, tag a core contributor: @texodus, @timkpaine, @sc1f or leave a
+comment. --->
+
+- [ ] Breaking feature
+- [ ] Non-breaking feature
+
 
 ## Changelog
 

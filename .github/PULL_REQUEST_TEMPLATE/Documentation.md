@@ -6,9 +6,7 @@ about: Improves documentation for the API or on the docs website.
 
 # {Describe your documentation changes in a few words.}
 
-## Description
-
-<!--- Where was documentation added/improved? -->
+<!--- Describe your documentation additions/improvements in detail here. -->
 
 ## Validation
 
