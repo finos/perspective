@@ -10,9 +10,25 @@
 import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 
 import "regular-table";
-import MATERIAL_STYLE from "regular-table/dist/less/material.less";
+import {createViewCache, configureRegularTable} from "regular-table/dist/examples/perspective.js";
+import MATERIAL_STYLE from "../less/regular_table.less";
 
 const VIEWER_MAP = new WeakMap();
+const INSTALLED = new WeakMap();
+
+async function datagridPlugin(regular, table, view) {
+    const is_installed = INSTALLED.has(regular);
+    if (!is_installed) {
+        const new_model = await createViewCache(regular, table, view);
+        await configureRegularTable(regular, new_model);
+        INSTALLED.set(regular, new_model);
+    } else {
+        await createViewCache(regular, table, view, INSTALLED.get(regular));
+    }
+    regular.scrollTop = 0;
+    regular.scrollLeft = 0;
+    await regular.draw();
+}
 
 /**
  * Initializes a new datagrid renderer if needed, or returns an existing one
@@ -33,7 +49,7 @@ function get_or_create_datagrid(element, div) {
     } else {
         datagrid = VIEWER_MAP.get(div);
         if (!datagrid.isConnected) {
-            datagrid.clear();
+            //datagrid.clear();
             div.innerHTML = "";
             div.appendChild(document.createElement("slot"));
             element.appendChild(datagrid);
@@ -56,7 +72,7 @@ class DatagridPlugin {
     static async update(div) {
         try {
             const datagrid = VIEWER_MAP.get(div);
-            await datagrid.draw({invalid_viewport: true});
+            await datagrid.draw();
         } catch (e) {
             return;
         }
@@ -64,18 +80,19 @@ class DatagridPlugin {
 
     static async create(div, view) {
         const datagrid = get_or_create_datagrid(this, div);
-        const options = await datagrid.set_view(this.table, view);
-        if (this._plugin_config) {
-            datagrid.restore(this._plugin_config);
-            delete this._plugin_config;
+        try {
+            await datagridPlugin(datagrid, this.table, view);
+            datagrid._resetAutoSize();
+            await datagrid.draw();
+        } catch (e) {
+            return;
         }
-        await datagrid.draw(options);
     }
 
     static async resize() {
         if (this.view && VIEWER_MAP.has(this._datavis)) {
             const datagrid = VIEWER_MAP.get(this._datavis);
-            await datagrid.draw({invalid_viewport: true});
+            await datagrid.draw();
         }
     }
 
@@ -86,26 +103,14 @@ class DatagridPlugin {
         }
     }
 
-    static save() {
-        if (this.view && VIEWER_MAP.has(this._datavis)) {
-            const datagrid = VIEWER_MAP.get(this._datavis);
-            return datagrid.save();
-        }
-    }
+    static save() {}
 
-    static restore(config) {
-        if (this.view && VIEWER_MAP.has(this._datavis)) {
-            const datagrid = VIEWER_MAP.get(this._datavis);
-            datagrid.restore(config);
-        } else {
-            this._plugin_config = config;
-        }
-    }
+    static restore() {}
 }
 
 /**
  * Appends the default tbale CSS to `<head>`, should be run once on module
- *  import.
+ * import.
  *
  */
 function _register_global_styles() {

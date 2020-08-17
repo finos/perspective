@@ -54,27 +54,45 @@ perspective-viewer, .perspective-viewer-material-dark {
     }
 
     tr td.pd-group-header,
-    tr th.pd-group-header {
+    tr th.pd-group-header,
+    .psp-header-border {
         border-right: 1px solid #999;
     }
 
-    tr:last-child th {
+    .psp-tree-label:before {
+        color: #999;
+    }
+
+    tbody th:last-of-type {
+        border-right: 1px solid #999;
+    }
+
+    thead tr:last-child th {
         border-bottom: 1px solid #999;
+    }
+
+    .psp-tree-label:hover:before {
+        color: @lightblue600;
+        text-shadow: 0px 0px 3px @lightblue600;
     }
 
     .pd-selected td {
         background-color: rgba(0,0,0,0);
     }
 
-    tr.pd-selected:hover td div {
+    tr.psp-selected:hover td div {
         background-color: #444;
     }
 
-    td.pd-negative {
+    td.psp-negative {
         color: rgb(255,136,136);
     }
 
-    td.pd-positive {
+    tbody th:empty {
+        background: linear-gradient(to right,transparent 9px,#444 10px,transparent 11px);
+    }
+
+    td.psp-positive {
         color: @lightblue600;
     }
 
