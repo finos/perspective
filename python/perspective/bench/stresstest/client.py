@@ -5,15 +5,12 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-import asyncio
 import six
-import signal
-import os
 import sys
 import random
 import logging
 import json
-import perspective
+import time
 
 from datetime import datetime, timedelta
 from tornado import gen, ioloop, websocket
@@ -21,7 +18,7 @@ from tornado import gen, ioloop, websocket
 
 class PerspectiveWebSocketClient(object):
 
-    def __init__(self, url, client_id, results_table, row_window=50, column_window=10):
+    def __init__(self, url, client_id, results_table, test_type="table", row_window=50, column_window=10):
         """Create a PerspectiveWebSocketClient that mimics a Perspective Viewer
         through the wire API.
 
@@ -30,10 +27,16 @@ class PerspectiveWebSocketClient(object):
             client_id (:obj:`str`)
             results_table (:obj:`perspective.Table`)
 
+        Keyword Args:
+            test_type (:obj:`str`)
+            row_window (:obj:`int`)
+            column_window (:obj:`int`)
+
         Examples:
             >>> @gen.coroutine
-            >>> def run_client(URL):
-            >>>     client = PerspectiveWebSocketClient(URL)
+            >>> def run_client(URL, client_id, results_table):
+            >>>     # for ease of debugging, client_id should be incremental
+            >>>     client = PerspectiveWebSocketClient(URL, client_id, results_table)
             >>>     # Connect to the server and send the initialization message
             >>>     yield client.connect()
             >>>     # Register an on_update callback to handle new ticks
@@ -44,6 +47,7 @@ class PerspectiveWebSocketClient(object):
         self.url = url
         self.client_id = client_id
         self.results_table = results_table
+        self.test_type = test_type
         self.client = None
 
         self.pending_messages = {}
@@ -62,7 +66,7 @@ class PerspectiveWebSocketClient(object):
 
         self.cmds = ["table_method", "view_method"]
 
-        # A list of views created by this client
+        # The current view managed by this client
         self.view_name = None
 
         # A list of messages that can be decomposed into *args for
@@ -88,12 +92,18 @@ class PerspectiveWebSocketClient(object):
         """Create and maintain a websocket client to Perspective, initializing
         the connection with the `init` message."""
         self.client = yield websocket.websocket_connect(self.url)
+        logging.info("%s Sending %s, id: %s", self.client_id, "init", self.message_id)
         yield self.write_message({"id": self.message_id, "cmd": "init"})
 
     @gen.coroutine
     def run(self):
         """Send random messages at intervals that simulate the actions of a
         Perspective viewer in the front-end."""
+        if self.test_type == "view":
+            # For a view test, don't send any messages besides the on_update.
+            # TODO: implement client-server editing for kicks
+            return
+
         for i in range(self.total_messages):
             message = None
 
@@ -146,7 +156,7 @@ class PerspectiveWebSocketClient(object):
                     name="table",
                     method=method)
 
-            # TODO: reimplement wait properly
+            # TODO: reimplement wait properly - we need to log the time - wait
             wait = False  # random.random() > 0.75
             wait_time = None
 
@@ -204,8 +214,14 @@ class PerspectiveWebSocketClient(object):
 
         # Connect server and initialize schema and update callback
         yield self.connect()
-        yield self.get_table_schema()
-        yield self.make_view()
+
+        if self.test_type == "table":
+            yield self.get_table_schema()
+            yield self.make_view()
+
+        if self.test_type == "view":
+            yield self.get_initial_arrow()
+
         yield self.register_on_update()
 
         timeout_delta = None
@@ -255,7 +271,7 @@ class PerspectiveWebSocketClient(object):
 
         try:
             response = self.parse_response(message)
-            response_id = response["id"]
+            response_id = response.get("id")
             logging.info("%s Received id: %s", self.client_id, response_id)
             meta = None
 
@@ -267,13 +283,36 @@ class PerspectiveWebSocketClient(object):
                 self.results_table.update([meta])
                 self.pending_messages.pop(response_id)
 
+            if self.test_type == "view" and response.get("method") != "to_arrow":
+                # View reads messages sent from on_update, which don't exist
+                # in the pending_messages map but need to be read anyway.
+                meta = {
+                    "receive_timestamp": datetime.now(),
+                    "client_id": self.client_id,
+                    "cmd": "view_method",
+                    "method": response.get("method", "on_update_callback"),
+                    "message_id": response.get("id", None),
+                    "binary": response.get("binary"),
+                    "byte_length": response.get("byte_length")
+                }
+
+                if response.get("send_time"):
+                    meta["microseconds_on_wire"] = (time.time() * 100000) - response.get("send_time")
+
+                self.results_table.update([meta])
+
             if response_id in self.callbacks:
                 # Call back into the on_update callback
                 ioloop.IOLoop.current().add_callback(self.callbacks[response_id], self)
 
-            assert "error" not in response
         except AssertionError:
             logging.critical("Server returned error for %s: %s", self.client_id, message)
+
+    @gen.coroutine
+    def get_initial_arrow(self):
+        """Retrieve an arrow of the whole dataset."""
+        message = self._make_message(cmd="view_method", name="view", method="to_arrow")
+        yield self.write_message(message)
 
     @gen.coroutine
     def make_view(self):
@@ -373,6 +412,29 @@ class PerspectiveWebSocketClient(object):
         """Registers an `on_update` callback that mimics the callback of the
         viewer by requesting more metadata from the server whenever it updates,
         thereby calling back into the Tornado IOLoop on the server."""
+        if self.test_type == "view":
+            # view should request arrows on update
+            @gen.coroutine
+            def view_on_update(self):
+                pass
+
+            # Store callbacks as they would be on the viewer - by message ID
+            self.callbacks[self.message_id] = view_on_update
+
+            # send the message that registers on_update
+            on_update_message = self._make_message(
+                "view_method",
+                "view",
+                "on_update",
+                args=[{"mode": "row"}],
+                subscribe=True,
+                callback_id="callback_1")
+
+            logging.info("%s Sending %s: %s, id: %s", self.client_id, "view_method", "on_update", on_update_message["id"])
+
+            yield self.write_message(on_update_message)
+            return
+
         @gen.coroutine
         def on_update(self):
             # Send 5 more messages back to the server whenever on_update
@@ -431,9 +493,16 @@ class PerspectiveWebSocketClient(object):
     def parse_response(self, response):
         """Checks that the server has responded with a valid message, i.e. one
         that does not have "error" set, and return the parsed response."""
-        res = json.loads(response)
-        assert "error" not in res
-        return res
+        try:
+            res = json.loads(response)
+            assert "error" not in res
+            return res
+        except Exception:
+            # Catch arrow binaries and return their bytelength
+            return {
+                "binary": True,
+                "byte_length": len(response)
+            }
 
     def _make_message(self, cmd, name, method, **kwargs):
         """Returns a message that will execute the given method on the
@@ -463,48 +532,3 @@ class PerspectiveWebSocketClient(object):
         }
 
         return message
-
-
-if __name__ == "__main__":
-    # If this module is run through a subprocess, create its own instance of
-    # the results table and dump to arrow at the end.
-    logging.basicConfig(level=logging.DEBUG)
-    HERE = os.path.abspath(os.path.dirname(__file__))
-
-    RESULTS_SCHEMA = {
-        "client_id": str,
-        "cmd": str,
-        "method": str,
-        "args": str,
-        "send_timestamp": datetime,
-        "receive_timestamp": datetime,
-        "microseconds_on_wire": float,
-        "message_id": int,
-        "errored": bool
-    }
-
-    RESULTS_TABLE = perspective.Table(RESULTS_SCHEMA)
-    CLIENT_ID = sys.argv[1]
-
-    def dump_and_exit(sig, frame):
-        dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
-        filename = "results_{}_{}.arrow".format(CLIENT_ID, dt)
-        logging.critical("KeyboardInterrupt: dumping %s rows of results to %s", RESULTS_TABLE.size(), filename)
-
-        with open(os.path.join(HERE, "results", filename), "wb") as results_arrow:
-            results_arrow.write(RESULTS_TABLE.view().to_arrow())
-
-        logging.critical("Exiting")
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, dump_and_exit)
-
-    def run(client_id):
-        """Create a new client and run it forever on a new IOLoop."""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        client = PerspectiveWebSocketClient("ws://127.0.0.1:{}/".format(8888), client_id, RESULTS_TABLE)
-        loop.run_until_complete(client.run_until_timeout())
-        loop.run_forever()
-
-    run(CLIENT_ID)

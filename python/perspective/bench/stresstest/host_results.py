@@ -94,7 +94,7 @@ if __name__ == "__main__":
             arrow.write(view.to_arrow())
         logging.info("Exported combined arrow to: %s", path)
 
-    app.listen(8888)
-    logging.critical("Listening on http://localhost:8888")
+    app.listen(8889)
+    logging.critical("Listening on http://localhost:8889")
     loop = tornado.ioloop.IOLoop.current()
     loop.start()

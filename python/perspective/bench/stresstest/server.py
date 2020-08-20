@@ -8,11 +8,10 @@
 import logging
 import os
 import sys
+import json
 import random
 import tornado
-
-
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), "..", ".."))
+import time
 import perspective
 
 
@@ -20,6 +19,21 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 TABLE = None
 VIEW = None
 MANAGER = perspective.PerspectiveManager()
+
+
+class PerspectiveTornadoHandlerWithMetrics(perspective.PerspectiveTornadoHandler):
+
+    def post(self, message, binary=False):
+        """Add telemetry to the message with a `send_time` field, which
+        contains the `time.time()` in microseconds of when the message
+        was sent."""
+        if not binary:
+            msg = json.loads(message)
+            msg["send_time"] = time.time() * 100000
+            super(PerspectiveTornadoHandlerWithMetrics, self).post(json.dumps(msg), binary)
+        else:
+            super(PerspectiveTornadoHandlerWithMetrics, self).post(message, binary)
+
 
 with open(os.path.join(HERE, "superstore.arrow"), "rb") as arrow:
     TABLE = perspective.Table(arrow.read(), index="Row ID")
@@ -49,15 +63,15 @@ def make_app():
     MANAGER.host_table("table", TABLE)
     MANAGER.host_view("view", TABLE.view())
 
-    # Update with 50 rows every 5 seconds
+    # Update with 50 rows every second
     def updater():
         TABLE.update(get_data())
 
-    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=5)
+    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=500, jitter=3)
     callback.start()
 
     return tornado.web.Application([
-        (r"/", perspective.PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
+        (r"/", PerspectiveTornadoHandlerWithMetrics, {"manager": MANAGER, "check_origin": True})
     ])
 
 
