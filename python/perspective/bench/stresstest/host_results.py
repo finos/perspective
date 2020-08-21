@@ -26,8 +26,16 @@ PARSER.add_argument(
     help="Whether to export the accumulated results as a single Arrow. Defaults to True.")
 
 PARSER.add_argument(
+    "--latest",
+    dest="latest",
+    default=False,
+    type=bool,
+    help="Whether to find the newest folder of results, or use the exact results path."
+)
+
+PARSER.add_argument(
     "results_path",
-    help="A path to a folder containing test results stored as Arrows.")
+    help="A path to a folder containing test results stored as Arrows. If --latest is True, the script will find the newest created folder of results.")
 
 MANAGER = perspective.PerspectiveManager()
 
@@ -51,7 +59,8 @@ def make_results_table(results_path):
 
     table = None
     for file in os.listdir(results_path):
-        valid = Path(file).suffix == ".arrow"
+        path = Path(file)
+        valid = path.suffix == ".arrow" and path.name != "results_combined.arrow"
         if valid:
             with open(os.path.join(results_path, file), "rb") as arrow:
                 if table is not None:
@@ -83,6 +92,12 @@ if __name__ == "__main__":
     args = PARSER.parse_args()
     RESULTS_PATH = args.results_path
     EXPORT = args.export
+
+    if args.latest:
+        dirs = []
+        paths = sorted([p for p in Path(RESULTS_PATH).iterdir() if p.is_dir()], key=os.path.getmtime)
+        RESULTS_PATH = paths[-1]
+        logging.info("Results path: %s", RESULTS_PATH)
 
     app = make_app(RESULTS_PATH)
 

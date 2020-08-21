@@ -15,26 +15,13 @@ from datetime import datetime
 
 import perspective
 from client import PerspectiveWebSocketClient
+from results_schema import RESULTS_SCHEMA
 
 if __name__ == "__main__":
     # If this module is run through a subprocess, create its own instance of
     # the results table and dump to arrow at the end.
     logging.basicConfig(level=logging.DEBUG)
     HERE = os.path.abspath(os.path.dirname(__file__))
-
-    RESULTS_SCHEMA = {
-        "client_id": str,
-        "cmd": str,
-        "method": str,
-        "args": str,
-        "send_timestamp": datetime,
-        "receive_timestamp": datetime,
-        "microseconds_on_wire": float,
-        "message_id": int,
-        "errored": bool,
-        "binary": bool,
-        "byte_length": int
-    }
 
     RESULTS_TABLE = perspective.Table(RESULTS_SCHEMA)
 

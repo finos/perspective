@@ -8,6 +8,7 @@
 import os
 import argparse
 import logging
+import time
 import asyncio
 
 from datetime import datetime
@@ -66,9 +67,12 @@ if __name__ == "__main__":
     if args.debug:
         log_level = logging.DEBUG
 
-    logging.basicConfig(level=log_level)
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        level=log_level,
+        datefmt="%Y-%m-%d %H:%M:%S")
 
-    logging.info("Running %d client(s)", args.num_clients)
+    logging.info("Running %d client(s) with %s second delay before startup", args.num_clients, args.delay)
 
     dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
     subfolder_name = "{}_run_{}".format(args.test_type, dt)
@@ -88,16 +92,27 @@ if __name__ == "__main__":
     processes = []
 
     async def run_subprocess(client_name):
-        if args.delay:
-            await asyncio.sleep(args.delay)
+        logging.info("Starting client %s", client_name)
         proc = await asyncio.create_subprocess_exec("python3", CLIENT_PATH, results_subfolder, client_name, args.test_type, args.url)
         await proc.wait()
 
     loop = asyncio.get_event_loop()
+    tasks = []
 
-    tasks = [
-        asyncio.ensure_future(run_subprocess("client_{}".format(i))) for i in range(args.num_clients)
-    ]
+    if args.delay > 0:
+        async def add_client_with_delay(i):
+            client_name = "client_{}".format(i)
+            if i > 0:
+                logging.info("Delaying client %s start for %d seconds", client_name, args.delay * i)
+                await asyncio.sleep(args.delay * i)
+            await asyncio.ensure_future(run_subprocess(client_name))
+
+        # add clients sequentially
+        tasks = [asyncio.ensure_future(add_client_with_delay(i)) for i in range(args.num_clients)]
+    else:
+        # add clients concurrently
+        tasks = [asyncio.ensure_future(run_subprocess("client_{}".format(i))) for i in range(args.num_clients)]
 
     loop.run_until_complete(asyncio.gather(*tasks))
+
     loop.close()

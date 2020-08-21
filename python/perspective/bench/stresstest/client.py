@@ -55,6 +55,10 @@ class PerspectiveWebSocketClient(object):
         # Each message must have a unique integer ID
         self.message_id = -1
 
+        # internal tracker that tracks the number of on_update messages
+        # received
+        self._on_update_callback_message_id = 0
+
         # The total number of messages that should be sent to the server on
         # every call to `self.run()`
         self.total_messages = 30
@@ -247,6 +251,10 @@ class PerspectiveWebSocketClient(object):
         meta["method"] = message.get("method", None)
         meta["args"] = json.dumps(message.get("args", None))
         meta["message_id"] = message.get("id", None)
+        meta["client_num_messages"] = self.message_id
+
+        # send remote_client_id
+        message["remote_client_id"] = self.client_id
 
         ioloop.IOLoop.current().add_callback(
             self.client.write_message,
@@ -280,10 +288,15 @@ class PerspectiveWebSocketClient(object):
                 meta["errored"] = "error" in response
                 meta["receive_timestamp"] = datetime.now()
                 meta["microseconds_on_wire"] = (meta["receive_timestamp"] - meta["send_timestamp"]).microseconds
-                self.results_table.update([meta])
                 self.pending_messages.pop(response_id)
 
-            if self.test_type == "view" and response.get("method") != "to_arrow":
+            elif self.test_type == "view" and response.get("cmd") != "init" and response.get("method") != "to_arrow":
+                if response.get("method") == "on_update" or response.get("binary"):
+                    # for view tests, there is one to_arrow and then the rest of
+                    # the binary callbacks are from on_update, so we can
+                    # automatically increment the internal tracker.
+                    self._on_update_callback_message_id += 1
+
                 # View reads messages sent from on_update, which don't exist
                 # in the pending_messages map but need to be read anyway.
                 meta = {
@@ -293,12 +306,27 @@ class PerspectiveWebSocketClient(object):
                     "method": response.get("method", "on_update_callback"),
                     "message_id": response.get("id", None),
                     "binary": response.get("binary"),
-                    "byte_length": response.get("byte_length")
+                    "byte_length": response.get("byte_length"),
+                    "client_num_messages": self._on_update_callback_message_id
                 }
 
+                # TODO: use server telemetry
                 if response.get("send_time"):
                     meta["microseconds_on_wire"] = (time.time() * 100000) - response.get("send_time")
 
+            if isinstance(meta, dict):
+                if response.get("telemetry"):
+                    meta.update({
+                        "server_received": response["telemetry"]["server_received"],
+                        "server_start_process_time": response["telemetry"]["server_start_process_time"],
+                        "server_send_time": response["telemetry"]["server_send_time"],
+                    })
+
+                    # For an on_update callback, return the time it takes from
+                    # callback invocation in the manager to when the client
+                    # received it.
+                    if not meta.get("microseconds_on_wire"):
+                        meta["microseconds_on_wire"] = (meta["receive_timestamp"] - meta["server_start_process_time"]).microseconds
                 self.results_table.update([meta])
 
             if response_id in self.callbacks:
@@ -312,6 +340,7 @@ class PerspectiveWebSocketClient(object):
     def get_initial_arrow(self):
         """Retrieve an arrow of the whole dataset."""
         message = self._make_message(cmd="view_method", name="view", method="to_arrow")
+        logging.info("%s Sending %s: %s, id: %s", self.client_id, "view_method", "to_arrow", message["id"])
         yield self.write_message(message)
 
     @gen.coroutine

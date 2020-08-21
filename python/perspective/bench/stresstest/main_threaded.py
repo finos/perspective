@@ -17,21 +17,9 @@ import perspective
 from datetime import datetime
 from tornado.platform.asyncio import AnyThreadEventLoopPolicy
 from client import PerspectiveWebSocketClient
+from results_schema import RESULTS_SCHEMA
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-
-RESULTS_SCHEMA = {
-    "client_id": str,
-    "cmd": str,
-    "method": str,
-    "args": str,
-    "send_timestamp": datetime,
-    "receive_timestamp": datetime,
-    "microseconds_on_wire": float,
-    "message_id": int,
-    "errored": bool,
-    "wait_time": float
-}
 
 RESULTS_TABLE = perspective.Table(RESULTS_SCHEMA)
 
