@@ -381,20 +381,12 @@ t_ctx0::sidedness() const {
     return 0;
 }
 
-/**
- * @brief Handle additions and new data, calculating deltas along the way.
- *
- * @param flattened
- * @param delta
- * @param prev
- * @param curr
- * @param transitions
- * @param existed
- */
 void
 t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     const t_data_table& prev, const t_data_table& curr, const t_data_table& transitions,
     const t_data_table& existed) {
+    // Notify the context with new data when the `t_gstate` master table is
+    // not empty, and being updated with new data.
     psp_log_time(repr() + " notify.enter");
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
@@ -406,6 +398,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     const t_column* existed_col = existed_sptr.get();
 
     bool delete_encountered = false;
+
     if (m_config.has_filters()) {
         t_mask msk_prev = filter_table_for_config(prev, m_config);
         t_mask msk_curr = filter_table_for_config(curr, m_config);
@@ -441,7 +434,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
                 default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
             }
 
-            // add the pkey for updated rows
+            // add the pkey for row delta
             add_delta_pkey(pkey);
         }
         psp_log_time(repr() + " notify.has_filter_path.updated_traversal");
@@ -455,6 +448,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         return;
     }
 
+    // Context does not have filters applied
     for (t_uindex idx = 0; idx < nrecs; ++idx) {
         t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
         std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
@@ -476,7 +470,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
             default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
         }
 
-        // add the pkey for updated rows
+        // add the pkey for row delta
         add_delta_pkey(pkey);
     }
 
@@ -489,13 +483,10 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     psp_log_time(repr() + " notify.no_filter_path.exit");
 }
 
-/**
- * @brief Handle the addition of new data.
- *
- * @param flattened
- */
 void
 t_ctx0::notify(const t_data_table& flattened) {
+    // Notify the context with new data after the `t_gstate`'s master table
+    // has been updated for the first time with data.
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
     std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
@@ -518,10 +509,11 @@ t_ctx0::notify(const t_data_table& flattened) {
                         m_traversal->add_row(m_gstate, m_config, pkey);
                     }
                 } break;
-                default: {
-                    // pass
-                } break;
+                default: break;
             }
+
+            // Add primary key to track row delta
+            add_delta_pkey(pkey);
         }
         return;
     }
@@ -535,13 +527,19 @@ t_ctx0::notify(const t_data_table& flattened) {
             case OP_INSERT: {
                 m_traversal->add_row(m_gstate, m_config, pkey);
             } break;
-            default: { } break; }
+            default: break; 
+        }
+
+        // Add primary key to track row delta
+        add_delta_pkey(pkey);
     }
 }
 
 void
 t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
     const t_data_table& curr, const t_data_table& transitions) {
+    // Calculate step deltas when the `t_gstate` master table already has
+    // data, so we can take transitions into account.
     t_uindex nrows = flattened.size();
 
     PSP_VERBOSE_ASSERT(prev.size() == nrows, "Shape violation detected");
@@ -579,6 +577,13 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
         }
     }
 }
+
+void
+t_ctx0::calc_step_delta(const t_data_table& flattened) {
+    // Calculate step deltas when the `t_gstate` master table is updated with
+    // data for the first time, so every single row is a new delta.
+}
+
 
 /**
  * @brief Mark a primary key as updated by adding it to the tracking set.
