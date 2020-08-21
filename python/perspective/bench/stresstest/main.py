@@ -8,14 +8,13 @@
 import os
 import argparse
 import logging
-import time
 import asyncio
 
 from datetime import datetime
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-CLIENT_PATH = os.path.join(HERE, "client_runner.py")
+CLIENT_PATH = os.path.join(HERE, "client", "client_runner.py")
 
 PARSER = argparse.ArgumentParser(description="Stress testing for Perspective's websocket interface.")
 
@@ -72,10 +71,10 @@ if __name__ == "__main__":
         level=log_level,
         datefmt="%Y-%m-%d %H:%M:%S")
 
-    logging.info("Running %d client(s) with %s second delay before startup", args.num_clients, args.delay)
+    logging.info("Running %d client(s) with %s second delay before startup against URL %s", args.num_clients, args.delay, args.url)
 
     dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
-    subfolder_name = "{}_run_{}".format(args.test_type, dt)
+    subfolder_name = "{}_run_{}_{}".format(args.test_type, args.url, dt)
     results_folder = os.path.join(HERE, "results")
     results_subfolder = os.path.join(results_folder, subfolder_name)
 

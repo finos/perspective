@@ -49,7 +49,7 @@ class PerspectiveManagerWithTelemetry(PerspectiveManager):
             telemetry["server_start_process_time"] = datetime.now()
             msg["telemetry"] = telemetry
 
-        logging.info("manager.callback was executed for message ID %d", id)
+        logging.debug("manager.callback was executed for message ID %d", id)
         super(PerspectiveManagerWithTelemetry, self).callback(*args, **kwargs)
 
     def _message_to_json(self, id, message):
@@ -63,5 +63,5 @@ class PerspectiveManagerWithTelemetry(PerspectiveManager):
             if telemetry.get("method") != "on_update":
                 self._pending_telemetry.pop(id)
 
-        logging.info("Sending %s to %s, id: %d", telemetry.get("method"), telemetry.get("remote_client_id"), id)
+        logging.debug("Sending %s to %s, id: %d", telemetry.get("method"), telemetry.get("remote_client_id"), id)
         return super(PerspectiveManagerWithTelemetry, self)._message_to_json(id, message)

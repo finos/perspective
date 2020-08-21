@@ -55,9 +55,9 @@ class PerspectiveWebSocketClient(object):
         # Each message must have a unique integer ID
         self.message_id = -1
 
-        # internal tracker that tracks the number of on_update messages
-        # received
-        self._on_update_callback_message_id = 0
+        # internal tracker that tracks the number of messages logged to the
+        # output table.
+        self._num_messages_logged = 0
 
         # The total number of messages that should be sent to the server on
         # every call to `self.run()`
@@ -251,7 +251,6 @@ class PerspectiveWebSocketClient(object):
         meta["method"] = message.get("method", None)
         meta["args"] = json.dumps(message.get("args", None))
         meta["message_id"] = message.get("id", None)
-        meta["client_num_messages"] = self.message_id
 
         # send remote_client_id
         message["remote_client_id"] = self.client_id
@@ -280,7 +279,7 @@ class PerspectiveWebSocketClient(object):
         try:
             response = self.parse_response(message)
             response_id = response.get("id")
-            logging.info("%s Received id: %s", self.client_id, response_id)
+            logging.debug("%s Received id: %s", self.client_id, response_id)
             meta = None
 
             if response_id in self.pending_messages:
@@ -307,14 +306,14 @@ class PerspectiveWebSocketClient(object):
                     "message_id": response.get("id", None),
                     "binary": response.get("binary"),
                     "byte_length": response.get("byte_length"),
-                    "client_num_messages": self._on_update_callback_message_id
+                    "num_messages_logged": self._num_messages_logged
                 }
 
-                # TODO: use server telemetry
                 if response.get("send_time"):
                     meta["microseconds_on_wire"] = (time.time() * 100000) - response.get("send_time")
 
             if isinstance(meta, dict):
+                # Check telemetry from the server
                 if response.get("telemetry"):
                     meta.update({
                         "server_received": response["telemetry"]["server_received"],
@@ -332,15 +331,14 @@ class PerspectiveWebSocketClient(object):
             if response_id in self.callbacks:
                 # Call back into the on_update callback
                 ioloop.IOLoop.current().add_callback(self.callbacks[response_id], self)
-
-        except AssertionError:
+        except Exception:
             logging.critical("Server returned error for %s: %s", self.client_id, message)
 
     @gen.coroutine
     def get_initial_arrow(self):
         """Retrieve an arrow of the whole dataset."""
         message = self._make_message(cmd="view_method", name="view", method="to_arrow")
-        logging.info("%s Sending %s: %s, id: %s", self.client_id, "view_method", "to_arrow", message["id"])
+        logging.debug("%s Sending %s: %s, id: %s", self.client_id, "view_method", "to_arrow", message["id"])
         yield self.write_message(message)
 
     @gen.coroutine
