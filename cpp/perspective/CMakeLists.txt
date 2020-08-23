@@ -12,7 +12,7 @@ if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
 endif()
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
-set(PSP_ARROW_VERSION 0.15.1)
+set(PSP_ARROW_VERSION 0.16.0)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
     set(MACOS OFF)
@@ -356,11 +356,22 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# so we use a custom FindPythonHeaders that is the same as the
 			# default, but ignores when the python libraries can't be found.
 			message("${Red}Manylinux build has no python shared libraries${ColorReset}")
-			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter )
-			find_package( PythonHeaders ${PSP_PYTHON_VERSION} REQUIRED)
+			find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter)
+
+			# Run with exact version so its cached for pybind
+			find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+			find_package(PythonLibs ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+			
 		else()
 			message("${Cyan}Use python shared libraries${ColorReset}")
-			find_package( Python ${PSP_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
+			find_package( Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development)
+
+			# Run with exact version so its cached for pybind
+			find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+			find_package(PythonLibs ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+
 			link_directories( ${Python_LIBRARY_DIRS} )
 		endif()
 		message("${Cyan}Using Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, Python_LIBRARIES: ${Python_LIBRARIES} ${ColorReset}")
