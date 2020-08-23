@@ -118,7 +118,6 @@ class PSPBuild(build_ext):
 
         PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
-        print('PREFIX', sysconfig.PREFIX, sys.executable)
         cmake_args = [
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join(extdir, 'perspective', 'table')).replace('\\', '/'),
             '-DCMAKE_BUILD_TYPE=' + cfg,
