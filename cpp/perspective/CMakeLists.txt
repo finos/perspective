@@ -361,15 +361,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# Run with exact version so its cached for pybind
 			find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
-			find_package(PythonLibs ${PSP_PYTHON_VERSION} EXACT REQUIRED)
-			
 		else()
 			message("${Cyan}Use python shared libraries${ColorReset}")
 			find_package( Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development)
 
 			# Run with exact version so its cached for pybind
 			find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
-			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 			find_package(PythonLibs ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 
 			link_directories( ${Python_LIBRARY_DIRS} )

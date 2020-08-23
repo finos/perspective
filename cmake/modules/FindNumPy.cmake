@@ -6,12 +6,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 if(NOT Python_EXECUTABLE)
-  if(NumPy_FIND_QUIETLY)
-    find_package( PythonInterp REQUIRED QUIET)
-  else()
-    find_package( PythonInterp REQUIRED )
-    set(__numpy_out 1)
-  endif()
+  find_package( PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED )
+  set(__numpy_out 1)
 endif()
 
 if (Python_EXECUTABLE)
