@@ -11,17 +11,6 @@ execute_process(
   COMMAND "${Python_EXECUTABLE}" -c
           "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_include(), end='')\nexcept:pass"
           OUTPUT_VARIABLE __pyarrow_path)
-message(WARNING ${Python_EXECUTABLE})
-message(WARNING ${Python_EXECUTABLE})
-message(WARNING ${Python_EXECUTABLE})
-message(WARNING ${Python_EXECUTABLE})
-message(WARNING ${Python_EXECUTABLE})
-
-execute_process(
-  COMMAND "${Python_EXECUTABLE}" -c
-          "import sys, os; print(sys.path); print(os.environ['PYTHONPATH'])"
-  OUTPUT_VARIABLE __test)
-message(WARNING ${__test})
 
 # And the lib dirs
 execute_process(
