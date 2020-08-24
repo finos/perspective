@@ -60,6 +60,72 @@ module.exports = perspective => {
             table.update(partial_change_y);
         });
 
+        it("Should calculate step delta for 0-sided contexts from schema", async function(done) {
+            let table = perspective.table(
+                {
+                    x: "integer",
+                    y: "string",
+                    z: "boolean"
+                },
+                {index: "x"}
+            );
+            let view = table.view();
+            view.on_update(
+                function(updated) {
+                    expect(updated.delta).toEqual(data);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+            table.update(data);
+        });
+
+        it("Should calculate step delta for added rows in 0-sided contexts from schema", async function(done) {
+            let table = perspective.table({
+                x: "integer",
+                y: "string",
+                z: "boolean"
+            });
+            let view = table.view();
+            view.on_update(
+                function(updated) {
+                    expect(updated.delta).toEqual(data);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+            table.update(data);
+        });
+
+        it("Should calculate step delta for added rows with partial nones in 0-sided contexts from schema", async function(done) {
+            let table = perspective.table({
+                x: "integer",
+                y: "string",
+                z: "boolean"
+            });
+            let view = table.view();
+            view.on_update(
+                function(updated) {
+                    expect(updated.delta).toEqual([
+                        {x: 1, y: "a", z: true},
+                        {x: 2, y: "b", z: null}
+                    ]);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+            table.update([
+                {x: 1, y: "a", z: true},
+                {x: 2, y: "b"}
+            ]);
+        });
+
         it.skip("Should calculate step delta for 0-sided contexts during non-sequential updates", async function(done) {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();

@@ -439,8 +439,10 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         }
         psp_log_time(repr() + " notify.has_filter_path.updated_traversal");
 
-        // calculate deltas
-        calc_step_delta(flattened, prev, curr, transitions);
+        // calculate cell deltas if enabled
+        if (get_deltas_enabled()) {
+            calc_step_delta(flattened, prev, curr, transitions);
+        }
         m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
         psp_log_time(repr() + " notify.has_filter_path.exit");
@@ -476,8 +478,10 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
     psp_log_time(repr() + " notify.no_filter_path.updated_traversal");
 
-    // calculate deltas
-    calc_step_delta(flattened, prev, curr, transitions);
+    // calculate cell deltas if enabled
+    if (get_deltas_enabled()) {
+        calc_step_delta(flattened, prev, curr, transitions);
+    }
     m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
     psp_log_time(repr() + " notify.no_filter_path.exit");
@@ -533,6 +537,38 @@ t_ctx0::notify(const t_data_table& flattened) {
         // Add primary key to track row delta
         add_delta_pkey(pkey);
     }
+
+    // Calculate the step delta, if enabled in the context through an on_update
+    // callback with the "cell" or "row" mode set.
+    if (get_deltas_enabled()) {
+        calc_step_delta(flattened);
+    }
+}
+
+void
+t_ctx0::calc_step_delta(const t_data_table& flattened) {
+    // Calculate step deltas when the `t_gstate` master table is updated with
+    // data for the first time, so every single row is a new delta.
+    t_uindex nrows = flattened.size();
+    const auto& column_names = m_config.get_column_names();
+    const t_column* pkey_col = flattened.get_const_column("psp_pkey").get();
+
+    // Add every row and every column to the delta
+    for (const auto& name : column_names) {
+        auto cidx = m_config.get_colidx(name);
+        const t_column* flattened_column = flattened.get_const_column(name).get();
+
+        for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
+            m_deltas->insert(
+                t_zcdelta(
+                    get_interned_tscalar(pkey_col->get_scalar(ridx)),
+                    cidx,
+                    mknone(),
+                    get_interned_tscalar(flattened_column->get_scalar(ridx))
+                )
+            );
+        }
+    }
 }
 
 void
@@ -576,12 +612,6 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
             }
         }
     }
-}
-
-void
-t_ctx0::calc_step_delta(const t_data_table& flattened) {
-    // Calculate step deltas when the `t_gstate` master table is updated with
-    // data for the first time, so every single row is a new delta.
 }
 
 
