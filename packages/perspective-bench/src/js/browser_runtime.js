@@ -133,7 +133,7 @@ class Benchmark {
         this._table_printer(
             ...(OUTPUT_MODE === "tree" ? path : []),
             `{${color} ${completed}}{whiteBright /${total}}`,
-            `({${color} ${(100 * completed_per).toFixed(2)}}{whiteBright %)}`,
+            `{${color} ${(100 * completed_per).toFixed(2)}}{whiteBright %)}`,
             `{whiteBright ${time.toFixed(3)}}s`,
             `{whiteBright ${time_per.toFixed(2)}}secs/op`,
             `{${stddev_color} ${(100 * stddev).toFixed(2)}}{whiteBright %} σ/mean`,
