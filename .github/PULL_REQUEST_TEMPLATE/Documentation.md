@@ -4,7 +4,7 @@ about: Improves documentation for the API or on the docs website.
 
 ---
 
-# {Describe your documentation changes in a few words.}
+# Documentation
 
 <!--- Describe your documentation additions/improvements in detail here. -->
 

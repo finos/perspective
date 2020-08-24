@@ -4,7 +4,7 @@ about: Adds a new feature to Perspective 🙂!
 
 ---
 
-# {Describe your feature addition in a few words}
+# Feature
 
 <!--- Describe your feature addition and all changes you've made in detail.
 
