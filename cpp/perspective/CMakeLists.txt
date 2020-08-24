@@ -357,10 +357,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# default, but ignores when the python libraries can't be found.
 			message("${Red}Manylinux build has no python shared libraries${ColorReset}")
 			find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter)
+			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 
 			# Run with exact version so its cached for pybind
 			find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
-			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 		else()
 			message("${Cyan}Use python shared libraries${ColorReset}")
 			find_package( Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development)

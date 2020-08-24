@@ -27,6 +27,7 @@ if (IS_DOCKER) {
 }
 
 const IS_CI = getarg("--ci");
+const SETUP_ONLY = getarg("--setup-only");
 const IS_INSTALL = getarg("--install");
 
 // Check that the `PYTHON` command is valid, else default to `python`.
@@ -51,6 +52,11 @@ try {
     fs.copySync(lic, dlic, {preserveTimestamps: true});
     fs.copySync(cmake, dcmake, {preserveTimestamps: true});
     clean(obj);
+
+    if (SETUP_ONLY) {
+        // don't execute any build steps
+        return;
+    }
 
     let cmd;
     if (IS_CI) {
