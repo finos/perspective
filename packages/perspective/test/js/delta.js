@@ -101,6 +101,33 @@ module.exports = perspective => {
             table.update(data);
         });
 
+        it("Should calculate step delta for added rows in 0-sided filtered contexts from schema", async function(done) {
+            let table = perspective.table({
+                x: "integer",
+                y: "string",
+                z: "boolean"
+            });
+            let view = table.view({
+                filter: [["x", ">", 3]]
+            });
+            view.on_update(
+                function(updated) {
+                    expect(updated.delta).toEqual([
+                        {
+                            x: 4,
+                            y: "d",
+                            z: false
+                        }
+                    ]);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "cell"}
+            );
+            table.update(data);
+        });
+
         it("Should calculate step delta for added rows with partial nones in 0-sided contexts from schema", async function(done) {
             let table = perspective.table({
                 x: "integer",

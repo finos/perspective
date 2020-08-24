@@ -55,7 +55,7 @@ module.exports = perspective => {
                 table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
             });
 
-            it("Returns appended rows for normal and computed columns froms schema", async function(done) {
+            it("Returns appended rows for normal and computed columns from schema", async function(done) {
                 const table = perspective.table({
                     x: "integer",
                     y: "string"
@@ -88,7 +88,7 @@ module.exports = perspective => {
 
                 table.update({
                     x: [1, 2, 3, 4],
-                    y: ["A", "B", "C", "D"]
+                    y: ["a", "b", "c", "d"]
                 });
             });
 
