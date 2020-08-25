@@ -10,6 +10,7 @@ from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
+from distutils import sysconfig
 from codecs import open
 import io
 import logging
@@ -126,6 +127,7 @@ class PSPBuild(build_ext):
             '-DPSP_PYTHON_VERSION={}'.format(PYTHON_VERSION),
             '-DPython_ADDITIONAL_VERSIONS={}'.format(PYTHON_VERSION),
             '-DPython_FIND_VERSION={}'.format(PYTHON_VERSION),
+            '-DPSP_PYTHON_ARROWINSTALLDIR={}'.format(os.environ.get('PSP_PYTHON_ARROWINSTALLDIR', os.path.join(sysconfig.get_python_lib(), 'pyarrow').replace('\\', '/'))),
             '-DPython_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
             '-DPython_ROOT_DIR={}'.format(sys.prefix).replace('\\', '/'),
             '-DPython_ROOT={}'.format(sys.prefix).replace('\\', '/'),
