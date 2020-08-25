@@ -631,10 +631,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# `site-packages`, the relative search path should be able to pick
 			# up pyarrow. This is only enabled for MacOS, as `auditwheel`
 			# will not delocate libarrow properly if it is in the rpath.
-			message(WARNING ${CMAKE_INSTALL_RPATH})
-			message(WARNING ${module_origin_path})
-			message(WARNING ${PYTHON_PYARROW_LIBRARY_DIR})
-
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
 		else()
