@@ -67,7 +67,7 @@ try {
 
         cmd =
             cmd +
-            `${PYTHON} -m pip install -e -vv .[dev] && \
+            `${PYTHON} -m pip install -vv -e .[dev] && \
             ${PYTHON} -m flake8 perspective && echo OK && \
             ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
             ${PYTHON} -m pytest -vvv perspective \
