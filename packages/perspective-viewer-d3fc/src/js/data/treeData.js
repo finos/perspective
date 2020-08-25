@@ -8,6 +8,7 @@
  */
 
 import * as d3 from "d3";
+import {toValue} from "../tooltip/selectionData";
 
 export function treeData(settings) {
     const sets = {};
@@ -66,9 +67,14 @@ export function treeData(settings) {
                 .map(cross => cross.data.name)
                 .join("|");
             d.key = set[0];
+            d.label = toValue(settings.crossValues[d.depth - 1 < 0 ? 0 : d.depth - 1].type, d.data.name);
         });
 
-        return {split: set[0], data: chartData, extents: getExtents(settings, set)};
+        return {
+            split: set[0],
+            data: chartData,
+            extents: getExtents(settings, set)
+        };
     });
 
     return data;

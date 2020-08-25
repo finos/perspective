@@ -108,7 +108,7 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
     if (parent) {
         parentCtrls
             .hide(false)
-            .text(d.data.name)
+            .text(d.label)
             .onClick(() => changeLevel(parent, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls, duration))();
     } else {
         parentCtrls.hide(true)();

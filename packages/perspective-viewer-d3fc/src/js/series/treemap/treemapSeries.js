@@ -13,7 +13,11 @@ import {changeLevel, returnToLevel} from "./treemapTransitions";
 import {parentControls} from "./treemapControls";
 import {calculateRootLevelMap, saveLabelMap} from "./treemapLevelCalculation";
 
-export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
+export const nodeLevel = {
+    leaf: "leafnode",
+    branch: "branchnode",
+    root: "rootnode"
+};
 export const calcWidth = d => d.x1 - d.x0;
 export const calcHeight = d => d.y1 - d.y0;
 const isLeafNode = (maxDepth, d) => d.depth === maxDepth;
@@ -59,7 +63,7 @@ export function treemapSeries() {
             .select("text")
             .attr("x", d => d.x0 + calcWidth(d) / 2)
             .attr("y", d => d.y0 + calcHeight(d) / 2)
-            .text(d => d.data.name);
+            .text(d => d.label);
 
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         calculateRootLevelMap(nodesMerge, rootNode);
