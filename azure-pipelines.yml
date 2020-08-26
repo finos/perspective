@@ -122,6 +122,10 @@ jobs:
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
+    # Clean prior to wheel build
+    - bash: yarn clean
+      displayName: 'Clean for wheel build'
+
     # Build a python wheel for Manylinux
     - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
       condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
@@ -271,6 +275,10 @@ jobs:
           codeCoverageTool: Cobertura
           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
 
+      # Clean prior to wheel build
+      - bash: yarn clean
+        displayName: 'Clean for wheel build'
+
       # Build a python wheel for Mac 10.14
       - bash: yarn _wheel_python --ci $(python_flag) --macos
         displayName: 'Build wheel'
@@ -356,6 +364,10 @@ jobs:
       inputs: 
         codeCoverageTool: Cobertura
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+
+    # Clean prior to wheel build
+    - bash: yarn clean
+      displayName: 'Clean for wheel build'
 
     # Build a python wheel for Mac 10.14
     - bash: yarn _wheel_python --ci $(python_flag) --macos
