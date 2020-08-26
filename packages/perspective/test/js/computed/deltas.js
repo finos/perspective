@@ -55,6 +55,43 @@ module.exports = perspective => {
                 table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
             });
 
+            it("Returns appended rows for normal and computed columns from schema", async function(done) {
+                const table = perspective.table({
+                    x: "integer",
+                    y: "string"
+                });
+                const view = table.view({
+                    computed_columns: [
+                        {
+                            column: "uppercase",
+                            computed_function_name: "Uppercase",
+                            inputs: ["y"]
+                        }
+                    ]
+                });
+
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 1, y: "a", uppercase: "A"},
+                            {x: 2, y: "b", uppercase: "B"},
+                            {x: 3, y: "c", uppercase: "C"},
+                            {x: 4, y: "d", uppercase: "D"}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        await view.delete();
+                        await table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+
+                table.update({
+                    x: [1, 2, 3, 4],
+                    y: ["a", "b", "c", "d"]
+                });
+            });
+
             it("Returns partially updated step delta for normal and computed columns", async function(done) {
                 let table = perspective.table(
                     [

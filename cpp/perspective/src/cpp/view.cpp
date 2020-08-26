@@ -596,21 +596,11 @@ View<CTX_T>::_get_deltas_enabled() const {
     return m_ctx->get_deltas_enabled();
 }
 
-template <>
-bool
-View<t_ctx0>::_get_deltas_enabled() const {
-    return true;
-}
-
 template <typename CTX_T>
 void
 View<CTX_T>::_set_deltas_enabled(bool enabled_state) {
     m_ctx->set_deltas_enabled(enabled_state);
 }
-
-template <>
-void
-View<t_ctx0>::_set_deltas_enabled(bool enabled_state) {}
 
 // Pivot table operations
 template <typename CTX_T>

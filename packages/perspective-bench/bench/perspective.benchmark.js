@@ -92,16 +92,108 @@ describe("Update", async () => {
     const static_table = worker.table(data.arrow.slice());
     const static_view = static_table.view();
 
-    let table;
+    let table, view;
 
     afterEach(async () => {
+        if (view) {
+            await view.delete();
+        }
         await table.delete();
     });
 
     for (const name of Object.keys(data)) {
         describe("mixed", async () => {
-            describe("update", async () => {
+            // Benchmark how long it takes the table to update without any
+            // linked contexts to notify.
+            describe("table_only", async () => {
                 table = worker.table(data.arrow.slice());
+
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+
+            describe("ctx0", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view();
+
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+
+            describe("ctx1", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view({
+                    row_pivots: ["State"]
+                });
+
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+
+            describe("ctx1 deep", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view({
+                    row_pivots: ["State", "City"]
+                });
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+
+            describe("ctx2", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view({
+                    row_pivots: ["State"],
+                    column_pivots: ["Sub-Category"]
+                });
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+
+            describe("ctx2 deep", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view({
+                    row_pivots: ["State", "City"],
+                    column_pivots: ["Sub-Category"]
+                });
+                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await table.size();
+                    }
+                });
+            });
+
+            describe("ctx1.5", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view({
+                    column_pivots: ["Sub-Category"]
+                });
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
@@ -112,6 +204,124 @@ describe("Update", async () => {
             });
         });
     }
+});
+
+describe("Deltas", async () => {
+    // Generate update data from Perspective
+    const static_table = worker.table(data.arrow.slice());
+    const static_view = static_table.view();
+
+    let table, view;
+
+    afterEach(async () => {
+        await view.delete();
+        await table.delete();
+    });
+
+    describe("mixed", async () => {
+        describe("ctx0", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view();
+            view.on_update(() => {}, {mode: "cell"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("cell delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice());
+                    await table.size();
+                }
+            });
+        });
+
+        describe("ctx0", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view();
+            view.on_update(() => {}, {mode: "row"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("row delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice ? test_data.slice() : test_data);
+                    await table.size();
+                }
+            });
+        });
+
+        describe("ctx1", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view({
+                row_pivots: ["State"]
+            });
+            view.on_update(() => {}, {mode: "row"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("row delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice());
+                    await table.size();
+                }
+            });
+        });
+
+        describe("ctx1 deep", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view({
+                row_pivots: ["State", "City"]
+            });
+            view.on_update(() => {}, {mode: "row"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("row delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice());
+                    await table.size();
+                }
+            });
+        });
+
+        describe("ctx2", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view({
+                row_pivots: ["State"],
+                column_pivots: ["Sub-Category"]
+            });
+            view.on_update(() => {}, {mode: "row"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("row delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice());
+                    await table.size();
+                }
+            });
+        });
+
+        describe("ctx2 deep", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view({
+                row_pivots: ["State", "City"],
+                column_pivots: ["Sub-Category"]
+            });
+            view.on_update(() => {}, {mode: "row"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("row delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice());
+                    await table.size();
+                }
+            });
+        });
+
+        describe("ctx1.5", async () => {
+            table = worker.table(data.arrow.slice());
+            view = table.view({
+                column_pivots: ["Sub-Category"]
+            });
+            view.on_update(() => {}, {mode: "row"});
+            const test_data = await static_view.to_arrow({end_row: 500});
+            benchmark("row delta", async () => {
+                for (let i = 0; i < 3; i++) {
+                    table.update(test_data.slice());
+                    await table.size();
+                }
+            });
+        });
+    });
 });
 
 describe("View", async () => {

@@ -842,6 +842,85 @@ class TestView(object):
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
+    def test_view_row_delta_zero_from_schema(self, util):
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, update_data)
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view()
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_zero_from_schema_filtered(self, util):
+        update_data = {
+            "a": [8, 9, 10, 11],
+            "b": [1, 2, 3, 4]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [11],
+                "b": [4]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(filter=[["a", ">", 10]])
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_zero_from_schema_indexed(self, util):
+        update_data = {
+            "a": ["a", "b", "a"],
+            "b": [1, 2, 3]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": ["a", "b"],
+                "b": [3, 2]
+            })
+
+        tbl = Table({
+            "a": str,
+            "b": int
+        }, index="a")
+
+        view = tbl.view()
+        view.on_update(cb1, mode="row")
+
+        tbl.update(update_data)
+
+    def test_view_row_delta_zero_from_schema_indexed_filtered(self, util):
+        update_data = {
+            "a": [8, 9, 10, 11, 11],
+            "b": [1, 2, 3, 4, 5]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [11],
+                "b": [5]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+        view = tbl.view(filter=[["a", ">", 10]])
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
     def test_view_row_delta_one(self, util):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         update_data = {
@@ -863,6 +942,155 @@ class TestView(object):
             "b": [6, 2, 4]
         }
         view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5],
+            "b": [6, 7, 8, 9, 10]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [15, 1, 2, 3, 4, 5],
+                "b": [40, 6, 7, 8, 9, 10]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(row_pivots=["a"])
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema_sorted(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5],
+            "b": [6, 7, 8, 9, 10]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [15, 5, 4, 3, 2, 1],
+                "b": [40, 10, 9, 8, 7, 6]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(row_pivots=["a"], sort=[["a", "desc"]])
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema_filtered(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5],
+            "b": [6, 7, 8, 9, 10]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [9, 4, 5],
+                "b": [19, 9, 10]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(row_pivots=["a"], filter=[["a", ">", 3]])
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema_sorted_filtered(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5],
+            "b": [6, 7, 8, 9, 10]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [9, 5, 4],
+                "b": [19, 10, 9]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(
+            row_pivots=["a"],
+            sort=[["a", "desc"]],
+            filter=[["a", ">", 3]])
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema_indexed(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5, 5, 4],
+            "b": [6, 7, 8, 9, 10, 11, 12]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [15, 1, 2, 3, 4, 5],
+                "b": [44, 6, 7, 8, 12, 11]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+
+        view = tbl.view(row_pivots=["a"])
+        view.on_update(cb1, mode="row")
+
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema_sorted_indexed(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5, 5, 4],
+            "b": [6, 7, 8, 9, 10, 11, 12]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [15, 4, 5, 3, 2, 1],
+                "b": [44, 12, 11, 8, 7, 6]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+
+        view = tbl.view(row_pivots=["a"], sort=[["b", "desc"]])
+        view.on_update(cb1, mode="row")
+
+        tbl.update(update_data)
+
+    def test_view_row_delta_one_from_schema_filtered_indexed(self, util):
+        update_data = {
+            "a": [1, 2, 3, 4, 5, 5, 4],
+            "b": [6, 7, 8, 9, 10, 11, 12]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "a": [9, 4, 5],
+                "b": [23, 12, 11]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+
+        view = tbl.view(row_pivots=["a"], filter=[["a", ">", 3]])
+        view.on_update(cb1, mode="row")
+
         tbl.update(update_data)
 
     def test_view_row_delta_two(self, util):
@@ -894,6 +1122,44 @@ class TestView(object):
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
+    def test_view_row_delta_two_from_schema(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "2|a": [1, 1, None],
+                "2|b": [2, 2, None],
+                "4|a": [3, None, 3],
+                "4|b": [4, None, 4]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view.on_update(cb1, mode="row")
+        tbl.update(data)
+
+    def test_view_row_delta_two_from_schema_indexed(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 3, "b": 5}]
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "2|a": [1, 1, None],
+                "2|b": [2, 2, None],
+                "5|a": [3, None, 3],
+                "5|b": [5, None, 5]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view.on_update(cb1, mode="row")
+        tbl.update(data)
+
     def test_view_row_delta_two_column_only(self, util):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         update_data = {
@@ -922,7 +1188,73 @@ class TestView(object):
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
-    # hidden rows
+    def test_view_row_delta_two_column_only_indexed(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 3, "b": 5}]
+        update_data = {
+            "a": [5],
+            "b": [6]
+        }
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "2|a": [1, None],
+                "2|b": [2, None],
+                "5|a": [3, None],
+                "5|b": [5, None],
+                "6|a": [5, 5],
+                "6|b": [6, 6]
+            })
+
+        tbl = Table(data, index="a")
+        view = tbl.view(column_pivots=["b"])
+        assert view.to_dict() == {
+            "2|a": [1, None],
+            "2|b": [2, None],
+            "5|a": [None, 3],
+            "5|b": [None, 5],
+        }
+        view.on_update(cb1, mode="row")
+        tbl.update(update_data)
+
+    def test_view_row_delta_two_column_only_from_schema(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "2|a": [1, 1, None],
+                "2|b": [2, 2, None],
+                "4|a": [3, None, 3],
+                "4|b": [4, None, 4]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        })
+        view = tbl.view(column_pivots=["b"])
+        view.on_update(cb1, mode="row")
+        tbl.update(data)
+
+    def test_view_row_delta_two_column_only_from_schema_indexed(self, util):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 3, "b": 5}]
+
+        def cb1(port_id, delta):
+            compare_delta(delta, {
+                "2|a": [1, 1, None],
+                "2|b": [2, 2, None],
+                "5|a": [3, None, 3],
+                "5|b": [5, None, 5]
+            })
+
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+        view = tbl.view(column_pivots=["b"])
+        view.on_update(cb1, mode="row")
+        tbl.update(data)
+
+    # hidden cols
 
     def test_view_num_hidden_cols(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
