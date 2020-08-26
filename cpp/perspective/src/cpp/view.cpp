@@ -379,21 +379,42 @@ View<t_ctx2>::get_data(
          * Perspective generates headers for sorted columns, so we have to
          * skip them in the underlying slice.
          */
-        auto depth = m_column_pivots.size();
-        auto col_length = m_ctx->unity_get_column_count();
-        column_indices.push_back(0);
-        for (t_uindex i = 0; i < col_length; ++i) {
-            if (m_ctx->unity_get_column_path(i + 1).size() == depth) {
-                column_indices.push_back(i + 1);
+        t_uindex start_col_index = start_col;
+        t_uindex end_col_index = end_col;
+
+        // Only construct column_indices if start_col > end_col - get_data will
+        // handle the incorrect data window properly, which is consistent
+        // with the implementation for when the context is not sorted.
+        if (start_col < end_col) {
+            auto depth = m_column_pivots.size();
+            auto col_length = m_ctx->unity_get_column_count();
+            column_indices.push_back(0);
+            for (t_uindex i = 0; i < col_length; ++i) {
+                if (m_ctx->unity_get_column_path(i + 1).size() == depth) {
+                    column_indices.push_back(i + 1);
+                }
+            }
+
+            cols = column_names(true, depth);
+
+            // Filter down column indices by user-provided start/end columns
+            column_indices = std::vector<t_uindex>(
+                column_indices.begin() + start_col,
+                column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size())
+            );
+
+            // If start_col == end_col, then column_indices will be an empty
+            // vector. Only try to access the first and last elements if the
+            // vector is not empty. `get_data` correctly handles cases where
+            // start == end and start > end.
+            if (column_indices.size() > 0) {
+                start_col_index = column_indices.front();
+                end_col_index = column_indices.back() + 1;
             }
         }
 
-        cols = column_names(true, depth);
-        column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
-            column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size()));
-
         std::vector<t_tscalar> slice_with_headers = m_ctx->get_data(
-            start_row, end_row, column_indices.front(), column_indices.back() + 1);
+            start_row, end_row, start_col_index, end_col_index);
 
         auto iter = slice_with_headers.begin();
         while (iter != slice_with_headers.end()) {

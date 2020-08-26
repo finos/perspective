@@ -528,6 +528,26 @@ class TestToFormat(object):
         )
         assert records == data
 
+    def test_to_records_zero_start_gt_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=2,
+            end_col=1
+        )
+        assert records == [{}, {}]
+
+    def test_to_records_zero_start_eq_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records(
+            start_col=1,
+            end_col=1
+        )
+        assert records == [{}, {}]
+
     def test_to_records_one_over_max_col(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
@@ -542,6 +562,42 @@ class TestToFormat(object):
             {'__ROW_PATH__': [1.5], 'a': 1.5, 'b': 2.5},
             {'__ROW_PATH__': [3.5], 'a': 3.5, 'b': 4.5}
         ]
+
+    def test_to_records_one_start_gt_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"]
+        )
+        records = view.to_records(
+            start_col=2,
+            end_col=1
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_one_start_gt_end_col_large(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"]
+        )
+        records = view.to_records(
+            start_col=20,
+            end_col=19
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_one_start_eq_end_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"]
+        )
+        records = view.to_records(
+            start_col=0,
+            end_col=0
+        )
+        assert records == [{}, {}, {}]
 
     def test_to_records_two_over_max_col(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -593,6 +649,125 @@ class TestToFormat(object):
             {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': [1]},
             {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': [3]}
         ]
+
+    def test_to_records_two_start_gt_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=5,
+            end_col=4
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_two_start_gt_end_col_large_overage(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=50,
+            end_col=49
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_two_start_end_col_equiv(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=5,
+            end_col=5
+        )
+        assert records == [{}, {}, {}]
+
+
+    def test_to_records_two_sorted_start_gt_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"],
+            sort=[["a", "desc"]]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=5,
+            end_col=4
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_two_sorted_start_gt_end_col_large_overage(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"],
+            sort=[["a", "desc"]]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=20,
+            end_col=30
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_two_sorted_start_gt_end_col_overage(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            columns=[],
+            row_pivots=["a"],
+            column_pivots=["b"],
+            sort=[["a", "desc"]]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=1,
+            end_col=3
+        )
+        assert records == [{}, {}, {}]
+
+    def test_to_records_two_sorted_start_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"],
+            sort=[["a", "desc"]]
+        )
+        records = view.to_records(
+            start_col=1,
+            end_col=2
+        )
+        assert records == [{"__ROW_PATH__": []}, {"__ROW_PATH__": [3]}, {"__ROW_PATH__": [1]}]
+        
+
+    def test_to_records_two_sorted_start_end_col_equiv(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(
+            row_pivots=["a"],
+            column_pivots=["b"],
+            sort=[["a", "desc"]]
+        )
+        records = view.to_records(
+            end_row=12,
+            start_col=5,
+            end_col=5
+        )
+        assert records == [{}, {}, {}]
 
     def test_to_records_start_col_end_col(self):
         data = [{"a": 1, "b": 2, "c": 3}, {"a": 3, "b": 4, "c": 5}]
