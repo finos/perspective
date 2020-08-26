@@ -6,12 +6,13 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 
-function toValue(type, value) {
+export function toValue(type, value) {
     switch (type) {
         case "date":
         case "datetime":
-            return value instanceof Date ? value : new Date(parseInt(value));
+            return value instanceof Date ? value : new Date(parseInt(value)).toLocaleString("en-us", get_type_config(type).format);
         case "integer":
             return parseInt(value, 10);
         case "float":
@@ -23,13 +24,19 @@ function toValue(type, value) {
 export function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
     const groupValues = (data.crossValue.split ? data.crossValue.split("|") : [data.crossValue]) || [data.key];
-    return groupValues.map((cross, i) => ({name: settings.crossValues[i].name, value: toValue(settings.crossValues[i].type, cross)}));
+    return groupValues.map((cross, i) => ({
+        name: settings.crossValues[i].name,
+        value: toValue(settings.crossValues[i].type, cross)
+    }));
 }
 
 export function getSplitValues(data, settings) {
     if (settings.splitValues.length === 0) return [];
     const splitValues = data.key ? data.key.split("|") : data.mainValue.split ? data.mainValue.split("|") : [data.mainValue];
-    return settings.splitValues.map((split, i) => ({name: split.name, value: toValue(split.type, splitValues[i])}));
+    return settings.splitValues.map((split, i) => ({
+        name: split.name,
+        value: toValue(split.type, splitValues[i])
+    }));
 }
 
 export function getDataValues(data, settings) {
@@ -42,7 +49,10 @@ export function getDataValues(data, settings) {
                 }
             ];
         }
-        return settings.mainValues.map((main, i) => ({name: main.name, value: toValue(main.type, data.mainValues[i])}));
+        return settings.mainValues.map((main, i) => ({
+            name: main.name,
+            value: toValue(main.type, data.mainValues[i])
+        }));
     }
     return [
         {

@@ -8,6 +8,7 @@
  */
 import {select} from "d3";
 import {generateHtml} from "../../../../src/js/tooltip/generateHTML";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 
 describe("tooltip generateHTML should", () => {
     let tooltip = null;
@@ -61,7 +62,7 @@ describe("tooltip generateHTML should", () => {
             mainValue: testDate.getTime()
         };
         generateHtml(tooltip, data, settings);
-        expect(getContent()).toEqual([`main-1: ${testDate.toLocaleString()}`]);
+        expect(getContent()).toEqual([`main-1: ${testDate.toLocaleString("en-us", get_type_config("datetime").format)}`]);
     });
 
     test("format mainValue as integer", () => {

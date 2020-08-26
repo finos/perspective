@@ -20,6 +20,47 @@ utils.with_server({}, () => {
         "sunburst.html",
         () => {
             simple_tests.default("skip");
+
+            test.run("sunburst label shows formatted date", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
+                await page.evaluate(element => element.setAttribute("filters", '[["Product ID", "==", "FUR-BO-10001798"]]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                const result = await page.waitFor(
+                    element => {
+                        let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".segment");
+                        if (elem) {
+                            return elem.textContent.includes("11/12");
+                        }
+                    },
+                    {},
+                    viewer
+                );
+                return !!result;
+            });
+
+            test.run("sunburst parent button shows formatted date", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date", "City"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
+                await page.evaluate(element => element.setAttribute("filters", '[["Product ID", "==", "FUR-BO-10001798"]]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.mouse.click(500, 400);
+                const result = await page.waitFor(
+                    element => {
+                        let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".parent");
+                        if (elem) {
+                            return elem.textContent.includes("11/12/2013, 12:00:00 AM");
+                        }
+                    },
+                    {},
+                    viewer
+                );
+                return !!result;
+            });
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );

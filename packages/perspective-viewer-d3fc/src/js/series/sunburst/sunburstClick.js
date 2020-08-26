@@ -16,7 +16,7 @@ export const clickHandler = (data, g, parent, parentTitle, path, label, radius, 
     if (p.parent) {
         parent.datum(p.parent);
         parent.style("cursor", "pointer");
-        parentTitle.html(`&#8682; ${p.data.name}`);
+        parentTitle.html(`&#8682; ${p.label}`);
     } else {
         parent.datum(data);
         parent.style("cursor", "default");
