@@ -62,7 +62,7 @@ try {
     if (MANYLINUX_VERSION) {
         // install deps
         cmd += `${PYTHON} -m pip install 'numpy>=1.13.1' 'pyarrow>=0.16.0,<1' && `;
-        cmd += `rm -rf build/`;
+        cmd += `rm -rf build/ &&`;
         cmd += `${PYTHON} setup.py bdist_wheel`;
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
