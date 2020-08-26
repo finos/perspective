@@ -67,7 +67,7 @@ try {
 
         cmd =
             cmd +
-            `${PYTHON} -m pip install -vv -e .[dev] && \
+            `${PYTHON} -m pip install -vv -e .[dev] --no-clean && \
             ${PYTHON} -m flake8 perspective && echo OK && \
             ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
             ${PYTHON} -m pytest -vvv perspective \
@@ -82,7 +82,7 @@ try {
                 ${PYTHON} -m pip install -U dist/*.tar.gz`;
         }
     } else if (IS_INSTALL) {
-        cmd = `${PYTHON} -m pip install . --no-clean`;
+        cmd = `${PYTHON} -m pip install .`;
     } else {
         cmd = bash`${PYTHON} setup.py build -v`;
     }
