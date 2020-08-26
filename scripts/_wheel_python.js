@@ -59,9 +59,10 @@ try {
     }
 
     // Create a wheel
-    cmd += `${PYTHON} setup.py bdist_wheel`;
-
     if (MANYLINUX_VERSION) {
+        // install deps
+        cmd += `${PYTHON} -m pip install 'numpy>=1.13.1' 'pyarrow>=0.16.0,<1' && `;
+        cmd += `${PYTHON} setup.py bdist_wheel`;
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
         let PYTHON_INTERPRETER = PYTHON;
@@ -71,7 +72,10 @@ try {
         }
         cmd += `&& ${PYTHON_INTERPRETER} -m auditwheel -v show ./dist/*.whl && ${PYTHON_INTERPRETER} -m auditwheel -v repair -L .lib ./dist/*.whl`;
     } else if (IS_MACOS) {
+        cmd += `${PYTHON} setup.py bdist_wheel`;
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
+    } else {
+        cmd += `${PYTHON} setup.py bdist_wheel`;
     }
 
     // TODO: MacOS wheel processed with delocate segfaults on
