@@ -54,7 +54,8 @@ try {
     clean(obj);
 
     if (SETUP_ONLY) {
-        // don't execute any build steps
+        // don't execute any build steps, just copy
+        // the C++ assets into the python folder
         return;
     }
 
@@ -65,6 +66,15 @@ try {
             cmd = bash`${PYTHON} -m pip install backports.shutil_which &&`;
         else cmd = bash``;
 
+        // pip install in-place with --no-clean so that pep-518 assets stick
+        // around for later wheel build (so cmake cache can stay in place)
+        //
+        // lint the folder with flake8
+        //
+        // pytest the client first (since we need to move the shared libraries out of place
+        // temporarily to simulate them not being installed)
+        //
+        // then run the remaining test suite
         cmd =
             cmd +
             `${PYTHON} -m pip install -vv -e .[dev] --no-clean && \
@@ -75,6 +85,8 @@ try {
             --junitxml=python_junit.xml --cov-report=xml --cov-branch \
             --cov=perspective`;
         if (IMAGE == "python") {
+            // test the sdist to make sure we dont 
+            // dist a non-functioning source dist
             cmd =
                 cmd +
                 `&& \
