@@ -129,7 +129,8 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
             message (:obj:`str`): a JSON-serialized string containing a message to the
                 front-end `perspective-viewer`.
         '''
-        self.write_message(message, binary)
+        loop = IOLoop.current()
+        loop.add_callback(self.write_message, message, binary)
 
     def on_close(self):
         '''Remove the views associated with the client when the websocket
