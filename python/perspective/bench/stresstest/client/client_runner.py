@@ -18,8 +18,8 @@ from client import PerspectiveWebSocketClient
 from results_schema import RESULTS_SCHEMA
 
 if __name__ == "__main__":
-    # If this module is run through a subprocess, create its own instance of
-    # the results table and dump to arrow at the end.
+    """Run the client and dump its results to a Perspective Table before
+    terminating."""
     logging.basicConfig(level=logging.DEBUG)
     HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -32,15 +32,19 @@ if __name__ == "__main__":
     URL = sys.argv[4]
 
     def dump_and_exit(sig, frame):
-        dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
-        filename = "results_{}_{}.arrow".format(CLIENT_ID, dt)
-        logging.critical(
-            "KeyboardInterrupt: dumping %s rows of results to %s",
-            RESULTS_TABLE.size(),
-            filename)
+        """Dump the client's results to an arrow in the results folder. Each
+        client generates its own arrow, which can be collected and hosted using
+        host_results.py"""
+        if RESULTS_TABLE.size() > 0:
+            dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
+            filename = "results_{}_{}.arrow".format(CLIENT_ID, dt)
+            logging.critical(
+                "KeyboardInterrupt: dumping %s rows of results to %s",
+                RESULTS_TABLE.size(),
+                filename)
 
-        with open(os.path.join(HERE, "results", RESULTS_FOLDER, filename), "wb") as results_arrow:
-            results_arrow.write(RESULTS_TABLE.view().to_arrow())
+            with open(os.path.join(HERE, "results", RESULTS_FOLDER, filename), "wb") as results_arrow:
+                results_arrow.write(RESULTS_TABLE.view().to_arrow())
 
         logging.critical("Exiting %s", CLIENT_ID)
         sys.exit(0)

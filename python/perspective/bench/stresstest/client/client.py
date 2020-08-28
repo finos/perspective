@@ -51,6 +51,7 @@ class PerspectiveWebSocketClient(object):
         self.client = None
 
         self.pending_messages = {}
+        self.pending_on_update_message = {}
 
         # Each message must have a unique integer ID
         self.message_id = -1
@@ -294,12 +295,6 @@ class PerspectiveWebSocketClient(object):
                 self.pending_messages.pop(response_id)
 
             elif self.test_type == "view" and response.get("cmd") != "init" and response.get("method") != "to_arrow":
-                if response.get("method") == "on_update" or response.get("binary"):
-                    # for view tests, there is one to_arrow and then the rest of
-                    # the binary callbacks are from on_update, so we can
-                    # automatically increment the internal tracker.
-                    self._num_messages_logged += 1
-
                 # View reads messages sent from on_update, which don't exist
                 # in the pending_messages map but need to be read anyway.
                 meta = {
@@ -313,23 +308,41 @@ class PerspectiveWebSocketClient(object):
                     "num_messages_logged": self._num_messages_logged
                 }
 
+                if meta.get("method") == "on_update" or meta.get("binary"):
+                    # for view tests, there is one to_arrow and then the rest of
+                    # the binary callbacks are from on_update, so we can
+                    # automatically increment the internal tracker.
+                    self._num_messages_logged += 1
+
+                # time on wire between tornado.write_message and client.read_message
                 if response.get("send_time"):
                     meta["microseconds_on_wire"] = (time.time() * 100000) - response.get("send_time")
+                    self.pending_on_update_message = meta
+
+            if response.get("is_transferable"):
+                # on_update/to_arrow always fires with two messages - we need
+                # to time both together.
+                self.pending_on_update_message = meta
 
             if isinstance(meta, dict):
                 # Check telemetry from the server
-                if response.get("telemetry"):
-                    meta.update({
-                        "server_received": response["telemetry"]["server_received"],
-                        "server_start_process_time": response["telemetry"]["server_start_process_time"],
-                        "server_send_time": response["telemetry"]["server_send_time"],
-                    })
+                telemetry_source = response.get("telemetry", self.pending_on_update_message)
 
-                    # For an on_update callback, return the time it takes from
-                    # callback invocation in the manager to when the client
-                    # received it.
-                    if not meta.get("microseconds_on_wire"):
-                        meta["microseconds_on_wire"] = (meta["receive_timestamp"] - meta["server_start_process_time"]).microseconds
+                meta.update({
+                    "server_received": telemetry_source.get("server_received"),
+                    "server_start_process_time": telemetry_source.get("server_start_process_time"),
+                    "server_send_time": telemetry_source.get("server_send_time"),
+                })
+
+                # For an on_update callback/binary, return the time it takes
+                # between this client receiving the `is_transferable`
+                # pre-message and getting the binary.
+                if not meta.get("microseconds_on_wire") and meta.get("server_start_process_time"):
+                    dt = meta["receive_timestamp"]
+                    seconds_timestamp = time.mktime(dt.timetuple()) + dt.microsecond / 1000000.0
+                    ms_timestamp = int(seconds_timestamp * 1000)
+                    meta["microseconds_on_wire"] = (ms_timestamp - meta.get("server_start_process_time")) * 1000
+
                 self.results_table.update([meta])
 
             if response_id in self.callbacks:
@@ -337,9 +350,9 @@ class PerspectiveWebSocketClient(object):
                 ioloop.IOLoop.current().add_callback(self.callbacks[response_id], self)
         except Exception as e:
             if isinstance(message, dict):
-                logging.critical("Error reading message for client id `%s`, message: %s, error: %s", self.client_id, message, e)
+                logging.critical("Error reading message for client id `%s`, message: %s, error: %s", self.client_id, message, e, exc_info=True)
             else:
-                logging.critical("Error reading message for client id `%s`, message: ARROW, error: %s", self.client_id, e)
+                logging.critical("Error reading message for client id `%s`, message: ARROW, error: %s", self.client_id, e, exc_info=True)
 
     @gen.coroutine
     def get_initial_arrow(self):

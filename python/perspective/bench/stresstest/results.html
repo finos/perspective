@@ -34,6 +34,10 @@
     <script>
 
         window.addEventListener('WebComponentsReady', async function() {
+            const viewer = document.getElementById("viewer");
+            viewer.addEventListener("perspective-config-update", () => localStorage.setItem("layout", JSON.stringify(viewer.save())));
+            viewer.restore(JSON.parse(localStorage.getItem("layout")));
+
             const websocket = perspective.websocket(
                 "ws://localhost:8889/websocket");
             const worker = perspective.worker();
@@ -50,8 +54,8 @@
             const table = worker.table(view);
             
             // Load this in the `<perspective-viewer>`.
-            document.getElementById('viewer').load(table);
-            viewer.toggleConfig();
+            await document.getElementById('viewer').load(table);
+            await viewer.toggleConfig();
         });
 
     </script>
