@@ -74,7 +74,7 @@ if __name__ == "__main__":
     logging.info("Running %d client(s) with %s second delay before startup against URL %s", args.num_clients, args.delay, args.url)
 
     dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
-    subfolder_name = "{}_run_{}_{}".format(args.test_type, args.url, dt)
+    subfolder_name = "{}_run_{}_{}".format(args.test_type, args.url.replace("/", "_"), dt)
     results_folder = os.path.join(HERE, "results")
     results_subfolder = os.path.join(results_folder, subfolder_name)
 

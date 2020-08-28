@@ -20,8 +20,9 @@ PARSER = argparse.ArgumentParser(description="A perspective-python server config
 PARSER.add_argument(
     "--table_size",
     dest="table_size",
+    default=10000,
     type=int,
-    help="The row size of the initial table. Defaults to 9000 rows.")
+    help="The row size of the initial table. Defaults to 10000 rows.")
 
 PARSER.add_argument(
     "--update_size",
@@ -103,9 +104,7 @@ def make_app(table_size, update_size, update_rate):
     def updater():
         TABLE.update(get_data(update_size))
 
-    # Call with jitter - allows for slight variation in when the callback is
-    # actually called on the loop.
-    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=update_rate, jitter=2)
+    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=update_rate)
     callback.start()
 
     return tornado.web.Application([
