@@ -27,6 +27,7 @@ if (IS_DOCKER) {
 }
 
 const IS_CI = getarg("--ci");
+const SETUP_ONLY = getarg("--setup-only");
 const IS_INSTALL = getarg("--install");
 
 // Check that the `PYTHON` command is valid, else default to `python`.
@@ -52,6 +53,12 @@ try {
     fs.copySync(cmake, dcmake, {preserveTimestamps: true});
     clean(obj);
 
+    if (SETUP_ONLY) {
+        // don't execute any build steps, just copy
+        // the C++ assets into the python folder
+        return;
+    }
+
     let cmd;
     if (IS_CI) {
         if (IS_PY2)
@@ -59,9 +66,18 @@ try {
             cmd = bash`${PYTHON} -m pip install backports.shutil_which &&`;
         else cmd = bash``;
 
+        // pip install in-place with --no-clean so that pep-518 assets stick
+        // around for later wheel build (so cmake cache can stay in place)
+        //
+        // lint the folder with flake8
+        //
+        // pytest the client first (since we need to move the shared libraries out of place
+        // temporarily to simulate them not being installed)
+        //
+        // then run the remaining test suite
         cmd =
             cmd +
-            `${PYTHON} -m pip install -e .[dev] && \
+            `${PYTHON} -m pip install -vv -e .[dev] --no-clean && \
             ${PYTHON} -m flake8 perspective && echo OK && \
             ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
             ${PYTHON} -m pytest -vvv perspective \
@@ -69,6 +85,8 @@ try {
             --junitxml=python_junit.xml --cov-report=xml --cov-branch \
             --cov=perspective`;
         if (IMAGE == "python") {
+            // test the sdist to make sure we dont 
+            // dist a non-functioning source dist
             cmd =
                 cmd +
                 `&& \
@@ -76,7 +94,7 @@ try {
                 ${PYTHON} -m pip install -U dist/*.tar.gz`;
         }
     } else if (IS_INSTALL) {
-        cmd = `${PYTHON} -m pip install . --no-clean`;
+        cmd = `${PYTHON} -m pip install .`;
     } else {
         cmd = bash`${PYTHON} setup.py build -v`;
     }

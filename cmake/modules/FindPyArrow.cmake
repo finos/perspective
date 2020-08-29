@@ -4,46 +4,33 @@
 # PYTHON_PYARROW_LIBRARY_DIR
 # PYTHON_PYARROW_LIBRARIES
 # will be set by this script
-
 cmake_minimum_required(VERSION 2.6)
 
-if(NOT Python_EXECUTABLE)
-  if(PyArrow_FIND_QUIETLY)
-    find_package( PythonInterp 3.7 REQUIRED )
-  else()
-    find_package( PythonInterp 3.7 REQUIRED )
-    set(__numpy_out 1)
-  endif()
-endif()
+# Find out the include path
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -c
+          "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_include(), end='')\nexcept:pass"
+          OUTPUT_VARIABLE __pyarrow_path)
 
-if (Python_EXECUTABLE)
-  # Find out the include path
-  execute_process(
-    COMMAND "${Python_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_include(), end='')\nexcept:pass"
-            OUTPUT_VARIABLE __pyarrow_path)
-  # And the lib dirs
-  execute_process(
-    COMMAND "${Python_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_library_dirs()[0], end='')\nexcept:pass"
-    OUTPUT_VARIABLE __pyarrow_library_dirs)
+# And the lib dirs
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -c
+          "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.get_library_dirs()[0], end='')\nexcept:pass"
+  OUTPUT_VARIABLE __pyarrow_library_dirs)
 
-  # And the lib dirs
-  execute_process(
-    COMMAND "${Python_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import pyarrow; print(' '.join(pyarrow.get_libraries()), end='')\nexcept:pass"
-    OUTPUT_VARIABLE __pyarrow_libraries)
+# And the lib dirs
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -c
+          "from __future__ import print_function\ntry: import pyarrow; print(' '.join(pyarrow.get_libraries()), end='')\nexcept:pass"
+  OUTPUT_VARIABLE __pyarrow_libraries)
 
-  # And the version
-  execute_process(
-    COMMAND "${Python_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.__version__, end='')\nexcept:pass"
-    OUTPUT_VARIABLE __pyarrow_version)
-elseif(__pyarrow_out)
-  message(STATUS "Python executable not found.")
-endif(Python_EXECUTABLE)
+# And the version
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -c
+          "from __future__ import print_function\ntry: import pyarrow; print(pyarrow.__version__, end='')\nexcept:pass"
+  OUTPUT_VARIABLE __pyarrow_version)
 
-find_path(PYTHON_PYARROW_INCLUDE_DIR arrow/python/api.h
+  find_path(PYTHON_PYARROW_INCLUDE_DIR arrow/python/api.h
   HINTS "${__pyarrow_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
 
 set(PYTHON_PYARROW_LIBRARY_DIR ${__pyarrow_library_dirs})

@@ -94,25 +94,17 @@ To install this specific version of Emscripten:
 
 ### `perspective-python`
 
-To build the Python library, navigate to the python source folder
-(`python/perspective`) and install the dependencies using `pip`:
+To build the Python library, run:
 
 ```bash
-python3 -m pip install -r requirements.txt
-python3 -m pip install -r requirements-dev.txt
-```
-
-Make sure that TBB is installed, as it is a system dependency:
-
-```bash
-brew install TBB
+yarn build_python
 ```
 
 `perspective-python` supports Python 3.7 and upwards, as well as Python 2.7.17.
 To build the Python 2 version of the library, use the `--python2` flag:
 
 ```bash
-yarn build --python2
+yarn build_python --python2
 ```
 
 ## System-Specific Instructions

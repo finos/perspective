@@ -177,7 +177,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install numpy pyarrow==0.16.0
+        python -m pip install numpy "pyarrow>=0.16.0,<1"
       displayName: "Python deps"
 
     - script: npm install -g yarn
@@ -248,7 +248,7 @@ jobs:
         displayName: "Which python"
 
       - script: |
-          python -m pip install delocate wheel numpy pyarrow==0.16.0
+          python -m pip install delocate wheel numpy "pyarrow>=0.16.0,<1"
         displayName: "Python deps"
 
       - script: npm install -g yarn
@@ -334,7 +334,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install delocate wheel numpy pyarrow==0.16.0
+        python -m pip install delocate wheel numpy "pyarrow>=0.16.0,<1"
       displayName: "Python deps"
 
     - script: npm install -g yarn

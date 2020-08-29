@@ -115,11 +115,9 @@ In addition to supporting row/columnar formats of data using `dict` and `list`,
 `pandas.DataFrame`, dictionaries of NumPy arrays, NumPy structured arrays, and
 NumPy record arrays are all supported in `perspective-python`.
 
-After installing `pyarrow` 0.16.0, `perspective-python` can be installed from 
-`pip`:
+`perspective-python` can be installed from `pip`:
 
 ```bash
-pip install pyarrow==0.16.0
 pip install perspective-python
 ```
 

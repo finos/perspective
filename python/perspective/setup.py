@@ -43,7 +43,7 @@ requires = [
     'future>=0.16.0',
     'numpy>=1.13.1',
     'pandas>=0.22.0',
-    'pyarrow==0.16.0',
+    'pyarrow>=0.16.0,<1',
     'python-dateutil>=2.8.0',
     'six>=1.11.0',
     'traitlets>=4.3.2',
@@ -128,9 +128,10 @@ class PSPBuild(build_ext):
             '-DPSP_PYTHON_VERSION={}'.format(PYTHON_VERSION),
             '-DPython_ADDITIONAL_VERSIONS={}'.format(PYTHON_VERSION),
             '-DPython_FIND_VERSION={}'.format(PYTHON_VERSION),
+            '-DPSP_PYTHON_ARROWINSTALLDIR={}'.format(os.environ.get('PSP_PYTHON_ARROWINSTALLDIR', os.path.join(sysconfig.get_python_lib(), 'pyarrow').replace('\\', '/'))),
             '-DPython_EXECUTABLE={}'.format(sys.executable).replace('\\', '/'),
-            '-DPython_ROOT_DIR={}'.format(sysconfig.PREFIX).replace('\\', '/'),
-            '-DPython_ROOT={}'.format(sysconfig.PREFIX).replace('\\', '/'),
+            '-DPython_ROOT_DIR={}'.format(sys.prefix).replace('\\', '/'),
+            '-DPython_ROOT={}'.format(sys.prefix).replace('\\', '/'),
             '-DPSP_CMAKE_MODULE_PATH={folder}'.format(folder=os.path.join(ext.sourcedir, 'cmake')).replace('\\', '/'),
             '-DPSP_CPP_SRC={folder}'.format(folder=ext.sourcedir).replace('\\', '/'),
             '-DPSP_PYTHON_SRC={folder}'.format(folder=os.path.join(ext.sourcedir, "..", 'perspective').replace('\\', '/'))
@@ -162,10 +163,10 @@ class PSPBuild(build_ext):
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
         env['OSX_DEPLOYMENT_TARGET'] = '10.9'
-        env["PYTHONPATH"] = os.path.sep.join((os.environ.get('PYTHONPATH', ''), os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))))
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
+
         subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         print()  # Add an empty line for cleaner output
