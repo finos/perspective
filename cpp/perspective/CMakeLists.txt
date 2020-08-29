@@ -640,8 +640,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
 
-		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
-		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
+		target_link_libraries(psp arrow arrow_python)
+		target_link_libraries(binding arrow arrow_python)
 
 		if(WIN32)
 			# Don't link
