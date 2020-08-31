@@ -92,6 +92,7 @@ function xyScatter(container, settings) {
     container.call(toolTip);
     if (legend) container.call(legend);
 }
+
 xyScatter.plugin = {
     type: "d3_xy_scatter",
     name: "X/Y Scatter Chart",

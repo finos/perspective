@@ -1,7 +1,7 @@
 {
     "candlestick_filter_by_a_single_instrument_": "f988ca6494d7a36bada09928cd1a544e",
     "candlestick_filter_to_date_range_": "8ca4da0a6229d4f9db4a845d5d415c20",
-    "__GIT_COMMIT__": "199af527de833da4f5865d57570aae55f8a18849",
+    "__GIT_COMMIT__": "715e26e221a61db4053e9e10b3aa6804182a91d6",
     "ohlc_filter_by_a_single_instrument_": "0110fac1f2befac1b97a9d33f0022acf",
     "ohlc_filter_to_date_range_": "3ec466996be47e2c8df135a4303bf383",
     "scatter_shows_a_grid_without_any_settings_applied_": "8677946ab48f16a376c421500d59e6c0",
@@ -128,5 +128,18 @@
     "treemap_tooltip_columns_works": "9b3a44cc1b4b1d11cb8b635c850a0612",
     "line_Sets_a_category_axis_when_pivoted_by_a_computed_datetime": "eb1c86dc44988ad9a65fdd5a335850b8",
     "sunburst_sunburst_label_shows_formatted_date": "590f474e076fd49ce10eb5e97bfc66d3",
-    "treemap_treemap_label_shows_formatted_date": "6c39c766e14c64c28316137f5f1ff85b"
+    "treemap_treemap_label_shows_formatted_date": "6c39c766e14c64c28316137f5f1ff85b",
+    "xyline_shows_a_grid_without_any_settings_applied_": "6d4bdd941a04d6e39fe14c2ea001886e",
+    "xyline_pivots_by_a_row_": "14c3bc345abb892ccab5ac2dad1f777a",
+    "xyline_pivots_by_two_rows_": "5ea6481c8e465b87a1fcaca2e8b2a759",
+    "xyline_pivots_by_a_column_": "665a82227ede8b9129c6c88574097eae",
+    "xyline_pivots_by_a_row_and_a_column_": "29f56130b2d178def3a3feb24304d779",
+    "xyline_pivots_by_two_rows_and_two_columns_": "70fc58b149bb28dd571fce92616eec02",
+    "xyline_sorts_by_a_hidden_column_": "c38fc638ae076df1f0caf51214bf7938",
+    "xyline_sorts_by_a_numeric_column_": "eb6022557a889eafce59eda986600f0c",
+    "xyline_filters_by_a_numeric_column_": "076a949ff4297a506463a0182159fc8b",
+    "xyline_filters_by_a_datetime_column_": "e43eb7c8d45ff150e8c4c8713b3bafd5",
+    "xyline_highlights_invalid_filter_": "f8f312392516ed4dfa070d436f6ede30",
+    "xyline_sorts_by_an_alpha_column_": "9cc9fc4d49b0671eeca80ad272664256",
+    "xyline_displays_visible_columns_": "533a7f651187eb77e32b2e0690b0b7b9"
 }
