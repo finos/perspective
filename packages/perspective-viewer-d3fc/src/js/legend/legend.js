@@ -90,7 +90,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
 
                 if (color) {
                     cells
-                        .select(symbolScale ? "circle" : "path")
+                        .select("circle, path")
                         .style("fill", d => (isHidden(d) ? null : color(d)))
                         .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
                 }
