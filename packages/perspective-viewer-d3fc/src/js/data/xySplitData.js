@@ -6,19 +6,20 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {labelFunction} from "../axis/axisLabel";
+
+import {groupFromKey} from "../series/seriesKey";
 
 export function xySplitData(settings, data) {
-    const labelfn = labelFunction(settings);
+    const n_cols = settings.mainValues.length;
 
-    return data.map((col, i) => {
+    return data.map(col => {
         const cols = Object.keys(col).filter(key => key !== "__ROW_PATH__");
-        const row = new Array(cols.length / 2);
-        for (let i = 0; i < cols.length / 2; i++) {
+        const row = new Array(cols.length / n_cols);
+        for (let i = 0; i < cols.length / n_cols; i++) {
             row[i] = {
-                key: cols[i * 2],
-                crossValue: col[cols[i * 2]],
-                mainValue: col[cols[i * 2 + 1]],
+                key: groupFromKey(cols[i * n_cols]),
+                crossValue: col[cols[i * n_cols]],
+                mainValue: col[cols[i * n_cols + 1]],
                 row: col
             };
         }

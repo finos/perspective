@@ -11,9 +11,11 @@ import * as fc from "d3fc";
 import {transposeData} from "../data/transposeData";
 import {axisFactory} from "../axis/axisFactory";
 import {chartSvgFactory} from "../axis/chartFactory";
+import {symbolTypeFromGroups} from "../series/pointSeriesCanvas";
 import {lineSeries} from "../series/lineSeries";
 import {xySplitData} from "../data/xySplitData";
-import {seriesColors} from "../series/seriesColors";
+import {seriesColorsFromGroups} from "../series/seriesColors";
+import {colorGroupLegend} from "../legend/legend";
 import {filterDataByGroup} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
@@ -23,7 +25,16 @@ import nearbyTip from "../tooltip/nearbyTip";
 function xyLine(container, settings) {
     const data = transposeData(xySplitData(settings, filterDataByGroup(settings)));
 
-    const color = seriesColors(settings);
+    const color = seriesColorsFromGroups(settings);
+    const symbols = symbolTypeFromGroups(settings);
+
+    let legend = null;
+    if (color.domain().length > 2) {
+        legend = colorGroupLegend()
+            .settings(settings)
+            .scale(symbols)
+            .color(color);
+    }
 
     const series = fc
         .seriesSvgRepeat()
@@ -75,6 +86,9 @@ function xyLine(container, settings) {
 
     container.datum(data).call(zoomChart);
     container.call(toolTip);
+    if (legend) {
+        container.call(legend);
+    }
 }
 
 xyLine.plugin = {

@@ -22,6 +22,7 @@ const scrollColorLegend = settings =>
             .shapeRadius(6),
         settings
     );
+
 const scrollSymbolLegend = settings =>
     scrollableLegend(
         d3Legend
@@ -33,6 +34,7 @@ const scrollSymbolLegend = settings =>
 
 export const colorLegend = () => legendComponent(scrollColorLegend);
 export const symbolLegend = () => legendComponent(scrollSymbolLegend, symbolScale);
+export const colorGroupLegend = () => legendComponent(scrollColorLegend, symbolScale);
 
 function symbolScale(fromScale) {
     if (!fromScale) return null;
@@ -88,7 +90,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
 
                 if (color) {
                     cells
-                        .select("path")
+                        .select(symbolScale ? "circle" : "path")
                         .style("fill", d => (isHidden(d) ? null : color(d)))
                         .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
                 }
