@@ -33,7 +33,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     }
 
     def __init__(self,
-                 plugin='hypergrid',
+                 plugin='datagrid',
                  columns=None,
                  row_pivots=None,
                  column_pivots=None,
@@ -231,7 +231,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.computed_columns = []
         self.aggregates = {}
         self.columns = []
-        self.plugin = "hypergrid"
+        self.plugin = "datagrid"
 
     def delete(self, delete_table=True):
         '''Delete the Viewer's data and clears its internal state. If
