@@ -13,14 +13,20 @@ import "regular-table";
 import {createViewCache, configureRegularTable} from "regular-table/dist/examples/perspective.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 
+import {selectionListener, selectionStyleListener} from "./row_selection.js";
+
 const VIEWER_MAP = new WeakMap();
 const INSTALLED = new WeakMap();
 
-async function datagridPlugin(regular, table, view) {
+async function datagridPlugin(regular, viewer, view) {
     const is_installed = INSTALLED.has(regular);
+    const table = viewer.table;
     if (!is_installed) {
         const new_model = await createViewCache(regular, table, view);
         await configureRegularTable(regular, new_model);
+        regular.addStyleListener(selectionStyleListener.bind(new_model, regular, viewer));
+        regular.addEventListener("mousedown", selectionListener.bind(new_model, regular, viewer));
+        await regular.draw();
         INSTALLED.set(regular, new_model);
     } else {
         await createViewCache(regular, table, view, INSTALLED.get(regular));
@@ -81,7 +87,7 @@ class DatagridPlugin {
     static async create(div, view) {
         const datagrid = get_or_create_datagrid(this, div);
         try {
-            await datagridPlugin(datagrid, this.table, view);
+            await datagridPlugin(datagrid, this, view);
             datagrid._resetAutoSize();
             await datagrid.draw();
         } catch (e) {
