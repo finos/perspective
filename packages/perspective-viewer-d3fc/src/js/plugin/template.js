@@ -26,7 +26,6 @@ class D3FCChartElement extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log("connected callback");
         this._container = this.shadowRoot.querySelector(".chart");
     }
 

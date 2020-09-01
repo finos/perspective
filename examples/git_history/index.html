@@ -27,14 +27,14 @@
 
 <body>
 
-    <perspective-viewer 
-        id="view1"
-        plugin="d3_y_area" 
-        row-pivots='["week_bucket(Date)"]' 
-        column-pivots='["Email"]'
-        columns='["Hash"]'
-        computed-columns='[{"name":"week_bucket(Date)","inputs":["Date"],"computed_function_name":"week_bucket"}]'>
     
+    <perspective-viewer 
+        id="view1" 
+        plugin="d3_y_area" 
+        columns='["Hash"]'' 
+        computed-columns='["week_bucket(\"Date\")"]''
+        row-pivots='["week_bucket(Date)"]' 
+        column-pivots='["Email"]'>
     </perspective-viewer>
 
     <script>

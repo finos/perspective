@@ -61,6 +61,18 @@ let browser,
 async function get_new_page() {
     page = await browser.newPage();
 
+    await page.setRequestInterception(true);
+
+    // Webfonts cause tests to render inconcistently (or block) when run in a
+    // firewalled environment, so for consistency abort these requests.
+    page.on("request", interceptedRequest => {
+        if (interceptedRequest.url().indexOf("googleapis") > -1) {
+            interceptedRequest.abort();
+        } else {
+            interceptedRequest.continue();
+        }
+    });
+
     page.track_mouse = track_mouse.bind(page);
     page.shadow_click = async function(...path) {
         await this.evaluate(path => {

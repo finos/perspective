@@ -1,0 +1,17 @@
+@import "~regular-table/src/less/material.less";
+@import (less) "~regular-table/dist/examples/perspective.css";
+
+// Row Selection
+
+.psp-row-selected, :hover .psp-row-selected {
+    color: black;
+    background-color: #EA7319;
+}
+
+.psp-row-selected.psp-tree-label:not(:hover):before {
+    color: black;
+}
+
+.psp-row-subselected, :hover .psp-row-subselected {
+    background: rgba(234, 115, 25, 0.2);
+}
