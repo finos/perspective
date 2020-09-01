@@ -128,7 +128,7 @@ elem.setAttribute('sort', JSON.stringify([["x","desc"]));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer sort='[["x","desc"]]'></perspective-viewer>
+<perspective-viewer sort='[["x","desc"]]'></perspective-viewer>;
 ```
 
 * * *
@@ -146,12 +146,12 @@ The set of visible columns.
 
 **Example** *(via Javascript DOM)*  
 ```js
-let elem = document.getElementById('my_viewer');
-elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
+let elem = document.getElementById("my_viewer");
+elem.setAttribute("columns", JSON.stringify(["x", "y'"]));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer columns='["x", "y"]'></perspective-viewer>
+<perspective-viewer columns='["x", "y"]'></perspective-viewer>;
 ```
 
 * * *
@@ -173,8 +173,8 @@ inputs to the computation.
 
 **Example** *(via Javascript DOM)*  
 ```js
-let elem = document.getElementById('my_viewer');
-elem.setAttribute('computed-columns', JSON.stringify([{column: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
+let elem = document.getElementById("my_viewer");
+elem.setAttribute("computed-columns", JSON.stringify([{column: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
 ```
 **Example** *(via HTML)*  
 ```js
@@ -200,13 +200,12 @@ column's type.  See [perspective/src/js/defaults.js](perspective/src/js/defaults
 
 **Example** *(via Javascript DOM)*  
 ```js
-let elem = document.getElementById('my_viewer');
-elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
+let elem = document.getElementById("my_viewer");
+elem.setAttribute("aggregates", JSON.stringify({x: "distinct count"}));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer aggregates='{"x": "distinct count"}'>
-</perspective-viewer>
+<perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>;
 ```
 
 * * *
@@ -224,13 +223,12 @@ let filters = [
     ["x", "<", 3],
     ["y", "contains", "abc"]
 ];
-let elem = document.getElementById('my_viewer');
-elem.setAttribute('filters', JSON.stringify(filters));
+let elem = document.getElementById("my_viewer");
+elem.setAttribute("filters", JSON.stringify(filters));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'>
-</perspective-viewer>
+<perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>;
 ```
 
 * * *
@@ -306,8 +304,8 @@ instance from the preferred worker.
 **Read only**: true  
 **Example**  
 ```js
-let elem = document.getElementById('my_viewer');
-let table = elem.worker.table([{x:1, y:2}]);
+let elem = document.getElementById("my_viewer");
+let table = elem.worker.table([{x: 1, y: 2}]);
 elem.load(table);
 ```
 
@@ -354,18 +352,18 @@ supported by `perspective.table`.
 
 **Example** *(Load CSV)*  
 ```js
-const my_viewer = document.getElementById('#my_viewer');
+const my_viewer = document.getElementById("#my_viewer");
 my_viewer.load("x,y\n1,a\n2,b");
 ```
 **Example** *(Load perspective.table)*  
 ```js
-const my_viewer = document.getElementById('#my_viewer');
+const my_viewer = document.getElementById("#my_viewer");
 const tbl = perspective.table("x,y\n1,a\n2,b");
 my_viewer.load(tbl);
 ```
 **Example** *(Load Promise&lt;perspective.table&gt;)*  
 ```js
-const my_viewer = document.getElementById('#my_viewer');
+const my_viewer = document.getElementById("#my_viewer");
 const tbl = async () => perspective.table("x,y\n1,a\n2,b");
 my_viewer.load(tbl);
 ```
@@ -386,10 +384,10 @@ supported by `perspective.table.update`.
 
 **Example**  
 ```js
-const my_viewer = document.getElementById('#my_viewer');
+const my_viewer = document.getElementById("#my_viewer");
 my_viewer.update([
-    {x: 1, y: 'a'},
-    {x: 2, y: 'b'}
+    {x: 1, y: "a"},
+    {x: 2, y: "b"}
 ]);
 ```
 
@@ -537,7 +535,7 @@ Opens/closes the element's config menu.
 
 #### perspectiveViewer.getEditPort()
 Returns a promise that resolves to the element's edit port ID, used
-internally when edits are made using Hypergrid or DataGrid.
+internally when edits are made using DataGrid.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 

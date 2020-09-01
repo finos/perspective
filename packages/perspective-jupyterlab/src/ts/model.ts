@@ -24,7 +24,7 @@ export class PerspectiveModel extends DOMWidgetModel {
             _view_module: PerspectiveModel.view_module,
             _view_module_version: PerspectiveModel.view_module_version,
 
-            plugin: "hypergrid",
+            plugin: "datagrid",
             columns: [],
             row_pivots: [],
             column_pivots: [],

@@ -867,7 +867,7 @@ class PerspectiveViewer extends ActionElement {
 
     /**
      * Returns a promise that resolves to the element's edit port ID, used
-     * internally when edits are made using Hypergrid or DataGrid.
+     * internally when edits are made using DataGrid.
      *
      * @async
      */

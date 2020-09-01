@@ -2,8 +2,6 @@ module.exports = {
     roots: [
         "packages/perspective/test/js",
         "packages/perspective-viewer/test/js",
-        "packages/perspective-viewer-hypergrid/test/js",
-        "packages/perspective-viewer-highcharts/test/js",
         "packages/perspective-viewer-datagrid/test/js",
         "packages/perspective-viewer-d3fc/test/js",
         "packages/perspective-workspace/test/js",

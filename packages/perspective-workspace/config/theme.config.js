@@ -5,8 +5,7 @@ const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 module.exports = {
     mode: "production",
     entry: {
-        material: path.join(__dirname, "../src/theme/material.less"),
-        vaporwave: path.join(__dirname, "../src/theme/vaporwave.less")
+        material: path.join(__dirname, "../src/theme/material.less")
     },
     plugins: [
         new MiniCssExtractPlugin({

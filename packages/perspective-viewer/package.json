@@ -13,8 +13,6 @@
         "themes/material.css": "./dist/umd/material.css",
         "themes/material.dark.less": "./dist/themes/material.dark.less",
         "themes/material.dark.css": "./dist/umd/material.dark.css",
-        "themes/vaporwave.less": "./dist/themes/vaporwave.less",
-        "themes/vaporwave.css": "./dist/umd/vaporwave.css",
         "themes/material-dense.less": "./dist/themes/material-dense.less",
         "themes/material-dense.css": "./dist/umd/material-dense.css",
         "themes/material-dense.dark.less": "./dist/themes/material-dense.dark.less",
