@@ -7,7 +7,6 @@
  *
  */
 
-const cp = require("child_process");
 const paths = require("./paths.js");
 const fs = require("fs");
 const termimg = require("term-img");
@@ -19,13 +18,7 @@ module.exports = class ImageViewerReporter {
     }
 
     write_img_fallback(filename) {
-        process.stdout.write("\r");
-        const diff = cp
-            .execSync(`tiv -h 60 -w 80 ${filename} 2>&1`)
-            .toString()
-            .replace(/Warning.+?$/g, "");
-        process.stdout.write(diff);
-        process.stdout.write("\n");
+        process.stdout.write("   <" + filename + ">\n");
     }
 
     write_img(title, ancestors, filename) {
