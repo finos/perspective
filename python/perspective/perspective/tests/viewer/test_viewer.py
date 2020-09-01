@@ -221,7 +221,7 @@ class TestViewer:
         viewer.load(table)
         assert viewer.filters == [["a", "==", 2]]
         viewer.reset()
-        assert viewer.plugin == "hypergrid"
+        assert viewer.plugin == "datagrid"
         assert viewer.filters == []
 
     # delete
@@ -259,7 +259,7 @@ class TestViewer:
 
         # reset configuration
         viewer.reset()
-        assert viewer.plugin == "hypergrid"
+        assert viewer.plugin == "datagrid"
         assert viewer.filters == []
 
         # restore configuration

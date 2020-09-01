@@ -588,7 +588,6 @@ types, you may choose to import these individually as well:
 import "@finos/perspective-viewer-d3fc/bar";
 import "@finos/perspective-viewer-d3fc/column";
 import "@finos/perspective-viewer-d3fc/xy-scatter";
-import "@finos/perspective-viewer-highcharts/treemap";
 ```
 
 Once imported, the `<perspective-viewer>` Web Component will be available in any

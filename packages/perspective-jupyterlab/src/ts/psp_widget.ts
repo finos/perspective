@@ -58,7 +58,7 @@ export class PerspectiveWidget extends Widget {
      * @param options
      */
     _set_attributes(options: PerspectiveWidgetOptions): void {
-        const plugin: string = options.plugin || "hypergrid";
+        const plugin: string = options.plugin || "datagrid";
         const columns: Columns = options.columns || [];
         const row_pivots: Pivots = options.row_pivots || options["row-pivots"] || [];
         const column_pivots: Pivots = options.column_pivots || options["column-pivots"] || [];

@@ -8,7 +8,6 @@
  */
 
 import perspective from "@finos/perspective";
-import "@finos/perspective-viewer-hypergrid";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import "@finos/perspective-workspace";
@@ -192,13 +191,13 @@ window.addEventListener("load", async () => {
             main_widget: {
                 table: "datasource",
                 name: "Superstore",
-                plugin: "hypergrid",
+                plugin: "datagrid",
                 editable: true
             },
             second_widget: {
                 table: "datasource",
                 name: "Superstore 2",
-                plugin: "hypergrid",
+                plugin: "datagrid",
                 editable: true
             }
         }

@@ -58,8 +58,6 @@ const DEFAULT_ASSETS = [
     "@finos/perspective/dist/umd",
     "@finos/perspective-bench/dist",
     "@finos/perspective-viewer/dist/umd",
-    "@finos/perspective-viewer-highcharts/dist/umd",
-    "@finos/perspective-viewer-hypergrid/dist/umd",
     "@finos/perspective-viewer-datagrid/dist/umd",
     "@finos/perspective-viewer-d3fc/dist/umd",
     "@finos/perspective-workspace/dist/umd"
