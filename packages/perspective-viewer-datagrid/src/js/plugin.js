@@ -13,20 +13,41 @@ import "regular-table";
 import {createViewCache, configureRegularTable} from "regular-table/dist/examples/perspective.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 
-import {selectionListener, selectionStyleListener} from "./row_selection.js";
+import {configureRowSelectable, deselect} from "./row_selection.js";
+import {configureEditable} from "./editing.js";
 
 const VIEWER_MAP = new WeakMap();
 const INSTALLED = new WeakMap();
 
-async function datagridPlugin(regular, viewer, view) {
+function lock(body) {
+    let lock;
+    return async function(...args) {
+        while (lock) {
+            await lock;
+        }
+
+        let resolve;
+        try {
+            lock = new Promise(x => (resolve = x));
+            await body.apply(this, args);
+        } catch (e) {
+            throw e;
+        } finally {
+            lock = undefined;
+            resolve();
+        }
+    };
+}
+
+const datagridPlugin = lock(async function(regular, viewer, view) {
     const is_installed = INSTALLED.has(regular);
     const table = viewer.table;
     if (!is_installed) {
         const new_model = await createViewCache(regular, table, view);
         await configureRegularTable(regular, new_model);
-        regular.addStyleListener(selectionStyleListener.bind(new_model, regular, viewer));
-        regular.addEventListener("mousedown", selectionListener.bind(new_model, regular, viewer));
+        await configureRowSelectable.call(new_model, regular, viewer);
         await regular.draw();
+        await configureEditable.call(new_model, regular, viewer);
         INSTALLED.set(regular, new_model);
     } else {
         await createViewCache(regular, table, view, INSTALLED.get(regular));
@@ -34,7 +55,7 @@ async function datagridPlugin(regular, viewer, view) {
     regular.scrollTop = 0;
     regular.scrollLeft = 0;
     await regular.draw();
-}
+});
 
 /**
  * Initializes a new datagrid renderer if needed, or returns an existing one
@@ -55,9 +76,9 @@ function get_or_create_datagrid(element, div) {
     } else {
         datagrid = VIEWER_MAP.get(div);
         if (!datagrid.isConnected) {
-            //datagrid.clear();
             div.innerHTML = "";
             div.appendChild(document.createElement("slot"));
+            datagrid.clear();
             element.appendChild(datagrid);
         }
     }
@@ -78,6 +99,8 @@ class DatagridPlugin {
     static async update(div) {
         try {
             const datagrid = VIEWER_MAP.get(div);
+            const model = INSTALLED.get(datagrid);
+            model._num_rows = await model._view.num_rows();
             await datagrid.draw();
         } catch (e) {
             return;
@@ -88,6 +111,7 @@ class DatagridPlugin {
         const datagrid = get_or_create_datagrid(this, div);
         try {
             await datagridPlugin(datagrid, this, view);
+            deselect(datagrid, this);
             datagrid._resetAutoSize();
             await datagrid.draw();
         } catch (e) {

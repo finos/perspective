@@ -3,7 +3,7 @@
 
 // Row Selection
 
-.psp-row-selected, :hover .psp-row-selected {
+.psp-row-selected, :hover .psp-row-selected, :hover th.psp-tree-leaf.psp-row-selected, :hover th.psp-tree-label.psp-row-selected {
     color: black;
     background-color: #EA7319;
 }
@@ -12,6 +12,16 @@
     color: black;
 }
 
-.psp-row-subselected, :hover .psp-row-subselected {
+.psp-row-subselected, :hover .psp-row-subselected, :hover th.psp-tree-leaf.psp-row-subselected, :hover th.psp-tree-label.psp-row-subselected  {
     background: rgba(234, 115, 25, 0.2);
+}
+
+.psp-error {
+    color: red;
+}
+
+td:focus {
+    outline: #666;
+    outline-style: dotted;
+    outline-width: 1px;
 }
