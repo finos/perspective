@@ -14,13 +14,12 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-    <script src="https://unpkg.com/@finos/perspective-viewer"></script>
-    <script src="https://unpkg.com/@finos/perspective-viewer-datagrid"></script>
-    <script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
-    <script src="https://unpkg.com/@finos/perspective"></script>
+    <script src="http://localhost:8080/node_modules/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+    <script src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+    <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+    <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
 
-    <link rel='stylesheet' href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.css">
-    
+    <link rel='stylesheet' href="http://localhost:8080/node_modules/perspective-viewer/dist/umd/material-dense.css">
 
     <style>
         perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
@@ -49,7 +48,7 @@
             const viewer = document.getElementById('viewer');
 
             // Create a client that expects a Perspective server to accept connections at the specified URL.
-            const websocket = perspective.websocket("ws://localhost:8888/websocket");
+            const websocket = perspective.websocket("ws://localhost:8080/websocket");
 
             /* `table` is a proxy for the `Table` we created on the server.
             

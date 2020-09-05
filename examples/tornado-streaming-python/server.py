@@ -1,26 +1,10 @@
-import os
-import os.path
 import random
-import sys
 import logging
 import tornado.websocket
 import tornado.web
 import tornado.ioloop
 from datetime import date, datetime
-
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
 from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
-
-
-class MainHandler(tornado.web.RequestHandler):
-
-    def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-
-    def get(self):
-        self.render("streaming.html")
 
 
 def data_source():
@@ -71,15 +55,24 @@ def make_app():
     callback.start()
 
     return tornado.web.Application([
-        (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
-        (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
+        (r"/websocket", PerspectiveTornadoHandler, {
+            "manager": MANAGER,
+            "check_origin": True
+        }),
+        (r"/node_modules/(.*)", tornado.web.StaticFileHandler, {
+            "path": "../../node_modules/@finos/"
+        }),
+        (r"/(.*)", tornado.web.StaticFileHandler, {
+            "path": "./",
+            "default_filename": "index.html"
+        })
     ])
 
 
 if __name__ == "__main__":
     app = make_app()
-    app.listen(8888)
-    logging.critical("Listening on http://localhost:8888")
+    app.listen(8080)
+    logging.critical("Listening on http://localhost:8080")
     loop = tornado.ioloop.IOLoop.current()
     loop.start()

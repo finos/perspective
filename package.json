@@ -132,8 +132,5 @@
         "fix": "npm-run-all --silent fix:*",
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js",
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py"
-    },
-    "dependencies": {
-        "exports-loader": "^1.1.0"
     }
 }
