@@ -42,7 +42,6 @@ endfunction()
 ###############################
 function (psp_build_dep name cmake_file)
 	if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
-		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
 	else()
 		configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
 
@@ -303,9 +302,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if(DEFINED ENV{BOOST_ROOT})
 			set(Boost_NO_BOOST_CMAKE TRUE)
 
-			message(WARNING "${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
-			message(WARNING "${Cyan}BOOST_INCLUDEDIR: $ENV{BOOST_INCLUDEDIR} ${ColorReset}")
-			message(WARNING "${Cyan}BOOST_LIBRARYDIR: $ENV{BOOST_LIBRARYDIR} ${ColorReset}")
 		endif()
 	endif()
 
@@ -313,7 +309,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	if(NOT Boost_FOUND)
 		message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
 	else()
-		message(WARNING "${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
 
@@ -322,7 +317,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
 		psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
 	else()
-		message("${Cyan}Found TBB: TBB_INCLUDE_DIRS - ${TBB_INCLUDE_DIRS}, TBB_LIBRARY_DIRS - ${TBB_LIBRARY_DIRS} ${ColorReset}")
 		include_directories( ${TBB_INCLUDE_DIRS} )
 	endif()
 
@@ -355,14 +349,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# without also finding (or failing to find) the python libraries
 			# so we use a custom FindPythonHeaders that is the same as the
 			# default, but ignores when the python libraries can't be found.
-			message("${Red}Manylinux build has no python shared libraries${ColorReset}")
 			find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter)
 			find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 
 			# Run with exact version so its cached for pybind
 			find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 		else()
-			message("${Cyan}Use python shared libraries${ColorReset}")
 			find_package( Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development)
 
 			# Run with exact version so its cached for pybind
@@ -371,7 +363,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 			link_directories( ${Python_LIBRARY_DIRS} )
 		endif()
-		message("${Cyan}Using Python ${Python_VERSION}, \nPython_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, \nPython_LIBRARIES: ${Python_LIBRARIES}, \nPython_EXECUTABLE: ${Python_EXECUTABLE} ${ColorReset}")
 		include_directories( ${Python_INCLUDE_DIRS} )
 
 		if(MACOS)
@@ -399,7 +390,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		    message("${Red}PyBind11 could not be located - building from external source${ColorReset}")
 			psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
 		else()
-		    message("${Cyan}Found PyBind11 in ${PYTHON_PYBIND_INCLUDE_DIR}${ColorReset}")
 			include_directories( ${PYTHON_PYBIND_INCLUDE_DIR} )
 		endif()
 
@@ -407,7 +397,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if(NOT PYTHON_NUMPY_FOUND)
 			message(FATAL_ERROR "${Red}Numpy could not be located${ColorReset}")
 		else()
-			message(WARNING "${Cyan}Numpy found: ${PYTHON_NUMPY_INCLUDE_DIR}${ColorReset}")
 			include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 		endif()
 
@@ -416,8 +405,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
-			message(WARNING "${Cyan}PyArrow found: PYTHON_PYARROW_INCLUDE_DIR - ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
-			message(WARNING "${Cyan}Using pre-built ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY} from: ${PYTHON_PYARROW_LIBRARY_DIR}${ColorReset}")
 			include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
 			link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
 		endif()
@@ -433,7 +420,6 @@ psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 # For WASM/CPP build, build minimal arrow from source
 if (NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
-	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
 	psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
 	psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
@@ -442,7 +428,6 @@ if (NOT PSP_PYTHON_BUILD)
 	if(NOT FLATBUFFERS_FOUND)
 		message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
 	else()
-		message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
 		include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 	endif()
 endif()

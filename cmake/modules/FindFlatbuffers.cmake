@@ -42,7 +42,6 @@ if(NOT ${FLATBUFFERS_INCLUDE_DIR})
   set(FLATBUFFERS_INCLUDE_DIR /usr/local/include)
 endif()
 
-message("${FLATBUFFERS_COMPILER}")
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FLATBUFFERS REQUIRED_VARS
   FLATBUFFERS_INCLUDE_DIR FLATBUFFERS_COMPILER)
