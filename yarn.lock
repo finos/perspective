@@ -12632,10 +12632,10 @@ regjsparser@^0.6.0:
   dependencies:
     jsesc "~0.5.0"
 
-regular-table@=0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.1.0.tgz#47044a10707a7549cbd4cfa50389baf4f2e727b5"
-  integrity sha512-GNQizd1tPoijJ7vWu+yBafTzskDv981MMOJ96zpuXZEuVc5hSM0XPrn7mD0dIAlcU/6HhLFoFOtdsBLTJ26NZQ==
+regular-table@=0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.1.2.tgz#75c56bc8c0eaea39a07becd168f5fc1e35fd6653"
+  integrity sha512-+P2veAk6TmDkY1d6ssBDm+K9XZna9KHrlq8r6ZxEV1+tZ2Xy7nWq8ySTOu++tyKEWMOyR0e2HfmKbSPFxdHPBw==
 
 relateurl@0.2.x:
   version "0.2.7"
