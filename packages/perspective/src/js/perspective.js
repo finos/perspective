@@ -1168,8 +1168,6 @@ export default function(Module) {
      * names.
      *
      * @async
-     * @param {boolean} computed Should computed columns be included? (default
-     * false)
      * @returns {Promise<Object>} A Promise of this
      * {@link module:perspective~table}'s schema.
      */
