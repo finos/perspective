@@ -154,7 +154,7 @@ export class Server {
                         if (msg.args && msg.args[0]) {
                             if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
                                 // actual arrow is in the `delta`
-                                this.post(result, ev.delta);
+                                this.post(result, [ev.delta]);
                                 return;
                             }
                         }

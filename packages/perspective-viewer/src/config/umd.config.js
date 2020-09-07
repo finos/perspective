@@ -33,7 +33,6 @@ module.exports = common({}, config => {
                 for (const theme of THEMES) {
                     try_delete(theme.replace("less", "js"));
                     try_delete(theme.replace("less", "js.map"));
-                    try_delete(theme.replace("less", "css.map"));
                 }
             });
         }
