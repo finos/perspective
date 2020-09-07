@@ -83,7 +83,7 @@ async function script(page) {
     await page.waitFor(200);
     await page.mouse.click(300, 300, {button: "right"});
     await page.waitFor(200);
-    await page.mouse.click(320, 320);
+    await page.mouse.click(320, 340);
     await page.waitFor(1000);
     const viewer2 = (await page.$$("perspective-viewer"))[1];
     const poke2 = make_poke(viewer2);
@@ -120,7 +120,7 @@ async function script(page) {
     await page.waitFor(200);
     await page.mouse.click(300, 300, {button: "right"});
     await page.waitFor(200);
-    await page.mouse.click(320, 340);
+    await page.mouse.click(320, 360);
     await page.waitFor(200);
 
     await poke2("column-pivots", ["symbol"]);
@@ -142,11 +142,12 @@ async function script(page) {
     await page.waitFor(500);
     await poke2("columns", ["vol", "chg"]);
     await page.waitFor(500);
-    await poke2("sort", [["vol", "desc"]]);
+    await poke2("sort", [["chg", "desc"]]);
     await page.waitFor(200);
 
     await page.mouse.move(100, 150);
     await page.mouse.click(100, 150);
+    await page.mouse.move(0, 0);
     await page.waitFor(500);
 
     // close filter
@@ -164,13 +165,7 @@ async function script(page) {
 
     // time series
 
-    await poke("computed-columns", [
-        {
-            name: "second_bucket(lastUpdate)",
-            inputs: ["lastUpdate"],
-            computed_function_name: "second_bucket"
-        }
-    ]);
+    await poke("computed-columns", ['second_bucket("lastUpdate")']);
     await poke("plugin", "y_line");
     await page.waitFor(200);
     await poke("columns", ["chg"]);
@@ -204,7 +199,7 @@ async function script(page) {
     await poke("columns", ["bid"]);
     await page.waitFor(3000);
 
-    script(page);
+    //script(page);
 }
 
 async function main() {

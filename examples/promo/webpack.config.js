@@ -19,12 +19,16 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            title: "Lumino Example"
+            title: "Kiosk Mode"
         }),
         new PerspectivePlugin({})
     ],
     module: {
         rules: [
+            {
+                test: /\.css$/,
+                use: [{loader: "style-loader"}, {loader: "css-loader"}]
+            },
             {
                 test: /\.less$/,
                 use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]

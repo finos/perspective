@@ -8,12 +8,12 @@
  */
 
 import perspective from "@finos/perspective";
-import {PerspectiveWorkspace, PerspectiveWidget} from "@finos/perspective-workspace";
-import {Widget} from "@lumino/widgets";
-import "@finos/perspective-workspace/src/theme/material/index.less";
 
+import "@finos/perspective-workspace";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
+
+import "@finos/perspective-workspace/dist/umd/material.css";
 
 import "./style/index.less";
 
@@ -53,31 +53,43 @@ function newRows(n = 5) {
 
 window.addEventListener("load", async () => {
     const table = worker.table(newRows(3000), {limit: 3000});
-    const workspace = new PerspectiveWorkspace();
-    const widget1 = new PerspectiveWidget("One");
+    const workspace = document.createElement("perspective-workspace");
+    document.body.appendChild(workspace);
+    workspace.tables.set("rtdata", table);
 
-    workspace.addViewer(widget1);
+    const viewer = document.createElement("perspective-viewer");
+    viewer.setAttribute("slot", "One");
+    workspace.appendChild(viewer);
 
-    Widget.attach(workspace, document.body);
-
-    widget1.load(table);
+    workspace.restore({
+        detail: {
+            main: {
+                currentIndex: 0,
+                type: "tab-area",
+                widgets: ["One"]
+            }
+        },
+        viewers: {
+            One: {table: "rtdata"}
+        }
+    });
 
     (function postRow() {
-        widget1.table.update(newRows());
+        table.update(newRows());
         setTimeout(postRow, 50);
     })();
 
     window.onresize = () => {
-        workspace.update();
+        workspace.notifyResize();
     };
 
-    window.workspace = workspace;
+    //window.workspace = workspace;
 
     window.reset = () => {
-        const widgets = workspace.widgets[0].widgets();
-        for (let z = widgets.next(); z; z = widgets.next()) {
-            if (z !== widget1) {
-                z.close();
+        const widgets = workspace.querySelectorAll("perspective-viewer");
+        for (let z of widgets) {
+            if (z !== viewer) {
+                workspace.removeChild(z);
             }
         }
     };

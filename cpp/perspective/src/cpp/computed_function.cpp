@@ -549,7 +549,7 @@ t_tscalar second_bucket<DTYPE_TIME>(t_tscalar x) {
     t_tscalar rval = mknone();
     if (x.is_none() || !x.is_valid()) return rval;
     auto int_ts = x.to_int64();
-    std::int64_t bucketed_ts = (static_cast<double>(int_ts) / 1000) * 1000;
+    std::int64_t bucketed_ts = floor(static_cast<double>(int_ts) / 1000) * 1000;
     rval.set(t_time(bucketed_ts));
     return rval;
 }
