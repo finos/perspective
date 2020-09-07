@@ -53,6 +53,7 @@ export function dragend(event) {
 export function drop(ev) {
     ev.preventDefault();
     ev.currentTarget.classList.remove("dropping");
+    DRAG_COUNT_MAP = new WeakMap();
     if (this._drop_target_hover) {
         this._drop_target_hover.removeAttribute("drop-target");
     }
@@ -153,9 +154,6 @@ function column_replace(new_index) {
 export function column_dragover(event) {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
-    if (event.currentTarget.className !== "dropping") {
-        event.currentTarget.classList.add("dropping");
-    }
     if (!this._drop_target_hover.hasAttribute("drop-target")) {
         this._drop_target_hover.toggleAttribute("drop-target", true);
     }
@@ -230,6 +228,7 @@ export function column_drop(ev) {
     ev.preventDefault();
     delete this._drop_target_null;
     ev.currentTarget.classList.remove("dropping");
+    DRAG_COUNT_MAP = new WeakMap();
     if (this._drop_target_hover.parentElement === this._active_columns) {
         this._drop_target_hover.removeAttribute("drop-target");
     }
@@ -239,23 +238,21 @@ export function column_drop(ev) {
     this._update_column_view();
 }
 
-export function dragenter(ev) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.currentTarget.classList.add("dropping");
-}
-
 export function dragover(ev) {
     ev.stopPropagation();
     ev.preventDefault();
-    ev.currentTarget.classList.add("dropping");
     ev.dataTransfer.dropEffect = "move";
 }
 
-export function dragleave(ev) {
-    if (ev.currentTarget == ev.target) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        ev.currentTarget.classList.remove("dropping");
-    }
+let DRAG_COUNT_MAP = new WeakMap();
+
+function dragenterleave(event) {
+    let dragHoverCount = DRAG_COUNT_MAP.get(event.currentTarget) || 0;
+    event.type === "dragenter" ? dragHoverCount++ : dragHoverCount--;
+    DRAG_COUNT_MAP.set(event.currentTarget, dragHoverCount);
+    event.currentTarget.classList.toggle("dropping", dragHoverCount > 0);
+    event.preventDefault();
 }
+
+export const dragenter = dragenterleave;
+export const dragleave = dragenterleave;

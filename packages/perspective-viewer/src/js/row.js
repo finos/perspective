@@ -211,10 +211,10 @@ class Row extends HTMLElement {
     _set_data_transfer(event) {
         if (this.hasAttribute("filter")) {
             const {operator, operand} = JSON.parse(this.getAttribute("filter"));
-            event.dataTransfer.setData("text", JSON.stringify([this.getAttribute("name"), operator, operand, this.getAttribute("type"), this.getAttribute("aggregate")]));
+            event.dataTransfer.setData("text/plain", JSON.stringify([this.getAttribute("name"), operator, operand, this.getAttribute("type"), this.getAttribute("aggregate")]));
         } else {
             event.dataTransfer.setData(
-                "text",
+                "text/plain",
                 JSON.stringify([this.getAttribute("name"), get_type_config(this.getAttribute("type")).filter_operator, undefined, this.getAttribute("type"), this.getAttribute("aggregate")])
             );
         }
