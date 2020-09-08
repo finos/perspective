@@ -49,7 +49,7 @@ export function colorRangeLegend() {
             .xScale(xScale)
             .yScale(yScale)
             .crossValue(0)
-            .baseValue((_, i) => (i > 0 ? expandedDomain[i - 1] : 0))
+            .baseValue((_, i) => expandedDomain[Math.max(0, i - 1)])
             .mainValue(d => d)
             .decorate(selection => {
                 selection.selectAll("path").style("fill", d => scale(d));
