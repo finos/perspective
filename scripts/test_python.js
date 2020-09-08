@@ -18,11 +18,7 @@ let IMAGE = "manylinux2010";
 
 if (IS_DOCKER) {
     // defaults to 2010
-    let MANYLINUX_VERSION = "manylinux2010";
-    if (!IS_PY2) {
-        // switch to 2014 only on python3
-        MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "";
-    }
+    let MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "";
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
@@ -45,11 +41,11 @@ const pytest_client_mode = IS_DOCKER => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} --noconftest 
+            ${VERBOSE ? "-vv" : ""} --noconftest 
             perspective/tests/client"`;
     } else {
         return bash`cd ${python_path} && ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} --noconftest 
+            ${VERBOSE ? "-vv" : ""} --noconftest 
             perspective/tests/client`;
     }
 };
@@ -61,12 +57,12 @@ const pytest = IS_DOCKER => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} perspective \
+            ${VERBOSE ? "-vv" : ""} perspective \
             --ignore=perspective/tests/client \
             --cov=perspective"`;
     } else {
         return bash`cd ${python_path} && ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv" : "-v"} perspective \
+            ${VERBOSE ? "-vv" : ""} perspective \
             --ignore=perspective/tests/client \
             ${COVERAGE ? "--cov=perspective" : ""}`;
     }

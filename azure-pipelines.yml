@@ -106,6 +106,10 @@ jobs:
     - bash: yarn
       displayName: 'Install Deps'
 
+    - bash: python -m pip install "black==20.8b1" flake8-black
+      condition: and(succeeded(), ne(variables['python.version'], '2.7'))
+      displayName: 'Install Python deps'
+
     - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
       displayName: 'build'
       env:
@@ -248,7 +252,7 @@ jobs:
         displayName: "Which python"
 
       - script: |
-          python -m pip install delocate wheel numpy "pyarrow>=0.16.0,<1"
+          python -m pip install delocate wheel numpy "black==20.8b1" flake8-black "pyarrow>=0.16.0,<1"
         displayName: "Python deps"
 
       - script: npm install -g yarn

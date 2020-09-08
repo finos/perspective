@@ -61,10 +61,12 @@ try {
 
     let cmd;
     if (IS_CI) {
-        if (IS_PY2)
+        if (IS_PY2) {
             // shutil_which is required in setup.py
-            cmd = bash`${PYTHON} -m pip install backports.shutil_which &&`;
-        else cmd = bash``;
+            cmd = bash`${PYTHON} -m pip install backports.shutil_which && ${PYTHON} -m pip install -vv -e .[devpy2] --no-clean &&`;
+        } else {
+            cmd = bash`${PYTHON} -m pip install -vv -e .[dev] --no-clean &&`;
+        }
 
         // pip install in-place with --no-clean so that pep-518 assets stick
         // around for later wheel build (so cmake cache can stay in place)
@@ -77,15 +79,14 @@ try {
         // then run the remaining test suite
         cmd =
             cmd +
-            `${PYTHON} -m pip install -vv -e .[dev] --no-clean && \
-            ${PYTHON} -m flake8 perspective && echo OK && \
+            `${PYTHON} -m flake8 perspective && echo OK && \
             ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
             ${PYTHON} -m pytest -vvv perspective \
             --ignore=perspective/tests/client \
             --junitxml=python_junit.xml --cov-report=xml --cov-branch \
             --cov=perspective`;
         if (IMAGE == "python") {
-            // test the sdist to make sure we dont 
+            // test the sdist to make sure we dont
             // dist a non-functioning source dist
             cmd =
                 cmd +

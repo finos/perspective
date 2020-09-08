@@ -28,9 +28,8 @@ const IS_FIX = getarg("--fix");
 
 try {
     let cmd;
-    let lint_cmd = `${PYTHON} -m flake8 perspective && echo "lint passed!"`;
-    let fix_cmd = `autopep8 -v --in-place --aggressive --recursive --exclude \
-        build --exclude tests . && echo "autopep8 formatting complete!"`;
+    let lint_cmd = `${PYTHON} -m flake8 perspective bench setup.py`;
+    let fix_cmd = `black perspective bench setup.py --exclude tests`;
 
     if (process.env.PSP_DOCKER) {
         cmd = `cd python/perspective && ${IS_FIX ? fix_cmd : lint_cmd}`;
