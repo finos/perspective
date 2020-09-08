@@ -56,17 +56,18 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
         await createModel(regular, table, view, model);
     }
 
-    if (!model._preserve_focus_state) {
-        regular.scrollTop = 0;
-        regular.scrollLeft = 0;
-        deselect(regular, viewer);
-        regular._resetAutoSize();
-    } else {
-        model._preserve_focus_state = false;
-    }
-
     try {
-        await regular.draw({swap: true});
+        const draw = regular.draw({swap: true});
+        if (!model._preserve_focus_state) {
+            regular.scrollTop = 0;
+            regular.scrollLeft = 0;
+            deselect(regular, viewer);
+            regular._resetAutoSize();
+        } else {
+            model._preserve_focus_state = false;
+        }
+
+        await draw;
     } catch (e) {
         console.error(e);
     }
