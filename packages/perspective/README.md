@@ -37,7 +37,7 @@ For more information, see the
         * [.on_delete(callback)](#module_perspective..table+on_delete)
         * [.remove_delete(callback)](#module_perspective..table+remove_delete)
         * [.size()](#module_perspective..table+size) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-        * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+        * [.schema()](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
         * [.computed_schema(computed_columns)](#module_perspective..table+computed_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
         * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
         * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
@@ -447,6 +447,11 @@ invoked.
 
 - callback <code>function</code> - A callback function invoked on delete.
 
+**Example**  
+```js
+// attach an `on_delete` callback
+view.on_delete(() => console.log("Deleted!"));
+```
 
 * * *
 
@@ -461,6 +466,12 @@ Unregister a previously registered delete callback with this
 
 - callback <code>function</code> - A delete callback function to be removed
 
+**Example**  
+```js
+// remove an `on_delete` callback
+const callback = () => console.log("Deleted!")
+view.remove_delete(callback);
+```
 
 * * *
 
@@ -477,7 +488,7 @@ Unregister a previously registered delete callback with this
     * [.on_delete(callback)](#module_perspective..table+on_delete)
     * [.remove_delete(callback)](#module_perspective..table+remove_delete)
     * [.size()](#module_perspective..table+size) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-    * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+    * [.schema()](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
     * [.computed_schema(computed_columns)](#module_perspective..table+computed_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
     * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
     * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
@@ -498,7 +509,7 @@ each.
 
 <strong>Note</strong> This constructor is not public - Tables are created
 by invoking the [table](#module_perspective..table) factory method, either
-on the perspective module object, or on a
+on the perspective module object, or an a
 [module:perspective~worker](module:perspective~worker) instance.
 
 
@@ -571,8 +582,8 @@ Unregister a previously registered delete callback with this
 #### table.size() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
 The number of accumulated rows in this [table](#module_perspective..table).
 This is affected by the "index" configuration parameter supplied to this
-[view](#module_perspective..view)'s constructor - as rows will be
-overwritten when they share an index column.
+[view](#module_perspective..view)'s contructor - as rows will be
+overwritten when they share an idnex column.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code> - The number of accumulated rows.  
@@ -581,7 +592,7 @@ overwritten when they share an index column.
 
 <a name="module_perspective..table+schema"></a>
 
-#### table.schema(computed) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+#### table.schema() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
 The schema of this [table](#module_perspective..table).  A schema is an
 Object whose keys are the columns of this
 [table](#module_perspective..table), and whose values are their string type
@@ -590,11 +601,6 @@ names.
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code> - A Promise of this
 [table](#module_perspective..table)'s schema.  
-**Params**
-
-- computed <code>boolean</code> - Should computed columns be included? (default
-false)
-
 
 * * *
 

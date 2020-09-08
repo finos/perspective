@@ -1,5 +1,36 @@
 # Changelog
 
+
+## [0.5.3] (2020-09-08)
+
+#### Added
+  * [#1177](https://github.com/finos/perspective/pull/1177) Add websocket stresstests for Tornado server ([@sc1f](https://github.com/sc1f))
+  * [#1156](https://github.com/finos/perspective/pull/1156) Submit tornado write_message to IOLoop, add websocket tests in Python ([@sc1f](https://github.com/sc1f))
+  * [#1147](https://github.com/finos/perspective/pull/1147) Adds `set_threadpool_size()` ([@texodus](https://github.com/texodus))
+  * [#1176](https://github.com/finos/perspective/pull/1176) `perspective-viewer-datagrid` support for `editable` ([@texodus](https://github.com/texodus))
+  * [#1174](https://github.com/finos/perspective/pull/1174) Remove deprecated plugins ([@texodus](https://github.com/texodus))
+  * [#1169](https://github.com/finos/perspective/pull/1169) Updated `@finos/perspective-viewer-datagrid` plugin to `regular-table` 0.0.9 ([@texodus](https://github.com/texodus))
+  * [#1172](https://github.com/finos/perspective/pull/1172) Add `d3fc` X/Y Line Chart ([@texodus](https://github.com/texodus))
+
+#### Fixed
+  * [#1186](https://github.com/finos/perspective/pull/1186) D3FC render fixes ([@texodus](https://github.com/texodus))
+  * [#1165](https://github.com/finos/perspective/pull/1165) fix(perspective-viewer-d3fc): show formatted dates on treemap and sunburst (1144) ([@Sam-Ogden](https://github.com/Sam-Ogden))
+  * [#1185](https://github.com/finos/perspective/pull/1185) Fix sticky dragdrop on `perspective-viewer` ([@texodus](https://github.com/texodus))
+  * [#1184](https://github.com/finos/perspective/pull/1184) `promo` example project update and computed function fix ([@texodus](https://github.com/texodus))
+  * [#1136](https://github.com/finos/perspective/pull/1136) Fix issue where contexts were being notified before gnode state was updated ([@sc1f](https://github.com/sc1f))
+  * [#1181](https://github.com/finos/perspective/pull/1181) Fix `perspective-viewer-datagrid` sorting ([@texodus](https://github.com/texodus))
+  * [#1183](https://github.com/finos/perspective/pull/1183) `perspective-workspace` CSS fixes ([@texodus](https://github.com/texodus))
+  * [#1163](https://github.com/finos/perspective/pull/1163) fix for virtualenvs/envs with multiple py3 installed, allow for up to arrow 0.17 ([@timkpaine](https://github.com/timkpaine))
+  * [#1153](https://github.com/finos/perspective/pull/1153) Fix segfault and errors on 2-sided sorted views when data window is invalid ([@sc1f](https://github.com/sc1f))
+  * [#1164](https://github.com/finos/perspective/pull/1164) Closes [#1159](https://github.com/finos/perspective/issues/1159) - deltas are now generated on first update for 0-sided contexts ([@sc1f](https://github.com/sc1f))
+  * [#1142](https://github.com/finos/perspective/pull/1142) Closes [#1129](https://github.com/finos/perspective/issues/1129) and #1130, remove Highcharts and Hypergrid from PerspectiveWidget ([@sc1f](https://github.com/sc1f))
+  * [#1140](https://github.com/finos/perspective/pull/1140) Enable updates from arrows that have more/less columns than the Table schema ([@sc1f](https://github.com/sc1f))
+  * [#1141](https://github.com/finos/perspective/pull/1141) Fix path resolution for cross-origin assets ([@texodus](https://github.com/texodus))
+
+#### Internal
+  * [#1155](https://github.com/finos/perspective/pull/1155) Adds PR templates for bugfix, documentation, and feature ([@sc1f](https://github.com/sc1f))
+  * [#1105](https://github.com/finos/perspective/pull/1105) Generate/test Manylinux wheels, clean up wheel/build process ([@sc1f](https://github.com/sc1f))
+
 ## [0.5.2] (2020-07-28)
 
 #### Fixed

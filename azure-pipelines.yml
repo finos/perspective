@@ -141,61 +141,61 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
         artifactName: '$(artifact_name)'
 
-- job: 'Windows'
-  pool:
-    vmImage: 'vs2017-win2016'
+# - job: 'Windows'
+#   pool:
+#     vmImage: 'vs2017-win2016'
 
-  strategy:
-    matrix:
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
-      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
-        Python36:
-          python.version: '3.6'
-          python_flag: '--python36'
-        Python38:
-          python.version: '3.8'
-          python_flag: '--python38'
+#   strategy:
+#     matrix:
+#       Python37:
+#         python.version: '3.7'
+#         python_flag: ''
+#       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+#         Python36:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#         Python38:
+#           python.version: '3.8'
+#           python_flag: '--python38'
 
-  steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
+#   steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#         architecture: 'x64'
 
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: '12.x'
 
-    - script: |
-        which python > python.txt
-        set /p PYTHON=<python.txt
-        ln -s %PYTHON% %PYTHON%$(python.version)
-        python --version
-        which python$(python.version)
-      displayName: "Which python"
+#     - script: |
+#         which python > python.txt
+#         set /p PYTHON=<python.txt
+#         ln -s %PYTHON% %PYTHON%$(python.version)
+#         python --version
+#         which python$(python.version)
+#       displayName: "Which python"
 
-    - script: |
-        python -m pip install numpy "pyarrow>=0.16.0,<1"
-      displayName: "Python deps"
+#     - script: |
+#         python -m pip install numpy "pyarrow>=0.16.0,<1"
+#       displayName: "Python deps"
 
-    - script: npm install -g yarn
-      displayName: "Install Yarn"
+#     - script: npm install -g yarn
+#       displayName: "Install Yarn"
 
-    - script: yarn
-      displayName: 'Install Deps'
+#     - script: yarn
+#       displayName: 'Install Deps'
 
-    - script: yarn build_python  --ci $(python_flag)
-      displayName: 'build'
-      env:
-        # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
-        # https://github.com/actions/virtual-environments/issues/687
-        # 06/18/2020 - seems like boost got moved to `x86_64` inside
-        # the boost folder, which broke builds for a bit.
-        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/"
-        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
-        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
+#     - script: yarn build_python  --ci $(python_flag)
+#       displayName: 'build'
+#       env:
+#         # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
+#         # https://github.com/actions/virtual-environments/issues/687
+#         # 06/18/2020 - seems like boost got moved to `x86_64` inside
+#         # the boost folder, which broke builds for a bit.
+#         BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/"
+#         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
+#         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
 
 - job: 'MacOS_Mojave'
   pool:
