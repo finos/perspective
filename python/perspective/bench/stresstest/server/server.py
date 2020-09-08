@@ -52,7 +52,7 @@ VIEW = None
 MANAGER = PerspectiveManagerWithTelemetry()
 
 
-with open(os.path.join(HERE, "superstore.arrow"), "rb") as arrow:
+with open(os.path.join(HERE, "..", "..", "..", "..", "..", "node_modules", "superstore-arrow", "superstore.arrow"), "rb") as arrow:
     TABLE = perspective.Table(arrow.read(), index="Row ID")
     VIEW = TABLE.view()
 

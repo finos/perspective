@@ -8,4 +8,4 @@
  */
 
 const {WebSocketServer} = require("@finos/perspective");
-new WebSocketServer({assets: [__dirname]});
+new WebSocketServer({assets: [__dirname, "../../node_modules/superstore-arrow"]});

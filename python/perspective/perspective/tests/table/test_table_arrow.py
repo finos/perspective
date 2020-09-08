@@ -13,7 +13,7 @@ import pyarrow as pa
 from datetime import date, datetime
 from perspective.table import Table
 
-SUPERSTORE_ARROW = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "examples", "simple", "superstore.arrow")
+SUPERSTORE_ARROW = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "node_modules", "superstore-arrow", "superstore.arrow")
 DATE32_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date32.arrow")
 DATE64_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "date64.arrow")
 DICT_ARROW = os.path.join(os.path.dirname(__file__), "arrow", "dict.arrow")

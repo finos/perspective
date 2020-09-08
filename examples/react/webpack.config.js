@@ -41,6 +41,6 @@ module.exports = {
     },
     devServer: {
         // superstore.arrow is served from here
-        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../simple")]
+        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../../node_modules/superstore-arrow")]
     }
 };

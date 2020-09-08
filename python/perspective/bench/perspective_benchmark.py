@@ -22,8 +22,8 @@ SUPERSTORE = superstore(9994)
 SUPERSTORE_ARROW = os.path.join(
     os.path.dirname(__file__),
     "..", "..", "..",
-    "examples",
-    "simple",
+    "node_modules",
+    "superstore-arrow",
     "superstore.arrow")
 
 VERSIONS = ["master", "0.4.1", "0.4.0rc6"]
