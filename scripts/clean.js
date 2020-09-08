@@ -9,6 +9,7 @@
 
 const {execute, clean} = require("./script_utils.js");
 
+const glob = require("glob");
 const minimatch = require("minimatch");
 const args = process.argv.slice(2);
 
@@ -30,7 +31,20 @@ try {
         clean`cpp/perspective/obj`;
     }
     if (process.env.PSP_PROJECT === "python") {
-        clean("cpp/perspective/obj", "cpp/perspective/cppbuild", "python/perspective/dist", "python/perspective/build", "python/perspective/perspective_python.egg-info");
+        clean(
+            "cpp/perspective/obj",
+            "cpp/perspective/cppbuild",
+            "python/perspective/dist",
+            "python/perspective/build",
+            "python/perspective/docs/build",
+            "python/perspective/perspective_python.egg-info",
+            "python/perspective/.coverage",
+            "python/perspective/.pytest_cache",
+            "python/perspective/python_junit.xml",
+            "python/perspective/coverage.xml",
+            ...glob.sync("python/perspective/**/*.pyc"),
+            ...glob.sync("python/perspective/**/__pycache__")
+        );
         return;
     }
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {

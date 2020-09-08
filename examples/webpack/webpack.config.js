@@ -32,7 +32,7 @@ module.exports = {
         ]
     },
     devServer: {
-        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../simple")]
+        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../../node_modules/superstore-arrow")]
     },
     devtool: "source-map"
 };

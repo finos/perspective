@@ -19,8 +19,8 @@ import "./index.css";
 
 const worker = perspective.shared_worker();
 
-// superstore.arrow located in examples/simple/ and it's configured by
-// 'devServer' in 'webpack.config.js'
+// superstore.arrow located in node_modules/superstore-arrow/ and it's
+// configured by 'devServer' in 'webpack.config.js'
 const req = fetch("./superstore.arrow");
 
 window.addEventListener("load", async () => {

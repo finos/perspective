@@ -7,7 +7,7 @@
         "examples": "docusaurus-examples",
         "start": "npm run build:arrow && npm run theme && docusaurus-start",
         "build:logo": "webpack --config logo.config.js --color",
-        "build:arrow": "cpx ../examples/simple/superstore.arrow static/arrow/",
+        "build:arrow": "cpx ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
         "docs": "npm run build:arrow && npm run build:logo && npm run theme && docusaurus-build",
         "publish-gh-pages": "npm run theme && docusaurus-publish",
         "write-translations": "docusaurus-write-translations"

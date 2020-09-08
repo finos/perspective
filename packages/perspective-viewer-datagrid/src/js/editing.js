@@ -106,8 +106,9 @@ const moveSelection = lock(async function(table, active_cell, dx, dy) {
 
 function editableStyleListener(table, viewer) {
     // Independently check "editable" and `isEditable()`, so we can skip
-    // the styler entirely if editing was disabled at the time of element creation,
-    // but toggle in when e.g. pivots or selectable affect editability.
+    // the styler entirely if editing was disabled at the time of element
+    // creation, but toggle in when e.g. pivots or selectable will
+    // affect editability.
     if (!viewer.hasAttribute("editable")) {
         return;
     }
