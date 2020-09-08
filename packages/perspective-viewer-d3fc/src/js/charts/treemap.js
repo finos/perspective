@@ -27,8 +27,12 @@ function treemap(container, settings) {
         settings,
         data.map(d => d.data)
     );
-    const treemapGrid = gridLayoutMultiChart().elementsPrefix("treemap");
 
+    if (color) {
+        this._container.classList.add("has-legend");
+    }
+
+    const treemapGrid = gridLayoutMultiChart().elementsPrefix("treemap");
     container.datum(data).call(treemapGrid);
 
     if (color) {

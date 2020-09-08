@@ -31,8 +31,8 @@ export function gridLayoutMultiChart() {
         const cols = Math.min(data.length, Math.floor(containerWidth / minSize));
         const rows = Math.ceil(data.length / cols);
         containerSize = {
-            width: containerWidth / cols,
-            height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / cols))
+            width: containerWidth / Math.max(cols, 1),
+            height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / Math.max(cols, 1)))
         };
         if (containerHeight / rows > containerSize.height * 0.75) {
             containerSize.height = containerHeight / rows;
