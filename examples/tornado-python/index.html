@@ -29,23 +29,43 @@
 
 <body>
 
+    <!--
+    Clicking on cells in the grid and typing will fire edits back into the Table in memory.
+    
+    If you open another tab and navigate to the same URL, edits will appear in all the windows in real time.
+
+    This allows collaborative editing of the underlying Table, with all updates propagated automatically to all clients.
+    -->
     <perspective-viewer id="viewer" editable></perspective-viewer>
 
     <script>
 
         window.addEventListener('WebComponentsReady', async function() {
             const viewer = document.getElementById('viewer');
+
+            // Connect to the websocket and create a new webworker
             const websocket = perspective.websocket("ws://localhost:8080/websocket");
             const worker = perspective.shared_worker();
 
-            const server_table = websocket.open_table('data_source_one');
+            // Get handles to both the `Table` and `View`, as we manually set
+            // up the client/server editing.
+            const server_table = websocket.open_table("data_source_one");
             const server_view = websocket.open_view("view_one");
+            
+            // Serialize the current state of the view to an arrow, and create
+            // a Table on the client that has the same index as the Table
+            // on the server. Client/server editing does not work on an
+            // unindexed Table.
             const arrow = await server_view.to_arrow();
             const client_table = worker.table(arrow, {index: "Row ID"});
             const client_view = client_table.view();// client -> server
 
             await viewer.load(client_table);
 
+            // Create ports on both the client and the server - this allows
+            // the client and server to track which updates are coming from
+            // the server, and which edits are coming from the client
+            // in the browser.
             const client_edit_port = await viewer.getEditPort();
             const server_edit_port = await server_table.make_port();
 
@@ -53,6 +73,7 @@
             // port then forward it to the server.
             client_view.on_update(updated => {
                 if (updated.port_id === client_edit_port) {
+                    // Must call `update` on the `server_edit_port`
                     server_table.update(updated.delta, {
                         port_id: server_edit_port
                     });
@@ -63,7 +84,8 @@
             // server edit port, then synchronize state with the client.
             server_view.on_update(updated => {
                 if (updated.port_id !== server_edit_port) {
-                    client_table.update(updated.delta); // any port, we dont care
+                    // any port, we dont care
+                    client_table.update(updated.delta);
                 }
             }, {mode: "row"});
 

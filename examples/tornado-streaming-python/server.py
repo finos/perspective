@@ -24,9 +24,12 @@ def data_source():
     return rows
 
 
-'''Set up our data for this example.'''
-SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"]
-CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"]
+SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N",
+              "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N",
+              "CSCO.N", "GOOGL.N", "PCLN.N"]
+
+CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie",
+           "Moe", "Lenny", "Carl", "Krusty"]
 
 
 def make_app():
@@ -51,7 +54,8 @@ def make_app():
     def updater():
         TABLE.update(data_source())
 
-    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=50)
+    callback = tornado.ioloop.PeriodicCallback(
+        callback=updater, callback_time=50)
     callback.start()
 
     return tornado.web.Application([

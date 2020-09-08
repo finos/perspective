@@ -9,11 +9,12 @@ from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))
-file_path = os.path.join(here, "..", "..", "node_modules", "superstore-arrow", "superstore.arrow")
+file_path = os.path.join(
+    here, "..", "..", "node_modules", "superstore-arrow", "superstore.arrow")
 
 
 def make_app():
-    with open(file_path, mode='rb') as file:        
+    with open(file_path, mode='rb') as file:
         # Create an instance of `PerspectiveManager` and a table.
         MANAGER = PerspectiveManager()
         TABLE = Table(file.read(), index="Row ID")
@@ -26,14 +27,14 @@ def make_app():
         return tornado.web.Application([
             # create a websocket endpoint that the client Javascript can access
             (r"/websocket", PerspectiveTornadoHandler, {
-                "manager": MANAGER, 
+                "manager": MANAGER,
                 "check_origin": True
             }),
             (r"/node_modules/(.*)", tornado.web.StaticFileHandler, {
                 "path": "../../node_modules/@finos/"
             }),
-            (r"/(.*)",tornado.web.StaticFileHandler, {
-                "path": "./", 
+            (r"/(.*)", tornado.web.StaticFileHandler, {
+                "path": "./",
                 "default_filename": "index.html"
             })
         ], websocket_ping_interval=15)
