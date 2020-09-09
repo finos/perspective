@@ -8,12 +8,12 @@
 
 import os
 import sys
-import subprocess
 import random
 import pandas as pd
 from functools import partial
 from bench import Benchmark, Suite, Runner
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
+
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), ".."))
 from perspective import Table  # noqa: E402
 from perspective.tests.common import superstore  # noqa: E402
 
@@ -21,19 +21,19 @@ SUPERSTORE = superstore(9994)
 
 SUPERSTORE_ARROW = os.path.join(
     os.path.dirname(__file__),
-    "..", "..", "..",
+    "..",
+    "..",
+    "..",
     "node_modules",
     "superstore-arrow",
-    "superstore.arrow")
+    "superstore.arrow",
+)
 
 VERSIONS = ["master", "0.4.1", "0.4.0rc6"]
 
 
 def make_meta(group, name):
-    return {
-        "group": group,
-        "name": name
-    }
+    return {"group": group, "name": name}
 
 
 def empty_callback(port_id):
@@ -45,7 +45,7 @@ class PerspectiveBenchmark(Suite):
     AGG_OPTIONS = [
         [{"column": "Sales", "op": "sum"}],
         [{"column": "State", "op": "dominant"}],
-        [{"column": "Order Date", "op": "dominant"}]
+        [{"column": "Order Date", "op": "dominant"}],
     ]
     COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"], ["Category", "Sub-Category"]]
     ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]]
@@ -55,7 +55,7 @@ class PerspectiveBenchmark(Suite):
         tbl = Table(SUPERSTORE)
         self._schema = tbl.schema()
         self._df_schema = tbl.schema()
-        # mutate schema to have some integer columns, so as to force numpy 
+        # mutate schema to have some integer columns, so as to force numpy
         # float-to-int demotion
         self._df_schema["Sales"] = int
         self._df_schema["Profit"] = int
@@ -126,9 +126,11 @@ class PerspectiveBenchmark(Suite):
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "zero"))
         setattr(self, "update_zero", func)
 
@@ -143,9 +145,11 @@ class PerspectiveBenchmark(Suite):
         for v in views:
             v.on_update(empty_callback)
         update_data = pd.DataFrame(self._get_update_data(1000))
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "zero_df"))
         setattr(self, "update_zero_df", func)
 
@@ -168,9 +172,11 @@ class PerspectiveBenchmark(Suite):
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "one"))
         setattr(self, "update_one", func)
 
@@ -181,9 +187,11 @@ class PerspectiveBenchmark(Suite):
         for v in views:
             v.on_update(empty_callback)
         update_data = pd.DataFrame(self._get_update_data(1000))
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "one_df"))
         setattr(self, "update_one_df", func)
 
@@ -194,10 +202,10 @@ class PerspectiveBenchmark(Suite):
             CP = PerspectiveBenchmark.COLUMN_PIVOT_OPTIONS[i]
             if len(RP) == 0 and len(CP) == 0:
                 continue
-            test_meta = make_meta(
-                "view", "two_{0}x{1}_pivot".format(len(RP), len(CP)))
+            test_meta = make_meta("view", "two_{0}x{1}_pivot".format(len(RP), len(CP)))
             view_constructor = partial(
-                self._table.view, row_pivots=RP, column_pivots=CP)
+                self._table.view, row_pivots=RP, column_pivots=CP
+            )
             func = Benchmark(lambda: view_constructor(), meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
 
@@ -206,27 +214,40 @@ class PerspectiveBenchmark(Suite):
         the on update callback that forces resolution of updates across
         25 views."""
         table = Table(self._schema)
-        views = [table.view(row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        views = [
+            table.view(
+                row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]
+            )
+            for i in range(25)
+        ]
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "two"))
         setattr(self, "update_two", func)
-
 
     def benchmark_view_two_df_updates(self):
         """Benchmark dataframe updates for two-sided views."""
         table = Table(self._df_schema)
-        views = [table.view(row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        views = [
+            table.view(
+                row_pivots=["State", "City"], column_pivots=["Category", "Sub-Category"]
+            )
+            for i in range(25)
+        ]
         for v in views:
             v.on_update(empty_callback)
         update_data = pd.DataFrame(self._get_update_data(1000))
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "two_df"))
         setattr(self, "update_two_df", func)
 
@@ -236,7 +257,8 @@ class PerspectiveBenchmark(Suite):
             if len(pivot) == 0:
                 continue
             test_meta = make_meta(
-                "view", "two_column_only_{0}_pivot".format(len(pivot)))
+                "view", "two_column_only_{0}_pivot".format(len(pivot))
+            )
             view_constructor = partial(self._table.view, column_pivots=pivot)
             func = Benchmark(lambda: view_constructor(), meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
@@ -246,26 +268,34 @@ class PerspectiveBenchmark(Suite):
         the on update callback that forces resolution of updates across
         25 views."""
         table = Table(self._schema)
-        views = [table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        views = [
+            table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)
+        ]
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "two_column_only"))
         setattr(self, "update_two_column_only", func)
-    
+
     def benchmark_view_two_column_only_df_updates(self):
         """Benchmark dataframe updates for two-sided column only views."""
         table = Table(self._df_schema)
-        views = [table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)]
+        views = [
+            table.view(column_pivots=["Category", "Sub-Category"]) for i in range(25)
+        ]
         for v in views:
             v.on_update(empty_callback)
         update_data = pd.DataFrame(self._get_update_data(1000))
+
         def resolve_update():
             table.update(update_data)
             table.size()
+
         func = Benchmark(resolve_update, meta=make_meta("update", "two_column_only_df"))
         setattr(self, "update_two_column_only_df", func)
 
@@ -274,7 +304,8 @@ class PerspectiveBenchmark(Suite):
         for name in ("numpy", "dict", "records", "df", "arrow"):
             test_meta = make_meta("to_format", "to_{}".format(name))
             func = Benchmark(
-                lambda: getattr(self._view, "to_{0}".format(name))(), meta=test_meta)
+                lambda: getattr(self._view, "to_{0}".format(name))(), meta=test_meta
+            )
             setattr(self, "to_format_{0}".format(name), func)
 
     def benchmark_to_format_one(self):
@@ -284,10 +315,12 @@ class PerspectiveBenchmark(Suite):
                 if len(pivot) == 0:
                     continue
                 test_meta = make_meta(
-                    "to_format", "to_{0}_r{1}".format(name, len(pivot)))
+                    "to_format", "to_{0}_r{1}".format(name, len(pivot))
+                )
                 view = self._table.view(row_pivots=pivot)
                 func = Benchmark(
-                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
+                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta
+                )
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
     def benchmark_to_format_two(self):
@@ -299,10 +332,12 @@ class PerspectiveBenchmark(Suite):
                 if len(RP) == 0 and len(CP) == 0:
                     continue
                 test_meta = make_meta(
-                    "to_format", "to_{0}_r{1}_c{2}".format(name, len(RP), len(CP)))
+                    "to_format", "to_{0}_r{1}_c{2}".format(name, len(RP), len(CP))
+                )
                 view = self._table.view(row_pivots=RP, column_pivots=CP)
                 func = Benchmark(
-                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
+                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta
+                )
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
     def benchmark_to_format_two_column_only(self):
@@ -313,10 +348,12 @@ class PerspectiveBenchmark(Suite):
                 if len(pivot) == 0:
                     continue
                 test_meta = make_meta(
-                    "to_format", "to_{0}_c_{1}".format(name, len(pivot)))
+                    "to_format", "to_{0}_c_{1}".format(name, len(pivot))
+                )
                 view = self._table.view(column_pivots=pivot)
                 func = Benchmark(
-                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
+                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta
+                )
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
 

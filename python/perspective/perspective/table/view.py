@@ -17,13 +17,21 @@ from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
-from .libbinding import make_view_zero, make_view_one, make_view_two,\
-    to_arrow_zero, to_arrow_one, to_arrow_two, get_row_delta_zero,\
-    get_row_delta_one, get_row_delta_two
+from .libbinding import (
+    make_view_zero,
+    make_view_one,
+    make_view_two,
+    to_arrow_zero,
+    to_arrow_one,
+    to_arrow_two,
+    get_row_delta_zero,
+    get_row_delta_one,
+    get_row_delta_two,
+)
 
 
 class View(object):
-    '''A :class:`~perspective.View` object represents a specific transform
+    """A :class:`~perspective.View` object represents a specific transform
     (pivot, filter, sort, etc) configuration on an underlying
     :class:`~perspective.Table`.  :class:`~perspective.View` objects
     cannot be directly instantiated - they must be derived from an existing
@@ -35,7 +43,7 @@ class View(object):
     serialized (via ``to_*`` methods) or trigger a callback when it is updated.
     :class:`~perspective.View` objects will remain in memory and actively
     process updates until :obj:`~perspective.View.delete()` method is called.
-    '''
+    """
 
     def __init__(self, Table, **kwargs):
         self._name = "py_" + str(random())
@@ -46,11 +54,29 @@ class View(object):
         date_validator = _PerspectiveDateValidator()
 
         if self._sides == 0:
-            self._view = make_view_zero(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_zero(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator,
+            )
         elif self._sides == 1:
-            self._view = make_view_one(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_one(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator,
+            )
         else:
-            self._view = make_view_two(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_two(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator,
+            )
 
         self._column_only = self._view.is_column_only()
         self._callbacks = self._table._callbacks
@@ -58,17 +84,17 @@ class View(object):
         self._client_id = None
 
     def get_config(self):
-        '''Returns a copy of the immutable configuration ``kwargs`` from which
+        """Returns a copy of the immutable configuration ``kwargs`` from which
         this :class:`~perspective.View` was instantiated.
 
         Returns:
             :obj:`dict`: ``kwargs`` supplied to the
                 :func:`perspective.Table.view()` method.
-        '''
+        """
         return self._config.get_config()
 
     def sides(self):
-        '''An integer representing the # of hierarchial axis on this
+        """An integer representing the # of hierarchial axis on this
         :class:`~perspective.View`.
 
         0 - Neither ``row_pivots`` nor ``column_pivots`` properties are set.
@@ -79,8 +105,11 @@ class View(object):
 
         Returns:
             :obj:`int`: 0 <= N <= 2
-        '''
-        if len(self._config.get_row_pivots()) > 0 or len(self._config.get_column_pivots()) > 0:
+        """
+        if (
+            len(self._config.get_row_pivots()) > 0
+            or len(self._config.get_column_pivots()) > 0
+        ):
             if len(self._config.get_column_pivots()) > 0:
                 return 2
             else:
@@ -89,78 +118,80 @@ class View(object):
             return 0
 
     def num_rows(self):
-        '''The number of aggregated rows in the :class:`~perspective.View`.
+        """The number of aggregated rows in the :class:`~perspective.View`.
 
         This count includes the total aggregate rows for all ``row_pivots``
         depth levels, and can also be affected by any applied ``filter``.
 
         Returns:
             :obj:`int`: Number of rows.
-        '''
+        """
         return self._view.num_rows()
 
     def num_columns(self):
-        '''The number of aggregated columns in the :class:`~perspective.View`.
+        """The number of aggregated columns in the :class:`~perspective.View`.
         This is affected by the ``column_pivots`` that are applied to the
         :class:`~perspective.View`.
 
         Returns:
             :obj:`int`: Number of columns.
-        '''
+        """
         return self._view.num_columns()
 
     def get_row_expanded(self, idx):
-        '''Returns whether row at `idx` is expanded or collapsed.
+        """Returns whether row at `idx` is expanded or collapsed.
 
         Returns:
             :obj:`bool`: Is this row expanded?
-        '''
+        """
         return self._view.get_row_expanded(idx)
 
     def expand(self, idx):
-        '''Expands the row at 'idx', i.e. displaying its leaf rows.
+        """Expands the row at 'idx', i.e. displaying its leaf rows.
 
         Args:
             idx (:obj:`int`): Row index to expand.
-        '''
+        """
         return self._view.expand(idx, len(self._config.get_row_pivots()))
 
     def collapse(self, idx):
-        '''Collapses the row at 'idx', i.e. hiding its leaf rows.
+        """Collapses the row at 'idx', i.e. hiding its leaf rows.
 
         Args:
             idx (:obj:`int`): Row index to collapse.
-        '''
+        """
         return self._view.collapse(idx)
 
     def set_depth(self, depth):
-        '''Sets the expansion depth of the pivot tree.
+        """Sets the expansion depth of the pivot tree.
 
         Args:
             depth (:obj:`int`): Depth to collapse all nodes to, which
                 may be no greater then the length of the ``row_pivots``
                 property.
-        '''
+        """
         return self._view.set_depth(depth, len(self._config.get_row_pivots()))
 
     def column_paths(self):
-        '''Returns the names of the columns as they show in the
+        """Returns the names of the columns as they show in the
         :class:`~perspective.View`, i.e. the hierarchial columns when
         ``column_pivots`` is applied.
 
         Returns:
             :obj:`list` of :obj`str`: Aggregated column names.
-        '''
+        """
         paths = self._view.column_paths()
         string_paths = []
 
         for path in paths:
-            string_paths.append(COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path]))
+            string_paths.append(
+                COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path])
+            )
 
         return string_paths
 
     def schema(self, as_string=False):
-        '''The schema of this :class:`~perspective.View`, which is a key-value
+        """The schema of this :class:`~perspective.View`, which is a key-value
         map that contains the column names and their Python data types.
 
         If the columns are aggregated, their aggregated types will be shown
@@ -173,20 +204,25 @@ class View(object):
         Returns:
             :obj:`dict`: A map of :obj:`str` column name to :obj:`str` or
                 :obj:`type`, depending on the value of ``as_string`` kwarg.
-        '''
+        """
         if as_string:
             return {item[0]: item[1] for item in self._view.schema().items()}
 
-        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
+        return {
+            item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()
+        }
 
     def computed_schema(self, as_string=False):
         if as_string:
             return {item[0]: item[1] for item in self._view.computed_schema().items()}
 
-        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.computed_schema().items()}
+        return {
+            item[0]: _str_to_pythontype(item[1])
+            for item in self._view.computed_schema().items()
+        }
 
     def on_update(self, callback, mode=None):
-        '''Add a callback to be fired when :func:`perspective.Table.update()` is
+        """Add a callback to be fired when :func:`perspective.Table.update()` is
         called on the parent :class:`~perspective.Table`.
 
         Multiple callbacks can be set through calling ``on_update`` multiple
@@ -210,31 +246,38 @@ class View(object):
             >>> view.on_update(updater)
             >>> table.update({"a": [1]})'
             >>> Update fired on port 0
-        '''
+        """
         self._table._state_manager.call_process(self._table._table.get_id())
         mode = mode or "none"
 
         if not callable(callback):
-            raise ValueError('Invalid callback - must be a callable function')
+            raise ValueError("Invalid callback - must be a callable function")
 
         if mode not in ["none", "cell", "row"]:
-            raise ValueError('Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(mode))
+            raise ValueError(
+                'Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(
+                    mode
+                )
+            )
 
         if mode == "cell" or mode == "row":
             if not self._view._get_deltas_enabled():
                 self._view._set_deltas_enabled(True)
 
         wrapped_callback = partial(
-            self._wrapped_on_update_callback, mode=mode, callback=callback)
+            self._wrapped_on_update_callback, mode=mode, callback=callback
+        )
 
-        self._callbacks.add_callback({
-            "name": self._name,
-            "orig_callback": callback,
-            "callback": wrapped_callback
-        })
+        self._callbacks.add_callback(
+            {
+                "name": self._name,
+                "orig_callback": callback,
+                "callback": wrapped_callback,
+            }
+        )
 
     def remove_update(self, callback):
-        '''Given a callback function, remove it from the list of callbacks.
+        """Given a callback function, remove it from the list of callbacks.
 
         Args:
             callback (:obj:`func`): a function reference that will be removed.
@@ -251,14 +294,14 @@ class View(object):
             called!
             >>> view2.remove_update(callback)
             >>> table.update(new_data) # callback removed and will not fire
-        '''
+        """
         self._table._state_manager.call_process(self._table._table.get_id())
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
         self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] == callback)
 
     def on_delete(self, callback):
-        '''Set a callback to be run when the :func:`perspective.View.delete()`
+        """Set a callback to be run when the :func:`perspective.View.delete()`
         method is called on this :class:`~perspective.View`.
 
         Args:
@@ -271,13 +314,13 @@ class View(object):
             >>> view.on_delete(deleter)
             >>> view.delete()
             >>> Delete called!
-        '''
+        """
         if not callable(callback):
             return ValueError("on_delete callback must be a callable function!")
         self._delete_callbacks.add_callback(callback)
 
     def delete(self):
-        '''Delete the :class:`~perspective.View` and clean up all associated
+        """Delete the :class:`~perspective.View` and clean up all associated
         callbacks.
 
         This method must be called to clean up resources used by the
@@ -288,7 +331,7 @@ class View(object):
             >>> table = perspective.Table(data)
             >>> view = table.view()
             >>> view.delete()
-        '''
+        """
         self._table._state_manager.remove_process(self._table._table.get_id())
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
@@ -296,7 +339,7 @@ class View(object):
         [cb() for cb in self._delete_callbacks]
 
     def remove_delete(self, callback):
-        '''Remove the delete callback associated with this
+        """Remove the delete callback associated with this
         :class:`~perspective.View`.
 
         Args:
@@ -315,7 +358,7 @@ class View(object):
             called!
             >>> view2.remove_delete(callback)
             >>> view2.delete() # callback removed and will not fire
-        '''
+        """
         if not callable(callback):
             return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
@@ -323,14 +366,32 @@ class View(object):
     def to_arrow(self, **kwargs):
         options = _parse_format_options(self, kwargs)
         if self._sides == 0:
-            return to_arrow_zero(self._view, options["start_row"], options["end_row"], options["start_col"], options["end_col"])
+            return to_arrow_zero(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
         elif self._sides == 1:
-            return to_arrow_one(self._view, options["start_row"], options["end_row"], options["start_col"], options["end_col"])
+            return to_arrow_one(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
         else:
-            return to_arrow_two(self._view, options["start_row"], options["end_row"], options["start_col"], options["end_col"])
+            return to_arrow_two(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
 
     def to_records(self, **kwargs):
-        '''Serialize the :class:`~perspective.View`'s dataset into a :obj:`list`
+        """Serialize the :class:`~perspective.View`'s dataset into a :obj:`list`
         of :obj:`dict` containing each row.
 
         By default, the entire dataset is returned, though this can be windowed
@@ -355,11 +416,11 @@ class View(object):
             :obj:`list` of :obj:`dict`: A list of :obj:`dict`, where each dict
                 represents a row of the current state of the
                 :class:`~perspective.View`.
-        '''
-        return to_format(kwargs, self, 'records')
+        """
+        return to_format(kwargs, self, "records")
 
     def to_dict(self, **options):
-        '''Serialize the :class:`~perspective.View`'s dataset into a :obj:`dict`
+        """Serialize the :class:`~perspective.View`'s dataset into a :obj:`dict`
         of :obj:`str` keys and :obj:`list` values.  Each key is a column name,
         and the associated value is the column's data packed into a :obj:`list`.
         If the :class:`~perspective.View` is aggregated, the aggregated dataset
@@ -380,11 +441,11 @@ class View(object):
         Returns:
             :obj:`dict`: A dictionary with string keys and list values, where
                 key = column name and value = column values.
-        '''
-        return to_format(options, self, 'dict')
+        """
+        return to_format(options, self, "dict")
 
     def to_numpy(self, **options):
-        '''Serialize the view's dataset into a :obj:`dict` of :obj:`str` keys
+        """Serialize the view's dataset into a :obj:`dict` of :obj:`str` keys
         and :class:`numpy.array` values.  Each key is a column name, and the
         associated value is the column's data packed into a numpy array.
 
@@ -404,11 +465,11 @@ class View(object):
             :obj:`dict` of :class:`numpy.array`: A dictionary with string keys
                 and numpy array values, where key = column name and
                 value = column values.
-        '''
-        return to_format(options, self, 'numpy')
+        """
+        return to_format(options, self, "numpy")
 
     def to_df(self, **options):
-        '''Serialize the view's dataset into a pandas dataframe.
+        """Serialize the view's dataset into a pandas dataframe.
 
         If the view is aggregated, the aggregated dataset will be returned.
 
@@ -428,12 +489,12 @@ class View(object):
         Returns:
             :class:`pandas.DataFrame`: A DataFrame serialization of the current
                 state of this :class:`~perspective.View`.
-        '''
+        """
         cols = self.to_numpy(**options)
         return pandas.DataFrame(cols)
 
     def to_csv(self, **options):
-        '''Serialize the :class:`~perspective.View`'s dataset into a CSV string.
+        """Serialize the :class:`~perspective.View`'s dataset into a CSV string.
 
         Keyword Args:
             start_row (:obj:`int`): (Defaults to 0).
@@ -451,8 +512,11 @@ class View(object):
 
         Returns:
             :obj:`str`: A CSV-formatted string containing the serialized data.
-        '''
-        return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"), line_terminator='\r\n' if os.name == 'nt' else '\n')
+        """
+        return self.to_df(**options).to_csv(
+            date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"),
+            line_terminator="\r\n" if os.name == "nt" else "\n",
+        )
 
     @wraps(to_records)
     def to_json(self, **options):
@@ -474,7 +538,7 @@ class View(object):
             return get_row_delta_two(self._view)
 
     def _num_hidden_cols(self):
-        '''Returns the number of columns that are sorted but not shown.'''
+        """Returns the number of columns that are sorted but not shown."""
         hidden = 0
         columns = self._config.get_columns()
         for sort in self._config.get_sort():
@@ -483,9 +547,9 @@ class View(object):
         return hidden
 
     def _wrapped_on_update_callback(self, **kwargs):
-        '''Provide the user-defined callback function with additional metadata
+        """Provide the user-defined callback function with additional metadata
         from the view.
-        '''
+        """
         mode = kwargs["mode"]
         port_id = kwargs["port_id"]
         cache = kwargs["cache"]

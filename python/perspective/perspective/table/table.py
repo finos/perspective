@@ -15,14 +15,21 @@ from ..core.exception import PerspectiveError
 from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
 from ._utils import _dtype_to_pythontype, _dtype_to_str
-from .libbinding import make_table, get_table_computed_schema, \
-                        get_computed_functions, get_computation_input_types, \
-                        str_to_filter_op, t_filter_op, t_op, t_dtype
+from .libbinding import (
+    make_table,
+    get_table_computed_schema,
+    get_computed_functions,
+    get_computation_input_types,
+    str_to_filter_op,
+    t_filter_op,
+    t_op,
+    t_dtype,
+)
 
 
 class Table(object):
     def __init__(self, data, limit=None, index=None):
-        '''Construct a :class:`~perspective.Table` using the provided data or
+        """Construct a :class:`~perspective.Table` using the provided data or
         schema and optional configuration dictionary.
 
         :class:`~perspective.Table` instances are immutable - column names and
@@ -41,9 +48,9 @@ class Table(object):
                 :class:`~perspective.Table` should have.  Cannot be set at the
                 same time as ``index``. Updates past the limit will begin
                 writing at row 0.
-        '''
+        """
         self._is_arrow = isinstance(data, (bytes, bytearray))
-        if (self._is_arrow):
+        if self._is_arrow:
             _accessor = data
         else:
             _accessor = _PerspectiveAccessor(data)
@@ -54,9 +61,16 @@ class Table(object):
         self._index = index or ""
 
         # Always create tables on port 0
-        self._table = make_table(None, _accessor, self._limit,
-                                 self._index, t_op.OP_INSERT, False,
-                                 self._is_arrow, 0)
+        self._table = make_table(
+            None,
+            _accessor,
+            self._limit,
+            self._index,
+            t_op.OP_INSERT,
+            False,
+            self._is_arrow,
+            0,
+        )
 
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
@@ -72,35 +86,35 @@ class Table(object):
         self._state_manager = _PerspectiveStateManager()
 
     def make_port(self):
-        '''Create a new input port on the underlying `gnode`, and return an
+        """Create a new input port on the underlying `gnode`, and return an
         :obj:`int` containing the ID of the new input port.
-        '''
+        """
         return self._table.make_port()
 
     def remove_port(self, port_id):
-        '''Remove the specified port from the underlying `gnode`.'''
+        """Remove the specified port from the underlying `gnode`."""
         self._table.remove_port()
 
     def compute(self):
-        '''Returns whether the computed column feature is enabled.'''
+        """Returns whether the computed column feature is enabled."""
         return True
 
     def clear(self):
-        '''Removes all the rows in the :class:`~perspective.Table`, but
+        """Removes all the rows in the :class:`~perspective.Table`, but
         preserves everything else including the schema and any callbacks or
         registered :class:`~perspective.View`.
-        '''
+        """
         self._state_manager.remove_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
 
     def replace(self, data):
-        '''Replaces all rows in the :class:`~perspective.Table` with the new
+        """Replaces all rows in the :class:`~perspective.Table` with the new
         data that conforms to the :class:`~perspective.Table` schema.
 
         Args:
             data (:obj:`dict`/:obj:`list`/:obj:`pandas.DataFrame`): New data
                 that will be filled into the :class:`~perspective.Table`.
-        '''
+        """
         self._state_manager.remove_process(self._table.get_id())
         self._table.reset_gnode(self._gnode_id)
         self.update(data)
@@ -128,12 +142,12 @@ class Table(object):
         return computed_functions
 
     def size(self):
-        '''Returns the row count of the :class:`~perspective.Table`.'''
+        """Returns the row count of the :class:`~perspective.Table`."""
         self._state_manager.call_process(self._table.get_id())
         return self._table.size()
 
     def schema(self, as_string=False):
-        '''Returns the schema of this :class:`~perspective.Table`, a :obj:`dict`
+        """Returns the schema of this :class:`~perspective.Table`, a :obj:`dict`
         mapping of string column names to python data types.
 
         Keyword Args:
@@ -142,13 +156,13 @@ class Table(object):
 
         Returns:
             :obj:`dict`: A key-value mapping of column names to data types.
-        '''
+        """
         s = self._table.get_schema()
         columns = s.columns()
         types = s.types()
         schema = {}
         for i in range(0, len(columns)):
-            if (columns[i] != "psp_okey"):
+            if columns[i] != "psp_okey":
                 if as_string:
                     schema[columns[i]] = _dtype_to_str(types[i])
                 else:
@@ -156,7 +170,7 @@ class Table(object):
         return schema
 
     def computed_schema(self, computed_columns=None, **kwargs):
-        '''Returns a schema containing the column names and data types of
+        """Returns a schema containing the column names and data types of
         the ``computed_columns`` argument.
 
         If any column has invalid input columns or invalid types, they
@@ -170,7 +184,7 @@ class Table(object):
         Keyword Args:
             as_string (:obj:`bool`): returns the data types as string
                 representations, if True
-        '''
+        """
         schema = {}
         if computed_columns is None or len(computed_columns) == 0:
             return schema
@@ -187,7 +201,7 @@ class Table(object):
         return schema
 
     def get_computation_input_types(self, computed_function_name=None, **kwargs):
-        '''Returns a list of accepted input types for the provided
+        """Returns a list of accepted input types for the provided
         ``computed_function_name``.
 
         Args:
@@ -197,7 +211,7 @@ class Table(object):
         Keyword Args:
             as_string (:obj:`bool`): returns the data types as string
                 representations, if True.
-        '''
+        """
         new_types = []
         if computed_function_name is None:
             return new_types
@@ -211,7 +225,7 @@ class Table(object):
         return new_types
 
     def columns(self, computed=False):
-        '''Returns the column names of this :class:`~perspective.Table`.
+        """Returns the column names of this :class:`~perspective.Table`.
 
         Keyword Args:
             computed (:obj:`bool`): Whether to include computed columns in this
@@ -219,12 +233,13 @@ class Table(object):
 
         Returns:
             :obj:`list`: a list of string column names
-        '''
-        return [name for name in self._table.get_schema().columns()
-                if name != "psp_okey"]
+        """
+        return [
+            name for name in self._table.get_schema().columns() if name != "psp_okey"
+        ]
 
     def is_valid_filter(self, filter):
-        '''Tests whether a given filter expression string is valid, e.g. that
+        """Tests whether a given filter expression string is valid, e.g. that
         the filter term is not None or an unparsable date/datetime.  `null`/
         `not null` operators don't need a comparison value.
 
@@ -233,14 +248,16 @@ class Table(object):
 
         Returns:
             :obj:`bool`: Whether this filter is valid.
-        '''
+        """
         if isinstance(filter[1], string_types):
             filter_op = str_to_filter_op(filter[1])
         else:
             filter_op = filter[1]
 
-        if filter_op == t_filter_op.FILTER_OP_IS_NULL or \
-           filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
+        if (
+            filter_op == t_filter_op.FILTER_OP_IS_NULL
+            or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL
+        ):
             # null/not null operators don't need a comparison value
             return True
 
@@ -258,7 +275,7 @@ class Table(object):
         return value is not None
 
     def update(self, data, port_id=0):
-        '''Update the :class:`~perspective.Table` with new data.
+        """Update the :class:`~perspective.Table` with new data.
 
         Updates on :class:`~perspective.Table` without an explicit ``index``
         are treated as appends.  Updates on :class:`~perspective.Table` with
@@ -276,25 +293,36 @@ class Table(object):
             >>> tbl.update({"a": [2, 3], "b": ["a", "a"]})
             >>> tbl.view().to_dict()
             {"a": [1, 2, 3], "b": ["a", "a", "a"]}
-        '''
+        """
         if not port_id:
             port_id = 0
 
         _is_arrow = isinstance(data, (bytes, bytearray))
 
-        if (_is_arrow):
+        if _is_arrow:
             _accessor = data
-            self._table = make_table(self._table, _accessor, self._limit, self._index, t_op.OP_INSERT, True, True, port_id)
+            self._table = make_table(
+                self._table,
+                _accessor,
+                self._limit,
+                self._index,
+                t_op.OP_INSERT,
+                True,
+                True,
+                port_id,
+            )
             self._state_manager.set_process(
-                self._table.get_pool(), self._table.get_id())
+                self._table.get_pool(), self._table.get_id()
+            )
             return
 
         columns = self.columns()
         types = self._table.get_schema().types()
         _accessor = _PerspectiveAccessor(data)
-        _accessor._names = columns + \
-            [name for name in _accessor._names if name == "__INDEX__"]
-        _accessor._types = types[:len(columns)]
+        _accessor._names = columns + [
+            name for name in _accessor._names if name == "__INDEX__"
+        ]
+        _accessor._types = types[: len(columns)]
 
         if _accessor._is_numpy:
             # Try to cast arrays to the Perspective dtype before they end up in
@@ -310,13 +338,20 @@ class Table(object):
             else:
                 _accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(self._table, _accessor, self._limit,
-                                 self._index, t_op.OP_INSERT, True, False, port_id)
-        self._state_manager.set_process(
-            self._table.get_pool(), self._table.get_id())
+        self._table = make_table(
+            self._table,
+            _accessor,
+            self._limit,
+            self._index,
+            t_op.OP_INSERT,
+            True,
+            False,
+            port_id,
+        )
+        self._state_manager.set_process(self._table.get_pool(), self._table.get_id())
 
     def remove(self, pkeys, port_id=0):
-        '''Removes the rows with the primary keys specified in ``pkeys``.
+        """Removes the rows with the primary keys specified in ``pkeys``.
 
         If the :class:`~perspective.Table` does not have an index, ``remove()``
         has no effect.  Removes propagate to views derived from the table.
@@ -330,7 +365,7 @@ class Table(object):
             >>> tbl.remove([2, 3])
             >>> tbl.view().to_records()
             [{"a": 1}]
-        '''
+        """
         if self._index == "":
             return
         pkeys = list(map(lambda idx: {self._index: idx}, pkeys))
@@ -338,13 +373,29 @@ class Table(object):
         _accessor = _PerspectiveAccessor(pkeys)
         _accessor._names = [self._index]
         _accessor._types = types
-        t = make_table(self._table, _accessor,  self._limit,
-                       self._index, t_op.OP_DELETE, True, False, port_id)
+        t = make_table(
+            self._table,
+            _accessor,
+            self._limit,
+            self._index,
+            t_op.OP_DELETE,
+            True,
+            False,
+            port_id,
+        )
         self._state_manager.set_process(t.get_pool(), t.get_id())
 
-    def view(self, columns=None, row_pivots=None, column_pivots=None,
-             aggregates=None, sort=None, filter=None, computed_columns=None):
-        ''' Create a new :class:`~perspective.View` from this
+    def view(
+        self,
+        columns=None,
+        row_pivots=None,
+        column_pivots=None,
+        aggregates=None,
+        sort=None,
+        filter=None,
+        computed_columns=None,
+    ):
+        """Create a new :class:`~perspective.View` from this
         :class:`~perspective.Table` via the supplied keyword arguments.
 
         A View is an immutable set of transformations applied to the data stored
@@ -378,7 +429,7 @@ class Table(object):
             >>> view = tbl.view(filter=[["a", "==", 1]]
             >>> view.to_dict()
             >>> {"a": [1]}
-        '''
+        """
         self._state_manager.call_process(self._table.get_id())
 
         config = {}
@@ -408,7 +459,7 @@ class Table(object):
         return view
 
     def on_delete(self, callback):
-        '''Register a callback to be invoked when the
+        """Register a callback to be invoked when the
         :func:`~perspective.Table.delete()` method is called on this
         :class:`~perspective.Table`.
 
@@ -421,13 +472,13 @@ class Table(object):
             >>> table.on_delete(deleter)
             >>> table.delete()
             >>> Delete called!
-        '''
+        """
         if not callable(callback):
             raise ValueError("on_delete callback must be a callable function!")
         self._delete_callbacks.add_callback(callback)
 
     def remove_delete(self, callback):
-        '''De-register the supplied callback from the
+        """De-register the supplied callback from the
         :func:`~perspective.Table.delete()` event for this
         :class:`~perspective.Table`
 
@@ -437,22 +488,22 @@ class Table(object):
             >>> table.on_delete(deleter)
             >>> table.remove_delete(deleter)
             >>> table.delete()
-        '''
+        """
         self._state_manager.remove_process(self._table.get_id())
         if not callable(callback):
-            return ValueError(
-                "remove_delete callback should be a callable function!")
+            return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
 
     def delete(self):
-        '''Delete this :class:`~perspective.Table` and clean up associated
+        """Delete this :class:`~perspective.Table` and clean up associated
         resources, assuming it has no :class:`~perspective.View` instances
         registered to it (which must be deleted first).
-        '''
+        """
         if len(self._views) > 0:
             raise PerspectiveError(
-                "Cannot delete a Table with active views still linked to it " +
-                "- call delete() on each view, and try again.")
+                "Cannot delete a Table with active views still linked to it "
+                + "- call delete() on each view, and try again."
+            )
         self._state_manager.remove_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks]

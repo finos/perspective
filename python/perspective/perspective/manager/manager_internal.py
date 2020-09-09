@@ -46,7 +46,7 @@ class _PerspectiveManagerInternal(object):
         self._lock = lock
 
     def _process(self, msg, post_callback, client_id=None):
-        '''Given a message from the client, process it through the Perspective
+        """Given a message from the client, process it through the Perspective
         engine.
 
         Args:
@@ -56,22 +56,25 @@ class _PerspectiveManagerInternal(object):
                 client. `post_callback` should be a callable that takes two
                 parameters: `data` (str), and `binary` (bool), a kwarg that
                 specifies whether `data` is a binary string.
-        '''
+        """
         if isinstance(msg, string_types):
-            if msg == "heartbeat":   # TODO fix this
+            if msg == "heartbeat":  # TODO fix this
                 return
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):
             raise PerspectiveError(
                 "Message passed into `_process` should either be a "
-                "JSON-serialized string or a dict.")
+                "JSON-serialized string or a dict."
+            )
 
         cmd = msg["cmd"]
 
         if self._is_locked_command(msg) is True:
             error_string = "`{0}` failed - access denied".format(
-                msg["cmd"] + (("." + msg["method"]) if msg.get("method", None) is not None else ""))
+                msg["cmd"]
+                + (("." + msg["method"]) if msg.get("method", None) is not None else "")
+            )
             error_message = self._make_error_message(msg["id"], error_string)
             post_callback(self._message_to_json(msg["id"], error_message))
             return
@@ -86,43 +89,47 @@ class _PerspectiveManagerInternal(object):
                     # create a new Table and track it
                     data_or_schema = msg["args"][0]
                     self._tables[msg["name"]] = Table(
-                        data_or_schema, **msg.get("options", {}))
+                        data_or_schema, **msg.get("options", {})
+                    )
                 except IndexError:
                     self._tables[msg["name"]] = []
             elif cmd == "view":
                 # create a new view and track it with the assigned client_id.
-                new_view = self._tables[msg["table_name"]].view(
-                    **msg.get("config", {}))
+                new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
                 new_view._client_id = client_id
                 self._views[msg["view_name"]] = new_view
             elif cmd == "table_method" or cmd == "view_method":
                 self._process_method_call(msg, post_callback, client_id)
-        except(PerspectiveError, PerspectiveCppError) as e:
+        except (PerspectiveError, PerspectiveCppError) as e:
             # Catch errors and return them to client
             error_message = self._make_error_message(msg["id"], str(e))
             post_callback(self._message_to_json(msg["id"], error_message))
 
     def _process_method_call(self, msg, post_callback, client_id):
-        '''When the client calls a method, validate the instance it calls on
+        """When the client calls a method, validate the instance it calls on
         and return the result.
-        '''
+        """
         if msg["cmd"] == "table_method":
             table_or_view = self._tables.get(msg["name"], None)
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
                 error_message = self._make_error_message(
-                    msg["id"], "View is not initialized")
+                    msg["id"], "View is not initialized"
+                )
                 post_callback(self._message_to_json(msg["id"], error_message))
         try:
             if msg.get("subscribe", False) is True:
-                self._process_subscribe(
-                    msg, table_or_view, post_callback, client_id)
+                self._process_subscribe(msg, table_or_view, post_callback, client_id)
             else:
                 # Decide how to dispatch the method
                 arguments = {}
 
-                if msg["method"] in ("schema", "computed_schema", "get_computation_input_types"):
+                if msg["method"] in (
+                    "schema",
+                    "computed_schema",
+                    "get_computation_input_types",
+                ):
                     # make sure schema returns string types through the
                     # wire API. `as_string` is respected by both the table
                     # and view's `schema` and `computed_schema` methods.
@@ -146,7 +153,9 @@ class _PerspectiveManagerInternal(object):
                     else:
                         # Return an error when `table.delete()` is called
                         # over the wire API.
-                        raise PerspectiveError("table.delete() cannot be called on a remote table, as the remote has full ownership.")
+                        raise PerspectiveError(
+                            "table.delete() cannot be called on a remote table, as the remote has full ownership."
+                        )
 
                 # Dispatch the method using the expected argument form
                 if msg["method"].startswith("to_"):
@@ -156,13 +165,18 @@ class _PerspectiveManagerInternal(object):
                     # Apply first arg as positional, then options dict as kwargs
                     data = arguments[0]
                     options = {}
-                    if (len(arguments) > 1 and isinstance(arguments[1], dict)):
+                    if len(arguments) > 1 and isinstance(arguments[1], dict):
                         options = arguments[1]
                     result = getattr(table_or_view, msg["method"])(data, **options)
-                elif msg["cmd"] == "table_method" and msg["method"] in ("computed_schema", "get_computation_input_types"):
+                elif msg["cmd"] == "table_method" and msg["method"] in (
+                    "computed_schema",
+                    "get_computation_input_types",
+                ):
                     # computed_schema on the table takes kwargs; computed
                     # schema on the view takes args.
-                    result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **arguments)
+                    result = getattr(table_or_view, msg["method"])(
+                        *msg.get("args", []), **arguments
+                    )
                 else:
                     # otherwise parse arguments as list
                     result = getattr(table_or_view, msg["method"])(*arguments)
@@ -184,7 +198,7 @@ class _PerspectiveManagerInternal(object):
             post_callback(self._message_to_json(msg["id"], message))
 
     def _process_subscribe(self, msg, table_or_view, post_callback, client_id):
-        '''When the client attempts to add or remove a subscription callback,
+        """When the client attempts to add or remove a subscription callback,
         validate and perform the requested operation.
 
         Args:
@@ -195,7 +209,7 @@ class _PerspectiveManagerInternal(object):
                 new data.
             client_id (str) : a unique str id that identifies the
                 `PerspectiveSession` object that is passing the message.
-        '''
+        """
         try:
             callback = None
             callback_id = msg.get("callback_id", None)
@@ -203,15 +217,16 @@ class _PerspectiveManagerInternal(object):
             args = msg.get("args", [])
             if method and method[:2] == "on":
                 # wrap the callback
-                callback = partial(
-                    self.callback, msg=msg, post_callback=post_callback)
+                callback = partial(self.callback, msg=msg, post_callback=post_callback)
                 if callback_id:
-                    self._callback_cache.add_callback({
-                        "client_id": client_id,
-                        "callback_id": callback_id,
-                        "callback": callback,
-                        "name": msg.get("name", None)
-                    })
+                    self._callback_cache.add_callback(
+                        {
+                            "client_id": client_id,
+                            "callback_id": callback_id,
+                            "callback": callback,
+                            "name": msg.get("name", None),
+                        }
+                    )
             elif callback_id is not None:
                 # pop the callback from the cache of the manager, and
                 # remove each of them from the underlying table or view
@@ -222,7 +237,7 @@ class _PerspectiveManagerInternal(object):
             if callback is not None:
                 # call the underlying method on the Table or View, and apply
                 # the dictionary of kwargs that is passed through.
-                if (method == "on_update"):
+                if method == "on_update":
                     # If there are no arguments, make sure we call `on_update`
                     # with mode set to "none".
                     mode = {"mode": "none"}
@@ -261,7 +276,7 @@ class _PerspectiveManagerInternal(object):
         post_callback(binary, binary=True)
 
     def callback(self, *args, **kwargs):
-        '''Return a message to the client using the `post_callback` method.'''
+        """Return a message to the client using the `post_callback` method."""
         id = kwargs.get("msg")["id"]
         post_callback = kwargs.get("post_callback")
         # Coerce the message to be an object so it can be handled in
@@ -276,12 +291,14 @@ class _PerspectiveManagerInternal(object):
             post_callback(self._message_to_json(msg["id"], msg))
 
     def clear_views(self, client_id):
-        '''Garbage collect views that belong to closed connections.'''
+        """Garbage collect views that belong to closed connections."""
         count = 0
         names = []
 
         if not client_id:
-            raise PerspectiveError("Cannot garbage collect views that are not linked to a specific client ID!")
+            raise PerspectiveError(
+                "Cannot garbage collect views that are not linked to a specific client ID!"
+            )
 
         for name, view in self._views.items():
             if view._client_id == client_id:
@@ -295,21 +312,15 @@ class _PerspectiveManagerInternal(object):
         logging.warning("GC {} views in memory".format(count))
 
     def _make_message(self, id, result):
-        '''Return a serializable message for a successful result.'''
-        return {
-            "id": id,
-            "data": result
-        }
+        """Return a serializable message for a successful result."""
+        return {"id": id, "data": result}
 
     def _make_error_message(self, id, error):
-        '''Return a serializable message for an error result.'''
-        return {
-            "id": id,
-            "error": error
-        }
+        """Return a serializable message for an error result."""
+        return {"id": id, "error": error}
 
     def _message_to_json(self, id, message):
-        '''Given a message object to be passed to Perspective, serialize it
+        """Given a message object to be passed to Perspective, serialize it
         into a string using `DateTimeEncoder` and `allow_nan=False`.
 
         If an Exception occurs in serialization, catch the Exception and
@@ -318,7 +329,7 @@ class _PerspectiveManagerInternal(object):
         Args:
             message (:obj:`dict`) a serializable message to be passed to
                 Perspective.
-        '''
+        """
         try:
             return json.dumps(message, allow_nan=False, cls=DateTimeEncoder)
         except ValueError as error:
@@ -327,16 +338,20 @@ class _PerspectiveManagerInternal(object):
             # Augment the default error message when invalid values are
             # detected, i.e. `NaN`
             if error_string == "Out of range float values are not JSON compliant":
-                error_string = "Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON."
+                error_string = (
+                    "Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON."
+                )
 
-            error_message = self._make_error_message(id, "JSON serialization error: {}".format(error_string))
+            error_message = self._make_error_message(
+                id, "JSON serialization error: {}".format(error_string)
+            )
 
             logging.warning(error_message["error"])
             return json.dumps(error_message)
 
     def _is_locked_command(self, msg):
-        '''Returns `True` if the manager instance is locked and the command
-        is in `_PerspectiveManagerInternal.LOCKED_COMMANDS`, and `False` otherwise.'''
+        """Returns `True` if the manager instance is locked and the command
+        is in `_PerspectiveManagerInternal.LOCKED_COMMANDS`, and `False` otherwise."""
         if not self._lock:
             return False
 

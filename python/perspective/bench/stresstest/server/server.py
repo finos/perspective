@@ -15,35 +15,41 @@ import perspective
 from manager_telemetry import PerspectiveManagerWithTelemetry
 from tornado_handler_telemetry import PerspectiveTornadoHandlerWithTelemetry
 
-PARSER = argparse.ArgumentParser(description="A perspective-python server configured to provide telemetry for use with stress testing.")
+PARSER = argparse.ArgumentParser(
+    description="A perspective-python server configured to provide telemetry for use with stress testing."
+)
 
 PARSER.add_argument(
     "--table_size",
     dest="table_size",
     default=10000,
     type=int,
-    help="The row size of the initial table. Defaults to 10000 rows.")
+    help="The row size of the initial table. Defaults to 10000 rows.",
+)
 
 PARSER.add_argument(
     "--update_size",
     dest="update_size",
     type=int,
     default=50,
-    help="The row size of each update. Defaults to 50 rows.")
+    help="The row size of each update. Defaults to 50 rows.",
+)
 
 PARSER.add_argument(
     "--update_rate",
     dest="update_rate",
     type=float,
     default=500,
-    help="The frequency of each update in milliseconds. Defaults to 500 milliseconds.")
+    help="The frequency of each update in milliseconds. Defaults to 500 milliseconds.",
+)
 
 PARSER.add_argument(
     "--port",
     dest="port",
     type=float,
     default=8888,
-    help="A port to host the Tornado server on. Defaults to 8888.")
+    help="A port to host the Tornado server on. Defaults to 8888.",
+)
 
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -52,7 +58,20 @@ VIEW = None
 MANAGER = PerspectiveManagerWithTelemetry()
 
 
-with open(os.path.join(HERE, "..", "..", "..", "..", "..", "node_modules", "superstore-arrow", "superstore.arrow"), "rb") as arrow:
+with open(
+    os.path.join(
+        HERE,
+        "..",
+        "..",
+        "..",
+        "..",
+        "..",
+        "node_modules",
+        "superstore-arrow",
+        "superstore.arrow",
+    ),
+    "rb",
+) as arrow:
     TABLE = perspective.Table(arrow.read(), index="Row ID")
     VIEW = TABLE.view()
 
@@ -66,11 +85,18 @@ def get_data(update_size):
     data = VIEW.to_dict(start_row=start, end_row=end)
 
     # Generate some random row IDs
-    data["Row ID"] = [random.randint(size, size + update_size) if i % 2 else data["Row ID"][i] for i in range(len(data["Row ID"]))]
+    data["Row ID"] = [
+        random.randint(size, size + update_size) if i % 2 else data["Row ID"][i]
+        for i in range(len(data["Row ID"]))
+    ]
 
     # And other randomized values
-    data["Sales"] = [random.randint(10, 1000) * random.random() for i in range(len(data["Sales"]))]
-    data["Profit"] = [random.randint(10, 100) * random.random() for i in range(len(data["Profit"]))]
+    data["Sales"] = [
+        random.randint(10, 1000) * random.random() for i in range(len(data["Sales"]))
+    ]
+    data["Profit"] = [
+        random.randint(10, 100) * random.random() for i in range(len(data["Profit"]))
+    ]
 
     return data
 
@@ -84,7 +110,11 @@ def make_app(table_size, update_size, update_rate):
         current_size = TABLE.size()
 
         while current_size < table_size:
-            logging.warning("Current table size %d, requested table size %d - inflating", TABLE.size(), table_size)
+            logging.warning(
+                "Current table size %d, requested table size %d - inflating",
+                TABLE.size(),
+                table_size,
+            )
             diff = table_size - TABLE.size()
             data = []
 
@@ -104,12 +134,20 @@ def make_app(table_size, update_size, update_rate):
     def updater():
         TABLE.update(get_data(update_size))
 
-    callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=update_rate)
+    callback = tornado.ioloop.PeriodicCallback(
+        callback=updater, callback_time=update_rate
+    )
     callback.start()
 
-    return tornado.web.Application([
-        (r"/", PerspectiveTornadoHandlerWithTelemetry, {"manager": MANAGER, "check_origin": True})
-    ])
+    return tornado.web.Application(
+        [
+            (
+                r"/",
+                PerspectiveTornadoHandlerWithTelemetry,
+                {"manager": MANAGER, "check_origin": True},
+            )
+        ]
+    )
 
 
 def start(port, table_size, update_size, update_rate):
@@ -129,5 +167,6 @@ if __name__ == "__main__":
         args.port,
         args.table_size,
         args.update_size,
-        args.update_rate)
+        args.update_rate,
+    )
     start(args.port, args.table_size, args.update_size, args.update_rate)

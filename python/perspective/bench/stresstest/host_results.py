@@ -17,35 +17,38 @@ from pathlib import Path
 HERE = os.path.abspath(os.path.dirname(__file__))
 CLIENT_PATH = os.path.join(HERE, "client.py")
 
-PARSER = argparse.ArgumentParser(description="Host results from a stresstest run in a Perspective Table.")
+PARSER = argparse.ArgumentParser(
+    description="Host results from a stresstest run in a Perspective Table."
+)
 
 PARSER.add_argument(
     "--export",
     default=True,
     type=bool,
-    help="Whether to export the accumulated results as a single Arrow. Defaults to True.")
+    help="Whether to export the accumulated results as a single Arrow. Defaults to True.",
+)
 
 PARSER.add_argument(
     "--latest",
     dest="latest",
     default=False,
     type=bool,
-    help="Whether to find the newest folder of results, or use the exact results path."
+    help="Whether to find the newest folder of results, or use the exact results path.",
 )
 
 PARSER.add_argument(
     "results_path",
-    help="A path to a folder containing test results stored as Arrows. If --latest is True, the script will find the newest created folder of results.")
+    help="A path to a folder containing test results stored as Arrows. If --latest is True, the script will find the newest created folder of results.",
+)
 
 MANAGER = perspective.PerspectiveManager()
 
 
 class MainHandler(tornado.web.RequestHandler):
-
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 
     def get(self):
         self.render("results.html")
@@ -80,11 +83,17 @@ def make_app(results_path):
     MANAGER.host_table("results_table", TABLE)
     MANAGER.host_view("results_view", TABLE.view())
 
-    return tornado.web.Application([
-        (r"/", MainHandler),
-        # create a websocket endpoint that the client Javascript can access
-        (r"/websocket", perspective.PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
-    ])
+    return tornado.web.Application(
+        [
+            (r"/", MainHandler),
+            # create a websocket endpoint that the client Javascript can access
+            (
+                r"/websocket",
+                perspective.PerspectiveTornadoHandler,
+                {"manager": MANAGER, "check_origin": True},
+            ),
+        ]
+    )
 
 
 if __name__ == "__main__":
@@ -95,7 +104,10 @@ if __name__ == "__main__":
 
     if args.latest:
         dirs = []
-        paths = sorted([p for p in Path(RESULTS_PATH).iterdir() if p.is_dir()], key=os.path.getmtime)
+        paths = sorted(
+            [p for p in Path(RESULTS_PATH).iterdir() if p.is_dir()],
+            key=os.path.getmtime,
+        )
         RESULTS_PATH = paths[-1]
         logging.info("Results path: %s", RESULTS_PATH)
 

@@ -22,11 +22,11 @@ if six.PY2:
 
 
 def _normalize_timestamp(obj):
-    '''Convert a timestamp in seconds to milliseconds.
+    """Convert a timestamp in seconds to milliseconds.
 
     If the input overflows, it is treated as milliseconds - otherwise it is
     treated as seconds and converted.
-    '''
+    """
     try:
         datetime.fromtimestamp(obj)
         return int(obj * 1000)
@@ -35,10 +35,10 @@ def _normalize_timestamp(obj):
 
 
 class _PerspectiveDateValidator(object):
-    '''Validate and parse dates using the `dateutil` package.'''
+    """Validate and parse dates using the `dateutil` package."""
 
     def parse(self, datestring):
-        '''Return a datetime.datetime object containing the parsed date, or
+        """Return a datetime.datetime object containing the parsed date, or
         None if the date is invalid.
 
         If a ISO date string with a timezone is provided, there is no guarantee
@@ -54,19 +54,19 @@ class _PerspectiveDateValidator(object):
         Returns:
             (:class:`datetime.date`/`datetime.datetime`/`None`): if parse is
                 successful.
-        '''
+        """
         try:
             return parse(datestring)
         except (ValueError, OverflowError):
             return None
 
     def to_date_components(self, obj):
-        '''Return a dictionary of string keys and integer values for `year`,
+        """Return a dictionary of string keys and integer values for `year`,
         `month` (from 0 - 11), and `day`.
 
         This method converts both datetime.date and numpy.datetime64 objects
         that contain datetime.date.
-        '''
+        """
         if obj is None:
             return obj
 
@@ -88,19 +88,15 @@ class _PerspectiveDateValidator(object):
         # Perspective stores month in `t_date` as an integer [0-11],
         # while Python stores month as [1-12], so decrement the Python value
         # before Perspective attempts to use it.
-        return {
-            "year": obj.year,
-            "month": obj.month - 1,
-            "day": obj.day
-        }
+        return {"year": obj.year, "month": obj.month - 1, "day": obj.day}
 
     def to_timestamp(self, obj):
-        '''Returns an integer corresponding to the number of milliseconds since
+        """Returns an integer corresponding to the number of milliseconds since
         epoch in the local timezone.
 
         If the `datetime.datetime` object has a `timezone` property set, this
         method will convert the object into UTC before returning a timestamp.
-        '''
+        """
         if obj is None:
             return obj
 
@@ -158,9 +154,14 @@ class _PerspectiveDateValidator(object):
 
         timetuple = getattr(obj, to_timetuple)()
 
-        is_datetime_min = timetuple.tm_year == 1 and timetuple.tm_mon == 1 \
-            and timetuple.tm_mday == 1 and timetuple.tm_hour == 0 \
-            and timetuple.tm_min == 0 and timetuple.tm_sec == 0
+        is_datetime_min = (
+            timetuple.tm_year == 1
+            and timetuple.tm_mon == 1
+            and timetuple.tm_mday == 1
+            and timetuple.tm_hour == 0
+            and timetuple.tm_min == 0
+            and timetuple.tm_sec == 0
+        )
 
         if is_datetime_min:
             # Return beginning of epoch when datetime is datetime.min
@@ -176,12 +177,12 @@ class _PerspectiveDateValidator(object):
         # using `to_format`, it will be in *local time* - Pybind will
         # automatically localize any conversion to `datetime.datetime`
         # from C++ to Python.
-        seconds_timestamp = (converter(timetuple) + obj.microsecond / 1000000.0)
+        seconds_timestamp = converter(timetuple) + obj.microsecond / 1000000.0
         ms_timestamp = int(seconds_timestamp * 1000)
         return ms_timestamp
 
     def format(self, datestring):
-        '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on
+        """Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on
         the format of the parsed date.
 
         If the parsed date is invalid, return t_dtype.DTYPE_STR to prevent
@@ -190,10 +191,12 @@ class _PerspectiveDateValidator(object):
 
         Args:
             datestring (:obj:'str'): the datestring to parse.
-        '''
+        """
         if isinstance(datestring, (bytes, bytearray)):
             datestring = datestring.decode("utf-8")
-        has_separators = bool(search(r"[/. -]", datestring))  # match commonly-used date separators
+        has_separators = bool(
+            search(r"[/. -]", datestring)
+        )  # match commonly-used date separators
         # match commonly-used date separators
 
         dtype = t_dtype.DTYPE_STR
@@ -201,7 +204,12 @@ class _PerspectiveDateValidator(object):
         if has_separators:
             try:
                 parsed = parse(datestring)
-                if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
+                if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (
+                    0,
+                    0,
+                    0,
+                    0,
+                ):
                     dtype = t_dtype.DTYPE_DATE
                 else:
                     dtype = t_dtype.DTYPE_TIME

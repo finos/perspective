@@ -17,8 +17,15 @@ from tornado import gen, ioloop, websocket
 
 
 class PerspectiveWebSocketClient(object):
-
-    def __init__(self, url, client_id, results_table, test_type="table", row_window=50, column_window=10):
+    def __init__(
+        self,
+        url,
+        client_id,
+        results_table,
+        test_type="table",
+        row_window=50,
+        column_window=10,
+    ):
         """Create a PerspectiveWebSocketClient that mimics a Perspective Viewer
         through the wire API.
 
@@ -78,7 +85,14 @@ class PerspectiveWebSocketClient(object):
         # self._make_message
         self.table_methods = ["schema", "size"]
         self.table_methods_mutate = ["update"]
-        self.view_methods = ["schema", "computed_schema", "column_paths", "sides", "to_columns", "to_json"]
+        self.view_methods = [
+            "schema",
+            "computed_schema",
+            "column_paths",
+            "sides",
+            "to_columns",
+            "to_json",
+        ]
         self.view_method_iter = 0
 
         # `on_update` callbacks managed by this client
@@ -138,28 +152,27 @@ class PerspectiveWebSocketClient(object):
                     if cols_in_config:
                         num_cols = len(cols_in_config)
 
-                    start_col = random.randint(0, num_cols - 1) if num_cols - 1 > 0 else 0
+                    start_col = (
+                        random.randint(0, num_cols - 1) if num_cols - 1 > 0 else 0
+                    )
                     _end = start_col + self.column_window
                     end_col = _end if _end < num_cols else num_cols
 
-                    args.append({
-                        "start_row": start_row,
-                        "end_row": end_row,
-                        "start_col": start_col,
-                        "end_col": end_col
-                    })
+                    args.append(
+                        {
+                            "start_row": start_row,
+                            "end_row": end_row,
+                            "start_col": start_col,
+                            "end_col": end_col,
+                        }
+                    )
 
                 message = self._make_message(
-                    cmd=cmd,
-                    name=self.view_name,
-                    method=method,
-                    args=args)
+                    cmd=cmd, name=self.view_name, method=method, args=args
+                )
             else:
                 method = random.choice(self.table_methods)
-                message = self._make_message(
-                    cmd=cmd,
-                    name="table",
-                    method=method)
+                message = self._make_message(cmd=cmd, name="table", method=method)
 
             # TODO: reimplement wait properly - we need to log the time - wait
             wait = False  # random.random() > 0.75
@@ -171,7 +184,9 @@ class PerspectiveWebSocketClient(object):
                 wait_time = random.random()
                 message["_wait"] = wait_time
 
-            logging.info("%s Sending %s: %s, id: %s", self.client_id, cmd, method, message["id"])
+            logging.info(
+                "%s Sending %s: %s, id: %s", self.client_id, cmd, method, message["id"]
+            )
             yield self.write_message(message)
 
             # perform the wait if needed
@@ -187,6 +202,7 @@ class PerspectiveWebSocketClient(object):
         Keyword Args:
             timeout (:obj:`float`/:obj:`datetime.timdelta`)
         """
+
         @gen.coroutine
         def _run(self, timeout):
             """Internal run callback - always run one iteration, and then
@@ -233,7 +249,7 @@ class PerspectiveWebSocketClient(object):
 
         if timeout:
             timeout_delta = None
-            if isinstance(timeout, six.integer_types + (float, )):
+            if isinstance(timeout, six.integer_types + (float,)):
                 timeout_delta = timedelta(seconds=timeout)
             elif isinstance(timeout, timedelta):
                 timeout_delta = timeout
@@ -257,8 +273,7 @@ class PerspectiveWebSocketClient(object):
         message["remote_client_id"] = self.client_id
 
         ioloop.IOLoop.current().add_callback(
-            self.client.write_message,
-            json.dumps(message)
+            self.client.write_message, json.dumps(message)
         )
 
         meta["send_timestamp"] = datetime.now()
@@ -282,7 +297,11 @@ class PerspectiveWebSocketClient(object):
             response = self.parse_response(message)
             response_id = response.get("id")
             if not response_id and response.get("binary"):
-                logging.debug("%s Received binary, bytelength: %d", self.client_id, response.get("byte_length"))
+                logging.debug(
+                    "%s Received binary, bytelength: %d",
+                    self.client_id,
+                    response.get("byte_length"),
+                )
             else:
                 logging.debug("%s Received id: %s", self.client_id, response_id)
             meta = None
@@ -291,10 +310,16 @@ class PerspectiveWebSocketClient(object):
                 meta = self.pending_messages[response_id]
                 meta["errored"] = "error" in response
                 meta["receive_timestamp"] = datetime.now()
-                meta["microseconds_on_wire"] = (meta["receive_timestamp"] - meta["send_timestamp"]).microseconds
+                meta["microseconds_on_wire"] = (
+                    meta["receive_timestamp"] - meta["send_timestamp"]
+                ).microseconds
                 self.pending_messages.pop(response_id)
 
-            elif self.test_type == "view" and response.get("cmd") != "init" and response.get("method") != "to_arrow":
+            elif (
+                self.test_type == "view"
+                and response.get("cmd") != "init"
+                and response.get("method") != "to_arrow"
+            ):
                 # View reads messages sent from on_update, which don't exist
                 # in the pending_messages map but need to be read anyway.
                 meta = {
@@ -305,7 +330,7 @@ class PerspectiveWebSocketClient(object):
                     "message_id": response.get("id", None),
                     "binary": response.get("binary"),
                     "byte_length": response.get("byte_length"),
-                    "num_messages_logged": self._num_messages_logged
+                    "num_messages_logged": self._num_messages_logged,
                 }
 
                 if meta.get("method") == "on_update" or meta.get("binary"):
@@ -316,7 +341,9 @@ class PerspectiveWebSocketClient(object):
 
                 # time on wire between tornado.write_message and client.read_message
                 if response.get("send_time"):
-                    meta["microseconds_on_wire"] = (time.time() * 100000) - response.get("send_time")
+                    meta["microseconds_on_wire"] = (
+                        time.time() * 100000
+                    ) - response.get("send_time")
                     self.pending_on_update_message = meta
 
             if response.get("is_transferable"):
@@ -326,22 +353,34 @@ class PerspectiveWebSocketClient(object):
 
             if isinstance(meta, dict):
                 # Check telemetry from the server
-                telemetry_source = response.get("telemetry", self.pending_on_update_message)
+                telemetry_source = response.get(
+                    "telemetry", self.pending_on_update_message
+                )
 
-                meta.update({
-                    "server_received": telemetry_source.get("server_received"),
-                    "server_start_process_time": telemetry_source.get("server_start_process_time"),
-                    "server_send_time": telemetry_source.get("server_send_time"),
-                })
+                meta.update(
+                    {
+                        "server_received": telemetry_source.get("server_received"),
+                        "server_start_process_time": telemetry_source.get(
+                            "server_start_process_time"
+                        ),
+                        "server_send_time": telemetry_source.get("server_send_time"),
+                    }
+                )
 
                 # For an on_update callback/binary, return the time it takes
                 # between this client receiving the `is_transferable`
                 # pre-message and getting the binary.
-                if not meta.get("microseconds_on_wire") and meta.get("server_start_process_time"):
+                if not meta.get("microseconds_on_wire") and meta.get(
+                    "server_start_process_time"
+                ):
                     dt = meta["receive_timestamp"]
-                    seconds_timestamp = time.mktime(dt.timetuple()) + dt.microsecond / 1000000.0
+                    seconds_timestamp = (
+                        time.mktime(dt.timetuple()) + dt.microsecond / 1000000.0
+                    )
                     ms_timestamp = int(seconds_timestamp * 1000)
-                    meta["microseconds_on_wire"] = (ms_timestamp - meta.get("server_start_process_time")) * 1000
+                    meta["microseconds_on_wire"] = (
+                        ms_timestamp - meta.get("server_start_process_time")
+                    ) * 1000
 
                 self.results_table.update([meta])
 
@@ -350,15 +389,32 @@ class PerspectiveWebSocketClient(object):
                 ioloop.IOLoop.current().add_callback(self.callbacks[response_id], self)
         except Exception as e:
             if isinstance(message, dict):
-                logging.critical("Error reading message for client id `%s`, message: %s, error: %s", self.client_id, message, e, exc_info=True)
+                logging.critical(
+                    "Error reading message for client id `%s`, message: %s, error: %s",
+                    self.client_id,
+                    message,
+                    e,
+                    exc_info=True,
+                )
             else:
-                logging.critical("Error reading message for client id `%s`, message: ARROW, error: %s", self.client_id, e, exc_info=True)
+                logging.critical(
+                    "Error reading message for client id `%s`, message: ARROW, error: %s",
+                    self.client_id,
+                    e,
+                    exc_info=True,
+                )
 
     @gen.coroutine
     def get_initial_arrow(self):
         """Retrieve an arrow of the whole dataset."""
         message = self._make_message(cmd="view_method", name="view", method="to_arrow")
-        logging.debug("%s Sending %s: %s, id: %s", self.client_id, "view_method", "to_arrow", message["id"])
+        logging.debug(
+            "%s Sending %s: %s, id: %s",
+            self.client_id,
+            "view_method",
+            "to_arrow",
+            message["id"],
+        )
         yield self.write_message(message)
 
     @gen.coroutine
@@ -373,23 +429,26 @@ class PerspectiveWebSocketClient(object):
         end = random.randint(start_col, start_col + 5)
         end_col = end if end < len(self.column_names) else len(self.column_names)
 
-        config = {
-            "columns": self.column_names[start_col:end_col]
-        }
+        config = {"columns": self.column_names[start_col:end_col]}
 
-        pivot_columns = \
-            self.columns_by_type.get("string", []) + \
-            self.columns_by_type.get("datetime", []) + \
-            self.columns_by_type.get("date", [])
+        pivot_columns = (
+            self.columns_by_type.get("string", [])
+            + self.columns_by_type.get("datetime", [])
+            + self.columns_by_type.get("date", [])
+        )
 
-        sort_columns = \
-            self.columns_by_type.get("integer", []) + \
-            self.columns_by_type.get("float", [])
+        sort_columns = self.columns_by_type.get(
+            "integer", []
+        ) + self.columns_by_type.get("float", [])
 
         if sides == 1:
-            config["row_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 2))]
+            config["row_pivots"] = [
+                random.choice(pivot_columns) for i in range(random.randint(0, 2))
+            ]
         elif sides == 2:
-            config["row_pivots"] = [random.choice(pivot_columns) for i in range(random.randint(0, 2))]
+            config["row_pivots"] = [
+                random.choice(pivot_columns) for i in range(random.randint(0, 2))
+            ]
             config["column_pivots"] = [random.choice(pivot_columns)]
         elif sides == 3:
             config["column_pivots"] = [random.choice(pivot_columns)]
@@ -408,15 +467,12 @@ class PerspectiveWebSocketClient(object):
     def delete_view(self):
         """Delete the view that is managed by this client from the server."""
         message = self._make_message(
-            cmd="view_method",
-            name=self.view_name,
-            method="delete"
+            cmd="view_method", name=self.view_name, method="delete"
         )
 
         # use the client directly because we don't care about the output
         ioloop.IOLoop.current().add_callback(
-            self.client.write_message,
-            json.dumps(message)
+            self.client.write_message, json.dumps(message)
         )
 
         self.message_id += 1
@@ -427,16 +483,11 @@ class PerspectiveWebSocketClient(object):
     @gen.coroutine
     def get_table_schema(self):
         """Get the schema of the table from the server."""
-        message = self._make_message(
-            cmd="table_method",
-            name="table",
-            method="schema"
-        )
+        message = self._make_message(cmd="table_method", name="table", method="schema")
 
         # use the client directly because we care about the output
         ioloop.IOLoop.current().add_callback(
-            self.client.write_message,
-            json.dumps(message)
+            self.client.write_message, json.dumps(message)
         )
 
         self.message_id += 1
@@ -475,9 +526,16 @@ class PerspectiveWebSocketClient(object):
                 "on_update",
                 args=[{"mode": "row"}],
                 subscribe=True,
-                callback_id="callback_1")
+                callback_id="callback_1",
+            )
 
-            logging.info("%s Sending %s: %s, id: %s", self.client_id, "view_method", "on_update", on_update_message["id"])
+            logging.info(
+                "%s Sending %s: %s, id: %s",
+                self.client_id,
+                "view_method",
+                "on_update",
+                on_update_message["id"],
+            )
 
             yield self.write_message(on_update_message)
             return
@@ -504,24 +562,28 @@ class PerspectiveWebSocketClient(object):
                     if cols_in_config:
                         num_cols = len(cols_in_config)
 
-                    start_col = random.randint(0, num_cols - 1) if num_cols - 1 > 0 else 0
+                    start_col = (
+                        random.randint(0, num_cols - 1) if num_cols - 1 > 0 else 0
+                    )
                     _end = start_col + self.column_window
                     end_col = _end if _end < num_cols else num_cols
 
-                    args.append({
-                        "start_row": start_row,
-                        "end_row": end_row,
-                        "start_col": start_col,
-                        "end_col": end_col
-                    })
+                    args.append(
+                        {
+                            "start_row": start_row,
+                            "end_row": end_row,
+                            "start_col": start_col,
+                            "end_col": end_col,
+                        }
+                    )
 
                 message = self._make_message(
-                    cmd="view_method",
-                    name=self.view_name,
-                    method=method,
-                    args=args)
+                    cmd="view_method", name=self.view_name, method=method, args=args
+                )
 
-                logging.info("Sending within on_update: %s, id: %s", method, message["id"])
+                logging.info(
+                    "Sending within on_update: %s, id: %s", method, message["id"]
+                )
                 yield self.write_message(message)
 
         # Store callbacks as they would be on the viewer - by message ID
@@ -529,11 +591,8 @@ class PerspectiveWebSocketClient(object):
 
         # send the message that registers on_update
         on_update_message = self._make_message(
-            "view_method",
-            "view",
-            "on_update",
-            subscribe=True,
-            callback_id="callback_1")
+            "view_method", "view", "on_update", subscribe=True, callback_id="callback_1"
+        )
 
         yield self.write_message(on_update_message)
 
@@ -546,10 +605,7 @@ class PerspectiveWebSocketClient(object):
             return res
         except Exception:
             # Catch arrow binaries and return their bytelength
-            return {
-                "binary": True,
-                "byte_length": len(response)
-            }
+            return {"binary": True, "byte_length": len(response)}
 
     def _make_message(self, cmd, name, method, **kwargs):
         """Returns a message that will execute the given method on the
@@ -575,7 +631,7 @@ class PerspectiveWebSocketClient(object):
             "cmd": "view",
             "table_name": "table",
             "view_name": name,
-            "config": config
+            "config": config,
         }
 
         return message

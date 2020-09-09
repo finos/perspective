@@ -15,15 +15,17 @@ class _PerspectiveCallBackCache(object):
         self._callbacks.append(callback)
 
     def remove_callbacks(self, condition):
-        '''Remove callback functions that satisfy the given condition.
+        """Remove callback functions that satisfy the given condition.
 
         Args:
             condition (func): a function that returns either True or False. If
                 True is returned, filter the item out.
-        '''
+        """
         if not callable(condition):
             raise ValueError("callback filter condition must be a callable function!")
-        self._callbacks = [callback for callback in self._callbacks if condition(callback) is False]
+        self._callbacks = [
+            callback for callback in self._callbacks if condition(callback) is False
+        ]
 
     def pop_callbacks(self, callback_id):
         """Removes and returns a list of callbacks with the given

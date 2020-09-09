@@ -12,15 +12,15 @@ from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
 from distutils import sysconfig
 from codecs import open
+
 import io
-import logging
 import os
 import os.path
 import re
 import platform
 import sys
 import subprocess
-from shutil import rmtree
+
 
 try:
     from shutil import which
@@ -31,7 +31,10 @@ except ImportError:
     try:
         from backports.shutil_which import which
     except ImportError:
-        which = lambda x: x  # just rely on path
+        # just rely on path
+        def which(x):
+            return x
+
     import multiprocessing
 
     CPU_COUNT = multiprocessing.cpu_count()
@@ -263,10 +266,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
-    extras_require={
-        "dev": requires_dev,
-        "devpy2": requires_dev_py2
-    },
+    extras_require={"dev": requires_dev, "devpy2": requires_dev_py2},
     ext_modules=[PSPExtension("perspective")],
     cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )

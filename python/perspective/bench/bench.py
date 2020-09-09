@@ -14,8 +14,13 @@ import venv
 import tornado
 from datetime import datetime
 from timeit import timeit
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler  # noqa: E402
+
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), ".."))
+from perspective import (
+    Table,
+    PerspectiveManager,
+    PerspectiveTornadoHandler,
+)  # noqa: E402
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,27 +41,26 @@ class VirtualEnvHandler(object):
 
     def activate_virtualenv(self):
         """Activates the virtualenv at `VIRTUALENV_PATH`."""
-        logging.info(
-            "Activating virtualenv at: `{}`".format(self._virtualenv_path))
+        logging.info("Activating virtualenv at: `{}`".format(self._virtualenv_path))
         subprocess.check_output(
-            "source {}/bin/activate".format(self._virtualenv_path),
-            shell=True)
+            "source {}/bin/activate".format(self._virtualenv_path), shell=True
+        )
         self._is_activated = True
 
     def create_virtualenv(self):
         """Clears the folder and creates a new virtualenv at
         `self._virtualenv_path`."""
         if self.virtualenv_exists():
-            logging.ERROR("Virtualenv already exists at: `{0}`".format(self._virtualenv_path))
+            logging.ERROR(
+                "Virtualenv already exists at: `{0}`".format(self._virtualenv_path)
+            )
             return
         logging.info("Creating virtualenv at: `{}`".format(self._virtualenv_path))
         venv.create(self._virtualenv_path, clear=True, with_pip=True)
 
     def deactivate_virtualenv(self):
         if self.virtualenv_exists() and self._is_activated:
-            subprocess.check_output(
-                "deactivate",
-                shell=True)
+            subprocess.check_output("deactivate", shell=True)
             logging.info("Virtualenv deactivated!")
             self._is_activated = False
 
@@ -67,7 +71,7 @@ class BenchmarkTornadoHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 
     def get(self):
         self.render("benchmark_hosted.html")
@@ -125,7 +129,8 @@ class Suite(object):
         This function must be implemented in all child classes of `Suite.`
         """
         raise NotImplementedError(
-                "Must implement `register_benchmarks` to run benchmark suite.")
+            "Must implement `register_benchmarks` to run benchmark suite."
+        )
 
     def before_all(self):
         pass
@@ -191,14 +196,17 @@ class Runner(object):
             return
         MANAGER = PerspectiveManager()
         MANAGER.host_table("benchmark_results", self._table)
-        application = tornado.web.Application([
-            (r"/", BenchmarkTornadoHandler),
-            # create a websocket endpoint that the client Javascript can access
-            (r"/websocket", PerspectiveTornadoHandler, {
-                "manager": MANAGER,
-                "check_origin": True
-            })
-        ])
+        application = tornado.web.Application(
+            [
+                (r"/", BenchmarkTornadoHandler),
+                # create a websocket endpoint that the client Javascript can access
+                (
+                    r"/websocket",
+                    PerspectiveTornadoHandler,
+                    {"manager": MANAGER, "check_origin": True},
+                ),
+            ]
+        )
         self._HOSTING = True
         application.listen(8888)
         logging.critical("Displaying results at http://localhost:8888")
@@ -221,8 +229,9 @@ class Runner(object):
         `ITERATIONS`, returning a result row that can be fed into Perspective.
         """
         overall_result = {
-            k.replace("__BENCH__", ""):
-                v for (k, v) in func.__dict__.items() if "__BENCH__" in k
+            k.replace("__BENCH__", ""): v
+            for (k, v) in func.__dict__.items()
+            if "__BENCH__" in k
         }
 
         result = timeit(func, number=Runner.ITERATIONS) / Runner.ITERATIONS
@@ -230,13 +239,15 @@ class Runner(object):
         return overall_result
 
     def print_result(self, result):
-        print("{}::{} ({}):{:30}{:>30}".format(
-            result["group"],
-            result["name"],
-            result["version"],
-            "",
-            result["__TIME__"],
-        ))
+        print(
+            "{}::{} ({}):{:30}{:>30}".format(
+                result["group"],
+                result["name"],
+                result["version"],
+                "",
+                result["__TIME__"],
+            )
+        )
 
     def run(self, version):
         """Runs each benchmark function from the suite for n `ITERATIONS`,

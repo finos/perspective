@@ -24,7 +24,9 @@ class PerspectiveTornadoHandlerWithTelemetry(PerspectiveTornadoHandler):
 
         msg = json.loads(message)
         msg["received"] = datetime.now()
-        super(PerspectiveTornadoHandlerWithTelemetry, self).on_message(json.dumps(msg, cls=DateTimeEncoder))
+        super(PerspectiveTornadoHandlerWithTelemetry, self).on_message(
+            json.dumps(msg, cls=DateTimeEncoder)
+        )
 
     def post(self, message, binary=False):
         """Add telemetry to the message with a `send_time` field, which
@@ -44,6 +46,8 @@ class PerspectiveTornadoHandlerWithTelemetry(PerspectiveTornadoHandler):
                     self._manager._pending_telemetry.pop(msg["id"])
 
             msg["send_time"] = time.time() * 100000
-            super(PerspectiveTornadoHandlerWithTelemetry, self).post(json.dumps(msg, cls=DateTimeEncoder), binary)
+            super(PerspectiveTornadoHandlerWithTelemetry, self).post(
+                json.dumps(msg, cls=DateTimeEncoder), binary
+            )
         else:
             super(PerspectiveTornadoHandlerWithTelemetry, self).post(message, binary)

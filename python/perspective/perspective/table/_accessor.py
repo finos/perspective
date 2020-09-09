@@ -20,7 +20,7 @@ from .libbinding import t_dtype
 
 
 def _flatten_structure(array):
-    '''Flatten numpy.recarray or structured arrays into a dict.'''
+    """Flatten numpy.recarray or structured arrays into a dict."""
     # recarrays/structured arrays do not have guaranteed bit offsets - make a
     # copy of the array to fix
     columns = [numpy.copy(array[col]) for col in array.dtype.names]
@@ -28,7 +28,7 @@ def _flatten_structure(array):
 
 
 def _type_to_format(data_or_schema):
-    '''Deconstructs data passed in by the user into a standard format:
+    """Deconstructs data passed in by the user into a standard format:
 
     - A :obj:`list` of dicts, each of which represents a single row.
     - A dict of :obj:`list`s, each of which represents a single column.
@@ -45,7 +45,7 @@ def _type_to_format(data_or_schema):
                 - 2: schema (dist[str]/dict[type])
         :obj:`list`: column names
         ():obj:`list`/:obj:`dict`): processed data
-    '''
+    """
     if isinstance(data_or_schema, list):
         # records
         names = list(data_or_schema[0].keys()) if len(data_or_schema) > 0 else []
@@ -64,19 +64,33 @@ def _type_to_format(data_or_schema):
                 try:
                     iter(v)
                 except TypeError:
-                    raise NotImplementedError("Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
+                    raise NotImplementedError(
+                        "Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`."
+                    )
                 else:
-                    return isinstance(v, numpy.ndarray), 1, list(data_or_schema.keys()), data_or_schema
+                    return (
+                        isinstance(v, numpy.ndarray),
+                        1,
+                        list(data_or_schema.keys()),
+                        data_or_schema,
+                    )
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
-            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
+            raise NotImplementedError(
+                "Data should be dict of numpy.ndarray or a structured array."
+            )
         flattened = _flatten_structure(data_or_schema)
         return True, 1, list(flattened.keys()), flattened
     else:
-        if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
+        if not (
+            isinstance(data_or_schema, pandas.DataFrame)
+            or isinstance(data_or_schema, pandas.Series)
+        ):
             # if pandas not installed or is not a dataframe or series
-            raise NotImplementedError("Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.")
+            raise NotImplementedError(
+                "Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array."
+            )
         else:
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
@@ -84,19 +98,27 @@ def _type_to_format(data_or_schema):
 
 
 class _PerspectiveAccessor(object):
-    '''A uniform accessor that wraps data/schemas of varying formats with a
+    """A uniform accessor that wraps data/schemas of varying formats with a
     common :func:`marshal` function.
-    '''
+    """
 
     INTEGER_TYPES = six.integer_types + (numpy.integer,)
 
     def __init__(self, data_or_schema):
-        self._is_numpy, self._format, self._names, self._data_or_schema = _type_to_format(data_or_schema)
+        (
+            self._is_numpy,
+            self._format,
+            self._names,
+            self._data_or_schema,
+        ) = _type_to_format(data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
-        self._row_count = \
-            len(self._data_or_schema) if self._format == 0 else \
-            len(max(self._data_or_schema.values(), key=len)) if self._format == 1 else \
-            0
+        self._row_count = (
+            len(self._data_or_schema)
+            if self._format == 0
+            else len(max(self._data_or_schema.values(), key=len))
+            if self._format == 1
+            else 0
+        )
 
         self._types = []
 
@@ -105,16 +127,25 @@ class _PerspectiveAccessor(object):
         for name in self._names:
             if not isinstance(name, six.string_types):
                 raise PerspectiveError(
-                    "Column names should be strings, not type `{0}`".format(type(name).__name__))
+                    "Column names should be strings, not type `{0}`".format(
+                        type(name).__name__
+                    )
+                )
             if self._is_numpy:
                 array = self._data_or_schema[name]
 
                 if not isinstance(array, numpy.ndarray):
-                    raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
+                    raise PerspectiveError(
+                        "Mixed datasets of numpy.ndarray and lists are not supported."
+                    )
 
                 dtype = array.dtype
 
-                if name == "index" and hasattr(data_or_schema, "index") and isinstance(data_or_schema.index, pandas.DatetimeIndex):
+                if (
+                    name == "index"
+                    and hasattr(data_or_schema, "index")
+                    and isinstance(data_or_schema.index, pandas.DatetimeIndex)
+                ):
                     # use the index of the original, unflattened dataframe
                     dtype = _parse_datetime_index(data_or_schema.index)
 
@@ -146,7 +177,7 @@ class _PerspectiveAccessor(object):
         return self._row_count
 
     def get(self, column_name, ridx):
-        '''Get the element at the specified column name and row index.
+        """Get the element at the specified column name and row index.
 
         If the element does not exist, return None.
 
@@ -156,7 +187,7 @@ class _PerspectiveAccessor(object):
 
         Returns:
             object or None
-        '''
+        """
         val = None
         try:
             if self._format == 0:
@@ -170,7 +201,7 @@ class _PerspectiveAccessor(object):
             return None
 
     def marshal(self, cidx, ridx, dtype):
-        '''Returns the element at the specified column and row index, and
+        """Returns the element at the specified column and row index, and
         marshals it into an object compatible with the core engine's
         :func:`fill` method.
 
@@ -184,7 +215,7 @@ class _PerspectiveAccessor(object):
 
         Returns:
             object or None
-        '''
+        """
         column_name = self._names[cidx]
         val = self.get(column_name, ridx)
 
@@ -237,7 +268,9 @@ class _PerspectiveAccessor(object):
                 # update int columns with either ints or floats
                 return int(val)
         elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
+            if not isinstance(val, bool) and isinstance(
+                val, _PerspectiveAccessor.INTEGER_TYPES
+            ):
                 # update float columns with either ints or floats
                 return float(val)
         elif dtype == t_dtype.DTYPE_OBJECT:
@@ -276,7 +309,7 @@ class _PerspectiveAccessor(object):
                 self._data_or_schema[name] = array.astype(numpy.float64)
 
     def _get_numpy_column(self, name):
-        '''For columnar datasets, return the :obj:`list`/Numpy array that
+        """For columnar datasets, return the :obj:`list`/Numpy array that
         contains the data for a single column.
 
         Args:
@@ -285,7 +318,7 @@ class _PerspectiveAccessor(object):
         Returns:
             (:obj:`list`/numpy.array/None): returns the column's data, or None
                 if it cannot be found.
-        '''
+        """
         data = self._data_or_schema.get(name, None)
         if data is None:
             raise PerspectiveError("Column `{0}` does not exist.".format(name))
@@ -293,7 +326,7 @@ class _PerspectiveAccessor(object):
         return deconstruct_numpy(data, mask)
 
     def _has_column(self, ridx, name):
-        '''Given a column name, validate that it is in the row.
+        """Given a column name, validate that it is in the row.
 
         This allows differentiation between value is None (unset) and value not
         in row (no-op).
@@ -305,7 +338,7 @@ class _PerspectiveAccessor(object):
         Returns:
             bool: True if column is in row, or if column belongs to pkey/op
                 columns required by the engine. False otherwise.
-        '''
+        """
         if self._format != 0 or name in ("psp_pkey", "psp_okey", "psp_op"):
             # no partial updates available on meta column, schema, dict updates
             return True
