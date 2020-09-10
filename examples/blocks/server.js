@@ -23,7 +23,7 @@ const template = body => `
 </html>
 `;
 
-const template_item = name => `
+const prod_template = name => `
 <li>
     <a href="src/${name}/index.html">local</a>
     <a href="dist/${name}/index.html">dist</a>
@@ -31,11 +31,22 @@ const template_item = name => `
 </li>
 `;
 
+const dev_template = name => `
+<li>
+    <a href="src/${name}/index.html">local</a>
+    ${name}
+</li>
+`;
+
 const gists = JSON.parse(fs.readFileSync("gists.json"));
 
 const lis = [];
-for (const key of Object.keys(gists)) {
-    lis.push(template_item(key));
+for (const key of fs.readdirSync("src")) {
+    if (!!gists[key]) {
+        lis.push(prod_template(key));
+    } else {
+        lis.push(dev_template(key));
+    }
 }
 
 fs.writeFileSync("dist/index.html", template(lis.join("\n")));
