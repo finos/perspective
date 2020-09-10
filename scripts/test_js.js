@@ -48,9 +48,8 @@ function jest() {
         --color
         --verbose 
         --maxWorkers=50%
-        --noStackTrace
         ${getarg("--bail") && "--bail"}
-        ${getarg("--debug") || "--silent 2>&1"} 
+        ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
         --testNamePattern="${get_regex()}"`;
 }
 
@@ -107,7 +106,6 @@ try {
                 -- 
                 yarn test:run
                 ${debug}
-                --noStackTrace
                 ${getarg("--interactive") && "--runInBand"}
                 --testNamePattern="${get_regex()}"`;
         } else {

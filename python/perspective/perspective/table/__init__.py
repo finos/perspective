@@ -7,6 +7,7 @@
 #
 
 from .table import Table
+from .view import View
 from .libbinding import PerspectiveCppError
 
-__all__ = ["Table", "PerspectiveCppError"]
+__all__ = ["Table", "View", "PerspectiveCppError"]

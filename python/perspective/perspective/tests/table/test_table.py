@@ -486,6 +486,18 @@ class TestTable(object):
             {"a": 1, "b": 4}
         ]
 
+    def test_table_index_from_schema(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 4}]
+        tbl = Table({
+            "a": int,
+            "b": int
+        }, index="a")
+        assert tbl.size() == 0
+        tbl.update(data)
+        assert tbl.view().to_records() == [
+            {"a": 1, "b": 4}
+        ]
+
     # index with None in column
 
     def test_table_index_int_with_none(self):

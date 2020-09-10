@@ -51,11 +51,35 @@ export class PerspectiveJupyterClient extends Client {
      * @param msg {any} the message to pass to the `PerspectiveManager`.
      */
     send(msg: any): void {
-        const serialized = JSON.stringify(msg);
-        this.view.send({
-            id: msg.id,
-            type: "cmd",
-            data: serialized
-        });
+        // Handle calls to `update` with a binary by setting `is_transferable`
+        // to true, so the kernel knows to handle the arraybuffer properly.
+        if (msg.method === "update" && msg.args.length === 2 && msg.args[0] instanceof ArrayBuffer) {
+            msg.is_transferable = true;
+            const buffers = [msg.args[0]];
+
+            // Remove the arraybuffer from the message args, so it can be
+            // passed along in `buffers`.
+            msg.args.shift();
+
+            const serialized = JSON.stringify(msg);
+
+            // Send the first update message over the Jupyter comm with
+            // `is_transferable` set, so the kernel knows the expect the arrow.
+            this.view.send({
+                id: msg.id,
+                type: "cmd",
+                data: serialized
+            });
+
+            // Send the second message with buffers.
+            this.view.send({}, buffers);
+        } else {
+            // Send the message over the Jupyter comm.
+            this.view.send({
+                id: msg.id,
+                type: "cmd",
+                data: JSON.stringify(msg)
+            });
+        }
     }
 }

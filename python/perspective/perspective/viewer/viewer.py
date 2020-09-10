@@ -23,7 +23,7 @@ from .viewer_traitlets import PerspectiveTraitlets
 from ..libpsp import is_libpsp
 
 if is_libpsp():
-    from ..libpsp import Table, PerspectiveManager
+    from ..libpsp import Table, View, PerspectiveManager
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -38,6 +38,20 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "aggregates": validate_aggregates,
         "sort": validate_sort,
     }
+
+    # Viewer attributes that should be saved in `save()` and restored using
+    # `restore()`. Symmetric to `PERSISTENT_ATTRIBUTES` in `perspective-viewer`.
+    PERSISTENT_ATTRIBUTES = (
+        "row_pivots",
+        "column_pivots",
+        "filters",
+        "sort",
+        "aggregates",
+        "columns",
+        "computed_columns",
+        "plugin",
+        "editable",
+    )
 
     def __init__(
         self,
@@ -78,11 +92,11 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 each dict containing ``column``, a new computed column name,
                 ``computed_function_name``, a string computed function name,
                 and ``inputs``, a list of input column names.
-            plugin (:obj:`str`/:obj:`perspective.Plugin`): Which plugin to select by
-                default.
+            plugin (:obj:`str`/:obj:`perspective.Plugin`): Which plugin to
+                select by default.
             plugin_config (:obj:`dict`): Custom config for all plugins by name.
+            dark (:obj:`bool`): Whether to invert the color theme.
             editable (:obj:`bool`): Whether to allow editability using the grid.
-            dark (:obj:`bool`): Whether to invert the colors.
 
         Examples:
             >>> viewer = PerspectiveViewer(
@@ -102,8 +116,15 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # from the `PerspectiveJupyterClient` on the front-end.
         if is_libpsp():
             self.manager = PerspectiveManager()
-        self.table_name = None  # not a traitlet - only used in python
-        self.view_name = None
+
+        # The string name of the Table under management by this viewer and its
+        # attached PerspectiveManager
+        self.table_name = None
+
+        # If `is_libpsp()` and the viewer has a Table, an internal view will be
+        # created to allow remote clients to host their own table that listens
+        # to updates from this table.
+        self._perspective_view_name = None
 
         # Viewer configuration
         self.plugin = validate_plugin(plugin)
@@ -124,36 +145,43 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         return self.manager.get_table(self.table_name)
 
     @property
-    def view(self):
-        """Returns the ``perspective.View`` currently shown by the viewer.
+    def _view(self):
+        """Returns the internal ``perspective.View`` under management by the
+        viewer, which has no bearing to the view that is displayed in the
+        widget."""
+        return self.manager.get_view(self._perspective_view_name)
 
-        This property changes every time the viewer configuration changes."""
-        return self.manager.get_view(self.view_name)
+    def load(self, data, **options):
+        """Given a ``perspective.Table``, a ``perspective.View``,
+        or data that can be handled by ``perspective.Table``, pass it to the
+        viewer.
 
-    def load(self, table_or_data, **options):
-        """Given a ``perspective.Table`` or data that can be handled by
-        ``perspective.Table``, pass it to the viewer.
+        ``load()`` resets the state of the viewer:
 
-        ``load()`` resets the state of the viewer.  If a ``perspective.Table``
-        is passed into ``table_or_data``, ``**options`` is ignored as the options
-        already set on the ``Table`` take precedence.  If data is passed in, a
-        ``perspective.Table`` is automatically created by this function, and the
-        options passed to ``**config`` are extended to the new Table.
+        If a ``perspective.Table`` is loaded, ``**options`` is ignored as the
+        options already set on the ``Table`` take precedence.
+
+        If a ``perspective.View`` is loaded, the options on the
+        ``perspective.Table`` linked to the view take precedence.
+
+        If data is passed in, a ``perspective.Table`` is automatically created
+        by this method, and the options passed to ``**config`` are extended to
+        the new Table.
 
         Args:
-            table_or_data (:obj:`Table`|:obj:`dict`|:obj:`list`|`pandas.DataFrame`): a
-                `perspective.Table` instance or a dataset to be displayed
-                in the viewer.
+            data (:obj:`Table`|:obj:`View`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
+                `perspective.Table` instance, a `perspective.View` instance, or
+                a dataset to be loaded in the viewer.
 
         Keyword Arguments:
             name (:obj:`str`): An optional name to reference the table by so it can
                 be accessed from the front-end. If not provided, a name will
                 be generated.
             index (:obj:`str`): A column name to be used as the primary key.
-                Ignored if a `Table` is supplied.
+                Ignored if a ``Table`` or ``View`` is supplied.
             limit (:obj:`int`): A upper limit on the number of rows in the Table.
-                Cannot be set at the same time as `index`, ignored if a `Table`
-                is passed in.
+                Cannot be set at the same time as `index`. Ignored if a
+                ``Table`` or ``View`` is supplied.
 
         Examples:
             >>> from perspective import Table, PerspectiveViewer
@@ -162,16 +190,21 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             >>> viewer = PerspectiveViewer()
             >>> viewer.load(tbl)
             >>> viewer.load(data, index="a") # viewer state is reset
+            >>> viewer2 = PerspectiveViewer()
+            >>> viewer2.load(tbl.view())
         """
         name = options.pop("name", str(random()))
-        if isinstance(table_or_data, Table):
-            table = table_or_data
+
+        if isinstance(data, Table):
+            table = data
+        elif isinstance(data, View):
+            table = data._table
         else:
-            table = Table(table_or_data, **options)
+            table = Table(data, **options)
 
         self.manager.host_table(name, table)
 
-        # Reset the viewer when `load()` is called again.
+        # Reset the viewer when `load()` is called multiple times.
         if self.table_name is not None:
             self.reset()
 
@@ -182,14 +215,24 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
         self.table_name = name
 
+        # If a `perspective.View` is loaded, then use it as the view that
+        # new clients will be built from. Otherwise, create a new view.
+        VIEW = data if isinstance(data, View) else table.view()
+
+        # Create a view from the table, and host it with the manager so it can
+        # be accessed remotely. This view should not be deleted or changed,
+        # and remains private to the viewer.
+        self._perspective_view_name = str(random())
+        self.manager.host_view(self._perspective_view_name, VIEW)
+
     def update(self, data):
         """Update the table under management by the viewer with new data.
         This function follows the semantics of `Table.update()`, and will be
         affected by whether an index is set on the underlying table.
 
         Args:
-            data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): the update data for the
-                table.
+            data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): the
+            update data for the table.
         """
         self.table.update(data)
 
@@ -202,40 +245,26 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """Replaces the rows of this viewer's `Table` with new data.
 
         Args:
-            data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): new data to set into the
-                table - must conform to the table's schema.
+            data (:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`): new data
+            to set into the table - must conform to the table's schema.
         """
         if self.table is not None:
             self.table.replace(data)
 
     def save(self):
-        """Get the viewer's attribute as a dictionary, symmetric with `restore` so that a
-        viewer's configuration can be reproduced."""
+        """Get the viewer's attribute as a dictionary, symmetric with `restore`
+        so that a viewer's configuration can be reproduced."""
         return {
-            "row_pivots": self.row_pivots,
-            "column_pivots": self.column_pivots,
-            "filters": self.filters,
-            "computed_columns": self.computed_columns,
-            "sort": self.sort,
-            "aggregates": self.aggregates,
-            "columns": self.columns,
-            "plugin": self.plugin,
+            attr: getattr(self, attr)
+            for attr in PerspectiveViewer.PERSISTENT_ATTRIBUTES
         }
 
     def restore(self, **kwargs):
-        """Restore a given set of attributes, passed as kwargs (e.g. dictionary). Symmetric with `save` so that
-        a given viewer's configuration can be reproduced"""
+        """Restore a given set of attributes, passed as kwargs
+        (e.g. dictionary). Symmetric with `save` so that a given viewer's
+        configuration can be reproduced."""
         for k, v in six.iteritems(kwargs):
-            if k in (
-                "row_pivots",
-                "column_pivots",
-                "filters",
-                "sort",
-                "aggregates",
-                "columns",
-                "computed_columns",
-                "plugin",
-            ):
+            if k in PerspectiveViewer.PERSISTENT_ATTRIBUTES:
                 setattr(self, k, v)
 
     def reset(self):
@@ -250,54 +279,27 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.aggregates = {}
         self.columns = []
         self.plugin = "datagrid"
+        self.editable = False
 
     def delete(self, delete_table=True):
         """Delete the Viewer's data and clears its internal state. If
-        ``delete_table`` is True, the underlying `perspective.Table` and all
-        associated ``View`` objects will be deleted.
+        ``delete_table`` is True, the underlying `perspective.Table` and the
+        internal `View` object will be deleted.
 
         Args:
             delete_table (:obj:`bool`) : whether the underlying `Table` will be
                 deleted. Defaults to True.
         """
-        if self.view:
-            self.view.delete()
-            self.view_name = None
-
-        for view in self.manager._views.values():
-            view.delete()
-
         if delete_table:
+            if self._view:
+                self._view.delete()
+                self._perspective_view_name = None
+
             self.table.delete()
             self.manager._tables.pop(self.table_name)
             self.table_name = None
 
         self.reset()
-
-    def _new_view(self):
-        """Create a new View, and assign its name to the viewer.  Do not call
-        this function - it will be called automatically when the state of the
-        viewer changes. There should only be one View associated with the
-        Viewer at any given time - when a new View is created, the old one
-        is destroyed.
-        """
-        if not self.table_name:
-            return
-
-        name = str(random())
-        table = self.manager.get_table(self.table_name)
-        view = table.view(
-            row_pivots=self.row_pivots,
-            column_pivots=self.column_pivots,
-            columns=self.columns,
-            aggregates=self.aggregates,
-            sort=self.sort,
-            filter=self.filters,
-            computed_columns=self.computed_columns,
-        )
-
-        self.manager.host_view(name, view)
-        self.view_name = name
 
     def __setattr__(self, name, value):
         """Override __setattr__ in order to allow Enums to be validated

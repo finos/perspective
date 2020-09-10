@@ -7,6 +7,7 @@
 #
 
 import six
+import logging
 import numpy
 import pandas
 import json
@@ -151,7 +152,13 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
     _view_module_version = Unicode("~{}".format(major_minor_version)).tag(sync=True)
 
     def __init__(
-        self, table_or_data, index=None, limit=None, client=not is_libpsp(), **kwargs
+        self,
+        data,
+        index=None,
+        limit=None,
+        server=False,
+        client=not is_libpsp(),
+        **kwargs
     ):
         """Initialize an instance of :class`~perspective.PerspectiveWidget`
         with the given table/data and viewer configuration.
@@ -161,22 +168,28 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         arguments that transform the view shown in the widget.
 
         Args:
-            table_or_data (perspective.Table|dict|list|pandas.DataFrame): The
-                `Table` or data that will be viewed in the widget.
+            data (:obj:`Table`|:obj:`View`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
+                `perspective.Table` instance, a `perspective.View` instance, or
+                a dataset to be loaded in the widget.
 
         Keyword Arguments:
-            index (`str`): A column name to be used as the primary key.
-                Ignored if a `Table` is supplied.
-            limit (`int`): A upper limit on the number of rows in the Table.
-                Cannot be set at the same time as `index`, ignored if a `Table`
-                is passed in.
+            index (:obj:`str`): A column name to be used as the primary key.
+                Ignored if `server` is True.
 
-            client (`bool`):  If True, convert the dataset into an Apache Arrow
+            limit (:obj:`int`): A upper limit on the number of rows in the Table.
+                Cannot be set at the same time as `index`, ignored if `server`
+                is True.
+
+            server (:obj:`bool`): Whether to run Perspective in "server-only"
+                mode, where the front-end client does not have its own Table,
+                and instead reads all data and operations from Python.
+
+            client (:obj:`bool`):  If True, convert the dataset into an Apache Arrow
                 binary and create the Table in Javascript using a copy of the
                 data. Defaults to False.
 
-            kwargs (`dict`): configuration options for the `PerspectiveViewer`,
-                and `Table` constructor if `table_or_data` is a dataset.
+            kwargs (:obj:`dict`): configuration options for the `PerspectiveViewer`,
+                and `Table` constructor if `data` is a dataset.
 
         Examples:
             >>> widget = PerspectiveWidget(
@@ -194,15 +207,24 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         self._displayed = False
         self.on_displayed(self._on_display)
 
-        # If `self.client` is True, the front-end `perspective-viewer` is given
-        # a copy of the data serialized to Arrow, and changes made in Python
-        # do not reflect to the front-end.
+        # Trigger special flow when receiving an ArrayBuffer/binary
+        self._is_transferable = False
+        self._is_transferable_pre_message = None
+
+        # If `self.client` is True, the front-end `<perspective-viewer>` is
+        # given a copy of the data serialized to JSON, and the Python kernel
+        # does not create a `perspective.Table.`
         self.client = client
 
-        if self.client:
-            # Pass table load options to the front-end in client mode
-            self._client_options = {}
+        # If `self.server` is True, the widget runs in server-only mode where
+        # the front-end `<perspective-viewer>` does not create a Table, and
+        # will proxy all operations back to the server.
+        self.server = server
 
+        # Pass table load options to the front-end, unless in server mode
+        self._options = {}
+
+        if self.client:
             # Cache calls to `update()` before the widget has been displayed.
             self._predisplay_update_cache = []
 
@@ -210,11 +232,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             raise PerspectiveError("Index and Limit cannot be set at the same time!")
 
         # Parse the dataset we pass in - if it's Pandas, preserve pivots
-        if isinstance(table_or_data, pandas.DataFrame) or isinstance(
-            table_or_data, pandas.Series
-        ):
-            data, config = deconstruct_pandas(table_or_data)
-            table_or_data = data
+        if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
+            data, config = deconstruct_pandas(data)
 
             if config.get("row_pivots", None) and "row_pivots" not in kwargs:
                 kwargs.update({"row_pivots": config["row_pivots"]})
@@ -239,37 +258,37 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             if is_libpsp():
                 from ..libpsp import Table
 
-                if isinstance(table_or_data, Table):
+                if isinstance(data, Table):
                     raise PerspectiveError(
                         "Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!"
                     )
 
             if index is not None:
-                self._client_options["index"] = index
+                self._options["index"] = index
 
             if limit is not None:
-                self._client_options["limit"] = limit
+                self._options["limit"] = limit
 
             # cache self._data so creating multiple views don't reserialize the
             # same data
             if not hasattr(self, "_data") or self._data is None:
-                self._data = _serialize(table_or_data)
+                self._data = _serialize(data)
         else:
-            #  If an empty dataset is provided, don't call `load()`
-            load_kwargs = {}
-            if table_or_data is None:
+            # If an empty dataset is provided, don't call `load()` and wait
+            # for the user to call `load()`.
+            if data is None:
                 if index is not None or limit is not None:
                     raise PerspectiveError(
                         "Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!"
                     )
             else:
                 if index is not None:
-                    load_kwargs.update({"index": index})
+                    self._options.update({"index": index})
 
                 if limit is not None:
-                    load_kwargs.update({"limit": limit})
+                    self._options.update({"limit": limit})
 
-                self.load(table_or_data, **load_kwargs)
+                self.load(data, **self._options)
 
     def load(self, data, **options):
         """Load the widget with data. If running in client mode, this method
@@ -283,9 +302,15 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             d = _serialize(data)
             self._data = d
         else:
+            # Viewer will ignore **options if `data` is a Table or View.
             super(PerspectiveWidget, self).load(data, **options)
 
-        # proactively notify front-end of new data
+            # Do not enable editing if the table is unindexed.
+            if self.editable and self.table._index == "":
+                logging.critical("Cannot edit on an unindexed `perspective.Table`!")
+                self.editable = False
+
+        # Notify front-end of load immediately.
         message = self._make_load_message()
         self.send(message.to_dict())
 
@@ -348,7 +373,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         # Close the underlying comm and remove widget from the front-end
         self.close()
 
-    def post(self, msg, msg_id=None):
+    def post(self, msg, msg_id=None, binary=False):
         """Post a serialized message to the `PerspectiveJupyterClient`
         in the front end.
 
@@ -360,9 +385,15 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 viewer to process.
             msg_id (int): an integer id that allows the client to process
                 the message.
+            binary (bool): whether the message contains binary buffers that
+                should be sent with a special protocol.
         """
-        message = _PerspectiveWidgetMessage(msg_id, "cmd", msg)
-        self.send(message.to_dict())
+        if binary:
+            # The front end will read `buffers` properly.
+            self.send(None, buffers=[msg])
+        else:
+            message = _PerspectiveWidgetMessage(msg_id, "cmd", msg)
+            self.send(message.to_dict())
 
     @observe("value")
     def handle_message(self, widget, content, buffers):
@@ -376,6 +407,20 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 de-serialized by ipywidgets.
             buffers : optional arraybuffers from the front-end, if any.
         """
+        if self._is_transferable:
+            msg = self._is_transferable_pre_message
+
+            # arrow is a `MemoryView` - convert to bytes
+            arrow = buffers[0].tobytes()
+            msg["args"].insert(0, arrow)
+
+            # Send the message to the manager to process
+            post_callback = partial(self.post, msg_id=msg["id"])
+            self.manager._process(msg, post_callback)
+            self._is_transferable_pre_message = None
+            self._is_transferable = False
+            return
+
         if content["type"] == "cmd":
             parsed = json.loads(content["data"])
 
@@ -393,33 +438,62 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                     for data in self._predisplay_update_cache:
                         self.update(data)
             else:
+                # If the message has `is_transferable` set, wait for the arrow
+                # and join it with the JSON message.
+                if parsed.get("is_transferable"):
+                    self._is_transferable = True
+                    self._is_transferable_pre_message = parsed
+                    return
+
                 # For all calls to Perspective, process it in the manager.
                 post_callback = partial(self.post, msg_id=parsed["id"])
                 self.manager._process(parsed, post_callback)
 
-    def _make_load_message(self):
+    def _make_load_message(self, index=None, limit=None):
         """Send a message to the front-end either containing the name of a
-        Table in python, or the serialized dataset with options while in client
-        mode.
+        hosted view in Python, so the front-end can create a table in the
+        Perspective WebAssembly client, or if `server` is True, the name of a
+        Table in python, or the serialized dataset with options if `client`
+        is True.
+
+        If the front-end requests data and it has not been loaded yet,
+        an error will be logged, and the front-end will wait for `load()` to
+        be called, which will notify the front-end of new data.
         """
         msg_data = None
-        if self.client and self._data is not None:
-            # Send data to the client, transferring ownership to the browser
-            msg_data = {"data": self._data}
 
-            if len(self._client_options.keys()) > 0:
-                msg_data["options"] = self._client_options
-        elif self.table_name is not None:
-            # Only pass back the table if it's been loaded. If the table isn't
-            # loaded, the `load()` method will handle synchronizing the
-            # front-end.
+        if self.client and self._data is not None:
+            # Send serialized data to the browser, which will run Perspective
+            # in client mode: there is no table in the Python kernel.
+            msg_data = {"data": self._data, "options": self._options}
+        elif self.server and self.table_name is not None:
+            # If the `server` kwarg is set during initialization, Perspective
+            # will run in server-only mode, where a Table is hosted in the
+            # kernel and the front-end proxies pivots, sorts, data requests
+            # etc. to the kernel and does not run a Table in the front-end.
             msg_data = {"table_name": self.table_name}
+        elif self._perspective_view_name is not None:
+            # If a view is hosted by the widget's manager (by default),
+            # run Perspective in client-server mode: a Table will be created
+            # in the front-end that mirrors the Table hosted in the kernel,
+            # and updates and edits will be synchronized across the client
+            # and the server.
+            msg_data = {
+                "table_name": self.table_name,
+                "view_name": self._perspective_view_name,
+                "options": {},
+            }
+
+            if self.table._index is not None:
+                msg_data["options"]["index"] = self.table._index
+            elif self.table._limit is not None:
+                msg_data["options"]["limit"] = self.table._limit
 
         if msg_data is not None:
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
             raise PerspectiveError(
-                "Widget could not find a dataset or a `Table` to load."
+                "Widget does not have any data loaded - use the `load()` method to provide it with data."
             )
 
     def _on_display(self, widget, **kwargs):
