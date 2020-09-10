@@ -121,6 +121,29 @@ NumPy record arrays are all supported in `perspective-python`.
 pip install perspective-python
 ```
 
+### Troubleshooting installation
+If you have installation troubles, try installing in verbose mode:
+
+```bash
+pip install -vv perspective-python
+```
+
+The most common culprits are:
+- CMake version too old
+- Boost headers are missing or too old
+- PyArrow not installed prior to installing perspective
+
+Additionally, due to PEP-518 and build isolation, its possible that the version of PyArrow that pip uses to build perspective-python is different from the one you have installed. To disable this, pass the `--no-build-isolation` flag to pip.
+
+#### Wheels PyArrow linkage
+Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight-coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.16.0.
+
+To ignore compiled wheels and install from source with pip, install via
+
+```bash
+pip install --no-binary perspective-python
+```
+
 ### Jupyterlab
 
 `PerspectiveWidget` is a JupyterLab widget that implements the same API as
