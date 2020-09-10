@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+        <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.css">
+
+        <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+                
+        <style>
+
+            body {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+        </style>
+
+    </head>
+    <body> 
+
+        <perspective-workspace id="workspace">
+            <perspective-viewer table="superstore"></perspective-viewer>
+        </perspective-workspace>
+      
+        <script>
+
+            const URL = "/node_modules/superstore-arrow/superstore.arrow";
+                        
+            async function get_layout() {
+                const req = await fetch("layout.json");
+                const json = await req.json();
+                return json;
+            }
+
+            const datasource = async () => {
+                const request = fetch(URL);
+                const worker = perspective.worker();
+                const response = await request;
+                const buffer = await response.arrayBuffer();
+                return worker.table(buffer);
+            };
+
+            window.addEventListener("load", async () => {
+                const plugin = window.getPlugin("d3_heatmap");
+                plugin.max_cells = 10000;
+                plugin.max_columns = 200;
+                window.workspace.tables.set("superstore", datasource());
+                const layout = await get_layout();
+                window.workspace.restore(layout);
+            });
+
+        </script>
+    </body>
+</html>

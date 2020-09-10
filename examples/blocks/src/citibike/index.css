@@ -1,0 +1,14 @@
+#grid {
+    display: flex;
+    max-width: 600px;
+    max-height: 1200px;
+    margin: auto;
+    flex-direction: column;
+}
+
+#grid perspective-viewer {
+    height: 600px;
+    width: 600px;
+    flex: 1;
+    display: block;
+}

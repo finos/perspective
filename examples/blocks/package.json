@@ -1,0 +1,20 @@
+{
+    "name": "blocks",
+    "private": true,
+    "version": "0.5.3",
+    "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
+    "scripts": {
+        "start": "node server.js",
+        "clean": "rimraf dist",
+        "dist": "node dist.js"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "^0.5.3",
+        "@finos/perspective-viewer": "^0.5.3",
+        "@finos/perspective-viewer-d3fc": "^0.5.3",
+        "@finos/perspective-viewer-datagrid": "^0.5.3",
+        "superstore-arrow": "1.0.0"
+    }
+}
