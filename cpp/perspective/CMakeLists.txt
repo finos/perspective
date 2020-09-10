@@ -375,6 +375,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories( ${Python_INCLUDE_DIRS} )
 
 		if(MACOS)
+			# don't link against build python
+			# https://blog.tim-smith.us/2015/09/python-extension-modules-os-x/
+			set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
+
 			# on mac, use the vanilla pybind11 finder
 			find_package(pybind11)
 			if(pybind11_FOUND)
@@ -383,11 +387,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			else()
 				# Check if pip installed PyBind is available
 				find_package(Pybind)
-				if(PYTHON_PYBIND_FOUND)
-					# Need to add extra flags due to pybind weirness
-					# https://github.com/pybind/pybind11/blob/7830e8509f2adc97ce9ee32bf99cd4b82089cc4c/tools/pybind11Tools.cmake#L103
-				    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
-				endif()
 			endif()
 
 		else()
@@ -631,21 +630,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# `site-packages`, the relative search path should be able to pick
 			# up pyarrow. This is only enabled for MacOS, as `auditwheel`
 			# will not delocate libarrow properly if it is in the rpath.
-            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
-            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
+            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
+            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
 		else()
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
 
 		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
 		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
-
-		if(WIN32)
-			# Don't link
-		else()
-			target_link_libraries(psp ${PYTHON_LIBRARIES})
-			target_link_libraries(binding ${PYTHON_LIBRARIES})
-		endif()
 
 		target_link_libraries(psp tbb)
 		target_link_libraries(binding tbb)
