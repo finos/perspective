@@ -33,10 +33,17 @@ class PerspectiveManagerWithTelemetry(PerspectiveManager):
             "cmd": msg.get("cmd"),
             "method": msg.get("method"),
             "args": msg.get("args"),
-            "session_id": client_id
+            "session_id": client_id,
         }
-        logging.info("Received %s from %s, id: %d", msg.get("method"), msg.get("remote_client_id"), msg["id"])
-        super(PerspectiveManagerWithTelemetry, self)._process(msg, post_callback, client_id=client_id)
+        logging.info(
+            "Received %s from %s, id: %d",
+            msg.get("method"),
+            msg.get("remote_client_id"),
+            msg["id"],
+        )
+        super(PerspectiveManagerWithTelemetry, self)._process(
+            msg, post_callback, client_id=client_id
+        )
 
     def callback(self, *args, **kwargs):
         msg = kwargs.get("msg")
@@ -63,5 +70,12 @@ class PerspectiveManagerWithTelemetry(PerspectiveManager):
             if telemetry.get("method") != "on_update":
                 self._pending_telemetry.pop(id)
 
-        logging.debug("Sending %s to %s, id: %d", telemetry.get("method"), telemetry.get("remote_client_id"), id)
-        return super(PerspectiveManagerWithTelemetry, self)._message_to_json(id, message)
+        logging.debug(
+            "Sending %s to %s, id: %d",
+            telemetry.get("method"),
+            telemetry.get("remote_client_id"),
+            id,
+        )
+        return super(PerspectiveManagerWithTelemetry, self)._message_to_json(
+            id, message
+        )

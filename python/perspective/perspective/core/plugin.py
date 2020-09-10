@@ -10,28 +10,28 @@ from enum import Enum
 
 
 class Plugin(Enum):
-    '''The plugins (grids/charts) available in Perspective.  Pass these into
+    """The plugins (grids/charts) available in Perspective.  Pass these into
     the `plugin` arg in `PerspectiveWidget` or `PerspectiveViewer`.
 
     Examples:
         >>> widget = PerspectiveWidget(data, plugin=Plugin.TREEMAP)
-    '''
+    """
 
-    GRID = 'datagrid'
+    GRID = "datagrid"
 
-    YBAR = 'y_bar'
-    XBAR = 'x_bar'
-    YLINE = 'y_line'
-    YAREA = 'y_area'
-    YSCATTER = 'y_scatter'
-    XYLINE = 'xy_line'
-    XYSCATTER = 'xy_scatter'
-    TREEMAP = 'treemap'
-    SUNBURST = 'sunburst'
-    HEATMAP = 'heatmap'
+    YBAR = "y_bar"
+    XBAR = "x_bar"
+    YLINE = "y_line"
+    YAREA = "y_area"
+    YSCATTER = "y_scatter"
+    XYLINE = "xy_line"
+    XYSCATTER = "xy_scatter"
+    TREEMAP = "treemap"
+    SUNBURST = "sunburst"
+    HEATMAP = "heatmap"
 
-    CANDLESTICK = 'd3_candlestick'
-    OHLC = 'd3_ohlc'
+    CANDLESTICK = "d3_candlestick"
+    OHLC = "d3_ohlc"
 
     @staticmethod
     def options():

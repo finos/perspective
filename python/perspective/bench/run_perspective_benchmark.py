@@ -25,7 +25,8 @@ if __name__ == "__main__":
 
     print("Benchmarking perspective-python==master")
     subprocess.check_output(
-        "python3 {}/perspective_benchmark.py master".format(HERE), shell=True)
+        "python3 {}/perspective_benchmark.py master".format(HERE), shell=True
+    )
 
     # Run previous versions in virtualenv
     if not venv_handler.virtualenv_exists():
@@ -35,17 +36,18 @@ if __name__ == "__main__":
         venv_handler.activate_virtualenv()
 
     print("Installing pyarrow==0.16.0")
-    subprocess.check_output(
-        "yes | python3 -m pip install pyarrow==0.16.0", shell=True)
+    subprocess.check_output("yes | python3 -m pip install pyarrow==0.16.0", shell=True)
 
     for version in VERSIONS[1:]:
         print("Installing perspective-python=={}".format(version))
         subprocess.check_output(
-            "yes | python3 -m pip uninstall perspective-python", shell=True)
+            "yes | python3 -m pip uninstall perspective-python", shell=True
+        )
         subprocess.check_output(
             "yes | python3 -m pip install perspective-python=={}".format(version),
-            shell=True)
+            shell=True,
+        )
         print("Benchmarking perspective-python=={}".format(version))
         subprocess.check_output(
-            "python3 {}/perspective_benchmark.py {}".format(HERE, version), shell=True)
-
+            "python3 {}/perspective_benchmark.py {}".format(HERE, version), shell=True
+        )

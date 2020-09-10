@@ -16,22 +16,20 @@ from datetime import datetime
 HERE = os.path.abspath(os.path.dirname(__file__))
 CLIENT_PATH = os.path.join(HERE, "client", "client_runner.py")
 
-PARSER = argparse.ArgumentParser(description="Stress testing for Perspective's websocket interface.")
+PARSER = argparse.ArgumentParser(
+    description="Stress testing for Perspective's websocket interface."
+)
 
 PARSER.add_argument(
     "--delay",
     dest="delay",
     type=float,
     default=0,
-    help="The number of seconds to wait between starting each client."
+    help="The number of seconds to wait between starting each client.",
 )
 
 PARSER.add_argument(
-    "--debug",
-    dest="debug",
-    type=bool,
-    default=False,
-    help="Shows debug output."
+    "--debug", dest="debug", type=bool, default=False, help="Shows debug output."
 )
 
 PARSER.add_argument(
@@ -39,7 +37,7 @@ PARSER.add_argument(
     dest="test_type",
     default="table",
     choices=["table", "view"],
-    help="Whether the client should mimic a remote table (all operations are sent to the server) or a remote view (only updates are streamed)."
+    help="Whether the client should mimic a remote table (all operations are sent to the server) or a remote view (only updates are streamed).",
 )
 
 PARSER.add_argument(
@@ -47,12 +45,13 @@ PARSER.add_argument(
     default=5,
     type=int,
     dest="num_clients",
-    help="The number of clients to run - each client will have its own subprocess.")
+    help="The number of clients to run - each client will have its own subprocess.",
+)
 
 PARSER.add_argument(
     "url",
     type=str,
-    help="A full Websocket URL to a remote Perspective server, which MUST host a table named `table` or/and a view named `view`."
+    help="A full Websocket URL to a remote Perspective server, which MUST host a table named `table` or/and a view named `view`.",
 )
 
 if __name__ == "__main__":
@@ -69,9 +68,15 @@ if __name__ == "__main__":
     logging.basicConfig(
         format="%(asctime)s %(levelname)-8s %(message)s",
         level=log_level,
-        datefmt="%Y-%m-%d %H:%M:%S")
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
-    logging.info("Running %d client(s) with %s second delay before startup against URL %s", args.num_clients, args.delay, args.url)
+    logging.info(
+        "Running %d client(s) with %s second delay before startup against URL %s",
+        args.num_clients,
+        args.delay,
+        args.url,
+    )
 
     dt = "{:%Y%m%dT%H%M%S}".format(datetime.now())
     subfolder_name = "{}_run_{}".format(args.test_type, dt)
@@ -86,31 +91,51 @@ if __name__ == "__main__":
         logging.warning("Creating results subfolder: %s", results_subfolder)
         os.mkdir(results_subfolder)
 
-    logging.info("To display results, run host_results.py from python/perspective/bench/stresstest")
+    logging.info(
+        "To display results, run host_results.py from python/perspective/bench/stresstest"
+    )
 
     processes = []
 
     async def run_subprocess(client_name):
         logging.info("Starting client %s", client_name)
-        proc = await asyncio.create_subprocess_exec("python3", CLIENT_PATH, results_subfolder, client_name, args.test_type, args.url)
+        proc = await asyncio.create_subprocess_exec(
+            "python3",
+            CLIENT_PATH,
+            results_subfolder,
+            client_name,
+            args.test_type,
+            args.url,
+        )
         await proc.wait()
 
     loop = asyncio.get_event_loop()
     tasks = []
 
     if args.delay > 0:
+
         async def add_client_with_delay(i):
             client_name = "client_{}".format(i)
             if i > 0:
-                logging.info("Delaying client %s start for %d seconds", client_name, args.delay * i)
+                logging.info(
+                    "Delaying client %s start for %d seconds",
+                    client_name,
+                    args.delay * i,
+                )
                 await asyncio.sleep(args.delay * i)
             await asyncio.ensure_future(run_subprocess(client_name))
 
         # add clients sequentially
-        tasks = [asyncio.ensure_future(add_client_with_delay(i)) for i in range(args.num_clients)]
+        tasks = [
+            asyncio.ensure_future(add_client_with_delay(i))
+            for i in range(args.num_clients)
+        ]
     else:
         # add clients concurrently
-        tasks = [asyncio.ensure_future(run_subprocess("client_{}".format(i))) for i in range(args.num_clients)]
+        tasks = [
+            asyncio.ensure_future(run_subprocess("client_{}".format(i)))
+            for i in range(args.num_clients)
+        ]
 
     loop.run_until_complete(asyncio.gather(*tasks))
 

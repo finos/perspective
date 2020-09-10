@@ -41,9 +41,12 @@ if __name__ == "__main__":
             logging.critical(
                 "KeyboardInterrupt: dumping %s rows of results to %s",
                 RESULTS_TABLE.size(),
-                filename)
+                filename,
+            )
 
-            with open(os.path.join(HERE, "results", RESULTS_FOLDER, filename), "wb") as results_arrow:
+            with open(
+                os.path.join(HERE, "results", RESULTS_FOLDER, filename), "wb"
+            ) as results_arrow:
                 results_arrow.write(RESULTS_TABLE.view().to_arrow())
 
         logging.critical("Exiting %s", CLIENT_ID)
@@ -56,7 +59,8 @@ if __name__ == "__main__":
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         client = PerspectiveWebSocketClient(
-            URL, client_id, RESULTS_TABLE, test_type=TEST_TYPE)
+            URL, client_id, RESULTS_TABLE, test_type=TEST_TYPE
+        )
         loop.run_until_complete(client.run_until_timeout())
         loop.run_forever()
 

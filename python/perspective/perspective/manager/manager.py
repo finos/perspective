@@ -21,7 +21,7 @@ def gen_name(size=10, chars=string.ascii_uppercase + string.digits):
 
 
 class PerspectiveManager(_PerspectiveManagerInternal):
-    '''PerspectiveManager is an orchestrator for running Perspective on the
+    """PerspectiveManager is an orchestrator for running Perspective on the
     server side.
 
     The core functionality resides in `process()`, which receives
@@ -40,7 +40,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         should be spawned using `new_session()`.
     - When the websocket closes, call `close()` on the session instance to
         clean up associated resources.
-    '''
+    """
 
     def __init__(self, lock=False):
         super(PerspectiveManager, self).__init__(lock=lock)
@@ -81,36 +81,38 @@ class PerspectiveManager(_PerspectiveManagerInternal):
             self.host_view(name, item)
         else:
             raise PerspectiveError(
-                "Only `Table()` and `View()` instances can be hosted.")
+                "Only `Table()` and `View()` instances can be hosted."
+            )
 
     def host_table(self, name, table):
-        '''Given a reference to a `Table`, manage it and allow operations on it
+        """Given a reference to a `Table`, manage it and allow operations on it
         to occur through the Manager.
 
         If a function for `queue_process` is defined (i.e., by
         :obj:`~perspective.PerspectiveTornadoHandler`), bind the function to
         :obj:`~perspective.Table` and have it call the manager's version of
         `queue_process`.
-        '''
+        """
         if self._queue_process_callback is not None:
             # always bind the callback to the table's state manager
             table._state_manager.queue_process = partial(
-                self._queue_process_callback, state_manager=table._state_manager)
+                self._queue_process_callback, state_manager=table._state_manager
+            )
         self._tables[name] = table
         return name
 
     def host_view(self, name, view):
-        '''Given a :obj:`~perspective.View`, add it to the manager's views
+        """Given a :obj:`~perspective.View`, add it to the manager's views
         container.
-        '''
+        """
         self._views[name] = view
 
     def get_table(self, name):
-        '''Return a table under management by name.'''
+        """Return a table under management by name."""
         return self._tables.get(name, None)
 
     def get_view(self, name):
-        '''Return a view under management by name.'''
+        """Return a view under management by name."""
         return self._views.get(name, None)
 
     def new_session(self):
@@ -126,4 +128,5 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         self._queue_process_callback = func
         for table in self._tables.values():
             table._state_manager.queue_process = partial(
-                self._queue_process_callback, state_manager=table._state_manager)
+                self._queue_process_callback, state_manager=table._state_manager
+            )

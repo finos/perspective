@@ -25,7 +25,7 @@ try:
     from .table.libbinding import make_computations, _set_nthreads
 
     def set_threadpool_size(nthreads):
-        """ Sets the size of the global Perspective thread pool, up to the
+        """Sets the size of the global Perspective thread pool, up to the
         total number of available cores, which can be set explicity by
         setting `nthreads` to `None`.
         """
@@ -34,8 +34,10 @@ try:
     make_computations()
 except ImportError:
     __is_libpsp__ = False
-    critical("Failed to import C++ bindings for Perspective "
-             "probably as it could not be built for your architecture "
-             "(check install logs for more details).\n",
-             exc_info=True)
+    critical(
+        "Failed to import C++ bindings for Perspective "
+        "probably as it could not be built for your architecture "
+        "(check install logs for more details).\n",
+        exc_info=True,
+    )
     critical("You can still use `PerspectiveWidget` in client mode using JupyterLab.")

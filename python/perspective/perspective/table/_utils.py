@@ -20,7 +20,7 @@ def _extract_type(type, typemap):
 
 
 def _dtype_to_pythontype(dtype):
-    '''Returns the native Python type from a Perspective type'''
+    """Returns the native Python type from a Perspective type"""
     mapping = {
         t_dtype.DTYPE_BOOL: bool,
         t_dtype.DTYPE_FLOAT32: float,
@@ -39,9 +39,9 @@ def _dtype_to_pythontype(dtype):
 
 
 def _dtype_to_str(dtype):
-    '''Returns the normalized string representation of a Perspective type,
+    """Returns the normalized string representation of a Perspective type,
     compatible with Perspective.js.
-    '''
+    """
     mapping = {
         t_dtype.DTYPE_BOOL: "boolean",
         t_dtype.DTYPE_FLOAT32: "float",
@@ -53,16 +53,16 @@ def _dtype_to_str(dtype):
         t_dtype.DTYPE_DATE: "date",
         t_dtype.DTYPE_TIME: "datetime",
         t_dtype.DTYPE_STR: "string",
-        t_dtype.DTYPE_OBJECT: "object"
+        t_dtype.DTYPE_OBJECT: "object",
     }
 
     return _extract_type(dtype, mapping)
 
 
 def _str_to_pythontype(typestring):
-    '''Returns a Python type from the normalized string representation of a
+    """Returns a Python type from the normalized string representation of a
     Perspective type, i.e. from Perspective.js
-    '''
+    """
     mapping = {
         "boolean": bool,
         "float": float,

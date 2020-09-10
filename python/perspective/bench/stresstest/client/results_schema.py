@@ -24,5 +24,5 @@ RESULTS_SCHEMA = {
     "server_received": datetime,  # When the tornado handler on the server receives the message
     "server_start_process_time": datetime,  # When manager._process is called
     "server_send_time": datetime,  # When the server tornado handler sends the response to the client
-    "num_messages_logged": int  # The total number of messages logged by the client
+    "num_messages_logged": int,  # The total number of messages logged by the client
 }

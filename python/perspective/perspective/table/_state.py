@@ -30,6 +30,7 @@ class _PerspectiveStateManager(object):
     state manager, `TO_PROCESS`, which contains the `t_pool` objects for pending
     `_process` calls, is shared amongst all instances of the state manager.
     """
+
     TO_PROCESS = {}
 
     def __init__(self):

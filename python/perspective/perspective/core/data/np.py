@@ -10,7 +10,12 @@ import six
 import numpy as np
 from datetime import datetime
 
-DATE_DTYPES = [np.dtype("datetime64[D]"), np.dtype("datetime64[W]"), np.dtype("datetime64[M]"), np.dtype("datetime64[Y]")]
+DATE_DTYPES = [
+    np.dtype("datetime64[D]"),
+    np.dtype("datetime64[W]"),
+    np.dtype("datetime64[M]"),
+    np.dtype("datetime64[Y]"),
+]
 
 
 def make_null_mask(array):
@@ -27,14 +32,18 @@ def make_null_mask(array):
     """
     mask = []
 
-    is_object_or_string_dtype = np.issubdtype(array.dtype, np.str_) or\
-        np.issubdtype(array.dtype, np.object_)
+    is_object_or_string_dtype = np.issubdtype(array.dtype, np.str_) or np.issubdtype(
+        array.dtype, np.object_
+    )
 
     if six.PY2:
-        is_object_or_string_dtype = is_object_or_string_dtype or np.issubdtype(array.dtype, np.unicode_)
+        is_object_or_string_dtype = is_object_or_string_dtype or np.issubdtype(
+            array.dtype, np.unicode_
+        )
 
-    is_datetime_dtype = np.issubdtype(array.dtype, np.datetime64) or\
-        np.issubdtype(array.dtype, np.timedelta64)
+    is_datetime_dtype = np.issubdtype(array.dtype, np.datetime64) or np.issubdtype(
+        array.dtype, np.timedelta64
+    )
 
     for i, item in enumerate(array):
         invalid = item is None
@@ -52,7 +61,7 @@ def make_null_mask(array):
 
 
 def deconstruct_numpy(array, mask=None):
-    '''Given a numpy array, parse it and return the data as well as a numpy
+    """Given a numpy array, parse it and return the data as well as a numpy
     array of null indices.
 
     Args:
@@ -64,7 +73,7 @@ def deconstruct_numpy(array, mask=None):
     Returns:
         (:obj:`dict`): `array` is the original array, and `mask` is an array of
             booleans where `True` represents a nan/None value.
-    '''
+    """
     if mask is None:
         mask = make_null_mask(array)
 
@@ -95,7 +104,4 @@ def deconstruct_numpy(array, mask=None):
     elif np.issubdtype(array.dtype, np.timedelta64):
         array = array.astype(np.float64, copy=False)
 
-    return {
-            "array": array,
-            "mask": mask
-        }
+    return {"array": array, "mask": mask}
