@@ -1,0 +1,72 @@
+{
+    "sizes": [
+        1
+    ],
+    "detail": {
+        "main": {
+            "type": "split-area",
+            "orientation": "horizontal",
+            "children": [
+                {
+                    "type": "tab-area",
+                    "widgets": [
+                        "PERSPECTIVE_GENERATED_ID_0"
+                    ],
+                    "currentIndex": 0
+                },
+                {
+                    "type": "tab-area",
+                    "widgets": [
+                        "PERSPECTIVE_GENERATED_ID_1"
+                    ],
+                    "currentIndex": 0
+                }
+            ],
+            "sizes": [
+                0.6,
+                0.4
+            ]
+        }
+    },
+    "mode": "globalFilters",
+    "viewers": {
+        "PERSPECTIVE_GENERATED_ID_0": {
+            "plugin": "d3_xy_scatter",
+            "columns": [
+                "lon",
+                "lat",
+                "num_bikes_available"
+            ],
+            "sort": [
+                [
+                    "num_bikes_available",
+                    "asc"
+                ]
+            ],
+            "plugin_config": {
+                "realValues": [
+                    "lon",
+                    "lat",
+                    "num_bikes_available"
+                ]
+            },
+            "master": false,
+            "table": "citibike",
+            "linked": false,
+            "name": "Map"
+        },
+        "PERSPECTIVE_GENERATED_ID_1": {
+            "plugin": "datagrid",
+            "columns": [
+                "capacity",
+                "num_bikes_available",
+                "name"
+            ],
+            "sort": [["last_reported", "desc"]],
+            "master": false,
+            "table": "citibike",
+            "linked": false,
+            "name": "Recently updated"
+        }
+    }
+}

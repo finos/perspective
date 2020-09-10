@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.css">
+        <link rel='stylesheet' href="index.css"> 
+      
+        <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+        <script src="citibike.js"></script>
+
+        <style>
+
+            body {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+        </style>
+    </head>
+    <body> 
+
+        <perspective-workspace id="workspace">
+        </perspective-workspace>
+      
+    </body>
+</html>
