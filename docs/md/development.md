@@ -54,22 +54,21 @@ environments are provided for the Javascript and Python libraries.
 
 To build Perspective using Docker, select the option in `yarn setup`.
 
-### System Dependencies
-
-Perspective requires some system dependencies to be installed before it can be
-built from source:
-
-- Boost (version 1.67)
-- CMake (version 3.15.4 or higher)
-- TBB
-- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
-
-### `Perspective.js`
+## `Perspective.js`
 
 To build the Javascript library, which includes WebAssembly compilation,
 [Emscripten](https://github.com/kripken/emscripten) and its prerequisites are
 required. A Docker image is provided with the correct environment and
 prerequisites.
+
+#### System Dependencies
+
+Perspective requires some system dependencies to be installed before it can be
+built using local Emscripten:
+
+- Boost (version 1.67)
+- CMake (version 3.15.4 or higher)
+- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
 
 #### Building via EMSDK
 
@@ -92,7 +91,7 @@ To install this specific version of Emscripten:
 ./emsdk install 1.39.13
 ```
 
-### `perspective-python`
+## `perspective-python`
 
 To build the Python library, run:
 
@@ -107,9 +106,29 @@ To build the Python 2 version of the library, use the `--python2` flag:
 yarn build_python --python2
 ```
 
+### System Dependencies
+
+`perspective-python` requires the following system dependencies to be installed before it can be
+built from source:
+
+- Boost (version 1.67)
+- CMake (version 3.15.4 or higher)
+- TBB
+
 ## System-Specific Instructions
 
-### MacOS/OSX specific instructions
+### MacOS/OSX
+
+Install system dependencies through Homebrew:
+
+```bash
+brew install cmake
+brew install boost@1.67
+brew install tbb
+brew install flatbuffers
+```
+
+#### Emscripten
 
 Installing and activating the latest
 [Emscripten SDK](https://github.com/kripken/emscripten):
@@ -119,16 +138,7 @@ Installing and activating the latest
 ./emsdk activate latest
 ```
 
-You'll also need the system dependencies noted earlier - installing them through
-Homebrew is the easiest way, especially as flatbuffers can be installed through
-`brew` without building from source:
-
-```bash
-brew install boost@1.67
-brew install tbb
-brew install cmake
-brew install flatbuffers
-```
+#### `perspective-python`
 
 If building the Python 2 version of the library, make sure your version of
 Python 2 is the latest version (`2.7.17`) supplied by Homebrew, and not the
@@ -138,7 +148,7 @@ earlier version that ships with MacOS. To install Python 2 using Homebrew:
 brew install python2
 ```
 
-### Windows 10 specific instructions
+### Windows 10
 
 You need to use bash in order to build Perspective packages. To successfully
 build on Windows 10, enable
