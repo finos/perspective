@@ -1120,6 +1120,25 @@ class TestToFormat(object):
             "b": [2.5, 4.5]
         }
 
+    def test_to_format_implicit_id_records(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_records(id=True) == [
+            {"__ID__": [0], "a": 1.5, "b": 2.5},
+            {"__ID__": [1], "a": 3.5, "b": 4.5}
+        ]
+
+    def test_to_format_implicit_id_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_dict(id=True) == {
+            "__ID__": [[0], [1]],
+            "a": [1.5, 3.5],
+            "b": [2.5, 4.5]
+        }
+
     def test_to_format_implicit_index_two_dict(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
@@ -1130,6 +1149,19 @@ class TestToFormat(object):
             '4.5|a': [3.5, None, 3.5],
             '4.5|b': [4.5, None, 4.5],
             '__INDEX__': [[], [], []],  # index needs to be the same length as each column
+            '__ROW_PATH__': [[], [1.5], [3.5]]
+        }
+
+    def test_to_format_implicit_index_two_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        assert view.to_dict(id=True) == {
+            '2.5|a': [1.5, 1.5, None],
+            '2.5|b': [2.5, 2.5, None],
+            '4.5|a': [3.5, None, 3.5],
+            '4.5|b': [4.5, None, 4.5],
+            '__ID__': [[], [1.5], [3.5]],  # index needs to be the same length as each column
             '__ROW_PATH__': [[], [1.5], [3.5]]
         }
 

@@ -43,6 +43,8 @@ def to_format(options, view, output_format):
         data = {}
         if options["index"]:
             data["__INDEX__"] = []
+        if options["id"]:
+            data["__ID__"] = []
 
     num_columns = len(view._config.get_columns())
     num_hidden = view._num_hidden_cols()
@@ -73,10 +75,14 @@ def to_format(options, view, output_format):
                     ]
                     if output_format == "records":
                         data[-1]["__ROW_PATH__"] = paths
+                        if options["id"]:
+                            data[-1]["__ID__"] = paths
                     elif output_format in ("dict", "numpy"):
                         if "__ROW_PATH__" not in data:
                             data["__ROW_PATH__"] = []
                         data["__ROW_PATH__"].append(paths)
+                        if options["id"]:
+                            data["__ID__"].append(paths)
             else:
                 if output_format in ("dict", "numpy") and (name not in data):
                     # TODO: push into C++ for numpy
@@ -112,6 +118,18 @@ def to_format(options, view, output_format):
                     data["__INDEX__"].append([])
                 for pkey in pkeys:
                     data["__INDEX__"].append([pkey])
+
+        if options["id"] and view._sides == 0:
+            pkeys = get_pkeys_from_data_slice_zero(data_slice, ridx, 0)
+            if output_format == "records":
+                data[-1]["__ID__"] = []
+                for pkey in pkeys:
+                    data[-1]["__ID__"].append(pkey)
+            elif output_format in ("dict", "numpy"):
+                if len(pkeys) == 0:
+                    data["__ID__"].append([])
+                for pkey in pkeys:
+                    data["__ID__"].append([pkey])
 
     if output_format in ("dict", "numpy") and (
         not options["has_row_path"] and ("__ROW_PATH__" in data)
@@ -189,6 +207,7 @@ def _parse_format_options(view, options):
             )
         ),
         "index": options.get("index", False),
+        "id": options.get("id", False),
         "leaves_only": options.get("leaves_only", False),
         "has_row_path": view._sides > 0 and (not view._column_only),
     }
