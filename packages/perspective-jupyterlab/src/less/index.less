@@ -1,6 +1,6 @@
 @import "~@finos/perspective-viewer/src/less/fonts.less";
-@import (reference) "~@finos/perspective-viewer/src/themes/material.less";
-@import (reference) "~@finos/perspective-viewer/src/themes/material.dark.less";
+@import (reference) "~@finos/perspective-viewer/src/themes/material-dense.less";
+@import (reference) "~@finos/perspective-viewer/src/themes/material-dense.dark.less";
 
 div.PSPContainer,
 div.PSPContainer-dark {
@@ -14,15 +14,17 @@ div.PSPContainer-dark {
 
 .jp-NotebookPanel-notebook div.PSPContainer,
 .jp-NotebookPanel-notebook div.PSPContainer-dark {
-    height: 500px;
+    height: 520px;
 }
 
 div.PSPContainer perspective-viewer {
-    .perspective-viewer-material();
+    .perspective-viewer-material-dense();
+    --plugin--border: 1px solid #e0e0e0;
 }
 
 div.PSPContainer-dark perspective-viewer {
-    .perspective-viewer-material-dark();
+    .perspective-viewer-material-dense-dark();
+    --plugin--border: 1px solid #333333;
 }
 
 div.PSPContainer perspective-viewer,
