@@ -121,6 +121,38 @@ NumPy record arrays are all supported in `perspective-python`.
 pip install perspective-python
 ```
 
+### Troubleshooting installation from source
+
+If you are installing from a source distribution (sdist), make sure you have
+CMake and Boost headers present on your machine:
+
+- CMake (version 3.15.4 or higher)
+- Boost Headers (version 1.67)
+
+Try installing in verbose mode:
+
+```bash
+pip install -vv perspective-python
+```
+
+The most common culprits are:
+
+- CMake version too old
+- Boost headers are missing or too old
+- PyArrow not installed prior to installing perspective
+
+Additionally, due to PEP-518 and build isolation, its possible that the version of PyArrow that pip uses to build perspective-python is different from the one you have installed. To disable this, pass the `--no-build-isolation` flag to pip.
+
+#### Wheels PyArrow linkage
+
+Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight mcoupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.16.0.
+
+To ignore compiled wheels and install from source with pip, install via
+
+```bash
+pip install --no-binary perspective-python
+```
+
 ### Jupyterlab
 
 `PerspectiveWidget` is a JupyterLab widget that implements the same API as
@@ -130,10 +162,16 @@ transformations/visualizations of various data formats within JupyterLab.
 <img src="https://perspective.finos.org/img/jupyterlab.png"></img>
 
 To use the JupyterLab plugin, make sure you have installed `perspective-python`
-and install from the Jupyter lab extension directory:
+and then install the extension from the Jupyter lab extension directory:
 
 ```bash
 jupyter labextension install @finos/perspective-jupyterlab
+```
+
+If the widget does not display, you might be missing the [ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension). Install it from the extension directory:
+
+```bash
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
 ```
 
 ## From source
