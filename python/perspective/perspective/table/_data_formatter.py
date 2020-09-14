@@ -172,6 +172,7 @@ def _to_format_helper(view, options=None):
 def _parse_format_options(view, options):
     """Given a user-provided options dictionary, extract the useful values."""
     max_cols = view.num_columns() + (1 if view._sides > 0 else 0)
+    column_only_offset = 1 if view._sides > 0 or view._column_only else 0
     return {
         "start_row": int(floor(max(options.get("start_row", 0), 0))),
         "end_row": int(
@@ -181,7 +182,8 @@ def _parse_format_options(view, options):
         "end_col": int(
             ceil(
                 min(
-                    options.get("end_col", max_cols) * (view._num_hidden_cols() + 1),
+                    (options.get("end_col", max_cols) + column_only_offset)
+                    * (view._num_hidden_cols() + 1),
                     max_cols,
                 )
             )

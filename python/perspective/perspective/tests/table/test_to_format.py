@@ -597,7 +597,7 @@ class TestToFormat(object):
             start_col=0,
             end_col=0
         )
-        assert records == [{}, {}, {}]
+        assert records == [{'__ROW_PATH__': []}, {'__ROW_PATH__': [1.5]}, {'__ROW_PATH__': [3.5]}]
 
     def test_to_records_two_over_max_col(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -751,8 +751,11 @@ class TestToFormat(object):
             start_col=1,
             end_col=2
         )
-        assert records == [{"__ROW_PATH__": []}, {"__ROW_PATH__": [3]}, {"__ROW_PATH__": [1]}]
-        
+        assert records == [
+            {'2|b': 2, '__ROW_PATH__': []},
+            {'2|b': None, '__ROW_PATH__': [3]},
+            {'2|b': 2, '__ROW_PATH__': [1]}
+        ]
 
     def test_to_records_two_sorted_start_end_col_equiv(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
