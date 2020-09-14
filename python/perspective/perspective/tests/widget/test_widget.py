@@ -25,6 +25,18 @@ class TestWidget:
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data, plugin="x_bar")
         assert widget.plugin == "x_bar"
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
+                "options": {
+                    "index": ""
+                }
+            }
+        }
 
     def test_widget_no_data(self):
         widget = PerspectiveWidget(None, plugin="x_bar", row_pivots=["a"])
@@ -61,17 +73,81 @@ class TestWidget:
         with raises(PerspectiveError):
             PerspectiveWidget(None, limit=5)
 
+    def test_widget_eventual_data(self):
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(None, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+
+        with raises(PerspectiveError):
+            widget._make_load_message()
+
+        widget.load(table)
+
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
+                "options": {
+                    "index": ""
+                }
+            }
+        }
+
     def test_widget_load_table(self):
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, plugin="x_bar")
         assert widget.plugin == "x_bar"
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
+                "options": {
+                    "index": ""
+                }
+            }
+        }
+
+    def test_widget_load_view(self):
+        table = Table({"a": np.arange(0, 50)})
+        view = table.view()
+        widget = PerspectiveWidget(view, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
+                "options": {
+                    "index": ""
+                }
+            }
+        }
 
     def test_widget_load_table_ignore_limit(self):
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, limit=1)
         assert widget.table.size() == 50
 
-    def test_widget_pass_options(self):
+    def test_widget_load_view_ignore_limit(self):
+        table = Table({"a": np.arange(0, 50)})
+        view = table.view()
+        widget = PerspectiveWidget(view, plugin="x_bar", limit=1)
+        assert widget.table.size() == 50
+
+    def test_widget_pass_index(self):
+        data = {"a": [1, 2, 3, 1]}
+        widget = PerspectiveWidget(data, index="a")
+        assert widget.table.size() == 3
+
+    def test_widget_pass_limit(self):
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data, limit=1)
         assert widget.table.size() == 1
@@ -81,6 +157,56 @@ class TestWidget:
         with raises(PerspectiveError):
             PerspectiveWidget(data, index="index", limit=1)
 
+    # server mode
+    def test_widget_load_table_server(self):
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(table, server=True)
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name
+            }
+        }
+
+    def test_widget_load_view_server(self):
+        table = Table({"a": np.arange(0, 50)})
+        view = table.view()
+        widget = PerspectiveWidget(view, server=True)
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name
+            }
+        }
+
+    def test_widget_no_data_with_server(self):
+        # should fail
+        widget = PerspectiveWidget(None, server=True)
+        with raises(PerspectiveError):
+            widget._make_load_message()
+
+    def test_widget_eventual_data_with_server(self):
+        # should fail
+        widget = PerspectiveWidget(None, server=True)
+
+        with raises(PerspectiveError):
+            widget._make_load_message()
+
+        # then succeed
+        widget.load(Table({"a": np.arange(0, 50)}))
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name
+            }
+        }
+
     # clear
 
     def test_widget_clear(self):
@@ -89,11 +215,23 @@ class TestWidget:
         widget.clear()
         assert widget.table.size() == 0
 
+    def test_widget_clear_server(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, server=True)
+        widget.clear()
+        assert widget.table.size() == 0
+
     # replace
 
     def test_widget_replace(self):
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data)
+        widget.replace({"a": [1]})
+        assert widget.table.size() == 1
+
+    def test_widget_replace_server(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, server=True)
         widget.replace({"a": [1]})
         assert widget.table.size() == 1
 
@@ -107,4 +245,18 @@ class TestWidget:
         })
         widget.post = MethodType(mocked_post, widget)
         widget.delete()
+        assert widget._view is None
+        assert widget.table is None
+
+    def test_widget_delete_view(self):
+        data = {"a": np.arange(0, 50)}
+        table = Table(data)
+        view = table.view()
+        widget = PerspectiveWidget(view)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "delete"
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.delete()
+        assert widget._view is None
         assert widget.table is None

@@ -8,9 +8,13 @@
  */
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
+import {PerspectiveWorker, Table, View} from "@finos/perspective";
 
 import {PerspectiveJupyterWidget} from "./widget";
 import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const perspective = require("@finos/perspective");
 
 /**
  * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with
@@ -20,7 +24,14 @@ export class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveJupyterWidget; // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
-    _createElement(tagName: string) {
+    // The message ID that is expecting an arrow as a follow-up message.
+    _pending_arrow: number;
+
+    // if there is a port_id, join it with the pending arrow so on_update
+    // callbacks work correctly
+    _pending_port_id: number;
+
+    _createElement(tagName: string): HTMLElement {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
@@ -31,6 +42,7 @@ export class PerspectiveView extends DOMWidgetView {
             filters: this.model.get("filters"),
             computed_columns: this.model.get("computed_columns"),
             plugin_config: this.model.get("plugin_config"),
+            server: this.model.get("server"),
             client: this.model.get("client"),
             dark:
                 this.model.get("dark") === null // only set if its a bool, otherwise inherit
@@ -44,7 +56,7 @@ export class PerspectiveView extends DOMWidgetView {
         return this.pWidget.node;
     }
 
-    _setElement(el: HTMLElement) {
+    _setElement(el: HTMLElement): void {
         if (this.el || el !== this.pWidget.node) {
             // Do not allow the view to be reassigned to a different element.
             throw new Error("Cannot reset the DOM element.");
@@ -57,7 +69,7 @@ export class PerspectiveView extends DOMWidgetView {
      *
      * @param mutations
      */
-    _synchronize_state(mutations: any) {
+    _synchronize_state(mutations: any): void {
         for (const mutation of mutations) {
             const name = mutation.attributeName.replace(/-/g, "_");
             let new_value = this.pWidget.viewer.getAttribute(mutation.attributeName);
@@ -84,7 +96,7 @@ export class PerspectiveView extends DOMWidgetView {
      * Attach event handlers, and watch the DOM for state changes in order to
      * reflect them back to Python.
      */
-    render() {
+    render(): void {
         super.render();
 
         this.model.on("msg:custom", this._handle_message, this);
@@ -129,10 +141,42 @@ export class PerspectiveView extends DOMWidgetView {
      *
      * @param msg {PerspectiveJupyterMessage}
      */
-    _handle_message(msg: PerspectiveJupyterMessage) {
-        // If in client-only mode (no Table on the python widget), message.data
-        // is an object containing "data" and "options".
+    _handle_message(msg: PerspectiveJupyterMessage, buffers: Array<DataView>): void {
+        if (this._pending_arrow && buffers.length === 1) {
+            const binary = buffers[0].buffer.slice(0);
+
+            // make sure on_update callbacks are called with a `port_id`
+            // AND the transferred arrow.
+            if (this._pending_port_id !== undefined) {
+                // call handle individually to bypass typescript complaints
+                // that we override `data` with different types.
+                this.perspective_client._handle({
+                    id: this._pending_arrow,
+                    data: {
+                        id: this._pending_arrow,
+                        data: {
+                            port_id: this._pending_port_id,
+                            delta: binary
+                        }
+                    }
+                });
+            } else {
+                this.perspective_client._handle({
+                    id: this._pending_arrow,
+                    data: {
+                        id: this._pending_arrow,
+                        data: binary
+                    }
+                });
+            }
+            this._pending_port_id = undefined;
+            this._pending_arrow = undefined;
+            return;
+        }
+
         if (msg.type === "table") {
+            // If in client-only mode (no Table on the python widget),
+            // message.data is an object containing "data" and "options".
             this._handle_load_message(msg);
         } else {
             if (msg.data["cmd"] === "delete") {
@@ -164,7 +208,23 @@ export class PerspectiveView extends DOMWidgetView {
                     message.data = JSON.parse(message.data);
                 }
 
-                this.perspective_client._handle(message);
+                if (message.data["is_transferable"]) {
+                    // If the `is_transferable` flag is set, the worker expects
+                    // the next message to be a transferable object. This sets
+                    // the `_pending_arrow` flag, which triggers a special
+                    // handler for the ArrayBuffer containing arrow data.
+                    this._pending_arrow = message.data.id;
+
+                    // Check whether the message also contains a `port_id`,
+                    // indicating that we are in an `on_update` callback and
+                    // the pending arrow needs to be joined with the port_id
+                    // for on_update handlers to work properly.
+                    if (message.data.data && message.data.data.port_id !== undefined) {
+                        this._pending_port_id = message.data.data.port_id;
+                    }
+                } else {
+                    this.perspective_client._handle(message);
+                }
             }
         }
     }
@@ -172,16 +232,81 @@ export class PerspectiveView extends DOMWidgetView {
     /**
      * Given a message that commands the widget to load a dataset or table,
      * process it.
+     *
      * @param {PerspectiveJupyterMessage} msg
      */
-    _handle_load_message(msg: PerspectiveJupyterMessage) {
-        if (this.pWidget.client === true) {
+    _handle_load_message(msg: PerspectiveJupyterMessage): void {
+        const table_options = msg.data["options"] || {};
+
+        if (this.pWidget.client) {
+            // In client mode, retrieve the serialized data and the options
+            // passed by the user, and create a new table on the client end.
             const data = msg.data["data"];
-            const options = msg.data["options"] || {};
-            this.pWidget.load(data, options);
+            this.pWidget.load(data, table_options);
         } else {
-            const new_table = this.perspective_client.open_table(msg.data["table_name"]);
-            this.pWidget.load(new_table);
+            if (this.pWidget.server && msg.data["table_name"]) {
+                // Get a remote table handle, and load the remote table in
+                // the client.
+                const table = this.perspective_client.open_table(msg.data["table_name"]);
+                this.pWidget.load(table, table_options);
+            } else if (msg.data["table_name"] && msg.data["view_name"]) {
+                // Get a remote view handle from the Jupyter kernel, and
+                // create a client-side table using the view handle.
+                const kernel_table: Table = this.perspective_client.open_table(msg.data["table_name"]);
+                const kernel_view: View = this.perspective_client.open_view(msg.data["view_name"]);
+
+                // If the widget is editable, set up client/server editing
+                if (this.pWidget.editable) {
+                    let worker: PerspectiveWorker;
+                    let client_table: Table;
+                    let client_view: View;
+
+                    kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
+                        worker = perspective.worker();
+                        client_table = worker.table(arrow, table_options);
+                        client_view = client_table.view();
+
+                        let client_edit_port: number, server_edit_port: number;
+
+                        // Create ports on the client and kernel.
+                        Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(outs => {
+                            client_edit_port = outs[1];
+                            server_edit_port = outs[2];
+                        });
+
+                        // When the client updates, if the update comes through
+                        // the edit port then forward it to the server.
+                        client_view.on_update(
+                            updated => {
+                                if (updated.port_id === client_edit_port) {
+                                    kernel_table.update(updated.delta, {
+                                        port_id: server_edit_port
+                                    });
+                                }
+                            },
+                            {mode: "row"}
+                        );
+
+                        // If the server updates, and the edit is not coming
+                        // from the server edit port, then synchronize state
+                        // with the client.
+                        kernel_view.on_update(
+                            updated => {
+                                if (updated.port_id !== server_edit_port) {
+                                    client_table.update(updated.delta); // any port, we dont care
+                                }
+                            },
+                            {mode: "row"}
+                        );
+                    });
+                } else {
+                    // Just load the view into the widget, everything else
+                    // is handled.
+                    this.pWidget.load(kernel_view, table_options);
+                }
+            } else {
+                throw new Error(`PerspectiveWidget cannot load data from kernel message: ${JSON.stringify(msg)}`);
+            }
 
             // Only call `init` after the viewer has a table.
             this.perspective_client.send({
@@ -193,49 +318,50 @@ export class PerspectiveView extends DOMWidgetView {
 
     /**
      * When traitlets are updated in python, update the corresponding value on
-     * the front-end viewer.
+     * the front-end viewer. `client` and `server` are not included, as they
+     * are not properties in `<perspective-viewer>`.
      */
-    plugin_changed() {
+    plugin_changed(): void {
         this.pWidget.plugin = this.model.get("plugin");
     }
 
-    columns_changed() {
+    columns_changed(): void {
         this.pWidget.columns = this.model.get("columns");
     }
 
-    row_pivots_changed() {
+    row_pivots_changed(): void {
         this.pWidget.row_pivots = this.model.get("row_pivots");
     }
 
-    column_pivots_changed() {
+    column_pivots_changed(): void {
         this.pWidget.column_pivots = this.model.get("column_pivots");
     }
 
-    aggregates_changed() {
+    aggregates_changed(): void {
         this.pWidget.aggregates = this.model.get("aggregates");
     }
 
-    sort_changed() {
+    sort_changed(): void {
         this.pWidget.sort = this.model.get("sort");
     }
 
-    filters_changed() {
+    filters_changed(): void {
         this.pWidget.filters = this.model.get("filters");
     }
 
-    computed_columns_changed() {
+    computed_columns_changed(): void {
         this.pWidget.computed_columns = this.model.get("computed_columns");
     }
 
-    plugin_config_changed() {
+    plugin_config_changed(): void {
         this.pWidget.plugin_config = this.model.get("plugin_config");
     }
 
-    dark_changed() {
+    dark_changed(): void {
         this.pWidget.dark = this.model.get("dark");
     }
 
-    editable_changed() {
+    editable_changed(): void {
         this.pWidget.editable = this.model.get("editable");
     }
 }

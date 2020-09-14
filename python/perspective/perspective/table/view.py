@@ -407,6 +407,8 @@ class View(object):
             start_col (:obj:`int`): (Defaults to 0).
             end_col (:obj:`int`): (Defaults to
                 :func:`perspective.View.num_columns()`).
+            id (:obj:`bool`): Whether to return a logical row ID for each
+                row (Defaults to ``False``).
             index (:obj:`bool`): Whether to return an implicit pkey for each
                 row (Defaults to ``False``).
             leaves_only (:obj:`bool`): Whether to return only the data at the
@@ -433,6 +435,8 @@ class View(object):
             start_col (:obj:`int`): (Defaults to 0).
             end_col (:obj:`int`): (Defaults to
                 :func:`perspective.View.num_columns()`).
+            id (:obj:`bool`): Whether to return a logical row ID for each
+                row (Defaults to ``False``).
             index (:obj:`bool`): Whether to return an implicit pkey for each
                 row (Defaults to ``False``).
             leaves_only (:obj:`bool`): Whether to return only the data at the
@@ -456,6 +460,8 @@ class View(object):
             start_col (:obj:`int`): (Defaults to 0).
             end_col (:obj:`int`): (Defaults to
                 :func:`perspective.View.num_columns()`).
+            id (:obj:`bool`): Whether to return a logical row ID for each
+                row (Defaults to ``False``).
             index (:obj:`bool`): Whether to return an implicit pkey for each
                 row (Defaults to ``False``).
             leaves_only (:obj:`bool`): Whether to return only the data at the
@@ -480,6 +486,8 @@ class View(object):
             start_col (:obj:`int`): (Defaults to 0).
             end_col (:obj:`int`): (Defaults to
                 :func:`perspective.View.num_columns()`).
+            id (:obj:`bool`): Whether to return a logical row ID for each
+                row (Defaults to ``False``).
             index (:obj:`bool`): Whether to return an implicit pkey for each
                 row (Defaults to ``False``).
             leaves_only (:obj:`bool`): Whether to return only the data at the
@@ -503,6 +511,8 @@ class View(object):
             start_col (:obj:`int`): (Defaults to 0).
             end_col (:obj:`int`): (Defaults to
                 :func:`perspective.View.num_columns()`).
+            id (:obj:`bool`): Whether to return a logical row ID for each
+                row (Defaults to ``False``).
             index (:obj:`bool`): Whether to return an implicit pkey for each
                 row (Defaults to False).
             leaves_only (:obj:`bool`): Whether to return only the data at the

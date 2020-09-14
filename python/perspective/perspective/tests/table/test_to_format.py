@@ -597,7 +597,7 @@ class TestToFormat(object):
             start_col=0,
             end_col=0
         )
-        assert records == [{}, {}, {}]
+        assert records == [{'__ROW_PATH__': []}, {'__ROW_PATH__': [1.5]}, {'__ROW_PATH__': [3.5]}]
 
     def test_to_records_two_over_max_col(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -751,8 +751,11 @@ class TestToFormat(object):
             start_col=1,
             end_col=2
         )
-        assert records == [{"__ROW_PATH__": []}, {"__ROW_PATH__": [3]}, {"__ROW_PATH__": [1]}]
-        
+        assert records == [
+            {'2|b': 2, '__ROW_PATH__': []},
+            {'2|b': None, '__ROW_PATH__': [3]},
+            {'2|b': 2, '__ROW_PATH__': [1]}
+        ]
 
     def test_to_records_two_sorted_start_end_col_equiv(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -1117,6 +1120,25 @@ class TestToFormat(object):
             "b": [2.5, 4.5]
         }
 
+    def test_to_format_implicit_id_records(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_records(id=True) == [
+            {"__ID__": [0], "a": 1.5, "b": 2.5},
+            {"__ID__": [1], "a": 3.5, "b": 4.5}
+        ]
+
+    def test_to_format_implicit_id_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_dict(id=True) == {
+            "__ID__": [[0], [1]],
+            "a": [1.5, 3.5],
+            "b": [2.5, 4.5]
+        }
+
     def test_to_format_implicit_index_two_dict(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
@@ -1127,6 +1149,19 @@ class TestToFormat(object):
             '4.5|a': [3.5, None, 3.5],
             '4.5|b': [4.5, None, 4.5],
             '__INDEX__': [[], [], []],  # index needs to be the same length as each column
+            '__ROW_PATH__': [[], [1.5], [3.5]]
+        }
+
+    def test_to_format_implicit_index_two_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        assert view.to_dict(id=True) == {
+            '2.5|a': [1.5, 1.5, None],
+            '2.5|b': [2.5, 2.5, None],
+            '4.5|a': [3.5, None, 3.5],
+            '4.5|b': [4.5, None, 4.5],
+            '__ID__': [[], [1.5], [3.5]],  # index needs to be the same length as each column
             '__ROW_PATH__': [[], [1.5], [3.5]]
         }
 

@@ -38,6 +38,11 @@ class TestUpdate(object):
         tbl.update([{"a": "abc", "b": 456}])
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
 
+    def test_update_partial_cols_not_in_schema(self):
+        tbl = Table([{"a": "abc", "b": 123}], index="a")
+        tbl.update([{"a": "abc", "b": 456, "c": 789}])
+        assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
+
     def test_update_columnar_append(self):
         tbl = Table({"a": ["abc"], "b": [123]})
         tbl.update({"a": ["def"], "b": [456]})

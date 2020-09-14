@@ -89,7 +89,9 @@ def _type_to_format(data_or_schema):
         ):
             # if pandas not installed or is not a dataframe or series
             raise NotImplementedError(
-                "Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array."
+                "Invalid data format `{}` - Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.".format(
+                    type(data_or_schema)
+                )
             )
         else:
             # flatten column/index multiindex

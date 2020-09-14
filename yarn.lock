@@ -1266,6 +1266,16 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
+"@jupyter-widgets/base-manager@^1.0.0-alpha.0":
+  version "1.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@jupyter-widgets/base-manager/-/base-manager-1.0.0-alpha.0.tgz#d69da034574fcb08dcf3f85d453b77efadc87a21"
+  integrity sha512-WHSsGXWxvdsTd1xeZP9enBWhR+ZeV5ZxyFhlc7bETgGlakwKnLJMkFeYQ5thx7d9kgpgxZMroOHLEcLkgWLO1g==
+  dependencies:
+    "@jupyter-widgets/base" "^4.0.0-alpha.0"
+    "@jupyterlab/services" "^5.0.2"
+    "@lumino/coreutils" "^1.4.2"
+    base64-js "^1.2.1"
+
 "@jupyter-widgets/base@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-3.0.0.tgz#3996d566cddb742d275b007e0713de1e17f55a44"
@@ -1279,6 +1289,21 @@
     "@types/lodash" "^4.14.134"
     backbone "1.2.3"
     base64-js "^1.2.1"
+    jquery "^3.1.1"
+    lodash "^4.17.4"
+
+"@jupyter-widgets/base@^4.0.0-alpha.0":
+  version "4.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-4.0.0-alpha.0.tgz#ffa6d1c631653f1b147db916e685d130b35ec79f"
+  integrity sha512-kufdXKDTJdyYPPJwF6gIhAwyjTBW+qf9AZ4F/RBPNxGMvAHQVNKr2lxBE7gLiY54IKBPmcUds1J9aU/uVPuU7g==
+  dependencies:
+    "@jupyterlab/services" "^5.0.2"
+    "@lumino/coreutils" "^1.4.2"
+    "@lumino/messaging" "^1.3.3"
+    "@lumino/widgets" "^1.11.1"
+    "@types/backbone" "^1.4.1"
+    "@types/lodash" "^4.14.134"
+    backbone "1.2.3"
     jquery "^3.1.1"
     lodash "^4.17.4"
 
@@ -12577,10 +12602,10 @@ regjsparser@^0.6.0:
   dependencies:
     jsesc "~0.5.0"
 
-regular-table@=0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.1.3.tgz#27fc0f54f9ac8682c8fcaf982689cc1e9efbe44e"
-  integrity sha512-41PadI6lCijE/371w1v3V7bm4bMZzHC0fG2hZBi+SRkTXPneCll6a4+kNXDxsgbPX8ahiBbcXtm/ASEavxHaPQ==
+regular-table@=0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.1.4.tgz#14b0cd6b5745cc64424c6ec0742710e09848ff03"
+  integrity sha512-qHdxRGHZT4SgCK37pfWxlDfLzgWFGezsHmaVcmZj4Lu3JUxUZdbz+Bvr0t6S31gQv5mDfyjdZ7OzDDlRaD6pxg==
 
 relateurl@0.2.x:
   version "0.2.7"
@@ -13879,7 +13904,7 @@ subarg@^1.0.0:
   dependencies:
     minimist "^1.1.0"
 
-superstore-arrow@^1.0.0:
+superstore-arrow@1.0.0, superstore-arrow@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/superstore-arrow/-/superstore-arrow-1.0.0.tgz#55a0ecdc872a31e8914c3502dd8e7790da44f849"
   integrity sha512-kDG1JykWoNYi0CYv1NWEwqZoNl/Yc/i4GIzfVQSeNvMfnOdyzUw/3gIXrw8qZtSQQCf9yp5jnXvWkvsfqJlBqA==
@@ -14402,22 +14427,6 @@ truncate-html@^1.0.3:
   dependencies:
     "@types/cheerio" "^0.22.8"
     cheerio "0.22.0"
-
-ts-jest@^24.1.0:
-  version "24.2.0"
-  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-24.2.0.tgz#7abca28c2b4b0a1fdd715cd667d65d047ea4e768"
-  integrity sha512-Yc+HLyldlIC9iIK8xEN7tV960Or56N49MDP7hubCZUeI7EbIOTsas6rXCMB4kQjLACJ7eDOF4xWEO5qumpKsag==
-  dependencies:
-    bs-logger "0.x"
-    buffer-from "1.x"
-    fast-json-stable-stringify "2.x"
-    json5 "2.x"
-    lodash.memoize "4.x"
-    make-error "1.x"
-    mkdirp "0.x"
-    resolve "1.x"
-    semver "^5.5"
-    yargs-parser "10.x"
 
 ts-jest@^25.1.0:
   version "25.2.0"

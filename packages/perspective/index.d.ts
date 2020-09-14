@@ -90,7 +90,7 @@ declare module "@finos/perspective" {
         num_columns(): Promise<number>;
         num_rows(): Promise<number>;
         on_delete(callback: Function): void;
-        on_update(callback: UpdateCallback): void;
+        on_update(callback: UpdateCallback, options?: {mode?: string}): void;
         schema(): Promise<Schema>;
         computed_schema(): Promise<Schema>;
         to_arrow(options?: SerializeConfig & {data_slice: any}): Promise<ArrayBuffer>;
@@ -100,9 +100,9 @@ declare module "@finos/perspective" {
     };
 
     /**** Table ****/
-    export type UpdateCallback = (data: Array<object>) => void;
+    export type UpdateCallback = (updated: {port_id: number; delta: Array<object> | ArrayBuffer}) => void;
 
-    export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string};
+    export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string} | ArrayBuffer;
 
     export type TableOptions = {
         index?: string;
@@ -130,8 +130,9 @@ declare module "@finos/perspective" {
         computed_schema(): Promise<Schema>;
         schema(): Promise<Schema>;
         size(): Promise<number>;
-        update(data: TableData): void;
+        update(data: TableData, options?: {port_id?: number}): void;
         view(config?: ViewConfig): View;
+        make_port(): number;
     };
 
     /**** perspective ****/
@@ -140,7 +141,7 @@ declare module "@finos/perspective" {
     }
 
     export type PerspectiveWorker = {
-        table(data: TableData, options?: TableOptions): Table;
+        table(data: TableData | View, options?: TableOptions): Table;
     };
 
     export class WebSocketClient {

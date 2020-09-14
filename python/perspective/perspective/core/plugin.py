@@ -30,6 +30,16 @@ class Plugin(Enum):
     SUNBURST = "sunburst"
     HEATMAP = "heatmap"
 
+    YBAR_D3 = "d3_y_bar"
+    XBAR_D3 = "d3_x_bar"
+    YLINE_D3 = "d3_y_line"
+    YAREA_D3 = "d3_y_area"
+    YSCATTER_D3 = "d3_y_scatter"
+    XYSCATTER_D3 = "d3_xy_scatter"
+    TREEMAP_D3 = "d3_treemap"
+    SUNBURST_D3 = "d3_sunburst"
+    HEATMAP_D3 = "d3_heatmap"
+
     CANDLESTICK = "d3_candlestick"
     OHLC = "d3_ohlc"
 

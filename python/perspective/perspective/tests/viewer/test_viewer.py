@@ -19,38 +19,6 @@ class TestViewer:
         viewer.load(table)
         assert viewer.table == table
 
-    # server-side view creation
-
-    def test_viewer_make_view(self):
-        table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(filters=[["a", "==", 2]])
-        viewer.load(table)
-        viewer._new_view()
-        assert viewer.view.to_dict() == {
-            "a": [2]
-        }
-
-    def test_viewer_make_view_none(self):
-        table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(filters=[["a", "==", 2]])
-        viewer.load(table)
-        assert viewer.view_name is None
-        assert viewer.view is None
-
-    def test_viewer_make_view_replace(self):
-        table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(filters=[["a", "==", 2]])
-        viewer.load(table)
-        viewer._new_view()
-        assert viewer.view.to_dict() == {
-            "a": [2]
-        }
-        viewer.filters = []
-        viewer._new_view()
-        assert viewer.view.to_dict() == {
-            "a": [1, 2, 3]
-        }
-
     # loading
 
     def test_viewer_load_table(self):
@@ -103,6 +71,14 @@ class TestViewer:
         viewer.load({"a": [1, 2, 3]}, limit=1)
         assert viewer.columns == ["a"]
         assert viewer.table.size() == 1
+
+    def test_viewer_load_view(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer()
+        view = table.view()
+        viewer.load(view)
+        assert viewer._view == view
+        assert viewer.table == table
 
     def test_viewer_load_clears_state(self):
         table = Table({"a": [1, 2, 3]})
@@ -235,6 +211,17 @@ class TestViewer:
         assert viewer.table_name is None
         assert viewer.table is None
 
+    def test_viewer_delete_view(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table.view())
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.delete()
+        assert viewer._perspective_view_name is None
+        assert viewer._view is None
+        assert viewer.table_name is None
+        assert viewer.table is None
+
     def test_viewer_delete_without_table(self):
         table = Table({"a": [1, 2, 3]})
         viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
@@ -243,11 +230,13 @@ class TestViewer:
         viewer.delete(delete_table=False)
         assert viewer.table_name is not None
         assert viewer.table is not None
+        assert viewer._perspective_view_name is not None
+        assert viewer._view is not None
         assert viewer.filters == []
 
     def test_save_restore(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]], editable=True)
         viewer.load(table)
 
         # Save config
@@ -256,13 +245,16 @@ class TestViewer:
         assert config["filters"] == [["a", "==", 2]]
         assert viewer.plugin == "x_bar"
         assert config["plugin"] == "x_bar"
+        assert config["editable"] is True
 
         # reset configuration
         viewer.reset()
         assert viewer.plugin == "datagrid"
         assert viewer.filters == []
+        assert viewer.editable is False
 
         # restore configuration
         viewer.restore(**config)
         assert viewer.filters == [["a", "==", 2]]
         assert viewer.plugin == "x_bar"
+        assert viewer.editable is True

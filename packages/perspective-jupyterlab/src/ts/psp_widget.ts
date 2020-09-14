@@ -11,7 +11,7 @@
 
 import "@finos/perspective-viewer";
 
-import {Table, TableData, TableOptions} from "@finos/perspective";
+import {Table, TableData, TableOptions, View} from "@finos/perspective";
 import {Message} from "@lumino/messaging";
 import {Widget} from "@lumino/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
@@ -23,6 +23,7 @@ let _increment = 0;
 export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     dark?: boolean;
     client?: boolean;
+    server?: boolean;
     title?: string;
     bindto?: HTMLElement;
     plugin_config?: PerspectiveViewerOptions;
@@ -69,9 +70,11 @@ export class PerspectiveWidget extends Widget {
         const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
+        const server: boolean = options.server || false;
         const client: boolean = options.client || false;
         const selectable: boolean = options.selectable || false;
 
+        this.server = server;
         this.client = client;
         this.dark = dark;
         this.editable = editable;
@@ -139,7 +142,7 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table a `perspective.table` object.
      */
-    load(table: TableData | Table, options?: TableOptions): void {
+    load(table: TableData | Table | View, options?: TableOptions): void {
         this.viewer.load(table, options);
     }
 
@@ -180,15 +183,23 @@ export class PerspectiveWidget extends Widget {
      * @param {boolean} delete_table Whether `delete()` should be called on the
      * underlying `Table`.
      */
-    delete(delete_table = true) {
+    delete(delete_table = true): void {
         this.viewer.delete(delete_table || this.client);
+    }
+
+    /**
+     * Returns a promise that resolves to the element's edit port ID, used
+     * internally when edits are made using datagrid in client/server mode.
+     */
+    async getEditPort(): Promise<number> {
+        return await this.viewer.getEditPort();
     }
 
     get table(): Table {
         return this.viewer.table;
     }
 
-    /******************************************************************************
+    /***************************************************************************
      *
      * Getters
      *
@@ -312,6 +323,18 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
+     * True if the widget is in server-only mode, i.e. the Python backend has
+     * full ownership of the widget's data, and the widget does not have a
+     * `perspective.Table` of its own.
+     */
+    get server(): boolean {
+        return this._server;
+    }
+    set server(server: boolean) {
+        this._server = server;
+    }
+
+    /**
      * Enable or disable dark mode by re-rendering the viewer.
      */
     get dark(): boolean {
@@ -397,6 +420,7 @@ export class PerspectiveWidget extends Widget {
     private _viewer: HTMLPerspectiveViewerElement;
     private _plugin_config: PerspectiveViewerOptions;
     private _client: boolean;
+    private _server: boolean;
     private _dark: boolean;
     private _editable: boolean;
 }
