@@ -2,11 +2,7 @@
 
 For this example to work, you'll need a `perspective-python` server running
 over a websocket at an accessible URL. This example is preconfigured to use
-`client_server_edits.py` in `python/perspective/examples`. Make sure you
-have `perspective-python` installed, and then run:
+`server.py` in the `src` folder.
 
-```bash
-python3 python/perspective/examples/client_server.py
-```
-
-Then, run `yarn start webpack` from this example to run the local test server.
+Make sure you have `perspective-python` built locally, and then run
+`yarn start:server` and `yarn start:client` in separate shells.

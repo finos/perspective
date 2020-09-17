@@ -37,15 +37,18 @@
     <script>
 
         window.addEventListener('WebComponentsReady', async function() {
-
-            // Create a client that expects a Perspective server to accept connections at the specified URL.
+            // Create a client that expects a Perspective server to accept
+            // Websocket connections at the specified URL.
             const websocket = perspective.websocket("ws://localhost:8080/websocket");
 
-            /* `table` is a proxy for the `Table` we created on the server.
+            /* This shows Perspective running in "server mode": the `table`
+            variable is a proxy for the `Table` we created on the server.
             
-            All operations that are possible through the Javascript API are possible on the Python API as well,
-            thus calling `view()`, `schema()`, `update()` etc on `const table` will pass those operations to the
-            Python `Table`, execute the commands, and return the result back to Javascript.
+            All operations that are possible through the Javascript API are
+            possible on the Python API as well, thus calling `view()`,
+            `schema()`, `update()` etc on `const table` will pass those
+            operations to the Python `Table`, execute the commands,
+            and return the result back to Javascript.
             */
             const table = websocket.open_table('data_source_one');
             

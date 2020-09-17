@@ -4,7 +4,9 @@
     "version": "0.5.5",
     "description": "An example app demonstrating client/server editing, built using `@finos/perspective-workspace` and `perspective-python`.",
     "scripts": {
-        "start": "webpack-dev-server --open",
+        "start": "echo 'Run yarn start:client and yarn start:server in separate shells.'",
+        "start:client": "webpack-dev-server --open",
+        "start:server": "PYTHONPATH=../../python/perspective python3 src/server.py",
         "webpack": "webpack --colour"
     },
     "keywords": [],
