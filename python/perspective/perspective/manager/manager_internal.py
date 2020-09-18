@@ -309,7 +309,12 @@ class _PerspectiveManagerInternal(object):
         for name in names:
             self._views.pop(name)
 
-        logging.warning("GC {} views in memory".format(count))
+        if count > 0:
+            logging.warning(
+                "client {} disconnected - GC {} views in memory".format(
+                    client_id, count
+                )
+            )
 
     def _make_message(self, id, result):
         """Return a serializable message for a successful result."""

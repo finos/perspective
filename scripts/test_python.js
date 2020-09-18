@@ -42,11 +42,11 @@ const pytest_client_mode = IS_DOCKER => {
         return bash`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : ""} --noconftest 
-            perspective/tests/client"`;
+            perspective/tests/client_mode"`;
     } else {
         return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : ""} --noconftest 
-            perspective/tests/client`;
+            perspective/tests/client_mode`;
     }
 };
 

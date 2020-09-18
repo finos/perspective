@@ -70,40 +70,43 @@ const arrow_indexed_result = [
 module.exports = perspective => {
     describe("Removes", function() {
         it("after an `update()`", async function() {
-            var table = perspective.table(meta, {index: "x"});
+            const table = perspective.table(meta, {index: "x"});
             table.update(data);
-            var view = table.view();
+            const view = table.view();
             table.remove([1, 2]);
-            let result = await view.to_json();
+            const result = await view.to_json();
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
+            // expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
 
         it("after a regular data load", async function() {
-            var table = perspective.table(data, {index: "x"});
-            var view = table.view();
+            const table = perspective.table(data, {index: "x"});
+            const view = table.view();
             table.remove([1, 2]);
-            let result = await view.to_json();
+            const result = await view.to_json();
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
+            // expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
 
         it("multiple single element removes", async function() {
-            let table = perspective.table(meta, {index: "x"});
+            const table = perspective.table(meta, {index: "x"});
             for (let i = 0; i < 100; i++) {
                 table.update([{x: i, y: "test", z: false}]);
             }
             for (let i = 1; i < 100; i++) {
                 table.remove([i]);
             }
-            let view = table.view();
-            let result = await view.to_json();
+            const view = table.view();
+            const result = await view.to_json();
             expect(result).toEqual([{x: 0, y: "test", z: false}]);
             expect(result.length).toEqual(1);
+            // expect(await table.size()).toEqual(1);
             view.delete();
             table.delete();
         });

@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from .tornado_handler import PerspectiveTornadoHandler
-from .tornado_client import websocket
+from .client import PerspectiveClient  # noqa: F401
 
-__all__ = ["PerspectiveTornadoHandler", "websocket"]
+__all__ = ["PerspectiveClient"]
