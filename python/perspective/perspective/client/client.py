@@ -6,8 +6,8 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from random import random
-from asyncio import Future
 
+from tornado.concurrent import Future
 from ..core.exception import PerspectiveError
 from .table_api import PerspectiveTableProxy
 from .table_api import table as make_table
@@ -27,6 +27,22 @@ class PerspectiveClient(object):
         self._handlers = {}
         self._loop = None
         self._create_future = None
+
+        # Because we can't reuse a `Future` in Python, we can't just resolve
+        # the same `Future` over and over again in order to actually execute
+        # on_update/on_delete etc. callbacks.
+        #
+        # Instead, we store the callbacks on the client and use `callback_id`
+        # to access callback references. `self._callback_cache` is a map of
+        # callbacks to integer IDs, which is required to allow the `remove_{}`
+        # APIs to receive a callable to remove.
+        #
+        # To execute the callbacks themselves, we can look up the callback
+        # in `self._callback_id_cache` (a dict of integer ID to callback),
+        # and execute it in the `_handle` method.
+        self._callback_cache = {}
+        self._callback_id_cache = {}
+        self._callback_id = 0
 
     def set_event_loop(self, loop):
         """Given an event loop, decide how to create a new `Future` object
@@ -66,12 +82,28 @@ class PerspectiveClient(object):
 
         if handler:
             future = handler["future"]
+
+            keep_alive = handler.get("keep_alive")
+
+            if keep_alive and handler.get("callback_id") and future.done():
+                # Must look up callback function and execute it, and then
+                # return without re-setting the result of the Future.
+                callback = self._callback_id_cache.get(handler["callback_id"])
+                data = msg["data"]["data"]
+                if data and isinstance(data, dict):
+                    callback(**data)
+                elif data:
+                    callback(data)
+                else:
+                    callback()
+                return
+
             if msg["data"].get("error"):
                 future.set_exception(PerspectiveError(msg["data"]["error"]))
             else:
                 future.set_result(msg["data"]["data"])
 
-            if not handler.get("keep_alive"):
+            if not keep_alive:
                 del self._handlers[msg["data"]["id"]]
 
     def send(self, msg):
@@ -86,11 +118,16 @@ class PerspectiveClient(object):
             raise PerspectiveError("An event loop must be set on `PerspectiveClient`!")
 
         if future:
-            self._msg_id += 1
-            self._handlers[self._msg_id] = {
+            handler = {
                 "future": future,
                 "keep_alive": keep_alive,
             }
+
+            if keep_alive and msg.get("callback_id"):
+                handler["callback_id"] = msg["callback_id"]
+
+            self._msg_id += 1
+            self._handlers[self._msg_id] = handler
 
         msg["id"] = self._msg_id
 

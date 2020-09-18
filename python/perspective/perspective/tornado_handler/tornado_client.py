@@ -9,12 +9,14 @@ import json
 from tornado import gen, ioloop
 from tornado.websocket import websocket_connect
 from ..client import PerspectiveClient
+from ..manager.manager_internal import DateTimeEncoder
 
 
 @gen.coroutine
-def websocket(url, ioloop):
+def websocket(url, ioloop=ioloop.IOLoop.current()):
     """Create a new websocket client at the given `url`, using the given
-    `ioloop` instance."""
+    `ioloop` instance, which defaults to ioloop.IOLoop.current() if
+    not provided by the user."""
     client = PerspectiveTornadoClient(url, ioloop)
     yield client._connect()
     raise gen.Return(client)
@@ -27,7 +29,8 @@ class PerspectiveTornadoClient(PerspectiveClient):
 
     def __init__(self, url, ioloop):
         """Create a `PerspectiveTornadoClient` that interfaces with a
-        Perspective server over a Websocket."""
+        Perspective server over a Websocket. This class should not be
+        initialized directly - use `perspective.tornado_client.websocket`."""
         super(PerspectiveTornadoClient, self).__init__()
         self._url = url
         self._ws = None
@@ -73,9 +76,9 @@ class PerspectiveTornadoClient(PerspectiveClient):
             result = {"data": {"id": self._pending_arrow, "data": msg}}
 
             if self._pending_port_id is not None:
-                result.data.data = {
+                result["data"]["data"] = {
                     "port_id": self._pending_port_id,
-                    "delta": msg.data,
+                    "delta": msg,
                 }
 
             self._handle(result)
@@ -87,7 +90,7 @@ class PerspectiveTornadoClient(PerspectiveClient):
             if msg.get("is_transferable"):
                 self._pending_arrow = msg["id"]
 
-                if msg.get("data") and msg["data"].get("port_id"):
+                if msg.get("data") and msg["data"].get("port_id", None) is not None:
                     self._pending_port_id = msg["data"].get("port_id")
             else:
                 self._handle({"data": msg})
@@ -105,13 +108,18 @@ class PerspectiveTornadoClient(PerspectiveClient):
             pre_msg = msg
             arrow = pre_msg["args"].pop(0)
 
+            # tornado_handler expects the first arg to be an empty object,
+            # which is the result of stringifying an ArrayBuffer in JS - add
+            # an empty dict here so we don't break compatibility.
+            pre_msg["args"].insert(0, {})
+
             # Must be received in order - for some reason if we yield sending
             # the pre-message, other messages are sent in its place which
             # breaks the expectation that the next message is an arrow.
-            self._ws.write_message(json.dumps(pre_msg))
+            self._ws.write_message(json.dumps(pre_msg, cls=DateTimeEncoder))
             yield self._ws.write_message(arrow, binary=True)
         else:
-            yield self._ws.write_message(json.dumps(msg))
+            yield self._ws.write_message(json.dumps(msg, cls=DateTimeEncoder))
 
     def terminate(self):
         """Close the websocket client connection."""

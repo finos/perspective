@@ -277,14 +277,21 @@ class _PerspectiveManagerInternal(object):
 
     def callback(self, *args, **kwargs):
         """Return a message to the client using the `post_callback` method."""
-        id = kwargs.get("msg")["id"]
+        orig_msg = kwargs.get("msg")
+        id = orig_msg["id"]
+        method = orig_msg["method"]
         post_callback = kwargs.get("post_callback")
-        # Coerce the message to be an object so it can be handled in
-        # Javascript, where promises cannot be resolved with multiple args.
-        updated = {
-            "port_id": args[0],
-        }
-        msg = self._make_message(id, updated)
+
+        if method == "on_update":
+            # Coerce the message to be an object so it can be handled in
+            # Javascript, where promises cannot be resolved with multiple args.
+            updated = {
+                "port_id": args[0],
+            }
+            msg = self._make_message(id, updated)
+        else:
+            msg = self._make_message(id, None)
+
         if len(args) > 1 and type(args[1]) == bytes:
             self._process_bytes(args[1], msg, post_callback)
         else:

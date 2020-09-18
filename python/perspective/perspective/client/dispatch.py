@@ -5,8 +5,6 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-_CALLBACK_CACHE = {}
-_CALLBACK_INDEX = 0
 
 
 def async_queue(client, name, method, cmd, *args, **kwargs):
@@ -27,27 +25,28 @@ def async_queue(client, name, method, cmd, *args, **kwargs):
     }
 
     future = client._create_future()
-    client.post(msg, future, keep_alive=False)
+    client.post(msg, future)
     return future
 
 
 def subscribe(client, name, method, cmd, *args, **kwargs):
     """Subscribe to an event that occurs on the Perspective server
     implementation, like `on_update`."""
-    global _CALLBACK_INDEX
-
     arguments = list(args)
     callback = None
 
-    for arg in arguments[::-1]:
-        if callable(arg):
-            callback = arg
+    for i in range(len(arguments)):
+        if callable(arguments[i]):
+            callback = arguments.pop(i)
 
     if len(kwargs) > 0:
         arguments.append(kwargs)
 
-    _CALLBACK_INDEX += 1
-    _CALLBACK_CACHE[callback] = _CALLBACK_INDEX
+    # Instead of storing in a global map, store the callbacks on the
+    # client itself.
+    client._callback_id += 1
+    client._callback_cache[callback] = client._callback_id
+    client._callback_id_cache[client._callback_id] = callback
 
     msg = {
         "cmd": cmd,
@@ -55,7 +54,7 @@ def subscribe(client, name, method, cmd, *args, **kwargs):
         "method": method,
         "args": arguments,
         "subscribe": True,
-        "callback_id": _CALLBACK_INDEX,
+        "callback_id": client._callback_id,
     }
 
     future = client._create_future()
@@ -69,15 +68,16 @@ def unsubscribe(client, name, method, cmd, *args, **kwargs):
     arguments = list(args)
     callback = None
 
-    for arg in arguments[::-1]:
-        if callable(arg):
-            callback = arg
+    for i in range(len(arguments)):
+        if callable(arguments[i]):
+            callback = arguments.pop(i)
 
     if len(kwargs) > 0:
         arguments.append(kwargs)
 
-    callback_id = _CALLBACK_CACHE.get(callback)
-    del _CALLBACK_CACHE[callback]
+    callback_id = client._callback_cache.get(callback)
+    del client._callback_cache[callback]
+    del client._callback_id_cache[callback_id]
 
     msg = {
         "cmd": cmd,

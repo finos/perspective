@@ -58,12 +58,12 @@ const pytest = IS_DOCKER => {
         return bash`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : ""} perspective \
-            --ignore=perspective/tests/client \
+            --ignore=perspective/tests/client_mode \
             --cov=perspective"`;
     } else {
         return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv" : ""} perspective \
-            --ignore=perspective/tests/client \
+            --ignore=perspective/tests/client_mode \
             ${COVERAGE ? "--cov=perspective" : ""}`;
     }
 };
