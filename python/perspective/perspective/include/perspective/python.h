@@ -384,6 +384,7 @@ PYBIND11_MODULE(libbinding, m)
     m.def("make_computations", &make_computations);
     m.def("scalar_to_py", &scalar_to_py);
     m.def("_set_nthreads", &_set_nthreads);
+    m.def("_set_event_loop", &_set_event_loop);
 }
 
 #endif

@@ -7,15 +7,10 @@
 #
 
 import json
+from functools import partial
 import tornado.websocket
 from tornado.ioloop import IOLoop
 from ..core.exception import PerspectiveError
-
-
-# Redefine `queue_process` to take advantage of `tornado.ioloop`
-def _queue_process_tornado(table_id, state_manager):
-    loop = IOLoop.current()
-    loop.add_callback(state_manager.call_process, table_id=table_id)
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
@@ -68,9 +63,6 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
         super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
 
-        # make sure each `Table` calls the asynchronous version of `queue_process`
-        self._manager._set_queue_process(_queue_process_tornado)
-
     def check_origin(self, origin):
         """Returns whether the handler allows requests from origins outside
         of the host URL.
@@ -121,7 +113,8 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
                 self._is_transferable = True
                 return
 
-        self._session.process(message, self.post)
+        loop = IOLoop.current()
+        self._session.process(message, partial(loop.add_callback, self.post))
 
     def post(self, message, binary=False):
         """When `post` is called by `PerspectiveManager`, serialize the data to
@@ -132,7 +125,13 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
                 front-end `perspective-viewer`.
         """
         loop = IOLoop.current()
-        loop.add_callback(self.write_message, message, binary)
+        loop.add_callback(self._try_post, message, binary)
+
+    def _try_post(self, message, binary=False):
+        try:
+            self.write_message(message, binary)
+        except tornado.websocket.WebSocketClosedError:
+            pass
 
     def on_close(self):
         """Remove the views associated with the client when the websocket
