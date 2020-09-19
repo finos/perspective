@@ -15,11 +15,13 @@ class TestRemove(object):
         tbl = Table([{"a": "abc", "b": 123}], index="a")
         tbl.remove(["abc"])
         assert tbl.view().to_records() == []
+        # assert tbl.size() == 0
 
     def test_remove_nonsequential(self):
         tbl = Table([{"a": "abc", "b": 123}, {"a": "def", "b": 456}, {"a": "efg", "b": 789}], index="a")
         tbl.remove(["abc", "efg"])
         assert tbl.view().to_records() == [{"a": "def", "b": 456}]
+        # assert tbl.size() == 1
 
     def test_remove_multiple_single(self):
         tbl = Table({"a": int, "b": str}, index="a")
@@ -28,3 +30,4 @@ class TestRemove(object):
         for i in range(1, 10):
             tbl.remove([i])
         assert tbl.view().to_records() == [{"a": 0, "b": "0"}]
+        # assert tbl.size() == 0

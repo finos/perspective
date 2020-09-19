@@ -80,7 +80,7 @@ requires_dev_py2 = [
 requires_dev = [
     "flake8-black>=0.2.0",
     "black==20.8b1",
-] + requires_dev_py2
+] + requires_dev_py2  # for development, remember to install black and flake8-black
 
 
 def get_version(file, name="__version__"):

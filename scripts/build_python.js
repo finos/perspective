@@ -80,9 +80,9 @@ try {
         cmd =
             cmd +
             `${PYTHON} -m flake8 perspective && echo OK && \
-            ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client && \
+            ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client_mode && \
             ${PYTHON} -m pytest -vvv perspective \
-            --ignore=perspective/tests/client \
+            --ignore=perspective/tests/client_mode \
             --junitxml=python_junit.xml --cov-report=xml --cov-branch \
             --cov=perspective`;
         if (IMAGE == "python") {
