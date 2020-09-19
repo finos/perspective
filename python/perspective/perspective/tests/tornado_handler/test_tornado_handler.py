@@ -53,9 +53,8 @@ class TestPerspectiveTornadoHandler(object):
         """Connect and initialize a websocket client connection to the
         Perspective tornado server.
         """
-        client_loop = ioloop.IOLoop(make_current=False)
         client = yield websocket(
-            "ws://127.0.0.1:{0}/websocket".format(port), ioloop=client_loop
+            "ws://127.0.0.1:{0}/websocket".format(port)
         )
 
         # Compatibility with Python < 3.3

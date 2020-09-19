@@ -6,6 +6,8 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import tornado
+
 
 def async_queue(client, name, method, cmd, *args, **kwargs):
     """Given a method, command, and expected arguments, create a message to
@@ -24,7 +26,7 @@ def async_queue(client, name, method, cmd, *args, **kwargs):
         "subscribe": False,
     }
 
-    future = client._create_future()
+    future = tornado.concurrent.Future()
     client.post(msg, future)
     return future
 
@@ -57,7 +59,7 @@ def subscribe(client, name, method, cmd, *args, **kwargs):
         "callback_id": client._callback_id,
     }
 
-    future = client._create_future()
+    future = tornado.concurrent.Future()
     client.post(msg, future, keep_alive=True)
     return future
 
@@ -88,6 +90,6 @@ def unsubscribe(client, name, method, cmd, *args, **kwargs):
         "callback_id": callback_id,
     }
 
-    future = client._create_future()
+    future = tornado.concurrent.Future()
     client.post(msg, future, keep_alive=True)
     return future

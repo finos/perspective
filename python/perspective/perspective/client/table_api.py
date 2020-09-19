@@ -5,13 +5,13 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from random import random
+
 from functools import partial
 from .dispatch import async_queue, subscribe, unsubscribe
 from .view_api import view as make_view
 
 
-def table(client, data, index=None, limit=None, name=str(random())):
+def table(client, data, name, index=None, limit=None):
     """Create a Perspective `Table` by posting a message to a Perspective
     server implementation through `client`, returning a `PerspectiveTableProxy`
     object whose API is entirely async and must be called with `await` or

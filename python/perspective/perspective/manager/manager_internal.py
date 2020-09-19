@@ -317,7 +317,7 @@ class _PerspectiveManagerInternal(object):
             self._views.pop(name)
 
         if count > 0:
-            logging.warning(
+            logging.debug(
                 "client {} disconnected - GC {} views in memory".format(
                     client_id, count
                 )
