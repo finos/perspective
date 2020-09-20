@@ -58,11 +58,10 @@ class PerspectiveClient(object):
         handler = self._handlers.get(msg["data"].get("id"))
 
         if handler:
-            future = handler["future"]
+            future = handler.get("future", None)
+            keep_alive = handler.get("keep_alive", False)
 
-            keep_alive = handler.get("keep_alive")
-
-            if keep_alive and handler.get("callback_id") and future.done():
+            if keep_alive and handler.get("callback_id"):
                 # Must look up callback function and execute it, and then
                 # return without re-setting the result of the Future.
                 callback = self._callback_id_cache.get(handler["callback_id"])
@@ -74,11 +73,11 @@ class PerspectiveClient(object):
                 else:
                     callback()
                 return
-
-            if msg["data"].get("error"):
-                future.set_exception(PerspectiveError(msg["data"]["error"]))
-            else:
-                future.set_result(msg["data"]["data"])
+            elif future:
+                if msg["data"].get("error"):
+                    future.set_exception(PerspectiveError(msg["data"]["error"]))
+                else:
+                    future.set_result(msg["data"]["data"])
 
             if not keep_alive:
                 del self._handlers[msg["data"]["id"]]
@@ -91,17 +90,20 @@ class PerspectiveClient(object):
     def post(self, msg, future=None, keep_alive=False):
         """Given a message and an associated `Future` object, store the future
         and send the message to the server."""
-
+        self._msg_id += 1
         if future:
             handler = {
                 "future": future,
+            }
+            self._handlers[self._msg_id] = handler
+        elif keep_alive:
+            handler = {
                 "keep_alive": keep_alive,
             }
 
-            if keep_alive and msg.get("callback_id"):
+            if msg.get("callback_id"):
                 handler["callback_id"] = msg["callback_id"]
 
-            self._msg_id += 1
             self._handlers[self._msg_id] = handler
 
         msg["id"] = self._msg_id

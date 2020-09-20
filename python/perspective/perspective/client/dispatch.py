@@ -59,9 +59,7 @@ def subscribe(client, name, method, cmd, *args, **kwargs):
         "callback_id": client._callback_id,
     }
 
-    future = tornado.concurrent.Future()
-    client.post(msg, future, keep_alive=True)
-    return future
+    client.post(msg, keep_alive=True)
 
 
 def unsubscribe(client, name, method, cmd, *args, **kwargs):
@@ -90,6 +88,4 @@ def unsubscribe(client, name, method, cmd, *args, **kwargs):
         "callback_id": callback_id,
     }
 
-    future = tornado.concurrent.Future()
-    client.post(msg, future, keep_alive=True)
-    return future
+    client.post(msg, keep_alive=True)

@@ -1004,7 +1004,7 @@ class TestPerspectiveManager(object):
 
         manager.set_loop_callback(fake_queue_process)
         table.update({"a": [7, 8, 9]})
-        assert s.get() == 1
+        assert s.get() == 2
 
     def test_manager_set_queue_process_before_host_table(self, sentinel):
         s = sentinel(0)
@@ -1020,7 +1020,7 @@ class TestPerspectiveManager(object):
         table.update({"a": [4, 5, 6]})
         table.update({"a": [4, 5, 6]})
 
-        assert s.get() == 2
+        assert s.get() == 3
 
     def test_manager_set_queue_process_multiple(self, sentinel):
         # manager2's queue process should not affect manager1,
@@ -1055,4 +1055,4 @@ class TestPerspectiveManager(object):
             "a": [1, 2, 3, 7, 8, 9]
         }
         assert s.get() == 0
-        assert s2.get() == 1
+        assert s2.get() == 2

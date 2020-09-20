@@ -174,7 +174,7 @@ class TestAsync(object):
             tbl2.update([data[i]])
 
         assert SENTINEL.get() != 0
-        assert SENTINEL_2.get() == -5
+        assert SENTINEL_2.get() == -6
 
         assert tbl2_id not in _PerspectiveStateManager.TO_PROCESS
 
@@ -388,7 +388,7 @@ class TestAsync(object):
             tbl2.update([port_data[idx]], port_id=port_id)
 
         assert SENTINEL.get() != 0
-        assert SENTINEL_2.get() == -11
+        assert SENTINEL_2.get() == -12
 
         tbl2.delete()
         tbl.delete()
