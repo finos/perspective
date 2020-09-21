@@ -111,24 +111,49 @@
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
             const data = await fetch("/node_modules/superstore-arrow/superstore.arrow");
             const arr = await data.arrayBuffer();
-            viewer.load(arr.slice());
+            await viewer.load(arr.slice());
             viewer.toggleConfig();
 
             let max = -Infinity;
+            let config = {}
 
-            viewer.addEventListener("perspective-config-update", () => {
+            const table_schema = await viewer.table.schema();
+            let dirty = false;
+            let column_paths = await viewer.view.column_paths();
+            let row_pivots = await viewer.view.get_config()["row_pivots"];
+            let schema = await viewer.view.schema();
+
+            viewer.addEventListener("perspective-config-update", async () => {
                 max = -Infinity;
+                dirty = true;
             });
 
-            viewer.addEventListener("perspective-datagrid-after-update", event => {
+            const datagrid = viewer.querySelector("regular-table");
+            datagrid.addStyleListener(async () => {
+                if (dirty) {
+                    column_paths = await viewer.view.column_paths();
+                    row_pivots = await viewer.view.get_config()["row_pivots"];
+                    schema = await viewer.view.schema();
+                    dirty = false;
+                }
                 const cache = clone_img_cache();
-                const datagrid = event.detail;
-                for (const td of datagrid.get_tds()) {
-                    const metadata = datagrid.get_meta(td);
+                for (const td of datagrid.querySelectorAll("td")) {
+                    const metadata = datagrid.getMeta(td);
+                    
+                    let type;
+                    if (metadata.x >= 0) {
+                        const column_path = column_paths[metadata.x];
+                        const column_path_parts = column_path.split("|");
+                        type = schema[column_path_parts[column_path_parts.length - 1]];
+                    } else {
+                        const column_path = row_pivots[metadata.row_header_x - 1];
+                        type = table_schema[column_path];
+                    }
                     const clean_name = metadata.value && metadata.value.trim && metadata.value.trim();
-                    if (td.classList.contains("pd-float")) {
+                    td.classList.toggle("orbitron", type === "integer" || type === "float");
+                    if (type === "float") {
                         make_led_cell(td, metadata);
-                    } else if (td.classList.contains("pd-integer")) {
+                    } else if (type === "integer") {
                         max = make_bar_chart(td, metadata, max);
                     } else if (clean_name in states) {
                         make_flag(td, metadata, cache, clean_name);
@@ -137,6 +162,8 @@
                     }
                 }
             });
+
+            datagrid.draw();
         });
 
         const states = {
@@ -226,9 +253,9 @@
             transition: none;
         }
 
-        perspective-viewer tr:last-child th {
+        /* perspective-viewer tr:last-child th {
             border-bottom: 1px solid #666;
-        }
+        } */
 
         perspective-viewer tr th {
             border-right: 1px solid #666;
@@ -244,7 +271,7 @@
             background: rgba(0, 0, 0, 0.1);
         }
 
-        perspective-viewer td.float {
+        perspective-viewer td.orbitron {
             text-align: center !important;
             font-family: Orbitron;
         }

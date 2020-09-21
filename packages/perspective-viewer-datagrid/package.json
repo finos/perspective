@@ -41,7 +41,7 @@
     "dependencies": {
         "@finos/perspective": "^0.5.3",
         "@finos/perspective-viewer": "^0.5.3",
-        "regular-table": "=0.1.4"
+        "regular-table": "=0.1.5"
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.5.3",

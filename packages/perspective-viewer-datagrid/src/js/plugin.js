@@ -10,7 +10,7 @@
 import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 
 import "regular-table";
-import {createModel, configureRegularTable} from "regular-table/dist/examples/perspective.js";
+import {createModel, configureRegularTable, formatters} from "regular-table/dist/examples/perspective.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 
 import {configureRowSelectable, deselect} from "./row_selection.js";
@@ -85,6 +85,7 @@ function get_or_create_datagrid(element, div) {
     let datagrid;
     if (!VIEWER_MAP.has(div)) {
         datagrid = document.createElement("regular-table");
+        datagrid.formatters = formatters;
         div.innerHTML = "";
         div.appendChild(document.createElement("slot"));
         element.appendChild(datagrid);
