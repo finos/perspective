@@ -25,6 +25,9 @@
 #include <perspective/computed_column_map.h>
 #include <perspective/computed_function.h>
 #include <tsl/ordered_map.h>
+#ifdef PSP_ENABLE_PYTHON
+#include <thread>
+#endif
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -189,6 +192,10 @@ public:
 
     void pprint() const;
     std::string repr() const;
+
+#ifdef PSP_ENABLE_PYTHON
+    void set_event_loop_thread_id(std::thread::id id);
+#endif
 
 protected:
     /**
@@ -390,6 +397,10 @@ private:
     std::vector<t_custom_column> m_custom_columns;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
+
+#ifdef PSP_ENABLE_PYTHON
+    std::thread::id m_event_loop_thread_id;
+#endif
 };
 
 /**

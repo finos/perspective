@@ -11,7 +11,6 @@ import string
 from functools import partial
 from ..core.exception import PerspectiveError
 from ..table import Table
-from ..table.libbinding import _set_event_loop
 from ..table.view import View
 from .session import PerspectiveSession
 from .manager_internal import _PerspectiveManagerInternal
@@ -97,6 +96,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         """
         if self._loop_callback is not None:
             # always bind the callback to the table's state manager
+            self._loop_callback(lambda: table._table.get_pool().set_event_loop())
             table._state_manager.queue_process = partial(
                 self._loop_callback, table._state_manager.call_process
             )
@@ -132,9 +132,9 @@ class PerspectiveManager(_PerspectiveManagerInternal):
                 and schedules it to run on the same thread on which
                 `set_loop_callback()` was originally invoked.
         """
-        loop_callback(_set_event_loop)
         self._loop_callback = loop_callback
         for table in self._tables.values():
+            loop_callback(lambda: table._table.get_pool().set_event_loop())
             table._state_manager.queue_process = partial(
                 loop_callback, table._state_manager.call_process
             )

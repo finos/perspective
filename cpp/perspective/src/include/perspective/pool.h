@@ -15,6 +15,10 @@
 #include <mutex>
 #include <atomic>
 
+#ifdef PSP_ENABLE_PYTHON
+#include <thread>
+#endif
+
 #if defined PSP_ENABLE_WASM
     #include <emscripten/val.h>
     typedef emscripten::val t_val;
@@ -57,6 +61,11 @@ public:
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
 #endif
 
+#ifdef PSP_ENABLE_PYTHON
+    void set_event_loop();
+    std::thread::id get_event_loop_thread_id() const;
+#endif
+
     /**
      * @brief Call the binding language's `update_callback` method,
      * set at initialize time.
@@ -74,7 +83,7 @@ public:
     void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table);
 
     void _process();
-    void _process_helper();
+
     void init();
     void stop();
     void set_sleep(t_uindex ms);
@@ -102,6 +111,9 @@ protected:
     bool validate_gnode_id(t_uindex gnode_id) const;
 
 private:
+#ifdef PSP_ENABLE_PYTHON
+    std::thread::id m_event_loop_thread_id;
+#endif
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
 

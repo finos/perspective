@@ -11,6 +11,7 @@
 
 #include <perspective/base.h>
 #include <perspective/binding.h>
+#include <perspective/pyutils.h>
 #include <perspective/python/base.h>
 
 namespace perspective {

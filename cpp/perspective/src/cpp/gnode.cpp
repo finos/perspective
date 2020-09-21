@@ -20,6 +20,10 @@
 #include <perspective/logtime.h>
 #include <perspective/utils.h>
 
+#ifdef PSP_ENABLE_PYTHON
+#include <perspective/pyutils.h>
+#endif
+
 namespace perspective {
 
 t_tscalar
@@ -250,7 +254,7 @@ t_gnode::_process_table(t_uindex port_id) {
         return result;
     }
 
-    std::shared_ptr<t_port> input_port = m_input_ports[port_id];
+    std::shared_ptr<t_port>& input_port = m_input_ports[port_id];
 
     if (input_port->get_table()->size() == 0) {
         return result;
@@ -288,7 +292,7 @@ t_gnode::_process_table(t_uindex port_id) {
         // contexts obliquely read gnode state at various points.
         _update_contexts_from_state(flattened);
 
-        release_inputs();
+        input_port->release();
         release_outputs();
 
     #ifdef PSP_GNODE_VERIFY
@@ -593,6 +597,9 @@ bool
 t_gnode::process(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `process` on an uninited gnode.");
+#ifdef PSP_ENABLE_PYTHON
+    PerspectiveScopedGILRelease acquire(m_event_loop_thread_id);
+#endif
 
     t_process_table_result result = _process_table(port_id);
 
@@ -1346,6 +1353,13 @@ t_gnode::repr() const {
     ss << "t_gnode<" << this << ">";
     return ss.str();
 }
+
+#ifdef PSP_ENABLE_PYTHON
+void 
+t_gnode::set_event_loop_thread_id(std::thread::id id) {
+    m_event_loop_thread_id = id;
+}
+#endif
 
 void
 t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx) {
