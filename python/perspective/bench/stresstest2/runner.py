@@ -81,9 +81,6 @@ class PerspectiveBenchRunner(object):
             self.url,
         )
 
-        # Execute over n clients, r runs, and sleep for s seconds
-        self.run()
-
     def run(self):
         client = partial(self.run_client, self)
         with multiprocessing.Pool(processes=self.num_clients) as pool:
