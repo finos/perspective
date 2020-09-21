@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.5] (2020-09-21)
+
+#### Added
+  * [#1198](https://github.com/finos/perspective/pull/1198) GIL release for perspective-python Async mode ([@texodus](https://github.com/texodus))
+  * [#1199](https://github.com/finos/perspective/pull/1199) Add Python client implementation ([@sc1f](https://github.com/sc1f))
+  * [#1195](https://github.com/finos/perspective/pull/1195) Server mode for Jupyterlab `PerspectiveWidget` ([@texodus](https://github.com/texodus))
+
+#### Fixed
+  * [#1203](https://github.com/finos/perspective/pull/1203) Upgrade to regular-table 0.1.5 and fix custom-style example ([@texodus](https://github.com/texodus))
+  * [#1200](https://github.com/finos/perspective/pull/1200) `perspective-python` Client fixes ([@texodus](https://github.com/texodus))
+  * [#1194](https://github.com/finos/perspective/pull/1194) Remove linking against python ([@timkpaine](https://github.com/timkpaine))
+
+#### Internal
+* [#1191](https://github.com/finos/perspective/pull/1191) Bl.ocks ([@texodus](https://github.com/texodus))
+* [#1188](https://github.com/finos/perspective/pull/1188) Use `black` Python format ([@texodus](https://github.com/texodus))
 
 ## [0.5.3] (2020-09-08)
 
