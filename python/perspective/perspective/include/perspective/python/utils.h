@@ -19,16 +19,6 @@
 namespace perspective {
 namespace binding {
 
-class PerspectiveScopedGILRelease {
-    public:
-        PerspectiveScopedGILRelease();
-        ~PerspectiveScopedGILRelease();
-    private:
-        PyThreadState* thread_state;
-};
-
-
-void _set_event_loop();
 
 void _set_nthreads(int nthreads);
 

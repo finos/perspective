@@ -315,7 +315,10 @@ class _PerspectiveManagerInternal(object):
 
         for name, view in self._views.items():
             if view._client_id == client_id:
-                view.delete()
+                if self._loop_callback:
+                    self._loop_callback(view.delete)
+                else:
+                    view.delete()
                 names.append(name)
                 count += 1
 

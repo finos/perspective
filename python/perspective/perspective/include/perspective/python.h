@@ -30,6 +30,7 @@
 #include <perspective/binding.h>
 #include <perspective/exception.h>
 #include <perspective/exports.h>
+#include <perspective/pyutils.h>
 #include <perspective/python/accessor.h>
 #include <perspective/python/base.h>
 #include <perspective/python/computed.h>
@@ -255,6 +256,7 @@ PYBIND11_MODULE(libbinding, m)
         .def(py::init<>())
         .def("set_update_delegate", &t_pool::set_update_delegate)
         .def("unregister_gnode", &t_pool::unregister_gnode)
+        .def("set_event_loop", &t_pool::set_event_loop)
         .def("_process", &t_pool::_process);
 
     /******************************************************************************
@@ -384,7 +386,6 @@ PYBIND11_MODULE(libbinding, m)
     m.def("make_computations", &make_computations);
     m.def("scalar_to_py", &scalar_to_py);
     m.def("_set_nthreads", &_set_nthreads);
-    m.def("_set_event_loop", &_set_event_loop);
 }
 
 #endif

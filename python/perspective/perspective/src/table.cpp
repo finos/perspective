@@ -42,6 +42,8 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         gnode = tbl->get_gnode();
         offset = tbl->get_offset();
         is_update = (is_update || gnode->mapping_size() > 0);
+    } else {
+        pool = std::make_shared<t_pool>();
     }
 
     std::vector<std::string> column_names;
@@ -60,7 +62,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         void * ptr = malloc(size);
         std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
         {
-            PerspectiveScopedGILRelease acquire;
+            PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
         
             arrow_loader.initialize((uintptr_t)ptr, size);
 
@@ -155,7 +157,6 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     }
     
     if (!table_initialized) {
-        pool = std::make_shared<t_pool>();
         tbl = std::make_shared<Table>(pool, column_names, data_types, limit, index);
         offset = 0;
     }
@@ -178,7 +179,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     data_table.init();
     std::uint32_t row_count;
     if (is_arrow) {
-        PerspectiveScopedGILRelease acquire;
+        PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
         row_count = arrow_loader.row_count();
         data_table.extend(arrow_loader.row_count());
         arrow_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);

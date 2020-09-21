@@ -13,7 +13,9 @@
 #include <perspective/update_task.h>
 #include <perspective/compat.h>
 #include <perspective/env_vars.h>
+#ifdef PSP_ENABLE_PYTHON
 #include <thread>
+#endif
 #include <chrono>
 
 namespace perspective {
@@ -48,6 +50,7 @@ empty_callback() {
 
 t_pool::t_pool()
     : m_update_delegate(empty_callback())
+    , m_event_loop_thread_id(std::thread::id())
     , m_sleep(0) {
         m_run.clear();
     }
@@ -83,6 +86,11 @@ t_pool::register_gnode(t_gnode* node) {
     t_uindex id = m_gnodes.size() - 1;
     node->set_id(id);
     node->set_pool_cleanup([this, id]() { this->m_gnodes[id] = 0; });
+#ifdef PSP_ENABLE_PYTHON
+    if (m_event_loop_thread_id != std::thread::id()) {
+        node->set_event_loop_thread_id(m_event_loop_thread_id);
+    }
+#endif
 
     if (t_env::log_progress()) {
         std::cout << "t_pool.register_gnode node => " << node << " rv => " << id << std::endl;
@@ -124,8 +132,21 @@ t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table) {
     }
 }
 
+#ifdef PSP_ENABLE_PYTHON
+void t_pool::set_event_loop() {
+    m_event_loop_thread_id = std::this_thread::get_id();
+    for (auto node : m_gnodes) {
+        node->set_event_loop_thread_id(m_event_loop_thread_id);
+    }
+}
+
+std::thread::id t_pool::get_event_loop_thread_id() const {
+    return m_event_loop_thread_id;
+}
+#endif
+
 void
-t_pool::_process_helper() {
+t_pool::_process() {
     auto work_to_do = m_data_remaining.load();
     if (work_to_do) {
         t_update_task task(*this);
@@ -134,17 +155,9 @@ t_pool::_process_helper() {
 }
 
 void
-t_pool::_process() {
-    t_uindex sleep_time = m_sleep.load();
-    _process_helper();
-    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
-}
-
-void
 t_pool::stop() {
     m_run.clear(std::memory_order_release);
-    _process_helper();
-
+    _process();
     if (t_env::log_progress()) {
         std::cout << "t_pool.stop" << std::endl;
     }

@@ -770,6 +770,14 @@ View<CTX_T>::is_column_only() const {
     return m_view_config->is_column_only();
 }
 
+#ifdef PSP_ENABLE_PYTHON
+template <typename CTX_T>
+std::thread::id 
+View<CTX_T>::get_event_loop_thread_id() const {
+    return m_table->get_pool()->get_event_loop_thread_id();
+};
+#endif
+
 /******************************************************************************
  *
  * Private
