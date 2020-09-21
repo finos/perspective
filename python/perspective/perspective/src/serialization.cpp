@@ -25,6 +25,7 @@ template <typename CTX_T>
 std::shared_ptr<t_data_slice<CTX_T>>
 get_data_slice(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
     std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col) {
+    PerspectiveScopedGILRelease acquire;
     auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
     return data_slice;
 }

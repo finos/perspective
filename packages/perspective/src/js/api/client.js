@@ -48,8 +48,9 @@ export class Client {
      * Process an asynchronous message.
      */
     post(msg, resolve, reject, keep_alive = false) {
+        ++this._worker.msg_id;
         if (resolve || reject) {
-            this._worker.handlers[++this._worker.msg_id] = {resolve, reject, keep_alive};
+            this._worker.handlers[this._worker.msg_id] = {resolve, reject, keep_alive};
         }
         msg.id = this._worker.msg_id;
         if (this._worker.initialized.value) {

@@ -223,6 +223,42 @@ websocket connection.
 [operate remotely](/docs/md/js.html#remote-perspective-via-perspective-python-and-tornado)
 using a websocket API.
 
+### Async Mode
+
+By default, `perspective` will run with a synchronous interface.  Using the
+`PerspectiveManager.set_loop_callback()` method, `perspective` can be configured
+to defer the application of side-effectful calls like `update()` to an event
+loop, such as `asyncio`.  When running in Async mode, Perspective will release
+the GIL for some operations, enabling better parallelism and overall better
+server performance.  There are a few important differences when running
+`PerspectiveManager` in this mode:
+
+  * Calls to methods like `update()` will return immediately, and the reciprocal 
+    `on_update()` callbacks will be invoked on an event later scheduled.  Calls
+    to other methods which require an up-to-date object however will still
+    synchronously apply the pending update.
+  * Updates will be _conflated_ when multiple calls to `update()` occur before
+    the scheduled application.  In such cases, you may receive a single
+    `on_update()` notification for multiple `update()` calls.
+  * Once `set_loop_callback()` has been called, you may not call Perspective
+    functions from any other thread.
+
+For example, using Tornado `IOLoop` you can create a dedicated thread for a
+`PerspectiveManager`:
+
+```python
+manager = perspective.PerspectiveManager()
+
+def perspective_thread():
+    loop = tornado.ioloop.IOLoop()
+    manager.set_loop_callback(loop.add_callback)
+    loop.start()
+
+thread = threading.Thread(target=perspective_thread)
+thread.daemon = True
+thread.start()
+```
+
 ### Hosting `Table` and `View` instances
 
 `PerspectiveManager` has the ability to "host" `perspective.Table` and

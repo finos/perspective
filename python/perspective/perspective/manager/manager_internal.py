@@ -57,6 +57,12 @@ class _PerspectiveManagerInternal(object):
                 parameters: `data` (str), and `binary` (bool), a kwarg that
                 specifies whether `data` is a binary string.
         """
+        if self._loop_callback:
+            self._loop_callback(self.__process, msg, post_callback, client_id)
+        else:
+            self.__process(msg, post_callback, client_id)
+
+    def __process(self, msg, post_callback, client_id=None):
         if isinstance(msg, string_types):
             if msg == "heartbeat":  # TODO fix this
                 return

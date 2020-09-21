@@ -11,6 +11,7 @@ import string
 from functools import partial
 from ..core.exception import PerspectiveError
 from ..table import Table
+from ..table.libbinding import _set_event_loop
 from ..table.view import View
 from .session import PerspectiveSession
 from .manager_internal import _PerspectiveManagerInternal
@@ -44,6 +45,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
 
     def __init__(self, lock=False):
         super(PerspectiveManager, self).__init__(lock=lock)
+        self._loop_callback = None
 
     def lock(self):
         """Block messages that can mutate the state of :obj:`~perspective.Table`
@@ -93,10 +95,10 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         :obj:`~perspective.Table` and have it call the manager's version of
         `queue_process`.
         """
-        if self._queue_process_callback is not None:
+        if self._loop_callback is not None:
             # always bind the callback to the table's state manager
             table._state_manager.queue_process = partial(
-                self._queue_process_callback, state_manager=table._state_manager
+                self._loop_callback, table._state_manager.call_process
             )
         self._tables[name] = table
         return name
@@ -118,15 +120,21 @@ class PerspectiveManager(_PerspectiveManagerInternal):
     def new_session(self):
         return PerspectiveSession(self)
 
-    def _set_queue_process(self, func):
-        """For each table under management, bind :obj:`func` to the table's state
-        manager and to run whenever ``queue_process`` is called.
+    def set_loop_callback(self, loop_callback):
+        """Sets this `PerspectiveManager` to run in Async mode, defering
+        `update()` application and releasing the GIL for expensive operations.
 
-        After this method is called, future Tables hosted on this manager
-        instance will call the same ``queue_process`` callback.
+        Once called, this `PerspectiveManager` and all Perspective objects it
+        hosts must only be interacted with from the same thread.
+
+        Args:
+            loop_callback: A Function which accepts a Function arguments
+                and schedules it to run on the same thread on which
+                `set_loop_callback()` was originally invoked.
         """
-        self._queue_process_callback = func
+        loop_callback(_set_event_loop)
+        self._loop_callback = loop_callback
         for table in self._tables.values():
             table._state_manager.queue_process = partial(
-                self._queue_process_callback, state_manager=table._state_manager
+                loop_callback, table._state_manager.call_process
             )

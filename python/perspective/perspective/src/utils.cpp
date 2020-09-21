@@ -22,6 +22,30 @@
 namespace perspective {
 namespace binding {
 
+std::thread::id* event_loop_thread;
+
+PerspectiveScopedGILRelease::PerspectiveScopedGILRelease() : thread_state(0) {
+    if (event_loop_thread != NULL) {
+        if (std::this_thread::get_id() != *event_loop_thread) {
+            std::cerr << "Perspective called from wrong thread; Expected " << *event_loop_thread << "; Got " << std::this_thread::get_id() << std::endl;
+        }
+        thread_state = PyEval_SaveThread();
+    }
+}
+
+PerspectiveScopedGILRelease::~PerspectiveScopedGILRelease() {
+     if (event_loop_thread != NULL) {
+        if (std::this_thread::get_id() != *event_loop_thread) {
+            std::cerr << "Perspective called from wrong thread; Expected " << *event_loop_thread << "; Got " << std::this_thread::get_id() << std::endl;
+        }
+        PyEval_RestoreThread(thread_state);
+    }
+}
+
+void _set_event_loop() {
+    event_loop_thread = new std::thread::id(std::this_thread::get_id());
+}
+
 std::shared_ptr<tbb::global_control> control = 
     std::make_shared<tbb::global_control>(
         tbb::global_control::max_allowed_parallelism,

@@ -28,7 +28,7 @@ class PerspectiveTornadoClient(PerspectiveClient):
     # Send a heartbeat every 15 seconds
     HEARTBEAT_TIMEOUT = 15 * 1000
 
-    def __init__(self, loop=None):
+    def __init__(self):
         """Create a `PerspectiveTornadoClient` that interfaces with a
         Perspective server over a Websocket, using the given
         `loop` instance, which defaults to ioloop.IOLoop.current() if

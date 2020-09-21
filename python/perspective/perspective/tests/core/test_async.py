@@ -32,18 +32,16 @@ class AsyncSentinel(object):
 SENTINEL = AsyncSentinel(0)
 
 
-def queue_process_async(table_id, state_manager, loop=None):
+def queue_process_async(loop, f, *args, **kwargs):
     """Create our own `queue_process` method that uses a Tornado IOLoop."""
-    if loop:
-        SENTINEL.set(SENTINEL.get() + 1)
-        loop.add_callback(state_manager.call_process, table_id=table_id)
+    SENTINEL.set(SENTINEL.get() + 1)
+    loop.add_callback(f, *args, **kwargs)
 
 
-def queue_process_async_delay(table_id, state_manager, delay=0.25, loop=None):
+def queue_process_async_delay(loop, delay, f, *args, **kwargs):
     """Create our own `queue_process` method that uses a Tornado IOLoop."""
-    if loop:
-        SENTINEL.set(SENTINEL.get() + 1)
-        loop.call_later(delay, state_manager.call_process, table_id=table_id)
+    SENTINEL.set(SENTINEL.get() + 1)
+    loop.call_later(delay, f, *args, **kwargs)
 
 
 data = [{"a": i, "b": i * 0.5, "c": str(i)} for i in range(10)]
@@ -56,7 +54,7 @@ class TestAsync(object):
     def setup_class(cls):
         cls.loop = tornado.ioloop.IOLoop()
         cls.loop.make_current()
-        cls.wrapped_queue_process = partial(queue_process_async, loop=cls.loop)
+        cls.wrapped_queue_process = partial(queue_process_async, cls.loop)
         cls.thread = Thread(target=cls.loop.start)
         cls.thread.daemon = True
         cls.thread.start()
@@ -90,7 +88,7 @@ class TestAsync(object):
             "c": str
         })
         manager = PerspectiveManager()
-        manager._set_queue_process(TestAsync.wrapped_queue_process)
+        manager.set_loop_callback(TestAsync.wrapped_queue_process)
         manager.host(tbl)
 
         assert tbl.size() == 0
@@ -120,8 +118,8 @@ class TestAsync(object):
         manager.host_table("tbl", tbl)
         manager2.host_table("tbl2", tbl2)
 
-        manager._set_queue_process(TestAsync.wrapped_queue_process)
-        manager2._set_queue_process(TestAsync.wrapped_queue_process)
+        manager.set_loop_callback(TestAsync.wrapped_queue_process)
+        manager2.set_loop_callback(TestAsync.wrapped_queue_process)
 
         for i in range(5):
             tbl.update([data[i]])
@@ -144,9 +142,9 @@ class TestAsync(object):
         # mutate when synchronously calling queue_process for each update
         SENTINEL_2 = AsyncSentinel(0)
 
-        def sync_queue_process(table_id, state_manager):
+        def sync_queue_process(f, *args, **kwargs):
             SENTINEL_2.set(SENTINEL_2.get() - 1)
-            state_manager.call_process(table_id)
+            f(*args, **kwargs)
 
         tbl = Table({
             "a": int,
@@ -165,8 +163,8 @@ class TestAsync(object):
         manager2.host_table("tbl2", tbl2)
 
         # manager uses tornado, manager2 is synchronous
-        manager._set_queue_process(TestAsync.wrapped_queue_process)
-        manager2._set_queue_process(sync_queue_process)
+        manager.set_loop_callback(TestAsync.wrapped_queue_process)
+        manager2.set_loop_callback(sync_queue_process)
 
         tbl_id = tbl._table.get_id()
         tbl2_id = tbl2._table.get_id()
@@ -176,7 +174,7 @@ class TestAsync(object):
             tbl2.update([data[i]])
 
         assert SENTINEL.get() != 0
-        assert SENTINEL_2.get() == -5
+        assert SENTINEL_2.get() == -6
 
         assert tbl2_id not in _PerspectiveStateManager.TO_PROCESS
 
@@ -191,10 +189,8 @@ class TestAsync(object):
 
     def test_async_multiple_managers_delayed_process(self):
         from time import sleep
-        short_delay_queue_process = partial(queue_process_async_delay,
-                                            delay=0.5, loop=TestAsync.loop)
-        long_delay_queue_process = partial(queue_process_async_delay,
-                                           delay=1, loop=TestAsync.loop)
+        short_delay_queue_process = partial(queue_process_async_delay, TestAsync.loop, 0.5)
+        long_delay_queue_process = partial(queue_process_async_delay, TestAsync.loop, 1)
 
         tbl = Table({
             "a": int,
@@ -216,8 +212,8 @@ class TestAsync(object):
         # will be called, either by user action or loop iteration. By adding
         # the delay, we can artificially queue up actions for later execution
         # and see that it's working properly.
-        manager._set_queue_process(short_delay_queue_process)
-        manager2._set_queue_process(long_delay_queue_process)
+        manager.set_loop_callback(short_delay_queue_process)
+        manager2.set_loop_callback(long_delay_queue_process)
 
         tbl_id = tbl._table.get_id()
         tbl2_id = tbl2._table.get_id()
@@ -266,7 +262,7 @@ class TestAsync(object):
         assert port_ids == list(range(0, 11))
 
         manager = PerspectiveManager()
-        manager._set_queue_process(TestAsync.wrapped_queue_process)
+        manager.set_loop_callback(TestAsync.wrapped_queue_process)
         manager.host(tbl)
 
         assert tbl.size() == 0
@@ -321,8 +317,8 @@ class TestAsync(object):
         manager.host_table("tbl", tbl)
         manager2.host_table("tbl2", tbl2)
 
-        manager._set_queue_process(TestAsync.wrapped_queue_process)
-        manager2._set_queue_process(TestAsync.wrapped_queue_process)
+        manager.set_loop_callback(TestAsync.wrapped_queue_process)
+        manager2.set_loop_callback(TestAsync.wrapped_queue_process)
 
         random.shuffle(port_ids)
 
@@ -338,9 +334,9 @@ class TestAsync(object):
         # mutate when synchronously calling queue_process for each update
         SENTINEL_2 = AsyncSentinel(0)
 
-        def sync_queue_process(table_id, state_manager):
+        def sync_queue_process(f, *args, **kwargs):
             SENTINEL_2.set(SENTINEL_2.get() - 1)
-            state_manager.call_process(table_id)
+            f(*args, **kwargs)
 
         tbl = Table({
             "a": int,
@@ -381,8 +377,8 @@ class TestAsync(object):
         manager2.host_table("tbl2", tbl2)
 
         # manager uses tornado, manager2 is synchronous
-        manager._set_queue_process(TestAsync.wrapped_queue_process)
-        manager2._set_queue_process(sync_queue_process)
+        manager.set_loop_callback(TestAsync.wrapped_queue_process)
+        manager2.set_loop_callback(sync_queue_process)
 
         random.shuffle(port_ids)
 
@@ -392,17 +388,15 @@ class TestAsync(object):
             tbl2.update([port_data[idx]], port_id=port_id)
 
         assert SENTINEL.get() != 0
-        assert SENTINEL_2.get() == -11
+        assert SENTINEL_2.get() == -12
 
         tbl2.delete()
         tbl.delete()
 
     def test_async_multiple_managers_delayed_process_multiple_ports(self):
         from time import sleep
-        short_delay_queue_process = partial(queue_process_async_delay,
-                                            delay=0.5, loop=TestAsync.loop)
-        long_delay_queue_process = partial(queue_process_async_delay,
-                                           delay=1, loop=TestAsync.loop)
+        short_delay_queue_process = partial(queue_process_async_delay, TestAsync.loop, 0.5)
+        long_delay_queue_process = partial(queue_process_async_delay, TestAsync.loop, 1)
 
         tbl = Table({
             "a": int,
@@ -424,8 +418,8 @@ class TestAsync(object):
         # will be called, either by user action or loop iteration. By adding
         # the delay, we can artificially queue up actions for later execution
         # and see that it's working properly.
-        manager._set_queue_process(short_delay_queue_process)
-        manager2._set_queue_process(long_delay_queue_process)
+        manager.set_loop_callback(short_delay_queue_process)
+        manager2.set_loop_callback(long_delay_queue_process)
 
         tbl_id = tbl._table.get_id()
         tbl2_id = tbl2._table.get_id()
