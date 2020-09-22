@@ -11,6 +11,7 @@ import subprocess
 from bench import VirtualEnvHandler
 
 if __name__ == "__main__":
+    """Benchmark the `perspective-python` runtime locally."""
     VERSIONS = ["master", "0.4.1", "0.4.0-rc.6"]
 
     # Access the benchmark virtualenv

@@ -7,15 +7,12 @@
 #
 
 import os
-import sys
 import random
 import pandas as pd
 from functools import partial
 from bench import Benchmark, Suite, Runner
-
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), ".."))
-from perspective import Table  # noqa: E402
-from perspective.tests.common import superstore  # noqa: E402
+from perspective import Table
+from perspective.tests.common import superstore
 
 SUPERSTORE = superstore(9994)
 
@@ -51,7 +48,7 @@ class PerspectiveBenchmark(Suite):
     ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]]
 
     def __init__(self):
-        """Create a benchmark suite for `perspective-python`."""
+        """Create a benchmark suite for the `perspective-python` runtime."""
         tbl = Table(SUPERSTORE)
         self._schema = tbl.schema()
         self._df_schema = tbl.schema()

@@ -17,12 +17,15 @@ import tornado
 import threading
 import numpy
 
+from bench import PerspectiveTornadoBenchmark
+
 TABLE_SCALAR = 20
 DOWNLOAD_ITERATIONS = 1
 NUM_CLIENTS = 10
 
 file_path = os.path.join(
     os.path.abspath(os.path.dirname(__file__)),
+    "..",
     "..",
     "..",
     "..",
@@ -57,10 +60,9 @@ def least_sq(y):
     print("Mean {:.2f}".format(numpy.mean(y)))
 
 
-async def session():
+async def session(client):
     """Perform client test."""
     times = numpy.zeros(DOWNLOAD_ITERATIONS)
-    client = await perspective.tornado_handler.websocket("ws://127.0.0.1:8080/")
     table = client.open_table("data_source_one")
     view = table.view()
     for i in range(DOWNLOAD_ITERATIONS):
@@ -68,21 +70,7 @@ async def session():
         arrow = await view.to_arrow()
         times[i] = time.time() - start
         assert len(arrow) > 0
-    client.terminate()
     return times
-
-
-def client(i):
-    """Start a client in this thread."""
-    return asyncio.run(session())
-
-
-def start_client(queue):
-    """Start a pool of clients, when `queue.get()` unblocks."""
-    queue.get()
-    with multiprocessing.Pool(processes=NUM_CLIENTS) as pool:
-        samples = pool.map(client, range(NUM_CLIENTS))
-        least_sq(numpy.array(samples).flatten())
 
 
 # Server
@@ -154,13 +142,36 @@ def start_server(queue, is_async):
 
 def run(is_async):
     """Runs an entire test scenario, server and client pool, then prints run
-    statistics.  The server under test can be run in `sync` or `async` modes."""
+    statistics.  The server under test can be run in `sync` or `async` modes.
+
+    This example uses PerspectiveTornadoBenchmark, which wraps a task function
+    and runs it over multiple clients and multiple runs."""
     queue = multiprocessing.Queue()
     start_server(queue, is_async)
-    start_client(queue)
+
+    # Wait for the queue to clear, indicating the server is ready.
+    queue.get()
+    runner = PerspectiveTornadoBenchmark(session)
+    runner.run()
 
 
 if __name__ == "__main__":
+    """To allow your test script to run within the benchmark harness,
+    import and create a `PerspectiveTornadoBenchmark`, and call its
+    `run()` method.
+
+    The `task` function you give to the benchmark must have `client` as
+    an argument, and return a list of float times as the benchmark
+    result.
+
+    This will allow you to call the script from the command line with
+    timing options:
+
+    ```bash
+    # 10 clients, 5 runs of task per client
+    yarn bench test_benchmark.py -c10 -r5 ws://localhost:8080
+    ```
+    """
     print("Sync mode")
     proc = multiprocessing.Process(target=run, args=(False,))
     proc.start()

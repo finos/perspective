@@ -6,8 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import logging
-import re
-import sys
+import argparse
 import pprint
 import numpy
 import multiprocessing
@@ -45,34 +44,42 @@ def least_sq(y):
     print("Mean {:.2f}".format(numpy.mean(y)))
 
 
-def read_args():
-    """Read args from argv for quick and dirty GCC-style arguments."""
-    num_clients = 10
-    num_runs = 1
-    sleep_time = 0
-
-    for arg in sys.argv[1:]:
-        flag = arg[:2].lower()
-        value = re.search(r"\d+", arg)
-        if value:
-            match = value.group(0)
-            if flag == "-c":
-                num_clients = int(match)
-            elif flag == "-r":
-                num_runs = int(match)
-            elif flag == "-s":
-                sleep_time = float(match)
-
-    return num_clients, num_runs, sleep_time
-
-
-class PerspectiveBenchRunner(object):
+class PerspectiveTornadoBenchmark(object):
     def __init__(self, task):
         """A simple test runner for a perspective-python benchmark. See
         `scenarios/gil_test.py` for example usage."""
         self.task = task
-        self.url = sys.argv.pop()
-        self.num_clients, self.num_runs, self.sleep_time = read_args()
+        self.parser = argparse.ArgumentParser(
+            description="Runs a task against a remote `perspective-python` server using multiple websocket clients."
+        )
+
+        self.parser.add_argument(
+            "-c",
+            "--clients",
+            type=int,
+            default=10,
+            dest="num_clients",
+            help="The number of clients that will be run against the remote server, each on a separate thread.",
+        )
+        self.parser.add_argument(
+            "-r",
+            "--runs",
+            type=int,
+            default=1,
+            dest="num_runs",
+            help="The number of times to run `task` on each client.",
+        )
+        self.parser.add_argument(
+            "-s",
+            "--sleep",
+            type=float,
+            default=0,
+            dest="sleep_time",
+            help="The number of seconds to sleep between each run of `task` on each client.",
+        )
+
+        self.parser.add_argument("url", type=str)
+        self.parser.parse_args(namespace=self)
 
         logging.critical(
             "Running task %d times over %d clients against %s",
@@ -80,6 +87,9 @@ class PerspectiveBenchRunner(object):
             self.num_clients,
             self.url,
         )
+
+        # Deref parser as it cannot be pickled for multiprocessing.
+        self.parser = None
 
     def run(self):
         client = partial(self.run_client, self)
@@ -92,12 +102,15 @@ class PerspectiveBenchRunner(object):
         return asyncio.run(self.client(i))
 
     async def client(self, client_id):
+        """Create a Perspective websocket client and use it to run the task
+        for `num_runs`."""
         psp_client = await perspective.tornado_handler.websocket(self.url)
         results = []
         for i in range(self.num_runs):
-            logging.info("Client {}, Run {}".format(client_id, i))
             result = await self.task(psp_client)
+            logging.info("Client {}, Run {}, Result: {}".format(client_id, i, result))
             results.append(result)
             if self.sleep_time > 0:
+                logging.info("Sleeping for {} seconds".format(self.sleep_time))
                 await asyncio.sleep(self.sleep_time)
         return numpy.array(results).flatten()

@@ -14,13 +14,11 @@ import venv
 import tornado
 from datetime import datetime
 from timeit import timeit
-
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), ".."))
 from perspective import (
     Table,
     PerspectiveManager,
     PerspectiveTornadoHandler,
-)  # noqa: E402
+)
 
 logging.basicConfig(level=logging.INFO)
 
