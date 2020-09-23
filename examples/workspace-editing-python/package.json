@@ -1,5 +1,5 @@
 {
-    "name": "workspace-editing",
+    "name": "workspace-editing-python",
     "private": true,
     "version": "0.5.5",
     "description": "An example app demonstrating client/server editing, built using `@finos/perspective-workspace` and `perspective-python`.",
