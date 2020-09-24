@@ -53,9 +53,9 @@ if __name__ == "__main__":
     yarn bench test_benchmark.py -c10 -r5 ws://localhost:8080
     ```
     """
-    # logging.info("Create view, request arrow length %d", ARROW_LENGTH)
-    # runner = PerspectiveTornadoBenchmark(make_view_arrow)
-    # runner.run()
+    logging.info("Create view, request arrow length %d", ARROW_LENGTH)
+    runner = PerspectiveTornadoBenchmark(make_view_arrow)
+    runner.run()
     logging.info("Open view, request arrow length %d", ARROW_LENGTH)
     runner2 = PerspectiveTornadoBenchmark(open_view_arrow)
     runner2.run()

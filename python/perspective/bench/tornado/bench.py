@@ -77,6 +77,41 @@ class PerspectiveTornadoBenchmark(object):
             dest="sleep_time",
             help="The number of seconds to sleep between each run of `task` on each client.",
         )
+        self.parser.add_argument(
+            "-d",
+            "--delay",
+            type=float,
+            default=0,
+            dest="delay_time",
+            help="The number of seconds to delay between initializing each client.",
+        )
+        self.parser.add_argument(
+            "--interpolate",
+            dest="interpolate",
+            type=str,
+            choices=["clients", "runs", "sleep", "delay"],
+            default=None,
+            help="A single axis to interpolate - choose between `clients`, \
+                  `runs`, `sleep`, or `delay`. \n Uses the values of \
+                  `--range` and `--step` to interpolate, or defaults to 3 \
+                   increments with steps of 5, i.e. interpolating 10 clients \
+                   by --range=3 and --step=2 will run the suite 4 times, \
+                   for [10, 12, 14, 16] clients respectively.",
+        )
+        self.parser.add_argument(
+            "--range",
+            dest="interpolate_range",
+            type=int,
+            default=3,
+            help="How many times to interpolate the axis.",
+        )
+        self.parser.add_argument(
+            "--step",
+            dest="interpolate_step",
+            type=int,
+            default=3,
+            help="A value to increment/decrement the axis by on every interpolation.",
+        )
 
         self.parser.add_argument("url", type=str)
         self.parser.parse_args(namespace=self)
@@ -88,13 +123,58 @@ class PerspectiveTornadoBenchmark(object):
             self.url,
         )
 
-        # Deref parser as it cannot be pickled for multiprocessing.
+        self.interpolate_options = {
+            "clients": "num_clients",
+            "runs": "num_runs",
+            "sleep": "sleep_time",
+            "delay": "delay_time",
+        }
+
+        # Only interpolate one axis at a time
+        self.interpolate_attr = self.interpolate_options.get(self.interpolate)
+
+        # num of interpolated runs + 1 un-interpolated run
+        self.interpolate_range += 1
+
+        # Deref parser as it cannot be pickled for multiprocessing, and we
+        # don't need it once we have the args parsed.
         self.parser = None
 
     def run(self):
+        """Run the suite with interpolation if specified."""
         client = partial(self.run_client, self)
+
+        if self.interpolate and self.interpolate_attr:
+            self._run_interpolate(client)
+        else:
+            self._run_single(client)
+
+    def _run_interpolate(self, client_func):
+        """Calculate interpolation bounds for the given axis and run the
+        suite `range` times, stepping the interpolated axis by `step`."""
+        start = int(getattr(self, self.interpolate_attr))
+        end = int(
+            getattr(self, self.interpolate_attr)
+            + ((self.interpolate_range - 1) * self.interpolate_step)
+        )
+
+        logging.info(
+            "Interpolating {} over {} runs, range: {} to {}".format(
+                self.interpolate_attr, self.interpolate_range, start, end
+            )
+        )
+
+        for i in range(0, self.interpolate_range):
+            value = start
+            setattr(self, self.interpolate_attr, value)
+            logging.info("Interpolating {}: {}".format(self.interpolate_attr, value))
+            self._run_single(client_func)
+            start = start + self.interpolate_step
+
+    def _run_single(self, client_func):
+        """Perform a single run of the suite."""
         with multiprocessing.Pool(processes=self.num_clients) as pool:
-            samples = pool.map(client, range(self.num_clients))
+            samples = pool.map(client_func, range(self.num_clients))
             least_sq(numpy.array(samples).flatten())
 
     def run_client(self, *args):
@@ -103,9 +183,21 @@ class PerspectiveTornadoBenchmark(object):
 
     async def client(self, client_id):
         """Create a Perspective websocket client and use it to run the task
-        for `num_runs`."""
+        for `num_runs`, sleeping for `sleep_time` if needed.
+
+        If a delay is specified, use the incrementing `client_id` to calculate
+        the total delay time so that all clients run in the right order."""
+        delay = self.delay_time * client_id
+
+        if delay > 0:
+            logging.info(
+                "Delaying client {} execution by {} seconds".format(client_id, delay)
+            )
+            await asyncio.sleep(delay)
+
         psp_client = await perspective.tornado_handler.websocket(self.url)
         results = []
+
         for i in range(self.num_runs):
             result = await self.task(psp_client)
             logging.info("Client {}, Run {}, Result: {}".format(client_id, i, result))
