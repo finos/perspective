@@ -9,7 +9,7 @@ import random
 import pytest
 
 import tornado
-from tornado import gen, ioloop
+from tornado import gen
 from datetime import datetime
 
 from ...table import Table
@@ -277,7 +277,6 @@ class TestPerspectiveTornadoHandler(object):
         view = table.view()
 
         output = yield view.to_arrow()
-
 
         for i in range(10):
             table.update(output)

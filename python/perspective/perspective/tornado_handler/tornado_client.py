@@ -25,8 +25,8 @@ def websocket(url):
 
 class PerspectiveTornadoClient(PerspectiveClient):
 
-    # Send a heartbeat every 15 seconds
-    HEARTBEAT_TIMEOUT = 15 * 1000
+    # Ping the server every 30 seconds
+    PING_TIMEOUT = 15 * 1000
 
     def __init__(self):
         """Create a `PerspectiveTornadoClient` that interfaces with a
@@ -40,10 +40,10 @@ class PerspectiveTornadoClient(PerspectiveClient):
         self._pending_port_id = None
 
     @gen.coroutine
-    def _send_heartbeat(self):
-        """Send a heartbeat message to the server's Websocket, which will
-        respond with `heartbeat`."""
-        yield self.send("heartbeat")
+    def _send_ping(self):
+        """Send a `ping` heartbeat message to the server's Websocket, which will
+        respond with `pong`."""
+        yield self.send("ping")
 
     @gen.coroutine
     def connect(self, url):
@@ -57,19 +57,19 @@ class PerspectiveTornadoClient(PerspectiveClient):
 
         yield self.send({"id": -1, "cmd": "init"})
 
-        # Send a `heartbeat` message every 15 seconds.
-        self._heartbeat_callback = ioloop.PeriodicCallback(
-            self._send_heartbeat,
-            callback_time=PerspectiveTornadoClient.HEARTBEAT_TIMEOUT,
+        # Send a `ping` message every 15 seconds.
+        self._ping_callback = ioloop.PeriodicCallback(
+            self._send_ping,
+            callback_time=PerspectiveTornadoClient.PING_TIMEOUT,
         )
 
-        self._heartbeat_callback.start()
+        self._ping_callback.start()
 
     def on_message(self, msg):
         """When a message is received, send it to the `_handle` method, or
         await the incoming arrow from the server."""
-        if msg == "heartbeat":
-            # Do not respond to server heartbeats - only send them
+        if msg == "pong":
+            # Do not respond to server pong heartbeats - only send them
             return
 
         if self._pending_arrow is not None:
@@ -128,5 +128,5 @@ class PerspectiveTornadoClient(PerspectiveClient):
 
     def terminate(self):
         """Close the websocket client connection."""
-        self._heartbeat_callback.stop()
+        self._ping_callback.stop()
         self._ws.close()

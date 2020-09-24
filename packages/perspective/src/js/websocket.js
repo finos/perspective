@@ -1,7 +1,8 @@
 import {Client} from "./api/client.js";
 import {Server} from "./api/server.js";
 
-const HEARTBEAT_TIMEOUT = 15000;
+// Initiate a `ping` to the server every 30 seconds
+const PING_TIMEOUT = 30000;
 let CLIENT_ID_GEN = 0;
 
 export class WebSocketClient extends Client {
@@ -12,13 +13,13 @@ export class WebSocketClient extends Client {
         this._ws.onopen = () => {
             this.send({id: -1, cmd: "init"});
         };
-        const heartbeat = () => {
-            this._ws.send("heartbeat");
-            setTimeout(heartbeat, HEARTBEAT_TIMEOUT);
+        const ping = () => {
+            this._ws.send("ping");
+            setTimeout(ping, PING_TIMEOUT);
         };
-        setTimeout(heartbeat, 15000);
+        setTimeout(ping, PING_TIMEOUT);
         this._ws.onmessage = msg => {
-            if (msg.data === "heartbeat") {
+            if (msg.data === "pong") {
                 return;
             }
             if (this._pending_arrow) {
@@ -138,8 +139,8 @@ export class WebSocketManager extends Server {
         ws.on("message", msg => {
             ws.isAlive = true;
 
-            if (msg === "heartbeat") {
-                ws.send("heartbeat");
+            if (msg === "ping") {
+                ws.send("pong");
                 return;
             }
 
