@@ -38,6 +38,9 @@ class PerspectiveTornadoClient(PerspectiveClient):
         self._ws = None
         self._pending_arrow = None
         self._pending_port_id = None
+        self._total_chunk_length = 0
+        self._pending_arrow_length = 0
+        self._full_arrow = b""
 
     @gen.coroutine
     def _send_ping(self):
@@ -73,22 +76,40 @@ class PerspectiveTornadoClient(PerspectiveClient):
             return
 
         if self._pending_arrow is not None:
-            result = {"data": {"id": self._pending_arrow, "data": msg}}
+            arrow = msg
+
+            self._full_arrow += arrow
+            self._total_chunk_length += len(arrow)
+
+            if self._total_chunk_length == self._pending_arrow_length:
+                # Chunking is complete
+                arrow = self._full_arrow
+            else:
+                # Wait for the next chunk
+                return
+
+            result = {"data": {"id": self._pending_arrow, "data": arrow}}
 
             if self._pending_port_id is not None:
                 result["data"]["data"] = {
                     "port_id": self._pending_port_id,
-                    "delta": msg,
+                    "delta": arrow,
                 }
 
             self._handle(result)
+
+            # Clear flags for special arrow flow
             self._pending_arrow = None
+            self._pending_arrow_length = None
             self._pending_port_id = None
+            self._total_chunk_length = 0
+            self._full_arrow = b""
         elif isinstance(msg, six.string_types):
             msg = json.loads(msg)
 
             if msg.get("is_transferable"):
                 self._pending_arrow = msg["id"]
+                self._pending_arrow_length = msg["arrow_length"]
 
                 if msg.get("data") and msg["data"].get("port_id", None) is not None:
                     self._pending_port_id = msg["data"].get("port_id")

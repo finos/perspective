@@ -312,6 +312,11 @@ class _PerspectiveManagerInternal(object):
                 byte messages without serializing to JSON.
         """
         msg["is_transferable"] = True
+
+        # Pass the total length of the arrow to the client, so it knows to
+        # wait until the arrow has been received in whole.
+        msg["arrow_length"] = len(binary)
+
         post_callback(json.dumps(msg, cls=DateTimeEncoder))
         post_callback(binary, binary=True)
 

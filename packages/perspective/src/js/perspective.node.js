@@ -176,6 +176,11 @@ class WebSocketServer extends WebSocketManager {
     }
 }
 
+/**
+ * Create a new Websocket connection to `url`, setting up the protocol for
+ * a Perspective server and Perspective client to communicate.
+ * @param {*} url
+ */
 const websocket = url => {
     return new WebSocketClient(new WebSocket(url));
 };

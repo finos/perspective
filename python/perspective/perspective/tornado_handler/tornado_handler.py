@@ -8,6 +8,7 @@
 
 from functools import partial
 import tornado.websocket
+from tornado.gen import coroutine
 from tornado.ioloop import IOLoop
 from ..core.exception import PerspectiveError
 
@@ -42,7 +43,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         given Manager instance.
 
         Keyword Args:
-            manager (:obj`PerspectiveManager`): A `PerspectiveManager` instance.
+            manager (:obj:`PerspectiveManager`): A `PerspectiveManager` instance.
                 Must be provided on initialization.
             check_origin (:obj`bool`): If True, all requests will be accepted
                 regardless of origin. Defaults to False.
@@ -50,6 +51,10 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         self._manager = kwargs.pop("manager", None)
         self._session = self._manager.new_session()
         self._check_origin = kwargs.pop("check_origin", False)
+
+        # Chunk settings for binary messages
+        self._chunk_threshold = self._manager._chunk_threshold
+        self._chunk_size = self._manager._chunk_size
 
         # Trigger special flow when receiving an ArrayBuffer/binary
         self._is_transferable = False
@@ -96,7 +101,27 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
                 front-end `perspective-viewer`.
         """
         loop = IOLoop.current()
-        loop.add_callback(self._try_post, message, binary)
+
+        # Only send message in chunks if it passes the threshold set by the
+        # `PerspectiveManager`.
+        chunked = len(message) > self._chunk_threshold
+
+        if binary and chunked:
+            loop.add_callback(
+                self._write_message_chunked,
+                message,
+                0,
+                self._chunk_size,
+                len(message),
+            )
+        else:
+            loop.add_callback(self._try_post, message, binary)
+
+    def on_close(self):
+        """Remove the views associated with the client when the websocket
+        closes.
+        """
+        self._session.close()
 
     def _try_post(self, message, binary=False):
         try:
@@ -104,8 +129,19 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         except tornado.websocket.WebSocketClosedError:
             pass
 
-    def on_close(self):
-        """Remove the views associated with the client when the websocket
-        closes.
-        """
-        self._session.close()
+    @coroutine
+    def _write_message_chunked(self, message, start, end, message_length):
+        """Send a binary message in chunks on the websocket."""
+        if start < message_length:
+            end = start + self._chunk_size
+
+            if end >= message_length:
+                end = message_length
+
+            self.write_message(message[start:end], binary=True)
+            start = end
+
+            # Allow the loop to process heartbeats so that client sockets don't
+            # get closed in the middle of sending a chunk.
+            yield tornado.gen.sleep(0.05)
+            yield self._write_message_chunked(message, start, end, message_length)

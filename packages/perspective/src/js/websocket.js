@@ -1,3 +1,11 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
 import {Client} from "./api/client.js";
 import {Server} from "./api/server.js";
 
@@ -10,23 +18,54 @@ export class WebSocketClient extends Client {
         super();
         this._ws = ws;
         this._ws.binaryType = "arraybuffer";
+        this._full_arrow;
+        this._total_chunk_length = 0;
+        this._pending_arrow_length = 0;
+
         this._ws.onopen = () => {
-            this.send({id: -1, cmd: "init"});
+            this.send({
+                id: -1,
+                cmd: "init"
+            });
         };
+
         const ping = () => {
             this._ws.send("ping");
             setTimeout(ping, PING_TIMEOUT);
         };
+
         setTimeout(ping, PING_TIMEOUT);
+
         this._ws.onmessage = msg => {
             if (msg.data === "pong") {
                 return;
             }
+
             if (this._pending_arrow) {
+                // Process an arrow binary being sent by the server, which
+                // can decide how many chunks to send and the size of each
+                // chunk.
+                let arrow = msg.data;
+
+                this._full_arrow.set(new Uint8Array(arrow), this._total_chunk_length);
+                this._total_chunk_length += arrow.byteLength;
+
+                // Use the total length of the arrow from the pre-message
+                // to decide when to stop waiting for new chunks from the
+                // server.
+                if (this._total_chunk_length === this._pending_arrow_length) {
+                    // Chunking is complete and the arrow has been received
+                    // in full.
+                    arrow = this._full_arrow.buffer;
+                } else {
+                    // Wait for another chunk.
+                    return;
+                }
+
                 let result = {
                     data: {
                         id: this._pending_arrow,
-                        data: msg.data
+                        data: arrow
                     }
                 };
 
@@ -35,13 +74,21 @@ export class WebSocketClient extends Client {
                 if (this._pending_port_id !== undefined) {
                     const new_data_with_port_id = {
                         port_id: this._pending_port_id,
-                        delta: msg.data
+                        delta: arrow
                     };
                     result.data.data = new_data_with_port_id;
                 }
+
+                // Send the joined message to the client for handling.
                 this._handle(result);
-                delete this._pending_port_id;
+
+                // Reset flags to end special message flow.
                 delete this._pending_arrow;
+                delete this._pending_arrow_length;
+                delete this._pending_port_id;
+
+                this._total_chunk_length = 0;
+                this._full_arrow = null;
             } else {
                 msg = JSON.parse(msg.data);
 
@@ -51,6 +98,7 @@ export class WebSocketClient extends Client {
                 // the ArrayBuffer containing arrow data.
                 if (msg.is_transferable) {
                     this._pending_arrow = msg.id;
+                    this._pending_arrow_length = msg.arrow_length;
 
                     // Check whether the message also contains a `port_id`,
                     // indicating that we are in an `on_update` callback and
@@ -59,15 +107,21 @@ export class WebSocketClient extends Client {
                     if (msg.data && msg.data.port_id !== undefined) {
                         this._pending_port_id = msg.data.port_id;
                     }
+
+                    // Create an empty ArrayBuffer to hold the arrow, as it
+                    // will be sent in n >= 1 chunks.
+                    this._full_arrow = new Uint8Array(this._pending_arrow_length);
                 } else {
-                    this._handle({data: msg});
+                    this._handle({
+                        data: msg
+                    });
                 }
             }
         };
     }
 
     /**
-     * Send a message to the remote, checking whether the arguments contain an
+     * Send a message to the server, checking whether the arguments contain an
      * ArrayBuffer.
      *
      * @param {Object} msg a message to send to the remote. If the `args`
@@ -97,10 +151,11 @@ export class WebSocketClient extends Client {
 }
 
 /**
- * A WebSocket Manager instance for a remote perspective
+ * A WebSocket Manager instance to host a Perspective server in NodeJS.
  */
 export class WebSocketManager extends Server {
     constructor(...args) {
+        // TODO: implement chunked arrow send
         super(...args);
         this.requests_id_map = new Map();
         this.requests = {};
@@ -176,7 +231,10 @@ export class WebSocketManager extends Server {
                 const compoundId = `${msg.id}/${ws.id}`;
                 this.requests_id_map.set(compoundId, msg.id);
                 msg.id = compoundId;
-                this.requests[msg.id] = {ws, msg};
+                this.requests[msg.id] = {
+                    ws,
+                    msg
+                };
                 this.process(msg, ws.id);
             } catch (e) {
                 console.error(e);
@@ -210,6 +268,7 @@ export class WebSocketManager extends Server {
         }
         msg.id = this.requests_id_map.get(id);
         if (transferable) {
+            // TODO: send arrow as chunks
             msg.is_transferable = true;
             req.ws.send(JSON.stringify(msg));
             req.ws.send(transferable[0]);

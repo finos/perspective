@@ -42,8 +42,26 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         clean up associated resources.
     """
 
-    def __init__(self, lock=False):
+    def __init__(
+        self,
+        lock=False,
+        chunk_threshold=200 * 1000 * 1000,
+        chunk_size=50 * 1000 * 1000,
+    ):
+        """Create a new ``PerspectiveManager`` instance.
+
+        Keyword Args:
+            lock (:obj:`bool`): [description]. Defaults to False.
+            chunk_threshold (:obj:`int`): [description]. Binary messages above
+                this length in bytes will be passed as chunks of ``chunk_size``.
+                Defaults to  200MB.
+            chunk_size (:obj:`int`): Binary messages above ``chunk_threshold``
+                will be passed in chunks of this length (in bytes). Defaults
+                to 20MB.
+        """
         super(PerspectiveManager, self).__init__(lock=lock)
+        self._chunk_threshold = chunk_threshold
+        self._chunk_size = chunk_size
         self._loop_callback = None
 
     def lock(self):
