@@ -253,7 +253,7 @@ exports.docker = function docker(image = "puppeteer") {
     let ret = bash`docker run \
         ${flags} \
         ${env_vars} \
-        -v${CWD}:/usr/src/app/perspective \
+        -v ${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
         --cpus="${CPUS}.0" ${IMAGE}`;
     return ret;
