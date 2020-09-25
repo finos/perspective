@@ -45,6 +45,12 @@ class _PerspectiveManagerInternal(object):
         self._queue_process_callback = None
         self._lock = lock
 
+        # Perspective sends binary messages in two messages - a JSON
+        # pre-message and the binary itself. Set up flags to handle that
+        # special message flow.
+        self._pending_binary = False
+        self._pending_binary_pre_message = None
+
     def _process(self, msg, post_callback, client_id=None):
         """Given a message from the client, process it through the Perspective
         engine.
@@ -63,11 +69,30 @@ class _PerspectiveManagerInternal(object):
             self.__process(msg, post_callback, client_id)
 
     def __process(self, msg, post_callback, client_id=None):
+        """Process the message through the Perspective engine, handling the
+        special flow for binary messages along the way."""
+        if self._pending_binary:
+            # The message is an ArrayBuffer, and it needs to be combined with
+            # the previous message to reconsitute metadata before processing.
+            full_message = self._pending_binary_pre_message
+            full_message.pop("is_transferable")
+
+            # msg is the binary
+            new_args = [msg]
+
+            if len(full_message["args"]) > 1:
+                # append additional args, such as port_id. Javascript will
+                # serialize the ArrayBuffer as an empty object, so ignore
+                # the first argument always.
+                new_args += full_message["args"][1:]
+
+            full_message["args"] = new_args
+            msg = full_message
+
+            self._pending_binary = False
+            self._pending_binary_pre_message = None
+
         if isinstance(msg, string_types):
-            if msg == "ping":
-                # Ignore ping heartbeats that reach the manager - they should
-                # be handled in the transport layer.
-                return
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):
@@ -75,6 +100,13 @@ class _PerspectiveManagerInternal(object):
                 "Message passed into `_process` should either be a "
                 "JSON-serialized string or a dict."
             )
+
+        if msg.get("is_transferable", None):
+            # cache the message and wait for the ArrayBuffer that will
+            # follow immediately after.
+            self._pending_binary = True
+            self._pending_binary_pre_message = msg
+            return
 
         cmd = msg["cmd"]
 

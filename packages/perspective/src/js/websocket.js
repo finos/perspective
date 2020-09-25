@@ -189,7 +189,8 @@ export class WebSocketManager extends Server {
     }
 
     /**
-     * Send an asynchronous message to the Perspective web worker.
+     * Send an asynchronous message to the Perspective client through
+     * the websocket.
      *
      * If the `transferable` param is set, pass two messages: the string
      * representation of the message and then the ArrayBuffer data that needs to

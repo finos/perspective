@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import json
 from functools import partial
 import tornado.websocket
 from tornado.ioloop import IOLoop
@@ -78,42 +77,12 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         """When the websocket receives a message, send it to the :obj:`process`
         method of the `PerspectiveManager` with a reference to the :obj:`post`
-        callback. Contains special logic to handle passing :obj:`ArrayBuffer`
-        objects over the wire from JS to Python, and vice-versa.
+        callback.
         """
         if message == "ping":
-            # Respond to ping heartbeats from the client.
+            # Respond to ping heartbeats from the Websocket client.
             self.write_message("pong")
             return
-
-        # The message is an ArrayBuffer, and it needs to be combined with the
-        # previous message to reconsitute metadata before going into
-        # PerspectiveManager
-        if self._is_transferable:
-            full_message = self._is_transferable_pre_message
-            full_message.pop("is_transferable")
-
-            # `message` is the binary
-            new_args = [message]
-
-            if len(full_message["args"]) > 1:
-                # append additional args
-                new_args += full_message["args"][1:]
-
-            full_message["args"] = new_args
-            message = full_message
-
-            self._is_transferable = False
-            self._is_transferable_pre_message = None
-        else:
-            message = json.loads(message)
-
-            if message.get("is_transferable", None):
-                # cache the message and wait for the ArrayBuffer that will
-                # follow immediately after.
-                self._is_transferable_pre_message = message
-                self._is_transferable = True
-                return
 
         loop = IOLoop.current()
         self._session.process(message, partial(loop.add_callback, self.post))
