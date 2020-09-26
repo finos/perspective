@@ -145,7 +145,7 @@ Additionally, due to PEP-518 and build isolation, its possible that the version 
 
 #### Wheels PyArrow linkage
 
-Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight mcoupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.16.0.
+Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.17.1 for Python 3.* and PyArrow==0.16.0 for Python 2.7.
 
 To ignore compiled wheels and install from source with pip, install via
 
