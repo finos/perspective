@@ -18,7 +18,13 @@ from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 here = os.path.abspath(os.path.dirname(__file__))
 file_path = os.path.join(
-    here, "..", "..", "node_modules", "superstore-arrow", "superstore.arrow"
+    here,
+    "..",
+    "..",
+    "..",
+    "node_modules",
+    "superstore-arrow",
+    "superstore.arrow",
 )
 
 
@@ -27,17 +33,22 @@ def perspective_thread(manager):
     adds the table with the name "data_source_one", which will be used
     in the front-end."""
     psp_loop = tornado.ioloop.IOLoop()
+
+    # Set Perspective to run in async mode
     manager.set_loop_callback(psp_loop.add_callback)
+
     with open(file_path, mode="rb") as file:
         table = Table(file.read(), index="Row ID")
         manager.host_table("data_source_one", table)
         manager.host_view("view_one", table.view())
+
     psp_loop.start()
 
 
 def make_app():
     manager = PerspectiveManager()
 
+    # Run Perspective in its own thread with its own IOLoop
     thread = threading.Thread(target=perspective_thread, args=(manager,))
     thread.daemon = True
     thread.start()
@@ -52,12 +63,15 @@ def make_app():
             (
                 r"/node_modules/(.*)",
                 tornado.web.StaticFileHandler,
-                {"path": "../../node_modules/@finos/"},
+                {"path": "../../../node_modules/@finos/"},
             ),
             (
                 r"/(.*)",
                 tornado.web.StaticFileHandler,
-                {"path": "./", "default_filename": "index.html"},
+                {
+                    "path": os.path.join(here, "..", "dist"),
+                    "default_filename": "index.html",
+                },
             ),
         ],
         websocket_ping_interval=15,

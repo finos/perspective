@@ -14,7 +14,7 @@ import "@finos/perspective-workspace";
 
 import "./index.less";
 
-const URL = "ws://localhost:8888/websocket";
+const URL = "ws://localhost:8080/websocket";
 
 /**
  * `perspective.websocket` allows Perspective in Javascript to access tables

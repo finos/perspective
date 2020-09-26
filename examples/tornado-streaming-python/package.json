@@ -4,7 +4,8 @@
     "version": "0.5.5",
     "description": "An example of streaming a `perspective-python` server to the browser.",
     "scripts": {
-        "start": "PYTHONPATH=../../python/perspective python3 server.py"
+        "start": "PYTHONPATH=../../python/perspective python3 server.py",
+        "start:python2": "PYTHONPATH=../../python/perspective python2 server.py"
     },
     "keywords": [],
     "license": "Apache-2.0",
