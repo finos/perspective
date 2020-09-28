@@ -38,7 +38,6 @@ class PerspectiveTornadoClient(PerspectiveClient):
         self._ws = None
         self._pending_arrow = None
         self._pending_port_id = None
-        self._total_chunk_length = 0
         self._pending_arrow_length = 0
         self._full_arrow = b""
 
@@ -79,9 +78,8 @@ class PerspectiveTornadoClient(PerspectiveClient):
             arrow = msg
 
             self._full_arrow += arrow
-            self._total_chunk_length += len(arrow)
 
-            if self._total_chunk_length == self._pending_arrow_length:
+            if len(self._full_arrow) == self._pending_arrow_length:
                 # Chunking is complete
                 arrow = self._full_arrow
             else:
@@ -102,7 +100,6 @@ class PerspectiveTornadoClient(PerspectiveClient):
             self._pending_arrow = None
             self._pending_arrow_length = None
             self._pending_port_id = None
-            self._total_chunk_length = 0
             self._full_arrow = b""
         elif isinstance(msg, six.string_types):
             msg = json.loads(msg)

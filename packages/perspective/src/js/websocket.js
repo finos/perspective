@@ -155,11 +155,16 @@ export class WebSocketClient extends Client {
  */
 export class WebSocketManager extends Server {
     constructor(...args) {
-        // TODO: implement chunked arrow send
         super(...args);
         this.requests_id_map = new Map();
         this.requests = {};
         this.websockets = {};
+
+        // Send binary messages in chunks above this threshold (in bytes)
+        this.chunk_threshold = 200 * 1000 * 1000;
+
+        // Send chunks of this size (in bytes)
+        this.chunk_size = 50 * 1000 * 1000;
 
         // clear invalid connections
         setInterval(() => {
@@ -268,16 +273,40 @@ export class WebSocketManager extends Server {
         }
         msg.id = this.requests_id_map.get(id);
         if (transferable) {
-            // TODO: send arrow as chunks
+            const arrow = transferable[0];
             msg.is_transferable = true;
+            msg.arrow_length = arrow.byteLength;
             req.ws.send(JSON.stringify(msg));
-            req.ws.send(transferable[0]);
+            setTimeout(() => {
+                this._post_chunked(req, arrow, 0, this.chunk_size, arrow.byteLength);
+            }, 0);
         } else {
             req.ws.send(JSON.stringify(msg));
         }
         if (!req.msg.subscribe) {
             this.requests_id_map.delete(id);
             delete this.requests[id];
+        }
+    }
+
+    /**
+     * Send a binary message (in the transferable param) in chunks.
+     *
+     * @param {*} request
+     * @param {ArrayBuffer} binary
+     * @param {Number} start
+     * @param {Number} end
+     * @param {Number} length
+     */
+    _post_chunked(request, binary, start, end, length) {
+        if (start < length) {
+            end = start + this.chunk_size;
+            if (end > length) end = length;
+            request.ws.send(binary.slice(start, end));
+            start = end;
+            setTimeout(() => {
+                this._post_chunked(request, binary, start, end, length);
+            }, 0);
         }
     }
 
