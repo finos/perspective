@@ -10,7 +10,7 @@
 import * as defaults from "./config/constants.js";
 import {get_config} from "./config";
 import {Client} from "./api/client.js";
-const {WebSocketClient} = require("./websocket");
+const {WebSocketClient} = require("./websocket/client");
 
 import wasm_worker from "./perspective.wasm.js";
 import wasm from "./psp.async.wasm.js";

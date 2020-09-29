@@ -9,7 +9,8 @@
 
 const {Client} = require("./api/client.js");
 const {Server} = require("./api/server.js");
-const {WebSocketManager, WebSocketClient} = require("./websocket");
+const {WebSocketManager} = require("./websocket/manager");
+const {WebSocketClient} = require("./websocket/client");
 
 const perspective = require("./perspective.js").default;
 
