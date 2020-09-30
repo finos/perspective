@@ -149,6 +149,9 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     _addEventListeners() {
+        this.tabActivateRequested.connect(() => {
+            this.currentTitle.owner.notifyResize();
+        });
         this.node.addEventListener("dblclick", this);
         this.node.addEventListener("contextmenu", this);
     }

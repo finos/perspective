@@ -16,6 +16,7 @@ import {initialiseStyles} from "../series/colorStyles";
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils";
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
+const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
 
 @bindTemplate(template, styleWithD3FC) // eslint-disable-next-line no-unused-vars
 class D3FCChartElement extends HTMLElement {
@@ -31,7 +32,18 @@ class D3FCChartElement extends HTMLElement {
 
     render(chart, settings) {
         this._chart = chart;
-        this._settings = this._configureSettings(this._settings, settings);
+
+        const handler = {
+            set: (obj, prop, value) => {
+                if (!EXCLUDED_SETTINGS.includes(prop)) {
+                    this._container && this._container.dispatchEvent(new Event("perspective-plugin-update", {bubbles: true, composed: true}));
+                }
+                obj[prop] = value;
+                return true;
+            }
+        };
+
+        this._settings = new Proxy(this._configureSettings(this._settings, settings), handler);
         initialiseStyles(this._container, this._settings);
 
         if ((this._settings.data && this._settings.data.length > 0) || chart.plugin.type !== this._chart.plugin.type) {
@@ -77,9 +89,8 @@ class D3FCChartElement extends HTMLElement {
     }
 
     getSettings() {
-        const excludeSettings = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
         const settings = {...this._settings};
-        excludeSettings.forEach(s => {
+        EXCLUDED_SETTINGS.forEach(s => {
             delete settings[s];
         });
         return settings;
