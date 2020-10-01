@@ -246,14 +246,7 @@ public:
 
     void set_deltas_enabled(bool enabled_state);
 
-    void set_minmax_enabled(bool enabled_state);
-
     void set_feature_state(t_ctx_feature feature, bool state);
-
-    template <typename ITER_T>
-    t_minmax get_agg_min_max(ITER_T biter, ITER_T eiter, t_uindex aggidx) const;
-    t_minmax get_agg_min_max(t_uindex aggidx, t_depth depth) const;
-    std::vector<t_minmax> get_min_max() const;
 
     void clear_deltas();
 
@@ -319,7 +312,6 @@ private:
     t_sidxmap m_smap;
     std::vector<const t_column*> m_aggcols;
     std::shared_ptr<t_tcdeltas> m_deltas;
-    std::vector<t_minmax> m_minmax;
     t_tree_unify_rec_vec m_tree_unification_records;
     std::vector<bool> m_features;
     t_symtable m_symtable;
@@ -327,32 +319,5 @@ private:
     std::string m_grand_agg_str;
 };
 
-template <typename ITER_T>
-t_minmax
-t_stree::get_agg_min_max(ITER_T biter, ITER_T eiter, t_uindex aggidx) const {
-    auto aggcols = m_aggregates->get_const_columns();
-    auto col = aggcols[aggidx];
-    t_minmax minmax;
-
-    for (auto iter = biter; iter != eiter; ++iter) {
-        if (iter->m_idx == 0)
-            continue;
-        t_uindex aggidx = iter->m_aggidx;
-        t_tscalar v = col->get_scalar(aggidx);
-
-        if (minmax.m_min.is_none()) {
-            minmax.m_min = v;
-        } else {
-            minmax.m_min = std::min(v, minmax.m_min);
-        }
-
-        if (minmax.m_max.is_none()) {
-            minmax.m_max = v;
-        } else {
-            minmax.m_max = std::max(v, minmax.m_max);
-        }
-    }
-    return minmax;
-}
 
 } // end namespace perspective

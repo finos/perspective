@@ -8,12 +8,11 @@
  */
 
 #pragma once
+
 #ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 #include <windows.h>
-#endif
+#endif // WIN32
+
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
 #include <perspective/exports.h>
@@ -368,7 +367,6 @@ enum t_gnode_port {
 
 enum t_ctx_feature {
     CTX_FEAT_PROCESS,
-    CTX_FEAT_MINMAX,
     CTX_FEAT_DELTA,
     CTX_FEAT_ALERT,
     CTX_FEAT_ENABLED,

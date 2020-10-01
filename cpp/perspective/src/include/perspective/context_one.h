@@ -38,8 +38,6 @@ public:
     std::vector<t_tscalar> get_row_path(t_index idx) const;
     void set_depth(t_depth depth);
 
-    t_minmax get_agg_min_max(t_uindex aggidx, t_depth depth) const;
-
     t_index get_row_idx(const std::vector<t_tscalar>& path) const;
 
     t_depth get_trav_depth(t_index idx) const;

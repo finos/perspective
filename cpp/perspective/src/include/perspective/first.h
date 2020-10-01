@@ -19,11 +19,6 @@
 #endif
 
 #pragma once
-#ifdef WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif // ifndex nominmax
-#endif // win32
 
 #ifdef PSP_VERIFY
 #define PSP_STORAGE_VERIFY

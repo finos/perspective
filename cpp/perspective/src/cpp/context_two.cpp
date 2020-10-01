@@ -69,7 +69,6 @@ t_ctx2::init() {
     m_rtraversal = std::make_shared<t_traversal>(rtree());
 
     m_ctraversal = std::make_shared<t_traversal>(ctree());
-    m_minmax = std::vector<t_minmax>(m_config.get_num_aggregates());
     m_init = true;
 }
 
@@ -80,7 +79,6 @@ t_ctx2::step_begin() {
 
 void
 t_ctx2::step_end() {
-    m_minmax = m_trees.back()->get_min_max();
     if (m_row_depth_set) {
         set_depth(HEADER_ROW, m_row_depth);
     }
@@ -782,11 +780,6 @@ t_ctx2::get_rows_changed() {
     return rows;
 }
 
-std::vector<t_minmax>
-t_ctx2::get_min_max() const {
-    return m_minmax;
-}
-
 void
 t_ctx2::reset() {
     for (t_uindex treeidx = 0, tree_loop_end = m_trees.size(); treeidx < tree_loop_end;
@@ -846,14 +839,6 @@ t_ctx2::set_deltas_enabled(bool enabled_state) {
     m_features[CTX_FEAT_DELTA] = enabled_state;
     for (auto& tr : m_trees) {
         tr->set_deltas_enabled(enabled_state);
-    }
-}
-
-void
-t_ctx2::set_minmax_enabled(bool enabled_state) {
-    m_features[CTX_FEAT_MINMAX] = enabled_state;
-    for (auto& tr : m_trees) {
-        tr->set_minmax_enabled(enabled_state);
     }
 }
 
