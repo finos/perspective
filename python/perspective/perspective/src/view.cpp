@@ -154,9 +154,10 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
          * as all lookups into `schema` must be valid for all computed
          * columns on the View.
          */
-        std::vector<t_dtype> input_types;
-        for (const auto& input_column : input_columns) {
-            input_types.push_back(schema->get_dtype(input_column));
+        std::vector<t_dtype> input_types(input_columns.size());
+
+        for (auto i = 0; i < input_columns.size(); ++i) {
+            input_types[i] = schema->get_dtype(input_columns[i]);
         }
 
         t_computation computation = t_computed_column::get_computation(

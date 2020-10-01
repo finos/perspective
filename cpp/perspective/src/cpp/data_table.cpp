@@ -411,6 +411,9 @@ t_data_table::append(const t_data_table& other) {
     std::vector<const t_column*> src_cols;
     std::vector<t_column*> dst_cols;
 
+    src_cols.reserve(other.m_schema.m_columns.size());
+    dst_cols.reserve(m_schema.m_columns.size());
+
     std::set<std::string> incoming;
 
     for (const auto& cname : other.m_schema.m_columns) {
@@ -586,6 +589,7 @@ t_data_table::borrow(const std::vector<std::string>& columns) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     std::vector<t_dtype> dtypes;
+    dtypes.reserve(columns.size());
 
     for (const auto& col : columns) {
         dtypes.push_back(m_schema.get_dtype(col));

@@ -251,6 +251,7 @@ t_ftrav::step_end() {
     t_uindex i = 0;
     t_multisorter sorter(get_sort_orders(m_sortby));
     std::vector<t_mselem> new_rows;
+    new_rows.reserve(m_new_elems.size());
 
     for (t_pkmselem_map::const_iterator pkelem_iter = m_new_elems.begin();
          pkelem_iter != m_new_elems.end(); ++pkelem_iter) {

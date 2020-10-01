@@ -77,11 +77,13 @@ get_from_data_slice_ctx2(
 template <typename CTX_T>
 std::vector<t_val>
 get_pkeys_from_data_slice(std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx) {
-    std::vector<t_val> rval;
     std::vector<t_tscalar> pkeys = data_slice->get_pkeys(ridx, cidx);
-    for (const auto& pk : pkeys) {
-        rval.push_back(scalar_to_py(pk));
+    std::vector<t_val> rval(pkeys.size());
+
+    for (auto i = 0; i < pkeys.size(); ++i) {
+        rval[i] = scalar_to_py(pkeys[i]);
     }
+
     return rval;
 }
 

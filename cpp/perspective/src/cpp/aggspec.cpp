@@ -264,6 +264,7 @@ t_aggspec::get_inv_mode() const {
 std::vector<std::string>
 t_aggspec::get_input_depnames() const {
     std::vector<std::string> rval;
+    rval.reserve(m_dependencies.size());
     for (const auto & d : m_dependencies) {
         rval.push_back(d.name());
     }
@@ -273,6 +274,7 @@ t_aggspec::get_input_depnames() const {
 std::vector<std::string>
 t_aggspec::get_output_depnames() const {
     std::vector<std::string> rval;
+    rval.reserve(m_dependencies.size());
     for (const auto & d: m_dependencies) {
         rval.push_back(d.name());
     }
@@ -331,6 +333,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_UDF_COMBINER:
         case AGGTYPE_UDF_REDUCER: {
             std::vector<t_col_name_type> rval;
+            rval.reserve(m_odependencies.size());
             for (const auto& d : m_odependencies) {
                 t_col_name_type tp(d.name(), d.dtype());
                 rval.push_back(tp);

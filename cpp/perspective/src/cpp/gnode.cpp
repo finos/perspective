@@ -730,6 +730,7 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
 std::vector<std::string>
 t_gnode::get_registered_contexts() const {
     std::vector<std::string> rval;
+    rval.reserve(m_contexts.size());
 
     for (const auto& kv : m_contexts) {
         std::stringstream ss;
@@ -1022,16 +1023,14 @@ void
 t_gnode::_compute_column(
     const t_computed_column_definition& computed_column,
     std::shared_ptr<t_data_table> tbl) {
-        std::vector<t_dtype> input_types;
-    std::vector<std::shared_ptr<t_column>> input_columns;
-
     std::string computed_column_name = std::get<0>(computed_column);
     std::vector<std::string> input_column_names = std::get<2>(computed_column);
     t_computation computation = std::get<3>(computed_column);
-    
-    for (const auto& name : input_column_names) {
-        auto column = tbl->get_column(name);
-        input_columns.push_back(column);
+
+    std::vector<std::shared_ptr<t_column>> input_columns(input_column_names.size());
+
+    for (auto i = 0; i < input_column_names.size(); ++i) {
+        input_columns[i] = tbl->get_column(input_column_names[i]);
     }
 
     if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
@@ -1062,7 +1061,6 @@ t_gnode::_recompute_column(
     std::shared_ptr<t_data_table> table,
     std::shared_ptr<t_data_table> flattened,
     const std::vector<t_rlookup>& changed_rows) {
-    std::vector<t_dtype> input_types;
     std::vector<std::shared_ptr<t_column>> table_columns;
     std::vector<std::shared_ptr<t_column>> flattened_columns;
 
