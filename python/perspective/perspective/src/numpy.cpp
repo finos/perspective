@@ -33,8 +33,8 @@ namespace numpy {
     std::vector<t_dtype> 
     NumpyLoader::reconcile_dtypes(const std::vector<t_dtype>& inferred_types) const {
         PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-        std::vector<t_dtype> reconciled_types;
         std::uint32_t num_columns = m_names.size();
+        std::vector<t_dtype> reconciled_types(num_columns);
 
         // Get numpy dtypes as string so we can tell the difference between dates and datetimes
         std::vector<std::string> str_dtypes = m_accessor.attr("types")().cast<std::vector<std::string>>();
@@ -55,9 +55,9 @@ namespace numpy {
 
             // Otherwise, numpy type takes precedence unless date/object - need specificity of inferred type
             if (inferred_type == DTYPE_DATE || numpy_type == DTYPE_OBJECT) {
-                reconciled_types.push_back(inferred_type);
+                reconciled_types[i] = inferred_type;
             } else {
-                reconciled_types.push_back(numpy_type);
+                reconciled_types[i] = numpy_type;
             }
         }
 
@@ -617,10 +617,13 @@ namespace numpy {
 
     std::vector<t_dtype>
     NumpyLoader::make_types() {
-        std::vector<t_dtype> rval;
+        std::vector<t_dtype> rval(m_names.size());
         
         auto data = m_accessor.attr("data")();
-        for (const auto& name : m_names) {
+
+        for (auto i = 0; i < m_names.size(); ++i) {
+            const std::string& name = m_names[i];
+
             // Access each array by name to guarantee ordered access.
             py::array array = py::array::ensure(data[py::str(name)]);
 
@@ -633,40 +636,40 @@ namespace numpy {
 
             if (dtype_code == 'M') {
                 // datetime64
-                rval.push_back(DTYPE_TIME);
+                rval[i] = DTYPE_TIME;
                 continue;
             } else if (dtype_code == 'm') {
                 // coerce timedelta to string
-                rval.push_back(DTYPE_STR);
+                rval[i] = DTYPE_STR;
                 continue;
             }
 
             // isinstance checks equality of underlying dtype, not just pointer equality
             if (py::isinstance<py::array_t<std::uint8_t>>(array)) {
-                rval.push_back(DTYPE_UINT8);
+                rval[i] = DTYPE_UINT8;
             } else if (py::isinstance<py::array_t<std::uint16_t>>(array)) {
-                rval.push_back(DTYPE_UINT16);
+                rval[i] = DTYPE_UINT16;
             } else if (py::isinstance<py::array_t<std::uint32_t>>(array)) {
-                rval.push_back(DTYPE_UINT32);
+                rval[i] = DTYPE_UINT32;
             } else if (py::isinstance<py::array_t<std::uint64_t>>(array)) {
-                rval.push_back(DTYPE_UINT64);
+                rval[i] = DTYPE_UINT64;
             } else if (py::isinstance<py::array_t<std::int8_t>>(array)) {
-                rval.push_back(DTYPE_INT8);
+                rval[i] = DTYPE_INT8;
             } else if (py::isinstance<py::array_t<std::int16_t>>(array)) {
-                rval.push_back(DTYPE_INT16);
+                rval[i] = DTYPE_INT16;
             } else if (py::isinstance<py::array_t<std::int32_t>>(array)) {
-                rval.push_back(DTYPE_INT32);
+                rval[i] = DTYPE_INT32;
             } else if (py::isinstance<py::array_t<std::int64_t>>(array)) {
-                rval.push_back(DTYPE_INT64);
+                rval[i] = DTYPE_INT64;
             } else if (py::isinstance<py::array_t<float>>(array)) {
-                rval.push_back(DTYPE_FLOAT32);
+                rval[i] = DTYPE_FLOAT32;
             } else if (py::isinstance<py::array_t<double>>(array)) {
-                rval.push_back(DTYPE_FLOAT64);
+                rval[i] = DTYPE_FLOAT64;
             } else if (py::isinstance<py::array_t<bool>>(array)) {
-                rval.push_back(DTYPE_BOOL);
+                rval[i] = DTYPE_BOOL;
             } else {
                 // DTYPE_OBJECT defers to the inferred type: this allows parsing of datetime strings, boolean strings, etc.
-                rval.push_back(DTYPE_OBJECT);
+                rval[i] = DTYPE_OBJECT;
             }
         }
 

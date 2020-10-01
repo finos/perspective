@@ -55,36 +55,36 @@ t_ctx0::step_end() {
     }
 
     m_traversal->step_end();
-#ifndef PSP_ENABLE_WASM
-    t_uindex ncols = m_config.get_num_columns();
-    std::vector<t_minmax> rval(ncols);
+// #ifndef PSP_ENABLE_WASM
+//     t_uindex ncols = m_config.get_num_columns();
+//     std::vector<t_minmax> rval(ncols);
 
-    auto pkeys = m_traversal->get_pkeys();
-    auto stbl = m_gstate->get_table();
+//     auto pkeys = m_traversal->get_pkeys();
+//     auto stbl = m_gstate->get_table();
 
-#ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(ncols), 1,
-        [&rval, &stbl, pkeys, this](int colidx)
-#else
-    for (t_uindex colidx = 0; colidx < ncols; ++colidx)
-#endif
-        {
-            auto colname = m_config.col_at(colidx);
+// #ifdef PSP_PARALLEL_FOR
+//     tbb::parallel_for(0, int(ncols), 1,
+//         [&rval, &stbl, pkeys, this](int colidx)
+// #else
+//     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
+// #endif
+//         {
+//             auto colname = m_config.col_at(colidx);
 
-            if (stbl->get_dtype(colname) != DTYPE_STR) {
-                auto v = m_gstate->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
-                    const std::vector<t_tscalar>&)>>(pkeys, colname, get_vec_min_max);
+//             if (stbl->get_dtype(colname) != DTYPE_STR) {
+//                 auto v = m_gstate->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
+//                     const std::vector<t_tscalar>&)>>(pkeys, colname, get_vec_min_max);
 
-                rval[colidx].m_min = v.first;
-                rval[colidx].m_max = v.second;
-            }
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+//                 rval[colidx].m_min = v.first;
+//                 rval[colidx].m_max = v.second;
+//             }
+//         }
+// #ifdef PSP_PARALLEL_FOR
+//     );
+// #endif
 
-    m_minmax = rval;
-#endif
+//     m_minmax = rval;
+// #endif
 }
 
 t_index

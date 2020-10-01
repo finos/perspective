@@ -201,10 +201,10 @@ get_data_types(t_val data, std::int32_t format, std::vector<std::string> names,
 
         return types;
     } else {
-        for (auto name : names) {
-            // infer type for each column
-            t_dtype type = get_data_type(data, format, py::str(name), date_validator);
-            types.push_back(type);
+        types.resize(names.size());
+        for (auto i = 0; i < names.size(); ++i) {
+            t_dtype type = get_data_type(data, format, py::str(names[i]), date_validator);
+            types[i] = type;
         }
     }
 

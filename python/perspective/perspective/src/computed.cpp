@@ -25,14 +25,23 @@ get_table_computed_schema_py(
     t_val p_computed_columns) {
     // cast into vector of py::dicts
     std::vector<t_val> py_computed = p_computed_columns.cast<std::vector<t_val>>();
-    std::vector<t_computed_column_definition> computed_columns;
+    std::vector<t_computed_column_definition> computed_columns(py_computed.size());
+    
+    for (auto i = 0; i < py_computed.size(); ++i) {
+        t_val computed_def = py_computed[i];
 
-    for (auto c : py_computed) {
-        py::dict computed_column = c.cast<py::dict>();
-        std::string computed_column_name = c["column"].cast<std::string>();
+        py::dict computed_column = computed_def.cast<py::dict>();
+
+        std::string computed_column_name = 
+            computed_def["column"].cast<std::string>();
+
         t_computed_function_name computed_function_name = 
-            str_to_computed_function_name(c["computed_function_name"].cast<std::string>());
-        std::vector<std::string> input_columns = c["inputs"].cast<std::vector<std::string>>();
+            str_to_computed_function_name(
+                computed_def["computed_function_name"].cast<std::string>());
+    
+        std::vector<std::string> input_columns = 
+            computed_def["inputs"].cast<std::vector<std::string>>();
+
         t_computation invalid_computation = t_computation();
 
         // Add the computed column to the config.
@@ -41,7 +50,8 @@ get_table_computed_schema_py(
             computed_function_name,
             input_columns,
             invalid_computation);
-        computed_columns.push_back(tp);
+
+        computed_columns[i] = tp;
     }
     
     t_schema computed_schema = table->get_computed_schema(computed_columns);
