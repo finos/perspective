@@ -43,7 +43,6 @@ t_ctx_grouped_pkey::init() {
     m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
-    m_minmax = std::vector<t_minmax>(m_config.get_num_aggregates());
     m_init = true;
 }
 
@@ -194,7 +193,6 @@ void
 t_ctx_grouped_pkey::step_end() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_minmax = m_tree->get_min_max();
     sort_by(m_sortby);
     if (m_depth_set) {
         set_depth(m_depth);
@@ -395,19 +393,6 @@ t_ctx_grouped_pkey::set_deltas_enabled(bool enabled_state) {
     m_tree->set_deltas_enabled(enabled_state);
 }
 
-void
-t_ctx_grouped_pkey::set_minmax_enabled(bool enabled_state) {
-    m_features[CTX_FEAT_MINMAX] = enabled_state;
-    m_tree->set_minmax_enabled(enabled_state);
-}
-
-std::vector<t_minmax>
-t_ctx_grouped_pkey::get_min_max() const {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_minmax;
-}
-
 t_stepdelta
 t_ctx_grouped_pkey::get_step_delta(t_index bidx, t_index eidx) {
     PSP_TRACE_SENTINEL();
@@ -470,13 +455,6 @@ t_ctx_grouped_pkey::has_deltas() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return true;
-}
-
-t_minmax
-t_ctx_grouped_pkey::get_agg_min_max(t_uindex aggidx, t_depth depth) const {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_agg_min_max(aggidx, depth);
 }
 
 template <typename DATA_T>

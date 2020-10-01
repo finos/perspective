@@ -78,7 +78,6 @@ t_stree::t_stree(const std::vector<t_pivot>& pivots, const std::vector<t_aggspec
     , m_aggspecs(aggspecs)
     , m_schema(schema)
     , m_cur_aggidx(1)
-    , m_minmax(aggspecs.size())
     , m_has_delta(false) {
     auto g_agg_str = cfg.get_grand_agg_str();
     m_grand_agg_str = g_agg_str.empty() ? "Grand Aggregate" : g_agg_str;
@@ -1750,32 +1749,8 @@ t_stree::set_deltas_enabled(bool enabled_state) {
 }
 
 void
-t_stree::set_minmax_enabled(bool enabled_state) {
-    m_features[CTX_FEAT_MINMAX] = enabled_state;
-}
-
-void
 t_stree::set_feature_state(t_ctx_feature feature, bool state) {
     m_features[feature] = state;
-}
-
-t_minmax
-t_stree::get_agg_min_max(t_uindex aggidx, t_depth depth) const {
-    auto iterators = m_nodes->get<by_depth>().equal_range(depth);
-    return get_agg_min_max(iterators.first, iterators.second, aggidx);
-}
-
-std::vector<t_minmax>
-t_stree::get_min_max() const {
-    t_uindex naggs = m_aggspecs.size();
-    std::vector<t_minmax> rval(naggs);
-    for (t_uindex cidx = 0; cidx < naggs; ++cidx) {
-
-        auto biter = m_nodes->get<by_idx>().begin();
-        auto eiter = m_nodes->get<by_idx>().end();
-        rval[cidx] = get_agg_min_max(biter, eiter, cidx);
-    }
-    return rval;
 }
 
 const std::shared_ptr<t_tcdeltas>&

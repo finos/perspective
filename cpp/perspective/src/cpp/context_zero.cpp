@@ -22,7 +22,6 @@ t_ctx0::t_ctx0() {}
 
 t_ctx0::t_ctx0(const t_schema& schema, const t_config& config)
     : t_ctxbase<t_ctx0>(schema, config)
-    , m_minmax(m_config.get_num_columns())
     , m_has_delta(false)
 
 {}
@@ -55,36 +54,6 @@ t_ctx0::step_end() {
     }
 
     m_traversal->step_end();
-// #ifndef PSP_ENABLE_WASM
-//     t_uindex ncols = m_config.get_num_columns();
-//     std::vector<t_minmax> rval(ncols);
-
-//     auto pkeys = m_traversal->get_pkeys();
-//     auto stbl = m_gstate->get_table();
-
-// #ifdef PSP_PARALLEL_FOR
-//     tbb::parallel_for(0, int(ncols), 1,
-//         [&rval, &stbl, pkeys, this](int colidx)
-// #else
-//     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
-// #endif
-//         {
-//             auto colname = m_config.col_at(colidx);
-
-//             if (stbl->get_dtype(colname) != DTYPE_STR) {
-//                 auto v = m_gstate->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
-//                     const std::vector<t_tscalar>&)>>(pkeys, colname, get_vec_min_max);
-
-//                 rval[colidx].m_min = v.first;
-//                 rval[colidx].m_max = v.second;
-//             }
-//         }
-// #ifdef PSP_PARALLEL_FOR
-//     );
-// #endif
-
-//     m_minmax = rval;
-// #endif
 }
 
 t_index
@@ -372,7 +341,6 @@ void
 t_ctx0::reset() {
     m_traversal->reset();
     m_deltas = std::make_shared<t_zcdeltas>();
-    m_minmax = std::vector<t_minmax>(m_config.get_num_columns());
     m_has_delta = false;
 }
 
@@ -631,11 +599,6 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
 void
 t_ctx0::add_delta_pkey(t_tscalar pkey) {
     m_delta_pkeys.insert(pkey);
-}
-
-std::vector<t_minmax>
-t_ctx0::get_min_max() const {
-    return m_minmax;
 }
 
 void

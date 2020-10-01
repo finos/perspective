@@ -44,16 +44,12 @@ void set_alerts_enabled(bool enabled_state);
 
 void set_deltas_enabled(bool enabled_state);
 
-void set_minmax_enabled(bool enabled_state);
-
 void set_feature_state(t_ctx_feature feature, bool state);
 
 std::vector<t_tscalar> get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
 std::vector<t_tscalar> get_cell_data(
     const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
-
-std::vector<t_minmax> get_min_max() const;
 
 t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 

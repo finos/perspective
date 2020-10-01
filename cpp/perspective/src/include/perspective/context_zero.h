@@ -76,7 +76,6 @@ private:
     std::shared_ptr<t_ftrav> m_traversal;
     std::shared_ptr<t_zcdeltas> m_deltas;
     tsl::hopscotch_set<t_tscalar> m_delta_pkeys;
-    std::vector<t_minmax> m_minmax;
     t_symtable m_symtable;
     bool m_has_delta;
 };

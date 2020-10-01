@@ -45,8 +45,6 @@ public:
 
     void expand_path(const std::vector<t_tscalar>& path);
 
-    t_minmax get_agg_min_max(t_uindex aggidx, t_depth depth) const;
-
     // aggregates should be presized to be same size
     // as agg_indices
     void get_aggregates_for_sorting(t_uindex nidx, const std::vector<t_index>& agg_indices,
