@@ -120,9 +120,21 @@ export class Server {
                 this.process_method_call(msg);
                 break;
             case "view":
-                // create a new view and track it with `client_id`
-                this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
-                this._views[msg.view_name].client_id = client_id;
+                const tableMsgQueue = this._tables[msg.table_name];
+                if (tableMsgQueue && Array.isArray(tableMsgQueue)) {
+                    tableMsgQueue.push(msg);
+                    this._views[msg.view_name] = [];
+                } else {
+                    // create a new view and track it with `client_id`
+                    const msgs = this._views[msg.view_name];
+                    this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
+                    this._views[msg.view_name].client_id = client_id;
+                    if (msgs) {
+                        for (const msg of msgs) {
+                            this.process(msg);
+                        }
+                    }
+                }
                 break;
         }
     }
@@ -211,7 +223,8 @@ export class Server {
      */
     process_method_call(msg) {
         let obj, result;
-        msg.cmd === "table_method" ? (obj = this._tables[msg.name]) : (obj = this._views[msg.name]);
+        const name = msg.view_name || msg.name;
+        msg.cmd === "table_method" ? (obj = this._tables[name]) : (obj = this._views[name]);
 
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a
