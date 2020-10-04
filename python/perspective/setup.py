@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from __future__ import print_function
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
@@ -49,7 +50,6 @@ requires = [
     "future>=0.16.0",
     "numpy>=1.13.1",
     "pandas>=0.22.0",
-    "pyarrow>=0.16.0,<1",
     "python-dateutil>=2.8.0",
     "six>=1.11.0",
     "tornado>=4.5.3",
@@ -57,7 +57,10 @@ requires = [
 ]
 
 if sys.version_info.major < 3:
-    requires += ["backports.shutil-which"]
+    requires.append("backports.shutil-which")
+    requires.append("pyarrow<2")
+else:
+    requires.append("pyarrow>=1.0.1,<2")
 
 if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
     sys.version_info.major == 3 and sys.version_info.minor < 6

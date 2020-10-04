@@ -1,4 +1,4 @@
-# *****************************************************************************
+###############################################################################
 #
 # Copyright (c) 2020, the Perspective Authors.
 #
@@ -26,7 +26,6 @@ RUN rm -rf /opt/python/cp36-cp36m/bin/auditwheel
 RUN rm -rf /opt/python/cp37-cp37m/bin/auditwheel
 RUN rm -rf /opt/python/cp38-cp38/bin/auditwheel
 
-
 # Copy assets
 RUN cp -arf /opt/python/cp27-cp27m/* /usr/local/
 RUN cp -arf /opt/python/cp36-cp36m/* /usr/local/
@@ -53,18 +52,10 @@ RUN tar xfz boost_1_71_0.tar.gz
 RUN cd boost_1_71_0 && ./bootstrap.sh
 RUN cd boost_1_71_0 && ./b2 -j8 --with-program_options --with-filesystem --with-system install 
 
-RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' git+https://chromium.googlesource.com/external/gyp
-RUN python3.6 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
-RUN python3.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
-RUN python3.8 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
-
-# install pyarrow
-RUN wget https://github.com/apache/arrow/archive/apache-arrow-0.16.0.tar.gz >/dev/null 2>&1  || echo "wget arrow failed"
-RUN tar xfz apache-arrow-0.16.0.tar.gz
-RUN cd arrow-apache-arrow-0.16.0 && mkdir build && cd build && cmake ../cpp/ -DPython_ADDITIONAL_VERSIONS=2.7 -DARROW_RPATH_ORIGIN=ON -DARROW_PYTHON=ON -DARROW_FLIGHT=OFF -DARROW_IPC=ON -DARROW_COMPUTE=ON -DCMAKE_INSTALL_PREFIX=/usr -DARROW_DATASET=OFF -DARROW_BUILD_UTILITIES=OFF -DARROW_JEMALLOC=OFF -DARROW_DEPENDENCY_SOURCE=BUNDLED -DARROW_HDFS=OFF -DARROW_WITH_BACKTRACE=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=OFF && make -j2 && sudo make install && cd ../python && PYARROW_BUNDLE_ARROW_CPP=1 sudo python2.7 setup.py install --single-version-externally-managed --record RECORD 
-RUN cd arrow-apache-arrow-0.16.0 && rm -rf build && mkdir build && cd build && cmake ../cpp/ -DPython_ADDITIONAL_VERSIONS=3.6 -DARROW_RPATH_ORIGIN=ON -DARROW_PYTHON=ON -DARROW_FLIGHT=OFF -DARROW_IPC=ON -DARROW_COMPUTE=ON -DCMAKE_INSTALL_PREFIX=/usr -DARROW_DATASET=OFF -DARROW_BUILD_UTILITIES=OFF -DARROW_JEMALLOC=OFF -DARROW_DEPENDENCY_SOURCE=BUNDLED -DARROW_HDFS=OFF -DARROW_WITH_BACKTRACE=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=OFF && make -j2 && sudo make install && cd ../python && PYARROW_BUNDLE_ARROW_CPP=1 sudo python3.6 setup.py install --single-version-externally-managed --record RECORD 
-RUN cd arrow-apache-arrow-0.16.0 && rm -rf build && mkdir build && cd build && cmake ../cpp/ -DPython_ADDITIONAL_VERSIONS=3.7 -DARROW_RPATH_ORIGIN=ON -DARROW_PYTHON=ON -DARROW_FLIGHT=OFF -DARROW_IPC=ON -DARROW_COMPUTE=ON -DCMAKE_INSTALL_PREFIX=/usr -DARROW_DATASET=OFF -DARROW_BUILD_UTILITIES=OFF -DARROW_JEMALLOC=OFF -DARROW_DEPENDENCY_SOURCE=BUNDLED -DARROW_HDFS=OFF -DARROW_WITH_BACKTRACE=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=OFF && make -j2 && sudo make install && cd ../python && PYARROW_BUNDLE_ARROW_CPP=1 sudo python3.7 setup.py install --single-version-externally-managed --record RECORD 
-RUN cd arrow-apache-arrow-0.16.0 && rm -rf build && mkdir build && cd build && cmake ../cpp/ -DPython_ADDITIONAL_VERSIONS=3.8 -DARROW_RPATH_ORIGIN=ON -DARROW_PYTHON=ON -DARROW_FLIGHT=OFF -DARROW_IPC=ON -DARROW_COMPUTE=ON -DCMAKE_INSTALL_PREFIX=/usr -DARROW_DATASET=OFF -DARROW_BUILD_UTILITIES=OFF -DARROW_JEMALLOC=OFF -DARROW_DEPENDENCY_SOURCE=BUNDLED -DARROW_HDFS=OFF -DARROW_WITH_BACKTRACE=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=OFF && make -j2 && sudo make install && cd ../python && PYARROW_BUNDLE_ARROW_CPP=1 sudo python3.8 setup.py install --single-version-externally-managed --record RECORD 
+RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow<2' git+https://chromium.googlesource.com/external/gyp
+RUN python3.6 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=1.0.1,<2'
+RUN python3.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=1.0.1,<2'
+RUN python3.8 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=1.0.1,<2'
 
 # install node
 RUN curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -

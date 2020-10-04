@@ -645,10 +645,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# `site-packages`, the relative search path should be able to pick
             # up pyarrow. This is only enabled for *nix (non-manylinux), as `auditwheel`
 			# will not delocate libarrow properly if it is in the rpath.
-            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
-            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
+			#
+			# We also include the install-time path to pyarrow so that pep-518
+			# can build properly
+            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
+            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
 		else()
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+			target_compile_options(binding PRIVATE -Wno-deprecated-register)
+			target_compile_options(psp PRIVATE -Wno-deprecated-register)
 		endif()
 
 		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
