@@ -548,7 +548,13 @@ set (SOURCE_FILES
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
 	${PSP_PYTHON_SRC}/src/column.cpp
-	)
+)
+
+set(WASM_SOURCE_FILES ${SOURCE_FILES}
+	${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
+	${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
+)
+
 
 set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
@@ -570,7 +576,7 @@ else()
 endif()
 
 if (PSP_WASM_BUILD)
-	add_library(psp ${SOURCE_FILES})
+	add_library(psp ${WASM_SOURCE_FILES})
 	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	target_link_libraries(psp arrow)
@@ -663,7 +669,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		########################
 	else()
-		add_library(psp SHARED ${SOURCE_FILES})
+		add_library(psp SHARED ${WASM_SOURCE_FILES})
 
 		# Link perspective against custom-built minimal arrow
 		target_link_libraries(psp arrow)

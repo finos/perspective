@@ -7,8 +7,6 @@
  *
  */
 
-import papaparse from "papaparse";
-
 const jsonFormatter = {
     initDataValue: () => [],
     initRowValue: () => ({}),
@@ -23,7 +21,34 @@ const jsonFormatter = {
 const csvFormatter = Object.assign({}, jsonFormatter, {
     addColumnValue: (data, row, colName, value) => row[colName.split("|").join(",")].unshift(value),
     setColumnValue: (data, row, colName, value) => (row[colName.split("|").join(",")] = value),
-    formatData: (data, config) => papaparse.unparse(data, config)
+    formatData: function(data, {delimiter = ","} = {}) {
+        if (data.length === 0) {
+            return "";
+        }
+
+        const format = function(x) {
+            if (x === null) {
+                return "";
+            }
+            switch (typeof x) {
+                case "object":
+                case "string":
+                    return x.indexOf(delimiter) > -1 ? `"${x}"` : x.toString();
+                case "number":
+                    return x;
+                case "boolean":
+                    return x.toString();
+            }
+        };
+
+        const columns = Object.keys(data[0]);
+        let csv = columns.map(format).join(delimiter);
+        for (let x = 0; x < data.length; x++) {
+            csv += "\r\n" + columns.map(column => format(data[x][column])).join(delimiter);
+        }
+
+        return csv;
+    }
 });
 
 const jsonTableFormatter = {

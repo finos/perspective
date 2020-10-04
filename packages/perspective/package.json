@@ -59,13 +59,13 @@
         "flatbuffers": "^1.10.2",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
-        "papaparse": "^5.2.0",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.5.5",
-        "jsverify": "^0.8.4"
+        "jsverify": "^0.8.4",
+        "papaparse": "^5.2.0"
     }
 }

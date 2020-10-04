@@ -5,14 +5,14 @@
     "superstore_pivots_by_a_column_": "8f064a78e0b77f505632df053317a806",
     "superstore_pivots_by_a_row_and_a_column_": "c3cd66b434ae463f556fd3ab429d4f2a",
     "superstore_pivots_by_two_rows_and_two_columns_": "ddbfbcb81e6fda2fbba7405f5ab00443",
-    "superstore_sorts_by_a_hidden_column_": "910bdbc2579b1e8f24282356fae5d317",
+    "superstore_sorts_by_a_hidden_column_": "a4b2f7179bdb07728465f5f2a510c512",
     "superstore_sorts_by_a_numeric_column_": "880ea680df9bc48415450553735c2a6c",
     "superstore_filters_by_a_numeric_column_": "45d824114c57a56b990fe637f5514330",
     "superstore_filters_by_a_datetime_column_": "4ebf21eead875f46e1470714ef79ba3d",
     "superstore_highlights_invalid_filter_": "452e3d6d1fb9fcb18bfc6a3b6ef021ff",
     "superstore_sorts_by_an_alpha_column_": "7d4a5cde8d795e020eec5e27763eacbd",
-    "superstore_displays_visible_columns_": "91b906e38d0e3115c929cfa5e15cb5fb",
+    "superstore_displays_visible_columns_": "e2f92ee6e81b832b526e4d262577eb4e",
     "superstore_resets_viewable_area_when_the_logical_size_expands_": "e0dcc4db517a7ff5471f27301aaceb29",
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "7e269a544b300a204b82806f32bef31b",
-    "__GIT_COMMIT__": "8256bc9394fe07d15b2d7856f8f94630c1df6a87"
+    "__GIT_COMMIT__": "ffcc3be9fb137f23a21e3737e07e809e55e71e49"
 }

@@ -13,7 +13,7 @@ const args = process.argv.slice(2);
 const LIMIT = args.indexOf("--limit");
 const IS_DELTA = args.indexOf("--delta");
 
-if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "javascript") {
+if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
     function docker() {
         console.log("Creating puppeteer docker image");
         let cmd = "docker run -it --rm --shm-size=2g --cap-add=SYS_NICE -u root -e PACKAGE=${PACKAGE} -e HTTPS_PROXY -e HTTPS_PROXY -v $(pwd):/src -w /src";
