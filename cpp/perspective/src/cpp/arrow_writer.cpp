@@ -263,11 +263,29 @@ namespace apachearrow {
         auto dictionary_type = 
             arrow::dictionary(arrow::int32(), arrow::utf8());
 
+#if ARROW_VERSION_MAJOR < 1
         std::shared_ptr<arrow::Array> dictionary_array;
         PSP_CHECK_ARROW_STATUS(arrow::DictionaryArray::FromArrays(
             dictionary_type, indices_array, values_array, &dictionary_array));
         
         return dictionary_array;
+#else
+        arrow::Result<std::shared_ptr<arrow::Array>> result = arrow::DictionaryArray::FromArrays(
+            dictionary_type, 
+            indices_array, 
+            values_array
+        );
+        
+        if (!result.ok()) {           
+            std::stringstream ss;
+            ss << "Could not write values for dictionary array: "
+               << result.status().message()
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        return *result;
+#endif
     }
 
 } // namespace arrow

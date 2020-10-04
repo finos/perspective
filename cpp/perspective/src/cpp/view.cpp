@@ -567,23 +567,33 @@ View<CTX_T>::data_slice_to_arrow(
     }
 
     std::shared_ptr<arrow::ResizableBuffer> buffer;
+
+#if ARROW_VERSION_MAJOR < 1
     auto allocated = arrow::AllocateResizableBuffer(0, &buffer);
     if (!allocated.ok()) {
         std::stringstream ss;
         ss << "Failed to allocate buffer: " << allocated.message() << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
-    
-    arrow::io::BufferOutputStream sink(buffer);    
-    
+
+    arrow::io::BufferOutputStream sink(buffer);        
     auto options = arrow::ipc::IpcOptions::Defaults();
-    // options.allow_64bit = true;
-    // options.write_legacy_ipc_format = true;
-    // options.alignment = 64;
-
     auto res = arrow::ipc::RecordBatchStreamWriter::Open(&sink, arrow_schema, options);
-    std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;
+#else
+    arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated = arrow::AllocateResizableBuffer(0);
+    if (!allocated.ok()) {
+        std::stringstream ss;
+        ss << "Failed to allocate buffer: " << allocated.status().message() << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+   
+    buffer = *allocated;    
+    arrow::io::BufferOutputStream sink(buffer);    
+    auto options = arrow::ipc::IpcWriteOptions::Defaults();
+    auto res = arrow::ipc::NewStreamWriter(&sink, arrow_schema, options);
+#endif
 
+    std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;
     PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
     PSP_CHECK_ARROW_STATUS(writer->Close());
     return std::make_shared<std::string>(buffer->ToString());

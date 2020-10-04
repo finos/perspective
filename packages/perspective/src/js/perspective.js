@@ -16,7 +16,6 @@ import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
 import formatters from "./view_formatters";
-import papaparse from "papaparse";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not
 // exist in IE workers
@@ -91,8 +90,8 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, port_id) {
-        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow, port_id);
+    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, is_csv, port_id) {
+        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow, is_csv, port_id);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -594,9 +593,6 @@ export default function(Module) {
      * serialize.
      * @param {number} options.end_col The ending column index from which to
      * serialize.
-     * @param {Object} options.config A config object for the Papaparse
-     * {@link https://www.papaparse.com/docs#json-to-csv} config object.
-     *
      * @returns {Promise<string>} A Promise resolving to a string in CSV format
      * representing the rows of this {@link module:perspective~view}.  If this
      * {@link module:perspective~view} had a "row_pivots" config parameter
@@ -1440,6 +1436,7 @@ export default function(Module) {
         let schema = this._Table.get_schema();
         let types = schema.types();
         let is_arrow = false;
+        let is_csv = false;
 
         pdata = accessor;
 
@@ -1450,13 +1447,9 @@ export default function(Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            accessor.init(papaparse.parse(data.trim(), {header: true}).data);
-            accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
-            accessor.types = extract_vector(types).slice(0, accessor.names.length);
-
-            if (meter) {
-                meter(accessor.row_count);
-            }
+            is_csv = true;
+            is_arrow = true;
+            pdata = data;
         } else {
             accessor.init(data);
             accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
@@ -1491,7 +1484,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow, options.port_id);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow, is_csv, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1533,7 +1526,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow, options.port_id);
+            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow, false, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1655,18 +1648,19 @@ export default function(Module) {
             let data_accessor;
             let is_arrow = false;
             let overridden_types = {};
+            let is_csv = false;
 
             if (data instanceof ArrayBuffer || (typeof Buffer !== "undefined" && data instanceof Buffer)) {
                 data_accessor = new Uint8Array(data);
                 is_arrow = true;
-            } else {
-                if (typeof data === "string") {
-                    if (data[0] === ",") {
-                        data = "_" + data;
-                    }
-                    data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
+            } else if (typeof data === "string") {
+                if (data[0] === ",") {
+                    data = "_" + data;
                 }
-
+                is_csv = true;
+                is_arrow = true;
+                data_accessor = data;
+            } else {
                 accessor.clean();
                 overridden_types = accessor.init(data);
                 data_accessor = accessor;
@@ -1681,7 +1675,7 @@ export default function(Module) {
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
                 // Always create new tables using port 0
-                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, 0);
+                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, is_csv, 0);
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {

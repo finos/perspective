@@ -237,6 +237,7 @@ namespace binding {
         t_op op,
         bool is_update,
         bool is_arrow,
+        bool is_csv,
         t_uindex port_id);
 
     /******************************************************************************

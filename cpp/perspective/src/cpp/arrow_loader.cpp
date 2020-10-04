@@ -12,6 +12,104 @@
 namespace perspective {
 namespace apachearrow {
 
+    void 
+    load_stream(const uintptr_t ptr, const uint32_t length, std::shared_ptr<arrow::Table>& table) {
+        arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
+#if ARROW_VERSION_MAJOR < 1        
+        std::shared_ptr<arrow::ipc::RecordBatchReader> batch_reader;
+        arrow::Status status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
+        if (!status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        } else { 
+            status = batch_reader->ReadAll(&table);
+            if (!status.ok()) {
+                std::stringstream ss;
+                ss << "Failed to read stream record batch: " << status.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            };
+        }
+#else
+        auto status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader); 
+        if (!status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to open RecordBatchStreamReader: " << status.status().ToString() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        } else { 
+            auto batch_reader = *status;
+            auto status5 = batch_reader->ReadAll(&table);
+            if (!status5.ok()) {
+                std::stringstream ss;
+                ss << "Failed to read stream record batch: " << status5.ToString() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            };
+        }
+#endif
+    }
+
+    void
+    load_file(const uintptr_t ptr, const uint32_t length, std::shared_ptr<arrow::Table>& table) {
+        arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
+#if ARROW_VERSION_MAJOR < 1
+        std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader;
+        arrow::Status status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
+        if (!status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        } else {
+            std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
+            auto num_batches = batch_reader->num_record_batches();
+            for (int i = 0; i < num_batches; ++i) {
+                std::shared_ptr<arrow::RecordBatch> chunk;
+                status = batch_reader->ReadRecordBatch(i, &chunk);
+                if (!status.ok()) {
+                    PSP_COMPLAIN_AND_ABORT(
+                        "Failed to read file record batch: " + status.message());
+                }
+                batches.push_back(chunk);
+            }
+            status = arrow::Table::FromRecordBatches(batches, &table);
+            if (!status.ok()) {
+                std::stringstream ss;
+                ss << "Failed to create Table from RecordBatches: "
+                    << status.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            };
+        };
+#else
+        auto status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader);        
+        if (!status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to open RecordBatchFileReader: " << status.status().ToString() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        } else {
+            std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader = *status;
+            std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
+            auto num_batches = batch_reader->num_record_batches();
+            for (int i = 0; i < num_batches; ++i) {
+                
+                auto status2 = batch_reader->ReadRecordBatch(i);
+                if (!status2.ok()) {
+                    PSP_COMPLAIN_AND_ABORT(
+                        "Failed to read file record batch: " + status2.status().ToString());
+                }
+                std::shared_ptr<arrow::RecordBatch> chunk = *status2;
+                batches.push_back(chunk);
+            }
+            auto status3 = arrow::Table::FromRecordBatches(batches);
+            if (!status3.ok()) {
+                std::stringstream ss;
+                ss << "Failed to create Table from RecordBatches: "
+                    << status3.status().ToString() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            };
+            table = *status3;
+        };
+#endif
+    }
+
     using namespace perspective;
 
     ArrowLoader::ArrowLoader() {}
@@ -47,6 +145,8 @@ namespace apachearrow {
             return DTYPE_TIME;
         } else if (src == "date32" || src == "date64") {
             return DTYPE_DATE;
+        } else if (src == "null") {
+            return DTYPE_STR;
         }
         std::stringstream ss;
         ss << "Could not load arrow column of type `" << src << "`" << std::endl;
@@ -58,47 +158,9 @@ namespace apachearrow {
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
         arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
         if (std::memcmp("ARROW1", (const void *)ptr, 6) == 0) {
-            std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader;
-            arrow::Status status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
-            if (!status.ok()) {
-                std::stringstream ss;
-                ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(ss.str());
-            } else {
-                std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
-                auto num_batches = batch_reader->num_record_batches();
-                for (int i = 0; i < num_batches; ++i) {
-                    std::shared_ptr<arrow::RecordBatch> chunk;
-                    status = batch_reader->ReadRecordBatch(i, &chunk);
-                    if (!status.ok()) {
-                        PSP_COMPLAIN_AND_ABORT(
-                            "Failed to read file record batch: " + status.message());
-                    }
-                    batches.push_back(chunk);
-                }
-                status = arrow::Table::FromRecordBatches(batches, &m_table);
-                if (!status.ok()) {
-                    std::stringstream ss;
-                    ss << "Failed to create Table from RecordBatches: "
-                       << status.message() << std::endl;
-                    PSP_COMPLAIN_AND_ABORT(ss.str());
-                };
-            };
+            load_file(ptr, length, m_table);
         } else {
-            std::shared_ptr<arrow::ipc::RecordBatchReader> batch_reader;
-            arrow::Status status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
-            if (!status.ok()) {
-                std::stringstream ss;
-                ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(ss.str());
-            } else { 
-                status = batch_reader->ReadAll(&m_table);
-                if (!status.ok()) {
-                    std::stringstream ss;
-                    ss << "Failed to read stream record batch: " << status.message() << std::endl;
-                    PSP_COMPLAIN_AND_ABORT(ss.str());
-                };
-            }
+            load_stream(ptr, length, m_table);
         }
 
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
@@ -109,6 +171,21 @@ namespace apachearrow {
             m_types.push_back(convert_type(field->type()->name()));
         }
     }
+
+#ifdef PSP_ENABLE_WASM
+    void
+    ArrowLoader::init_csv(std::string& csv, bool is_update,  std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& psp_schema) {        
+        m_table = csvToTable(csv, is_update, psp_schema);
+
+        std::shared_ptr<arrow::Schema> schema = m_table->schema();
+        std::vector<std::shared_ptr<arrow::Field>> fields = schema->fields();
+
+        for (auto field : fields) {
+            m_names.push_back(field->name());
+            m_types.push_back(convert_type(field->type()->name()));
+        }
+    }
+#endif
 
     void
     ArrowLoader::fill_table(
@@ -381,6 +458,11 @@ namespace apachearrow {
                     std::uint8_t elem = null_bitmap[i / 8];
                     bool v = elem & (1 << (i % 8));
                     dest->set_nth<bool>(offset + i, v);
+                }
+            } break;
+            case arrow::NullType::type_id: {
+                for (uint32_t i = 0; i < len; ++i) {
+                    dest->set_valid(i, false);
                 }
             } break;
             default: {

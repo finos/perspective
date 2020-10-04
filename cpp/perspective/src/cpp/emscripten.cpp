@@ -10,6 +10,7 @@
 #include <perspective/emscripten.h>
 #include <perspective/arrow_loader.h>
 #include <perspective/arrow_writer.h>
+#include <arrow/csv/api.h>
 
 using namespace emscripten;
 using namespace perspective;
@@ -1021,6 +1022,7 @@ namespace binding {
         t_op op,
         bool is_update,
         bool is_arrow,
+        bool is_csv,
         t_uindex port_id) {
         bool table_initialized = has_value(table);
         std::shared_ptr<t_pool> pool;
@@ -1044,24 +1046,79 @@ namespace binding {
 
         // Determine metadata
         bool is_delete = op == OP_DELETE;
+
         if (is_arrow && !is_delete) {
-            t_val constructor = accessor["constructor"];
-            std::int32_t length = accessor["byteLength"].as<std::int32_t>();
+            if (is_csv) {
+                std::string s = accessor.as<std::string>();
+                auto map = std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>();
+                if (is_update) {
+                    auto gnode_output_schema = gnode->get_output_schema();
+                    auto schema = gnode_output_schema.drop({"psp_okey"});
+                    auto column_names = schema.columns();
+                    auto data_types = schema.types();
+                    
+                    for (auto idx = 0; idx < column_names.size(); ++idx) {
+                        const std::string& name = column_names[idx];
+                        const t_dtype& type = data_types[idx];
+                        switch (type) {
+                            case DTYPE_FLOAT32:
+                                map[name] = std::make_shared<arrow::FloatType>();
+                                break;
+                            case DTYPE_FLOAT64:
+                                map[name] = std::make_shared<arrow::DoubleType>();
+                                break;
+                            case DTYPE_STR:
+                                map[name] = std::make_shared<arrow::StringType>();
+                                break;
+                            case DTYPE_BOOL:
+                                map[name] = std::make_shared<arrow::BooleanType>();
+                                break;
+                            case DTYPE_UINT32:
+                                map[name] = std::make_shared<arrow::UInt32Type>();
+                                break;
+                            case DTYPE_UINT64:
+                                map[name] = std::make_shared<arrow::UInt64Type>();
+                                break;                  
+                            case DTYPE_INT32:
+                                map[name] = std::make_shared<arrow::Int32Type>();
+                                break;
+                            case DTYPE_INT64:
+                                map[name] = std::make_shared<arrow::Int64Type>();
+                                break;
+                            case DTYPE_TIME:
+                                map[name] = std::make_shared<arrow::TimestampType>();
+                                break;                       
+                            case DTYPE_DATE:
+                                map[name] = std::make_shared<arrow::Date64Type>();
+                                break;
+                            default:
+                                std::stringstream ss;
+                                ss << "Error loading arrow type " << dtype_to_str(type) << " for column " << name << std::endl;
+                                PSP_COMPLAIN_AND_ABORT(ss.str())
+                                break;
+                        }
+                    }
+                }
+                arrow_loader.init_csv(s, is_update, map);
+            } else {
+                t_val constructor = accessor["constructor"];
+                std::int32_t length = accessor["byteLength"].as<std::int32_t>();
 
-            // Allocate memory 
-            ptr = reinterpret_cast<std::uintptr_t>(malloc(length));
-            if (ptr == NULL) {
-                std::cout << "Unable to load arrow of size 0" << std::endl;
-                return nullptr;
+                // Allocate memory 
+                ptr = reinterpret_cast<std::uintptr_t>(malloc(length));
+                if (ptr == NULL) {
+                    std::cout << "Unable to load arrow of size 0" << std::endl;
+                    return nullptr;
+                }
+
+                // Write to the C++ heap where we allocated the space
+                t_val memory = t_val::module_property("HEAP8")["buffer"];
+                t_val memoryView = constructor.new_(memory, ptr, length);
+                memoryView.call<void>("set", accessor);
+
+                // Parse the arrow and get its metadata
+                arrow_loader.initialize(ptr, length);
             }
-
-            // Write to the C++ heap where we allocated the space
-            t_val memory = t_val::module_property("HEAP8")["buffer"];
-            t_val memoryView = constructor.new_(memory, ptr, length);
-            memoryView.call<void>("set", accessor);
-
-            // Parse the arrow and get its metadata
-            arrow_loader.initialize(ptr, length);
             
             // Always use the `Table` column names and data types on up
             if (table_initialized && is_update) {
@@ -1167,7 +1224,7 @@ namespace binding {
             _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
         }
 
-        if (is_arrow) {
+        if (is_arrow && !is_csv) {
             free((void *)ptr);
         }
 

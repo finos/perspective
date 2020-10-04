@@ -281,9 +281,6 @@ serialize.
 serialize.
     - .end_col <code>number</code> - The ending column index from which to
 serialize.
-    - .config <code>Object</code> - A config object for the Papaparse
-[https://www.papaparse.com/docs#json-to-csv](https://www.papaparse.com/docs#json-to-csv) config object.
-
 
 * * *
 
