@@ -185,7 +185,7 @@ describe("PerspectiveView", function() {
             const to_arrow_pre_msg = {
                 id: 1,
                 cmd: "view_method",
-                is_transferable: true,
+                binary_length: arrow.byteLength,
                 method: "to_arrow",
                 name: "view",
                 subscribe: false
@@ -194,7 +194,7 @@ describe("PerspectiveView", function() {
             view = await manager.create_view(model)();
 
             // Two messages are sent by the server: the first being the
-            // original message with `is_transferable` set to true,
+            // original message with `binary_length` set to true,
             // and the second the binary itself with the message as `null`.
             view._handle_message({
                 id: 1,
@@ -202,7 +202,7 @@ describe("PerspectiveView", function() {
                 data: to_arrow_pre_msg
             });
 
-            expect(view._pending_arrow).toEqual(1);
+            expect(view._pending_binary).toEqual(1);
 
             view._handle_message(null, [new DataView(arrow)]);
 
@@ -229,7 +229,7 @@ describe("PerspectiveView", function() {
             const on_update_pre_msg = {
                 id: 1,
                 cmd: "view_method",
-                is_transferable: true,
+                binary_length: arrow.byteLength,
                 data: {
                     port_id: 123
                 }
@@ -238,7 +238,7 @@ describe("PerspectiveView", function() {
             view = await manager.create_view(model)();
 
             // Two messages are sent by the server: the first being the
-            // original message with `is_transferable` set to true,
+            // original message with `binary_length` set to true,
             // and the second the binary itself with the message as `null`.
             view._handle_message({
                 id: 1,
@@ -246,7 +246,7 @@ describe("PerspectiveView", function() {
                 data: on_update_pre_msg
             });
 
-            expect(view._pending_arrow).toEqual(1);
+            expect(view._pending_binary).toEqual(1);
             expect(view._pending_port_id).toEqual(123);
 
             view._handle_message(null, [new DataView(arrow)]);

@@ -84,7 +84,7 @@ describe("WebSocketManager", function() {
         });
     });
 
-    it("Calls `update` and sends arraybuffers using `is_transferable`", async () => {
+    it("Calls `update` and sends arraybuffers using `binary_length`", async () => {
         const data = [{x: 1}];
         const table = perspective.table(data);
         const view = table.view();
@@ -104,7 +104,7 @@ describe("WebSocketManager", function() {
         server.eject_table("test");
     });
 
-    it("Calls `update` and sends arraybuffers using `is_transferable` multiple times", async () => {
+    it("Calls `update` and sends arraybuffers using `binary_length` multiple times", async () => {
         const data = [{x: 1}];
         const table = perspective.table(data);
         const view = table.view();

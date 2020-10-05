@@ -56,10 +56,6 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         self._chunk_threshold = self._manager._chunk_threshold
         self._chunk_size = self._manager._chunk_size
 
-        # Trigger special flow when receiving an ArrayBuffer/binary
-        self._is_transferable = False
-        self._is_transferable_pre_message = None
-
         if self._manager is None:
             raise PerspectiveError(
                 "A `PerspectiveManager` instance must be provided to the tornado handler!"

@@ -18,9 +18,9 @@ export class WebSocketClient extends Client {
         super();
         this._ws = ws;
         this._ws.binaryType = "arraybuffer";
-        this._full_arrow;
+        this._full_binary;
         this._total_chunk_length = 0;
-        this._pending_arrow_length = 0;
+        this._pending_binary_length = 0;
 
         this._ws.onopen = () => {
             this.send({
@@ -41,22 +41,22 @@ export class WebSocketClient extends Client {
                 return;
             }
 
-            if (this._pending_arrow) {
-                // Process an arrow binary being sent by the server, which
+            if (this._pending_binary) {
+                // Process a binary being sent by the server, which
                 // can decide how many chunks to send and the size of each
                 // chunk.
-                let arrow = msg.data;
+                let binary_msg = msg.data;
 
-                this._full_arrow.set(new Uint8Array(arrow), this._total_chunk_length);
-                this._total_chunk_length += arrow.byteLength;
+                this._full_binary.set(new Uint8Array(binary_msg), this._total_chunk_length);
+                this._total_chunk_length += binary_msg.byteLength;
 
-                // Use the total length of the arrow from the pre-message
+                // Use the total length of the binary from the pre-message
                 // to decide when to stop waiting for new chunks from the
                 // server.
-                if (this._total_chunk_length === this._pending_arrow_length) {
-                    // Chunking is complete and the arrow has been received
+                if (this._total_chunk_length === this._pending_binary_length) {
+                    // Chunking is complete and the binary has been received
                     // in full.
-                    arrow = this._full_arrow.buffer;
+                    binary_msg = this._full_binary.buffer;
                 } else {
                     // Wait for another chunk.
                     return;
@@ -64,17 +64,17 @@ export class WebSocketClient extends Client {
 
                 let result = {
                     data: {
-                        id: this._pending_arrow,
-                        data: arrow
+                        id: this._pending_binary,
+                        data: binary_msg
                     }
                 };
 
                 // make sure on_update callbacks are called with a `port_id`
-                // AND the transferred arrow.
+                // AND the transferred binary.
                 if (this._pending_port_id !== undefined) {
                     const new_data_with_port_id = {
                         port_id: this._pending_port_id,
-                        delta: arrow
+                        delta: binary_msg
                     };
                     result.data.data = new_data_with_port_id;
                 }
@@ -83,34 +83,34 @@ export class WebSocketClient extends Client {
                 this._handle(result);
 
                 // Reset flags to end special message flow.
-                delete this._pending_arrow;
-                delete this._pending_arrow_length;
+                delete this._pending_binary;
+                delete this._pending_binary_length;
                 delete this._pending_port_id;
 
                 this._total_chunk_length = 0;
-                this._full_arrow = null;
+                this._full_binary = null;
             } else {
                 msg = JSON.parse(msg.data);
 
-                // If the `is_transferable` flag is set, the worker expects the
-                // next message to be a transferable object. This sets the
-                // `_pending_arrow` flag, which triggers a special handler for
-                // the ArrayBuffer containing arrow data.
-                if (msg.is_transferable) {
-                    this._pending_arrow = msg.id;
-                    this._pending_arrow_length = msg.arrow_length;
+                // If the message has `binary_length` set,the worker expects the
+                // next message to be a binary message. This sets the
+                // `_pending_binary` flag, which triggers a special handler for
+                // the ArrayBuffer containing binary data.
+                if (msg.binary_length) {
+                    this._pending_binary = msg.id;
+                    this._pending_binary_length = msg.binary_length;
 
                     // Check whether the message also contains a `port_id`,
                     // indicating that we are in an `on_update` callback and
-                    // the pending arrow needs to be joined with the port_id
+                    // the pending binary needs to be joined with the port_id
                     // for on_update handlers to work properly.
                     if (msg.data && msg.data.port_id !== undefined) {
                         this._pending_port_id = msg.data.port_id;
                     }
 
-                    // Create an empty ArrayBuffer to hold the arrow, as it
+                    // Create an empty ArrayBuffer to hold the binary, as it
                     // will be sent in n >= 1 chunks.
-                    this._full_arrow = new Uint8Array(this._pending_arrow_length);
+                    this._full_binary = new Uint8Array(this._pending_binary_length);
                 } else {
                     this._handle({
                         data: msg
@@ -126,7 +126,7 @@ export class WebSocketClient extends Client {
      *
      * @param {Object} msg a message to send to the remote. If the `args`
      * param contains an ArrayBuffer, two messages will be sent - a pre-message
-     * with the `is_transferable` flag set to true, and a second message
+     * with the `binary_length` flag set to true, and a second message
      * containing the ArrayBuffer. This allows for transport of metadata
      * alongside an ArrayBuffer, and the pattern should be implemented by the
      * receiver.
@@ -134,7 +134,7 @@ export class WebSocketClient extends Client {
     send(msg) {
         if (msg.args && msg.args.length > 0 && msg.args[0] instanceof ArrayBuffer && msg.args[0].byteLength !== undefined) {
             const pre_msg = msg;
-            msg.is_transferable = true;
+            msg.binary_length = msg.args[0].byteLength;
             this._ws.send(JSON.stringify(pre_msg));
             this._ws.send(msg.args[0]);
             return;
@@ -180,7 +180,7 @@ export class WebSocketManager extends Server {
 
     /**
      * Add a new websocket connection to the manager, and define a handler
-     * for all incoming messages. If the incoming message has `is_transferable`
+     * for all incoming messages. If the incoming message has `binary_length`
      * set, handle incoming `ArrayBuffers` correctly.
      *
      * The WebsocketManager manages the websocket connection and processes every
@@ -204,28 +204,27 @@ export class WebSocketManager extends Server {
                 return;
             }
 
-            if (this._is_transferable) {
+            if (this._pending_binary) {
                 // Combine ArrayBuffer and previous message so that metadata can
-                // be reconstituted.
-                const buffer = msg;
-                let new_args = [buffer];
-                msg = this._is_transferable_pre_message;
+                // be reconstituted for the server, as the server needs the
+                // whole message to correctly delegate commands.
+                const binary = msg;
+                let new_args = [binary];
+                msg = this._pending_binary;
 
                 if (msg.args && msg.args.length > 1) {
                     new_args = new_args.concat(msg.args.slice(1));
                 }
 
                 msg.args = new_args;
-                delete msg.is_transferable;
 
-                this._is_transferable = false;
-                this._is_transferable_pre_message = undefined;
+                delete msg.binary_length;
+                delete this._pending_binary;
             } else {
                 msg = JSON.parse(msg);
 
-                if (msg.is_transferable) {
-                    this._is_transferable = true;
-                    this._is_transferable_pre_message = msg;
+                if (msg.binary_length) {
+                    this._pending_binary = msg;
                     return;
                 }
             }
@@ -257,8 +256,8 @@ export class WebSocketManager extends Server {
      *
      * If the `transferable` param is set, pass two messages: the string
      * representation of the message and then the ArrayBuffer data that needs to
-     * be transferred. The `is_transferable` flag tells the client to expect the
-     * next message to be a transferable object.
+     * be transferred. `binary_length` tells the client to expect the next
+     * message to be a transferable object.
      *
      * @param {Object} msg a valid JSON-serializable message to pass to the
      * client
@@ -273,12 +272,11 @@ export class WebSocketManager extends Server {
         }
         msg.id = this.requests_id_map.get(id);
         if (transferable) {
-            const arrow = transferable[0];
-            msg.is_transferable = true;
-            msg.arrow_length = arrow.byteLength;
+            const binary_msg = transferable[0];
+            msg.binary_length = binary_msg.byteLength;
             req.ws.send(JSON.stringify(msg));
             setTimeout(() => {
-                this._post_chunked(req, arrow, 0, this.chunk_size, arrow.byteLength);
+                this._post_chunked(req, binary_msg, 0, this.chunk_size, binary_msg.byteLength);
             }, 0);
         } else {
             req.ws.send(JSON.stringify(msg));

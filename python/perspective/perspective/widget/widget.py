@@ -208,8 +208,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         self.on_displayed(self._on_display)
 
         # Trigger special flow when receiving an ArrayBuffer/binary
-        self._is_transferable = False
-        self._is_transferable_pre_message = None
+        self._pending_binary = None
 
         # If `self.client` is True, the front-end `<perspective-viewer>` is
         # given a copy of the data serialized to JSON, and the Python kernel
@@ -407,8 +406,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 de-serialized by ipywidgets.
             buffers : optional arraybuffers from the front-end, if any.
         """
-        if self._is_transferable:
-            msg = self._is_transferable_pre_message
+        if self._pending_binary:
+            msg = self._pending_binary
 
             # arrow is a `MemoryView` - convert to bytes
             arrow = buffers[0].tobytes()
@@ -417,8 +416,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             # Send the message to the manager to process
             post_callback = partial(self.post, msg_id=msg["id"])
             self.manager._process(msg, post_callback)
-            self._is_transferable_pre_message = None
-            self._is_transferable = False
+            self._pending_binary = None
             return
 
         if content["type"] == "cmd":
@@ -438,11 +436,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                     for data in self._predisplay_update_cache:
                         self.update(data)
             else:
-                # If the message has `is_transferable` set, wait for the arrow
+                # If the message has `binary_length` set, wait for the arrow
                 # and join it with the JSON message.
-                if parsed.get("is_transferable"):
-                    self._is_transferable = True
-                    self._is_transferable_pre_message = parsed
+                if parsed.get("binary_length"):
+                    self._pending_binary = parsed
                     return
 
                 # For all calls to Perspective, process it in the manager.

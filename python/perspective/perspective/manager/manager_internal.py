@@ -48,8 +48,7 @@ class _PerspectiveManagerInternal(object):
         # Perspective sends binary messages in two messages - a JSON
         # pre-message and the binary itself. Set up flags to handle that
         # special message flow.
-        self._pending_binary = False
-        self._pending_binary_pre_message = None
+        self._pending_binary = None
 
     def _process(self, msg, post_callback, client_id=None):
         """Given a message from the client, process it through the Perspective
@@ -71,11 +70,11 @@ class _PerspectiveManagerInternal(object):
     def __process(self, msg, post_callback, client_id=None):
         """Process the message through the Perspective engine, handling the
         special flow for binary messages along the way."""
-        if self._pending_binary:
+        if self._pending_binary is not None:
             # The message is an ArrayBuffer, and it needs to be combined with
             # the previous message to reconsitute metadata before processing.
-            full_message = self._pending_binary_pre_message
-            full_message.pop("is_transferable")
+            full_message = self._pending_binary
+            full_message.pop("binary_length")
 
             # msg is the binary
             new_args = [msg]
@@ -89,8 +88,7 @@ class _PerspectiveManagerInternal(object):
             full_message["args"] = new_args
             msg = full_message
 
-            self._pending_binary = False
-            self._pending_binary_pre_message = None
+            self._pending_binary = None
 
         if isinstance(msg, string_types):
             msg = json.loads(msg)
@@ -101,11 +99,10 @@ class _PerspectiveManagerInternal(object):
                 "JSON-serialized string or a dict."
             )
 
-        if msg.get("is_transferable", None):
+        if msg.get("binary_length", None):
             # cache the message and wait for the ArrayBuffer that will
             # follow immediately after.
-            self._pending_binary = True
-            self._pending_binary_pre_message = msg
+            self._pending_binary = msg
             return
 
         cmd = msg["cmd"]
@@ -311,11 +308,9 @@ class _PerspectiveManagerInternal(object):
                 client, with a `binary` (bool) kwarg that allows it to pass
                 byte messages without serializing to JSON.
         """
-        msg["is_transferable"] = True
-
-        # Pass the total length of the arrow to the client, so it knows to
+        # Pass the total length of the binary to the client, so it knows to
         # wait until the arrow has been received in whole.
-        msg["arrow_length"] = len(binary)
+        msg["binary_length"] = len(binary)
 
         post_callback(json.dumps(msg, cls=DateTimeEncoder))
         post_callback(binary, binary=True)
