@@ -724,12 +724,14 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         widget.node.addEventListener("contextmenu", contextMenu);
         widget.viewer.addEventListener("perspective-toggle-settings", settings);
         widget.viewer.addEventListener("perspective-config-update", updated);
+        widget.viewer.addEventListener("perspective-plugin-update", this.workspaceUpdated);
         widget.title.changed.connect(updated);
 
         this.listeners.set(widget, () => {
             widget.node.removeEventListener("contextmenu", contextMenu);
             widget.viewer.removeEventListener("perspective-toggle-settings", settings);
             widget.viewer.removeEventListener("perspective-config-update", updated);
+            widget.viewer.removeEventListener("perspective-plugin-update", this.workspaceUpdated);
             widget.title.changed.disconnect(updated);
         });
     }
@@ -755,10 +757,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
     }
 
-    workspaceUpdated() {
+    workspaceUpdated = () => {
         if (!this._save) {
             this._save = debounce(() => this.dockpanel.mode !== "single-document" && this._fireUpdateEvent(), 500);
         }
         this._save();
-    }
+    };
 }
