@@ -6,7 +6,7 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg?style=flat-square)](https://pypi.python.org/pypi/perspective-python)
 [![Build Status](https://dev.azure.com/finosfoundation/perspective/_apis/build/status/finos.perspective?branchName=master)](https://dev.azure.com/finosfoundation/perspective/_build/latest?definitionId=1&branchName=master)
 [![FINOS - Active](https://cdn.jsdelivr.net/gh/finos/contrib-toolbox@master/images/badge-active.svg)](https://finosfoundation.atlassian.net/wiki/display/FINOS/Active)
-[![Binder](http://mybinder.org/badge_logo.svg)](http://beta.mybinder.org/v2/gh/finos/perspective/binder?urlpath=lab/tree/examples/jupyter-notebooks)
+[![Binder](http://mybinder.org/badge_logo.svg)](http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks)
 
 Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
 datasets. Originally developed for J.P. Morgan's trading business,  Perspective
