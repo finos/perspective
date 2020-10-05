@@ -26,13 +26,12 @@ jobs:
 
     - bash: yarn
       displayName: "Install Deps"
-      env:
-        PSP_DOCKER: 1
+
+    - bash: sudo node scripts/install_tools.js
+      displayName: "Install Tools"
 
     - bash: yarn build_js --ci
       displayName: "Build"
-      env:
-        PSP_DOCKER: 1
 
     - bash: yarn test_js --quiet --ci
       displayName: "Test"
