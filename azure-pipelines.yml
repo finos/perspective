@@ -145,149 +145,149 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
         artifactName: '$(artifact_name)'
 
-# - job: 'Windows'
-#   pool:
-#     vmImage: 'vs2017-win2016'
-
-#   strategy:
-#     matrix:
-#       Python37:
-#         python.version: '3.7'
-#         python_flag: ''
-#       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
-#         Python36:
-#           python.version: '3.6'
-#           python_flag: '--python36'
-#         Python38:
-#           python.version: '3.8'
-#           python_flag: '--python38'
-
-#   steps:
-#     - task: UsePythonVersion@0
-#       inputs:
-#         versionSpec: '$(python.version)'
-#         architecture: 'x64'
-
-#     - task: NodeTool@0
-#       inputs:
-#         versionSpec: '12.x'
-
-#     - script: |
-#         which python > python.txt
-#         set /p PYTHON=<python.txt
-#         ln -s %PYTHON% %PYTHON%$(python.version)
-#         python --version
-#         which python$(python.version)
-#       displayName: "Which python"
-
-#     - script: |
-#         python -m pip install numpy "pyarrow>=0.16.0,<1"
-#       displayName: "Python deps"
-
-#     - script: npm install -g yarn
-#       displayName: "Install Yarn"
-
-#     - script: yarn
-#       displayName: 'Install Deps'
-
-#     - script: yarn build_python  --ci $(python_flag)
-#       displayName: 'build'
-#       env:
-#         # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
-#         # https://github.com/actions/virtual-environments/issues/687
-#         # 06/18/2020 - seems like boost got moved to `x86_64` inside
-#         # the boost folder, which broke builds for a bit.
-#         BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/"
-#         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
-#         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
-
-- job: 'MacOS_Mojave'
+- job: 'Windows'
   pool:
-    vmImage: 'macos-10.14'
+    vmImage: 'vs2017-win2016'
 
   strategy:
     matrix:
       Python37:
         python.version: '3.7'
         python_flag: ''
-        artifact_name: 'cp37-cp37m-macosx_10_14_x86_64'
-
       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
-        Python27:
-          python.version: '2.7'
-          python_flag: '--python2'
-          artifact_name: 'cp27-cp27m-macosx_10_14_x86_64'
-
         Python36:
           python.version: '3.6'
           python_flag: '--python36'
-          artifact_name: 'cp36-cp36m-macosx_10_14_x86_64'
-
         Python38:
           python.version: '3.8'
           python_flag: '--python38'
-          artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
 
   steps:
-    # only build python37 if not a release
-    - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(python.version)'
-          architecture: 'x64'
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
 
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '12.x'
+    - script: |
+        which python > python.txt
+        set /p PYTHON=<python.txt
+        ln -s %PYTHON% %PYTHON%$(python.version)
+        python --version
+        which python$(python.version)
+      displayName: "Which python"
 
-      - script: |
-          brew install boost
-        displayName: "System deps"
+    - script: |
+        python -m pip install numpy "pyarrow>=0.16.0,<1"
+      displayName: "Python deps"
 
-      - script: |
-          which python
-          python --version
-          which python$(python.version)
-        displayName: "Which python"
+    - script: npm install -g yarn
+      displayName: "Install Yarn"
 
-      - script: |
-          python -m pip install delocate wheel numpy "black==20.8b1" flake8-black "pyarrow>=0.16.0,<1"
-        displayName: "Python deps"
+    - script: yarn
+      displayName: 'Install Deps'
 
-      - script: npm install -g yarn
-        displayName: "Install Yarn"
+    - script: yarn build_python  --ci $(python_flag)
+      displayName: 'build'
+      env:
+        # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
+        # https://github.com/actions/virtual-environments/issues/687
+        # 06/18/2020 - seems like boost got moved to `x86_64` inside
+        # the boost folder, which broke builds for a bit.
+        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/"
+        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
+        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
 
-      - script: yarn
-        displayName: 'Install Deps'
+# - job: 'MacOS_Mojave'
+#   pool:
+#     vmImage: 'macos-10.14'
 
-      - script: yarn build_python --ci $(python_flag)
-        displayName: 'build'
+#   strategy:
+#     matrix:
+#       Python37:
+#         python.version: '3.7'
+#         python_flag: ''
+#         artifact_name: 'cp37-cp37m-macosx_10_14_x86_64'
 
-      - task: PublishTestResults@2
-        condition: succeededOrFailed()
-        inputs:
-          testResultsFiles: 'python/perspective/python_junit.xml'
-          testRunTitle: 'Publish test results for Python $(python.version)'
+#       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+#         Python27:
+#           python.version: '2.7'
+#           python_flag: '--python2'
+#           artifact_name: 'cp27-cp27m-macosx_10_14_x86_64'
 
-      - task: PublishCodeCoverageResults@1
-        inputs: 
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+#         Python36:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#           artifact_name: 'cp36-cp36m-macosx_10_14_x86_64'
 
-      # Build a python wheel for Mac 10.14
-      - bash: yarn _wheel_python --ci $(python_flag) --macos
-        displayName: 'Build wheel'
+#         Python38:
+#           python.version: '3.8'
+#           python_flag: '--python38'
+#           artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
 
-      # Test the wheel
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
-        displayName: 'Test Mac Wheel'
+#   steps:
+#     # only build python37 if not a release
+#     - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
 
-      # Save the artifact to Azure storage
-      - task: PublishPipelineArtifact@1
-        inputs:
-          targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
-          artifactName: '$(artifact_name)'
+#       - task: UsePythonVersion@0
+#         inputs:
+#           versionSpec: '$(python.version)'
+#           architecture: 'x64'
+
+#       - task: NodeTool@0
+#         inputs:
+#           versionSpec: '12.x'
+
+#       - script: |
+#           brew install boost
+#         displayName: "System deps"
+
+#       - script: |
+#           which python
+#           python --version
+#           which python$(python.version)
+#         displayName: "Which python"
+
+#       - script: |
+#           python -m pip install delocate wheel numpy "black==20.8b1" flake8-black "pyarrow>=0.16.0,<1"
+#         displayName: "Python deps"
+
+#       - script: npm install -g yarn
+#         displayName: "Install Yarn"
+
+#       - script: yarn
+#         displayName: 'Install Deps'
+
+#       - script: yarn build_python --ci $(python_flag)
+#         displayName: 'build'
+
+#       - task: PublishTestResults@2
+#         condition: succeededOrFailed()
+#         inputs:
+#           testResultsFiles: 'python/perspective/python_junit.xml'
+#           testRunTitle: 'Publish test results for Python $(python.version)'
+
+#       - task: PublishCodeCoverageResults@1
+#         inputs: 
+#           codeCoverageTool: Cobertura
+#           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+
+#       # Build a python wheel for Mac 10.14
+#       - bash: yarn _wheel_python --ci $(python_flag) --macos
+#         displayName: 'Build wheel'
+
+#       # Test the wheel
+#       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
+#         displayName: 'Test Mac Wheel'
+
+#       # Save the artifact to Azure storage
+#       - task: PublishPipelineArtifact@1
+#         inputs:
+#           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
+#           artifactName: '$(artifact_name)'
 
 - job: 'MacOS_Catalina'
   pool:

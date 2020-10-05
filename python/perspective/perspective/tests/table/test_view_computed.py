@@ -196,6 +196,34 @@ class TestViewComputed(object):
             "computed2": [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4]
         }
 
+    def test_view_delete_with_scope(self):
+        """Tests that `View`'s `__del__` method, when called by the Python
+        reference counter, leaves an empty `Table` in a clean state.
+        """
+        table = Table(
+            {"id": int, "msg": str, "val": float},
+            index="id",
+        )
+        table.view(
+            computed_columns=[
+                {
+                    "column": "inverted",
+                    "computed_function_name": "invert",
+                    "inputs": ["val"],
+                }
+            ],
+            columns=["inverted"],
+        )
+        table.update(
+            [
+                {
+                    "id": 1,
+                    "msg": "test",
+                    "val": 1.0,
+                }
+            ]
+        )
+
     def test_view_computed_with_custom_columns(self):
         table = Table({
             "a": [1, 2, 3, 4],

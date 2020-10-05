@@ -7,7 +7,7 @@
  *
  */
 
-const {execute, execute_throw, docker, clean, resolve, getarg, bash, python_image} = require("./script_utils.js");
+const {execute, execute_throw, docker, resolve, getarg, bash, python_image} = require("./script_utils.js");
 const fs = require("fs-extra");
 
 const IS_PY2 = getarg("--python2");
@@ -21,7 +21,7 @@ if (IS_DOCKER) {
     let MANYLINUX_VERSION = "manylinux2010";
     if (!IS_PY2) {
         // switch to 2014 only on python3
-        (MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : ""), PYTHON;
+        (MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "manylinux2010"), PYTHON;
     }
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
@@ -37,21 +37,20 @@ try {
     console.warn(`\`${PYTHON}\` not found - using \`python\` instead.`);
     PYTHON = "python";
 }
-
 try {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
-    const cpp = resolve`${__dirname}/../cpp/perspective`;
+    const cpp = resolve`${__dirname}/../cpp/perspective/src`;
+    const cmakelists = resolve`${__dirname}/../cpp/perspective/CMakeLists.txt`;
     const lic = resolve`${__dirname}/../LICENSE`;
     const cmake = resolve`${__dirname}/../cmake`;
     const dcmake = resolve`${dist}/cmake`;
     const dlic = resolve`${dist}/LICENSE`;
-    const obj = resolve`${dist}/obj`;
 
     fs.mkdirpSync(dist);
-    fs.copySync(cpp, dist, {preserveTimestamps: true});
+    fs.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {preserveTimestamps: true});
+    fs.copySync(cpp, resolve`${dist}/src`, {preserveTimestamps: true});
     fs.copySync(lic, dlic, {preserveTimestamps: true});
     fs.copySync(cmake, dcmake, {preserveTimestamps: true});
-    clean(obj);
 
     if (SETUP_ONLY) {
         // don't execute any build steps, just copy
@@ -63,9 +62,9 @@ try {
     if (IS_CI) {
         if (IS_PY2) {
             // shutil_which is required in setup.py
-            cmd = bash`${PYTHON} -m pip install backports.shutil_which && ${PYTHON} -m pip install -vv -e .[devpy2] --no-clean &&`;
+            cmd = bash`${PYTHON} -m pip install backports.shutil_which && ${PYTHON} -m pip install -e .[devpy2] --no-clean &&`;
         } else {
-            cmd = bash`${PYTHON} -m pip install -vv -e .[dev] --no-clean &&`;
+            cmd = bash`${PYTHON} -m pip install -e .[dev] --no-clean &&`;
         }
 
         // pip install in-place with --no-clean so that pep-518 assets stick

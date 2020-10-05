@@ -15,7 +15,7 @@
 
 namespace perspective {
 
-class PerspectiveScopedGILRelease {
+class PERSPECTIVE_EXPORT PerspectiveScopedGILRelease {
     public:
         PerspectiveScopedGILRelease(std::thread::id event_loop_thread_id);
         ~PerspectiveScopedGILRelease();

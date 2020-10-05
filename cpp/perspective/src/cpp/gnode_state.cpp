@@ -132,7 +132,14 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
             // Clone each column from flattened into `m_table`
             const std::string& column_name = master_table_schema.m_columns[idx];
             // No need for safe lookup as master_table schema == flattened schema
-            const t_column* flattened_column = flattened->get_const_column(column_name).get();
+            auto flattened_column = flattened->get_const_column_safe(column_name);
+            if (!flattened_column) {
+#ifdef PSP_PARALLEL_FOR
+                return;
+#else
+                continue;
+#endif
+            }
             master_table->set_column(idx, flattened_column->clone());
         }
 #ifdef PSP_PARALLEL_FOR

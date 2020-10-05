@@ -555,6 +555,21 @@ module.exports = perspective => {
         });
     });
 
+    describe("Other `View`s", function() {
+        it("Construct a table from another view", async function() {
+            const table = perspective.table(int_float_string_data);
+            const view = table.view();
+            const table2 = perspective.table(view);
+            const view2 = table2.view();
+            const data = await view2.to_json();
+            expect(data).toEqual(int_float_string_data);
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+    });
+
     describe("Formatters", function() {
         it("Serializes a simple view to CSV", async function() {
             var table = perspective.table(data);
