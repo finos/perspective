@@ -8,14 +8,10 @@
  */
 
 const {bash, execute, getarg, docker} = require("./script_utils.js");
-const minimatch = require("minimatch");
-const execSync = require("child_process").execSync;
 const fs = require("fs");
 
 const IS_PUPPETEER = !!getarg("--private-puppeteer");
-const IS_EMSDK = !!getarg("--private-emsdk");
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
-const IS_DOCKER = !!getarg("--docker") || process.env.PSP_DOCKER;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 const PACKAGE = process.env.PACKAGE;
@@ -53,12 +49,6 @@ function jest() {
         --testNamePattern="${get_regex()}"`;
 }
 
-function emsdk() {
-    console.log("-- Creating emsdk docker image");
-    return bash`${docker("emsdk")} node scripts/test_js.js
-        --private-emsdk ${getarg()}`;
-}
-
 function get_regex() {
     const regex = getarg`-t`;
     if (regex) {
@@ -69,18 +59,10 @@ function get_regex() {
 
 try {
     if (!IS_PUPPETEER && !IS_LOCAL_PUPPETEER) {
-        if (IS_DOCKER && !IS_EMSDK) {
-            execute(emsdk());
-        } else {
-            execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-            execute`node_modules/.bin/lerna run test:build --stream
-                --scope="@finos/${PACKAGE}"`;
-        }
-        if (!IS_EMSDK) {
-            execute`yarn --silent clean --screenshots`;
-            execute`${docker("puppeteer")} node scripts/test_js.js
-                --private-puppeteer ${getarg()}`;
-        }
+        execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+        execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
+        execute`yarn --silent clean --screenshots`;
+        execute`${docker("puppeteer")} node scripts/test_js.js --private-puppeteer ${getarg()}`;
     } else {
         if (IS_LOCAL_PUPPETEER) {
             execute`yarn --silent clean --screenshots`;

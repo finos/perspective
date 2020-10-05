@@ -14,11 +14,8 @@ sure the newcomer experience is as straightforward as possible, but some things
 might not work the way you're used to!
 
 Perspective is organized as a
-[monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md)
-and uses [lerna](https://lernajs.io/) to manage dependencies. The
-`@finos/perspective` modules has an additional, unmanaged dependency—the
-[Emscripten](https://github.com/kripken/emscripten) compiler, which is used to
-compile the core C++ engine to WebAssembly, and must be installed independently.
+[monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md),
+and uses [lerna](https://lernajs.io/) to manage dependencies.
 
 This guide provides instructions for both the JavaScript and Python libraries.
 To switch your development toolchain between the two, use `yarn setup`. Once the
@@ -64,13 +61,13 @@ prerequisites.
 #### System Dependencies
 
 Perspective requires some system dependencies to be installed before it can be
-built using local Emscripten:
+built using Emscripten:
 
 - [CMake](https://cmake.org/) (version 3.15.4 or higher)
 - [Boost](https://www.boost.org/) (version 1.67 or higher)
 - [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
 
-#### Building via EMSDK
+#### Building via local EMSDK
 
 To build using local Emscripten,
 [install](https://emscripten.org/docs/getting_started/downloads.html) the
@@ -93,17 +90,18 @@ To install this specific version of Emscripten:
 
 ## `perspective-python`
 
-To build the Python library, run:
+To build the Python library, first configure your project to Python via
+`yarn setup`, then run:
 
 ```bash
-yarn build_python
+yarn build
 ```
 
 `perspective-python` supports Python 3.7 and upwards, as well as Python 2.7.17.
 To build the Python 2 version of the library, use the `--python2` flag:
 
 ```bash
-yarn build_python --python2
+yarn build --python2
 ```
 
 ### System Dependencies
@@ -124,16 +122,6 @@ Install system dependencies through Homebrew:
 brew install cmake
 brew install boost@1.67
 brew install flatbuffers
-```
-
-#### Emscripten
-
-Installing and activating the latest
-[Emscripten SDK](https://github.com/kripken/emscripten):
-
-```bash
-./emsdk install latest
-./emsdk activate latest
 ```
 
 #### `perspective-python`
@@ -162,10 +150,7 @@ prerequisite tools.
 
 ### Ubuntu/Debian
 
-When installing Emscripten, make sure to follow
-[Linux specific instructions](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux).
-
-On Ubuntu, Cmake will mistakenly resolve the system headers in `/usr/include`
+On Ubuntu, CMake will mistakenly resolve the system headers in `/usr/include`
 rather than the emscripten supplied versions. You can resolve this by moving
 `boost` and `flatbuffers` dependencies to somewhere other than `/usr/include` -
 into Perspective's own `src` dir (as per
