@@ -160,9 +160,6 @@ export class WebSocketManager extends Server {
         this.requests = {};
         this.websockets = {};
 
-        // Send binary messages in chunks above this threshold (in bytes)
-        this.chunk_threshold = 200 * 1000 * 1000;
-
         // Send chunks of this size (in bytes)
         this.chunk_size = 50 * 1000 * 1000;
 
@@ -275,9 +272,7 @@ export class WebSocketManager extends Server {
             const binary_msg = transferable[0];
             msg.binary_length = binary_msg.byteLength;
             req.ws.send(JSON.stringify(msg));
-            setTimeout(() => {
-                this._post_chunked(req, binary_msg, 0, this.chunk_size, binary_msg.byteLength);
-            }, 0);
+            this._post_chunked(req, binary_msg, 0, this.chunk_size, binary_msg.byteLength);
         } else {
             req.ws.send(JSON.stringify(msg));
         }

@@ -47,14 +47,15 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
                 Must be provided on initialization.
             check_origin (:obj`bool`): If True, all requests will be accepted
                 regardless of origin. Defaults to False.
+            chunk_size (:obj:`int`): Binary messages will not exceed this length
+                (in bytes);  payloads above this limit will be chunked
+                across multiple messages. Defaults to `25165824` (24MB), and
+                be disabled entirely with `None`.
         """
         self._manager = kwargs.pop("manager", None)
-        self._session = self._manager.new_session()
         self._check_origin = kwargs.pop("check_origin", False)
-
-        # Chunk settings for binary messages
-        self._chunk_threshold = self._manager._chunk_threshold
-        self._chunk_size = self._manager._chunk_size
+        self._chunk_size = kwargs.pop("chunk_size", 25165824)
+        self._session = self._manager.new_session()
 
         if self._manager is None:
             raise PerspectiveError(
@@ -100,7 +101,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
         # Only send message in chunks if it passes the threshold set by the
         # `PerspectiveManager`.
-        chunked = len(message) > self._chunk_threshold
+        chunked = len(message) > self._chunk_size
 
         if binary and chunked:
             loop.add_callback(

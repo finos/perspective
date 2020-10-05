@@ -24,14 +24,14 @@ data = {
     "d": [datetime(2020, 3, i, i, 30, 45) for i in range(1, 11)],
 }
 
-MANAGER = PerspectiveManager(chunk_threshold=1000, chunk_size=500)
+MANAGER = PerspectiveManager()
 
 APPLICATION = tornado.web.Application(
     [
         (
             r"/websocket",
             PerspectiveTornadoHandler,
-            {"manager": MANAGER, "check_origin": True},
+            {"manager": MANAGER, "check_origin": True, "chunk_size": 500},
         )
     ]
 )
