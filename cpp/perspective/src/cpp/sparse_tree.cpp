@@ -604,7 +604,7 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx) {
     auto root_iter = m_nodes->get<by_idx>().find(0);
     auto root_node = *root_iter;
     t_index root_nstrands = *(scount->get_nth<t_index>(0)) + root_node.m_nstrands;
-    root_node.set_nstrands(root_nstrands);
+    root_node.set_nstrands(std::max(root_nstrands, (t_index)1));
     m_nodes->get<by_idx>().replace(root_iter, root_node);
 
     t_tree_unify_rec unif_rec(0, 0, 0, root_nstrands);
