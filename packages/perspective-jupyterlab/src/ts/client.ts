@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+/* eslint-disable @typescript-eslint/camelcase */
 
 import {DOMWidgetView} from "@jupyter-widgets/base";
 import {Client} from "@finos/perspective/dist/esm/api/client";
@@ -51,11 +52,15 @@ export class PerspectiveJupyterClient extends Client {
      * @param msg {any} the message to pass to the `PerspectiveManager`.
      */
     send(msg: any): void {
-        // Handle calls to `update` with a binary by setting `is_transferable`
+        // Handle calls to `update` with a binary by setting `binary_length`
         // to true, so the kernel knows to handle the arraybuffer properly.
         if (msg.method === "update" && msg.args.length === 2 && msg.args[0] instanceof ArrayBuffer) {
-            msg.is_transferable = true;
-            const buffers = [msg.args[0]];
+            const binary_msg = msg.args[0];
+            const buffers = [binary_msg];
+
+            // Set `binary_length` to true so the manager expects a binary
+            // message.
+            msg.binary_length = binary_msg.byteLength;
 
             // Remove the arraybuffer from the message args, so it can be
             // passed along in `buffers`.
@@ -64,7 +69,7 @@ export class PerspectiveJupyterClient extends Client {
             const serialized = JSON.stringify(msg);
 
             // Send the first update message over the Jupyter comm with
-            // `is_transferable` set, so the kernel knows the expect the arrow.
+            // `binary_length` set, so the kernel knows the expect the arrow.
             this.view.send({
                 id: msg.id,
                 type: "cmd",

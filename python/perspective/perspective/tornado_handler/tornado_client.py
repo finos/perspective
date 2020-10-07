@@ -25,8 +25,8 @@ def websocket(url):
 
 class PerspectiveTornadoClient(PerspectiveClient):
 
-    # Send a heartbeat every 15 seconds
-    HEARTBEAT_TIMEOUT = 15 * 1000
+    # Ping the server every 30 seconds
+    PING_TIMEOUT = 15 * 1000
 
     def __init__(self):
         """Create a `PerspectiveTornadoClient` that interfaces with a
@@ -36,14 +36,16 @@ class PerspectiveTornadoClient(PerspectiveClient):
         super(PerspectiveTornadoClient, self).__init__()
 
         self._ws = None
-        self._pending_arrow = None
+        self._pending_binary = None
+        self._pending_binary_length = 0
         self._pending_port_id = None
+        self._full_binary = b""
 
     @gen.coroutine
-    def _send_heartbeat(self):
-        """Send a heartbeat message to the server's Websocket, which will
-        respond with `heartbeat`."""
-        yield self.send("heartbeat")
+    def _send_ping(self):
+        """Send a `ping` heartbeat message to the server's Websocket, which will
+        respond with `pong`."""
+        yield self.send("ping")
 
     @gen.coroutine
     def connect(self, url):
@@ -57,38 +59,54 @@ class PerspectiveTornadoClient(PerspectiveClient):
 
         yield self.send({"id": -1, "cmd": "init"})
 
-        # Send a `heartbeat` message every 15 seconds.
-        self._heartbeat_callback = ioloop.PeriodicCallback(
-            self._send_heartbeat,
-            callback_time=PerspectiveTornadoClient.HEARTBEAT_TIMEOUT,
+        # Send a `ping` message every 15 seconds.
+        self._ping_callback = ioloop.PeriodicCallback(
+            self._send_ping,
+            callback_time=PerspectiveTornadoClient.PING_TIMEOUT,
         )
 
-        self._heartbeat_callback.start()
+        self._ping_callback.start()
 
     def on_message(self, msg):
         """When a message is received, send it to the `_handle` method, or
-        await the incoming arrow from the server."""
-        if msg == "heartbeat":
-            # Do not respond to server heartbeats - only send them
+        await the incoming binary from the server."""
+        if msg == "pong":
+            # Do not respond to server pong heartbeats - only send them
             return
 
-        if self._pending_arrow is not None:
-            result = {"data": {"id": self._pending_arrow, "data": msg}}
+        if self._pending_binary is not None:
+            binary_msg = msg
+
+            self._full_binary += binary_msg
+
+            if len(self._full_binary) == self._pending_binary_length:
+                # Chunking is complete
+                binary_msg = self._full_binary
+            else:
+                # Wait for the next chunk
+                return
+
+            result = {"data": {"id": self._pending_binary, "data": binary_msg}}
 
             if self._pending_port_id is not None:
                 result["data"]["data"] = {
                     "port_id": self._pending_port_id,
-                    "delta": msg,
+                    "delta": binary_msg,
                 }
 
             self._handle(result)
-            self._pending_arrow = None
+
+            # Clear flags for special binary message flow
+            self._pending_binary = None
+            self._pending_binary_length = None
             self._pending_port_id = None
+            self._full_binary = b""
         elif isinstance(msg, six.string_types):
             msg = json.loads(msg)
 
-            if msg.get("is_transferable"):
-                self._pending_arrow = msg["id"]
+            if msg.get("binary_length"):
+                self._pending_binary = msg["id"]
+                self._pending_binary_length = msg["binary_length"]
 
                 if msg.get("data") and msg["data"].get("port_id", None) is not None:
                     self._pending_port_id = msg["data"].get("port_id")
@@ -107,9 +125,9 @@ class PerspectiveTornadoClient(PerspectiveClient):
             and len(msg["args"]) > 0
             and isinstance(msg["args"][0], (bytes, bytearray))
         ):
-            msg["is_transferable"] = True
+            msg["binary_length"] = len(msg["args"][0])
             pre_msg = msg
-            arrow = pre_msg["args"].pop(0)
+            binary_msg = pre_msg["args"].pop(0)
 
             # tornado_handler expects the first arg to be an empty object,
             # which is the result of stringifying an ArrayBuffer in JS - add
@@ -118,9 +136,9 @@ class PerspectiveTornadoClient(PerspectiveClient):
 
             # Must be received in order - for some reason if we yield sending
             # the pre-message, other messages are sent in its place which
-            # breaks the expectation that the next message is an arrow.
+            # breaks the expectation that the next message is an binary.
             self._ws.write_message(json.dumps(pre_msg, cls=DateTimeEncoder))
-            yield self._ws.write_message(arrow, binary=True)
+            yield self._ws.write_message(binary_msg, binary=True)
         elif isinstance(msg, str):
             yield self._ws.write_message(msg)
         else:
@@ -128,5 +146,5 @@ class PerspectiveTornadoClient(PerspectiveClient):
 
     def terminate(self):
         """Close the websocket client connection."""
-        self._heartbeat_callback.stop()
+        self._ping_callback.stop()
         self._ws.close()

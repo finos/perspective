@@ -84,7 +84,7 @@ describe("WebSocketManager", function() {
         });
     });
 
-    it("Calls `update` and sends arraybuffers using `is_transferable`", async () => {
+    it("Calls `update` and sends arraybuffers using `binary_length`", async () => {
         const data = [{x: 1}];
         const table = perspective.table(data);
         const view = table.view();
@@ -104,7 +104,7 @@ describe("WebSocketManager", function() {
         server.eject_table("test");
     });
 
-    it("Calls `update` and sends arraybuffers using `is_transferable` multiple times", async () => {
+    it("Calls `update` and sends arraybuffers using `binary_length` multiple times", async () => {
         const data = [{x: 1}];
         const table = perspective.table(data);
         const view = table.view();
@@ -124,5 +124,39 @@ describe("WebSocketManager", function() {
 
         await client.terminate();
         server.eject_table("test");
+    });
+
+    it("Calls `update` and sends arraybuffers using `on_update`", async done => {
+        const data = [{x: 1}];
+        const table = perspective.table(data);
+        const view = table.view();
+        const arrow = await view.to_arrow();
+
+        let update_port;
+
+        const updater = async updated => {
+            expect(updated.port_id).toEqual(update_port);
+            expect(updated.delta instanceof ArrayBuffer).toEqual(true);
+            expect(updated.delta.byteLength).toBeGreaterThan(0);
+            await client.terminate();
+            server.eject_table("test");
+            done();
+        };
+
+        view.on_update(updater, {mode: "row"});
+
+        server.host_table("test", table);
+
+        const client = perspective.websocket(`ws://localhost:${port}`);
+        const client_table = client.open_table("test");
+
+        for (let i = 0; i < 5; i++) {
+            // take up some ports on the remote table
+            await client_table.make_port();
+        }
+
+        update_port = await client_table.make_port();
+
+        client_table.update(arrow, {port_id: update_port});
     });
 });

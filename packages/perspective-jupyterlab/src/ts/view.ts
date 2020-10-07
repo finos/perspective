@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+/* eslint-disable @typescript-eslint/camelcase */
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 import {PerspectiveWorker, Table, View} from "@finos/perspective";
@@ -24,10 +25,10 @@ export class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveJupyterWidget; // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
-    // The message ID that is expecting an arrow as a follow-up message.
-    _pending_arrow: number;
+    // The message ID that is expecting a binary as a follow-up message.
+    _pending_binary: number;
 
-    // if there is a port_id, join it with the pending arrow so on_update
+    // if there is a port_id, join it with the pending binary so on_update
     // callbacks work correctly
     _pending_port_id: number;
 
@@ -142,18 +143,20 @@ export class PerspectiveView extends DOMWidgetView {
      * @param msg {PerspectiveJupyterMessage}
      */
     _handle_message(msg: PerspectiveJupyterMessage, buffers: Array<DataView>): void {
-        if (this._pending_arrow && buffers.length === 1) {
+        if (this._pending_binary && buffers.length === 1) {
+            // Handle binary messages from the widget, which (unlike the
+            // tornado handler), does not send messages in chunks.
             const binary = buffers[0].buffer.slice(0);
 
             // make sure on_update callbacks are called with a `port_id`
-            // AND the transferred arrow.
+            // AND the transferred binary.
             if (this._pending_port_id !== undefined) {
                 // call handle individually to bypass typescript complaints
                 // that we override `data` with different types.
                 this.perspective_client._handle({
-                    id: this._pending_arrow,
+                    id: this._pending_binary,
                     data: {
-                        id: this._pending_arrow,
+                        id: this._pending_binary,
                         data: {
                             port_id: this._pending_port_id,
                             delta: binary
@@ -162,15 +165,15 @@ export class PerspectiveView extends DOMWidgetView {
                 });
             } else {
                 this.perspective_client._handle({
-                    id: this._pending_arrow,
+                    id: this._pending_binary,
                     data: {
-                        id: this._pending_arrow,
+                        id: this._pending_binary,
                         data: binary
                     }
                 });
             }
             this._pending_port_id = undefined;
-            this._pending_arrow = undefined;
+            this._pending_binary = undefined;
             return;
         }
 
@@ -208,16 +211,16 @@ export class PerspectiveView extends DOMWidgetView {
                     message.data = JSON.parse(message.data);
                 }
 
-                if (message.data["is_transferable"]) {
-                    // If the `is_transferable` flag is set, the worker expects
+                if (message.data["binary_length"]) {
+                    // If the `binary_length` flag is set, the worker expects
                     // the next message to be a transferable object. This sets
-                    // the `_pending_arrow` flag, which triggers a special
-                    // handler for the ArrayBuffer containing arrow data.
-                    this._pending_arrow = message.data.id;
+                    // the `_pending_binary` flag, which triggers a special
+                    // handler for the ArrayBuffer containing binary data.
+                    this._pending_binary = message.data.id;
 
                     // Check whether the message also contains a `port_id`,
                     // indicating that we are in an `on_update` callback and
-                    // the pending arrow needs to be joined with the port_id
+                    // the pending binary needs to be joined with the port_id
                     // for on_update handlers to work properly.
                     if (message.data.data && message.data.data.port_id !== undefined) {
                         this._pending_port_id = message.data.data.port_id;

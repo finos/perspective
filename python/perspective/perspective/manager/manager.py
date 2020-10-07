@@ -43,6 +43,11 @@ class PerspectiveManager(_PerspectiveManagerInternal):
     """
 
     def __init__(self, lock=False):
+        """Create a new ``PerspectiveManager`` instance.
+
+        Keyword Args:
+            lock (:obj:`bool`): [description]. Defaults to False.
+        """
         super(PerspectiveManager, self).__init__(lock=lock)
         self._loop_callback = None
 

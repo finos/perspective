@@ -59,8 +59,7 @@ def make_app():
                 tornado.web.StaticFileHandler,
                 {"path": "./", "default_filename": "index.html"},
             ),
-        ],
-        websocket_ping_interval=15,
+        ]
     )
 
 

@@ -1,7 +1,16 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
 import {Client} from "./api/client.js";
 import {Server} from "./api/server.js";
 
-const HEARTBEAT_TIMEOUT = 15000;
+// Initiate a `ping` to the server every 30 seconds
+const PING_TIMEOUT = 30000;
 let CLIENT_ID_GEN = 0;
 
 export class WebSocketClient extends Client {
@@ -9,69 +18,115 @@ export class WebSocketClient extends Client {
         super();
         this._ws = ws;
         this._ws.binaryType = "arraybuffer";
+        this._full_binary;
+        this._total_chunk_length = 0;
+        this._pending_binary_length = 0;
+
         this._ws.onopen = () => {
-            this.send({id: -1, cmd: "init"});
+            this.send({
+                id: -1,
+                cmd: "init"
+            });
         };
-        const heartbeat = () => {
-            this._ws.send("heartbeat");
-            setTimeout(heartbeat, HEARTBEAT_TIMEOUT);
+
+        const ping = () => {
+            this._ws.send("ping");
+            setTimeout(ping, PING_TIMEOUT);
         };
-        setTimeout(heartbeat, 15000);
+
+        setTimeout(ping, PING_TIMEOUT);
+
         this._ws.onmessage = msg => {
-            if (msg.data === "heartbeat") {
+            if (msg.data === "pong") {
                 return;
             }
-            if (this._pending_arrow) {
+
+            if (this._pending_binary) {
+                // Process a binary being sent by the server, which
+                // can decide how many chunks to send and the size of each
+                // chunk.
+                let binary_msg = msg.data;
+
+                this._full_binary.set(new Uint8Array(binary_msg), this._total_chunk_length);
+                this._total_chunk_length += binary_msg.byteLength;
+
+                // Use the total length of the binary from the pre-message
+                // to decide when to stop waiting for new chunks from the
+                // server.
+                if (this._total_chunk_length === this._pending_binary_length) {
+                    // Chunking is complete and the binary has been received
+                    // in full.
+                    binary_msg = this._full_binary.buffer;
+                } else {
+                    // Wait for another chunk.
+                    return;
+                }
+
                 let result = {
                     data: {
-                        id: this._pending_arrow,
-                        data: msg.data
+                        id: this._pending_binary,
+                        data: binary_msg
                     }
                 };
 
                 // make sure on_update callbacks are called with a `port_id`
-                // AND the transferred arrow.
+                // AND the transferred binary.
                 if (this._pending_port_id !== undefined) {
                     const new_data_with_port_id = {
                         port_id: this._pending_port_id,
-                        delta: msg.data
+                        delta: binary_msg
                     };
                     result.data.data = new_data_with_port_id;
                 }
+
+                // Send the joined message to the client for handling.
                 this._handle(result);
+
+                // Reset flags to end special message flow.
+                delete this._pending_binary;
+                delete this._pending_binary_length;
                 delete this._pending_port_id;
-                delete this._pending_arrow;
+
+                this._total_chunk_length = 0;
+                this._full_binary = null;
             } else {
                 msg = JSON.parse(msg.data);
 
-                // If the `is_transferable` flag is set, the worker expects the
-                // next message to be a transferable object. This sets the
-                // `_pending_arrow` flag, which triggers a special handler for
-                // the ArrayBuffer containing arrow data.
-                if (msg.is_transferable) {
-                    this._pending_arrow = msg.id;
+                // If the message has `binary_length` set,the worker expects the
+                // next message to be a binary message. This sets the
+                // `_pending_binary` flag, which triggers a special handler for
+                // the ArrayBuffer containing binary data.
+                if (msg.binary_length) {
+                    this._pending_binary = msg.id;
+                    this._pending_binary_length = msg.binary_length;
 
                     // Check whether the message also contains a `port_id`,
                     // indicating that we are in an `on_update` callback and
-                    // the pending arrow needs to be joined with the port_id
+                    // the pending binary needs to be joined with the port_id
                     // for on_update handlers to work properly.
                     if (msg.data && msg.data.port_id !== undefined) {
                         this._pending_port_id = msg.data.port_id;
                     }
+
+                    // Create an empty ArrayBuffer to hold the binary, as it
+                    // will be sent in n >= 1 chunks.
+                    this._full_binary = new Uint8Array(this._pending_binary_length);
                 } else {
-                    this._handle({data: msg});
+                    this._handle({
+                        data: msg
+                    });
                 }
             }
         };
     }
 
     /**
-     * Send a message to the remote, checking whether the arguments contain an
+     * Send a message to the server, checking whether the arguments contain an
      * ArrayBuffer.
      *
      * @param {Object} msg a message to send to the remote. If the `args`
      * param contains an ArrayBuffer, two messages will be sent - a pre-message
-     * with the `is_transferable` flag set to true, and a second message
+     * with the `binary_length` flag set to true, and a second message
      * containing the ArrayBuffer. This allows for transport of metadata
      * alongside an ArrayBuffer, and the pattern should be implemented by the
      * receiver.
@@ -79,7 +134,7 @@ export class WebSocketClient extends Client {
     send(msg) {
         if (msg.args && msg.args.length > 0 && msg.args[0] instanceof ArrayBuffer && msg.args[0].byteLength !== undefined) {
             const pre_msg = msg;
-            msg.is_transferable = true;
+            msg.binary_length = msg.args[0].byteLength;
             this._ws.send(JSON.stringify(pre_msg));
             this._ws.send(msg.args[0]);
             return;
@@ -96,7 +151,7 @@ export class WebSocketClient extends Client {
 }
 
 /**
- * A WebSocket Manager instance for a remote perspective
+ * A WebSocket Manager instance to host a Perspective server in NodeJS.
  */
 export class WebSocketManager extends Server {
     constructor(...args) {
@@ -104,6 +159,9 @@ export class WebSocketManager extends Server {
         this.requests_id_map = new Map();
         this.requests = {};
         this.websockets = {};
+
+        // Send chunks of this size (in bytes)
+        this.chunk_size = 50 * 1000 * 1000;
 
         // clear invalid connections
         setInterval(() => {
@@ -119,7 +177,7 @@ export class WebSocketManager extends Server {
 
     /**
      * Add a new websocket connection to the manager, and define a handler
-     * for all incoming messages. If the incoming message has `is_transferable`
+     * for all incoming messages. If the incoming message has `binary_length`
      * set, handle incoming `ArrayBuffers` correctly.
      *
      * The WebsocketManager manages the websocket connection and processes every
@@ -138,33 +196,32 @@ export class WebSocketManager extends Server {
         ws.on("message", msg => {
             ws.isAlive = true;
 
-            if (msg === "heartbeat") {
-                ws.send("heartbeat");
+            if (msg === "ping") {
+                ws.send("pong");
                 return;
             }
 
-            if (this._is_transferable) {
+            if (this._pending_binary) {
                 // Combine ArrayBuffer and previous message so that metadata can
-                // be reconstituted.
-                const buffer = msg;
-                let new_args = [buffer];
-                msg = this._is_transferable_pre_message;
+                // be reconstituted for the server, as the server needs the
+                // whole message to correctly delegate commands.
+                const binary = msg;
+                let new_args = [binary];
+                msg = this._pending_binary;
 
                 if (msg.args && msg.args.length > 1) {
                     new_args = new_args.concat(msg.args.slice(1));
                 }
 
                 msg.args = new_args;
-                delete msg.is_transferable;
 
-                this._is_transferable = false;
-                this._is_transferable_pre_message = undefined;
+                delete msg.binary_length;
+                delete this._pending_binary;
             } else {
                 msg = JSON.parse(msg);
 
-                if (msg.is_transferable) {
-                    this._is_transferable = true;
-                    this._is_transferable_pre_message = msg;
+                if (msg.binary_length) {
+                    this._pending_binary = msg;
                     return;
                 }
             }
@@ -175,7 +232,10 @@ export class WebSocketManager extends Server {
                 const compoundId = `${msg.id}/${ws.id}`;
                 this.requests_id_map.set(compoundId, msg.id);
                 msg.id = compoundId;
-                this.requests[msg.id] = {ws, msg};
+                this.requests[msg.id] = {
+                    ws,
+                    msg
+                };
                 this.process(msg, ws.id);
             } catch (e) {
                 console.error(e);
@@ -188,12 +248,13 @@ export class WebSocketManager extends Server {
     }
 
     /**
-     * Send an asynchronous message to the Perspective web worker.
+     * Send an asynchronous message to the Perspective client through
+     * the websocket.
      *
      * If the `transferable` param is set, pass two messages: the string
      * representation of the message and then the ArrayBuffer data that needs to
-     * be transferred. The `is_transferable` flag tells the client to expect the
-     * next message to be a transferable object.
+     * be transferred. `binary_length` tells the client to expect the next
+     * message to be a transferable object.
      *
      * @param {Object} msg a valid JSON-serializable message to pass to the
      * client
@@ -208,15 +269,37 @@ export class WebSocketManager extends Server {
         }
         msg.id = this.requests_id_map.get(id);
         if (transferable) {
-            msg.is_transferable = true;
+            const binary_msg = transferable[0];
+            msg.binary_length = binary_msg.byteLength;
             req.ws.send(JSON.stringify(msg));
-            req.ws.send(transferable[0]);
+            this._post_chunked(req, binary_msg, 0, this.chunk_size, binary_msg.byteLength);
         } else {
             req.ws.send(JSON.stringify(msg));
         }
         if (!req.msg.subscribe) {
             this.requests_id_map.delete(id);
             delete this.requests[id];
+        }
+    }
+
+    /**
+     * Send a binary message (in the transferable param) in chunks.
+     *
+     * @param {*} request
+     * @param {ArrayBuffer} binary
+     * @param {Number} start
+     * @param {Number} end
+     * @param {Number} length
+     */
+    _post_chunked(request, binary, start, end, length) {
+        if (start < length) {
+            end = start + this.chunk_size;
+            if (end > length) end = length;
+            request.ws.send(binary.slice(start, end));
+            start = end;
+            setTimeout(() => {
+                this._post_chunked(request, binary, start, end, length);
+            }, 0);
         }
     }
 
