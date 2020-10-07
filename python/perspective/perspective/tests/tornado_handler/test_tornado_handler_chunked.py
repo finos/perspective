@@ -93,3 +93,31 @@ class TestPerspectiveTornadoHandlerChunked(object):
 
         size2 = yield table.size()
         assert size2 == 110
+
+    @pytest.mark.gen_test(run_sync=False)
+    def test_tornado_handler_update_chunked_interleaved_with_trivial(
+        self, app, http_client, http_port, sentinel
+    ):
+        """Tests that, when a chunked response `output_fut` is interleaved with
+        a response belonging to another message ID (and not binary encoded)
+        `size3`, both messages de-multiplex correclty and succeed.
+        """
+        table_name = str(random.random())
+        _table = Table(data)
+        MANAGER.host_table(table_name, _table)
+
+        client = yield self.websocket_client(http_port)
+        table = client.open_table(table_name)
+        view = table.view()
+
+        output_fut = view.to_arrow()
+        size3 = yield view.num_rows()
+        assert size3 == 10
+
+        output = yield output_fut
+
+        for i in range(10):
+            table.update(output)
+
+        size2 = yield table.size()
+        assert size2 == 110

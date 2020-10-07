@@ -56,6 +56,10 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         self._check_origin = kwargs.pop("check_origin", False)
         self._chunk_size = kwargs.pop("chunk_size", 25165824)
         self._session = self._manager.new_session()
+        self._stream_lock = tornado.locks.Lock()
+
+        # https://www.tornadoweb.org/en/stable/gen.html#tornado.gen.moment
+        self._chunk_sleep = kwargs.pop("_chunk_sleep", 0)
 
         if self._manager is None:
             raise PerspectiveError(
@@ -105,14 +109,15 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
         if binary and chunked:
             loop.add_callback(
-                self._write_message_chunked,
+                self._with_lock,
+                self._post_chunked,
                 message,
                 0,
                 self._chunk_size,
                 len(message),
             )
         else:
-            loop.add_callback(self._try_post, message, binary)
+            loop.add_callback(self._with_lock, self.write_message, message, binary)
 
     def on_close(self):
         """Remove the views associated with the client when the websocket
@@ -120,14 +125,22 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         """
         self._session.close()
 
-    def _try_post(self, message, binary=False):
+    @tornado.gen.coroutine
+    def _with_lock(self, f, *args, **kwargs):
+        """A python2-compatible, tornado-async-friendly lock wrapper which
+        serializes access of `f`, used to block responses from future messages
+        from interleaving binary streams.
+        """
+        yield self._stream_lock.acquire()
         try:
-            self.write_message(message, binary)
+            yield f(*args, **kwargs)
         except tornado.websocket.WebSocketClosedError:
             pass
+        finally:
+            yield self._stream_lock.release()
 
     @coroutine
-    def _write_message_chunked(self, message, start, end, message_length):
+    def _post_chunked(self, message, start, end, message_length):
         """Send a binary message in chunks on the websocket."""
         if start < message_length:
             end = start + self._chunk_size
@@ -140,5 +153,5 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
             # Allow the loop to process heartbeats so that client sockets don't
             # get closed in the middle of sending a chunk.
-            yield tornado.gen.sleep(0.05)
-            yield self._write_message_chunked(message, start, end, message_length)
+            yield tornado.gen.sleep(self._chunk_sleep)
+            yield self._post_chunked(message, start, end, message_length)
