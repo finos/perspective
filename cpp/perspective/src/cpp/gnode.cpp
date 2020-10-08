@@ -192,8 +192,8 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     t_column* pkey_col = 
         process_state.m_flattened_data_table->get_column("psp_pkey").get();
     
-    process_state.m_added_offset.reserve(flattened_num_rows);
-    process_state.m_prev_pkey_eq_vec.reserve(flattened_num_rows);
+    process_state.m_added_offset.resize(flattened_num_rows);
+    process_state.m_prev_pkey_eq_vec.resize(flattened_num_rows);
 
     t_mask mask(flattened_num_rows);
     t_uindex added_count = 0;
@@ -208,6 +208,7 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
         std::uint8_t op_ = process_state.m_op_base[idx];
         t_op op = static_cast<t_op>(op_);
 
+        PSP_VERBOSE_ASSERT(idx < process_state.m_lookup.size(), "process_state.m_lookup[idx] out of bounds");
         bool row_pre_existed = process_state.m_lookup[idx].m_exists;
         process_state.m_prev_pkey_eq_vec[idx] = pkey == prev_pkey;
 

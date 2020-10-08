@@ -1261,3 +1261,64 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(columns=["a"], sort=[["b", "desc"]])
         assert view._num_hidden_cols() == 1
+
+    def test_view_context_two_update_clears_column_regression(self, util):
+        """Tests that, when a 2-sided View() is updated to a state where one of
+        the column groups is empty, an infinite loop is not encountered.
+        """
+        data = [
+            {"a": "a", "b": 1, "c": 1.5, "i": 0},
+            {"a": "a", "b": 2, "c": 2.5, "i": 1},
+            {"a": "a", "b": 3, "c": 3.5, "i": 2},
+            {"a": "b", "b": 1, "c": 4.5, "i": 3},
+            {"a": "b", "b": 2, "c": 5.5, "i": 4},
+            {"a": "b", "b": 3, "c": 6.5, "i": 5},
+        ]
+
+        tbl = Table(data, index="i")
+        view = tbl.view(
+            row_pivots=["b"],
+            column_pivots=["a"],
+            columns=["c"],
+            filter=[["c", ">", 0]],
+            sort=[["c", "asc"], ["a", "col asc"]],
+        )
+
+        assert view.to_records() == [
+             {'__ROW_PATH__': [], 'a|c': 7.5, 'b|c': 16.5},
+             {'__ROW_PATH__': [1], 'a|c': 1.5, 'b|c': 4.5},
+             {'__ROW_PATH__': [2], 'a|c': 2.5, 'b|c': 5.5},
+             {'__ROW_PATH__': [3], 'a|c': 3.5, 'b|c': 6.5}
+        ]
+
+        tbl.update(
+            [
+                {"c": -1, "i": 0},
+                {"c": -1, "i": 1},
+                {"c": -1, "i": 2},
+            ]
+        )
+
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "b|c": 16.5},
+            {"__ROW_PATH__": [1], "b|c": 4.5},
+            {"__ROW_PATH__": [2], "b|c": 5.5},
+            {"__ROW_PATH__": [3], "b|c": 6.5},
+        ]
+
+        tbl.update(
+            [
+                {"a": "a", "b": 1, "c": 1.5, "i": 6},
+                {"a": "a", "b": 2, "c": 2.5, "i": 7},
+                {"a": "a", "b": 3, "c": 3.5, "i": 8},
+            ]
+        )
+
+        assert view.to_records() == [
+             {'__ROW_PATH__': [], 'a|c': 7.5, 'b|c': 16.5},
+             {'__ROW_PATH__': [1], 'a|c': 1.5, 'b|c': 4.5},
+             {'__ROW_PATH__': [2], 'a|c': 2.5, 'b|c': 5.5},
+             {'__ROW_PATH__': [3], 'a|c': 3.5, 'b|c': 6.5}
+        ]
+
+        assert tbl.size() == 9
