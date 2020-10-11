@@ -1,7 +1,13 @@
 {
   "docs": {
-    "Getting Started": ["md/installation", "md/js", "md/python", "md/concepts", "md/styles", "md/development"],
-    "JavaScript API": ["obj/perspective", "obj/perspective-viewer"],
-    "Python API": ["obj/perspective-python"]
+    "Guides": [
+      "md/js",
+      "md/python",
+      "md/table",
+      "md/view",
+      "md/server",
+      "md/development"
+    ],
+    "API": ["obj/perspective", "obj/perspective-viewer", "obj/perspective-python"]
   }
 }

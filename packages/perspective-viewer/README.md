@@ -27,20 +27,16 @@ relevent DOM method e.g. `document.createElement("perspective-viewer")` or
         * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
         * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>Boolean</code>
         * [.throttle](#module_perspective-viewer..PerspectiveViewer+throttle) : <code>Number</code> \| <code>String</code>
-        * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
         * [.table](#module_perspective-viewer..PerspectiveViewer+table)
         * [.view](#module_perspective-viewer..PerspectiveViewer+view)
         * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-        * [.update(data)](#module_perspective-viewer..PerspectiveViewer+update)
         * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
         * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
-        * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code>
+        * [.delete()](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code>
         * [.restyleElement()](#module_perspective-viewer..PerspectiveViewer+restyleElement)
         * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
         * [.restore(config)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
         * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-        * [.clear()](#module_perspective-viewer..PerspectiveViewer+clear)
-        * [.replace()](#module_perspective-viewer..PerspectiveViewer+replace)
         * [.reset()](#module_perspective-viewer..PerspectiveViewer+reset)
         * [.copy()](#module_perspective-viewer..PerspectiveViewer+copy)
         * [.toggleConfig()](#module_perspective-viewer..PerspectiveViewer+toggleConfig)
@@ -67,20 +63,16 @@ relevent DOM method e.g. `document.createElement("perspective-viewer")` or
     * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
     * [.editable](#module_perspective-viewer..PerspectiveViewer+editable) : <code>Boolean</code>
     * [.throttle](#module_perspective-viewer..PerspectiveViewer+throttle) : <code>Number</code> \| <code>String</code>
-    * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
     * [.table](#module_perspective-viewer..PerspectiveViewer+table)
     * [.view](#module_perspective-viewer..PerspectiveViewer+view)
     * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-    * [.update(data)](#module_perspective-viewer..PerspectiveViewer+update)
     * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
     * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
-    * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code>
+    * [.delete()](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code>
     * [.restyleElement()](#module_perspective-viewer..PerspectiveViewer+restyleElement)
     * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
     * [.restore(config)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
     * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-    * [.clear()](#module_perspective-viewer..PerspectiveViewer+clear)
-    * [.replace()](#module_perspective-viewer..PerspectiveViewer+replace)
     * [.reset()](#module_perspective-viewer..PerspectiveViewer+reset)
     * [.copy()](#module_perspective-viewer..PerspectiveViewer+copy)
     * [.toggleConfig()](#module_perspective-viewer..PerspectiveViewer+toggleConfig)
@@ -294,25 +286,6 @@ render framerate.
 
 * * *
 
-<a name="module_perspective-viewer..PerspectiveViewer+worker"></a>
-
-#### perspectiveViewer.worker
-This element's `perspective` worker instance. This property is not
-reflected as an HTML attribute, and is readonly; it can be effectively
-set however by calling the `load() method with a `perspective.table`
-instance from the preferred worker.
-
-**Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Read only**: true  
-**Example**  
-```js
-let elem = document.getElementById('my_viewer');
-let table = elem.worker.table([{x:1, y:2}]);
-elem.load(table);
-```
-
-* * *
-
 <a name="module_perspective-viewer..PerspectiveViewer+table"></a>
 
 #### perspectiveViewer.table
@@ -349,14 +322,9 @@ PerspectiveViewer#perspective-view-update
 ]);event:</code>  
 **Params**
 
-- data <code>any</code> - The data to load.  Works with the same input types
-supported by `perspective.table`.
+- data <code>any</code> - The data to load, as a `perspective.Table` or
+`Promise<perspective.Table>`.
 
-**Example** *(Load CSV)*  
-```js
-const my_viewer = document.getElementById('#my_viewer');
-my_viewer.load("x,y\n1,a\n2,b");
-```
 **Example** *(Load perspective.table)*  
 ```js
 const my_viewer = document.getElementById('#my_viewer');
@@ -368,29 +336,6 @@ my_viewer.load(tbl);
 const my_viewer = document.getElementById('#my_viewer');
 const tbl = async () => perspective.table("x,y\n1,a\n2,b");
 my_viewer.load(tbl);
-```
-
-* * *
-
-<a name="module_perspective-viewer..PerspectiveViewer+update"></a>
-
-#### perspectiveViewer.update(data)
-Updates this element's `perspective.table` with new data.
-
-**Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Emits**: <code>PerspectiveViewer#event:perspective-view-update</code>  
-**Params**
-
-- data <code>any</code> - The data to load.  Works with the same input types
-supported by `perspective.table.update`.
-
-**Example**  
-```js
-const my_viewer = document.getElementById('#my_viewer');
-my_viewer.update([
-    {x: 1, y: 'a'},
-    {x: 2, y: 'b'}
-]);
 ```
 
 * * *
@@ -421,19 +366,16 @@ elements
 
 <a name="module_perspective-viewer..PerspectiveViewer+delete"></a>
 
-#### perspectiveViewer.delete(delete_table) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code>
-Deletes this element's data and clears it's internal state (but not its
-user state).  This (or the underlying `perspective.table`'s equivalent
-method) must be called in order for its memory to be reclaimed.
+#### perspectiveViewer.delete() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code>
+Deletes this element and clears it's internal state (but not its
+user state).  This (or the underlying `perspective.view`'s equivalent
+method) must be called in order for its memory to be reclaimed, as well
+as the recipcorcal method on the `perspective.table` which this viewer is
+bound to.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Boolean&gt;</code> - Whether or not this call resulted in the
 underlying `perspective.table` actually being deleted.  
-**Params**
-
-- delete_table <code>Boolean</code> <code> = true</code> - Should a delete call also be made to the
-underlying `table()`.
-
 
 * * *
 
@@ -480,24 +422,6 @@ Flush any pending attribute modifications to this element.
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code> - A promise which resolves when the current
 attribute state has been applied.  
-
-* * *
-
-<a name="module_perspective-viewer..PerspectiveViewer+clear"></a>
-
-#### perspectiveViewer.clear()
-Clears the rows in the current [table](table).
-
-**Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-
-* * *
-
-<a name="module_perspective-viewer..PerspectiveViewer+replace"></a>
-
-#### perspectiveViewer.replace()
-Replaces all rows in the current [table](table).
-
-**Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 
 * * *
 

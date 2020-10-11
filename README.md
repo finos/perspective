@@ -7,9 +7,9 @@
 
 Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
 datasets. Originally developed for J.P. Morgan's trading business,  Perspective
-makes it simple to build real-time & user configurable analytics entirely in the
+makes it simple to build user-configurable analytics entirely in the
 browser, or in concert with Python and/or
-[Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
+[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/).
 Use it to create reports, dashboards, notebooks and applications, with static
 data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
@@ -17,18 +17,10 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
 ## Features
 
-- A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow](https://arrow.apache.org/).
+- A fast, memory efficient streaming query engine, written in C++ and compiled for both [WebAssembly](https://webassembly.org/) and [Python](https://www.python.org/), with read/write/stream/virtual support for [Apache Arrow](https://arrow.apache.org/).
 
-- A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a Web Worker and/or WebSocket data engine host for stable interactivity at high frequency.
-
-- A customizable HTML Data Grid plugin, and a Chart plugin built on [D3FC](https://d3fc.io/).
-
-- Integration with [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/), both natively in a Python kernel, and as a notebook Widget.
-
-- Cross-language streaming and/or virtualization to the browser via [Apache Arrow](https://arrow.apache.org/).
-
-- Runtimes for the browser, Python, and Node.js.
-
+- A framework-agnostic User Interface component and [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/) Widget, over WebWorker (WebAssembly) or WebSocket (Python/Node), and a suite of Datagrid and [D3FC](https://d3fc.io/) Chart plugins.
+`
 ## Examples
 ||||
 |:--|:--|:--|
@@ -44,11 +36,12 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 ## Documentation
 
 * [Project Site](https://perspective.finos.org/)
-* [Installation](https://perspective.finos.org/docs/md/installation.html)
-* [JavaScript User's Guide](https://perspective.finos.org/docs/md/js.html)
-* [Python User's Guide](https://perspective.finos.org/docs/md/python.html)
-* [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
-* [Conceptual Overview](https://perspective.finos.org/docs/md/concepts.html)
+* [Table](https://perspective.finos.org/docs/md/table.html)
+* [View](https://perspective.finos.org/docs/md/view.html)
+* [Javascript User Guide](https://perspective.finos.org/docs/md/js.html)
+* [Python User Guide](https://perspective.finos.org/docs/md/python.html)
+* [Data Binding](https://perspective.finos.org/docs/md/table.html)
+* [Developer Guide](https://perspective.finos.org/docs/md/development.html)
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
 * [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
