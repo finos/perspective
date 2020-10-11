@@ -534,7 +534,7 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 let table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
+                let isValid = await table.is_valid_filter(["y", "==", "2019-11-02 11:11:11.111"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
@@ -544,7 +544,7 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 let table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
+                let isValid = await table.is_valid_filter(["y", ">", "2019-11-02 11:11:11:111"]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });

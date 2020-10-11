@@ -10,7 +10,6 @@
 import * as defaults from "./config/constants.js";
 import {get_type_config} from "./config/index.js";
 import {DataAccessor} from "./data_accessor";
-import {DateParser} from "./data_accessor/date_parser.js";
 import {extract_vector, extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
@@ -133,16 +132,15 @@ export default function(Module) {
      */
     function view(table, sides, config, view_config, name, callbacks, overridden_types) {
         this._View = undefined;
-        this.date_parser = new DateParser();
         this.config = config || {};
         this.view_config = view_config || new view_config();
 
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
         }
 
         this.table = table;
@@ -1281,7 +1279,7 @@ export default function(Module) {
         const schema = this.schema();
         const exists = schema[filter[0]];
         if (exists && (schema[filter[0]] === "date" || schema[filter[0]] === "datetime")) {
-            value = new DateParser().parse(value);
+            return __MODULE__.is_valid_datetime(filter[2]);
         }
 
         return typeof value !== "undefined" && value !== null;
