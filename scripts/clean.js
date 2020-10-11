@@ -28,12 +28,10 @@ function clean_screenshots() {
 
 try {
     if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
-        clean`cpp/perspective/obj`;
+        clean`packages/perspective/build`;
     }
     if (process.env.PSP_PROJECT === "python") {
         clean(
-            "cpp/perspective/obj",
-            "cpp/perspective/cppbuild",
             "python/perspective/dist",
             "python/perspective/build",
             "python/perspective/docs/build",
