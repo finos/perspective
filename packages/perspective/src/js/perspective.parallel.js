@@ -19,7 +19,7 @@ import {override_config} from "../../dist/esm/config/index.js";
 // eslint-disable-next-line max-len
 const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While Perspective's runtime performance is not affected, you may see smaller assets size and faster engine initial load time using "@finos/perspective-webpack-plugin" to build your application.
 
-https://perspective.finos.org/docs/md/installation.html#-an-important-note-about-hosting`;
+https://perspective.finos.org/docs/md/js.html`;
 
 /**
  * Singleton WASM file download cache.

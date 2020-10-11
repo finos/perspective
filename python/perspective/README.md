@@ -35,8 +35,9 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 ## Documentation
 
 * [Project Site](https://perspective.finos.org/)
-* [Installation](https://perspective.finos.org/docs/md/installation.html)
-* [Python User's Guide](https://perspective.finos.org/docs/md/python.html)
+* [Python Installation and User Guide](https://perspective.finos.org/docs/md/python.html)
+* [Table (Conceptual Overview)](https://perspective.finos.org/docs/md/table.html)
+* [View (Conceptual Overview)](https://perspective.finos.org/docs/md/view.html)
+* [Data Binding](https://perspective.finos.org/docs/md/table.html)
 * [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
-* [Conceptual Overview](https://perspective.finos.org/docs/md/concepts.html)
 * [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)

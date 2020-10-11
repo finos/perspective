@@ -1,38 +1,32 @@
 /* your custom css */
 
-@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
-}
+@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {}
 
 @media only screen and (min-width: 1024px) {
     body {
         left: 0;
         right: 0;
     }
-    
 }
 
-@media only screen and (max-width: 1023px) {
-}
+@media only screen and (max-width: 1023px) {}
+@media only screen and (min-width: 1400px) {}
+@media only screen and (min-width: 1500px) {}
 
-@media only screen and (min-width: 1400px) {
-}
-
-@media only screen and (min-width: 1500px) {
-}
-
-
-
-
-.promoSection .buttonWrapper {
-   transition: color 0.2s ease-in-out;
+body {
+    position: absolute; /* mobile fix */
 }
 
 .nav-footer {
     background: #242526;
 }
 
-body {
-    position: absolute; /* mobile fix */
+.darkBackground, .darkBackground perspective-viewer {
+    background-color: #242526 !important;
+}
+
+.imageAlignTop .blockImage {
+    max-width: 100%;
 }
 
 .homeContainer .buttonWrapper.selected a {
@@ -44,7 +38,19 @@ body {
     background: #242526;
 }
 
+.imageAlignSide .blockImage {
+    flex: 0 1 50%;
+    margin-top: 82px;
+    max-width: 10000px;
+}
+
+.imageAlignSide .blockImage > * {
+    box-shadow: 0 5px 5px rgba(0,0,0,0.2);
+}
+
 .titleViewer {
+    font: initial;
+    font-family:Arial;
     margin-top:24px;
     margin-bottom:48px;
     position:relative;
@@ -61,11 +67,6 @@ body {
 
 .titleViewer ul {
     background: none !important;
-}
-
-.titleViewer {
-    font: initial;
-    font-family:Arial;
 }
 
 .fixedHeaderContainer {
@@ -89,20 +90,30 @@ h2.headerTitle {
 .sideNavVisible .logo {
     opacity: 1;
 }
+
 .logo {
     font-family: "Public Sans", Arial, Helvetica, sans-serif;
     height: 50% !important;
     opacity: 0;
     transition: opacity 0.2s;
-
-    /* hide alt text just in case */
     text-indent: 100%;
     white-space: nowrap;
     overflow: hidden;
 }
 
-.mainContainer .blockImage img {
-    width: 100px;
+.youtube {
+    position:relative;
+    width:100%;
+    height:0;
+    padding-bottom: 56%;
+}
+
+.youtube iframe {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
 }
 
 .homeContainer {
@@ -137,10 +148,6 @@ h2.headerTitle {
     color: #1A7DA1 !important;
 }
 
-.darkBackground a {
-    color:#222;
-}
-
 #get_started {
     background: #242526;
     color: white;
@@ -160,11 +167,11 @@ h2.headerTitle {
 }
 
 .blockContent {
+    color: #242526 !important;
     counter-reset: list-counter;
 }
 
 .blockContent a {
-    color: #fff;
     text-decoration: underline;
 }
 
@@ -172,14 +179,20 @@ h2.headerTitle {
     --plugin--box-shadow: none !important;
 }
 
-perspective-viewer {
-    border: none !important;
+.productShowcaseSection .logos img {
+    width: auto;
+    max-height: 10000px;
+    padding: 0px;
+    margin: 20px;
+    box-shadow: 0 5px 5px rgba(0,0,0,0.2);
 }
 
+.productShowcaseSection .logos a {
+    flex: 1 1 300px;
+}
 
-#psp1 {
-    margin-bottom: -48px;
-    margin-right: -48px;
+perspective-viewer {
+    border: none !important;
 }
 
 ol li {
@@ -214,6 +227,14 @@ code *, pre * {
 
 a {
     color: #1A7DA1;
+}
+
+a.toggle-language {
+    margin-bottom: 12px;
+}
+
+pre code.hljs {
+    margin-top: 0.5em;
 }
 
 .blockContent code.hljs.css.language-bash {
