@@ -19,6 +19,28 @@
 namespace perspective {
 namespace apachearrow {
 
+    class UnixTimestampParser : public arrow::TimestampParser {
+    public:
+        bool
+        operator()(const char* s, size_t length, arrow::TimeUnit::type out_unit,
+            int64_t* out) const override {
+            size_t endptr;
+            std::string val(s, s + length);
+            int64_t value = std::stoll(static_cast<std::string>(val), &endptr, 10);
+            if (endptr != length) {
+                return false;
+            } else {
+                (*out) = value;
+                return true;
+            }
+        }
+
+        const char*
+        kind() const override {
+            return "unixtimestamp";
+        }
+    };
+
     static inline bool
     ParseSSS(const char* s, std::chrono::milliseconds* out) {
         uint16_t millis = 0;
@@ -127,6 +149,15 @@ namespace apachearrow {
         arrow::TimestampParser::MakeStrptime("%d %m %Y"),
         arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
 
+    std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
+        std::make_shared<UnixTimestampParser>(),
+        std::make_shared<CustomISO8601Parser>(),
+        arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
+        arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
+        arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
+        arrow::TimestampParser::MakeStrptime("%d %m %Y"),
+        arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
+
     int64_t
     parseAsArrowTimestamp(const std::string& input) {
         for (auto candidate : DATE_PARSERS) {
@@ -153,6 +184,9 @@ namespace apachearrow {
 
         if (is_update) {
             convert_options.column_types = std::move(schema);
+            convert_options.timestamp_parsers = DATE_READERS;
+        } else {
+            convert_options.timestamp_parsers = DATE_PARSERS;
         }
 
         auto maybe_reader = arrow::csv::TableReader::Make(

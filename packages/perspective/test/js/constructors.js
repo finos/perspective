@@ -628,6 +628,23 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("Transitively loads a CSV created from `to_csv()` on a table with a datetime column", async function() {
+            // Assert that the CSV parser can handle POSIX timestamps.
+            let table = perspective.table(arrow_date_data);
+            let view = table.view();
+            let schema = await table.schema();
+            let csv = await view.to_csv();
+            let table2 = perspective.table(schema);
+            table2.update(csv);
+            let view2 = table2.view();
+            let csv2 = await view2.to_csv();
+            expect(csv2).toEqual(csv);
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("Constructors", function() {
