@@ -629,6 +629,20 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Handles strings with quotation characters and commas", async function() {
+            let table = perspective.table({x: "string", y: "integer"});
+            table.update([
+                {x: "Test, hello!", y: 1},
+                {x: 'Test2"', y: 2},
+                {x: 'Test3, Hello!"', y: 3}
+            ]);
+            let view = table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual(`x,y\r\n"Test, hello!",1\r\nTest2",2\r\n"Test3, Hello!""",3`);
+            view.delete();
+            table.delete();
+        });
+
         it("Transitively loads a CSV created from `to_csv()` on a table with a datetime column", async function() {
             // Assert that the CSV parser can handle POSIX timestamps.
             let table = perspective.table(arrow_date_data);

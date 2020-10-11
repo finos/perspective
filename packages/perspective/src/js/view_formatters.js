@@ -33,7 +33,9 @@ const csvFormatter = Object.assign({}, jsonFormatter, {
             switch (typeof x) {
                 case "object":
                 case "string":
-                    return x.indexOf(delimiter) > -1 ? `"${x}"` : x.toString();
+                    // CSV escapes with double double quotes, for real.
+                    // [Section 2.7 of the fake CSV spec](https://tools.ietf.org/html/rfc4180)
+                    return x.indexOf(delimiter) > -1 ? `"${x.replace(/\"/g, '""')}"` : x.toString();
                 case "number":
                     return x;
                 case "boolean":
