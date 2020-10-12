@@ -493,6 +493,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/context_one.cpp
 	${PSP_CPP_SRC}/src/cpp/context_two.cpp
 	${PSP_CPP_SRC}/src/cpp/context_zero.cpp
+	${PSP_CPP_SRC}/src/cpp/context_unit.cpp
 	${PSP_CPP_SRC}/src/cpp/custom_column.cpp
 	${PSP_CPP_SRC}/src/cpp/data.cpp
 	${PSP_CPP_SRC}/src/cpp/data_slice.cpp

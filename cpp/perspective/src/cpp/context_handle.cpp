@@ -32,6 +32,9 @@ t_ctx_handle::get_type_descr() const {
         case ZERO_SIDED_CONTEXT: {
             return "ZERO_SIDED_CONTEXT";
         } break;
+        case UNIT_CONTEXT: {
+            return "UNIT_CONTEXT";
+        } break;
         case GROUPED_PKEY_CONTEXT: {
             return "GROUPED_PKEY_CONTEXT";
         } break;

@@ -176,6 +176,7 @@ t_data_slice<CTX_T>::get_slice_idx(t_uindex ridx, t_uindex cidx) const {
 }
 
 // Explicitly instantiate data slice for each context
+template class t_data_slice<t_ctxunit>;
 template class t_data_slice<t_ctx0>;
 template class t_data_slice<t_ctx1>;
 template class t_data_slice<t_ctx2>;

@@ -14,6 +14,7 @@
 #include <perspective/raw_types.h>
 #include <perspective/scalar.h>
 #include <perspective/get_data_extents.h>
+#include <perspective/context_unit.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>

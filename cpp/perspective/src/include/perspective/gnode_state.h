@@ -100,22 +100,48 @@ public:
      * @param pkeys 
      * @param out_data 
      */
-    void read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    void read_column(
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
         std::vector<t_tscalar>& out_data) const;
 
-    void read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    void read_column(
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
         std::vector<double>& out_data) const;
 
-    void read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
-        std::vector<double>& out_data, bool include_nones) const;
+    void read_column(
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        std::vector<double>& out_data,
+        bool include_nones) const;
 
     /**
-     * @brief Read the entirety of a column into `out_data`.
+     * @brief Read a column from `start_idx` to `end_idx` into `out_data`.
      * 
      * @param colname 
+     * @param start_idx
+     * @param end_idx
      * @param out_data 
      */
-    void read_column(const std::string& colname, std::vector<t_tscalar>& out_data);
+    void read_column(
+        const std::string& colname,
+        t_uindex start_idx,
+        t_uindex end_idx,
+        std::vector<t_tscalar>& out_data) const;
+
+    /**
+     * @brief Read a column using `row_indices` (not necessarily contiguous)
+     * into `out_data`.
+     * 
+     * @param colname 
+     * @param row_indices 
+     * @param out_data 
+     */
+    void read_column(
+        const std::string& colname,
+        const std::vector<t_uindex>& row_indices,
+        std::vector<t_tscalar>& out_data) const;
 
     /**
      * @brief Apply the lambda `fn` to each primary-keyed value in the column,
@@ -177,11 +203,18 @@ public:
     t_tscalar get_value(const t_tscalar& pkey, const std::string& colname) const;
 
     /**
-     * @brief Return the size of the underlying `t_data_table`.
+     * @brief Return the number of rows on the master `t_data_table`.
      * 
      * @return t_uindex 
      */
-    t_uindex size() const;
+    t_uindex num_rows() const;
+
+    /**
+     * @brief Return the number of columns on the master `t_data_table`.
+     * 
+     * @return t_uindex 
+     */
+    t_uindex num_columns() const;
 
     /**
      * @brief Returns the size of the underlying primary key map.
@@ -191,7 +224,7 @@ public:
     t_uindex mapping_size() const;
 
     /**
-     * @brief Resets the gnode state and its underlying `t_data_table` and
+     * @brief Resets the gnode state and its master `t_data_table` and
      * mapping.
      * 
      */

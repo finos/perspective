@@ -44,6 +44,7 @@ PERSPECTIVE_EXPORT t_tscalar calc_newer(
 
 PERSPECTIVE_EXPORT t_tscalar calc_negate(t_tscalar val);
 
+class t_ctxunit;
 class t_ctx0;
 class t_ctx1;
 class t_ctx2;
@@ -185,6 +186,7 @@ public:
     void promote_column(const std::string& name, t_dtype new_type);
 
     // Gnode will steal a reference to the context
+    void register_context(const std::string& name, std::shared_ptr<t_ctxunit> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);

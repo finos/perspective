@@ -322,6 +322,7 @@ PERSPECTIVE_EXPORT std::string _get_default_aggregate_string(t_dtype dtype);
 enum t_totals { TOTALS_BEFORE, TOTALS_HIDDEN, TOTALS_AFTER };
 
 enum t_ctx_type {
+    UNIT_CONTEXT,
     ZERO_SIDED_CONTEXT,
     ONE_SIDED_CONTEXT,
     TWO_SIDED_CONTEXT,
