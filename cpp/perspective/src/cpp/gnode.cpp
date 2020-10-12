@@ -8,9 +8,10 @@
  */
 
 #include <perspective/first.h>
+#include <perspective/context_unit.h>
+#include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
-#include <perspective/context_zero.h>
 #include <perspective/context_grouped_pkey.h>
 #include <perspective/gnode.h>
 #include <perspective/gnode_state.h>
@@ -717,6 +718,11 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
                 ctx->reset();
                 update_context_from_state<t_ctx0>(ctx, tbl);
             } break;
+            case UNIT_CONTEXT: {
+                auto ctx = static_cast<t_ctxunit*>(ctxh.m_ctx);
+                ctx->reset();
+                update_context_from_state<t_ctxunit>(ctx, tbl);
+            } break;
             case GROUPED_PKEY_CONTEXT: {
                 auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->reset();
@@ -748,6 +754,10 @@ t_gnode::get_registered_contexts() const {
             } break;
             case ZERO_SIDED_CONTEXT: {
                 auto ctx = static_cast<const t_ctx0*>(ctxh.m_ctx);
+                ss << ctx->repr() << ")";
+            } break;
+            case UNIT_CONTEXT: {
+                auto ctx = static_cast<const t_ctxunit*>(ctxh.m_ctx);
                 ss << ctx->repr() << ")";
             } break;
             case GROUPED_PKEY_CONTEXT: {
@@ -825,6 +835,15 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
                 update_context_from_state<t_ctx0>(ctx, pkeyed_table);
             }
         } break;
+        case UNIT_CONTEXT: {
+            set_ctx_state<t_ctxunit>(ptr_);
+            t_ctxunit* ctx = static_cast<t_ctxunit*>(ptr_);
+            ctx->reset();
+
+            if (should_update) {
+                update_context_from_state<t_ctxunit>(ctx, pkeyed_table);
+            }
+        } break;
         case GROUPED_PKEY_CONTEXT: {
             set_ctx_state<t_ctx0>(ptr_);
             auto ctx = static_cast<t_ctx_grouped_pkey*>(ptr_);
@@ -861,6 +880,8 @@ t_gnode::_unregister_context(const std::string& name) {
 
     std::vector<std::string> computed_column_names;
     switch (type) {
+        // No computed columns to remove
+        case UNIT_CONTEXT: break;
         case TWO_SIDED_CONTEXT: {
             t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
             auto computed_columns = ctx->get_config().get_computed_columns();
@@ -931,6 +952,9 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
             } break;
             case ZERO_SIDED_CONTEXT: {
                 notify_context<t_ctx0>(flattened, ctxh);
+            } break;
+            case UNIT_CONTEXT: {
+                notify_context<t_ctxunit>(flattened, ctxh);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 notify_context<t_ctx_grouped_pkey>(flattened, ctxh);
@@ -1122,6 +1146,7 @@ t_gnode::get_pivots() const {
                 auto pivots = ctx->get_pivots();
                 rval.insert(std::end(rval), std::begin(pivots), std::end(pivots));
             } break;
+            case UNIT_CONTEXT:
             case ZERO_SIDED_CONTEXT:
             case GROUPED_PKEY_CONTEXT: {
                 // no pivots
@@ -1150,6 +1175,9 @@ t_gnode::get_trees() {
         auto& ctxh = kv.second;
 
         switch (ctxh.m_ctx_type) {
+            // `get_trees()` not implemented, as unit contexts have no
+            // traversal of their own.
+            case UNIT_CONTEXT: break;
             case TWO_SIDED_CONTEXT: {
                 auto ctx = reinterpret_cast<t_ctx2*>(ctxh.m_ctx);
                 auto trees = ctx->get_trees();
@@ -1236,6 +1264,12 @@ t_gnode::get_contexts_last_updated() const {
                     rval.push_back(kv.first);
                 }
             } break;
+            case UNIT_CONTEXT: {
+                auto ctx = reinterpret_cast<t_ctxunit*>(ctxh.m_ctx);
+                if (ctx->has_deltas()) {
+                    rval.push_back(kv.first);
+                }
+            } break;
             case GROUPED_PKEY_CONTEXT: {
                 auto ctx = reinterpret_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 if (ctx->has_deltas()) {
@@ -1278,6 +1312,10 @@ t_gnode::reset() {
             } break;
             case ZERO_SIDED_CONTEXT: {
                 auto ctx = reinterpret_cast<t_ctx0*>(ctxh.m_ctx);
+                ctx->reset();
+            } break;
+            case UNIT_CONTEXT: {
+                auto ctx = reinterpret_cast<t_ctxunit*>(ctxh.m_ctx);
                 ctx->reset();
             } break;
             case GROUPED_PKEY_CONTEXT: {
@@ -1359,6 +1397,11 @@ t_gnode::set_event_loop_thread_id(std::thread::id id) {
     m_event_loop_thread_id = id;
 }
 #endif
+
+void
+t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctxunit> ctx) {
+    _register_context(name, UNIT_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
 
 void
 t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx) {

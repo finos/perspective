@@ -92,6 +92,19 @@ public:
 
     bool is_column_only() const;
 
+    /**
+     * @brief Whether this config can be used for a `t_ctxunit` - the config
+     * must have no pivots, sorts, filters, or computed columns, and the
+     * ordering of columns must be equal to `table_columns`.
+     * 
+     * @param table_columns a vector of column names from the `Table` for
+     * comparison.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool is_unit_config(const std::vector<std::string>& table_columns) const;
+
     std::int32_t get_row_pivot_depth() const;
     std::int32_t get_column_pivot_depth() const;
 

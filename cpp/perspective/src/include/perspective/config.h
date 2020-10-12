@@ -97,6 +97,9 @@ public:
         const std::vector<t_computed_column_definition>& computed_columns,
         bool column_only);
 
+    // An empty config, used for the unit context.
+    t_config();
+
     // Constructors used for C++ tests, not exposed to other parts of the engine
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
@@ -113,8 +116,6 @@ public:
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
 
     t_config(const std::vector<std::string>& detail_columns);
-
-    t_config();
     
     /**
      * @brief For each column in the config's `detail_columns` (i.e. visible

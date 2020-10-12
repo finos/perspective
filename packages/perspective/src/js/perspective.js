@@ -7,6 +7,9 @@
  *
  */
 
+// TODO remove this when is_unit_config is fully in c++
+import {isEqual} from "underscore";
+
 import * as defaults from "./config/constants.js";
 import {get_type_config} from "./config/index.js";
 import {DataAccessor} from "./data_accessor";
@@ -143,10 +146,25 @@ export default function(Module) {
     function view(table, sides, config, view_config, name) {
         this.name = name;
         this._View = undefined;
+        this.table = table;
+
         this.config = config || {};
         this.view_config = view_config || new view_config();
 
-        if (sides === 0) {
+        const num_columns = this.table.columns().length;
+
+        this.is_unit_config =
+            this.table.index === "" &&
+            sides === 0 &&
+            isEqual(this.view_config.columns.length, num_columns) &&
+            this.view_config.row_pivots.length === 0 &&
+            this.view_config.column_pivots.length === 0 &&
+            this.view_config.filter.length === 0 &&
+            this.view_config.sort.length === 0;
+
+        if (this.is_unit_config) {
+            this._View = __MODULE__.make_view_unit(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
+        } else if (sides === 0) {
             this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
         } else if (sides === 1) {
             this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
@@ -154,7 +172,6 @@ export default function(Module) {
             this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
         }
 
-        this.table = table;
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
         this.update_callbacks = this.table.update_callbacks;
@@ -346,9 +363,13 @@ export default function(Module) {
     };
 
     view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
-        const num_sides = this.sides();
-        const nidx = SIDES[num_sides];
-        return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+        if (this.is_unit_config) {
+            return __MODULE__.get_data_slice_unit(this._View, start_row, end_row, start_col, end_col);
+        } else {
+            const num_sides = this.sides();
+            const nidx = SIDES[num_sides];
+            return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+        }
     };
 
     /**
@@ -407,6 +428,14 @@ export default function(Module) {
         const has_row_path = num_sides !== 0 && !this.column_only;
         const nidx = SIDES[num_sides];
 
+        let get_from_data_slice;
+
+        if (this.is_unit_config) {
+            get_from_data_slice = __MODULE__.get_from_data_slice_unit;
+        } else {
+            get_from_data_slice = __MODULE__[`get_from_data_slice_${nidx}`];
+        }
+
         const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
         const ns = slice.get_column_names();
         const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
@@ -445,7 +474,7 @@ export default function(Module) {
                     // these.
                     continue;
                 } else {
-                    let value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
+                    let value = get_from_data_slice(slice, ridx, cidx);
                     if ((col_type === "datetime" || col_type === "date") && value !== undefined) {
                         if (date_format) {
                             value = new Date(value);
@@ -678,7 +707,9 @@ export default function(Module) {
         const end_col = options.end_col;
         const sides = this.sides();
 
-        if (sides === 0) {
+        if (this.is_unit_config) {
+            return __MODULE__.to_arrow_unit(this._View, start_row, end_row, start_col, end_col);
+        } else if (sides === 0) {
             return __MODULE__.to_arrow_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (sides === 1) {
             return __MODULE__.to_arrow_one(this._View, start_row, end_row, start_col, end_col);
@@ -794,9 +825,13 @@ export default function(Module) {
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        const sides = this.sides();
-        const nidx = SIDES[sides];
-        return __MODULE__[`get_row_delta_${nidx}`](this._View);
+        if (this.is_unit_config) {
+            return __MODULE__.get_row_delta_unit(this._View);
+        } else {
+            const sides = this.sides();
+            const nidx = SIDES[sides];
+            return __MODULE__[`get_row_delta_${nidx}`](this._View);
+        }
     };
 
     /**

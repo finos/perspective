@@ -12,6 +12,7 @@
 #include <perspective/exports.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
+#include <perspective/context_unit.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>

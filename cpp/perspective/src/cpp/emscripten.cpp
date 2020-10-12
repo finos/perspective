@@ -1511,6 +1511,31 @@ namespace binding {
      *
      * Context API
      */
+    template <>
+    std::shared_ptr<t_ctxunit>
+    make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
+        std::shared_ptr<t_view_config> view_config, const std::string& name) {
+        auto columns = view_config->get_columns();
+        auto filter_op = view_config->get_filter_op();
+        auto fterm = view_config->get_fterm();
+        auto sortspec = view_config->get_sortspec();
+        auto computed_columns = view_config->get_computed_columns();
+
+        auto cfg = t_config(columns, fterm, filter_op, computed_columns);
+        auto ctx_unit = std::make_shared<t_ctxunit>(*(schema.get()), cfg);
+        ctx_unit->init();
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
+
+        pool->register_context(
+            gnode->get_id(),
+            name,
+            UNIT_CONTEXT,
+            reinterpret_cast<std::uintptr_t>(ctx_unit.get()));
+
+        return ctx_unit;
+    }
 
     template <>
     std::shared_ptr<t_ctx0>
@@ -1763,6 +1788,34 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     // Bind a View for each context type
 
+    class_<View<t_ctxunit>>("View_ctxunit")
+        .constructor<
+            std::shared_ptr<Table>,
+            std::shared_ptr<t_ctxunit>,
+            const std::string&,
+            const std::string&,
+            std::shared_ptr<t_view_config>>()
+        .smart_ptr<std::shared_ptr<View<t_ctxunit>>>("shared_ptr<View_ctxunit>")
+        .function("sides", &View<t_ctxunit>::sides)
+        .function("num_rows", &View<t_ctxunit>::num_rows)
+        .function("num_columns", &View<t_ctxunit>::num_columns)
+        .function("get_row_expanded", &View<t_ctxunit>::get_row_expanded)
+        .function("schema", &View<t_ctxunit>::schema)
+        .function("computed_schema", &View<t_ctxunit>::computed_schema)
+        .function("column_names", &View<t_ctxunit>::column_names)
+        .function("column_paths", &View<t_ctxunit>::column_paths)
+        .function("_get_deltas_enabled", &View<t_ctxunit>::_get_deltas_enabled)
+        .function("_set_deltas_enabled", &View<t_ctxunit>::_set_deltas_enabled)
+        .function("get_context", &View<t_ctxunit>::get_context, allow_raw_pointers())
+        .function("get_row_pivots", &View<t_ctxunit>::get_row_pivots)
+        .function("get_column_pivots", &View<t_ctxunit>::get_column_pivots)
+        .function("get_aggregates", &View<t_ctxunit>::get_aggregates)
+        .function("get_filter", &View<t_ctxunit>::get_filter)
+        .function("get_sort", &View<t_ctxunit>::get_sort)
+        .function("get_step_delta", &View<t_ctxunit>::get_step_delta)
+        .function("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
+        .function("is_column_only", &View<t_ctxunit>::is_column_only);
+
     class_<View<t_ctx0>>("View_ctx0")
         .constructor<
             std::shared_ptr<Table>,
@@ -1903,6 +1956,15 @@ EMSCRIPTEN_BINDINGS(perspective) {
      *
      * t_data_slice
      */
+    class_<t_data_slice<t_ctxunit>>("t_data_slice_ctxunit")
+        .smart_ptr<std::shared_ptr<t_data_slice<t_ctxunit>>>("shared_ptr<t_data_slice<t_ctxunit>>>")
+        .function(
+            "get_column_slice", &t_data_slice<t_ctxunit>::get_column_slice)
+        .function("get_slice", &t_data_slice<t_ctxunit>::get_slice)
+        .function("get_pkeys", &t_data_slice<t_ctxunit>::get_pkeys)
+        .function(
+            "get_column_names", &t_data_slice<t_ctxunit>::get_column_names);
+
     class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
         .function(
@@ -1931,6 +1993,13 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function(
             "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
         .function("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
+        
+    
+    /******************************************************************************
+     *
+     * t_ctxunit
+     */
+    class_<t_ctxunit>("t_ctxunit").smart_ptr<std::shared_ptr<t_ctxunit>>("shared_ptr<t_ctxunit>");
 
     /******************************************************************************
      *
@@ -2115,18 +2184,23 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     function("make_table", &make_table<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
+    function("make_view_unit", &make_view<t_ctxunit>);
     function("make_view_zero", &make_view<t_ctx0>);
     function("make_view_one", &make_view<t_ctx1>);
     function("make_view_two", &make_view<t_ctx2>);
+    function("get_data_slice_unit", &get_data_slice<t_ctxunit>, allow_raw_pointers());
+    function("get_from_data_slice_unit", &get_from_data_slice<t_ctxunit>, allow_raw_pointers());
     function("get_data_slice_zero", &get_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_from_data_slice_zero", &get_from_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_data_slice_one", &get_data_slice<t_ctx1>, allow_raw_pointers());
     function("get_from_data_slice_one", &get_from_data_slice<t_ctx1>, allow_raw_pointers());
     function("get_data_slice_two", &get_data_slice<t_ctx2>, allow_raw_pointers());
     function("get_from_data_slice_two", &get_from_data_slice<t_ctx2>, allow_raw_pointers());
+    function("to_arrow_unit", &to_arrow<t_ctxunit>);
     function("to_arrow_zero", &to_arrow<t_ctx0>);
     function("to_arrow_one", &to_arrow<t_ctx1>);
     function("to_arrow_two", &to_arrow<t_ctx2>);
+    function("get_row_delta_unit", &get_row_delta<t_ctxunit>);
     function("get_row_delta_zero", &get_row_delta<t_ctx0>);
     function("get_row_delta_one", &get_row_delta<t_ctx1>);
     function("get_row_delta_two", &get_row_delta<t_ctx2>);
