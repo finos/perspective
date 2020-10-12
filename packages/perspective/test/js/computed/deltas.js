@@ -92,44 +92,6 @@ module.exports = perspective => {
                 });
             });
 
-            it("Returns partially updated step delta for normal and computed columns", async function(done) {
-                let table = perspective.table(
-                    [
-                        {x: 1, y: "a", z: true},
-                        {x: 2, y: "b", z: false},
-                        {x: 3, y: "c", z: true},
-                        {x: 4, y: "d", z: false}
-                    ],
-                    {index: "x"}
-                );
-                let view = table.view({
-                    computed_columns: [
-                        {
-                            column: "upper",
-                            computed_function_name: "Uppercase",
-                            inputs: ["y"]
-                        }
-                    ]
-                });
-                view.on_update(
-                    function(updated) {
-                        expect(updated.delta).toEqual([
-                            {x: 1, y: "string1", z: false, upper: "STRING1"},
-                            {x: 2, y: "string2", z: true, upper: "STRING2"}
-                        ]);
-                        view.delete();
-                        table.delete();
-                        done();
-                    },
-                    {mode: "cell"}
-                );
-
-                table.update([
-                    {x: 1, y: "string1", z: false},
-                    {x: 2, y: "string2", z: true}
-                ]);
-            });
-
             it("Returns partially updated rows for normal and computed columns", async function(done) {
                 const table = perspective.table(
                     {

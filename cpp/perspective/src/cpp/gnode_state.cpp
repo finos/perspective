@@ -415,6 +415,21 @@ t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& 
     std::swap(rval, out_data);
 }
 
+void
+t_gstate::read_column(const std::string& colname, std::vector<t_tscalar>& out_data) const {
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    const t_column* col_ = col.get();
+    t_uindex col_size = col_->size();
+    std::vector<t_tscalar> rval(col_size);
+
+    for (t_index idx = 0; idx < col_size; ++idx) {
+        rval[idx].set(col_->get_scalar(idx));
+    }
+
+    std::swap(rval, out_data);
+}
+
+
 t_tscalar
 t_gstate::get(t_tscalar pkey, const std::string& colname) const {
     t_mapping::const_iterator iter = m_mapping.find(pkey);

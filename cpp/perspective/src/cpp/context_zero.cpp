@@ -407,11 +407,6 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         }
         psp_log_time(repr() + " notify.has_filter_path.updated_traversal");
 
-        // calculate cell deltas if enabled
-        if (get_deltas_enabled()) {
-            calc_step_delta(flattened, prev, curr, transitions);
-        }
-
         m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
         psp_log_time(repr() + " notify.has_filter_path.exit");
@@ -447,10 +442,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
     psp_log_time(repr() + " notify.no_filter_path.updated_traversal");
 
-    // calculate cell deltas if enabled
-    if (get_deltas_enabled()) {
-        calc_step_delta(flattened, prev, curr, transitions);
-    }
+
     m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
     psp_log_time(repr() + " notify.no_filter_path.exit");
@@ -489,12 +481,6 @@ t_ctx0::notify(const t_data_table& flattened) {
             add_delta_pkey(pkey);
         }
 
-        // Calculate the step delta, if enabled in the context through an on_update
-        // callback with the "cell" or "row" mode set.
-        if (get_deltas_enabled()) {
-            calc_step_delta(flattened);
-        }
-
         return;
     }
 
@@ -512,12 +498,6 @@ t_ctx0::notify(const t_data_table& flattened) {
 
         // Add primary key to track row delta
         add_delta_pkey(pkey);
-    }
-
-    // Calculate the step delta, if enabled in the context through an on_update
-    // callback with the "cell" or "row" mode set.
-    if (get_deltas_enabled()) {
-        calc_step_delta(flattened);
     }
 }
 
