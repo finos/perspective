@@ -15,6 +15,8 @@
 namespace perspective {
 namespace apachearrow {
 
+    int64_t parseAsArrowTimestamp(const std::string& input);
+
     /**
      * @brief Initialize the arrow loader with a CSV.
      *

@@ -55,6 +55,40 @@ namespace binding {
         return jsdate;
     }
 
+    t_val
+    is_valid_datetime(t_val filter_term) {
+        return t_val(apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1);
+    }
+
+    bool val_to_date(t_val& item, t_date* out) {
+        time_t tt;
+        if (item.typeOf().as<std::string>().compare("string") == 0) {
+            tt = time_t(apachearrow::parseAsArrowTimestamp(item.as<std::string>()) / 1000);
+        } else if (item.typeOf().as<std::string>().compare("number") == 0) {
+            tt = time_t(static_cast<int64_t>(item.as<double>()) / 1000);
+        } else if (item.typeOf().as<std::string>().compare("object") == 0) {
+            tt = time_t(static_cast<int64_t>(item.call<t_val>("getTime").as<double>()) / 1000);
+        } else {
+            return false;
+        }
+        tm local_tm = *localtime(&tt);
+        (*out) = t_date(local_tm.tm_year + 1900, local_tm.tm_mon, local_tm.tm_mday);
+        return true;
+    }
+
+    bool val_to_datetime(t_val& item, int64_t* out) {
+        if (item.typeOf().as<std::string>().compare("string") == 0) {
+            (*out) = apachearrow::parseAsArrowTimestamp(item.as<std::string>());
+        } else if (item.typeOf().as<std::string>().compare("number") == 0) {
+            (*out) = static_cast<int64_t>(item.as<double>());
+        } else if (item.typeOf().as<std::string>().compare("object") == 0) {
+            (*out) = static_cast<int64_t>(item.call<t_val>("getTime").as<double>());
+        } else {
+            return false;
+        }
+        return true;
+    }
+
     /******************************************************************************
      *
      * Manipulate scalar values
@@ -524,7 +558,7 @@ namespace binding {
     }
 
     t_dtype
-    infer_type(t_val x, t_val date_validator) {
+    infer_type(t_val x) {
         std::string jstype = x.typeOf().as<std::string>();
         t_dtype t = t_dtype::DTYPE_STR;
 
@@ -560,7 +594,7 @@ namespace binding {
                 t = t_dtype::DTYPE_TIME;
             }
         } else if (jstype == "string") {
-            if (date_validator.call<t_val>("call", t_val::object(), x).as<bool>()) {
+            if (apachearrow::parseAsArrowTimestamp(x.as<std::string>()) != -1) {
                 t = t_dtype::DTYPE_TIME;
             } else {
                 std::string lower = x.call<t_val>("toLowerCase").as<std::string>();
@@ -577,7 +611,7 @@ namespace binding {
 
     t_dtype
     get_data_type(
-        t_val data, std::int32_t format, const std::string& name, t_val date_validator) {
+        t_val data, std::int32_t format, const std::string& name) {
         std::int32_t i = 0;
         boost::optional<t_dtype> inferredType;
 
@@ -587,7 +621,7 @@ namespace binding {
                 && i < data["length"].as<std::int32_t>()) {
                 if (data[i].call<t_val>("hasOwnProperty", name).as<bool>() == true) {
                     if (!data[i][name].isNull()) {
-                        inferredType = infer_type(data[i][name], date_validator);
+                        inferredType = infer_type(data[i][name]);
                     } else {
                         inferredType = t_dtype::DTYPE_STR;
                     }
@@ -599,7 +633,7 @@ namespace binding {
             while (!inferredType.is_initialized() && i < 100
                 && i < data[name]["length"].as<std::int32_t>()) {
                 if (!data[name][i].isNull()) {
-                    inferredType = infer_type(data[name][i], date_validator);
+                    inferredType = infer_type(data[name][i]);
                 } else {
                     inferredType = t_dtype::DTYPE_STR;
                 }
@@ -616,8 +650,7 @@ namespace binding {
     }
 
     std::vector<t_dtype>
-    get_data_types(t_val data, std::int32_t format, const std::vector<std::string>& names,
-        t_val date_validator) {
+    get_data_types(t_val data, std::int32_t format, const std::vector<std::string>& names) {
         if (names.size() == 0) {
             PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
         }
@@ -661,7 +694,7 @@ namespace binding {
         } else {
             for (const std::string& name : names) {
                 // infer type for each column
-                t_dtype type = get_data_type(data, format, name, date_validator);
+                t_dtype type = get_data_type(data, format, name);
                 types.push_back(type);
             }
         }
@@ -693,9 +726,14 @@ namespace binding {
                 continue;
             }
 
-            auto elem = static_cast<std::int64_t>(
-                item.call<t_val>("getTime").as<double>()); // dcol[i].as<T>();
-            col->set_nth(i, elem);
+            int64_t out;
+            if (val_to_datetime(item, &out)) {
+                col->set_nth(i, out);
+            } else if (is_update) {
+                col->unset(i);
+            } else {
+                col->clear(i);
+            }
         }
     }
 
@@ -718,7 +756,14 @@ namespace binding {
                 continue;
             }
 
-            col->set_nth(i, jsdate_to_t_date(item));
+            t_date out;
+            if (val_to_date(item, &out)) {
+                col->set_nth(i, out);
+            } else if (is_update) {
+                col->unset(i);
+            } else {
+                col->clear(i);
+            }
         }
     }
 
@@ -1177,7 +1222,7 @@ namespace binding {
             t_val data = accessor["data"];
             std::int32_t format = accessor["format"].as<std::int32_t>();
             column_names = get_column_names(data, format);
-            data_types = get_data_types(data, format, column_names, accessor["date_validator"]);
+            data_types = get_data_types(data, format, column_names);
         }
 
         if (!table_initialized) {
@@ -1245,8 +1290,11 @@ namespace binding {
             || filter_operator == t_filter_op::FILTER_OP_IS_NOT_NULL) {
             return true;
         } else if (column_type == DTYPE_DATE || column_type == DTYPE_TIME) {
-            t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
-            return has_value(parsed_date);
+            if (filter_term.typeOf().as<std::string>().compare("string") == 0) {
+                return has_value(filter_term) && apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1;
+            } else {
+                return has_value(filter_term);
+            }         
         } else {
             return has_value(filter_term);
         }
@@ -1284,13 +1332,20 @@ namespace binding {
                         terms.push_back(mktscalar(filter_term.as<bool>()));
                     } break;
                     case DTYPE_DATE: {
-                        t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
-                        terms.push_back(mktscalar(jsdate_to_t_date(parsed_date)));
+                        t_date out;
+                        if (val_to_date(filter_term, &out)) {
+                            terms.push_back(mktscalar(out));
+                        } else {
+                            terms.push_back(mknone());
+                        }
                     } break;
                     case DTYPE_TIME: {
-                        t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
-                        terms.push_back(mktscalar(t_time(static_cast<std::int64_t>(
-                            parsed_date.call<t_val>("getTime").as<double>()))));
+                        int64_t out;
+                        if (val_to_datetime(filter_term, &out)) {
+                            terms.push_back(mktscalar(t_time(out)));
+                        } else {
+                            terms.push_back(mknone());
+                        }
                     } break;
                     default: {
                         terms.push_back(
@@ -2077,4 +2132,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_computed_functions", &get_computed_functions);
     function("get_table_computed_schema", &get_table_computed_schema<t_val>);
     function("get_computation_input_types", &get_computation_input_types);
+    function("is_valid_datetime", &is_valid_datetime);
 }

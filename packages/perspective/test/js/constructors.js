@@ -628,6 +628,37 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("Handles strings with quotation characters and commas", async function() {
+            let table = perspective.table({x: "string", y: "integer"});
+            table.update([
+                {x: "Test, hello!", y: 1},
+                {x: 'Test2"', y: 2},
+                {x: 'Test3, Hello!"', y: 3}
+            ]);
+            let view = table.view();
+            let result = await view.to_csv();
+            expect(result).toEqual(`x,y\r\n"Test, hello!",1\r\nTest2",2\r\n"Test3, Hello!""",3`);
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitively loads a CSV created from `to_csv()` on a table with a datetime column", async function() {
+            // Assert that the CSV parser can handle POSIX timestamps.
+            let table = perspective.table(arrow_date_data);
+            let view = table.view();
+            let schema = await table.schema();
+            let csv = await view.to_csv();
+            let table2 = perspective.table(schema);
+            table2.update(csv);
+            let view2 = table2.view();
+            let csv2 = await view2.to_csv();
+            expect(csv2).toEqual(csv);
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("Constructors", function() {
@@ -980,6 +1011,27 @@ module.exports = perspective => {
 
         describe("Datetime constructors", function() {
             it("Correctly parses an ISO-8601 formatted string", async function() {
+                let table = perspective.table({d: ["2011-10-05T14:48:00"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
+            it("Correctly parses an ISO-8601 formatted string 2", async function() {
+                let table = perspective.table({d: ["2011-10-05T14:48:00.000"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
+            it("Correctly parses an ISO-8601 formatted string 3", async function() {
+                let table = perspective.table({d: ["2011-10-05T14:48:00Z"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
+            it("Correctly parses an ISO-8601 formatted string 3", async function() {
                 let table = perspective.table({d: ["2011-10-05T14:48:00.000Z"]});
                 let view = table.view({});
                 let result = await view.schema();
@@ -993,7 +1045,7 @@ module.exports = perspective => {
                 expect(result["d"]).toEqual("datetime");
             });
 
-            it("Correctly parses an RFC 2822 formatted string", async function() {
+            it.skip("Correctly parses an RFC 2822 formatted string", async function() {
                 let table = perspective.table({d: ["Wed, 05 Oct 2011 22:26:12 -0400"]});
                 let view = table.view({});
                 let result = await view.schema();

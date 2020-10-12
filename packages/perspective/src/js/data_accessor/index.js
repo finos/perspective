@@ -7,7 +7,6 @@
  *
  */
 
-import {DateParser, is_valid_date} from "./date_parser.js";
 import {get_column_type} from "../utils.js";
 import {get_type_config} from "../config/index.js";
 
@@ -23,8 +22,6 @@ export class DataAccessor {
         this.names = undefined;
         this.types = undefined;
         this.row_count = undefined;
-        this.date_parsers = {};
-        this.date_validator = val => is_valid_date(val);
     }
 
     is_format(data) {
@@ -77,7 +74,6 @@ export class DataAccessor {
     marshal(column_index, row_index, type) {
         const column_name = this.names[column_index];
         let val = clean_data(this.get(column_name, row_index));
-        let date_parser;
 
         if (val === null) {
             return null;
@@ -86,12 +82,6 @@ export class DataAccessor {
         if (typeof val === "undefined") {
             return undefined;
         }
-
-        if (this.date_parsers[column_name] === undefined) {
-            this.date_parsers[column_name] = new DateParser();
-        }
-
-        date_parser = this.date_parsers[column_name];
 
         switch (get_column_type(type.value)) {
             case "float":
@@ -109,7 +99,6 @@ export class DataAccessor {
             }
             case "datetime":
             case "date": {
-                val = date_parser.parse(val);
                 break;
             }
             default: {
@@ -127,7 +116,6 @@ export class DataAccessor {
      * @private
      */
     clean() {
-        this.date_parsers = {};
         this.names = undefined;
         this.types = undefined;
     }
