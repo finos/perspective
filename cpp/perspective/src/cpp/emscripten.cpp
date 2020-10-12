@@ -60,10 +60,10 @@ namespace binding {
         return t_val(apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1);
     }
 
-    bool val_to_date(t_val& item, t_date* out) {
+    bool val_to_date(t_val& item, bool is_update, t_date* out) {
         time_t tt;
         if (item.typeOf().as<std::string>().compare("string") == 0) {
-            tt = time_t(apachearrow::parseAsArrowTimestamp(item.as<std::string>()) / 1000);
+            tt = time_t(apachearrow::parseAsArrowTimestamp(item.as<std::string>(), is_update) / 1000);
         } else if (item.typeOf().as<std::string>().compare("number") == 0) {
             tt = time_t(static_cast<int64_t>(item.as<double>()) / 1000);
         } else if (item.typeOf().as<std::string>().compare("object") == 0) {
@@ -76,9 +76,9 @@ namespace binding {
         return true;
     }
 
-    bool val_to_datetime(t_val& item, int64_t* out) {
+    bool val_to_datetime(t_val& item, bool is_update, int64_t* out) {
         if (item.typeOf().as<std::string>().compare("string") == 0) {
-            (*out) = apachearrow::parseAsArrowTimestamp(item.as<std::string>());
+            (*out) = apachearrow::parseAsArrowTimestamp(item.as<std::string>(), is_update);
         } else if (item.typeOf().as<std::string>().compare("number") == 0) {
             (*out) = static_cast<int64_t>(item.as<double>());
         } else if (item.typeOf().as<std::string>().compare("object") == 0) {
@@ -604,6 +604,7 @@ namespace binding {
                     t = t_dtype::DTYPE_STR;
                 }
             }
+            apachearrow::resetTimestampParsers();
         }
 
         return t;
@@ -727,7 +728,7 @@ namespace binding {
             }
 
             int64_t out;
-            if (val_to_datetime(item, &out)) {
+            if (val_to_datetime(item, is_update, &out)) {
                 col->set_nth(i, out);
             } else if (is_update) {
                 col->unset(i);
@@ -735,6 +736,7 @@ namespace binding {
                 col->clear(i);
             }
         }
+        apachearrow::resetTimestampParsers(is_update);
     }
 
     void
@@ -757,7 +759,7 @@ namespace binding {
             }
 
             t_date out;
-            if (val_to_date(item, &out)) {
+            if (val_to_date(item, is_update, &out)) {
                 col->set_nth(i, out);
             } else if (is_update) {
                 col->unset(i);
@@ -765,6 +767,7 @@ namespace binding {
                 col->clear(i);
             }
         }
+        apachearrow::resetTimestampParsers(is_update);
     }
 
     void
@@ -1333,19 +1336,21 @@ namespace binding {
                     } break;
                     case DTYPE_DATE: {
                         t_date out;
-                        if (val_to_date(filter_term, &out)) {
+                        if (val_to_date(filter_term, false, &out)) {
                             terms.push_back(mktscalar(out));
                         } else {
                             terms.push_back(mknone());
                         }
+                        apachearrow::resetTimestampParsers(false);
                     } break;
                     case DTYPE_TIME: {
                         int64_t out;
-                        if (val_to_datetime(filter_term, &out)) {
+                        if (val_to_datetime(filter_term, false, &out)) {
                             terms.push_back(mktscalar(t_time(out)));
                         } else {
                             terms.push_back(mknone());
                         }
+                        apachearrow::resetTimestampParsers(false);
                     } break;
                     default: {
                         terms.push_back(

@@ -19,10 +19,39 @@
 namespace perspective {
 namespace apachearrow {
 
-    class UnixTimestampParser : public arrow::TimestampParser {
+    class MemoTimestampParser : public arrow::TimestampParser {
+    public:
+
+        MemoTimestampParser() : arrow::TimestampParser(), has_failed(new bool(false)) {}
+        
+        bool 
+        operator()(const char* s, size_t length, arrow::TimeUnit::type out_unit, int64_t* out) const override {
+            if (*has_failed) {
+                return false;
+            }
+            bool result = parse(s, length, out_unit, out);
+            if (!result && length > 0) {
+                (*has_failed) = true;
+            }
+            return result;
+        }
+
+        virtual 
+        bool
+        parse(const char* s, size_t length, arrow::TimeUnit::type out_unit, int64_t* out) const = 0;
+        
+        void
+        reset() const {
+            (*has_failed) = false;
+        }
+    private:
+        bool* has_failed;
+    };
+
+    class UnixTimestampParser : public MemoTimestampParser {
     public:
         bool
-        operator()(const char* s, size_t length, arrow::TimeUnit::type out_unit,
+        parse(const char* s, size_t length, arrow::TimeUnit::type out_unit,
             int64_t* out) const override {
             size_t endptr;
             std::string val(s, s + length);
@@ -79,10 +108,10 @@ namespace apachearrow {
         return true;
     }
 
-    class CustomISO8601Parser : public arrow::TimestampParser {
+    class CustomISO8601Parser : public MemoTimestampParser {
     public:
         bool
-        operator()(const char* s, size_t length, arrow::TimeUnit::type unit,
+        parse(const char* s, size_t length, arrow::TimeUnit::type unit,
             int64_t* out) const override {
 
             if (!arrow::internal::ParseTimestampISO8601(s, length, unit, out)) {
@@ -141,26 +170,57 @@ namespace apachearrow {
         }
     };
 
+    class StrptimeTimestampParser : public MemoTimestampParser {
+    public:
+        explicit StrptimeTimestampParser(std::string format) : 
+            format_(std::move(format)) {}
+
+        bool 
+        parse(const char* s, size_t length, arrow::TimeUnit::type out_unit,
+            int64_t* out) const override {
+            return arrow::internal::ParseTimestampStrptime(s, length, format_.c_str(),
+                false, false, out_unit, out);
+        }
+
+        const char* kind() const override { 
+            return "strptime";
+        }
+
+        const char* format() const override {
+            return format_.c_str();
+        }
+
+    private:
+        std::string format_;
+    };
+
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_PARSERS{
         std::make_shared<CustomISO8601Parser>(),
-        arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
-        arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
-        arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
-        arrow::TimestampParser::MakeStrptime("%d %m %Y"),
-        arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
+        std::make_shared<StrptimeTimestampParser>("%Y-%m-%d\\D%H:%M:%S.%f"),
+        std::make_shared<StrptimeTimestampParser>("%m-%d-%Y"),
+        std::make_shared<StrptimeTimestampParser>("%m/%d/%Y"),
+        std::make_shared<StrptimeTimestampParser>("%d %m %Y"),
+        std::make_shared<StrptimeTimestampParser>("%H:%M:%S.%f")};
 
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
         std::make_shared<UnixTimestampParser>(),
         std::make_shared<CustomISO8601Parser>(),
-        arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
-        arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
-        arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
-        arrow::TimestampParser::MakeStrptime("%d %m %Y"),
-        arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
+        std::make_shared<StrptimeTimestampParser>("%Y-%m-%d\\D%H:%M:%S.%f"),
+        std::make_shared<StrptimeTimestampParser>("%m-%d-%Y"),
+        std::make_shared<StrptimeTimestampParser>("%m/%d/%Y"),
+        std::make_shared<StrptimeTimestampParser>("%d %m %Y"),
+        std::make_shared<StrptimeTimestampParser>("%H:%M:%S.%f")};
+
+    void
+    resetTimestampParsers(bool is_update) {
+        for (const std::shared_ptr<arrow::TimestampParser>& x : is_update ? DATE_READERS : DATE_PARSERS) {
+            static_cast<const MemoTimestampParser*>(x.get())->reset();
+        }
+    }
 
     int64_t
-    parseAsArrowTimestamp(const std::string& input) {
-        for (auto candidate : DATE_PARSERS) {
+    parseAsArrowTimestamp(const std::string& input, bool is_update) {
+        for (auto candidate : is_update ? DATE_READERS: DATE_PARSERS) {
             int64_t datetime;
             if (candidate->operator()(
                     input.c_str(), input.size(), arrow::TimeUnit::MILLI, &datetime)) {
@@ -191,6 +251,8 @@ namespace apachearrow {
 
         auto maybe_reader = arrow::csv::TableReader::Make(
             pool, input, read_options, parse_options, convert_options);
+
+        resetTimestampParsers(is_update);
 
         std::shared_ptr<arrow::csv::TableReader> reader = *maybe_reader;
 

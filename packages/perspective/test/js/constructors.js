@@ -1045,6 +1045,13 @@ module.exports = perspective => {
                 expect(result["d"]).toEqual("datetime");
             });
 
+            it("Correctly parses an MM/DD/YYYY formatted string with timezone", async function() {
+                let table = perspective.table({d: ["2/22/2020"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
             it.skip("Correctly parses an RFC 2822 formatted string", async function() {
                 let table = perspective.table({d: ["Wed, 05 Oct 2011 22:26:12 -0400"]});
                 let view = table.view({});
@@ -1061,14 +1068,6 @@ module.exports = perspective => {
                     let result = await view.schema();
                     expect(result["d"]).toEqual("datetime");
                 }
-            });
-
-            // Only implemented in the C++ date parser - skip
-            it.skip("Correctly parses a 'dd mm yyyy' formatted string", async function() {
-                let table = perspective.table({d: ["15 08 08"]});
-                let view = table.view({});
-                let result = await view.schema();
-                expect(result["d"]).toEqual("datetime");
             });
 
             it("Does not (for now) parse a date string in non-US formatting", async function() {
