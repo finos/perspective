@@ -15,12 +15,10 @@ const execSync = require("child_process").execSync;
 const argv = require("minimist")(process.argv.slice(2));
 const minimatch = require("minimatch");
 const os = require("os");
-const {getarg} = require("./script_utils.js");
+const {getarg, bash, execute} = require("./script_utils.js");
 const IS_CI = getarg("--ci");
 
-require("dotenv").config({path: "./.perspectiverc"});
-
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
+//require("dotenv").config({path: "./.perspectiverc"});
 
 /**
  * WASM Output Options
@@ -42,27 +40,27 @@ const AVAILABLE_RUNTIMES = [WEB_WASM_OPTIONS];
 const RUNTIMES = AVAILABLE_RUNTIMES.filter(runtime => runtime.build).length ? AVAILABLE_RUNTIMES.filter(runtime => runtime.build) : AVAILABLE_RUNTIMES;
 
 // Directory of Emscripten output
-const getBaseDir = packageName => path.join(__dirname, "..", "cpp", packageName, "obj");
-const getBuildDir = packageName => path.join(getBaseDir(packageName), "build");
-const getOuputDir = packageName => path.join(__dirname, "..", "packages", packageName);
 
 function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
     console.log("-- Building %s", inputFile);
 
-    const OUTPUT_DIRECTORY = getOuputDir(packageName);
-    const BUILD_DIRECTORY = getBuildDir(packageName);
+    const dir_name = process.env.PSP_DEBUG ? "debug" : "release";
+    const base_dir = path.join(__dirname, "..", "packages", packageName, "build", dir_name);
 
-    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "obj"));
-    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "umd"));
+    const output_dir = path.join(__dirname, "..", "packages", packageName);
+    const build_dir = path.join(base_dir, "build");
+
+    mkdirp.sync(path.join(output_dir, "dist", "obj"));
+    mkdirp.sync(path.join(output_dir, "dist", "umd"));
 
     if (inputWasmFile) {
         console.log("-- Copying WASM file %s", inputWasmFile);
-        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, "dist", "umd", inputWasmFile));
+        fs.copyFileSync(path.join(build_dir, inputWasmFile), path.join(output_dir, "dist", "umd", inputWasmFile));
     }
 
     console.debug("-- Creating wrapped js runtime");
     const runtimeText = String(
-        fs.readFileSync(path.join(BUILD_DIRECTORY, inputFile), {
+        fs.readFileSync(path.join(build_dir, inputFile), {
             encoding: "utf8"
         })
     );
@@ -77,7 +75,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
         });
     }
 
-    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, "dist", "obj", inputFile), source);
+    fs.writeFileSync(path.join(output_dir, "dist", "obj", inputFile), source);
 }
 
 function docker(image = "emsdk") {
@@ -95,18 +93,18 @@ function docker(image = "emsdk") {
 }
 
 function compileCPP(packageName) {
-    const BASE_DIRECTORY = getBaseDir(packageName);
-    let cmd = `emcmake cmake ../ `;
-    if (process.env.PSP_DEBUG) {
-        cmd += `-DCMAKE_BUILD_TYPE=debug`;
-    }
-    cmd += `&& emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
+    const dir_name = process.env.PSP_DEBUG ? "debug" : "release";
+    const base_dir = path.join(__dirname, "..", "packages", packageName, "build", dir_name);
+    mkdirp.sync(base_dir);
+    const cmd = bash`
+        emcmake cmake ../../../../cpp/perspective ${process.env.PSP_DEBUG}-DCMAKE_BUILD_TYPE
+        && emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}
+    `;
     if (process.env.PSP_DOCKER) {
-        cmd = `${docker()} bash -c "cd cpp/${packageName}/obj && ${cmd}"`;
+        execute`${docker()} bash -c "cd /src/packages/perspective/build/${dir_name} && ${cmd}"`;
     } else {
-        cmd = `cd ${BASE_DIRECTORY} && ${cmd}`;
+        execute`cd ${base_dir} && ${cmd}`;
     }
-    execute(cmd);
 }
 
 function lerna() {
@@ -119,7 +117,6 @@ function lerna() {
 
 try {
     if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-        mkdirp("cpp/perspective/obj");
         compileCPP("perspective");
         RUNTIMES.map(compileRuntime);
     }

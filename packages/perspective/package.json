@@ -17,7 +17,6 @@
     ],
     "typings": "index.d.ts",
     "scripts": {
-        "prebuild": "mkdirp dist && mkdirp obj",
         "build": "npm-run-all build:babel:* build:webpack build:webpack:umd:inline",
         "build:babel:esm": "babel src/js --source-maps --out-dir dist/esm",
         "build:babel:emsdk": "BABEL_MODULE=auto babel dist/obj --source-maps --out-dir dist/cjs",
