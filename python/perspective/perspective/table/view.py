@@ -243,9 +243,13 @@ class View(object):
         Examples:
             >>> def updater(port_id):
             ...     print("Update fired on port", port_id)
+            >>> def updater_with_delta(port_id, delta):
+            ...     print("Update on port", port_id, "delta len:", len(delta)))
             >>> view.on_update(updater)
+            >>> view.on_update(updater, mode="row")
             >>> table.update({"a": [1]})'
             >>> Update fired on port 0
+            >>> Update on port 0 delta len: 64
         """
         self._table._state_manager.call_process(self._table._table.get_id())
         mode = mode or "none"
@@ -253,14 +257,14 @@ class View(object):
         if not callable(callback):
             raise ValueError("Invalid callback - must be a callable function")
 
-        if mode not in ["none", "cell", "row"]:
+        if mode not in ["none", "row"]:
             raise ValueError(
-                'Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(
+                'Invalid update mode {} - valid on_update modes are "none" or "row"'.format(
                     mode
                 )
             )
 
-        if mode == "cell" or mode == "row":
+        if mode == "row":
             if not self._view._get_deltas_enabled():
                 self._view._set_deltas_enabled(True)
 
@@ -536,9 +540,6 @@ class View(object):
     def to_columns(self, **options):
         return self.to_dict(**options)
 
-    def _get_step_delta(self):
-        pass
-
     def _get_row_delta(self):
         if self._sides == 0:
             return get_row_delta_zero(self._view)
@@ -568,11 +569,7 @@ class View(object):
         if cache.get(port_id) is None:
             cache[port_id] = {}
 
-        if mode == "cell":
-            if cache[port_id].get("step_delta") is None:
-                raise NotImplementedError("not implemented get_step_delta")
-            callback(port_id, cache["step_delta"])
-        elif mode == "row":
+        if mode == "row":
             if cache[port_id].get("row_delta") is None:
                 cache["row_delta"] = self._get_row_delta()
             callback(port_id, cache["row_delta"])

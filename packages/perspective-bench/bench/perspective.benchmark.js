@@ -222,19 +222,6 @@ describe("Deltas", async () => {
         describe("ctx0", async () => {
             table = worker.table(data.arrow.slice());
             view = table.view();
-            view.on_update(() => {}, {mode: "cell"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("cell delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice());
-                    await table.size();
-                }
-            });
-        });
-
-        describe("ctx0", async () => {
-            table = worker.table(data.arrow.slice());
-            view = table.view();
             view.on_update(() => {}, {mode: "row"});
             const test_data = await static_view.to_arrow({end_row: 500});
             benchmark("row delta", async () => {

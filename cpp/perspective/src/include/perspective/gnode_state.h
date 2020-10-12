@@ -110,6 +110,14 @@ public:
         std::vector<double>& out_data, bool include_nones) const;
 
     /**
+     * @brief Read the entirety of a column into `out_data`.
+     * 
+     * @param colname 
+     * @param out_data 
+     */
+    void read_column(const std::string& colname, std::vector<t_tscalar>& out_data);
+
+    /**
      * @brief Apply the lambda `fn` to each primary-keyed value in the column,
      * stopping when the lambda returns `true`.
      * 
