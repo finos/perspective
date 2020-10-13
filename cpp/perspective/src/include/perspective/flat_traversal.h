@@ -27,8 +27,6 @@
 namespace perspective {
 
 class PERSPECTIVE_EXPORT t_ftrav {
-    typedef tsl::hopscotch_map<t_tscalar, t_uindex> t_pkeyidx_map;
-    typedef tsl::hopscotch_map<t_tscalar, t_mselem> t_pkmselem_map;
 
 public:
     t_ftrav();
@@ -96,8 +94,13 @@ public:
 private:
     t_index m_step_deletes;
     t_index m_step_inserts;
-    t_pkeyidx_map m_pkeyidx;
-    t_pkmselem_map m_new_elems;
+
+    // map primary keys to row indices
+    tsl::hopscotch_map<t_tscalar, t_uindex> m_pkeyidx;
+
+    // map primary keys to sort items
+    tsl::hopscotch_map<t_tscalar, t_mselem> m_new_elems;
+
     std::vector<t_sortspec> m_sortby;
     std::shared_ptr<std::vector<t_mselem>> m_index;
     t_symtable m_symtable;

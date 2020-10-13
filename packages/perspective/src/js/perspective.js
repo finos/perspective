@@ -6,10 +6,6 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
-// TODO remove this when is_unit_config is fully in c++
-import {isEqual} from "underscore";
-
 import * as defaults from "./config/constants.js";
 import {get_type_config} from "./config/index.js";
 import {DataAccessor} from "./data_accessor";
@@ -142,14 +138,17 @@ export default function(Module) {
 
         const num_columns = this.table.columns().length;
 
+        // TODO: verify that a different order of the same num_cols as the
+        // table is valid as a unit context.
         this.is_unit_config =
             this.table.index === "" &&
             sides === 0 &&
-            isEqual(this.view_config.columns.length, num_columns) &&
+            this.view_config.columns.length === num_columns &&
             this.view_config.row_pivots.length === 0 &&
             this.view_config.column_pivots.length === 0 &&
             this.view_config.filter.length === 0 &&
-            this.view_config.sort.length === 0;
+            this.view_config.sort.length === 0 &&
+            this.view_config.computed_columns.length === 0;
 
         if (this.is_unit_config) {
             this._View = __MODULE__.make_view_unit(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);

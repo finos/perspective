@@ -10,51 +10,51 @@ const papaparse = require("papaparse");
 const moment = require("moment");
 const arrows = require("./test_arrows.js");
 
-var data = [
+const data = [
     {x: 1, y: "a", z: true},
     {x: 2, y: "b", z: false},
     {x: 3, y: "c", z: true},
     {x: 4, y: "d", z: false}
 ];
 
-var col_data = {
+const col_data = {
     x: [1, 2, 3, 4],
     y: ["a", "b", "c", "d"],
     z: [true, false, true, false]
 };
 
-var meta = {
+const meta = {
     x: "integer",
     y: "string",
     z: "boolean"
 };
 
-var data_3 = [
+const data_3 = [
     {w: 1.5, x: 1, y: "a", z: true},
     {w: 2.5, x: 2, y: "b", z: false},
     {w: 3.5, x: 3, y: "c", z: true},
     {w: 4.5, x: 4, y: "d", z: false}
 ];
 
-var data_7 = {
+const data_7 = {
     w: [1.5, 2.5, 3.5, 4.5],
     x: [1, 2, 3, 4],
     y: ["a", "b", "c", "d"],
     z: [true, false, true, false]
 };
 
-var int_in_string = [{a: "1"}, {a: "2"}, {a: "12345"}];
+const int_in_string = [{a: "1"}, {a: "2"}, {a: "12345"}];
 
-var float_in_string = [{a: "1.5"}, {a: "2.5"}, {a: "12345.56789"}];
+const float_in_string = [{a: "1.5"}, {a: "2.5"}, {a: "12345.56789"}];
 
-var meta_3 = {
+const meta_3 = {
     w: "float",
     x: "integer",
     y: "string",
     z: "boolean"
 };
 
-var arrow_result = [
+const arrow_result = [
     {
         f32: 1.5,
         f64: 1.5,
@@ -267,36 +267,52 @@ for (const k in arrow_date_data) {
     arrow_date_data[k] = arrow_date_data[k].map(d => (d ? new Date(d).getTime() : null));
 }
 
-var dt = () => {
+const dt = () => {
     let dt = new Date();
     dt.setHours(4);
     dt.setMinutes(12);
     return dt;
 };
 
-var data_4 = [{v: dt()}];
+const data_4 = [{v: dt()}];
 
-var data_5 = [{v: "11-09-2017"}];
+const data_5 = [{v: "11-09-2017"}];
 
-var meta_4 = {v: "datetime"};
+const meta_4 = {v: "datetime"};
 
-var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
+const csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 
-var data_6 = [{x: "š"}];
+const data_6 = [{x: "š"}];
 
-var int_float_data = [
+const int_float_data = [
     {int: 1, float: 2.25},
     {int: 2, float: 3.5},
     {int: 3, float: 4.75},
     {int: 4, float: 5.25}
 ];
-var int_float_string_data = [
+const int_float_string_data = [
     {int: 1, float: 2.25, string: "a"},
     {int: 2, float: 3.5, string: "b"},
     {int: 3, float: 4.75, string: "c"},
     {int: 4, float: 5.25, string: "d"}
 ];
-var datetime_data = [
+
+// out of order to make sure we can read out of perspective in insertion
+// order, not pkey order.
+const all_types_data = [
+    {int: 4, float: 5.25, string: "d", date: new Date(2020, 3, 15), datetime: new Date(2020, 0, 15, 23, 30), boolean: true},
+    {int: 3, float: 4.75, string: "c", date: new Date(2020, 2, 15), datetime: new Date(2020, 0, 15, 18, 30), boolean: false},
+    {int: 2, float: 3.5, string: "b", date: new Date(2020, 1, 15), datetime: new Date(2020, 0, 15, 12, 30), boolean: true},
+    {int: 1, float: 2.25, string: "a", date: new Date(2020, 0, 15), datetime: new Date(2020, 0, 15, 6, 30), boolean: false},
+    // values above should be replaced with these values below, due to
+    // indexing
+    {int: 4, float: 5.25, string: "d", date: new Date(2020, 3, 15), datetime: new Date(2020, 0, 15, 23, 30), boolean: true},
+    {int: 3, float: 4.75, string: "c", date: new Date(2020, 2, 15), datetime: new Date(2020, 0, 15, 18, 30), boolean: false},
+    {int: 2, float: 3.5, string: "b", date: new Date(2020, 1, 15), datetime: new Date(2020, 0, 15, 12, 30), boolean: true},
+    {int: 1, float: 2.25, string: "a", date: new Date(2020, 0, 15), datetime: new Date(2020, 0, 15, 6, 30), boolean: false}
+];
+
+const datetime_data = [
     {datetime: new Date(), int: 1},
     {datetime: new Date(), int: 1},
     {datetime: new Date(), int: 2},
@@ -1104,5 +1120,67 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         }, 3000);
+
+        describe("Indexed table constructors", function() {
+            it("Should index on an integer column", async function() {
+                const table = perspective.table(all_types_data, {index: "int"});
+                const view = table.view();
+                expect(await table.size()).toEqual(4);
+                expect(await view.to_json()).toEqual([
+                    {int: 1, float: 2.25, string: "a", date: 1579046400000, datetime: 1579069800000, boolean: false},
+                    {int: 2, float: 3.5, string: "b", date: 1581724800000, datetime: 1579091400000, boolean: true},
+                    {int: 3, float: 4.75, string: "c", date: 1584230400000, datetime: 1579113000000, boolean: false},
+                    {int: 4, float: 5.25, string: "d", date: 1586908800000, datetime: 1579131000000, boolean: true}
+                ]);
+            });
+
+            it("Should index on a float column", async function() {
+                const table = perspective.table(all_types_data, {index: "float"});
+                const view = table.view();
+                expect(await table.size()).toEqual(4);
+                expect(await view.to_json()).toEqual([
+                    {int: 1, float: 2.25, string: "a", date: 1579046400000, datetime: 1579069800000, boolean: false},
+                    {int: 2, float: 3.5, string: "b", date: 1581724800000, datetime: 1579091400000, boolean: true},
+                    {int: 3, float: 4.75, string: "c", date: 1584230400000, datetime: 1579113000000, boolean: false},
+                    {int: 4, float: 5.25, string: "d", date: 1586908800000, datetime: 1579131000000, boolean: true}
+                ]);
+            });
+
+            it("Should index on a string column", async function() {
+                const table = perspective.table(all_types_data, {index: "string"});
+                const view = table.view();
+                expect(await table.size()).toEqual(4);
+                expect(await view.to_json()).toEqual([
+                    {int: 1, float: 2.25, string: "a", date: 1579046400000, datetime: 1579069800000, boolean: false},
+                    {int: 2, float: 3.5, string: "b", date: 1581724800000, datetime: 1579091400000, boolean: true},
+                    {int: 3, float: 4.75, string: "c", date: 1584230400000, datetime: 1579113000000, boolean: false},
+                    {int: 4, float: 5.25, string: "d", date: 1586908800000, datetime: 1579131000000, boolean: true}
+                ]);
+            });
+
+            it("Should index on a date column", async function() {
+                const table = perspective.table(all_types_data, {index: "date"});
+                const view = table.view();
+                expect(await table.size()).toEqual(4);
+                expect(await view.to_json()).toEqual([
+                    {int: 1, float: 2.25, string: "a", date: 1579046400000, datetime: 1579069800000, boolean: false},
+                    {int: 2, float: 3.5, string: "b", date: 1581724800000, datetime: 1579091400000, boolean: true},
+                    {int: 3, float: 4.75, string: "c", date: 1584230400000, datetime: 1579113000000, boolean: false},
+                    {int: 4, float: 5.25, string: "d", date: 1586908800000, datetime: 1579131000000, boolean: true}
+                ]);
+            });
+
+            it("Should index on a datetime column", async function() {
+                const table = perspective.table(all_types_data, {index: "datetime"});
+                const view = table.view();
+                expect(await table.size()).toEqual(4);
+                expect(await view.to_json()).toEqual([
+                    {int: 1, float: 2.25, string: "a", date: 1579046400000, datetime: 1579069800000, boolean: false},
+                    {int: 2, float: 3.5, string: "b", date: 1581724800000, datetime: 1579091400000, boolean: true},
+                    {int: 3, float: 4.75, string: "c", date: 1584230400000, datetime: 1579113000000, boolean: false},
+                    {int: 4, float: 5.25, string: "d", date: 1586908800000, datetime: 1579131000000, boolean: true}
+                ]);
+            });
+        });
     });
 };

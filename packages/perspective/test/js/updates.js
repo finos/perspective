@@ -84,6 +84,7 @@ module.exports = perspective => {
             const view = table.view();
             table.remove([1, 2]);
             const result = await view.to_json();
+            expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
             // expect(await table.size()).toEqual(2);
@@ -96,8 +97,118 @@ module.exports = perspective => {
             const view = table.view();
             table.remove([1, 2]);
             const result = await view.to_json();
+            expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
+        it("after an `update()`, string pkey", async function() {
+            const table = perspective.table(meta, {index: "y"});
+            table.update(data);
+            const view = table.view();
+            table.remove(["a", "b"]);
+            const result = await view.to_json();
+            expect(await view.num_rows()).toEqual(2);
+            expect(result.length).toEqual(2);
+            expect(result).toEqual(data.slice(2, 4));
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
+        it("after a regular data load, string pkey", async function() {
+            const table = perspective.table(data, {index: "y"});
+            const view = table.view();
+            table.remove(["a", "b"]);
+            const result = await view.to_json();
+            expect(await view.num_rows()).toEqual(2);
+            expect(result.length).toEqual(2);
+            expect(result).toEqual(data.slice(2, 4));
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
+        it("after an update, date pkey", async function() {
+            const datetimes = [new Date(2020, 0, 15), new Date(2020, 1, 15), new Date(2020, 2, 15), new Date(2020, 3, 15)];
+            const table = perspective.table(
+                {
+                    x: "integer",
+                    y: "date",
+                    z: "float"
+                },
+                {index: "y"}
+            );
+            table.update({
+                x: [1, 2, 3, 4],
+                y: datetimes,
+                z: [1.5, 2.5, 3.5, 4.5]
+            });
+            const view = table.view();
+            table.remove(datetimes.slice(0, 2));
+            const result = await view.to_columns();
+            expect(await view.num_rows()).toEqual(2);
+            expect(result).toEqual({
+                x: [3, 4],
+                y: [1584230400000, 1586908800000],
+                z: [3.5, 4.5]
+            });
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
+        it("after an update, datetime pkey", async function() {
+            const datetimes = [new Date(2020, 0, 15), new Date(2020, 1, 15), new Date(2020, 2, 15), new Date(2020, 3, 15)];
+            const table = perspective.table(
+                {
+                    x: "integer",
+                    y: "datetime",
+                    z: "float"
+                },
+                {index: "y"}
+            );
+            table.update({
+                x: [1, 2, 3, 4],
+                y: datetimes,
+                z: [1.5, 2.5, 3.5, 4.5]
+            });
+            const view = table.view();
+            table.remove(datetimes.slice(0, 2));
+            const result = await view.to_columns();
+            expect(await view.num_rows()).toEqual(2);
+            expect(result).toEqual({
+                x: [3, 4],
+                y: [1584230400000, 1586908800000],
+                z: [3.5, 4.5]
+            });
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
+        it("after a regular data load, datetime pkey", async function() {
+            const datetimes = [new Date(2020, 0, 15), new Date(2020, 1, 15), new Date(2020, 2, 15), new Date(2020, 3, 15)];
+            const table = perspective.table(
+                {
+                    x: [1, 2, 3, 4],
+                    y: datetimes,
+                    z: [1.5, 2.5, 3.5, 4.5]
+                },
+                {index: "y"}
+            );
+            const view = table.view();
+            table.remove(datetimes.slice(0, 2));
+            const result = await view.to_columns();
+            expect(await view.num_rows()).toEqual(2);
+            expect(result).toEqual({
+                x: [3, 4],
+                y: [1584230400000, 1586908800000],
+                z: [3.5, 4.5]
+            });
             // expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
@@ -905,7 +1016,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("multiple updates on {index: 'x'}", async function() {
+        it("multiple updates on int {index: 'x'}", async function() {
             var table = perspective.table(data, {index: "x"});
             var view = table.view();
             table.update(data);
@@ -913,6 +1024,37 @@ module.exports = perspective => {
             table.update(data);
             let result = await view.to_json();
             expect(result).toEqual(data);
+            view.delete();
+            table.delete();
+        });
+
+        it("multiple updates on str {index: 'y'}", async function() {
+            var table = perspective.table(data, {index: "y"});
+            var view = table.view();
+            table.update(data);
+            table.update(data);
+            table.update(data);
+            let result = await view.to_json();
+            expect(result).toEqual(data);
+            view.delete();
+            table.delete();
+        });
+
+        it("multiple updates on str {index: 'y'} with new, old, null pkey", async function() {
+            var table = perspective.table(data, {index: "y"});
+            var view = table.view();
+            table.update([{x: 1, y: "a", z: true}]);
+            table.update([{x: 100, y: null, z: true}]);
+            table.update([{x: 123, y: "abc", z: true}]);
+            let result = await view.to_json();
+            expect(result).toEqual([
+                {x: 100, y: null, z: true},
+                {x: 1, y: "a", z: true},
+                {x: 123, y: "abc", z: true},
+                {x: 2, y: "b", z: false},
+                {x: 3, y: "c", z: true},
+                {x: 4, y: "d", z: false}
+            ]);
             view.delete();
             table.delete();
         });

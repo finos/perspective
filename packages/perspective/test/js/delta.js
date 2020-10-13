@@ -7,6 +7,8 @@
  *
  */
 
+const _ = require("underscore");
+
 let data = [
     {x: 1, y: "a", z: true},
     {x: 2, y: "b", z: false},
@@ -235,6 +237,153 @@ module.exports = perspective => {
             it("returns changed rows in non-sequential update", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view();
+                view.on_update(
+                    async function(updated) {
+                        const expected = partial_change_nonseq;
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_nonseq);
+            });
+        });
+
+        describe("0-sided row delta, randomized column order", function() {
+            it("returns changed rows", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let columns = _.shuffle(await table.columns());
+                let view = table.view({
+                    columns: columns
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 1, y: "string1", z: true},
+                            {x: 2, y: "string2", z: false}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns changed rows from schema", async function(done) {
+                let table = perspective.table(
+                    {
+                        x: "integer",
+                        y: "string",
+                        z: "boolean"
+                    },
+                    {index: "x"}
+                );
+                let columns = _.shuffle(await table.columns());
+                let view = table.view({
+                    columns: columns
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 1, y: "d", z: false},
+                            {x: 2, y: "b", z: false},
+                            {x: 3, y: "c", z: true}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update([
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 1, y: "d", z: false}
+                ]);
+            });
+
+            it("returns added rows", async function(done) {
+                let table = perspective.table(data);
+                let columns = _.shuffle(await table.columns());
+                let view = table.view({
+                    columns: columns
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 1, y: "string1", z: null},
+                            {x: 2, y: "string2", z: null}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns added rows from schema", async function(done) {
+                let table = perspective.table({
+                    x: "integer",
+                    y: "string",
+                    z: "boolean"
+                });
+                let columns = _.shuffle(await table.columns());
+                let view = table.view({
+                    columns: columns
+                });
+                view.on_update(
+                    async function(updated) {
+                        await match_delta(perspective, updated.delta, data);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(data);
+            });
+
+            it("returns deleted columns", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let columns = _.shuffle(await table.columns());
+                let view = table.view({
+                    columns: columns
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [
+                            {x: 1, y: null, z: true},
+                            {x: 4, y: null, z: false}
+                        ];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update([
+                    {x: 1, y: null},
+                    {x: 4, y: null}
+                ]);
+            });
+
+            it("returns changed rows in non-sequential update", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let columns = _.shuffle(await table.columns());
+                let view = table.view({
+                    columns: columns
+                });
                 view.on_update(
                     async function(updated) {
                         const expected = partial_change_nonseq;
