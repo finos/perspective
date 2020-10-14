@@ -236,7 +236,8 @@ if (PSP_WASM_BUILD)
 		-s MODULARIZE=1 \
 		-s EXPORT_NAME=\"load_perspective\" \
 		-s EXPORT_ES6=1 \
-		-s MAXIMUM_MEMORY=-1 \
+		-s MAXIMUM_MEMORY=4gb \
+		-s WASM_BIGINT=1 \
 		-s USE_ES6_IMPORT_META=0 \
 		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
