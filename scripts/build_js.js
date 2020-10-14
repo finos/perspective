@@ -16,6 +16,8 @@ const minimatch = require("minimatch");
 const os = require("os");
 const {bash, execute} = require("./script_utils.js");
 
+const pkg_json = require("../package.json");
+
 /**
  * WASM Output Options
  */
@@ -78,7 +80,7 @@ function compileCPP(packageName) {
 }
 
 function lerna() {
-    execute`lerna run build --loglevel silent --scope="@finos/${process.env.PACKAGE}`;
+    execute`lerna run build --loglevel silent --scope="@finos/${process.env.PACKAGE}"`;
 }
 
 try {
@@ -86,10 +88,11 @@ try {
         try {
             execSync(`yarn emsdk-run command -v emcc`, {stdio: "ignore"});
         } catch (e) {
-            console.log("-- Emscripten not detected, installing 1.39.13 ...");
+            const version = pkg_json.emscripten;
+            console.log(`-- Emscripten not detected, installing ${version} ...`);
             execute(`yarn emsdk-checkout`);
-            execute(`yarn emsdk install 1.39.13`);
-            execute(`yarn emsdk activate 1.39.13`);
+            execute(`yarn emsdk install ${version}`);
+            execute(`yarn emsdk activate ${version}`);
         }
         compileCPP("perspective");
         RUNTIMES.map(compileRuntime);

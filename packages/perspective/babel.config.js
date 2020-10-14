@@ -4,13 +4,11 @@ module.exports = {
             "@babel/preset-env",
             {
                 targets: {
-                    chrome: "70",
+                    chrome: "74",
                     node: "12",
                     ios: "13"
                 },
-                modules: process.env.BABEL_MODULE || false,
-                useBuiltIns: "usage",
-                corejs: 3
+                modules: process.env.BABEL_MODULE || false
             }
         ]
     ],

@@ -11,6 +11,10 @@ pr:
     include:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
 
+
+variables:
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+
 jobs:
 - job: 'WebAssembly'
   pool:
@@ -24,7 +28,16 @@ jobs:
     - bash: npm install -g yarn
       displayName: "Install Yarn"
 
-    - bash: yarn
+    - task: Cache@2
+      inputs:
+        key: 'yarn | "$(Agent.OS)" | yarn.lock'
+        restoreKeys: |
+          yarn | "$(Agent.OS)"
+          yarn
+        path: $(YARN_CACHE_FOLDER)
+      displayName: Cache Yarn packages
+
+    - bash: yarn --frozen-lockfile
       displayName: "Install Deps"
 
     - bash: sudo node scripts/install_tools.js
