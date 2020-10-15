@@ -1,5 +1,22 @@
 # Changelog
 
+
+## [0.5.6] (2020-10-15)
+
+#### Added
+  * [#1217](https://github.com/finos/perspective/pull/1217) adding binder link ([@timkpaine](https://github.com/timkpaine))
+  * [#1209](https://github.com/finos/perspective/pull/1209) Send large arrow binaries as chunks, add client-level Websocket heartbeat ([@sc1f](https://github.com/sc1f))
+  * [#1212](https://github.com/finos/perspective/pull/1212) Add `perspective-plugin-update` event for d3fc ([@zemeolotu](https://github.com/zemeolotu))
+  * [#1207](https://github.com/finos/perspective/pull/1207) Upgrade WebAssembly build to Arrow 1.0.1 ([@texodus](https://github.com/texodus))
+
+#### Fixed
+  * [#1219](https://github.com/finos/perspective/pull/1219) Fix infinite loop bug in 2-sided context ([@texodus](https://github.com/texodus))
+  * [#1214](https://github.com/finos/perspective/pull/1214) Fix `computed-column` and `table()` constructor Javascript bugs ([@texodus](https://github.com/texodus))
+
+#### Internal
+  * [#1221](https://github.com/finos/perspective/pull/1221) Separate 'release' and 'debug' builds ([@texodus](https://github.com/texodus))
+  * [#1220](https://github.com/finos/perspective/pull/1220) C++ Datetime Parsing ([@texodus](https://github.com/texodus))
+
 ## [0.5.5] (2020-09-21)
 
 #### Added
@@ -13,8 +30,8 @@
   * [#1194](https://github.com/finos/perspective/pull/1194) Remove linking against python ([@timkpaine](https://github.com/timkpaine))
 
 #### Internal
-* [#1191](https://github.com/finos/perspective/pull/1191) Bl.ocks ([@texodus](https://github.com/texodus))
-* [#1188](https://github.com/finos/perspective/pull/1188) Use `black` Python format ([@texodus](https://github.com/texodus))
+  * [#1191](https://github.com/finos/perspective/pull/1191) Bl.ocks ([@texodus](https://github.com/texodus))
+  * [#1188](https://github.com/finos/perspective/pull/1188) Use `black` Python format ([@texodus](https://github.com/texodus))
 
 ## [0.5.3] (2020-09-08)
 
