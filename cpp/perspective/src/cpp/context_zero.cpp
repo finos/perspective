@@ -23,18 +23,23 @@ t_ctx0::t_ctx0() {}
 t_ctx0::t_ctx0(const t_schema& schema, const t_config& config)
     : t_ctxbase<t_ctx0>(schema, config)
     , m_has_delta(false)
+{
 
-{}
+}
 
 t_ctx0::~t_ctx0() { m_traversal.reset(); }
 
-std::string
-t_ctx0::repr() const {
-    std::stringstream ss;
-    ss << "t_ctx0<" << this << ">";
-    return ss.str();
+void
+t_ctx0::init() {
+    m_traversal = std::make_shared<t_ftrav>();
+    m_deltas = std::make_shared<t_zcdeltas>();
+    m_init = true;
 }
 
+/**
+ * @brief When the gnode notifies the context with new data, clear deltas
+ * and prepare to reconcile new data with old.
+ */
 void
 t_ctx0::step_begin() {
     if (!m_init)
@@ -47,6 +52,10 @@ t_ctx0::step_begin() {
     m_traversal->step_begin();
 }
 
+/**
+ * @brief After all new rows have been processed, trigger the traversal's
+ * step_end() method which will reconcile traversal state.
+ */
 void
 t_ctx0::step_end() {
     if (!has_deltas()) {
@@ -56,305 +65,21 @@ t_ctx0::step_end() {
     m_traversal->step_end();
 }
 
-t_index
-t_ctx0::get_row_count() const {
-    return m_traversal->size();
-}
-
-t_index
-t_ctx0::get_column_count() const {
-    return m_config.get_num_columns();
-}
-
 /**
- * @brief Given a start/end row and column index, return the underlying data for the requested
- * subset.
- *
- * @param start_row
- * @param end_row
- * @param start_col
- * @param end_col
- * @return std::vector<t_tscalar>
+ * @brief Given new data from the gnode, add/update/remove each row from the
+ * newly-processed data from the traversal.
+ * 
+ * @param flattened 
+ * @param delta 
+ * @param prev 
+ * @param curr 
+ * @param transitions 
+ * @param existed 
  */
-std::vector<t_tscalar>
-t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
-    t_uindex ctx_nrows = get_row_count();
-    t_uindex ctx_ncols = get_column_count();
-    auto ext = sanitize_get_data_extents(
-        ctx_nrows, ctx_ncols, start_row, end_row, start_col, end_col);
-
-    t_index nrows = ext.m_erow - ext.m_srow;
-    t_index stride = ext.m_ecol - ext.m_scol;
-    std::vector<t_tscalar> values(nrows * stride);
-
-    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
-    auto none = mknone();
-
-    for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
-        std::vector<t_tscalar> out_data(pkeys.size());
-        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
-
-        for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
-            auto v = out_data[ridx - ext.m_srow];
-
-            // todo: fix null handling
-            if (!v.is_valid())
-                v.set(none);
-
-            values[(ridx - ext.m_srow) * stride + (cidx - ext.m_scol)] = v;
-        }
-    }
-
-    return values;
-}
-
-/**
- * @brief Given a vector of row indices, which may not be contiguous, return the underlying data
- * for these rows.
- *
- * @param rows a vector of row indices
- * @return std::vector<t_tscalar> a vector of scalars containing the underlying data
- */
-std::vector<t_tscalar>
-t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
-    t_uindex stride = get_column_count();
-    std::vector<t_tscalar> values(rows.size() * stride);
-    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(rows);
-
-    auto none = mknone();
-    for (t_uindex cidx = 0; cidx < stride; ++cidx) {
-        std::vector<t_tscalar> out_data(rows.size());
-        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
-
-        for (t_uindex ridx = 0; ridx < rows.size(); ++ridx) {
-            auto v = out_data[ridx];
-
-            if (!v.is_valid())
-                v.set(none);
-
-            values[(ridx)*stride + (cidx)] = v;
-        }
-    }
-
-    return values;
-}
-
-void
-t_ctx0::sort_by() {
-    reset_sortby();
-}
-
-void
-t_ctx0::sort_by(const std::vector<t_sortspec>& sortby) {
-    if (sortby.empty())
-        return;
-    m_traversal->sort_by(m_gstate, m_config, sortby);
-}
-
-void
-t_ctx0::reset_sortby() {
-    m_traversal->sort_by(m_gstate, m_config, std::vector<t_sortspec>());
-}
-
-t_tscalar
-t_ctx0::get_column_name(t_index idx) {
-    std::string empty("");
-
-    if (idx >= get_column_count())
-        return m_symtable.get_interned_tscalar(empty.c_str());
-
-    return m_symtable.get_interned_tscalar(m_config.col_at(idx).c_str());
-}
-
-void
-t_ctx0::init() {
-    m_traversal = std::make_shared<t_ftrav>();
-    m_deltas = std::make_shared<t_zcdeltas>();
-    m_init = true;
-}
-
-std::vector<t_tscalar>
-t_ctx0::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    if (!m_traversal->validate_cells(cells)) {
-        std::vector<t_tscalar> rval;
-        return rval;
-    }
-    return m_traversal->get_pkeys(cells);
-}
-
-std::vector<t_tscalar>
-t_ctx0::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    if (!m_traversal->validate_cells(cells)) {
-        std::vector<t_tscalar> rval;
-        return rval;
-    }
-    return m_traversal->get_all_pkeys(cells);
-}
-
-std::vector<t_tscalar>
-t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    if (!m_traversal->validate_cells(cells)) {
-        std::vector<t_tscalar> rval;
-        return rval;
-    }
-
-    t_uindex ncols = get_column_count();
-
-    for (const auto& c : cells) {
-        if (c.second >= ncols) {
-            std::vector<t_tscalar> rval;
-            return rval;
-        }
-    }
-
-    // Order aligned with cells
-    std::vector<t_tscalar> pkeys = get_all_pkeys(cells);
-    std::vector<t_tscalar> out_data;
-    out_data.reserve(cells.size());
-
-    for (t_index idx = 0, loop_end = pkeys.size(); idx < loop_end; ++idx) {
-        std::string colname = m_config.col_at(cells[idx].second);
-        out_data.push_back(m_gstate->get(pkeys[idx], colname));
-    }
-
-    return out_data;
-}
-
-/**
- * @brief
- *
- * @param bidx
- * @param eidx
- * @return std::vector<t_cellupd>
- */
-std::vector<t_cellupd>
-t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
-    tsl::hopscotch_set<t_tscalar> pkeys;
-    t_tscalar prev_pkey;
-    prev_pkey.set(t_none());
-
-    bidx = std::min(bidx, m_traversal->size());
-    eidx = std::min(eidx, m_traversal->size());
-
-    std::vector<t_cellupd> rval;
-
-    if (m_traversal->empty_sort_by()) {
-        std::vector<t_tscalar> pkey_vec = m_traversal->get_pkeys(bidx, eidx);
-        for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
-            const t_tscalar& pkey = pkey_vec[idx];
-            t_index row = bidx + idx;
-            std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
-                t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
-                iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
-            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
-                 iter != iters.second; ++iter) {
-                t_cellupd cellupd;
-                cellupd.row = row;
-                cellupd.column = iter->m_colidx;
-                cellupd.old_value = iter->m_old_value;
-                cellupd.new_value = iter->m_new_value;
-                rval.push_back(cellupd);
-            }
-        }
-    } else {
-        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
-             = m_deltas->get<by_zc_pkey_colidx>().begin();
-             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
-            if (prev_pkey != iter->m_pkey) {
-                pkeys.insert(iter->m_pkey);
-                prev_pkey = iter->m_pkey;
-            }
-        }
-
-        tsl::hopscotch_map<t_tscalar, t_index> r_indices;
-        m_traversal->get_row_indices(pkeys, r_indices);
-
-        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
-             = m_deltas->get<by_zc_pkey_colidx>().begin();
-             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
-            t_index row = r_indices[iter->m_pkey];
-            if (bidx <= row && row <= eidx) {
-                t_cellupd cellupd;
-                cellupd.row = row;
-                cellupd.column = iter->m_colidx;
-                cellupd.old_value = iter->m_old_value;
-                cellupd.new_value = iter->m_new_value;
-                rval.push_back(cellupd);
-            }
-        }
-    }
-    return rval;
-}
-
-/**
- * @brief Returns updated cells.
- *
- * @param bidx
- * @param eidx
- * @return t_stepdelta
- */
-t_stepdelta
-t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
-    bidx = std::min(bidx, m_traversal->size());
-    eidx = std::min(eidx, m_traversal->size());
-    bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
-    t_stepdelta rval(rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
-    m_deltas->clear();
-    clear_deltas();
-    return rval;
-}
-
-/**
- * @brief Returns a `t_rowdelta` struct containing data from updated rows and the updated row
- * indices.
- *
- * @return t_rowdelta
- */
-t_rowdelta
-t_ctx0::get_row_delta() {
-    bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
-    tsl::hopscotch_set<t_tscalar> pkeys = get_delta_pkeys();
-    std::vector<t_uindex> rows = m_traversal->get_row_indices(pkeys);
-    std::sort(rows.begin(), rows.end());
-    std::vector<t_tscalar> data = get_data(rows);
-    t_rowdelta rval(rows_changed, rows.size(), data);
-    clear_deltas();
-    return rval;
-}
-
-const tsl::hopscotch_set<t_tscalar>&
-t_ctx0::get_delta_pkeys() const {
-    return m_delta_pkeys;
-}
-
-std::vector<std::string>
-t_ctx0::get_column_names() const {
-    return m_config.get_column_names();
-}
-
-std::vector<t_sortspec>
-t_ctx0::get_sort_by() const {
-    return m_traversal->get_sort_by();
-}
-
-void
-t_ctx0::reset() {
-    m_traversal->reset();
-    m_deltas = std::make_shared<t_zcdeltas>();
-    m_has_delta = false;
-}
-
-t_index
-t_ctx0::sidedness() const {
-    return 0;
-}
-
 void
 t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     const t_data_table& prev, const t_data_table& curr, const t_data_table& transitions,
     const t_data_table& existed) {
-    // Notify the context with new data when the `t_gstate` master table is
-    // not empty, and being updated with new data.
     psp_log_time(repr() + " notify.enter");
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
@@ -442,16 +167,19 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
     psp_log_time(repr() + " notify.no_filter_path.updated_traversal");
 
-
     m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
     psp_log_time(repr() + " notify.no_filter_path.exit");
 }
 
+/**
+ * @brief Given new data from the gnode after its first update (going from 
+ * 0 rows to n > 0 rows), add each row to the traversal.
+ * 
+ * @param flattened 
+ */
 void
 t_ctx0::notify(const t_data_table& flattened) {
-    // Notify the context with new data after the `t_gstate`'s master table
-    // has been updated for the first time with data.
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
     std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
@@ -499,6 +227,197 @@ t_ctx0::notify(const t_data_table& flattened) {
         // Add primary key to track row delta
         add_delta_pkey(pkey);
     }
+}
+
+/**
+ * @brief Given a start/end row and column index, return the underlying data
+ * for the requested subset.
+ *
+ * @param start_row
+ * @param end_row
+ * @param start_col
+ * @param end_col
+ * @return std::vector<t_tscalar>
+ */
+std::vector<t_tscalar>
+t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ctx_ncols = get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ctx_ncols, start_row, end_row, start_col, end_col);
+
+    t_index nrows = ext.m_erow - ext.m_srow;
+    t_index stride = ext.m_ecol - ext.m_scol;
+    std::vector<t_tscalar> values(nrows * stride);
+
+    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
+    auto none = mknone();
+
+    for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
+        std::vector<t_tscalar> out_data(pkeys.size());
+        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
+
+        for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
+            auto v = out_data[ridx - ext.m_srow];
+
+            // todo: fix null handling
+            if (!v.is_valid())
+                v.set(none);
+
+            values[(ridx - ext.m_srow) * stride + (cidx - ext.m_scol)] = v;
+        }
+    }
+
+    return values;
+}
+
+/**
+ * @brief Given a vector of row indices, which may not be contiguous,
+ * return the underlying data for these rows.
+ *
+ * @param rows a vector of row indices
+ * @return std::vector<t_tscalar> a vector of scalars containing the data
+ */
+std::vector<t_tscalar>
+t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
+    t_uindex stride = get_column_count();
+    std::vector<t_tscalar> values(rows.size() * stride);
+    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(rows);
+
+    auto none = mknone();
+    for (t_uindex cidx = 0; cidx < stride; ++cidx) {
+        std::vector<t_tscalar> out_data(rows.size());
+        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
+
+        for (t_uindex ridx = 0; ridx < rows.size(); ++ridx) {
+            auto v = out_data[ridx];
+
+            if (!v.is_valid())
+                v.set(none);
+
+            values[(ridx)*stride + (cidx)] = v;
+        }
+    }
+
+    return values;
+}
+
+void
+t_ctx0::sort_by() {
+    reset_sortby();
+}
+
+void
+t_ctx0::sort_by(const std::vector<t_sortspec>& sortby) {
+    if (sortby.empty())
+        return;
+    m_traversal->sort_by(m_gstate, m_config, sortby);
+}
+
+void
+t_ctx0::reset_sortby() {
+    m_traversal->sort_by(m_gstate, m_config, std::vector<t_sortspec>());
+}
+
+t_tscalar
+t_ctx0::get_column_name(t_index idx) {
+    std::string empty("");
+
+    if (idx >= get_column_count())
+        return m_symtable.get_interned_tscalar(empty.c_str());
+
+    return m_symtable.get_interned_tscalar(m_config.col_at(idx).c_str());
+}
+
+std::vector<t_tscalar>
+t_ctx0::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+    if (!m_traversal->validate_cells(cells)) {
+        std::vector<t_tscalar> rval;
+        return rval;
+    }
+    return m_traversal->get_pkeys(cells);
+}
+
+std::vector<t_tscalar>
+t_ctx0::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+    if (!m_traversal->validate_cells(cells)) {
+        std::vector<t_tscalar> rval;
+        return rval;
+    }
+    return m_traversal->get_all_pkeys(cells);
+}
+
+std::vector<t_tscalar>
+t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+    if (!m_traversal->validate_cells(cells)) {
+        std::vector<t_tscalar> rval;
+        return rval;
+    }
+
+    t_uindex ncols = get_column_count();
+
+    for (const auto& c : cells) {
+        if (c.second >= ncols) {
+            std::vector<t_tscalar> rval;
+            return rval;
+        }
+    }
+
+    // Order aligned with cells
+    std::vector<t_tscalar> pkeys = get_all_pkeys(cells);
+    std::vector<t_tscalar> out_data;
+    out_data.reserve(cells.size());
+
+    for (t_index idx = 0, loop_end = pkeys.size(); idx < loop_end; ++idx) {
+        std::string colname = m_config.col_at(cells[idx].second);
+        out_data.push_back(m_gstate->get(pkeys[idx], colname));
+    }
+
+    return out_data;
+}
+
+/**
+ * @brief Returns a `t_rowdelta` struct containing data from updated rows and the updated row
+ * indices.
+ *
+ * @return t_rowdelta
+ */
+t_rowdelta
+t_ctx0::get_row_delta() {
+    bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
+    std::vector<t_uindex> rows = m_traversal->get_row_indices(m_delta_pkeys);
+    std::sort(rows.begin(), rows.end());
+    std::vector<t_tscalar> data = get_data(rows);
+    t_rowdelta rval(rows_changed, rows.size(), data);
+    clear_deltas();
+    return rval;
+}
+
+const tsl::hopscotch_set<t_tscalar>&
+t_ctx0::get_delta_pkeys() const {
+    return m_delta_pkeys;
+}
+
+std::vector<std::string>
+t_ctx0::get_column_names() const {
+    return m_config.get_column_names();
+}
+
+std::vector<t_sortspec>
+t_ctx0::get_sort_by() const {
+    return m_traversal->get_sort_by();
+}
+
+void
+t_ctx0::reset() {
+    m_traversal->reset();
+    m_deltas = std::make_shared<t_zcdeltas>();
+    m_has_delta = false;
+}
+
+t_index
+t_ctx0::sidedness() const {
+    return 0;
 }
 
 void
@@ -570,6 +489,100 @@ t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
     }
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return std::vector<t_cellupd>
+ */
+std::vector<t_cellupd>
+t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
+    tsl::hopscotch_set<t_tscalar> pkeys;
+    t_tscalar prev_pkey;
+    prev_pkey.set(t_none());
+
+    bidx = std::min(bidx, m_traversal->size());
+    eidx = std::min(eidx, m_traversal->size());
+
+    std::vector<t_cellupd> rval;
+
+    if (m_traversal->empty_sort_by()) {
+        std::vector<t_tscalar> pkey_vec = m_traversal->get_pkeys(bidx, eidx);
+        for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
+            const t_tscalar& pkey = pkey_vec[idx];
+            t_index row = bidx + idx;
+            std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
+                t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
+                iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
+            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
+                 iter != iters.second; ++iter) {
+                t_cellupd cellupd;
+                cellupd.row = row;
+                cellupd.column = iter->m_colidx;
+                cellupd.old_value = iter->m_old_value;
+                cellupd.new_value = iter->m_new_value;
+                rval.push_back(cellupd);
+            }
+        }
+    } else {
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
+             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
+            if (prev_pkey != iter->m_pkey) {
+                pkeys.insert(iter->m_pkey);
+                prev_pkey = iter->m_pkey;
+            }
+        }
+
+        tsl::hopscotch_map<t_tscalar, t_index> r_indices;
+        m_traversal->get_row_indices(pkeys, r_indices);
+
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
+             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
+            t_index row = r_indices[iter->m_pkey];
+            if (bidx <= row && row <= eidx) {
+                t_cellupd cellupd;
+                cellupd.row = row;
+                cellupd.column = iter->m_colidx;
+                cellupd.old_value = iter->m_old_value;
+                cellupd.new_value = iter->m_new_value;
+                rval.push_back(cellupd);
+            }
+        }
+    }
+    return rval;
+}
+
+/**
+ * @brief Returns updated cells.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
+t_stepdelta
+t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
+    bidx = std::min(bidx, m_traversal->size());
+    eidx = std::min(eidx, m_traversal->size());
+    bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
+    t_stepdelta rval(rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
+    m_deltas->clear();
+    clear_deltas();
+    return rval;
+}
+
+t_index
+t_ctx0::get_row_count() const {
+    return m_traversal->size();
+}
+
+t_index
+t_ctx0::get_column_count() const {
+    return m_config.get_num_columns();
+}
+
 
 /**
  * @brief Mark a primary key as updated by adding it to the tracking set.
@@ -615,9 +628,6 @@ bool
 t_ctx0::has_deltas() const {
     return m_has_delta;
 }
-
-void
-t_ctx0::pprint() const {}
 
 t_dtype
 t_ctx0::get_column_dtype(t_uindex idx) const {
@@ -710,5 +720,17 @@ t_ctx0::clear_deltas() {
 
 void
 t_ctx0::unity_init_load_step_end() {}
+
+
+std::string
+t_ctx0::repr() const {
+    std::stringstream ss;
+    ss << "t_ctx0<" << this << ">";
+    return ss.str();
+}
+
+void
+t_ctx0::pprint() const {}
+
 
 } // end namespace perspective

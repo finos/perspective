@@ -1612,7 +1612,7 @@ namespace binding {
         t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
         auto cfg = t_config(
-            row_pivots, column_pivots, aggspecs, total, fterm, filter_op, computed_columns,column_only);
+            row_pivots, column_pivots, aggspecs, total, fterm, filter_op, computed_columns, column_only);
         auto ctx2 = std::make_shared<t_ctx2>(*(schema.get()), cfg);
 
         ctx2->init();

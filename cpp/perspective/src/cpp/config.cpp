@@ -12,27 +12,6 @@
 
 namespace perspective {
 
-// Construct view config
-t_config::t_config(const std::vector<std::string>& row_pivots,
-    const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-    const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
-    t_filter_op combiner, const std::vector<t_fterm>& fterms,
-    const std::vector<std::string>& col_names, bool column_only)
-    : m_column_only(column_only)
-    , m_sortspecs(sortspecs)
-    , m_col_sortspecs(col_sortspecs)
-    , m_aggregates(aggregates)
-    , m_detail_columns(col_names) // this should be the columns property
-    , m_fterms(fterms)
-    , m_combiner(combiner) {
-    for (const auto& p : row_pivots) {
-        m_row_pivots.push_back(t_pivot(p));
-    }
-    for (const auto& p : col_pivots) {
-        m_col_pivots.push_back(t_pivot(p));
-    }
-};
-
 // t_ctx0
 t_config::t_config(
     const std::vector<std::string>& detail_columns,
@@ -41,10 +20,22 @@ t_config::t_config(
     const std::vector<t_computed_column_definition>& computed_columns)
     : m_detail_columns(detail_columns)
     , m_fterms(fterms)
-    , m_combiner(combiner)
     , m_computed_columns(computed_columns)
+    , m_combiner(combiner)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns);
+    if (m_row_pivots.empty() &&
+        m_col_pivots.empty() &&
+        m_sortby.empty() &&
+        m_sortspecs.empty() &&
+        m_col_sortspecs.empty() &&
+        m_detail_columns.empty() &&
+        m_fterms.empty() &&
+        m_computed_columns.empty()) {
+        m_is_trivial_config = true;
+    } else {
+        m_is_trivial_config = false;
+    }
 }
 
 // t_ctx1
@@ -55,10 +46,11 @@ t_config::t_config(
     t_filter_op combiner,
     const std::vector<t_computed_column_definition>& computed_columns)
     : m_aggregates(aggregates)
-    , m_totals(TOTALS_BEFORE)
     , m_fterms(fterms)
-    , m_combiner(combiner)
     , m_computed_columns(computed_columns)
+    , m_combiner(combiner)
+    , m_is_trivial_config(false)
+    , m_totals(TOTALS_BEFORE)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -76,12 +68,13 @@ t_config::t_config(
     t_filter_op combiner,
     const std::vector<t_computed_column_definition>& computed_columns,
     bool column_only)
-    : m_column_only(column_only)
-    , m_aggregates(aggregates)
-    , m_totals(totals)
+    : m_aggregates(aggregates)
     , m_fterms(fterms)
-    , m_combiner(combiner)
     , m_computed_columns(computed_columns)
+    , m_combiner(combiner)
+    , m_column_only(column_only)
+    , m_is_trivial_config(false)
+    , m_totals(totals)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -101,10 +94,11 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
     const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms)
     : m_aggregates(aggregates)
-    , m_totals(totals)
     , m_fterms(fterms)
     , m_combiner(combiner)
-    , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    , m_is_trivial_config(false) 
+    , m_totals(totals)
+    , m_fmode(FMODE_SIMPLE_CLAUSES){
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
     }
@@ -120,6 +114,7 @@ t_config::t_config(
     const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates)
     : m_row_pivots(row_pivots)
     , m_aggregates(aggregates)
+    , m_is_trivial_config(false)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
@@ -127,9 +122,10 @@ t_config::t_config(
 t_config::t_config(
     const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates)
     : m_aggregates(aggregates)
-    , m_totals(TOTALS_BEFORE)
     , m_combiner(FILTER_OP_AND)
-    , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    , m_is_trivial_config(false) 
+    , m_totals(TOTALS_BEFORE)
+    , m_fmode(FMODE_SIMPLE_CLAUSES){
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
     }
@@ -139,8 +135,9 @@ t_config::t_config(
 
 t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg)
     : m_aggregates(std::vector<t_aggspec>{agg})
-    , m_totals(TOTALS_BEFORE)
     , m_combiner(FILTER_OP_AND)
+    , m_is_trivial_config(false)
+    , m_totals(TOTALS_BEFORE)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -213,6 +210,11 @@ t_config::setup(const std::vector<std::string>& detail_columns,
 
     populate_sortby(m_row_pivots);
     populate_sortby(m_col_pivots);
+}
+
+bool
+t_config::is_trivial_config() {
+    return m_is_trivial_config;
 }
 
 void

@@ -398,6 +398,133 @@ module.exports = perspective => {
             });
         });
 
+        describe("0-sided row delta, column order subset", function() {
+            it("returns changed rows", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    columns: ["y"]
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [{y: "string1"}, {y: "string2"}];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns changed rows from schema", async function(done) {
+                let table = perspective.table(
+                    {
+                        x: "integer",
+                        y: "string",
+                        z: "boolean"
+                    },
+                    {index: "x"}
+                );
+                let view = table.view({
+                    columns: ["z"]
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [{z: false}, {z: false}, {z: true}];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update([
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 1, y: "d", z: false}
+                ]);
+            });
+
+            it("returns added rows", async function(done) {
+                let table = perspective.table(data);
+                let view = table.view({
+                    columns: ["y"]
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [{y: "string1"}, {y: "string2"}];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns added rows from schema", async function(done) {
+                let table = perspective.table({
+                    x: "integer",
+                    y: "string",
+                    z: "boolean"
+                });
+                let view = table.view({
+                    columns: ["z"]
+                });
+                view.on_update(
+                    async function(updated) {
+                        await match_delta(perspective, updated.delta, [{z: true}, {z: false}, {z: true}, {z: false}]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(data);
+            });
+
+            it("returns deleted rows", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    columns: ["y"]
+                });
+                view.on_update(
+                    async function(updated) {
+                        const expected = [{y: null}, {y: null}];
+                        await match_delta(perspective, updated.delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update([
+                    {x: 1, y: null},
+                    {x: 4, y: null}
+                ]);
+            });
+
+            it("returns changed rows in non-sequential update", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    columns: ["y"]
+                });
+                view.on_update(
+                    async function(updated) {
+                        await match_delta(perspective, updated.delta, [{y: "string1"}, {y: "string2"}]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_nonseq);
+            });
+        });
+
         describe("1-sided row delta", function() {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});

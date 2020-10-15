@@ -136,14 +136,9 @@ export default function(Module) {
         this.config = config || {};
         this.view_config = view_config || new view_config();
 
-        const num_columns = this.table.columns().length;
-
-        // TODO: verify that a different order of the same num_cols as the
-        // table is valid as a unit context.
         this.is_unit_config =
             this.table.index === "" &&
             sides === 0 &&
-            this.view_config.columns.length === num_columns &&
             this.view_config.row_pivots.length === 0 &&
             this.view_config.column_pivots.length === 0 &&
             this.view_config.filter.length === 0 &&

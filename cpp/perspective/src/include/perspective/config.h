@@ -28,26 +28,6 @@ namespace perspective {
 class PERSPECTIVE_EXPORT t_config {
 public:
     /**
-     * @brief Construct a config for a `View` object. Pivots are passed in as vectors of
-     * strings, which are converted to `t_pivot` objects.
-     *
-     * @param row_pivots
-     * @param column_pivots
-     * @param aggregates
-     * @param sortspecs
-     * @param col_sortspecs
-     * @param combiner
-     * @param fterms
-     * @param col_names
-     * @param column_only
-     */
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& column_pivots, const std::vector<t_aggspec>& aggregates,
-        const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms,
-        const std::vector<std::string>& col_names, bool column_only);
-
-    /**
      * @brief Construct a new config for a `t_ctx0` object.
      *
      * @param detail_columns the columns to be displayed in the context
@@ -129,6 +109,17 @@ public:
         const std::vector<std::string>& sort_pivot,
         const std::vector<std::string>& sort_pivot_by);
 
+    /**
+     * @brief A t_config is trivial if it does not have any pivots, sorts,
+     * filter terms, or computed columns. This allows a context_zero to
+     * skip creating a traversal and simply read from its gnode state for
+     * a performance boost.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool is_trivial_config();
+
     t_index get_colidx(const std::string& colname) const;
 
     std::string repr() const;
@@ -192,28 +183,32 @@ protected:
     void populate_sortby(const std::vector<t_pivot>& pivots);
 
 private:
+    // Set at initialization and accessible through a public API.
+    std::vector<std::string> m_detail_columns;
     std::vector<t_pivot> m_row_pivots;
     std::vector<t_pivot> m_col_pivots;
-    bool m_column_only;
+    std::vector<t_aggspec> m_aggregates;
     std::map<std::string, std::string> m_sortby;
     std::vector<t_sortspec> m_sortspecs;
     std::vector<t_sortspec> m_col_sortspecs;
-    std::vector<t_aggspec> m_aggregates;
-    std::vector<std::string> m_detail_columns;
+    std::vector<t_fterm> m_fterms;
+    std::vector<t_computed_column_definition> m_computed_columns;
+    t_filter_op m_combiner;
+    bool m_column_only;
+
+    // A trivial config exists if there are no pivots, sorts, filters, or
+    // computed columns.
+    bool m_is_trivial_config;
+
+    // Internal
     t_totals m_totals;
     std::map<std::string, t_index> m_detail_colmap;
-    bool m_has_pkey_agg;
-    // t_uindex m_row_expand_depth;
-    // t_uindex m_col_expand_depth;
-    std::vector<t_fterm> m_fterms;
-    t_filter_op m_combiner;
-    std::vector<t_computed_column_definition> m_computed_columns;
     std::string m_parent_pkey_column;
     std::string m_child_pkey_column;
     std::string m_grouping_label_column;
-    t_fmode m_fmode;
-    std::vector<std::string> m_filter_exprs;
     std::string m_grand_agg_str;
+    t_fmode m_fmode;
+    bool m_has_pkey_agg;
 };
 
 } // end namespace perspective

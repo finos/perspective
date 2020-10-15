@@ -322,42 +322,6 @@ describe("View", async () => {
         await table.delete();
     });
 
-    describe("mixed", async () => {
-        describe("ctx_unit", async () => {
-            let view;
-
-            afterEach(async () => {
-                await view.delete();
-            });
-
-            benchmark(`view`, async () => {
-                view = table.view();
-                await view.schema();
-            });
-        });
-    });
-
-    describe("mixed", async () => {
-        describe("ctx_unit", async () => {
-            let view;
-
-            beforeAll(async () => {
-                view = table.view();
-                await view.schema();
-            });
-
-            afterAll(async () => {
-                await view.delete();
-            });
-
-            for (const format of ["json", "columns", "arrow"]) {
-                benchmark(format, async () => {
-                    await view[`to_${format}`]();
-                });
-            }
-        });
-    });
-
     for (const aggregate of AGG_OPTIONS) {
         for (const row_pivot of ROW_PIVOT_OPTIONS) {
             for (const column_pivot of COLUMN_PIVOT_OPTIONS) {

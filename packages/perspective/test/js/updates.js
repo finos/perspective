@@ -431,6 +431,37 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("arrow dict contructor then arrow dict `update()` subset of columns", async function() {
+            var table = perspective.table(arrows.dict_arrow.slice());
+            table.update(arrows.dict_update_arrow.slice());
+            var view = table.view({
+                columns: ["a"]
+            });
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["abc", "def", "def", null, "abc", null, "update1", "update2"]
+            });
+            view.delete();
+            table.delete();
+        });
+
+        it("non-arrow constructor then arrow dict `update()`, subset of columns", async function() {
+            let table = perspective.table({
+                a: ["a", "b", "c"],
+                b: ["d", "e", "f"]
+            });
+            let view = table.view({
+                columns: ["a"]
+            });
+            table.update(arrows.dict_update_arrow.slice());
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                a: ["a", "b", "c", null, "update1", "update2"]
+            });
+            view.delete();
+            table.delete();
+        });
+
         it("arrow partial `update()` a single column", async function() {
             let table = perspective.table(arrows.test_arrow.slice(), {index: "i64"});
             table.update(arrows.partial_arrow.slice());

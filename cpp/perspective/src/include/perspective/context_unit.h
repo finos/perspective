@@ -41,10 +41,6 @@ public:
 
     std::vector<t_tscalar> get_data(const std::vector<t_tscalar>& pkeys) const;
 
-    void sort_by(const std::vector<t_sortspec>& sortby);
-
-    void reset_sortby();
-
     // will only work on empty contexts
     void notify(const t_data_table& flattened);
 
@@ -68,16 +64,11 @@ public:
 
     std::vector<t_tscalar> get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
-    std::vector<t_tscalar> get_cell_data(
-        const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
-
     t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 
     t_rowdelta get_row_delta();
 
     std::vector<t_uindex> get_rows_changed();
-
-    std::vector<t_cellupd> get_cell_delta(t_index bidx, t_index eidx) const;
 
     void clear_deltas();
 
@@ -86,8 +77,6 @@ public:
     void disable();
 
     void enable();
-
-    std::vector<t_stree*> get_trees();
 
     bool has_deltas() const;
 
@@ -114,10 +103,8 @@ public:
     std::string unity_get_column_display_name(t_uindex idx) const;
     t_uindex unity_get_column_count() const;
     t_uindex unity_get_row_count() const;
-    t_data_table unity_get_table() const;
     bool unity_get_row_expanded(t_uindex idx) const;
     bool unity_get_column_expanded(t_uindex idx) const;
-    void unity_init_load_step_end();
 
 protected:
     void add_delta_pkey(t_tscalar pkey);
@@ -137,9 +124,6 @@ private:
      * to the master table's data.
      */
     tsl::hopscotch_set<t_tscalar> m_delta_pkeys;
-
-    // A mapping of integer row indices to scalar primary keys.
-    tsl::hopscotch_map<t_uindex, t_tscalar> m_pkey_index;
 
     t_symtable m_symtable;
     bool m_has_delta;
