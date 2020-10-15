@@ -252,14 +252,15 @@ namespace apachearrow {
         auto maybe_reader = arrow::csv::TableReader::Make(
             pool, input, read_options, parse_options, convert_options);
 
-        resetTimestampParsers(is_update);
-
         std::shared_ptr<arrow::csv::TableReader> reader = *maybe_reader;
 
         auto maybe_table = reader->Read();
         if (!maybe_table.ok()) {
             PSP_COMPLAIN_AND_ABORT(maybe_table.status().ToString());
         }
+
+        resetTimestampParsers(is_update);
+
         return *maybe_table;
     }
 

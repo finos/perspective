@@ -57,7 +57,9 @@ namespace binding {
 
     t_val
     is_valid_datetime(t_val filter_term) {
-        return t_val(apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1);
+        t_val data(apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1);
+        apachearrow::resetTimestampParsers();
+        return data;
     }
 
     bool val_to_date(t_val& item, bool is_update, t_date* out) {
@@ -1294,7 +1296,9 @@ namespace binding {
             return true;
         } else if (column_type == DTYPE_DATE || column_type == DTYPE_TIME) {
             if (filter_term.typeOf().as<std::string>().compare("string") == 0) {
-                return has_value(filter_term) && apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1;
+                bool is_valid = has_value(filter_term) && apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1;
+                apachearrow::resetTimestampParsers();
+                return is_valid;
             } else {
                 return has_value(filter_term);
             }         

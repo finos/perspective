@@ -97,7 +97,7 @@ function compileCPP(packageName) {
     const base_dir = path.join(__dirname, "..", "packages", packageName, "build", dir_name);
     mkdirp.sync(base_dir);
     const cmd = bash`
-        emcmake cmake ../../../../cpp/perspective ${process.env.PSP_DEBUG}-DCMAKE_BUILD_TYPE
+        emcmake cmake ../../../../cpp/perspective -DCMAKE_BUILD_TYPE=${dir_name}
         && emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}
     `;
     if (process.env.PSP_DOCKER) {
