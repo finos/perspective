@@ -243,6 +243,7 @@ t_ftrav::step_begin() {
 
 void
 t_ftrav::step_end() {
+    // The new number of rows in this traversal
     t_index new_size = m_index->size() + m_step_inserts - m_step_deletes;
 
     auto new_index = std::make_shared<std::vector<t_mselem>>();
@@ -254,78 +255,56 @@ t_ftrav::step_end() {
     std::vector<t_mselem> new_rows;
     new_rows.reserve(m_new_elems.size());
 
-    std::cout << "pkeys in new_rows" << std::endl;
-
     for (
         tsl::hopscotch_map<t_tscalar, t_mselem>::const_iterator pkelem_iter = m_new_elems.begin();
         pkelem_iter != m_new_elems.end();
         ++pkelem_iter) {
-        std::cout << pkelem_iter->first << ", ";
         new_rows.push_back(pkelem_iter->second);
     }
 
-    std::cout << std::endl;
-
-    for (const auto& sort : m_sortby) {
-        std::cout << "sort: " << sort.m_colname << std::endl;
-    }
-
+    // TODO: int/float/date/datetime pkeys are already sorted here, so if
+    // there was a way to assert that `psp_pkey` is a string typed column,
+    // we can conditional the sort on whether m_sortby.size() > 0 or if
+    // psp_pkey is a string column.
     std::sort(new_rows.begin(), new_rows.end(), sorter);
-    std::cout << "pkeys in new_rows (sorted)" << std::endl;
-    for (const auto& r : new_rows) {
-        std::cout << r.m_pkey << ", ";
-    }
-
-    std::cout << std::endl << "new_index" << std::endl;
 
     for (auto it = new_rows.begin(); it != new_rows.end(); ++it) {
         const t_mselem& new_elem = *it;
+
         while (i < m_index->size()) {
             const t_mselem& old_elem = (*m_index)[i];
-            std::cout << old_elem.m_pkey;
+
             if (old_elem.m_deleted) {
-                std::cout << " deleted, ";
                 i++;
                 m_pkeyidx.erase(old_elem.m_pkey);
             } else if (old_elem.m_updated) {
-                std::cout << " updated, ";
                 i++;
             } else if (sorter(old_elem, new_elem)) {
-                std::cout << " sorted, ";
                 m_pkeyidx[old_elem.m_pkey] = new_index->size();
                 new_index->push_back(old_elem);
                 i++;
             } else {
-                std::cout << " noop, ";
                 break;
             }
         }
 
         m_pkeyidx[new_elem.m_pkey] = new_index->size();
-        std::cout << new_elem.m_pkey << ": " << new_index->size() << ", ";
         new_index->push_back(new_elem);
     }
-
-    std::cout << std::endl;
-    std::cout << "i: " << i << std::endl;
-    std::cout << "reconciling new_index" << std::endl;
 
     // reconcile old rows that are marked as removed or updated.
     while (i < m_index->size()) {
         const t_mselem& old_elem = (*m_index)[i++];
-        std::cout << old_elem.m_pkey;
+        
         if (old_elem.m_deleted) {
-            std::cout << " deleted, ";
             m_pkeyidx.erase(old_elem.m_pkey);
         } else if (!old_elem.m_updated) {
+            // Add back cells that have not changed during this step.
             m_pkeyidx[old_elem.m_pkey] = new_index->size();
-            std::cout << " not updated - new size: " << new_index->size() << ", ";
             new_index->push_back(old_elem);
-        } else {
-            std::cout << ", ";
         }
     }
-    std::cout << std::endl;
+
     std::swap(new_index, m_index);
     m_new_elems.clear();
 }

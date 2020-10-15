@@ -281,19 +281,4 @@ t_view_config::get_aggregate_index(const std::string& column) const {
     return t_index();
 }
 
-bool
-t_view_config::is_unit_config(
-    const std::vector<std::string>& table_columns) const {
-    if (m_row_pivots.size() == 0 &&
-        m_column_pivots.size() == 0 &&
-        m_filter.size() == 0 &&
-        m_sort.size() == 0 &&
-        m_computed_columns.size() == 0 &&
-        m_columns == table_columns) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 } // end namespace perspective
