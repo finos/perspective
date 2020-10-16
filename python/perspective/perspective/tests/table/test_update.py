@@ -11,7 +11,6 @@ from perspective.table import Table
 
 
 class TestUpdate(object):
-
     def test_update_from_schema(self):
         tbl = Table({
             "a": str,
@@ -52,6 +51,62 @@ class TestUpdate(object):
         tbl = Table({"a": ["abc"], "b": [123]}, index="a")
         tbl.update({"a": ["abc"], "b": [456]})
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
+
+    # make sure already created views are notified properly
+    def test_update_from_schema_notify(self):
+        tbl = Table({
+            "a": str,
+            "b": int
+        })
+        view = tbl.view()
+        assert view.num_rows() == 0
+        tbl.update([{"a": "abc", "b": 123}])
+        assert view.to_records() == [{"a": "abc", "b": 123}]
+
+    def test_update_columnar_from_schema_notify(self):
+        tbl = Table({
+            "a": str,
+            "b": int
+        })
+        view = tbl.view()
+        assert view.num_rows() == 0
+        tbl.update({"a": ["abc"], "b": [123]})
+        assert view.to_records() == [{"a": "abc", "b": 123}]
+
+    def test_update_append_notify(self):
+        tbl = Table([{"a": "abc", "b": 123}])
+        view = tbl.view()
+        assert view.num_rows() == 1
+        tbl.update([{"a": "def", "b": 456}])
+        assert view.to_records() == [{"a": "abc", "b": 123}, {"a": "def", "b": 456}]
+
+    def test_update_partial_notify(self):
+        tbl = Table([{"a": "abc", "b": 123}], index="a")
+        view = tbl.view()
+        assert view.num_rows() == 1
+        tbl.update([{"a": "abc", "b": 456}])
+        assert view.to_records() == [{"a": "abc", "b": 456}]
+
+    def test_update_partial_cols_not_in_schema_notify(self):
+        tbl = Table([{"a": "abc", "b": 123}], index="a")
+        view = tbl.view()
+        assert view.num_rows() == 1
+        tbl.update([{"a": "abc", "b": 456, "c": 789}])
+        assert view.to_records() == [{"a": "abc", "b": 456}]
+
+    def test_update_columnar_append_notify(self):
+        tbl = Table({"a": ["abc"], "b": [123]})
+        view = tbl.view()
+        assert view.num_rows() == 1
+        tbl.update({"a": ["def"], "b": [456]})
+        assert view.to_records() == [{"a": "abc", "b": 123}, {"a": "def", "b": 456}]
+
+    def test_update_columnar_partial_notify(self):
+        tbl = Table({"a": ["abc"], "b": [123]}, index="a")
+        view = tbl.view()
+        assert view.num_rows() == 1
+        tbl.update({"a": ["abc"], "b": [456]})
+        assert view.to_records() == [{"a": "abc", "b": 456}]
 
     # bool
 

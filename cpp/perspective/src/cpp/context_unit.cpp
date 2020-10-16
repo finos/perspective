@@ -151,6 +151,8 @@ t_ctxunit::get_data(
 
         std::vector<t_tscalar> out_data(num_rows);
 
+        // Read directly from the row indices on the table - they will
+        // always correspond exactly.
         m_gstate->read_column(colname, start_row, end_row, out_data);
 
         for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {

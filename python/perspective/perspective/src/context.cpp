@@ -22,6 +22,32 @@ namespace binding {
  */
 
 template <>
+std::shared_ptr<t_ctxunit>
+make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
+    std::shared_ptr<t_view_config> view_config, const std::string& name) {
+    auto columns = view_config->get_columns();
+    auto filter_op = view_config->get_filter_op();
+    auto fterm = view_config->get_fterm();
+    auto computed_columns = view_config->get_computed_columns();
+
+    auto cfg = t_config(columns, fterm, filter_op, computed_columns);
+    auto ctx_unit = std::make_shared<t_ctxunit>(*(schema.get()), cfg);
+    ctx_unit->init();
+
+    auto pool = table->get_pool();
+    auto gnode = table->get_gnode();
+
+    pool->register_context(
+        gnode->get_id(),
+        name,
+        UNIT_CONTEXT,
+        reinterpret_cast<std::uintptr_t>(ctx_unit.get()));
+
+    return ctx_unit;
+}
+
+
+template <>
 std::shared_ptr<t_ctx0>
 make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
     std::shared_ptr<t_view_config> view_config, const std::string& name) {

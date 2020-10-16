@@ -687,7 +687,7 @@ View<CTX_T>::_set_deltas_enabled(bool enabled_state) {
 
 // Pivot table operations
 template <typename CTX_T>
-std::int32_t
+bool
 View<CTX_T>::get_row_expanded(std::int32_t ridx) const {
     return m_ctx->unity_get_row_expanded(ridx);
 }
@@ -718,6 +718,12 @@ View<t_ctx2>::expand(std::int32_t ridx, std::int32_t row_pivot_length) {
     } else {
         return ridx;
     }
+}
+
+template <>
+t_index
+View<t_ctxunit>::collapse(std::int32_t ridx) {
+    return ridx;
 }
 
 template <>

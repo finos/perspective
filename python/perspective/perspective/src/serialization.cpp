@@ -30,6 +30,12 @@ get_data_slice(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
     return data_slice;
 }
 
+std::shared_ptr<t_data_slice<t_ctxunit>>
+get_data_slice_unit(std::shared_ptr<View<t_ctxunit>> view, std::uint32_t start_row,
+    std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col) {
+    return get_data_slice<t_ctxunit>(view, start_row, end_row, start_col, end_col);
+}
+
 std::shared_ptr<t_data_slice<t_ctx0>>
 get_data_slice_ctx0(std::shared_ptr<View<t_ctx0>> view, std::uint32_t start_row,
     std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col) {
@@ -54,6 +60,12 @@ get_from_data_slice(
     std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx) {
     auto d = data_slice->get(ridx, cidx);
     return scalar_to_py(d);
+}
+
+t_val
+get_from_data_slice_unit(
+    std::shared_ptr<t_data_slice<t_ctxunit>> data_slice, t_uindex ridx, t_uindex cidx) {
+    return get_from_data_slice<t_ctxunit>(data_slice, ridx, cidx);
 }
 
 t_val
@@ -85,6 +97,11 @@ get_pkeys_from_data_slice(std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uin
     }
 
     return rval;
+}
+
+std::vector<t_val>
+get_pkeys_from_data_slice_unit(std::shared_ptr<t_data_slice<t_ctxunit>> data_slice, t_uindex ridx, t_uindex cidx) {
+    return get_pkeys_from_data_slice<t_ctxunit>(data_slice, ridx, cidx);
 }
 
 std::vector<t_val>

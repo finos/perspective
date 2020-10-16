@@ -239,6 +239,11 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
     return view_config;
 }
 
+/******************************************************************************
+ *
+ * make_view
+ */
+
 template <typename CTX_T>
 std::shared_ptr<View<CTX_T>>
 make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
@@ -251,6 +256,12 @@ make_view(std::shared_ptr<Table> table, const std::string& name, const std::stri
         auto view_ptr = std::make_shared<View<CTX_T>>(table, ctx, name, separator, config);
         return view_ptr;
     }
+}
+
+std::shared_ptr<View<t_ctxunit>>
+make_view_unit(std::shared_ptr<Table> table, std::string name, std::string separator,
+    t_val view_config, t_val date_parser) {
+    return make_view<t_ctxunit>(table, name, separator, view_config, date_parser);
 }
 
 std::shared_ptr<View<t_ctx0>>
@@ -269,6 +280,25 @@ std::shared_ptr<View<t_ctx2>>
 make_view_ctx2(std::shared_ptr<Table> table, std::string name, std::string separator,
     t_val view_config, t_val date_parser) {
     return make_view<t_ctx2>(table, name, separator, view_config, date_parser);
+}
+
+/******************************************************************************
+ *
+ * to_arrow
+ */
+
+py::bytes
+to_arrow_unit(
+    std::shared_ptr<View<t_ctxunit>> view,
+    std::int32_t start_row,
+    std::int32_t end_row,
+    std::int32_t start_col,
+    std::int32_t end_col
+) {
+    PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+    std::shared_ptr<std::string> str = 
+        view->to_arrow(start_row, end_row, start_col, end_col);
+    return py::bytes(*str);
 }
 
 py::bytes
@@ -313,6 +343,19 @@ to_arrow_two(
     return py::bytes(*str);
 }
 
+/******************************************************************************
+ *
+ * get_row_delta
+ */
+
+py::bytes
+get_row_delta_unit(std::shared_ptr<View<t_ctxunit>> view) {
+    PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+    std::shared_ptr<t_data_slice<t_ctxunit>> slice = view->get_row_delta();
+    std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+    return py::bytes(*arrow);
+}
+
 py::bytes
 get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view) {
     PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
@@ -337,9 +380,6 @@ get_row_delta_two(
     std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
     return py::bytes(*arrow);
 }
-
-
-
 
 } //namespace binding
 } //namespace perspective

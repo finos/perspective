@@ -136,7 +136,7 @@ export default function(Module) {
         this.config = config || {};
         this.view_config = view_config || new view_config();
 
-        this.is_unit_config =
+        this.is_unit_context =
             this.table.index === "" &&
             sides === 0 &&
             this.view_config.row_pivots.length === 0 &&
@@ -145,7 +145,7 @@ export default function(Module) {
             this.view_config.sort.length === 0 &&
             this.view_config.computed_columns.length === 0;
 
-        if (this.is_unit_config) {
+        if (this.is_unit_context) {
             this._View = __MODULE__.make_view_unit(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
         } else if (sides === 0) {
             this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
@@ -345,7 +345,7 @@ export default function(Module) {
     };
 
     view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
-        if (this.is_unit_config) {
+        if (this.is_unit_context) {
             return __MODULE__.get_data_slice_unit(this._View, start_row, end_row, start_col, end_col);
         } else {
             const num_sides = this.sides();
@@ -412,7 +412,7 @@ export default function(Module) {
 
         let get_from_data_slice;
 
-        if (this.is_unit_config) {
+        if (this.is_unit_context) {
             get_from_data_slice = __MODULE__.get_from_data_slice_unit;
         } else {
             get_from_data_slice = __MODULE__[`get_from_data_slice_${nidx}`];
@@ -689,7 +689,7 @@ export default function(Module) {
         const end_col = options.end_col;
         const sides = this.sides();
 
-        if (this.is_unit_config) {
+        if (this.is_unit_context) {
             return __MODULE__.to_arrow_unit(this._View, start_row, end_row, start_col, end_col);
         } else if (sides === 0) {
             return __MODULE__.to_arrow_zero(this._View, start_row, end_row, start_col, end_col);
@@ -807,7 +807,7 @@ export default function(Module) {
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        if (this.is_unit_config) {
+        if (this.is_unit_context) {
             return __MODULE__.get_row_delta_unit(this._View);
         } else {
             const sides = this.sides();

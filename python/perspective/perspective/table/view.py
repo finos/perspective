@@ -18,12 +18,15 @@ from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
 from .libbinding import (
+    make_view_unit,
     make_view_zero,
     make_view_one,
     make_view_two,
+    to_arrow_unit,
     to_arrow_zero,
     to_arrow_one,
     to_arrow_two,
+    get_row_delta_unit,
     get_row_delta_zero,
     get_row_delta_one,
     get_row_delta_two,
@@ -53,7 +56,25 @@ class View(object):
 
         date_validator = _PerspectiveDateValidator()
 
-        if self._sides == 0:
+        self._is_unit_context = (
+            self._table._index == ""
+            and self._sides == 0
+            and len(self._config.get_row_pivots()) == 0
+            and len(self._config.get_column_pivots()) == 0
+            and len(self._config.get_filter()) == 0
+            and len(self._config.get_sort()) == 0
+            and len(self._config.get_computed_columns()) == 0
+        )
+
+        if self._is_unit_context:
+            self._view = make_view_unit(
+                self._table._table,
+                self._name,
+                COLUMN_SEPARATOR_STRING,
+                self._config,
+                date_validator,
+            )
+        elif self._sides == 0:
             self._view = make_view_zero(
                 self._table._table,
                 self._name,
@@ -369,7 +390,15 @@ class View(object):
 
     def to_arrow(self, **kwargs):
         options = _parse_format_options(self, kwargs)
-        if self._sides == 0:
+        if self._is_unit_context:
+            return to_arrow_unit(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
+        elif self._sides == 0:
             return to_arrow_zero(
                 self._view,
                 options["start_row"],
@@ -541,7 +570,9 @@ class View(object):
         return self.to_dict(**options)
 
     def _get_row_delta(self):
-        if self._sides == 0:
+        if self._is_unit_context:
+            return get_row_delta_unit(self._view)
+        elif self._sides == 0:
             return get_row_delta_zero(self._view)
         elif self._sides == 1:
             return get_row_delta_one(self._view)

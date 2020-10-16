@@ -40,9 +40,29 @@ std::shared_ptr<t_view_config> make_view_config(std::shared_ptr<t_schema> schema
 template <typename CTX_T>
 std::shared_ptr<View<CTX_T>> make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator, t_val view_config, t_val date_parser);
 
+/**
+ * Unlike Emscripten, where we can define templated headers in the Embind
+ * declaration, we need to explicitly specify all templated functions
+ * before they are used by Pybind.
+ */
+std::shared_ptr<View<t_ctxunit>> make_view_unit(std::shared_ptr<Table> table, std::string name, std::string separator, t_val view_config, t_val date_parser);
 std::shared_ptr<View<t_ctx0>> make_view_ctx0(std::shared_ptr<Table> table, std::string name, std::string separator, t_val view_config, t_val date_parser);
 std::shared_ptr<View<t_ctx1>> make_view_ctx1(std::shared_ptr<Table> table, std::string name, std::string separator, t_val view_config, t_val date_parser);
 std::shared_ptr<View<t_ctx2>> make_view_ctx2(std::shared_ptr<Table> table, std::string name, std::string separator, t_val view_config, t_val date_parser);
+
+py::bytes to_arrow_unit(
+    std::shared_ptr<View<t_ctxunit>> view,
+    std::int32_t start_row, 
+    std::int32_t end_row,
+    std::int32_t start_col, 
+    std::int32_t end_col);
+
+py::bytes to_arrow_zero(
+    std::shared_ptr<View<t_ctx0>> view,
+    std::int32_t start_row, 
+    std::int32_t end_row,
+    std::int32_t start_col, 
+    std::int32_t end_col);
 
 py::bytes to_arrow_zero(
     std::shared_ptr<View<t_ctx0>> view,
@@ -65,6 +85,7 @@ py::bytes to_arrow_two(
     std::int32_t start_col, 
     std::int32_t end_col);
 
+py::bytes get_row_delta_unit(std::shared_ptr<View<t_ctxunit>> view);
 py::bytes get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view);
 py::bytes get_row_delta_one(std::shared_ptr<View<t_ctx1>> view);
 py::bytes get_row_delta_two(std::shared_ptr<View<t_ctx2>> view);

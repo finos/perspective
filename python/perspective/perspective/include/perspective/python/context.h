@@ -21,6 +21,10 @@ namespace binding {
  * Context API
  */
 template <>
+std::shared_ptr<t_ctxunit>
+make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema, std::shared_ptr<t_view_config> view_config, const std::string& name);
+
+template <>
 std::shared_ptr<t_ctx0>
 make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema, std::shared_ptr<t_view_config> view_config, const std::string& name);
 
