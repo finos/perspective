@@ -1518,7 +1518,6 @@ namespace binding {
         auto columns = view_config->get_columns();
         auto filter_op = view_config->get_filter_op();
         auto fterm = view_config->get_fterm();
-        auto sortspec = view_config->get_sortspec();
         auto computed_columns = view_config->get_computed_columns();
 
         auto cfg = t_config(columns, fterm, filter_op, computed_columns);

@@ -181,7 +181,7 @@ public:
      * @param ridx
      * @return std::int32_t
      */
-    std::int32_t get_row_expanded(std::int32_t ridx) const;
+    bool get_row_expanded(std::int32_t ridx) const;
 
     /**
      * @brief Expands the row at "ridx".

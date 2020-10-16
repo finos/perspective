@@ -10,12 +10,15 @@ import numpy as np
 from math import floor, ceil, trunc
 from ._constants import COLUMN_SEPARATOR_STRING
 from .libbinding import (
+    get_data_slice_unit,
     get_data_slice_zero,
     get_data_slice_one,
     get_data_slice_two,
+    get_from_data_slice_unit,
     get_from_data_slice_zero,
     get_from_data_slice_one,
     get_from_data_slice_two,
+    get_pkeys_from_data_slice_unit,
     get_pkeys_from_data_slice_zero,
     get_pkeys_from_data_slice_one,
     get_pkeys_from_data_slice_two,
@@ -87,7 +90,9 @@ def to_format(options, view, output_format):
                 if output_format in ("dict", "numpy") and (name not in data):
                     # TODO: push into C++ for numpy
                     data[name] = []
-                if view._sides == 0:
+                if view._is_unit_context:
+                    value = get_from_data_slice_unit(data_slice, ridx, cidx)
+                elif view._sides == 0:
                     value = get_from_data_slice_zero(data_slice, ridx, cidx)
                 elif view._sides == 1:
                     value = get_from_data_slice_one(data_slice, ridx, cidx)
@@ -100,7 +105,9 @@ def to_format(options, view, output_format):
                     data[name].append(value)
 
         if options["index"]:
-            if view._sides == 0:
+            if view._is_unit_context:
+                pkeys = get_pkeys_from_data_slice_unit(data_slice, ridx, cidx)
+            elif view._sides == 0:
                 pkeys = get_pkeys_from_data_slice_zero(data_slice, ridx, 0)
             elif view._sides == 1:
                 pkeys = get_pkeys_from_data_slice_one(data_slice, ridx, 0)
@@ -119,8 +126,12 @@ def to_format(options, view, output_format):
                 for pkey in pkeys:
                     data["__INDEX__"].append([pkey])
 
-        if options["id"] and view._sides == 0:
-            pkeys = get_pkeys_from_data_slice_zero(data_slice, ridx, 0)
+        if options["id"] and (view._is_unit_context or view._sides == 0):
+            if view._is_unit_context:
+                pkeys = get_pkeys_from_data_slice_unit(data_slice, ridx, 0)
+            else:
+                pkeys = get_pkeys_from_data_slice_zero(data_slice, ridx, 0)
+
             if output_format == "records":
                 data[-1]["__ID__"] = []
                 for pkey in pkeys:
@@ -151,7 +162,15 @@ def _to_format_helper(view, options=None):
     options = options or {}
     opts = _parse_format_options(view, options)
 
-    if view._sides == 0:
+    if view._is_unit_context:
+        data_slice = get_data_slice_unit(
+            view._view,
+            opts["start_row"],
+            opts["end_row"],
+            opts["start_col"],
+            opts["end_col"],
+        )
+    elif view._sides == 0:
         data_slice = get_data_slice_zero(
             view._view,
             opts["start_row"],

@@ -87,6 +87,28 @@ PYBIND11_MODULE(libbinding, m)
      * View
      */
     // Bind a View for each context type
+    py::class_<View<t_ctxunit>, std::shared_ptr<View<t_ctxunit>>>(m, "View_ctxunit")
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctxunit>, std::string, std::string,
+            std::shared_ptr<t_view_config>>())
+        .def("sides", &View<t_ctxunit>::sides)
+        .def("num_rows", &View<t_ctxunit>::num_rows)
+        .def("num_columns", &View<t_ctxunit>::num_columns)
+        .def("get_row_expanded", &View<t_ctxunit>::get_row_expanded)
+        .def("schema", &View<t_ctxunit>::schema)
+        .def("computed_schema", &View<t_ctxunit>::computed_schema)
+        .def("column_names", &View<t_ctxunit>::column_names)
+        .def("column_paths", &View<t_ctxunit>::column_paths)
+        .def("_get_deltas_enabled", &View<t_ctxunit>::_get_deltas_enabled)
+        .def("_set_deltas_enabled", &View<t_ctxunit>::_set_deltas_enabled)
+        .def("get_context", &View<t_ctxunit>::get_context)
+        .def("get_row_pivots", &View<t_ctxunit>::get_row_pivots)
+        .def("get_column_pivots", &View<t_ctxunit>::get_column_pivots)
+        .def("get_aggregates", &View<t_ctxunit>::get_aggregates)
+        .def("get_filter", &View<t_ctxunit>::get_filter)
+        .def("get_sort", &View<t_ctxunit>::get_sort)
+        .def("get_step_delta", &View<t_ctxunit>::get_step_delta)
+        .def("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
+        .def("is_column_only", &View<t_ctxunit>::is_column_only);
 
     py::class_<View<t_ctx0>, std::shared_ptr<View<t_ctx0>>>(m, "View_ctx0")
         .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
@@ -209,6 +231,12 @@ PYBIND11_MODULE(libbinding, m)
      *
      * t_data_slice
      */
+    py::class_<t_data_slice<t_ctxunit>, std::shared_ptr<t_data_slice<t_ctxunit>>>(m, "t_data_slice_ctxunit")
+        .def("get_column_slice", &t_data_slice<t_ctxunit>::get_column_slice)
+        .def("get_slice", &t_data_slice<t_ctxunit>::get_slice)
+        .def("get_column_names", &t_data_slice<t_ctxunit>::get_column_names)
+        .def("get_pkeys", &t_data_slice<t_ctxunit>::get_pkeys);
+
     py::class_<t_data_slice<t_ctx0>, std::shared_ptr<t_data_slice<t_ctx0>>>(m, "t_data_slice_ctx0")
         .def("get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx0>::get_slice)
@@ -228,6 +256,12 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_column_names", &t_data_slice<t_ctx2>::get_column_names)
         .def("get_row_path", &t_data_slice<t_ctx2>::get_row_path)
         .def("get_pkeys", &t_data_slice<t_ctx2>::get_pkeys);
+
+    /******************************************************************************
+     *
+     * t_ctxunit
+     */
+    py::class_<t_ctxunit>(m, "t_ctxunit");
 
     /******************************************************************************
      *
@@ -362,9 +396,13 @@ PYBIND11_MODULE(libbinding, m)
      */
     m.def("str_to_filter_op", &str_to_filter_op);
     m.def("make_table", &make_table_py);
+    m.def("make_view_unit", &make_view_unit);
     m.def("make_view_zero", &make_view_ctx0);
     m.def("make_view_one", &make_view_ctx1);
     m.def("make_view_two", &make_view_ctx2);
+    m.def("get_data_slice_unit", &get_data_slice_unit);
+    m.def("get_from_data_slice_unit", &get_from_data_slice_unit);
+    m.def("get_pkeys_from_data_slice_unit", &get_pkeys_from_data_slice_unit);
     m.def("get_data_slice_zero", &get_data_slice_ctx0);
     m.def("get_from_data_slice_zero", &get_from_data_slice_ctx0);
     m.def("get_pkeys_from_data_slice_zero", &get_pkeys_from_data_slice_ctx0);
@@ -374,9 +412,11 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_data_slice_two", &get_data_slice_ctx2);
     m.def("get_from_data_slice_two", &get_from_data_slice_ctx2);
     m.def("get_pkeys_from_data_slice_two", &get_pkeys_from_data_slice_ctx2);
+    m.def("to_arrow_unit", &to_arrow_unit);
     m.def("to_arrow_zero", &to_arrow_zero);
     m.def("to_arrow_one", &to_arrow_one);
     m.def("to_arrow_two", &to_arrow_two);
+    m.def("get_row_delta_unit", &get_row_delta_unit);
     m.def("get_row_delta_zero", &get_row_delta_zero);
     m.def("get_row_delta_one", &get_row_delta_one);
     m.def("get_row_delta_two", &get_row_delta_two);
