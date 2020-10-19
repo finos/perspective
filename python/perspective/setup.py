@@ -53,13 +53,12 @@ requires = [
     "python-dateutil>=2.8.0",
     "six>=1.11.0",
     "traitlets>=4.3.2",
+    "tornado>=4.5.3",
 ]
 
 if sys.version_info.major < 3:
-    requires.append("backports.shutil-which")
-    requires.append("tornado==4.5.3")
-else:
-    requires.append("tornado>=4.5.3")
+    requires.pop()
+    requires += ["tornado==4.5.3", "backports.shutil-which"]
 
 if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
     sys.version_info.major == 3 and sys.version_info.minor < 6
