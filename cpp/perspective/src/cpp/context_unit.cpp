@@ -339,6 +339,11 @@ t_ctxunit::get_column_count() const {
 }
 
 std::vector<t_tscalar>
+t_ctxunit::unity_get_row_data(t_uindex idx) const {
+    return get_data(idx, idx + 1, 0, get_column_count());
+}
+
+std::vector<t_tscalar>
 t_ctxunit::unity_get_row_path(t_uindex idx) const {
     return std::vector<t_tscalar>(mktscalar(idx));
 }

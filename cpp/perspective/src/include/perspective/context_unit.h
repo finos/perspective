@@ -20,6 +20,25 @@
 
 namespace perspective {
 
+/**
+ * @brief A context that does not maintain its own traversal, instead
+ * reading directly from the underlying master table of the context's
+ * gnode state.
+ * 
+ * This context can be created when the table does not have an explicit index
+ * set, as the order of rows in the master table will be exactly the same as
+ * the primary key order (using PSP_PKEY). If the table has an explicit index,
+ * a context's traversal contains the sorted order of primary keys and thus
+ * the order in which the table is meant to be read.
+ * 
+ * Additionally, to create a unit context, the context must have no pivots,
+ * sorts, filters, or computed columns applied. It can have any number of
+ * columns in any order. See implementations in the binding language to see
+ * how a unit context is created.
+ * 
+ * Benchmarking shows a 5-10x improvement in View construction time compared
+ * to a regular ctx_0.
+ */
 class PERSPECTIVE_EXPORT t_ctxunit : public t_ctxbase<t_ctxunit> {
 public:
     t_ctxunit();
@@ -93,6 +112,7 @@ public:
     const tsl::hopscotch_set<t_tscalar>& get_delta_pkeys() const;
 
     // Unity api
+    std::vector<t_tscalar> unity_get_row_data(t_uindex idx) const;
     std::vector<t_tscalar> unity_get_row_path(t_uindex idx) const;
     std::vector<t_tscalar> unity_get_column_path(t_uindex idx) const;
     t_uindex unity_get_row_depth(t_uindex ridx) const;
