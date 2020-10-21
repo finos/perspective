@@ -57,15 +57,17 @@ class Table(object):
 
         self._date_validator = _PerspectiveDateValidator()
 
-        self._limit = limit or 4294967295
-        self._index = index or ""
+        self._limit = limit
+        self._index = index
 
-        # Always create tables on port 0
+        # C++ make_table does not accept `None`, so pass in defaults of ""
+        # for `index` and 4294967295 for `limit`, but always store `self._index`
+        # and `self._limit` as user-provided kwargs or `None`.
         self._table = make_table(
             None,
             _accessor,
-            self._limit,
-            self._index,
+            self._limit or 4294967295,
+            self._index or "",
             t_op.OP_INSERT,
             False,
             self._is_arrow,
@@ -304,8 +306,8 @@ class Table(object):
             self._table = make_table(
                 self._table,
                 _accessor,
-                self._limit,
-                self._index,
+                self._limit or 4294967295,
+                self._index or "",
                 t_op.OP_INSERT,
                 True,
                 True,
@@ -331,7 +333,7 @@ class Table(object):
             _accessor.try_cast_numpy_arrays()
 
         if "__INDEX__" in _accessor._names:
-            if self._index != "":
+            if self._index is not None:
                 index_pos = _accessor._names.index(self._index)
                 index_dtype = _accessor._types[index_pos]
                 _accessor._types.append(index_dtype)
@@ -341,8 +343,8 @@ class Table(object):
         self._table = make_table(
             self._table,
             _accessor,
-            self._limit,
-            self._index,
+            self._limit or 4294967295,
+            self._index or "",
             t_op.OP_INSERT,
             True,
             False,
@@ -366,7 +368,7 @@ class Table(object):
             >>> tbl.view().to_records()
             [{"a": 1}]
         """
-        if self._index == "":
+        if self._index is None:
             return
         pkeys = list(map(lambda idx: {self._index: idx}, pkeys))
         types = [self._table.get_schema().get_dtype(self._index)]
@@ -376,8 +378,8 @@ class Table(object):
         t = make_table(
             self._table,
             _accessor,
-            self._limit,
-            self._index,
+            self._limit or 4294967295,
+            self._index or "",
             t_op.OP_DELETE,
             True,
             False,

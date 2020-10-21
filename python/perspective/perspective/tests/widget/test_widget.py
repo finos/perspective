@@ -32,8 +32,23 @@ class TestWidget:
             "data": {
                 "table_name": widget.table_name,
                 "view_name": widget._perspective_view_name,
+                "options": {}
+            }
+        }
+
+    def test_widget_indexed(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, plugin="x_bar", index="a")
+        assert widget.plugin == "x_bar"
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
-                    "index": ""
+                    "index": "a"
                 }
             }
         }
@@ -90,8 +105,29 @@ class TestWidget:
             "data": {
                 "table_name": widget.table_name,
                 "view_name": widget._perspective_view_name,
+                "options": {}
+            }
+        }
+
+    def test_widget_eventual_data_indexed(self):
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(None, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+
+        with raises(PerspectiveError):
+            widget._make_load_message()
+
+        widget.load(table, index="a")
+
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
-                    "index": ""
+                    "index": "a"
                 }
             }
         }
@@ -107,8 +143,23 @@ class TestWidget:
             "data": {
                 "table_name": widget.table_name,
                 "view_name": widget._perspective_view_name,
+                "options": {}
+            }
+        }
+
+    def test_widget_load_table_indexed(self):
+        table = Table({"a": np.arange(0, 50)}, index="a")
+        widget = PerspectiveWidget(table, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
-                    "index": ""
+                    "index": "a"
                 }
             }
         }
@@ -125,9 +176,7 @@ class TestWidget:
             "data": {
                 "table_name": widget.table_name,
                 "view_name": widget._perspective_view_name,
-                "options": {
-                    "index": ""
-                }
+                "options": {}
             }
         }
 

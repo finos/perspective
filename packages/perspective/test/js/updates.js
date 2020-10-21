@@ -69,6 +69,20 @@ const arrow_indexed_result = [
 
 module.exports = perspective => {
     describe("Removes", function() {
+        it("should not remove without explicit index", async function() {
+            const table = perspective.table(meta);
+            table.update(data);
+            const view = table.view();
+            table.remove([0, 1]);
+            const result = await view.to_json();
+            expect(await view.num_rows()).toEqual(4);
+            expect(result.length).toEqual(4);
+            expect(result).toEqual(data);
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
         it("after an `update()`", async function() {
             const table = perspective.table(meta, {index: "x"});
             table.update(data);

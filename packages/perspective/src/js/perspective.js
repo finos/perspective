@@ -90,7 +90,17 @@ export default function(Module) {
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
     function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, is_csv, port_id) {
-        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow, is_csv, port_id);
+        // C++ constructor cannot take null values - use default values if
+        // index or limit are null.
+        if (!index) {
+            index = "";
+        }
+
+        if (!limit) {
+            limit = 4294967295;
+        }
+
+        _Table = __MODULE__.make_table(_Table, accessor, limit, index, op, is_update, is_arrow, is_csv, port_id);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -1040,14 +1050,14 @@ export default function(Module) {
     function table(_Table, index, computed, limit, overridden_types) {
         this._Table = _Table;
         this.gnode_id = this._Table.get_gnode().get_id();
+        this._Table.get_pool().set_update_delegate(this);
         this.name = Math.random() + "";
         this.initialized = false;
         this.index = index;
-        this._Table.get_pool().set_update_delegate(this);
+        this.limit = limit;
         this.computed = computed || [];
         this.callbacks = [];
         this.views = [];
-        this.limit = limit;
         this.overridden_types = overridden_types;
         this._delete_callbacks = [];
         bindall(this);
@@ -1480,9 +1490,9 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_INSERT;
-            // update the Table in C++, but don't keep the returned Table
+            // update the Table in C++, but don't keep the returned C++ Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow, is_csv, options.port_id);
+            make_table(pdata, this._Table, this.index, this.limit, op, true, is_arrow, is_csv, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1500,6 +1510,11 @@ export default function(Module) {
      * @see {@link module:perspective~table}
      */
     table.prototype.remove = function(data, options) {
+        if (!this.index) {
+            console.error("Cannot call `remove()` on a Table without a user-specified index.");
+            return;
+        }
+
         options = options || {};
         options.port_id = options.port_id || 0;
         let pdata;
@@ -1524,7 +1539,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow, false, options.port_id);
+            make_table(pdata, this._Table, this.index, this.limit, op, false, is_arrow, false, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1630,18 +1645,21 @@ export default function(Module) {
          * @param {Object} [options] An optional options dictionary.
          * @param {string} options.index The name of the column in the resulting
          *     table to treat as an index. When updating this table, rows
-         *     sharing an index of a new row will be overwritten. `index` is
-         *     mutually exclusive to `limit`.
+         *     sharing an index of a new row will be overwritten. `index`
+         *     cannot be applied at the same time as `limit`.
          * @param {integer} options.limit The maximum number of rows that can be
          *     added to this table. When exceeded, old rows will be overwritten
-         *     in the order they were inserted. `limit` is mutually exclusive
-         *     to `index`.
+         *     in the order they were inserted. `limit` cannot be applied at
+         *     the same time as `index`.
          *
          * @returns {table} A new {@link module:perspective~table} object.
          */
         table: function(data, options) {
             options = options || {};
-            options.index = options.index || "";
+
+            // Always store index and limit as user-provided values or `null`.
+            options.index = options.index || null;
+            options.limit = options.limit || null;
 
             let data_accessor;
             let is_arrow = false;
@@ -1672,8 +1690,15 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                // Always create new tables using port 0
+
+                // C++ Table constructor cannot take null values for index
+                // and limit, so `make_table` will convert null to default
+                // values of "" for index and 4294967295 for limit. Tables
+                // must be created on port 0.
                 _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, is_csv, 0);
+
+                // Pass through user-provided values or `null` to the
+                // Javascript Table constructor.
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {
