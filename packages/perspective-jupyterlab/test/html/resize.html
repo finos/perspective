@@ -12,8 +12,9 @@
     <head>
         
         <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-        <script src="lumino.js" preload></script>
-        <script src="perspective-viewer-datagrid.js" preload></script>
+        <script src="lumino.js"></script>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
 
         <link rel='stylesheet' href="demo.css">
 
@@ -30,7 +31,7 @@
                 window.__CSV__ = xhr.response;
                 window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
                 container.appendChild(window.__WIDGET__.node);
-                window.__WIDGET__.load(xhr.response);
+                window.__WIDGET__.load(perspective.worker().table(xhr.response));
                 window.__WIDGET__.plugin = "datagrid";
             }
             xhr.send(null);

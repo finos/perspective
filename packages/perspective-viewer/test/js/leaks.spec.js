@@ -14,42 +14,20 @@ utils.with_server({}, () => {
     describe.page(
         "superstore.html",
         () => {
-            // must specify timeout AND viewport
-            test.capture(
-                "doesn't leak tables.",
-                async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    for (var i = 0; i < 100; i++) {
-                        await page.evaluate(element => element.load(window.__CSV__), viewer);
-                        await page.waitForSelector("perspective-viewer:not([updating])");
-                    }
-                    await page.evaluate(
-                        element =>
-                            element.load(
-                                window.__CSV__
-                                    .split("\n")
-                                    .slice(0, 10)
-                                    .join("\n")
-                            ),
-                        viewer
-                    );
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                },
-                {timeout: 60000}
-            );
-
             test.capture(
                 "doesn't leak elements.",
                 async page => {
                     let viewer = await page.$("perspective-viewer");
-                    //await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(viewer => {
+                        window.__TABLE__ = viewer.table;
+                    }, viewer);
+
                     for (var i = 0; i < 100; i++) {
                         viewer = await page.$("perspective-viewer");
-                        await page.evaluate(element => {
+                        await page.evaluate(async element => {
                             element.delete();
-                            document.innerHTML = "<perspective_viewer></perspective-viewer>";
-                            document.getElementsByTagName("perspective-viewer")[0].load(window.__CSV__);
+                            document.innerHTML = "<perspective-viewer></perspective-viewer>";
+                            await document.getElementsByTagName("perspective-viewer")[0].load(window.__TABLE__);
                         }, viewer);
                         await page.waitForSelector("perspective-viewer:not([updating])");
                     }
@@ -57,10 +35,12 @@ utils.with_server({}, () => {
                     await page.evaluate(
                         element =>
                             element.load(
-                                window.__CSV__
-                                    .split("\n")
-                                    .slice(0, 10)
-                                    .join("\n")
+                                window.__WORKER__.table(
+                                    window.__CSV__
+                                        .split("\n")
+                                        .slice(0, 10)
+                                        .join("\n")
+                                )
                             ),
                         viewer
                     );

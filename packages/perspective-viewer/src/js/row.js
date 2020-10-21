@@ -14,7 +14,7 @@ import awesomplete_style from "!!css-loader!awesomplete/awesomplete.css";
 
 import {bindTemplate} from "./utils.js";
 
-import perspective from "@finos/perspective";
+import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import template from "../html/row.html";
 
