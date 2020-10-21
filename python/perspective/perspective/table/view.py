@@ -79,7 +79,7 @@ class View(object):
             )
 
         self._column_only = self._view.is_column_only()
-        self._callbacks = self._table._callbacks
+        self._update_callbacks = self._table._update_callbacks
         self._delete_callbacks = _PerspectiveCallBackCache()
         self._client_id = None
 
@@ -268,7 +268,7 @@ class View(object):
             self._wrapped_on_update_callback, mode=mode, callback=callback
         )
 
-        self._callbacks.add_callback(
+        self._update_callbacks.add_callback(
             {
                 "name": self._name,
                 "orig_callback": callback,
@@ -298,7 +298,9 @@ class View(object):
         self._table._state_manager.call_process(self._table._table.get_id())
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
-        self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] == callback)
+        self._update_callbacks.remove_callbacks(
+            lambda cb: cb["orig_callback"] == callback
+        )
 
     def on_delete(self, callback):
         """Set a callback to be run when the :func:`perspective.View.delete()`
@@ -335,7 +337,7 @@ class View(object):
         self._table._state_manager.remove_process(self._table._table.get_id())
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
-        self._callbacks.remove_callbacks(lambda cb: cb["name"] == self._name)
+        self._update_callbacks.remove_callbacks(lambda cb: cb["name"] == self._name)
         [cb() for cb in self._delete_callbacks]
 
     def remove_delete(self, callback):

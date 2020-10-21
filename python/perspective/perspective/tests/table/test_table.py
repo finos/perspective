@@ -609,3 +609,46 @@ class TestTable(object):
         tbl = Table(data)
         tbl.replace(data2)
         assert tbl.view().to_records() == data2
+
+    def test_table_replace_views_should_preserve(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        first = view.to_records()
+        tbl.replace(data2)
+        assert view.to_records() == first
+
+    def test_table_replace_should_fire_on_update(self, sentinel):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view()
+
+        s = sentinel(False)
+
+        def updater(port_id):
+            assert port_id == 0
+            s.set(True)
+
+        view.on_update(updater)
+        tbl.replace(data2)
+        assert s.get() is True
+
+    def test_table_replace_should_fire_on_update_with_delta(self, sentinel):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view()
+
+        s = sentinel(False)
+
+        def updater(port_id, delta):
+            assert port_id == 0
+            table2 = Table(delta)
+            assert table2.view().to_records() == data2
+            s.set(True)
+
+        view.on_update(updater, mode="row")
+        tbl.replace(data2)
+        assert s.get() is True

@@ -140,7 +140,8 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(table, sides, config, view_config, name, callbacks, overridden_types) {
+    function view(table, sides, config, view_config, name) {
+        this.name = name;
         this._View = undefined;
         this.config = config || {};
         this.view_config = view_config || new view_config();
@@ -156,9 +157,8 @@ export default function(Module) {
         this.table = table;
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
-        this.callbacks = callbacks;
-        this.name = name;
-        this.overridden_types = overridden_types;
+        this.update_callbacks = this.table.update_callbacks;
+        this.overridden_types = this.table.overridden_types;
         this._delete_callbacks = [];
         bindall(this);
     }
@@ -191,12 +191,14 @@ export default function(Module) {
         this.table = undefined;
         let i = 0,
             j = 0;
-        while (i < this.callbacks.length) {
-            let val = this.callbacks[i];
-            if (val.view !== this) this.callbacks[j++] = val;
+
+        // Remove old update callbacks from the Table.
+        while (i < this.update_callbacks.length) {
+            let val = this.update_callbacks[i];
+            if (val.view !== this) this.update_callbacks[j++] = val;
             i++;
         }
-        this.callbacks.length = j;
+        this.update_callbacks.length = j;
         this._delete_callbacks.forEach(cb => cb());
     };
 
@@ -835,7 +837,7 @@ export default function(Module) {
             }
         }
 
-        this.callbacks.push({
+        this.update_callbacks.push({
             view: this,
             orig_callback: callback,
             callback: async (port_id, cache) => {
@@ -903,9 +905,9 @@ export default function(Module) {
      */
     view.prototype.remove_update = function(callback) {
         _call_process(this.table.get_id());
-        const total = this.callbacks.length;
-        filterInPlace(this.callbacks, x => x.orig_callback !== callback);
-        console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
+        const total = this.update_callbacks.length;
+        filterInPlace(this.update_callbacks, x => x.orig_callback !== callback);
+        console.assert(total > this.update_callbacks.length, `"callback" does not match a registered updater`);
     };
 
     /**
@@ -1056,10 +1058,11 @@ export default function(Module) {
         this.index = index;
         this.limit = limit;
         this.computed = computed || [];
-        this.callbacks = [];
+        this.update_callbacks = [];
+        this.clear_callbacks = [];
+        this._delete_callbacks = [];
         this.views = [];
         this.overridden_types = overridden_types;
-        this._delete_callbacks = [];
         bindall(this);
     }
 
@@ -1085,8 +1088,14 @@ export default function(Module) {
 
     table.prototype._update_callback = function(port_id) {
         let cache = {};
-        for (let e in this.callbacks) {
-            this.callbacks[e].callback(port_id, cache);
+        for (let e in this.update_callbacks) {
+            this.update_callbacks[e].callback(port_id, cache);
+        }
+    };
+
+    table.prototype._clear_callback = function() {
+        for (let e in this.clear_callbacks) {
+            this.clear_callbacks[e].callback();
         }
     };
 
@@ -1113,14 +1122,28 @@ export default function(Module) {
     table.prototype.clear = function() {
         _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
+        for (const callback of this.clear_callbacks) {
+            callback();
+        }
+    };
+
+    /**
+     * Register a callback with this {@link module:perspective~table}. Whenever
+     * the {@link module:perspective~table} is cleared, this callback will be
+     * invoked.
+     *
+     * @param {function} callback A callback function with no parameters
+     *      that will be invoked on `clear()`.
+     */
+    table.prototype.on_clear = function(callback) {
+        this.clear_callbacks.push(callback);
     };
 
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
-        _remove_process(this.get_id());
-        this._Table.reset_gnode(this.gnode_id);
+        this.clear();
         this.update(data);
         _call_process(this.get_id());
     };
@@ -1138,7 +1161,11 @@ export default function(Module) {
         _remove_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
         this._Table.delete();
-        this._delete_callbacks.forEach(callback => callback());
+
+        // Call delete callbacks
+        for (const callback of this._delete_callbacks) {
+            callback();
+        }
     };
 
     /**
@@ -1146,9 +1173,8 @@ export default function(Module) {
      * the {@link module:perspective~table} is deleted, this callback will be
      * invoked.
      *
-     * @param {function} callback A callback function invoked on delete.  The
-     *     parameter to this callback shares a structure with the return type of
-     *     {@link module:perspective~table#to_json}.
+     * @param {function} callback A callback function with no parameters
+     *      that will be invoked on `delete()`.
      */
     table.prototype.on_delete = function(callback) {
         this._delete_callbacks.push(callback);
@@ -1411,7 +1437,7 @@ export default function(Module) {
         }
 
         let vc = new view_config(config);
-        let v = new view(this, sides, config, vc, name, this.callbacks, this.overridden_types);
+        let v = new view(this, sides, config, vc, name);
         this.views.push(v);
         return v;
     };

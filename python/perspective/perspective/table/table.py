@@ -75,7 +75,7 @@ class Table(object):
         )
 
         self._gnode_id = self._table.get_gnode().get_id()
-        self._callbacks = _PerspectiveCallBackCache()
+        self._update_callbacks = _PerspectiveCallBackCache()
         self._delete_callbacks = _PerspectiveCallBackCache()
         self._views = []
         self._delete_callback = None
@@ -530,5 +530,5 @@ class Table(object):
             came from.
         """
         cache = {}
-        for callback in self._callbacks:
+        for callback in self._update_callbacks:
             callback["callback"](port_id=port_id, cache=cache)
