@@ -1091,6 +1091,22 @@ export default function(Module) {
     };
 
     /**
+     * Returns the user-specified index column for this
+     * {@link module:perspective~table} or null if an index is not set.
+     */
+    table.prototype.get_index = function() {
+        return this.index;
+    };
+
+    /**
+     * Returns the user-specified limit column for this
+     * {@link module:perspective~table} or null if an limit is not set.
+     */
+    table.prototype.get_limit = function() {
+        return this.limit;
+    };
+
+    /**
      * Remove all rows in this {@link module:perspective~table} while preserving
      * the schema and construction options.
      */

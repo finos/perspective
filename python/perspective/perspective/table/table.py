@@ -101,6 +101,16 @@ class Table(object):
         """Returns whether the computed column feature is enabled."""
         return True
 
+    def get_index(self):
+        """Returns the Table's index column, or ``None`` if an index is not
+        specified by the user."""
+        return self._index
+
+    def get_limit(self):
+        """Returns the Table's limit, or ``None`` if an index is not
+        specified by the user."""
+        return self._limit
+
     def clear(self):
         """Removes all the rows in the :class:`~perspective.Table`, but
         preserves everything else including the schema and any callbacks or

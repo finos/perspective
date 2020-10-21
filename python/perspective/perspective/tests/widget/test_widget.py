@@ -109,16 +109,41 @@ class TestWidget:
             }
         }
 
+    def test_widget_eventual_data_server(self):
+        widget = PerspectiveWidget(None, plugin="x_bar", server=True)
+        assert widget.plugin == "x_bar"
+        widget.load({"a": np.arange(0, 50)}, index="a")
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+            }
+        }
+
     def test_widget_eventual_data_indexed(self):
-        table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(None, plugin="x_bar")
         assert widget.plugin == "x_bar"
+        widget.load({"a": np.arange(0, 50)}, index="a")
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
+                "options": {
+                    "index": "a"
+                }
+            }
+        }
 
-        with raises(PerspectiveError):
-            widget._make_load_message()
-
-        widget.load(table, index="a")
-
+    def test_widget_eventual_table_indexed(self):
+        table = Table({"a": np.arange(0, 50)}, index="a")
+        widget = PerspectiveWidget(None, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+        widget.load(table)
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
             "id": -2,

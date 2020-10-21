@@ -558,6 +558,20 @@ class TestTable(object):
             "b": [2, 4, 3, 1]
         }
 
+    def test_table_get_index(self):
+        tbl = Table({
+            "a": ["", "a", None, "b"],
+            "b": [4, 3, 2, 1]
+        }, index="a")
+        assert tbl.get_index() == "a"
+
+    def test_table_get_index_none(self):
+        tbl = Table({
+            "a": ["", "a", None, "b"],
+            "b": [4, 3, 2, 1]
+        })
+        assert tbl.get_index() is None
+
     # limit
 
     def test_table_limit(self):
@@ -567,6 +581,16 @@ class TestTable(object):
         assert tbl.view().to_records() == [
             {"a": 3, "b": 4}
         ]
+
+    def test_table_get_limit(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data, limit=1)
+        assert tbl.get_limit() == 1
+
+    def test_table_get_limit_none(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.get_limit() is None
 
     # clear
 
