@@ -186,6 +186,7 @@ const websocket = url => {
     return new WebSocketClient(new WebSocket(url));
 };
 
+module.exports.worker = () => module.exports;
 module.exports.websocket = websocket;
 module.exports.perspective_assets = perspective_assets;
 module.exports.WebSocketServer = WebSocketServer;

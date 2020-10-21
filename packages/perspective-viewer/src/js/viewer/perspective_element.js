@@ -11,7 +11,7 @@ import debounce from "lodash/debounce";
 import isEqual from "lodash/isEqual";
 import {html, render} from "lit-html";
 
-import perspective from "@finos/perspective";
+import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
 
@@ -559,7 +559,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    _clear_state(clear_table = true) {
+    _clear_state() {
         if (this._task) {
             this._task.cancel();
         }
@@ -570,13 +570,6 @@ export class PerspectiveElement extends StateElement {
             all.push(view.delete());
             view.remove_update(this._view_updater);
             view.remove_delete();
-        }
-        if (this._table && clear_table) {
-            const table = this._table;
-            this._table = undefined;
-            if (table._owner_viewer && table._owner_viewer === this) {
-                all.push(table.delete());
-            }
         }
         return Promise.all(all);
     }
@@ -602,12 +595,5 @@ export class PerspectiveElement extends StateElement {
                 resolve();
             }
         };
-    }
-
-    _get_worker() {
-        if (this._table) {
-            return this._table._worker;
-        }
-        return perspective.shared_worker();
     }
 }

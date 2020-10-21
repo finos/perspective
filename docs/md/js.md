@@ -20,88 +20,6 @@ For understanding Perspective's core concepts and vocabulary, see the
 For example code, see the [examples directory](https://github.com/finos/perspective/tree/master/examples)
 on GitHub.
 
-## Quick Start
-
-First, make sure that Perspective [is installed](/docs/md/installation.html),
-and that you have the library accessible through your Javascript bundler.
-
-If Perspective was added using a script tag, see the
-[From CDN](/docs/md/installation.html#from-cdn) section of the installation
-notes for a quick example.
-
-### Importing `perspective-viewer`
-
-To integrate Perspective with an existing data source in your application,
-you'll need to import the following modules:
-
-```javascript
-import "@finos/perspective-viewer";
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
-```
-
-`perspective-viewer` provides a widget for users to transform and analyze
-their data, while `perspective-viewer-datagrid` and `perspective-viewer-d3fc`
-provide fast, flexible grid and chart visualization plugins, respectively.
-
-These modules register the `<perspective-viewer>`
-[Web Component](https://www.webcomponents.org/introduction) for use within
-your application's HTML:
-
-```html
-<perspective-viewer id="view1"></perspective-viewer>
-```
-
-### Loading data
-
-`<perspective-viewer>` offers an attribute API that can be accessed through a
-reference to the HTML element:
-
-```javascript
-const viewer = document.getElementsByTagName("perspective-viewer")[0];
-```
-
-Use the viewer's `load()` method to provide it with data in JSON, CSV, or
-Apache Arrow format:
-
-```javascript
-const data = getData(); // returns a Javascript object
-viewer.load(data); // loads the data in `perspective-viewer`
-```
-
-### Updating data
-
-When your dataset updates with new information, call the viewer's `update()`
-method in order to update `perspective-viewer`. There is no need to refresh or
-re-create the viewer, or to accumulate your data elsewhere, as Perspective will
-handle everything for you:
-
-```javascript
-// Assume that new ticks are delivered via websocket
-websocket.onmessage = function(event) {
-    viewer.update(event.data);
-};
-```
-
-### Configuring `perspective-viewer`
-
-`<perspective-viewer>` defaults to showing a grid view of the entire dataset
-without any transformations applied. To configure your viewer to show a
-different visualization on load or transform the dataset, use the viewer's attribute API:
-
-```html
-<perspective-viewer
-  id="view1"
-  plugin="xy_scatter"
-  columns='["Sales", "Profits"]'
-  row_pivots='["State", "City"]'
->
-</perspective-viewer>
-```
-
-For more details about the full attribute API, see the
-[`<perspective-viewer>`](#setting--reading-viewer-configuration-via-attributes)section of this user guide.
-
 ## Module Structure
 
 Perspective is designed for flexibility, allowing developers to pick and choose
@@ -156,18 +74,18 @@ Depending on your requirements, you may need just one, or all Perspective
 modules. Some basic guidelines to help you decide what is most appropriate for
 your project:
 
-- For Perspective as a simple, browser-based data visualization widget, import:
-
-  - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
-  - `@finos/perspective-viewer-datagrid` for data grids
-  - `@finos/perspective-viewer-d3fc` for charting
-  - The core data engine `@finos/perspective` is a dependency of these packages
-    and does not need to be imported on its own for basic usage.
-
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
 
   - `@finos/perspective`, as detailed [here](#perspective-library)
+
+- For Perspective as a simple, browser-based data visualization widget, you
+  will need to import:
+
+  - `@finos/perspective`, as detailed [here](#perspective-library)
+  - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
+  - `@finos/perspective-viewer-datagrid` for data grids
+  - `@finos/perspective-viewer-d3fc` for charting
 
 - For more complex cases, such as
   [sharing tables between viewers](#sharing-a-table-between-multiple-perspective-viewers)
@@ -653,12 +571,20 @@ These can be directly linked in your HTML:
 
 ### Loading data into `<perspective-viewer>`
 
-Data can be loaded into `<perspective-viewer>` using the `load()` method in
-Javascript with JSON, CSV, or an `ArrayBuffer` in the Apache Arrow format.
+Data can be loaded into `<perspective-viewer>` in the form of a `Table()` via
+the `load()` method. 
 
-If `perspective-viewer` is imported via an inline `<script>` tag, you must wait
-for the document `WebComponentsReady` event to fire, which indicates that the
-provided
+```javascript
+// Create a new worker, then a new table on that worker.
+var table = perspective.worker().table(data);
+
+// Bind a viewer element to this table.
+viewer.load(table);
+```
+
+If `perspective-viewer` is imported via an inline
+`<script>` tag, you must wait for the document `WebComponentsReady` event to 
+fire, which indicates that the provided
 [webcomponents.js polyfill](https://github.com/webcomponents/webcomponentsjs)
 has loaded:
 
@@ -677,23 +603,6 @@ document.addEventListener("WebComponentsReady", function() {
     // Add new row
     viewer.update([{x: 5, y: "e", z: true}]);
 });
-```
-
-In some situations, you may want finer grained control over the `table()`
-construction (see below), and `<perspective-viewer>`'s `load()` method also
-supports loading `table()`s directly.
-
-Remember to import the `perspective.js` library also, or the `perspective`
-symbol will not be available. Alternatively, you can use the `worker` property
-on a `<perspective-viewer>` instance to get the default worker singleton
-instantiated when another is not provided:
-
-```javascript
-// Create a new worker, then a new table on that worker.
-var table = perspective.worker().table(data);
-
-// Bind a viewer element to this table.
-viewer.load(table);
 ```
 
 ### Sharing a `table()` between multiple `perspective-viewer`s

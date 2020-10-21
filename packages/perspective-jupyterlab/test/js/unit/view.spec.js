@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 import {MockManager} from "../mocks/manager";
 import {PerspectiveJupyterClient} from "../../../src/ts/client";
 import {PerspectiveJupyterWidget} from "../../../src/ts/widget";
@@ -342,7 +343,10 @@ describe("PerspectiveView", function() {
                 const widget_mock = PerspectiveJupyterWidget.mock.instances[0];
                 const load_args = widget_mock.load.mock.calls[0][0];
 
-                expect(load_args).toEqual(data);
+                const result = await load_args.view().to_columns();
+                result.b = result.b.map(x => new Date(x));
+
+                expect(result).toEqual(data);
             });
 
             it("Should correctly load a dataset with options", async function() {
@@ -370,8 +374,14 @@ describe("PerspectiveView", function() {
                 const widget_mock = PerspectiveJupyterWidget.mock.instances[0];
                 const load_args = widget_mock.load.mock.calls[0];
 
-                expect(load_args[0]).toEqual(data);
-                expect(load_args[1]).toEqual(options);
+                const result = await load_args[0].view().to_columns();
+                result.b = result.b.map(x => new Date(x));
+
+                expect(result).toEqual(data);
+
+                // TODO there is no way to verify this in perspective API
+                // currently ...
+                // expect(load_args[1]).toEqual(options);
             });
 
             it("Should correctly update a dataset", async function() {

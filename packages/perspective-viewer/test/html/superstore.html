@@ -11,8 +11,8 @@
 <html>
     <head>
         
-        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-        <script src="perspective-viewer.js" preload></script>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer.js"></script>
 
         <link rel='stylesheet' href="demo.css">
 
@@ -29,7 +29,9 @@
             xhr.open('GET', 'superstore.csv', true);
             xhr.onload = function () { 
                 window.__CSV__ = xhr.response;
-                document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
+                window.__WORKER__ = perspective.worker();
+                const table = window.__WORKER__.table(xhr.response);
+                document.getElementsByTagName('perspective-viewer')[0].load(table); 
             }
             xhr.send(null);
 

@@ -1,8 +1,7 @@
-const webpack = require("webpack");
 const path = require("path");
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
-const plugins = [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)];
+const plugins = [];
 
 function common({build_worker, no_minify, inline} = {}) {
     plugins.push(new PerspectivePlugin({build_worker: build_worker, workerLoaderOptions: {inline, name: "[name].worker.js"}, wasmLoaderOptions: {inline, name: "[name]"}}));
