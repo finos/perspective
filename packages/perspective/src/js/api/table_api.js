@@ -107,8 +107,6 @@ table.prototype.columns = async_queue("columns", "table_method");
 
 table.prototype.clear = async_queue("clear", "table_method");
 
-table.prototype.on_clear = subscribe("on_clear", "table_method", true);
-
 table.prototype.replace = async_queue("replace", "table_method");
 
 table.prototype.delete = async_queue("delete", "table_method");

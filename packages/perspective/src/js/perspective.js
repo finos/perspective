@@ -1059,7 +1059,6 @@ export default function(Module) {
         this.limit = limit;
         this.computed = computed || [];
         this.update_callbacks = [];
-        this.clear_callbacks = [];
         this._delete_callbacks = [];
         this.views = [];
         this.overridden_types = overridden_types;
@@ -1093,12 +1092,6 @@ export default function(Module) {
         }
     };
 
-    table.prototype._clear_callback = function() {
-        for (let e in this.clear_callbacks) {
-            this.clear_callbacks[e].callback();
-        }
-    };
-
     /**
      * Returns the user-specified index column for this
      * {@link module:perspective~table} or null if an index is not set.
@@ -1122,28 +1115,14 @@ export default function(Module) {
     table.prototype.clear = function() {
         _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
-        for (const callback of this.clear_callbacks) {
-            callback();
-        }
-    };
-
-    /**
-     * Register a callback with this {@link module:perspective~table}. Whenever
-     * the {@link module:perspective~table} is cleared, this callback will be
-     * invoked.
-     *
-     * @param {function} callback A callback function with no parameters
-     *      that will be invoked on `clear()`.
-     */
-    table.prototype.on_clear = function(callback) {
-        this.clear_callbacks.push(callback);
     };
 
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
-        this.clear();
+        _remove_process(this.get_id());
+        this._Table.reset_gnode(this.gnode_id);
         this.update(data);
         _call_process(this.get_id());
     };
