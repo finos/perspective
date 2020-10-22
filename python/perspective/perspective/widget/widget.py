@@ -305,7 +305,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             super(PerspectiveWidget, self).load(data, **options)
 
             # Do not enable editing if the table is unindexed.
-            if self.editable and self.table._index is None:
+            if self.editable and self.table.get_index() is None:
                 logging.critical("Cannot edit on an unindexed `perspective.Table`!")
                 self.editable = False
 

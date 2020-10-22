@@ -1112,8 +1112,8 @@ module.exports = perspective => {
             });
 
             it("get_index() on an indexed table", async function() {
-                const table = perspective.table(data, {index: "datetime"});
-                expect(await table.get_index()).toEqual("datetime");
+                const table = perspective.table(data, {index: "x"});
+                expect(await table.get_index()).toEqual("x");
             });
 
             it("get_limit() on table without limit", async function() {

@@ -72,11 +72,11 @@ class TestWidget:
 
     def test_widget_schema_with_index(self):
         widget = PerspectiveWidget({"a": int}, index="a")
-        assert widget.table._index == "a"
+        assert widget.table.get_index() == "a"
 
     def test_widget_schema_with_limit(self):
         widget = PerspectiveWidget({"a": int}, limit=5)
-        assert widget.table._limit == 5
+        assert widget.table.get_limit() == 5
 
     def test_widget_no_data_with_index(self):
         # should fail

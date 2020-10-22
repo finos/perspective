@@ -380,11 +380,13 @@ class Table(object):
         """
         if self._index is None:
             return
+
         pkeys = list(map(lambda idx: {self._index: idx}, pkeys))
         types = [self._table.get_schema().get_dtype(self._index)]
         _accessor = _PerspectiveAccessor(pkeys)
         _accessor._names = [self._index]
         _accessor._types = types
+
         t = make_table(
             self._table,
             _accessor,
@@ -395,6 +397,7 @@ class Table(object):
             False,
             port_id,
         )
+
         self._state_manager.set_process(t.get_pool(), t.get_id())
 
     def view(

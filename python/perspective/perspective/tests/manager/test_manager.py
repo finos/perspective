@@ -99,7 +99,7 @@ class TestPerspectiveManager(object):
             "b": str
         }
 
-        assert manager._tables["table1"]._index == "a"
+        assert manager._tables["table1"].get_index() == "a"
 
     def test_manager_create_indexed_table_and_update(self):
         message = {"id": 1, "name": "table1", "cmd": "table", "args": [data], "options": {"index": "a"}}
@@ -111,7 +111,7 @@ class TestPerspectiveManager(object):
             "a": int,
             "b": str
         }
-        assert manager._tables["table1"]._index == "a"
+        assert manager._tables["table1"].get_index() == "a"
         update_message = {"id": 2, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [1, 2, 3], "b": ["str1", "str2", "str3"]}]}
         manager._process(update_message, self.post)
         assert manager._tables["table1"].view().to_dict() == {
@@ -129,7 +129,7 @@ class TestPerspectiveManager(object):
             "a": int,
             "b": str
         }
-        assert manager._tables["table1"]._index == "a"
+        assert manager._tables["table1"].get_index() == "a"
         remove_message = {"id": 2, "name": "table1", "cmd": "table_method", "method": "remove", "args": [[1, 2]]}
         manager._process(remove_message, self.post)
         assert manager._tables["table1"].view().to_dict() == {
