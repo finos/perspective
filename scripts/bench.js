@@ -47,7 +47,14 @@ if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
     }
 } else {
     try {
-        execute`PYTHONPATH=./python/perspective python3 python/perspective/bench/giltest.py`;
+        /**
+         * Usage: `yarn bench PATH_TO_SCRIPT -c10 -r5 -s2
+         *
+         * -c number of clients to run
+         * -r number of times to run each task within each client
+         * -s seconds to sleep between each task run
+         */
+        execute`PYTHONPATH=./python/perspective python3 ${args.join(" ")}`;
     } catch (e) {
         process.exit(1);
     } finally {
