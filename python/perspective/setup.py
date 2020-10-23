@@ -52,11 +52,12 @@ requires = [
     "pyarrow>=0.16.0,<1",
     "python-dateutil>=2.8.0",
     "six>=1.11.0",
+    "tornado>=4.5.3",
     "traitlets>=4.3.2",
 ]
 
 if sys.version_info.major < 3:
-    requires.append("backports.shutil-which")
+    requires += ["backports.shutil-which"]
 
 if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
     sys.version_info.major == 3 and sys.version_info.minor < 6

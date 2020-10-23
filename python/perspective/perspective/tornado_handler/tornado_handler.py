@@ -7,6 +7,7 @@
 #
 
 from functools import partial
+import tornado.locks
 import tornado.websocket
 from tornado.gen import coroutine
 from tornado.ioloop import IOLoop
