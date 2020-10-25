@@ -67,6 +67,15 @@ const arrow_indexed_result = [
     {f32: 5.5, f64: 5.5, i64: 5, i32: 5, i16: 5, i8: 5, bool: true, char: "d", dict: "d", datetime: +new Date("2018-01-29")}
 ];
 
+async function match_delta(perspective, delta, expected) {
+    let table = perspective.table(delta);
+    let view = table.view();
+    let json = await view.to_json();
+    expect(json).toEqual(expected);
+    view.delete();
+    table.delete();
+}
+
 module.exports = perspective => {
     describe("Removes", function() {
         it("after an `update()`", async function() {
@@ -566,13 +575,13 @@ module.exports = perspective => {
             var table = perspective.table(meta);
             var view = table.view();
             view.on_update(
-                function(updated) {
-                    expect(updated.delta).toEqual(data);
+                async function(updated) {
+                    await match_delta(perspective, updated.delta, data);
                     view.delete();
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(data);
         });
@@ -583,16 +592,16 @@ module.exports = perspective => {
             table.update(data);
             var ran = false;
             view.on_update(
-                function(updated) {
+                async function(updated) {
                     if (!ran) {
-                        expect(updated.delta).toEqual(data);
+                        await match_delta(perspective, updated.delta, data);
                         ran = true;
                         view.delete();
                         table.delete();
                         done();
                     }
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(data);
         });
@@ -613,7 +622,7 @@ module.exports = perspective => {
                     table2.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table1.update(data);
         });
@@ -637,7 +646,7 @@ module.exports = perspective => {
                     table2.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table1.update(data);
         });
@@ -925,14 +934,14 @@ module.exports = perspective => {
             table.update(data);
             view.on_update(
                 async function(updated) {
-                    expect(data_2).toEqual(updated.delta);
+                    await match_delta(perspective, updated.delta, data_2);
                     let json = await view.to_json();
                     expect(json).toEqual(data.slice(0, 2).concat(data_2));
                     view.delete();
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(data_2);
         });
@@ -943,14 +952,14 @@ module.exports = perspective => {
             table.update(data);
             view.on_update(
                 async function(updated) {
-                    expect(data_2).toEqual(updated.delta);
+                    await match_delta(perspective, updated.delta, data_2);
                     let json = await view.to_json();
                     expect(json).toEqual(data.slice(0, 2).concat(data_2));
                     view.delete();
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(data_2);
         });
@@ -995,14 +1004,14 @@ module.exports = perspective => {
             table.update(data);
             view.on_update(
                 async function(updated) {
-                    expect(updated.delta).toEqual(expected.slice(0, 2));
+                    await match_delta(perspective, updated.delta, expected.slice(0, 2));
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
                     view.delete();
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(partial);
         });
@@ -1025,14 +1034,14 @@ module.exports = perspective => {
             table.update(col_data);
             view.on_update(
                 async function(updated) {
-                    expect(updated.delta).toEqual(expected.slice(0, 2));
+                    await match_delta(perspective, updated.delta, expected.slice(0, 2));
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
                     view.delete();
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(partial);
         });
@@ -1058,7 +1067,7 @@ module.exports = perspective => {
 
             view.on_update(
                 async function(updated) {
-                    expect(updated.delta).toEqual([
+                    await match_delta(perspective, updated.delta, [
                         {
                             x: 4,
                             y: "f"
@@ -1070,7 +1079,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
 
             table.update({
@@ -1103,7 +1112,7 @@ module.exports = perspective => {
 
             view.on_update(
                 async function(updated) {
-                    expect(updated.delta).toEqual([
+                    await match_delta(perspective, updated.delta, [
                         {
                             x: 4,
                             y: "f",
@@ -1116,7 +1125,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
 
             table.update({
@@ -1142,14 +1151,14 @@ module.exports = perspective => {
             table.update(col_data);
             view.on_update(
                 async function(updated) {
-                    expect(updated.delta).toEqual(expected.slice(0, 2));
+                    await match_delta(perspective, updated.delta, expected.slice(0, 2));
                     let json = await view.to_json();
                     expect(json).toEqual(expected);
                     view.delete();
                     table.delete();
                     done();
                 },
-                {mode: "cell"}
+                {mode: "row"}
             );
             table.update(partial);
         });

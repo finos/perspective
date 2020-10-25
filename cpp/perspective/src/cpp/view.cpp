@@ -151,11 +151,11 @@ template <typename CTX_T>
 std::vector<std::vector<t_tscalar>>
 View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
-    std::vector<std::string> aggregate_names;
-
     const std::vector<t_aggspec> aggs = m_ctx->get_aggregates();
-    for (const t_aggspec& agg : aggs) {
-        aggregate_names.push_back(agg.name());
+    std::vector<std::string> aggregate_names(aggs.size());
+
+    for (auto i = 0; i < aggs.size(); ++i) {
+        aggregate_names[i] = aggs[i].name();
     }
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
@@ -469,6 +469,13 @@ View<CTX_T>::data_slice_to_arrow(
 
     std::vector<std::shared_ptr<arrow::Array>> vectors;
     std::vector<std::shared_ptr<arrow::Field>> fields;
+
+    std::int32_t num_columns = end_col - start_col;
+
+    if (num_columns > 0) {
+        fields.reserve(num_columns);
+        vectors.reserve(num_columns);
+    }
 
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);

@@ -402,6 +402,7 @@ t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& 
     const t_column* col_ = col.get();
 
     std::vector<double> rval;
+    rval.reserve(num);
     for (t_index idx = 0; idx < num; ++idx) {
         t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
         if (iter != m_mapping.end()) {
@@ -413,6 +414,21 @@ t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& 
     }
     std::swap(rval, out_data);
 }
+
+void
+t_gstate::read_column(const std::string& colname, std::vector<t_tscalar>& out_data) const {
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    const t_column* col_ = col.get();
+    t_uindex col_size = col_->size();
+    std::vector<t_tscalar> rval(col_size);
+
+    for (t_index idx = 0; idx < col_size; ++idx) {
+        rval[idx].set(col_->get_scalar(idx));
+    }
+
+    std::swap(rval, out_data);
+}
+
 
 t_tscalar
 t_gstate::get(t_tscalar pkey, const std::string& colname) const {
@@ -510,6 +526,9 @@ t_gstate::get_sorted_pkeyed_table() const {
     auto pkey_col = rv->get_column("psp_pkey");
     std::vector<std::shared_ptr<t_column>> icolumns;
     std::vector<std::shared_ptr<t_column>> ocolumns;
+
+    icolumns.reserve(m_output_schema.m_columns.size());
+    ocolumns.reserve(m_output_schema.m_columns.size());
 
     for (const std::string& cname : m_output_schema.m_columns) {
         ocolumns.push_back(rv->get_column(cname));

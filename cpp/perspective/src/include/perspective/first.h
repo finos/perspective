@@ -19,6 +19,7 @@
 #endif
 
 #pragma once
+
 #ifdef WIN32
 #ifndef NOMINMAX
 #define NOMINMAX

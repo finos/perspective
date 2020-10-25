@@ -807,18 +807,16 @@ export default function(Module) {
      * update was triggered on, and `delta`, whose value is dependent on the
      * `mode` parameter:
      *     - "none" (default): `delta` is `undefined`.
-     *     - "cell": `delta` is the new data for each updated cell, serialized
-     *          to JSON format.
      *     - "row": `delta` is an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
         _call_process(this.table.get_id());
 
-        if (["none", "cell", "row"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`);
+        if (["none", "row"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none" and "row".`);
         }
 
-        if (mode === "cell" || mode === "row") {
+        if (mode === "row") {
             // Enable deltas only if needed by callback
             if (!this._View._get_deltas_enabled()) {
                 this._View._set_deltas_enabled(true);
@@ -838,25 +836,11 @@ export default function(Module) {
 
                 let updated = {port_id};
 
-                switch (mode) {
-                    case "cell":
-                        {
-                            if (cache[port_id]["step_delta"] === undefined) {
-                                cache[port_id]["step_delta"] = await this._get_step_delta();
-                            }
-                            updated.delta = cache[port_id]["step_delta"];
-                        }
-                        break;
-                    case "row":
-                        {
-                            if (cache[port_id]["row_delta"] === undefined) {
-                                cache[port_id]["row_delta"] = await this._get_row_delta();
-                            }
-                            updated.delta = cache[port_id]["row_delta"];
-                        }
-                        break;
-                    default:
-                        break;
+                if (mode === "row") {
+                    if (cache[port_id]["row_delta"] === undefined) {
+                        cache[port_id]["row_delta"] = await this._get_row_delta();
+                    }
+                    updated.delta = cache[port_id]["row_delta"];
                 }
 
                 // Call the callback with the updated object containing

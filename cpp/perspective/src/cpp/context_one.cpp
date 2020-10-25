@@ -34,7 +34,6 @@ t_ctx1::init() {
     m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
-    m_minmax = std::vector<t_minmax>(m_config.get_num_aggregates());
     m_init = true;
 }
 
@@ -233,7 +232,6 @@ void
 t_ctx1::step_end() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_minmax = m_tree->get_min_max();
     sort_by(m_sortby);
     if (m_depth_set) {
         set_depth(m_depth);
@@ -388,19 +386,6 @@ t_ctx1::set_deltas_enabled(bool enabled_state) {
     m_tree->set_deltas_enabled(enabled_state);
 }
 
-void
-t_ctx1::set_minmax_enabled(bool enabled_state) {
-    m_features[CTX_FEAT_MINMAX] = enabled_state;
-    m_tree->set_minmax_enabled(enabled_state);
-}
-
-std::vector<t_minmax>
-t_ctx1::get_min_max() const {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_minmax;
-}
-
 /**
  * @brief Returns updated cells.
  *
@@ -512,13 +497,6 @@ t_ctx1::has_deltas() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->has_deltas();
-}
-
-t_minmax
-t_ctx1::get_agg_min_max(t_uindex aggidx, t_depth depth) const {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_agg_min_max(aggidx, depth);
 }
 
 void

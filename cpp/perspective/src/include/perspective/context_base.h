@@ -63,7 +63,6 @@ public:
     // Backwards compatibility only
     bool get_alerts_enabled() const;
     bool get_deltas_enabled() const;
-    bool get_minmax_enabled() const;
 
     bool failed() const;
 
@@ -90,7 +89,6 @@ protected:
     std::shared_ptr<t_gstate> m_gstate;
     bool m_init;
     std::vector<bool> m_features;
-    std::vector<t_minmax> m_minmax;
 };
 
 template <typename DERIVED_T>
@@ -180,12 +178,6 @@ template <typename DERIVED_T>
 bool
 t_ctxbase<DERIVED_T>::get_deltas_enabled() const {
     return m_features[CTX_FEAT_DELTA];
-}
-
-template <typename DERIVED_T>
-bool
-t_ctxbase<DERIVED_T>::get_minmax_enabled() const {
-    return m_features[CTX_FEAT_MINMAX];
 }
 
 template <typename DERIVED_T>

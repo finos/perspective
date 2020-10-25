@@ -51,6 +51,129 @@ class TestViewComputed(object):
             "final": [36, 64, 100, 144]
         }
 
+    def test_view_computed_create_clear(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+        view = table.view(computed_columns=[{
+            "column": "computed",
+            "computed_function_name": "+",
+            "inputs": ["a", "b"]
+        }])
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12]
+        }
+        table.clear()
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float
+        }
+        assert view.to_columns() == {}
+
+    def test_view_computed_multiple_dependents_clear(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+        view = table.view(computed_columns=[{
+                "column": "computed",
+                "computed_function_name": "+",
+                "inputs": ["a", "b"]
+            },
+            {
+                "column": "final",
+                "computed_function_name": "pow2",
+                "inputs": ["computed"]
+            }
+        ])
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12],
+            "final": [36, 64, 100, 144]
+        }
+        table.clear()
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float,
+            "final": float
+        }
+        assert view.to_columns() == {}
+
+    def test_view_computed_create_replace(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+        view = table.view(computed_columns=[{
+            "column": "computed",
+            "computed_function_name": "+",
+            "inputs": ["a", "b"]
+        }])
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12]
+        }
+        table.replace({
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80]
+        })
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float
+        }
+        assert view.to_columns() == {
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80],
+            "computed": [60, 80, 100, 120]
+        }
+
+    def test_view_computed_multiple_dependents_replace(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+        view = table.view(computed_columns=[{
+                "column": "computed",
+                "computed_function_name": "+",
+                "inputs": ["a", "b"]
+            },
+            {
+                "column": "final",
+                "computed_function_name": "pow2",
+                "inputs": ["computed"]
+            }
+        ])
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12],
+            "final": [36, 64, 100, 144]
+        }
+        table.replace({
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80]
+        })
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float,
+            "final": float
+        }
+        assert view.to_columns() == {
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80],
+            "computed": [60, 80, 100, 120],
+            "final": [3600, 6400, 10000, 14400]
+        }
+
     def test_view_computed_multiple_views_should_not_conflate(self):
         table = Table({
             "a": [1, 2, 3, 4],
@@ -91,6 +214,125 @@ class TestViewComputed(object):
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
             "computed2": [-4, -4, -4, -4]
+        }
+
+    def test_view_computed_multiple_views_should_all_clear(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+
+        view = table.view(computed_columns=[{
+            "column": "computed",
+            "computed_function_name": "+",
+            "inputs": ["a", "b"]
+        }])
+
+        view2 = table.view(computed_columns=[{
+            "column": "computed2",
+            "computed_function_name": "-",
+            "inputs": ["a", "b"]
+        }])
+
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float
+        }
+
+        assert view2.schema() == {
+            "a": int,
+            "b": int,
+            "computed2": float
+        }
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12]
+        }
+
+        assert view2.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed2": [-4, -4, -4, -4]
+        }
+
+        table.clear()
+
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float
+        }
+
+        assert view2.schema() == {
+            "a": int,
+            "b": int,
+            "computed2": float
+        }
+
+        assert view.to_columns() == {}
+
+        assert view2.to_columns() == {}
+
+    def test_view_computed_multiple_views_should_all_replace(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+
+        view = table.view(computed_columns=[{
+            "column": "computed",
+            "computed_function_name": "+",
+            "inputs": ["a", "b"]
+        }])
+
+        view2 = table.view(computed_columns=[{
+            "column": "computed2",
+            "computed_function_name": "-",
+            "inputs": ["a", "b"]
+        }])
+
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float
+        }
+
+        assert view2.schema() == {
+            "a": int,
+            "b": int,
+            "computed2": float
+        }
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12]
+        }
+
+        assert view2.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed2": [-4, -4, -4, -4]
+        }
+
+        table.replace({
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80]
+        })
+
+        assert view.to_columns() == {
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80],
+            "computed": [60, 80, 100, 120],
+        }
+
+        assert view2.to_columns() == {
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80],
+            "computed2": [-40, -40, -40, -40]
         }
 
     def test_view_computed_delete_and_create(self):
@@ -260,6 +502,71 @@ class TestViewComputed(object):
             "a": [10, 1, 2, 3, 4],
             "b": [26, 5, 6, 7, 8],
             "computed": [36.0, 6.0, 8.0, 10.0, 12.0]
+        }
+
+    def test_view_computed_with_row_pivots_clear(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+
+        view = table.view(
+            row_pivots=["computed"],
+            computed_columns=[{
+                "column": "computed",
+                "computed_function_name": "+",
+                "inputs": ["a", "b"]
+            }]
+        )
+
+        assert view.to_columns() == {
+            "__ROW_PATH__": [[], [6], [8], [10], [12]],
+            "a": [10, 1, 2, 3, 4],
+            "b": [26, 5, 6, 7, 8],
+            "computed": [36.0, 6.0, 8.0, 10.0, 12.0]
+        }
+
+        table.clear()
+
+        assert view.to_columns() == {
+            "__ROW_PATH__": [[]],
+            "a": [None],
+            "b": [None],
+            "computed": [None]
+        }
+
+    def test_view_computed_with_row_pivots_replace(self):
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8]
+        })
+
+        view = table.view(
+            row_pivots=["computed"],
+            computed_columns=[{
+                "column": "computed",
+                "computed_function_name": "+",
+                "inputs": ["a", "b"]
+            }]
+        )
+
+        assert view.to_columns() == {
+            "__ROW_PATH__": [[], [6], [8], [10], [12]],
+            "a": [10, 1, 2, 3, 4],
+            "b": [26, 5, 6, 7, 8],
+            "computed": [36.0, 6.0, 8.0, 10.0, 12.0]
+        }
+
+        table.replace({
+            "a": [10, 20, 30, 40],
+            "b": [50, 60, 70, 80]
+        })
+
+        assert view.to_columns() == {
+            "__ROW_PATH__": [[], [60], [80], [100], [120]],
+            "a": [100, 10, 20, 30, 40],
+            "b": [260, 50, 60, 70, 80],
+            "computed": [360.0, 60.0, 80.0, 100.0, 120.0]
         }
 
     def test_view_computed_with_column_pivots(self):

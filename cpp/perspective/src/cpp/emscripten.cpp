@@ -1397,6 +1397,7 @@ namespace binding {
         // Fill the computed columns vector with tuples
         auto js_computed_columns = config.call<std::vector<std::vector<t_val>>>("get_computed_columns");
         std::vector<t_computed_column_definition> computed_columns;
+        computed_columns.reserve(js_computed_columns.size());
 
         for (auto c : js_computed_columns) {
             std::string computed_column_name = c.at(0).as<std::string>();
@@ -1411,9 +1412,9 @@ namespace binding {
              * as all lookups into `schema` must be valid for all computed
              * columns on the View.
              */
-            std::vector<t_dtype> input_types;
-            for (const auto& input_column : input_columns) {
-                input_types.push_back(schema->get_dtype(input_column));
+            std::vector<t_dtype> input_types(input_columns.size());
+            for (auto i = 0; i < input_columns.size(); ++i) {
+                input_types[i] = schema->get_dtype(input_columns[i]);
             }
 
             t_computation computation = t_computed_column::get_computation(
@@ -1631,6 +1632,7 @@ namespace binding {
         std::vector<std::vector<t_val>> j_computed_columns) {
         // Convert into vector of tuples
         std::vector<t_computed_column_definition> computed_columns;
+        computed_columns.reserve(j_computed_columns.size());
 
         for (auto c : j_computed_columns) {
             std::string computed_column_name = c.at(0).as<std::string>();
