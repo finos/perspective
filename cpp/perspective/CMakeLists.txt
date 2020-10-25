@@ -633,7 +633,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 			# .dll not importable
 			set_property(TARGET binding PROPERTY SUFFIX .pyd)
-		elseif (MACOS)
+        elseif (MACOS OR NOT MANYLINUX)
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 
 			# Add a relative path to search for PyArrow - when Perspective is
@@ -642,7 +642,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			#
 			# Assuming that both Pyarrow and Perspective are installed in
 			# `site-packages`, the relative search path should be able to pick
-			# up pyarrow. This is only enabled for MacOS, as `auditwheel`
+            # up pyarrow. This is only enabled for *nix (non-manylinux), as `auditwheel`
 			# will not delocate libarrow properly if it is in the rpath.
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
