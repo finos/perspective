@@ -409,6 +409,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         if self._pending_binary:
             msg = self._pending_binary
 
+            # manager looks at the `binary_length` flag so make sure to
+            # get rid of it before passing to `_process`.
+            del msg["binary_length"]
+
             # arrow is a `MemoryView` - convert to bytes
             arrow = buffers[0].tobytes()
             msg["args"].insert(0, arrow)
