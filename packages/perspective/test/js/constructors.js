@@ -1104,5 +1104,27 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         }, 3000);
+
+        describe("get_index/get_limit", function() {
+            it("get_index() on unindexed table", async function() {
+                const table = perspective.table(data);
+                expect(await table.get_index()).toBeNull();
+            });
+
+            it("get_index() on an indexed table", async function() {
+                const table = perspective.table(data, {index: "x"});
+                expect(await table.get_index()).toEqual("x");
+            });
+
+            it("get_limit() on table without limit", async function() {
+                const table = perspective.table(data);
+                expect(await table.get_limit()).toBeNull();
+            });
+
+            it("get_limit() on table with limit", async function() {
+                const table = perspective.table(data, {limit: 2});
+                expect(await table.get_limit()).toEqual(2);
+            });
+        });
     });
 };

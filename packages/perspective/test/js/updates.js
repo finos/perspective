@@ -78,6 +78,20 @@ async function match_delta(perspective, delta, expected) {
 
 module.exports = perspective => {
     describe("Removes", function() {
+        it("should not remove without explicit index", async function() {
+            const table = perspective.table(meta);
+            table.update(data);
+            const view = table.view();
+            table.remove([0, 1]);
+            const result = await view.to_json();
+            expect(await view.num_rows()).toEqual(4);
+            expect(result.length).toEqual(4);
+            expect(result).toEqual(data);
+            // expect(await table.size()).toEqual(2);
+            view.delete();
+            table.delete();
+        });
+
         it("after an `update()`", async function() {
             const table = perspective.table(meta, {index: "x"});
             table.update(data);
@@ -698,6 +712,58 @@ module.exports = perspective => {
                 table.delete();
                 done();
             });
+            table.update(data);
+        });
+
+        it("`on_update()` should be triggered in sequence", function(done) {
+            var table = perspective.table(meta);
+            var view = table.view();
+
+            let order = [];
+
+            const finish = function() {
+                if (order.length === 3) {
+                    expect(order).toEqual([0, 1, 2]);
+                    view.delete();
+                    table.delete();
+                    done();
+                }
+            };
+
+            for (let i = 0; i < 3; i++) {
+                view.on_update(() => {
+                    order.push(i);
+                    finish();
+                });
+            }
+
+            table.update(data);
+        });
+
+        it("`on_update()` should be triggered in sequence across multiple views", function(done) {
+            var table = perspective.table(meta);
+            const views = [table.view(), table.view(), table.view()];
+
+            let order = [];
+
+            const finish = function() {
+                if (order.length === 3) {
+                    expect(order).toEqual([0, 1, 2]);
+                    for (const view of views) {
+                        view.delete();
+                    }
+                    table.delete();
+                    done();
+                }
+            };
+
+            for (let i = 0; i < views.length; i++) {
+                views[i].on_update(() => {
+                    order.push(i);
+                    finish();
+                });
+            }
+
             table.update(data);
         });
     });

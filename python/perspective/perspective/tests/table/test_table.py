@@ -558,6 +558,20 @@ class TestTable(object):
             "b": [2, 4, 3, 1]
         }
 
+    def test_table_get_index(self):
+        tbl = Table({
+            "a": ["", "a", None, "b"],
+            "b": [4, 3, 2, 1]
+        }, index="a")
+        assert tbl.get_index() == "a"
+
+    def test_table_get_index_none(self):
+        tbl = Table({
+            "a": ["", "a", None, "b"],
+            "b": [4, 3, 2, 1]
+        })
+        assert tbl.get_index() is None
+
     # limit
 
     def test_table_limit(self):
@@ -567,6 +581,16 @@ class TestTable(object):
         assert tbl.view().to_records() == [
             {"a": 3, "b": 4}
         ]
+
+    def test_table_get_limit(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data, limit=1)
+        assert tbl.get_limit() == 1
+
+    def test_table_get_limit_none(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.get_limit() is None
 
     # clear
 
@@ -585,3 +609,46 @@ class TestTable(object):
         tbl = Table(data)
         tbl.replace(data2)
         assert tbl.view().to_records() == data2
+
+    def test_table_replace_views_should_preserve(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        first = view.to_records()
+        tbl.replace(data2)
+        assert view.to_records() == first
+
+    def test_table_replace_should_fire_on_update(self, sentinel):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view()
+
+        s = sentinel(False)
+
+        def updater(port_id):
+            assert port_id == 0
+            s.set(True)
+
+        view.on_update(updater)
+        tbl.replace(data2)
+        assert s.get() is True
+
+    def test_table_replace_should_fire_on_update_with_delta(self, sentinel):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view()
+
+        s = sentinel(False)
+
+        def updater(port_id, delta):
+            assert port_id == 0
+            table2 = Table(delta)
+            assert table2.view().to_records() == data2
+            s.set(True)
+
+        view.on_update(updater, mode="row")
+        tbl.replace(data2)
+        assert s.get() is True

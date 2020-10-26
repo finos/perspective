@@ -57,15 +57,17 @@ class Table(object):
 
         self._date_validator = _PerspectiveDateValidator()
 
-        self._limit = limit or 4294967295
-        self._index = index or ""
+        self._limit = limit
+        self._index = index
 
-        # Always create tables on port 0
+        # C++ make_table does not accept `None`, so pass in defaults of ""
+        # for `index` and 4294967295 for `limit`, but always store `self._index`
+        # and `self._limit` as user-provided kwargs or `None`.
         self._table = make_table(
             None,
             _accessor,
-            self._limit,
-            self._index,
+            self._limit or 4294967295,
+            self._index or "",
             t_op.OP_INSERT,
             False,
             self._is_arrow,
@@ -73,7 +75,7 @@ class Table(object):
         )
 
         self._gnode_id = self._table.get_gnode().get_id()
-        self._callbacks = _PerspectiveCallBackCache()
+        self._update_callbacks = _PerspectiveCallBackCache()
         self._delete_callbacks = _PerspectiveCallBackCache()
         self._views = []
         self._delete_callback = None
@@ -98,6 +100,16 @@ class Table(object):
     def compute(self):
         """Returns whether the computed column feature is enabled."""
         return True
+
+    def get_index(self):
+        """Returns the Table's index column, or ``None`` if an index is not
+        specified by the user."""
+        return self._index
+
+    def get_limit(self):
+        """Returns the Table's limit, or ``None`` if an index is not
+        specified by the user."""
+        return self._limit
 
     def clear(self):
         """Removes all the rows in the :class:`~perspective.Table`, but
@@ -304,8 +316,8 @@ class Table(object):
             self._table = make_table(
                 self._table,
                 _accessor,
-                self._limit,
-                self._index,
+                self._limit or 4294967295,
+                self._index or "",
                 t_op.OP_INSERT,
                 True,
                 True,
@@ -331,7 +343,7 @@ class Table(object):
             _accessor.try_cast_numpy_arrays()
 
         if "__INDEX__" in _accessor._names:
-            if self._index != "":
+            if self._index is not None:
                 index_pos = _accessor._names.index(self._index)
                 index_dtype = _accessor._types[index_pos]
                 _accessor._types.append(index_dtype)
@@ -341,8 +353,8 @@ class Table(object):
         self._table = make_table(
             self._table,
             _accessor,
-            self._limit,
-            self._index,
+            self._limit or 4294967295,
+            self._index or "",
             t_op.OP_INSERT,
             True,
             False,
@@ -366,23 +378,26 @@ class Table(object):
             >>> tbl.view().to_records()
             [{"a": 1}]
         """
-        if self._index == "":
+        if self._index is None:
             return
+
         pkeys = list(map(lambda idx: {self._index: idx}, pkeys))
         types = [self._table.get_schema().get_dtype(self._index)]
         _accessor = _PerspectiveAccessor(pkeys)
         _accessor._names = [self._index]
         _accessor._types = types
+
         t = make_table(
             self._table,
             _accessor,
-            self._limit,
-            self._index,
+            self._limit or 4294967295,
+            self._index or "",
             t_op.OP_DELETE,
             True,
             False,
             port_id,
         )
+
         self._state_manager.set_process(t.get_pool(), t.get_id())
 
     def view(
@@ -518,5 +533,5 @@ class Table(object):
             came from.
         """
         cache = {}
-        for callback in self._callbacks:
+        for callback in self._update_callbacks:
             callback["callback"](port_id=port_id, cache=cache)

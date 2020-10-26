@@ -305,7 +305,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             super(PerspectiveWidget, self).load(data, **options)
 
             # Do not enable editing if the table is unindexed.
-            if self.editable and self.table._index == "":
+            if self.editable and self.table.get_index() is None:
                 logging.critical("Cannot edit on an unindexed `perspective.Table`!")
                 self.editable = False
 
@@ -446,7 +446,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 post_callback = partial(self.post, msg_id=parsed["id"])
                 self.manager._process(parsed, post_callback)
 
-    def _make_load_message(self, index=None, limit=None):
+    def _make_load_message(self):
         """Send a message to the front-end either containing the name of a
         hosted view in Python, so the front-end can create a table in the
         Perspective WebAssembly client, or if `server` is True, the name of a
@@ -481,10 +481,13 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 "options": {},
             }
 
-            if self.table._index is not None:
-                msg_data["options"]["index"] = self.table._index
-            elif self.table._limit is not None:
-                msg_data["options"]["limit"] = self.table._limit
+            index = self.table.get_index()
+            limit = self.table.get_limit()
+
+            if index is not None:
+                msg_data["options"]["index"] = index
+            elif limit is not None:
+                msg_data["options"]["limit"] = limit
 
         if msg_data is not None:
             return _PerspectiveWidgetMessage(-2, "table", msg_data)

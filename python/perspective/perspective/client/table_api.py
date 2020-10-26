@@ -58,6 +58,12 @@ class PerspectiveTableProxy(object):
     def remove_port(self):
         return self._async_queue("remove_port", "table_method")
 
+    def get_index(self):
+        return self._async_queue("get_index", "table_method")
+
+    def get_limit(self):
+        return self._async_queue("get_limit", "table_method")
+
     def compute(self):
         return self._async_queue("compute", "table_method")
 

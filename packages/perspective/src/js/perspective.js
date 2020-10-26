@@ -90,7 +90,17 @@ export default function(Module) {
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
     function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, is_csv, port_id) {
-        _Table = __MODULE__.make_table(_Table, accessor, limit || 4294967295, index, op, is_update, is_arrow, is_csv, port_id);
+        // C++ constructor cannot take null values - use default values if
+        // index or limit are null.
+        if (!index) {
+            index = "";
+        }
+
+        if (!limit) {
+            limit = 4294967295;
+        }
+
+        _Table = __MODULE__.make_table(_Table, accessor, limit, index, op, is_update, is_arrow, is_csv, port_id);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -130,7 +140,8 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(table, sides, config, view_config, name, callbacks, overridden_types) {
+    function view(table, sides, config, view_config, name) {
+        this.name = name;
         this._View = undefined;
         this.config = config || {};
         this.view_config = view_config || new view_config();
@@ -146,9 +157,8 @@ export default function(Module) {
         this.table = table;
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
-        this.callbacks = callbacks;
-        this.name = name;
-        this.overridden_types = overridden_types;
+        this.update_callbacks = this.table.update_callbacks;
+        this.overridden_types = this.table.overridden_types;
         this._delete_callbacks = [];
         bindall(this);
     }
@@ -181,12 +191,14 @@ export default function(Module) {
         this.table = undefined;
         let i = 0,
             j = 0;
-        while (i < this.callbacks.length) {
-            let val = this.callbacks[i];
-            if (val.view !== this) this.callbacks[j++] = val;
+
+        // Remove old update callbacks from the Table.
+        while (i < this.update_callbacks.length) {
+            let val = this.update_callbacks[i];
+            if (val.view !== this) this.update_callbacks[j++] = val;
             i++;
         }
-        this.callbacks.length = j;
+        this.update_callbacks.length = j;
         this._delete_callbacks.forEach(cb => cb());
     };
 
@@ -823,7 +835,7 @@ export default function(Module) {
             }
         }
 
-        this.callbacks.push({
+        this.update_callbacks.push({
             view: this,
             orig_callback: callback,
             callback: async (port_id, cache) => {
@@ -877,9 +889,9 @@ export default function(Module) {
      */
     view.prototype.remove_update = function(callback) {
         _call_process(this.table.get_id());
-        const total = this.callbacks.length;
-        filterInPlace(this.callbacks, x => x.orig_callback !== callback);
-        console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
+        const total = this.update_callbacks.length;
+        filterInPlace(this.update_callbacks, x => x.orig_callback !== callback);
+        console.assert(total > this.update_callbacks.length, `"callback" does not match a registered updater`);
     };
 
     /**
@@ -1024,16 +1036,16 @@ export default function(Module) {
     function table(_Table, index, computed, limit, overridden_types) {
         this._Table = _Table;
         this.gnode_id = this._Table.get_gnode().get_id();
+        this._Table.get_pool().set_update_delegate(this);
         this.name = Math.random() + "";
         this.initialized = false;
         this.index = index;
-        this._Table.get_pool().set_update_delegate(this);
-        this.computed = computed || [];
-        this.callbacks = [];
-        this.views = [];
         this.limit = limit;
-        this.overridden_types = overridden_types;
+        this.computed = computed || [];
+        this.update_callbacks = [];
         this._delete_callbacks = [];
+        this.views = [];
+        this.overridden_types = overridden_types;
         bindall(this);
     }
 
@@ -1059,9 +1071,25 @@ export default function(Module) {
 
     table.prototype._update_callback = function(port_id) {
         let cache = {};
-        for (let e in this.callbacks) {
-            this.callbacks[e].callback(port_id, cache);
+        for (let e in this.update_callbacks) {
+            this.update_callbacks[e].callback(port_id, cache);
         }
+    };
+
+    /**
+     * Returns the user-specified index column for this
+     * {@link module:perspective~table} or null if an index is not set.
+     */
+    table.prototype.get_index = function() {
+        return this.index;
+    };
+
+    /**
+     * Returns the user-specified limit column for this
+     * {@link module:perspective~table} or null if an limit is not set.
+     */
+    table.prototype.get_limit = function() {
+        return this.limit;
     };
 
     /**
@@ -1096,7 +1124,11 @@ export default function(Module) {
         _remove_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
         this._Table.delete();
-        this._delete_callbacks.forEach(callback => callback());
+
+        // Call delete callbacks
+        for (const callback of this._delete_callbacks) {
+            callback();
+        }
     };
 
     /**
@@ -1104,9 +1136,8 @@ export default function(Module) {
      * the {@link module:perspective~table} is deleted, this callback will be
      * invoked.
      *
-     * @param {function} callback A callback function invoked on delete.  The
-     *     parameter to this callback shares a structure with the return type of
-     *     {@link module:perspective~table#to_json}.
+     * @param {function} callback A callback function with no parameters
+     *      that will be invoked on `delete()`.
      */
     table.prototype.on_delete = function(callback) {
         this._delete_callbacks.push(callback);
@@ -1369,7 +1400,7 @@ export default function(Module) {
         }
 
         let vc = new view_config(config);
-        let v = new view(this, sides, config, vc, name, this.callbacks, this.overridden_types);
+        let v = new view(this, sides, config, vc, name);
         this.views.push(v);
         return v;
     };
@@ -1464,9 +1495,9 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_INSERT;
-            // update the Table in C++, but don't keep the returned Table
+            // update the Table in C++, but don't keep the returned C++ Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, true, is_arrow, is_csv, options.port_id);
+            make_table(pdata, this._Table, this.index, this.limit, op, true, is_arrow, is_csv, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1484,6 +1515,11 @@ export default function(Module) {
      * @see {@link module:perspective~table}
      */
     table.prototype.remove = function(data, options) {
+        if (!this.index) {
+            console.error("Cannot call `remove()` on a Table without a user-specified index.");
+            return;
+        }
+
         options = options || {};
         options.port_id = options.port_id || 0;
         let pdata;
@@ -1508,7 +1544,7 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index || "", this.limit, op, false, is_arrow, false, options.port_id);
+            make_table(pdata, this._Table, this.index, this.limit, op, false, is_arrow, false, options.port_id);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1614,18 +1650,21 @@ export default function(Module) {
          * @param {Object} [options] An optional options dictionary.
          * @param {string} options.index The name of the column in the resulting
          *     table to treat as an index. When updating this table, rows
-         *     sharing an index of a new row will be overwritten. `index` is
-         *     mutually exclusive to `limit`.
+         *     sharing an index of a new row will be overwritten. `index`
+         *     cannot be applied at the same time as `limit`.
          * @param {integer} options.limit The maximum number of rows that can be
          *     added to this table. When exceeded, old rows will be overwritten
-         *     in the order they were inserted. `limit` is mutually exclusive
-         *     to `index`.
+         *     in the order they were inserted. `limit` cannot be applied at
+         *     the same time as `index`.
          *
          * @returns {table} A new {@link module:perspective~table} object.
          */
         table: function(data, options) {
             options = options || {};
-            options.index = options.index || "";
+
+            // Always store index and limit as user-provided values or `null`.
+            options.index = options.index || null;
+            options.limit = options.limit || null;
 
             let data_accessor;
             let is_arrow = false;
@@ -1656,8 +1695,15 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                // Always create new tables using port 0
+
+                // C++ Table constructor cannot take null values for index
+                // and limit, so `make_table` will convert null to default
+                // values of "" for index and 4294967295 for limit. Tables
+                // must be created on port 0.
                 _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, is_csv, 0);
+
+                // Pass through user-provided values or `null` to the
+                // Javascript Table constructor.
                 return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {
