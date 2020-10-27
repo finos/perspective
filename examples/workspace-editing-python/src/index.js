@@ -29,12 +29,11 @@ const websocket = perspective.websocket(URL);
 const worker = perspective.shared_worker();
 
 /**
- * `open_table` and `open_view` allow you to call API methods on remotely
- * hosted Perspective tables and views, just as you would on a locally created
- * table/view.
+ * `open_table` allows you to call API methods on remotely hosted Perspective
+ * tables just as you would on a locally created table.
  */
 const server_table = websocket.open_table("data_source_one");
-const server_view = websocket.open_view("view_one");
+const server_view = server_table.view();
 
 // All viewers are based on the same table, which then feed edits back to a
 // table on the server with a schema.

@@ -8,7 +8,6 @@
  */
 
 import {table, proxy_table} from "./table_api.js";
-import {proxy_view} from "./view_api.js";
 import {bindall} from "../utils.js";
 
 /**
@@ -85,10 +84,6 @@ export class Client {
      */
     open_table(name) {
         return new proxy_table(this, name);
-    }
-
-    open_view(name) {
-        return new proxy_view(this, name);
     }
 
     /**
