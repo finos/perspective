@@ -7,6 +7,7 @@
 #
 
 from six import iteritems, string_types
+from datetime import datetime, date
 from ..core.exception import PerspectiveError
 from ..core import Aggregate, Plugin, ALL_FILTERS, Sort
 
@@ -136,6 +137,11 @@ def validate_filters(filters):
                                     item
                                 )
                             )
+                else:
+                    if item.__class__.__name__ == "date":
+                        f[i] = item.strftime('%m/%d/%Y')
+                    elif isinstance(item, datetime):
+                        f[i] = item.strftime('%Y-%m-%d %H:%M:%S')
         return filters
     else:
         raise PerspectiveError(

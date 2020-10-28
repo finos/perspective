@@ -49,7 +49,7 @@ def _parse_datetime_index(index):
     return np.dtype("datetime64[{0}]".format(new_type))
 
 
-def deconstruct_pandas(data):
+def deconstruct_pandas(data, kwargs=None):
     """Given a dataframe, flatten it by resetting the index and memoizing the
     pivots that were applied.
 
@@ -60,46 +60,80 @@ def deconstruct_pandas(data):
         (pandas.DataFrame, dict): a Pandas DataFrame and a dictionary containing
             optional members `columns`, `row_pivots`, and `column_pivots`.
     """
-    kwargs = {}
-
-    # level unstacking
-    if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
-        data = pd.DataFrame(data.unstack())
-        columns = list(x for x in data.index.names if x)
-        kwargs["column_pivots"] = list(x for x in data.index.names if x)
-        kwargs["row_pivots"] = []
-        orig_columns = [" " for _ in data.columns.tolist()]
-
-        # deal with indexes
-        if len(columns) < len(data.index.names):
-            for i in range(len(data.index.names) - len(columns)):
-                if i == 0:
-                    columns.append("index")
-                    kwargs["row_pivots"].append("index")
-                else:
-                    columns.append("index-{}".format(i))
-                    kwargs["row_pivots"].append("index-{}".format(i))
-
-        # all columns in index
-        columns += orig_columns
-        data.reset_index(inplace=True)
-        data.columns = columns
-
-        # use these columns
-        kwargs["columns"] = orig_columns
+    kwargs = kwargs or {}
+    kwargs = {'columns': [], 'row_pivots': [], 'column_pivots': []}
 
     # Decompose Period index to timestamps
     if isinstance(data.index, pd.PeriodIndex):
         data.index = data.index.to_timestamp()
 
-    if isinstance(data.index, pd.MultiIndex):
-        kwargs["row_pivots"] = list(data.index.names)
-        kwargs["columns"] = data.columns.tolist()
+    if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex) and isinstance(data.index, pd.MultiIndex):
+        # Row and col pivots
+        kwargs['row_pivots'].extend([str(c) for c in data.index.names])
 
-    if isinstance(data, pd.Series) or "index" not in map(
-        lambda x: str(x).lower(), data.columns
-    ):
-        flattened = data.reset_index()
+        for _ in kwargs['row_pivots']:
+            # unstack row pivots
+            data = data.unstack()
+        data = pd.DataFrame(data)
+
+        i = 0
+        new_names = list(data.index.names)
+        for j, val in enumerate(data.index.names):
+            if val is None:
+                new_names[j] = 'index' if i == 0 else 'index-{}'.format(i)
+                i += 1
+            else:
+                if str(val) not in kwargs['row_pivots']:
+                    kwargs['column_pivots'].append(str(val))
+        data.index.names = new_names
+        data = data.reset_index()  # copy
+        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] else " " for c in data.columns]
+        kwargs['columns'].extend([" " for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots']])
+
+    elif isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
+        # Col pivots
+        if data.index.name:
+            kwargs['row_pivots'].append(str(data.index.name))
+            push_row_pivot = False
+        else:
+            push_row_pivot = True
+
+        data = pd.DataFrame(data.unstack())
+
+        i = 0
+        new_names = list(data.index.names)
+        for j, val in enumerate(data.index.names):
+            if val is None:
+                new_names[j] = 'index' if i == 0 else 'index-{}'.format(i)
+                i += 1
+                if push_row_pivot:
+                    kwargs['row_pivots'].append(str(new_names[j]))
+            else:
+                if str(val) not in kwargs['row_pivots']:
+                    kwargs['column_pivots'].append(str(val))
+
+        data.index.names = new_names
+        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] else " " for c in data.columns]
+        kwargs['columns'].extend([" " for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots']])
+
+    elif isinstance(data, pd.DataFrame) and isinstance(data.index, pd.MultiIndex):
+        # Row pivots
+        kwargs['row_pivots'].extend(list(data.index.names))
+        data = data.reset_index()  # copy
+
+    if isinstance(data, pd.DataFrame):
+        # flat df
+        if 'index' not in [str(c).lower() for c in data.columns]:
+            data = data.reset_index(col_fill='index')
+
+        if not kwargs['columns']:
+            # might already be set in row+col pivot df
+            kwargs['columns'].extend([str(c) for c in data.columns])
+            data.columns = kwargs['columns']
+
+    if isinstance(data, pd.Series):
+        # Series
+        flattened = data.reset_index()  # copy
 
         if isinstance(data, pd.Series):
             # preserve name from series
