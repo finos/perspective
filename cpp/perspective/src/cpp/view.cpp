@@ -90,6 +90,12 @@ View<CTX_T>::get_view_config() const {
 
 template <>
 std::int32_t
+View<t_ctxunit>::sides() const {
+    return 0;
+}
+
+template <>
+std::int32_t
 View<t_ctx0>::sides() const {
     return 0;
 }
@@ -199,6 +205,24 @@ View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
     return names;
 }
 
+template <>
+std::vector<std::vector<t_tscalar>>
+View<t_ctxunit>::column_names(bool skip, std::int32_t depth) const {
+    std::vector<std::vector<t_tscalar>> names;
+
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+        t_tscalar name = m_ctx->get_column_name(key);
+        if (name.to_string() == "psp_okey") {
+            continue;
+        };
+        std::vector<t_tscalar> col_path;
+        col_path.push_back(name);
+        names.push_back(col_path);
+    }
+
+    return names;
+}
+
 template <typename CTX_T>
 std::vector<std::vector<t_tscalar>>
 View<CTX_T>::column_paths() const {
@@ -263,7 +287,7 @@ View<CTX_T>::schema() const {
 
 template <>
 std::map<std::string, std::string>
-View<t_ctx0>::schema() const {
+View<t_ctxunit>::schema() const {
     t_schema schema = m_ctx->get_schema();
     std::vector<t_dtype> _types = schema.types();
     std::vector<std::string> names = schema.columns();
@@ -287,6 +311,31 @@ View<t_ctx0>::schema() const {
     return new_schema;
 }
 
+template <>
+std::map<std::string, std::string>
+View<t_ctx0>::schema() const {
+    t_schema schema = m_ctx->get_schema();
+    std::vector<t_dtype> _types = schema.types();
+    std::vector<std::string> names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    std::vector<std::vector<t_tscalar>> cols = column_names(false);
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = cols.size(); i != max; ++i) {
+        std::string name = cols[i].back().to_string();
+        if (name == "psp_okey") {
+            continue;
+        }
+        new_schema[name] = dtype_to_str(types[name]);
+    }
+
+    return new_schema;
+}
 
 template <typename CTX_T>
 std::map<std::string, std::string>
@@ -316,6 +365,12 @@ View<CTX_T>::computed_schema() const {
 
 template <>
 std::map<std::string, std::string>
+View<t_ctxunit>::computed_schema() const {
+    return {};
+}
+
+template <>
+std::map<std::string, std::string>
 View<t_ctx0>::computed_schema() const {
     t_schema schema = m_ctx->get_schema();
     std::vector<t_dtype> _types = schema.types();
@@ -333,6 +388,17 @@ View<t_ctx0>::computed_schema() const {
     }
 
     return new_schema;
+}
+
+template <>
+std::shared_ptr<t_data_slice<t_ctxunit>>
+View<t_ctxunit>::get_data(
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
+    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
+    auto col_names = column_names();
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctxunit>>(m_ctx, start_row, end_row,
+        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
+    return data_slice_ptr;
 }
 
 template <>
@@ -621,9 +687,15 @@ View<CTX_T>::_set_deltas_enabled(bool enabled_state) {
 
 // Pivot table operations
 template <typename CTX_T>
-std::int32_t
+bool
 View<CTX_T>::get_row_expanded(std::int32_t ridx) const {
     return m_ctx->unity_get_row_expanded(ridx);
+}
+
+template <>
+t_index
+View<t_ctxunit>::expand(std::int32_t ridx, std::int32_t row_pivot_length) {
+    return ridx;
 }
 
 template <>
@@ -650,6 +722,12 @@ View<t_ctx2>::expand(std::int32_t ridx, std::int32_t row_pivot_length) {
 
 template <>
 t_index
+View<t_ctxunit>::collapse(std::int32_t ridx) {
+    return ridx;
+}
+
+template <>
+t_index
 View<t_ctx0>::collapse(std::int32_t ridx) {
     return ridx;
 }
@@ -665,6 +743,10 @@ t_index
 View<t_ctx2>::collapse(std::int32_t ridx) {
     return m_ctx->close(t_header::HEADER_ROW, ridx);
 }
+
+template <>
+void
+View<t_ctxunit>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {}
 
 template <>
 void
@@ -739,6 +821,12 @@ View<t_ctx0>::get_row_path(t_uindex idx) const {
     return std::vector<t_tscalar>();
 }
 
+template <>
+std::vector<t_tscalar>
+View<t_ctxunit>::get_row_path(t_uindex idx) const {
+    return std::vector<t_tscalar>();
+}
+
 template <typename CTX_T>
 std::vector<t_tscalar>
 View<CTX_T>::get_row_path(t_uindex idx) const {
@@ -749,6 +837,12 @@ template <typename CTX_T>
 t_stepdelta
 View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
     return m_ctx->get_step_delta(bidx, eidx);
+}
+
+template <>
+t_stepdelta
+View<t_ctxunit>::get_step_delta(t_index bidx, t_index eidx) const {
+    return t_stepdelta();
 }
 
 template <typename CTX_T>
@@ -840,6 +934,7 @@ View<CTX_T>::_find_hidden_sort(const std::vector<t_sortspec>& sort) {
 }
 
 // Explicitly instantiate View for each context
+template class View<t_ctxunit>;
 template class View<t_ctx0>;
 template class View<t_ctx1>;
 template class View<t_ctx2>;

@@ -243,6 +243,7 @@ t_ftrav::step_begin() {
 
 void
 t_ftrav::step_end() {
+    // The new number of rows in this traversal
     t_index new_size = m_index->size() + m_step_inserts - m_step_deletes;
 
     auto new_index = std::make_shared<std::vector<t_mselem>>();
@@ -250,18 +251,29 @@ t_ftrav::step_end() {
 
     t_uindex i = 0;
     t_multisorter sorter(get_sort_orders(m_sortby));
+
     std::vector<t_mselem> new_rows;
     new_rows.reserve(m_new_elems.size());
 
-    for (t_pkmselem_map::const_iterator pkelem_iter = m_new_elems.begin();
-         pkelem_iter != m_new_elems.end(); ++pkelem_iter) {
+    for (
+        tsl::hopscotch_map<t_tscalar, t_mselem>::const_iterator pkelem_iter = m_new_elems.begin();
+        pkelem_iter != m_new_elems.end();
+        ++pkelem_iter) {
         new_rows.push_back(pkelem_iter->second);
     }
+
+    // TODO: int/float/date/datetime pkeys are already sorted here, so if
+    // there was a way to assert that `psp_pkey` is a string typed column,
+    // we can conditional the sort on whether m_sortby.size() > 0 or if
+    // psp_pkey is a string column.
     std::sort(new_rows.begin(), new_rows.end(), sorter);
+
     for (auto it = new_rows.begin(); it != new_rows.end(); ++it) {
         const t_mselem& new_elem = *it;
+
         while (i < m_index->size()) {
             const t_mselem& old_elem = (*m_index)[i];
+
             if (old_elem.m_deleted) {
                 i++;
                 m_pkeyidx.erase(old_elem.m_pkey);
@@ -280,11 +292,14 @@ t_ftrav::step_end() {
         new_index->push_back(new_elem);
     }
 
+    // reconcile old rows that are marked as removed or updated.
     while (i < m_index->size()) {
         const t_mselem& old_elem = (*m_index)[i++];
+        
         if (old_elem.m_deleted) {
             m_pkeyidx.erase(old_elem.m_pkey);
         } else if (!old_elem.m_updated) {
+            // Add back cells that have not changed during this step.
             m_pkeyidx[old_elem.m_pkey] = new_index->size();
             new_index->push_back(old_elem);
         }
@@ -308,7 +323,7 @@ t_ftrav::update_row(
     std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey) {
     if (m_sortby.empty())
         return;
-    t_pkeyidx_map::iterator pkiter = m_pkeyidx.find(pkey);
+    auto pkiter = m_pkeyidx.find(pkey);
     if (pkiter == m_pkeyidx.end()) {
         add_row(gstate, config, pkey);
         return;
@@ -321,7 +336,7 @@ t_ftrav::update_row(
 
 void
 t_ftrav::delete_row(t_tscalar pkey) {
-    t_pkeyidx_map::iterator pkiter = m_pkeyidx.find(pkey);
+    auto pkiter = m_pkeyidx.find(pkey);
     if (pkiter == m_pkeyidx.end())
         return;
     (*m_index)[pkiter->second].m_deleted = true;

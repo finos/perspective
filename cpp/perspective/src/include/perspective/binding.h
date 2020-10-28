@@ -14,6 +14,7 @@
 #include <perspective/gnode.h>
 #include <perspective/data_table.h>
 #include <perspective/pool.h>
+#include <perspective/context_unit.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>

@@ -12,6 +12,7 @@
 #include <perspective/exports.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
+#include <perspective/context_unit.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
@@ -180,7 +181,7 @@ public:
      * @param ridx
      * @return std::int32_t
      */
-    std::int32_t get_row_expanded(std::int32_t ridx) const;
+    bool get_row_expanded(std::int32_t ridx) const;
 
     /**
      * @brief Expands the row at "ridx".
