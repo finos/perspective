@@ -263,7 +263,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     keywords="analytics tools plotting",
-    packages=find_packages(exclude=['bench', "bench.*"]),
+    packages=find_packages(exclude=["bench", "bench.*"]),
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
