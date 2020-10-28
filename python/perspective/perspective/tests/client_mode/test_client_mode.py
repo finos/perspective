@@ -383,6 +383,6 @@ class TestClient(object):
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         widget = perspective.PerspectiveWidget(df_both)
         assert hasattr(widget, "table") is False
-        assert widget.columns == [' ']
+        assert widget.columns == ['value']
         assert widget.column_pivots == ['first', 'second', 'third']
         assert widget.row_pivots == ['index']
