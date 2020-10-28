@@ -8,6 +8,7 @@
 
 import random
 import string
+import types
 from functools import partial
 from ..core.exception import PerspectiveError
 from ..table import Table
@@ -106,6 +107,14 @@ class PerspectiveManager(_PerspectiveManagerInternal):
     def new_session(self):
         return PerspectiveSession(self)
 
+    def call_loop(self, f, *args, **kwargs):
+        """Calls `f()` on this `PerspectiveManager`'s event loop if it has one,
+        or synchronously if it does not.
+        """
+        if self._loop_callback is None:
+            return f(*args, **kwargs)        
+        return self._loop_callback(f, *args, **kwargs)
+
     def set_loop_callback(self, loop_callback):
         """Sets this `PerspectiveManager` to run in Async mode, defering
         `update()` application and releasing the GIL for expensive operations.
@@ -118,6 +127,10 @@ class PerspectiveManager(_PerspectiveManagerInternal):
                 and schedules it to run on the same thread on which
                 `set_loop_callback()` was originally invoked.
         """
+        if self._loop_callback is not None:
+            raise PerspectiveError("PerspectiveManager already has a `loop_callback`")
+        if type(loop_callback) is not types.FunctionType:
+            raise PerspectiveError("`loop_callback` must be a function")
         self._loop_callback = loop_callback
         for table in self._tables.values():
             loop_callback(lambda: table._table.get_pool().set_event_loop())
