@@ -55,7 +55,7 @@ class TestWidgetPandas:
         widget = PerspectiveWidget(pivot_table)
         assert widget.row_pivots == ['Country', 'Region']
         assert widget.column_pivots == ['Category', 'Segment']
-        assert widget.columns == [' ']
+        assert widget.columns == ['value']
         # table should host flattened data
         view = widget.table.view()
         assert view.num_rows() == 60
@@ -106,7 +106,7 @@ class TestWidgetPandas:
         index = pd.MultiIndex.from_tuples(tuples, names=['first', 'second', 'third'])
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         widget = PerspectiveWidget(df_both)
-        assert widget.columns == [' ']
+        assert widget.columns == ['value']
         assert widget.column_pivots == ['first', 'second', 'third']
         assert widget.row_pivots == ['index']
 
@@ -121,3 +121,23 @@ class TestWidgetPandas:
         assert widget.columns == ['first', "third"]
         assert widget.column_pivots == ['first', 'second', 'third']
         assert widget.row_pivots == ['index']
+
+    def test_pivottable_values_index(self):
+        arrays = {'A':['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux'],
+                'B':['one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two'],
+                'C':['X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y'],
+                'D':np.arange(16)}
+
+        df = pd.DataFrame(arrays)
+        df_pivot = df.pivot_table(values=['D'], index=['A'], columns=['B','C'], aggfunc={'D':'count'})
+        widget = PerspectiveWidget(df_pivot)
+        assert widget.columns == ['value']
+        assert widget.column_pivots == ['B', 'C']
+        assert widget.row_pivots == ['A']
+
+    def test_pivottable_multi_values(self):
+        pt = pd.pivot_table(DF, values = ['Discount','Sales'], index=['Country','Region'],aggfunc={'Discount':'count','Sales':'sum'},columns=["State","Quantity"])
+        widget = PerspectiveWidget(pt)
+        assert widget.columns == ['Discount', 'Sales']
+        assert widget.column_pivots == ['State', 'Quantity']
+        assert widget.row_pivots == ['Country', 'Region']

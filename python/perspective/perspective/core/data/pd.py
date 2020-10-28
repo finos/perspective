@@ -67,29 +67,71 @@ def deconstruct_pandas(data, kwargs=None):
     if isinstance(data.index, pd.PeriodIndex):
         data.index = data.index.to_timestamp()
 
+    # convert categories to str
+    if isinstance(data, pd.DataFrame):
+        if hasattr(pd, 'CategoricalDtype'):
+            for k, v in data.dtypes.items():
+                if isinstance(v, pd.CategoricalDtype):
+                    data[k] = data[k].astype(str)
+
     if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex) and isinstance(data.index, pd.MultiIndex):
         # Row and col pivots
         kwargs['row_pivots'].extend([str(c) for c in data.index.names])
 
-        for _ in kwargs['row_pivots']:
-            # unstack row pivots
-            data = data.unstack()
-        data = pd.DataFrame(data)
+        # Two strategies
+        if None in data.columns.names:
+            # In this case, we need to extract the column names from the row
+            # e.g. pt = pd.pivot_table(df, values = ['Discount','Sales'], index=['Country','Region'], columns=["State","Quantity"])
+            # Table will be
+            #                       Discount             Sales
+            #         State       Alabama Alaska ...      Alabama Alaska ...
+            #         Quantity    150 350 ...             300 500
+            # Country Region
+            #  US     Region 0    ...
+            #  US     Region 1
+            #
+            # We need to transform this to:
+            # row_pivots = ['Country', 'Region']
+            # column_pivots = ['State', 'Quantity']
+            # columns = ['Discount', 'Sales']
+            existent = kwargs['row_pivots'] + data.columns.names
+            for c in data.columns.names:
+                if c is not None:
+                    kwargs['column_pivots'].append(c)
+                    data = data.stack()
+            data = pd.DataFrame(data).reset_index()
 
+            for new_column in data.columns:
+                if new_column not in existent:
+                    kwargs['columns'].append(new_column)
+        else:
+            # In this case, we have no need as the values is just a single entry
+            # e.g. pt = pd.pivot_table(df, values = 'Discount', index=['Country','Region'], columns = ['Category', 'Segment'])
+            for _ in kwargs['row_pivots']:
+                # unstack row pivots
+                data = data.unstack()
+            data = pd.DataFrame(data)
+
+        # this rather weird loop is to map existing None columns into
+        # levels, e.g. in the `else` block above, to reconstruct
+        # the "Discount" name. IDK if this is stored or if the name is
+        # lots, so we'll just call it 'index', 'index-1', ...
         i = 0
         new_names = list(data.index.names)
         for j, val in enumerate(data.index.names):
             if val is None:
                 new_names[j] = 'index' if i == 0 else 'index-{}'.format(i)
                 i += 1
+                # kwargs['row_pivots'].append(str(new_names[j]))
             else:
                 if str(val) not in kwargs['row_pivots']:
                     kwargs['column_pivots'].append(str(val))
+
+        # Finally, remap any values columns to have column name 'value'
         data.index.names = new_names
         data = data.reset_index()  # copy
-        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] else " " for c in data.columns]
-        kwargs['columns'].extend([" " for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots']])
-
+        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] + kwargs['columns'] else "value" for c in data.columns]
+        kwargs['columns'].extend(["value" for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] + kwargs['columns']])
     elif isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
         # Col pivots
         if data.index.name:
@@ -113,8 +155,8 @@ def deconstruct_pandas(data, kwargs=None):
                     kwargs['column_pivots'].append(str(val))
 
         data.index.names = new_names
-        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] else " " for c in data.columns]
-        kwargs['columns'].extend([" " for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots']])
+        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] else "value" for c in data.columns]
+        kwargs['columns'].extend(["value" for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots']])
 
     elif isinstance(data, pd.DataFrame) and isinstance(data.index, pd.MultiIndex):
         # Row pivots

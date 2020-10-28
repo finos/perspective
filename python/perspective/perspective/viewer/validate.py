@@ -7,7 +7,7 @@
 #
 
 from six import iteritems, string_types
-from datetime import datetime, date
+from datetime import datetime
 from ..core.exception import PerspectiveError
 from ..core import Aggregate, Plugin, ALL_FILTERS, Sort
 
