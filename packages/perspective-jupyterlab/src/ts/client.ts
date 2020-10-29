@@ -52,7 +52,6 @@ export class PerspectiveJupyterClient extends Client {
      * @param msg {any} the message to pass to the `PerspectiveManager`.
      */
     send(msg: any): void {
-        console.log("SENDING", msg);
         // Handle calls to `update` with a binary by setting `binary_length`
         // to true, so the kernel knows to handle the arraybuffer properly.
         if (msg.method === "update" && msg.args.length === 2 && msg.args[0] instanceof ArrayBuffer) {
