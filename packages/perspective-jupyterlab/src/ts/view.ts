@@ -265,8 +265,6 @@ export class PerspectiveView extends DOMWidgetView {
                 const kernel_table: Table = this.perspective_client.open_table(msg.data["table_name"]);
                 const kernel_view: View = kernel_table.view();
 
-                console.log(kernel_view);
-
                 // If the widget is editable, set up client/server editing
                 if (this.pWidget.editable) {
                     let worker: PerspectiveWorker;
@@ -284,8 +282,6 @@ export class PerspectiveView extends DOMWidgetView {
                         Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(ports => {
                             client_edit_port = ports[1];
                             server_edit_port = ports[2];
-
-                            console.log(ports[1], ports[2]);
                         });
 
                         /**
@@ -295,7 +291,6 @@ export class PerspectiveView extends DOMWidgetView {
                         client_view.on_update(
                             updated => {
                                 if (updated.port_id === client_edit_port) {
-                                    console.log("CLIENT UPDATE");
                                     kernel_table.update(updated.delta, {
                                         port_id: server_edit_port
                                     });
@@ -312,7 +307,6 @@ export class PerspectiveView extends DOMWidgetView {
                         kernel_view.on_update(
                             updated => {
                                 if (updated.port_id !== server_edit_port) {
-                                    console.log("KERNEL UPDATE");
                                     client_table.update(updated.delta); // any port, we dont care
                                 }
                             },
