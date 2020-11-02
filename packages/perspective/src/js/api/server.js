@@ -235,6 +235,9 @@ export class Server {
                         return;
                     }
                 }
+                this.post({
+                    id: msg.id,
+                });
                 break;
         }
     }

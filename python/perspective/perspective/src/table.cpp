@@ -78,7 +78,7 @@ namespace binding {
 
             {
                 PerspectiveScopedGILRelease acquire(
-                    pool->get_event_loop_thread_id());
+                    pool->get_event_loop_thread_id(), pool->get_lock(), true);
 
                 // With the GIL released, load the arrow
                 if (is_csv) {
@@ -289,9 +289,9 @@ namespace binding {
 
         if (is_arrow) {
             PerspectiveScopedGILRelease acquire(
-                pool->get_event_loop_thread_id());
+                pool->get_event_loop_thread_id(), pool->get_lock(), true);
             row_count = arrow_loader.row_count();
-            data_table.extend(row_count);
+            data_table.extend(arrow_loader.row_count());
             arrow_loader.fill_table(
                 data_table, input_schema, index, offset, limit, is_update);
         } else if (is_numpy) {
