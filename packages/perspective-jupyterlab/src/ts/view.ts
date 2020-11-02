@@ -327,6 +327,10 @@ export class PerspectiveView extends DOMWidgetView {
                     kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
                         const table = this.client_worker.table(arrow, table_options);
                         this.pWidget.load(table);
+                        kernel_view.on_update(
+                            updated => table.update(updated.delta),
+                            {mode: "row"}
+                        );
                     });
                 }
             } else {

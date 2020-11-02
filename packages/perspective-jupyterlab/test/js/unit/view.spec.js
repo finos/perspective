@@ -101,7 +101,7 @@ describe("PerspectiveView", function() {
             view = await manager.create_view(model)();
             const mock_client = PerspectiveJupyterClient.mock.instances[0];
             mock_client.open_table.mockReturnValue({
-                view: jest.fn()
+                view: jest.fn().mockImplementation(name => ({to_arrow: jest.fn().mockImplementation(() => new Promise(() => null)), name}))
             });
 
             // Mock the output of open_table() so `view()` is valid
@@ -130,7 +130,7 @@ describe("PerspectiveView", function() {
             view = await manager.create_view(model)();
             const mock_client = PerspectiveJupyterClient.mock.instances[0];
             mock_client.open_table.mockReturnValue({
-                view: jest.fn()
+                view: jest.fn().mockImplementation(name => ({to_arrow: jest.fn().mockImplementation(() => new Promise(() => null)), name}))
             });
 
             const table_name = uuid();
@@ -160,7 +160,7 @@ describe("PerspectiveView", function() {
             view = await manager.create_view(model)();
             const mock_client = PerspectiveJupyterClient.mock.instances[0];
             mock_client.open_table.mockReturnValue({
-                view: jest.fn()
+                view: jest.fn().mockImplementation(name => ({to_arrow: jest.fn().mockImplementation(() => new Promise(() => null)), name}))
             });
 
             const table_name = uuid();
@@ -378,10 +378,7 @@ describe("PerspectiveView", function() {
                 result.b = result.b.map(x => new Date(x));
 
                 expect(result).toEqual(data);
-
-                // TODO there is no way to verify this in perspective API
-                // currently ...
-                // expect(load_args[1]).toEqual(options);
+                expect(await load_args[0].get_index()).toEqual("a");
             });
 
             it("Should correctly update a dataset", async function() {
