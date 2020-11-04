@@ -11,10 +11,13 @@ import logging
 import numpy
 import pandas
 import json
+
+from re import match
 from datetime import date, datetime
 from functools import partial
 from ipywidgets import Widget
 from traitlets import observe, Unicode
+
 from ..core.data import deconstruct_pandas
 from ..core.exception import PerspectiveError
 from ..libpsp import is_libpsp
@@ -48,39 +51,93 @@ def _type_to_string(t):
 
 
 def _serialize(data):
-    # Attempt to serialize data and pass it to the front-end as JSON
+    """In client mode, PerspectiveWidget will normalize the data before
+    passing it to the front-end.
+
+    Widget comms use a custom serializer and messages are not manually
+    serialized to JSON by the user, so take special care to remove certain
+    unparsable values such as `datetime.date`."""
     if isinstance(data, list):
+        # Check if any values are `datetime.date`
+        for row in data:
+            if not isinstance(row, dict):
+                raise PerspectiveError(
+                    "Received {} in list dataset, expected `dict`!".format(type(row))
+                )
+            for k, v in six.iteritems(row):
+                # isinstance(datetime, date) will always return True, so
+                # do a type comparison instead.
+                if type(v) is date:
+                    # Convert to datetime() which is parsable
+                    row[k] = datetime(v.year, v.month, v.day)
         return data
     elif isinstance(data, dict):
-        for v in data.values():
-            # serialize schema values to string
+        formatted = data
+
+        for v in six.itervalues(data):
             if isinstance(v, type):
-                return {k: _type_to_string(data[k]) for k in data}
+                # serialize schema values to string
+                return {
+                    column_name: _type_to_string(data[column_name])
+                    for column_name in data
+                }
             elif isinstance(v, numpy.ndarray):
-                return {k: data[k].tolist() for k in data}
-            else:
-                return data
+                # Convert dicts of numpy arrays to dicts of lists
+                formatted = {
+                    column_name: data[column_name].tolist() for column_name in data
+                }
+                break
+
+        for column_name, values in six.iteritems(formatted):
+            # Remove `datetime.date` values
+            formatted[column_name] = [
+                datetime(v.year, v.month, v.day) if type(v) is date else v
+                for v in values
+            ]
+
+        return formatted
     elif isinstance(data, numpy.ndarray):
         # structured or record array
         if not isinstance(data.dtype.names, tuple):
             raise NotImplementedError(
                 "Data should be dict of numpy.ndarray or a structured array."
             )
+
         columns = [data[col].tolist() for col in data.dtype.names]
-        return dict(zip(data.dtype.names, columns))
+        formatted = dict(zip(data.dtype.names, columns))
+
+        for column_name, values in six.iteritems(formatted):
+            # Remove `datetime.date` values
+            formatted[column_name] = [
+                datetime(v.year, v.month, v.day) if type(v) is date else v
+                for v in values
+            ]
+
+        return formatted
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
         # Take flattened dataframe and make it serializable
         d = {}
+
         for name in data.columns:
             column = data[name]
             values = column.values
+
             # Timezone-aware datetime64 dtypes throw an exception when using
             # `numpy.issubdtype` - match strings here instead.
             str_dtype = str(column.dtype)
             if "datetime64" in str_dtype:
+                # Convert datetime/date to string depending on the unit
+                unit = match(r"\[.+\]", str_dtype) or "ms"
+
                 # Convert all datetimes to string for serializing
-                values = numpy.datetime_as_string(column.values, unit="ms")
-            d[name] = values.tolist()
+                d[name] = numpy.datetime_as_string(column.values, unit=unit).tolist()
+            elif str_dtype == "object":
+                d[name] = [
+                    datetime(v.year, v.month, v.day) if type(v) is date else v
+                    for v in values
+                ]
+            else:
+                d[name] = values.tolist()
         return d
     else:
         raise NotImplementedError(
