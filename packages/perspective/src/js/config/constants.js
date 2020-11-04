@@ -25,6 +25,7 @@ export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "ag
 const NUMBER_AGGREGATES = [
     "any",
     "avg",
+    "abs sum",
     "count",
     "distinct count",
     "dominant",
