@@ -27,6 +27,7 @@ declare module "@finos/perspective" {
     }
 
     enum NUMBER_AGGREGATES {
+        ABS_SUM = "abs sum",
         ANY = "any",
         AVERAGE = "avg",
         COUNT = "count",
