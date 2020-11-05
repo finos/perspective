@@ -57,7 +57,17 @@ namespace binding {
 
     t_val
     is_valid_datetime(t_val filter_term) {
-        return t_val(apachearrow::parseAsArrowTimestamp(filter_term.as<std::string>()) != -1);
+        // Convert `Date()` values to string before parsing
+        std::string datetime_string;
+
+        if (filter_term.instanceof(t_val::global("Date"))) {
+            datetime_string = filter_term.call<t_val>("toLocaleString").as<std::string>();
+        } else {
+            datetime_string = filter_term.as<std::string>();
+        }
+
+        std::cout << datetime_string << std::endl;
+        return t_val(apachearrow::parseAsArrowTimestamp(datetime_string) != -1);
     }
 
     bool val_to_date(t_val& item, t_date* out) {
