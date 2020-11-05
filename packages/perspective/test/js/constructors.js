@@ -1005,64 +1005,6 @@ module.exports = perspective => {
             table.delete();
         });
 
-        // TODO: this only tests that strings created as UTC are parsed as UTC,
-        // and does not fix cross-timezone errors where the string->date parser
-        // treats a datestring as UTC when it is in browser local time.
-        it("Reads datetime strings created in UTC as local time", async function() {
-            const data = [
-                {w: "2020-03-01T12:30:55.000Z", x: 1, y: "a", z: true},
-                {w: "2020-10-01T15:30:55.000Z", x: 2, y: "b", z: false},
-                {w: "2020-11-01T19:30:55.000Z", x: 3, y: "c", z: true},
-                {w: "2020-12-01T23:30:55.000Z", x: 4, y: "d", z: false}
-            ];
-            const table = perspective.table(data);
-            const view = table.view();
-            const result = await view.to_json();
-
-            // perform a deep copy
-            const expected = JSON.parse(JSON.stringify(datetime_range_data)).map(row => {
-                row.w = +new Date(row.w);
-                return row;
-            });
-            console.log(result, expected);
-
-            expect(result).toEqual(expected);
-            view.delete();
-            table.delete();
-        });
-
-        // TODO: this only tests that strings created as UTC are parsed as UTC,
-        // and does not fix cross-timezone errors where the string->date parser
-        // treats a datestring as UTC when it is in browser local time.
-        it("Reads datetime strings created in EST as local time", async function() {
-            console.log(datetime_range_data);
-            const data = JSON.parse(JSON.stringify(datetime_range_data)).map(row => {
-                row.w = new Date(row.w).toLocaleString("en-US");
-                return row;
-            });
-            console.log(data);
-            const table = perspective.table({
-                w: "datetime",
-                x: "integer",
-                y: "string",
-                z: "boolean"
-            });
-            table.update(data);
-            const view = table.view();
-            const result = await view.to_json();
-
-            // perform a deep copy
-            const expected = JSON.parse(JSON.stringify(datetime_range_data)).map(row => {
-                row.w = +new Date(row.w);
-                return row;
-            });
-            console.log(result, expected);
-
-            expect(result).toEqual(expected);
-            view.delete();
-            table.delete();
-        });
-
         it("Handles datetime values with mixed formats", async function() {
             var table = perspective.table({datetime: "datetime"});
             table.update([{datetime: new Date(1549257586108)}, {datetime: "2019-01-30"}, {datetime: 11}]);
@@ -1110,29 +1052,36 @@ module.exports = perspective => {
             it("Correctly parses an ISO-8601 formatted string", async function() {
                 let table = perspective.table({d: ["2011-10-05T14:48:00"]});
                 let view = table.view({});
-                let result = await view.schema();
-                expect(result["d"]).toEqual("datetime");
+                let result = await view.to_columns();
+                expect(result["d"]).toEqual([+new Date("2011-10-05T14:48:00")]);
             });
 
             it("Correctly parses an ISO-8601 formatted string 2", async function() {
                 let table = perspective.table({d: ["2011-10-05T14:48:00.000"]});
                 let view = table.view({});
-                let result = await view.schema();
-                expect(result["d"]).toEqual("datetime");
+                let result = await view.to_columns();
+                expect(result["d"]).toEqual([+new Date("2011-10-05T14:48:00.000")]);
             });
 
             it("Correctly parses an ISO-8601 formatted string 3", async function() {
                 let table = perspective.table({d: ["2011-10-05T14:48:00Z"]});
                 let view = table.view({});
-                let result = await view.schema();
-                expect(result["d"]).toEqual("datetime");
+                let result = await view.to_columns();
+                expect(result["d"]).toEqual([+new Date("2011-10-05T14:48:00Z")]);
             });
 
-            it("Correctly parses an ISO-8601 formatted string 3", async function() {
-                let table = perspective.table({d: ["2011-10-05T14:48:00.000Z"]});
+            it("Correctly parses an ISO-8601 formatted string with milliseconds", async function() {
+                let table = perspective.table({d: ["2011-10-05T14:48:00.555"]});
                 let view = table.view({});
-                let result = await view.schema();
-                expect(result["d"]).toEqual("datetime");
+                let result = await view.to_columns();
+                expect(result["d"]).toEqual([+new Date("2011-10-05T14:48:00.555")]);
+            });
+
+            it("Correctly parses an ISO-8601 formatted string generated from toISOString", async function() {
+                let table = perspective.table({d: [new Date(2020, 5, 12, 14, 55, 12, 555).toISOString()]});
+                let view = table.view({});
+                let result = await view.to_columns();
+                expect(result["d"]).toEqual([+new Date(2020, 5, 12, 14, 55, 12, 555)]);
             });
 
             it("Correctly parses an ISO-8601 formatted string with timezone", async function() {
@@ -1180,6 +1129,32 @@ module.exports = perspective => {
                 let view = table.view({});
                 let result = await view.schema();
                 expect(result["d"]).toEqual("string");
+            });
+
+            // TODO: this only tests that strings created as UTC are parsed as UTC,
+            // and does not fix cross-timezone errors where the string->date parser
+            // treats a datestring as UTC when it is in browser local time.
+            it("Reads datetime strings created in UTC as local time", async function() {
+                const data = [
+                    {w: "2020-03-01T12:30:55.000Z", x: 1, y: "a", z: true},
+                    {w: "2020-10-01T15:30:55.000Z", x: 2, y: "b", z: false},
+                    {w: "2020-11-01T19:30:55.000Z", x: 3, y: "c", z: true},
+                    {w: "2020-12-01T23:30:55.000Z", x: 4, y: "d", z: false}
+                ];
+                const table = perspective.table(data);
+                const view = table.view();
+                const result = await view.to_json();
+
+                // perform a deep copy
+                const expected = JSON.parse(JSON.stringify(datetime_range_data)).map(row => {
+                    row.w = +new Date(row.w);
+                    return row;
+                });
+                console.log(result, expected);
+
+                expect(result).toEqual(expected);
+                view.delete();
+                table.delete();
             });
         });
 

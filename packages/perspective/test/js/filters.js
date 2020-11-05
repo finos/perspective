@@ -137,84 +137,107 @@ module.exports = perspective => {
 
                 it("w == datetime with time as string", async function() {
                     const table = perspective.table(datetime_range_data);
-                    const filter = [["w", "==", "2020/12/01 23:30:55"]];
+                    const filter = [["w", "==", "2020-12-01 23:30:55"]];
                     const valid = await table.is_valid_filter(filter[0]);
                     expect(valid).toEqual(true);
                     const view = table.view({
                         filter
                     });
                     const json = await view.to_json();
-                    expect(json).toEqual(datetime_range_data[0]);
+                    expect(json).toEqual([{w: +new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false}]);
                     view.delete();
                     table.delete();
                 });
 
                 it("w > datetime with time as string", async function() {
                     const table = perspective.table(datetime_range_data);
-                    const filter = [["w", ">", "2020/10/01 23:30:55"]];
+                    const filter = [["w", ">", "2020-10-01 23:30:55"]];
                     const valid = await table.is_valid_filter(filter[0]);
                     expect(valid).toEqual(true);
                     const view = table.view({
                         filter
                     });
                     const json = await view.to_json();
-                    expect(json).toEqual([datetime_range_data[0]]);
+                    expect(json).toEqual([
+                        {w: +new Date(2020, 10, 1, 19, 30, 55), x: 3, y: "c", z: true},
+                        {w: +new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false}
+                    ]);
                     view.delete();
                     table.delete();
                 });
 
                 it("w < datetime with time as string", async function() {
                     const table = perspective.table(datetime_range_data);
-                    const filter = [["w", "<", "2020/10/01 23:30:55"]];
+                    const filter = [["w", "<", "2020-10-01 23:30:55"]];
                     const valid = await table.is_valid_filter(filter[0]);
                     expect(valid).toEqual(true);
                     const view = table.view({
                         filter
                     });
                     let json = await view.to_json();
-                    expect(json).toEqual([datetime_range_data[0]]);
+                    expect(json).toEqual([
+                        {w: +new Date(2020, 2, 1, 12, 30, 55), x: 1, y: "a", z: true},
+                        {w: +new Date(2020, 9, 1, 15, 30, 55), x: 2, y: "b", z: false}
+                    ]);
                     view.delete();
                     table.delete();
                 });
 
-                it("w == datetime with time as toLocaleString", async function() {
+                it("w == datetime with time as toISOString", async function() {
                     const table = perspective.table(datetime_range_data);
-                    const filter = [["w", "==", new Date(2020, 2, 1, 12, 30, 55).toLocaleString()]];
+                    const filter = [["w", "==", new Date(2020, 2, 1, 12, 30, 55).toISOString()]];
                     const valid = await table.is_valid_filter(filter[0]);
                     expect(valid).toEqual(true);
                     const view = table.view({
                         filter
                     });
                     const json = await view.to_json();
-                    expect(json).toEqual(datetime_range_data[0]);
+                    expect(json).toEqual([
+                        {
+                            w: +new Date(2020, 2, 1, 12, 30, 55),
+                            x: 1,
+                            y: "a",
+                            z: true
+                        }
+                    ]);
                     view.delete();
                     table.delete();
                 });
 
-                it("w > datetime with time as toLocaleString", async function() {
+                it("w > datetime with time as toISOString", async function() {
                     const table = perspective.table(datetime_range_data);
-                    const filter = [["w", ">", new Date(2020, 9, 1, 15, 30, 55).toLocaleString()]];
+                    const filter = [["w", ">", new Date(2020, 9, 1, 15, 30, 55).toISOString()]];
                     const valid = await table.is_valid_filter(filter[0]);
                     expect(valid).toEqual(true);
                     const view = table.view({
                         filter
                     });
                     const json = await view.to_json();
-                    expect(json).toEqual([datetime_range_data[0]]);
+                    expect(json).toEqual([
+                        {w: +new Date(2020, 10, 1, 19, 30, 55), x: 3, y: "c", z: true},
+                        {w: +new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false}
+                    ]);
                     view.delete();
                     table.delete();
                 });
 
-                it("w < datetime with time as toLocaleString", async function() {
+                it("w < datetime with time as toISOString", async function() {
                     const table = perspective.table(datetime_range_data);
-                    const filter = [["w", "<", new Date(2020, 9, 1, 15, 30, 55).toLocaleString()]];
+                    const filter = [["w", "<", new Date(2020, 9, 1, 15, 30, 55).toISOString()]];
                     const valid = await table.is_valid_filter(filter[0]);
                     expect(valid).toEqual(true);
                     const view = table.view({
                         filter
                     });
                     let json = await view.to_json();
-                    expect(json).toEqual([datetime_range_data[0]]);
+                    expect(json).toEqual([
+                        {
+                            w: +new Date(2020, 2, 1, 12, 30, 55),
+                            x: 1,
+                            y: "a",
+                            z: true
+                        }
+                    ]);
                     view.delete();
                     table.delete();
                 });
@@ -228,7 +251,14 @@ module.exports = perspective => {
                         filter
                     });
                     const json = await view.to_json();
-                    expect(json).toEqual(datetime_range_data[0]);
+                    expect(json).toEqual([
+                        {
+                            w: +new Date(2020, 2, 1, 12, 30, 55),
+                            x: 1,
+                            y: "a",
+                            z: true
+                        }
+                    ]);
                     view.delete();
                     table.delete();
                 });
@@ -242,7 +272,10 @@ module.exports = perspective => {
                         filter
                     });
                     const json = await view.to_json();
-                    expect(json).toEqual([datetime_range_data[0]]);
+                    expect(json).toEqual([
+                        {w: +new Date(2020, 10, 1, 19, 30, 55), x: 3, y: "c", z: true},
+                        {w: +new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false}
+                    ]);
                     view.delete();
                     table.delete();
                 });
@@ -256,7 +289,77 @@ module.exports = perspective => {
                         filter
                     });
                     let json = await view.to_json();
-                    expect(json).toEqual([datetime_range_data[0]]);
+                    expect(json).toEqual([
+                        {
+                            w: +new Date(2020, 2, 1, 12, 30, 55),
+                            x: 1,
+                            y: "a",
+                            z: true
+                        }
+                    ]);
+                    view.delete();
+                    table.delete();
+                });
+            });
+
+            describe("Filter on datetime column in EST", () => {
+                beforeAll(() => {
+                    process.env.TZ = "US/Eastern";
+                });
+
+                afterAll(() => {
+                    process.env.TZ = "UTC";
+                });
+
+                it("w == datetime with time as string", async function() {
+                    expect(process.env.TZ).toEqual("US/Eastern");
+                    const table = perspective.table(datetime_range_data);
+                    const filter = [["w", "==", "2020-12-01 23:30:55"]];
+                    const valid = await table.is_valid_filter(filter[0]);
+                    expect(valid).toEqual(true);
+                    const view = table.view({
+                        filter
+                    });
+                    const json = await view.to_json();
+                    expect(json).toEqual([{w: +new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false}]);
+                    view.delete();
+                    table.delete();
+                });
+
+                it("w > datetime with time as string", async function() {
+                    expect(process.env.TZ).toEqual("US/Eastern");
+                    const table = perspective.table(datetime_range_data);
+                    const filter = [["w", ">", "2020-10-01 23:30:55"]];
+                    const valid = await table.is_valid_filter(filter[0]);
+                    expect(valid).toEqual(true);
+                    const view = table.view({
+                        filter
+                    });
+
+                    console.log(new Date("2020-10-01 23:30:55").toLocaleString());
+                    const json = await view.to_json();
+                    expect(json).toEqual([
+                        {w: +new Date(2020, 10, 1, 19, 30, 55), x: 3, y: "c", z: true},
+                        {w: +new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false}
+                    ]);
+                    view.delete();
+                    table.delete();
+                });
+
+                it("w < datetime with time as string", async function() {
+                    expect(process.env.TZ).toEqual("US/Eastern");
+                    const table = perspective.table(datetime_range_data);
+                    const filter = [["w", "<", "2020-10-01 23:30:55"]];
+                    const valid = await table.is_valid_filter(filter[0]);
+                    expect(valid).toEqual(true);
+                    const view = table.view({
+                        filter
+                    });
+                    let json = await view.to_json();
+                    expect(json).toEqual([
+                        {w: +new Date(2020, 2, 1, 12, 30, 55), x: 1, y: "a", z: true},
+                        {w: +new Date(2020, 9, 1, 15, 30, 55), x: 2, y: "b", z: false}
+                    ]);
                     view.delete();
                     table.delete();
                 });

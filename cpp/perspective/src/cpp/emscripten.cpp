@@ -61,7 +61,7 @@ namespace binding {
         std::string datetime_string;
 
         if (filter_term.instanceof(t_val::global("Date"))) {
-            datetime_string = filter_term.call<t_val>("toLocaleString").as<std::string>();
+            datetime_string = filter_term.call<t_val>("toISOString").as<std::string>();
         } else {
             datetime_string = filter_term.as<std::string>();
         }
