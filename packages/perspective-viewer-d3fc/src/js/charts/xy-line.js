@@ -96,6 +96,7 @@ xyLine.plugin = {
     name: "X/Y Line Chart",
     max_cells: 50000,
     max_columns: 50,
+    render_warning: true,
     initial: {
         type: "number",
         count: 2,
