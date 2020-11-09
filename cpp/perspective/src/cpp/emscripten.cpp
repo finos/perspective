@@ -18,6 +18,11 @@ using namespace perspective;
 namespace perspective {
 namespace binding {
 
+    extern "C" {
+        void hello_world();
+    }
+
+
     /******************************************************************************
      *
      * Utility
@@ -1074,6 +1079,8 @@ namespace binding {
         std::shared_ptr<Table> tbl;
         std::shared_ptr<t_gnode> gnode;
         std::uint32_t offset;
+
+        hello_world();
 
         // If the Table has already been created, use it
         if (table_initialized) {

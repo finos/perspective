@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7.2)
 project(psp)
 
 set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
 set(CMAKE_CXX_STANDARD 14)
@@ -204,6 +205,20 @@ if (PSP_WASM_BUILD)
 	####################
 	# EMSCRIPTEN BUILD #
 	####################
+	include(ExternalProject)
+	message(${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+	set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/rust)
+
+	# Add rust_example as a CMake target
+	ExternalProject_Add(
+		rust_example
+		DOWNLOAD_COMMAND ""
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND cargo build COMMAND cargo build --target=wasm32-unknown-unknown
+		BINARY_DIR "${CMAKE_SOURCE_DIR}/../../rust/perspective"
+		INSTALL_COMMAND ""
+		LOG_BUILD ON)
+
 	execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
 	execute_process(COMMAND which em++ OUTPUT_VARIABLE EMPP)
 	string(STRIP ${EMCC} EMCC)
@@ -590,7 +605,15 @@ if (PSP_WASM_BUILD)
 	target_link_libraries(psp arrow)
 
 	add_executable(perspective.async src/cpp/emscripten.cpp)
+
+	# Create dependency of Example on rust_example
+	add_dependencies(perspective.async rust_example)
+
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
+
+	target_link_libraries(perspective.async
+    	debug "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-unknown/debug/librust_example.a"
+    	optimized "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-unknown/release/librust_example.a")
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")

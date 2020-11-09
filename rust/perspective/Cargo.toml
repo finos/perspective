@@ -1,0 +1,10 @@
+[package]
+name = "rust_example"
+version = "0.1.0"
+authors = ["Jun Tan <tanjunyuan@hotmail.co.uk>"]
+edition = "2018"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]

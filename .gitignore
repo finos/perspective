@@ -150,6 +150,9 @@ docs/static/arrow/
 *.pyc
 __pycache__/
 
+# Rust
+rust/perspective/target
+
 # Copied C++ source folders
 python/perspective/cmake
 python/perspective/src
