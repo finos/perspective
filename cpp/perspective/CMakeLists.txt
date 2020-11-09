@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.7.2)
 project(psp)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
 set(CMAKE_CXX_STANDARD 14)
@@ -116,10 +115,12 @@ endif()
 
 if(DEFINED ENV{PSP_DEBUG})
 	set(CMAKE_BUILD_TYPE DEBUG)
+	set(CARGO_RELEASE_FLAG "")
 else()
 	if (NOT DEFINED CMAKE_BUILD_TYPE)
 		set(CMAKE_BUILD_TYPE RELEASE)
 	endif()
+	set(CARGO_RELEASE_FLAG "--release")
 endif()
 
 if(DEFINED ENV{PSP_MANYLINUX})
@@ -206,19 +207,24 @@ if (PSP_WASM_BUILD)
 	# EMSCRIPTEN BUILD #
 	####################
 	include(ExternalProject)
-	message(${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+
+	# Build the rust project inside `build/rust`
 	set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/rust)
 
-	# Add rust_example as a CMake target
+	# Add rust_example as a CMake target, and force it to always rebuild
+	# TODO: https://stackoverflow.com/a/51090545 
 	ExternalProject_Add(
 		rust_example
 		DOWNLOAD_COMMAND ""
 		CONFIGURE_COMMAND ""
-		BUILD_COMMAND cargo build COMMAND cargo build --target=wasm32-unknown-unknown
+		# Build the Rust project using cargo and the WASM emscripten target
+		BUILD_COMMAND cargo build COMMAND cargo build --target=wasm32-unknown-emscripten ${CARGO_RELEASE_FLAG}
+		# Find the rust project in rust/perspective
 		BINARY_DIR "${CMAKE_SOURCE_DIR}/../../rust/perspective"
 		INSTALL_COMMAND ""
-		LOG_BUILD ON)
+		BUILD_ALWAYS 1)
 
+	# Use Emscripten provided compiler toolchain
 	execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
 	execute_process(COMMAND which em++ OUTPUT_VARIABLE EMPP)
 	string(STRIP ${EMCC} EMCC)
@@ -269,11 +275,11 @@ if (PSP_WASM_BUILD)
 			-s DEMANGLE_SUPPORT=1 \
 			")
 	else()
+		# TODO: closure compiler does not work with rust's wasm32-unknown-emscripten target
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
 			-flto \
-			--closure 1 \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
 	endif()
@@ -611,9 +617,11 @@ if (PSP_WASM_BUILD)
 
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 
+	# Link Emscripten binding to the Perspective example
 	target_link_libraries(perspective.async
-    	debug "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-unknown/debug/librust_example.a"
-    	optimized "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-unknown/release/librust_example.a")
+    	debug "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-emscripten/debug/librust_example.a"
+		optimized "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-emscripten/release/librust_example.a")
+
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")

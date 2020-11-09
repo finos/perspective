@@ -7,7 +7,8 @@
  *
  */
 
-#[no_mangle]
-pub extern "C" fn hello_world() {
-    println!("rust function called!");
-}
+ fn main() {
+     // Generate C++ -> Rust bindings using bindgen
+
+     // Generate Rust -> C++ headers using cbindgen
+ }
