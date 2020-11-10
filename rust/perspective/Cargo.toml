@@ -8,3 +8,6 @@ edition = "2018"
 crate-type = ["staticlib"]
 
 [dependencies]
+cty = "0.2.1"
+libc = "0.2.80"
+rand = "0.7.3"
