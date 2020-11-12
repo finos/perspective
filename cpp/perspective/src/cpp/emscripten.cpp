@@ -8,7 +8,6 @@
  */
 
 #include <perspective/emscripten.h>
-#include <perspective/rust_bindings.h>
 #include <perspective/arrow_loader.h>
 #include <perspective/arrow_writer.h>
 #include <arrow/csv/api.h>
@@ -1075,32 +1074,6 @@ namespace binding {
         std::shared_ptr<Table> tbl;
         std::shared_ptr<t_gnode> gnode;
         std::uint32_t offset;
-
-        // Create a struct in rust, allocate it on the heap, and return a
-        // raw pointer with ownership of the heap object.
-        RStruct* cs = data_new();
-        RStruct cs_val = *cs;
-        std::unique_ptr<RStruct> cs_ptr = std::make_unique<RStruct>(cs_val);
-
-        std::cout << "unique ptr: " << cs_ptr->name << ", " << cs_ptr->value._int._0 << std::endl;
-        std::cout << "raw ptr: " << cs->name << ", " << cs->value._int._0 << std::endl;
-        std::cout << "deref'd: " << cs_val.name << ", " << cs_val.value._int._0 << std::endl;
-
-        // Pass params into rust
-        RStruct* cs2 = data_new_param(123456);
-        RStruct cs2_val = *cs2;
-        std::unique_ptr<RStruct> cs2_ptr = std::make_unique<RStruct>(cs2_val);
-
-        std::cout << "2 unique ptr: " << cs2_ptr->name << ", " << cs2_ptr->value._int._0 << std::endl;
-        std::cout << "2 raw ptr: " << cs2->name << ", " << cs2->value._int._0 << std::endl;
-        std::cout << "2 deref'd: " << cs2_val.name << ", " << cs2_val.value._int._0 << std::endl;
-
-        // Pass ownership back to rust in order to manually free.
-        data_free(cs);
-        data_free(cs2);
-
-        // data accessor
-        auto rda = RustDataAccessor(100);
 
         // If the Table has already been created, use it
         if (table_initialized) {

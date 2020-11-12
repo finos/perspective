@@ -206,23 +206,6 @@ if (PSP_WASM_BUILD)
 	####################
 	# EMSCRIPTEN BUILD #
 	####################
-	include(ExternalProject)
-
-	# Build the rust project inside `build/rust`
-	set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/rust)
-
-	# Add rust_example as a CMake target, and force it to always rebuild
-	# TODO: https://stackoverflow.com/a/51090545 
-	ExternalProject_Add(
-		rust_example
-		DOWNLOAD_COMMAND ""
-		CONFIGURE_COMMAND ""
-		# Build the Rust project using cargo and the WASM emscripten target
-		BUILD_COMMAND cargo build COMMAND cargo build --target=wasm32-unknown-emscripten ${CARGO_RELEASE_FLAG}
-		# Find the rust project in rust/perspective
-		BINARY_DIR "${CMAKE_SOURCE_DIR}/../../rust/perspective"
-		INSTALL_COMMAND ""
-		BUILD_ALWAYS 1)
 
 	# Use Emscripten provided compiler toolchain
 	execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
@@ -455,7 +438,8 @@ psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
-# For WASM/CPP build, build minimal arrow from source
+# For WASM/CPP build, build minimal arrow from source and build the rust
+# data slice after arrow is built.
 if (NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
@@ -470,6 +454,25 @@ if (NOT PSP_PYTHON_BUILD)
 		psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
 		include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 	endif()
+
+	include(ExternalProject)
+
+	# Build the rust project inside `build/rust`
+	set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/rust)
+
+	# Add rust_arrow_data_slice as a CMake target, and force it to always
+	# rebuild - TODO: https://stackoverflow.com/a/51090545
+	ExternalProject_Add(
+		rust_arrow_data_slice
+		DOWNLOAD_COMMAND ""
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND wasm-pack build
+		BINARY_DIR "${CMAKE_SOURCE_DIR}/../../rust/perspective/arrow-data-slice"
+		INSTALL_COMMAND ""
+		BUILD_ALWAYS 1)
+
+	# Don't build rust data slice if arrow fails to build.
+	add_dependencies(rust_arrow_data_slice arrow)
 endif()
 
 #####################
@@ -612,15 +615,11 @@ if (PSP_WASM_BUILD)
 
 	add_executable(perspective.async src/cpp/emscripten.cpp)
 
-	# Create dependency of Example on rust_example
-	add_dependencies(perspective.async rust_example)
+	# Stop the build if the rust module fails to build.
+	add_dependencies(psp rust_arrow_data_slice)
+	add_dependencies(perspective.async rust_arrow_data_slice)
 
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
-
-	# Link Emscripten binding to the Perspective example
-	target_link_libraries(perspective.async
-    	debug "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-emscripten/debug/librust_example.a"
-		optimized "${CMAKE_SOURCE_DIR}/../../rust/perspective/target/wasm32-unknown-emscripten/release/librust_example.a")
 
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")

@@ -151,7 +151,13 @@ docs/static/arrow/
 __pycache__/
 
 # Rust
-rust/perspective/target
+Cargo.lock
+rust/perspective/*/target
+rust/perspective/*/bin
+rust/perspective/*/pkg
+rust/perspective/**/*.rs.bk
+rust/perspective/*/wasm-pack.log
+
 
 # Copied C++ source folders
 python/perspective/cmake
