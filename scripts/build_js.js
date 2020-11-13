@@ -107,6 +107,27 @@ function compileCPP(packageName) {
     }
 }
 
+function compileRust() {
+    const base_dir = path.join(__dirname, "..", "rust", "perspective", "arrow-data-slice");
+    const node_modules_dir = path.join(__dirname, "..", "node_modules");
+    const node_modules_dir_rust = path.join(__dirname, "..", "node_modules", "arrow_data_slice")
+
+    mkdirp.sync(node_modules_dir_rust);
+
+    // Build the rust binary using wasm-pack, which generates WebAssembly
+    // compatible binaries and the intermediate binding as well.
+    const cmd = bash`wasm-pack build`;
+
+    // Copy it to `node_modules` using `yarn` so that our packages can import
+    const copy_cmd = bash`cp -R ${base_dir}/pkg ${node_modules_dir}`;
+
+    if (process.env.PSP_DOCKER) {
+        execute`${docker()} bash -c "cd /src/${base_dir} && ${cmd} && cd ${node_modules_dir} && ${copy_cmd}"`;
+    } else {
+        execute`cd ${base_dir} && ${cmd} && cd ${node_modules_dir} && ${copy_cmd}`;
+    }
+}
+
 function lerna() {
     let cmd = `lerna run build --loglevel silent `;
     if (process.env.PACKAGE) {
@@ -120,7 +141,13 @@ try {
         compileCPP("perspective");
         RUNTIMES.map(compileRuntime);
     }
+
     lerna();
+
+    if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
+        console.log("Compiling Rust `arrow-data-slice` module");
+        compileRust();
+    }
 } catch (e) {
     console.log(e.message);
     process.exit(1);

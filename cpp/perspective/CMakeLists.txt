@@ -258,11 +258,11 @@ if (PSP_WASM_BUILD)
 			-s DEMANGLE_SUPPORT=1 \
 			")
 	else()
-		# TODO: closure compiler does not work with rust's wasm32-unknown-emscripten target
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
 			-flto \
+			--closure 1 \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
 	endif()
@@ -438,8 +438,7 @@ psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
-# For WASM/CPP build, build minimal arrow from source and build the rust
-# data slice after arrow is built.
+# For WASM/CPP build, build minimal arrow from source
 if (NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
@@ -454,25 +453,6 @@ if (NOT PSP_PYTHON_BUILD)
 		psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
 		include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 	endif()
-
-	include(ExternalProject)
-
-	# Build the rust project inside `build/rust`
-	set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/rust)
-
-	# Add rust_arrow_data_slice as a CMake target, and force it to always
-	# rebuild - TODO: https://stackoverflow.com/a/51090545
-	ExternalProject_Add(
-		rust_arrow_data_slice
-		DOWNLOAD_COMMAND ""
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND wasm-pack build
-		BINARY_DIR "${CMAKE_SOURCE_DIR}/../../rust/perspective/arrow-data-slice"
-		INSTALL_COMMAND ""
-		BUILD_ALWAYS 1)
-
-	# Don't build rust data slice if arrow fails to build.
-	add_dependencies(rust_arrow_data_slice arrow)
 endif()
 
 #####################
@@ -614,10 +594,6 @@ if (PSP_WASM_BUILD)
 	target_link_libraries(psp arrow)
 
 	add_executable(perspective.async src/cpp/emscripten.cpp)
-
-	# Stop the build if the rust module fails to build.
-	add_dependencies(psp rust_arrow_data_slice)
-	add_dependencies(perspective.async rust_arrow_data_slice)
 
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 

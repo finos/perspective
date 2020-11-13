@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrow Data Slice Test</title>
+
+    <script src="https://unpkg.com/@finos/perspective/dist/umd/perspective.js"></script>
+</head>
+
+<body>
+    <script type="module">
+        import init, { load_arrow_buffer } from './pkg/arrow_data_slice.js';
+
+        async function run() {
+            await init();
+            const worker = perspective.worker();
+            const table = worker.table({
+                a: [1, 2, 3, 4],
+                b: ["a", "b", "c", "d"],
+                c: [new Date(), new Date(), new Date(), new Date()],
+                d: [1.5, 2.5, 3.5, 4.5],
+                e: [true, false, true, false]
+            });
+
+            const arrow1 = await table.view().to_arrow();
+            console.log(`arrow1 Bytelength in JS: ${arrow1.byteLength}`);
+            load_arrow_buffer(arrow1);
+
+            const table2 = worker.table({
+                a: "integer",
+                b: "string",
+                c: "datetime",
+                d: "date",
+                e: "float",
+                f: "boolean"
+            });
+
+            table2.update({
+                a: [1, 2, 3, 4],
+                b: ["a", "b", "c", "d"],
+                c: [new Date(), new Date(), new Date(), new Date()],
+                d: [new Date(), new Date(), new Date(), new Date()],
+                e: [1.5, 2.5, 3.5, 4.5],
+                f: [true, false, true, false]
+            });
+
+            const arrow2 = await table2.view().to_arrow();
+            console.log(`arrow2 Bytelength in JS: ${arrow2.byteLength}`);
+            load_arrow_buffer(arrow2);
+        };
+        run();
+    </script>
+</body>
+
+</html>
