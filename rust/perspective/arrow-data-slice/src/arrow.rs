@@ -8,7 +8,8 @@
  */
 use std::str;
 use std::io::Cursor;
-use arrow::ipc::reader::{FileReader, StreamReader};
+use arrow::error::{ArrowError, Result};
+use arrow::ipc::reader::{StreamReader};
 use arrow::record_batch::RecordBatch;
 use arrow::datatypes::Schema;
 use wasm_bindgen::prelude::*;
@@ -20,94 +21,33 @@ extern "C" {
     fn log(s: &str);
 }
 
-/// Load an arrow binary from a slice.
-pub fn load_arrow_slice(slice: &[u8]) {
-    // let slice = std::slice::from_raw_parts(ptr, length);
-    let cursor = Cursor::new(slice);
+/// Load an arrow binary in stream format.
+pub fn load_arrow_stream(buffer: Box<[u8]>) {
+    let cursor = Cursor::new(buffer);
+    let reader = StreamReader::try_new(cursor).unwrap();
+    let schema = reader.schema();
+    let mut batches: Vec<RecordBatch> = Vec::new();
+    log(format!("Schema from Rust StreamReader: {}", schema).as_str());
 
-    // Perspective generates streams - shortcut here
-    load_arrow_stream(cursor);
-
-    // // Check whether the first 6 bytes are `ARROW1` - if so, then
-    // // the arrow is a file format, otherwise it is a stream format.
-    // let arrow_header = slice.get(0..6);
-
-    // match arrow_header {
-    //     Some(v) => {
-    //         match str::from_utf8(v) {
-    //             Ok(v) => {
-    //                 match v {
-    //                     "ARROW1" => load_arrow_file(cursor),
-    //                     _ => load_arrow_stream(cursor)
-    //                 }
-    //             },
-    //             Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    //         };
-    //     },
-    //     None => panic!("Could not get arrow header from buffer!")
-    // }           
-}
-
-/// Load an arrow binary from a raw pointer to a block of memory.
-/// 
-/// # Arguments
-/// 
-/// * `ptr` - a pointer to a block of memory containing an arrow binary
-/// * `length` - the length of the binary located at ptr
-pub fn load_arrow_ptr(ptr: *const u8, length: usize) {
-    unsafe {
-        let slice = std::slice::from_raw_parts(ptr, length);
-        let cursor = Cursor::new(slice);
-
-        // Check whether the first 6 bytes are `ARROW1` - if so, then
-        // the arrow is a file format, otherwise it is a stream format.
-        let arrow_header = slice.get(0..6);
-
-        match arrow_header {
-            Some(v) => {
-                match str::from_utf8(v) {
-                    Ok(v) => {
-                        match v {
-                            "ARROW1" => load_arrow_file(cursor),
-                            _ => load_arrow_stream(cursor)
-                        }
-                    },
-                    Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-                };
+    reader.for_each(|batch| {
+        match batch {
+            Ok(val) => {
+                batches.push(val);
             },
-            None => panic!("Could not get arrow header from buffer!")
+            Err(err) => log(format!("{}", err).as_str())
         }
-        
-    };
-        
-}
+    });
 
-fn load_arrow_stream(cursor: Cursor<&[u8]>) {
-    let reader = StreamReader::try_new(cursor);
-    match reader {
-        Ok(v) => {
-            let schema = v.schema();
-            log(format!("Schema from Rust StreamReader: {}", schema).as_str());
-            // let batches = v.collect::<Result<_>>()?;
-        },
-        Err(e) => panic!("Could not read arrow stream: {}", e)
-    }
-}
-
-fn load_arrow_file(cursor: Cursor<&[u8]>) {
-    let reader = FileReader::try_new(cursor);
-    match reader {
-        Ok(v) => {
-            let schema = v.schema();
-            println!("Schema from FileReader: {}", schema);
-            // let batches = v.collect::<Result<_>>()?;
-        },
-        Err(e) => panic!("Could not read arrow file: {}", e)
+    for b in batches {
+        let num_columns: usize = b.num_columns();
+        let num_rows: usize = b.num_rows();
+        log(format!("{} x {}", num_columns, num_rows).as_str());
     }
 }
 
 #[wasm_bindgen]
 pub fn get_from_arrow(column_name: &str, ridx: usize) -> JsValue {
+    println!("{}[{}]", column_name, ridx);
     println!("Returning JS null");
     JsValue::NULL
 }
