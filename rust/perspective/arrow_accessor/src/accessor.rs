@@ -6,14 +6,15 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-use arrow::array::*;
-use arrow::datatypes::*;
-use arrow::record_batch::RecordBatch;
-use chrono::naive::NaiveDate;
 use std::collections::HashMap;
 use std::fmt;
 use std::str;
 use std::sync::Arc;
+
+use arrow::array::*;
+use arrow::datatypes::*;
+use arrow::record_batch::RecordBatch;
+use chrono::NaiveDate;
 
 pub struct ArrowAccessor {
     pub schema: HashMap<String, DataType>,
@@ -123,6 +124,8 @@ impl ArrowAccessor {
                 .downcast_ref::<Date32Array>()
                 .take()
                 .unwrap();
+
+            // Convert from days since epoch to milliseconds since epoch
             Some(col.value_as_date(ridx).unwrap())
         }
     }
@@ -181,7 +184,6 @@ impl ArrowAccessor {
             Some(String::from(strings.value(key)))
         }
     }
-    
     // Returns whether the lookup is valid - the column exists, the row is not
     // over the column length, and whether the value at column[row] is valid
     // and not null.
@@ -283,6 +285,7 @@ mod tests {
                 assert_eq!(accessor.get_i32("a", 1), Some(2));
                 assert_eq!(accessor.get_i64("b", 4), Some(5));
                 assert_eq!(accessor.get_f64("c", 3), Some(4.5));
+
                 assert_eq!(
                     accessor.get_date("d", 0),
                     Some(NaiveDate::parse_from_str("2019-04-14", "%Y-%m-%d").unwrap())
@@ -327,21 +330,45 @@ mod tests {
 
         let arrays: Vec<ArrayRef> = vec![
             Arc::new(Int32Array::from(vec![None, Some(2), None, Some(4), None])),
-            Arc::new(Int64Array::from(vec![None, Some(2), Some(3), Some(4), Some(5)])),
-            Arc::new(Float64Array::from(vec![Some(1.5), Some(2.5), None, None, Some(5.5)])),
+            Arc::new(Int64Array::from(vec![
+                None,
+                Some(2),
+                Some(3),
+                Some(4),
+                Some(5),
+            ])),
+            Arc::new(Float64Array::from(vec![
+                Some(1.5),
+                Some(2.5),
+                None,
+                None,
+                Some(5.5),
+            ])),
             Arc::new(Date32Array::from(vec![
-                None, Some(737000), Some(736000), None, None,
+                None,
+                Some(737000),
+                Some(736000),
+                None,
+                None,
             ])),
             Arc::new(TimestampMillisecondArray::from(vec![
                 None,
-                Some(NaiveDateTime::parse_from_str("2020-02-29 22:55:45", "%Y-%m-%d %H:%M:%S")
-                    .unwrap()
-                    .timestamp()),
+                Some(
+                    NaiveDateTime::parse_from_str("2020-02-29 22:55:45", "%Y-%m-%d %H:%M:%S")
+                        .unwrap()
+                        .timestamp(),
+                ),
                 None,
                 None,
                 None,
             ])),
-            Arc::new(BooleanArray::from(vec![None, Some(true), None, None, Some(false)])),
+            Arc::new(BooleanArray::from(vec![
+                None,
+                Some(true),
+                None,
+                None,
+                Some(false),
+            ])),
             Arc::new(dict_array),
         ];
 

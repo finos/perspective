@@ -61,9 +61,9 @@
             const json = await view.to_columns();
             console.log(`to_columns() took ${performance.now() - start2} seconds`);
 
-            // accessor_drop(accessor);
+            accessor_drop(accessor);
 
-            const view2 = table.view({column_pivots: ["b"]});
+            const view2 = table.view({columns: ["a", "d", "c"]});
             const num_columns2 = await view2.num_columns();
             const num_rows2 = await view2.num_rows();
             const cols2 = await view2.column_paths();
@@ -85,8 +85,9 @@
 
             console.log(reconstructed2);
 
+            let start4 = performance.now();
             console.log(await view2.to_columns());
-            console.log(await worker.table(arrow2).view().to_columns());
+            console.log(`columns took ${performance.now() - start4} seconds`);
 
         };
         run();

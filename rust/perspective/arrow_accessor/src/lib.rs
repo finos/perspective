@@ -13,9 +13,9 @@ use std::io::Cursor;
 use arrow::datatypes::{DataType, DateUnit, TimeUnit};
 use arrow::ipc::reader::StreamReader;
 use arrow::record_batch::RecordBatch;
-
 use chrono::Datelike;
-use js_sys::*;
+
+use js_sys::Date;
 use wasm_bindgen::prelude::*;
 
 use crate::accessor::ArrowAccessor;
@@ -86,19 +86,23 @@ pub fn accessor_get_value(accessor: *mut ArrowAccessor, column_name: &str, ridx:
                 None => JsValue::NULL,
             },
             DataType::Date32(DateUnit::Day) => match accessor.get_date(column_name, ridx) {
-                Some(value) => JsValue::from(Date::new_with_year_month_day(
-                    value.year() as u32,
-                    value.month0() as i32,
-                    value.day() as i32,
-                )),
+                Some(value) => {
+                    // Construct a new `Date()` object in the browser's local
+                    // time, and use the object's Unix timestamp, otherwise
+                    // the browser will attempt to coerce to UTC and offset the
+                    // timestamp value again when it is not needed.
+                    let dt = Date::new_with_year_month_day(
+                        value.year() as u32,
+                        value.month0() as i32,
+                        value.day() as i32,
+                    );
+                    JsValue::from(dt.value_of())
+                }
                 None => JsValue::NULL,
             },
             DataType::Timestamp(TimeUnit::Millisecond, _) => {
                 match accessor.get_datetime(column_name, ridx) {
-                    Some(value) => {
-                        let timestamp = JsValue::from(value as f64);
-                        JsValue::from(Date::new(&timestamp))
-                    }
+                    Some(value) => JsValue::from(value as f64),
                     None => JsValue::NULL,
                 }
             }
