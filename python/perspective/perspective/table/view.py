@@ -350,9 +350,9 @@ class View(object):
         """Delete the :class:`~perspective.View` and clean up all associated
         callbacks.
 
-        This method must be called to clean up resources used by the
-        :class:`~perspective.View`, as it will last for the lifetime of the
-        underlying :class:`~perspective.Table` otherwise.
+        This method must be called to clean up callbacks used by the
+        :class:`~perspective.View`, as well as allow for deletion of the
+        underlying :class:`~perspective.Table`.
 
         Examples:
             >>> table = perspective.Table(data)
