@@ -270,6 +270,14 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 deleted. Defaults to True.
         """
         if delete_table:
+            # Delete all created views on the widget's manager instance
+            for view in six.itervalues(self.manager._views):
+                view.delete()
+
+            # Reset view cache
+            self.manager._views = {}
+
+            # Delete table
             self.table.delete()
             self.manager._tables.pop(self.table_name)
             self.table_name = None
