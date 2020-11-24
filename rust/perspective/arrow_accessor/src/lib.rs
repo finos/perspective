@@ -14,6 +14,7 @@ use std::io::Cursor;
 use arrow::ipc::reader::StreamReader;
 use arrow::record_batch::RecordBatch;
 
+use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
 use crate::accessor_fast::ArrowAccessorFast;
@@ -60,13 +61,25 @@ pub fn accessor_make(buffer: Box<[u8]>) -> *const ArrowAccessorFast {
 }
 
 #[wasm_bindgen]
-pub fn accessor_get_column(accessor: *const ArrowAccessorFast, column_name: &str) -> Vec<JsValue> {
+pub fn accessor_get_column_paths(accessor: *const ArrowAccessorFast) -> Vec<JsValue> {
     let accessor = unsafe { accessor.as_ref().unwrap() };
-    if accessor.data.contains_key(column_name) {
-        accessor.data[column_name].to_vec()
-    } else {
-        Vec::new()
-    }
+    accessor.column_paths
+        .iter()
+        .map(|path| JsValue::from(path))
+        .collect::<Vec<JsValue>>()
+}
+
+// #[wasm_bindgen]
+// pub fn accessor_get_column(accessor: *const ArrowAccessorFast, column_name: &str) -> Vec<JsValue> {
+//     let accessor = unsafe { accessor.as_ref().unwrap() };
+//     let cidx = accessor.column_indices[column_name];
+//     accessor.data[cidx].to_vec()
+// }
+
+#[wasm_bindgen]
+pub fn accessor_get_data(accessor: *mut ArrowAccessorFast) -> Array {
+    let accessor = unsafe { accessor.as_mut().unwrap() };
+    accessor.data.take().unwrap()
 }
 
 #[wasm_bindgen]

@@ -14,11 +14,13 @@ use arrow::record_batch::RecordBatch;
 use chrono::NaiveDate;
 use chrono::Datelike;
 
-use js_sys::Date;
+use js_sys::{Array, Date};
 use wasm_bindgen::prelude::*;
 
 pub struct ArrowAccessorFast {
-    pub data: HashMap<String, Vec<JsValue>>
+    pub column_paths: Vec<String>,
+    pub column_indices: HashMap<String, usize>,
+    pub data: Option<Array>
 }
 
 impl ArrowAccessorFast {
@@ -26,14 +28,17 @@ impl ArrowAccessorFast {
     // batch into a vector of `JsValue`s, ready to be passed into Javascript.
     pub fn new(batch: Box<RecordBatch>, batch_schema: SchemaRef) -> Self {
         let num_columns = batch.num_columns();
-        let mut data: HashMap<String, Vec<JsValue>> = HashMap::new();
+        let mut column_paths: Vec<String> = Vec::with_capacity(num_columns);
+        let mut column_indices: HashMap<String, usize> = HashMap::new();
+        let data: Array = Array::new();
 
         for cidx in 0..num_columns {
             let col = batch.column(cidx);
             let name = batch_schema.field(cidx).name();
             let dtype = col.data_type();
             let nrows = col.len();
-            let mut converted: Vec<JsValue> = Vec::with_capacity(nrows);
+
+            let column_data: Array = Array::new();
         
             match dtype {
                 DataType::Boolean => {
@@ -43,9 +48,9 @@ impl ArrowAccessorFast {
                         .unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
-                            converted.push(JsValue::from(typed_col.value(ridx)));
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
                         } else {
-                            converted.push(JsValue::NULL);
+                            column_data.push(&JsValue::NULL);
                         }
                     }
                 },
@@ -56,9 +61,9 @@ impl ArrowAccessorFast {
                         .unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
-                            converted.push(JsValue::from(typed_col.value(ridx)));
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
                         } else {
-                            converted.push(JsValue::NULL);
+                            column_data.push(&JsValue::NULL);
                         }
                     }
                 },
@@ -69,9 +74,9 @@ impl ArrowAccessorFast {
                         .unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
-                            converted.push(JsValue::from(typed_col.value(ridx) as f64));
+                            column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
                         } else {
-                            converted.push(JsValue::NULL);
+                            column_data.push(&JsValue::NULL);
                         }
                     }
                 },
@@ -82,9 +87,9 @@ impl ArrowAccessorFast {
                         .unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
-                            converted.push(JsValue::from(typed_col.value(ridx)));
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
                         } else {
-                            converted.push(JsValue::NULL);
+                            column_data.push(&JsValue::NULL);
                         }
                     }
                 },
@@ -105,9 +110,9 @@ impl ArrowAccessorFast {
                                 value.month0() as i32,
                                 value.day() as i32,
                             );
-                            converted.push(JsValue::from(JsValue::from(dt.value_of())));
+                            column_data.push(&JsValue::from(JsValue::from(dt.value_of())));
                         } else {
-                            converted.push(JsValue::NULL);
+                            column_data.push(&JsValue::NULL);
                         }
                     }
                 },
@@ -118,9 +123,9 @@ impl ArrowAccessorFast {
                         .unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
-                            converted.push(JsValue::from(typed_col.value(ridx) as f64));
+                            column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
                         } else {
-                            converted.push(JsValue::NULL);
+                            column_data.push(&JsValue::NULL);
                         }
                     }
                 },
@@ -139,9 +144,9 @@ impl ArrowAccessorFast {
                             if col.is_valid(ridx) {
                                 let key = dict_array.keys_array().value(ridx) as usize;
                                 let val = String::from(strings.value(key));
-                                converted.push(JsValue::from(val));
+                                column_data.push(&JsValue::from(val));
                             } else {
-                                converted.push(JsValue::NULL);
+                                column_data.push(&JsValue::NULL);
                             }
                         }
                     }
@@ -149,12 +154,15 @@ impl ArrowAccessorFast {
                 },
                 dtype => panic!("Unexpected data type {:?}", dtype),
             };
-
-            data.insert(name.clone(), converted);
-        }
+            column_paths.push(name.clone());
+            column_indices.insert(name.clone(), cidx);
+            data.push(&column_data);
+        };
 
         ArrowAccessorFast {
-            data,
+            column_paths,
+            column_indices,
+            data: Some(data),
         }
     }
 }
