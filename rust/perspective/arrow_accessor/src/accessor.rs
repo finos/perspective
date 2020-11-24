@@ -19,7 +19,7 @@ use chrono::NaiveDate;
 pub struct ArrowAccessor {
     pub schema: HashMap<String, DataType>,
     pub column_names: Vec<String>,
-    data: HashMap<String, ArrayRef>,
+    pub data: HashMap<String, ArrayRef>,
 }
 
 impl ArrowAccessor {
