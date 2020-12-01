@@ -34,6 +34,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     std::shared_ptr<Table> tbl;
     std::shared_ptr<t_gnode> gnode;
     std::uint32_t offset;
+    void* ptr = nullptr;
 
     // If the Table has already been created, use it
     if (table_initialized) {
@@ -59,7 +60,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     if (is_arrow && !is_delete) {
         py::bytes bytes = accessor.cast<py::bytes>();
         std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
-        void * ptr = malloc(size);
+        ptr = malloc(size);
         std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
         {
             PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
@@ -191,6 +192,10 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         row_count = accessor.attr("row_count")().cast<std::int32_t>();
         data_table.extend(row_count);
         _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
+    }
+
+    if (is_arrow) {
+        free(ptr);
     }
 
     // calculate offset, limit, and set the gnode
