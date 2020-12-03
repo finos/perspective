@@ -7,7 +7,6 @@
  *
  */
 pub mod accessor;
-pub mod accessor_fast;
 
 use std::io::Cursor;
 
@@ -17,10 +16,10 @@ use arrow::record_batch::RecordBatch;
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
-use crate::accessor_fast::ArrowAccessorFast;
+use crate::accessor::ArrowAccessor;
 
 /// Load an arrow binary in stream format.
-pub fn load_arrow_stream(buffer: Box<[u8]>) -> Box<ArrowAccessorFast> {
+pub fn load_arrow_stream(buffer: Box<[u8]>) -> Box<ArrowAccessor> {
     let cursor = Cursor::new(buffer);
     let reader = StreamReader::try_new(cursor).unwrap();
     let schema = reader.schema();
@@ -35,7 +34,7 @@ pub fn load_arrow_stream(buffer: Box<[u8]>) -> Box<ArrowAccessorFast> {
         .collect::<Vec<Box<RecordBatch>>>();
 
     if let [batch] = &batches[..] {
-        Box::new(ArrowAccessorFast::new(batch.clone(), schema))
+        Box::new(ArrowAccessor::new(batch.clone(), schema))
     } else {
         panic!("Arrow should only contain a single record batch.")
     }
@@ -54,14 +53,14 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub fn accessor_make(buffer: Box<[u8]>) -> *const ArrowAccessorFast {
+pub fn accessor_make(buffer: Box<[u8]>) -> *const ArrowAccessor {
     set_panic_hook();
     let accessor = load_arrow_stream(buffer);
     Box::into_raw(accessor)
 }
 
 #[wasm_bindgen]
-pub fn accessor_get_column_paths(accessor: *const ArrowAccessorFast) -> Vec<JsValue> {
+pub fn accessor_get_column_paths(accessor: *const ArrowAccessor) -> Vec<JsValue> {
     let accessor = unsafe { accessor.as_ref().unwrap() };
     accessor.column_paths
         .iter()
@@ -69,22 +68,15 @@ pub fn accessor_get_column_paths(accessor: *const ArrowAccessorFast) -> Vec<JsVa
         .collect::<Vec<JsValue>>()
 }
 
-// #[wasm_bindgen]
-// pub fn accessor_get_column(accessor: *const ArrowAccessorFast, column_name: &str) -> Vec<JsValue> {
-//     let accessor = unsafe { accessor.as_ref().unwrap() };
-//     let cidx = accessor.column_indices[column_name];
-//     accessor.data[cidx].to_vec()
-// }
-
 #[wasm_bindgen]
-pub fn accessor_get_data(accessor: *mut ArrowAccessorFast) -> Array {
+pub fn accessor_get_data(accessor: *mut ArrowAccessor) -> Array {
     let accessor = unsafe { accessor.as_mut().unwrap() };
     accessor.data.take().unwrap()
 }
 
 #[wasm_bindgen]
-pub fn accessor_drop(accessor: *const ArrowAccessorFast) {
+pub fn accessor_drop(accessor: *const ArrowAccessor) {
     if !accessor.is_null() {
-        unsafe { Box::from_raw(accessor as *mut ArrowAccessorFast) };
+        unsafe { Box::from_raw(accessor as *mut ArrowAccessor) };
     }
 }

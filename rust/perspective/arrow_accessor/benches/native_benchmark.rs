@@ -12,22 +12,13 @@ use arrow::record_batch::RecordBatch;
 
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use arrow_accessor::accessor::ArrowAccessor;
-
-
 pub fn benchmark_load(c: &mut Criterion) {
     let filename = std::env::var("PSP_RUST_BENCHMARK_DATA").unwrap();
     let f = File::open(filename).unwrap();
     let reader = StreamReader::try_new(f).unwrap();
-    let batches = reader.map(|batch| {
+    let _batches = reader.map(|batch| {
         Box::new(batch.unwrap())
     }).collect::<Vec<Box<RecordBatch>>>();
-
-    if let [batch] = &batches[..] {
-        c.bench_function("load arrow", |b| b.iter(|| ArrowAccessor::new(batch.clone(), batch.schema())));
-    } else {
-        panic!("Arrow should only contain a single record batch.")
-    }
 }
 
 criterion_group!(benches, benchmark_load);
