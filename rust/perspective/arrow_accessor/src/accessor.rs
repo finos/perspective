@@ -11,8 +11,8 @@ use std::collections::HashMap;
 use arrow::array::*;
 use arrow::datatypes::*;
 use arrow::record_batch::RecordBatch;
-use chrono::NaiveDate;
 use chrono::Datelike;
+use chrono::NaiveDate;
 
 use js_sys::{Array, Date};
 use wasm_bindgen::prelude::*;
@@ -20,7 +20,7 @@ use wasm_bindgen::prelude::*;
 pub struct ArrowAccessor {
     pub column_paths: Vec<String>,
     pub column_indices: HashMap<String, usize>,
-    pub data: Option<Array>
+    pub data: Option<Array>,
 }
 
 impl ArrowAccessor {
@@ -39,13 +39,9 @@ impl ArrowAccessor {
             let nrows = col.len();
 
             let column_data: Array = Array::new();
-        
             match dtype {
                 DataType::Boolean => {
-                    let typed_col = col
-                        .as_any()
-                        .downcast_ref::<BooleanArray>()
-                        .unwrap();
+                    let typed_col = col.as_any().downcast_ref::<BooleanArray>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
                             column_data.push(&JsValue::from(typed_col.value(ridx)));
@@ -53,12 +49,9 @@ impl ArrowAccessor {
                             column_data.push(&JsValue::NULL);
                         }
                     }
-                },
-                DataType::Int32 => {
-                    let typed_col = col
-                        .as_any()
-                        .downcast_ref::<Int32Array>()
-                        .unwrap();
+                }
+                DataType::UInt8 => {
+                    let typed_col = col.as_any().downcast_ref::<UInt8Array>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
                             column_data.push(&JsValue::from(typed_col.value(ridx)));
@@ -66,12 +59,29 @@ impl ArrowAccessor {
                             column_data.push(&JsValue::NULL);
                         }
                     }
-                },
-                DataType::Int64 => {
-                    let typed_col = col
-                        .as_any()
-                        .downcast_ref::<Int64Array>()
-                        .unwrap();
+                }
+                DataType::UInt16 => {
+                    let typed_col = col.as_any().downcast_ref::<UInt16Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
+                DataType::UInt32 => {
+                    let typed_col = col.as_any().downcast_ref::<UInt32Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
+                DataType::UInt64 => {
+                    let typed_col = col.as_any().downcast_ref::<UInt64Array>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
                             column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
@@ -79,12 +89,9 @@ impl ArrowAccessor {
                             column_data.push(&JsValue::NULL);
                         }
                     }
-                },
-                DataType::Float64 => {
-                    let typed_col = col
-                        .as_any()
-                        .downcast_ref::<Float64Array>()
-                        .unwrap();
+                }
+                DataType::Int8 => {
+                    let typed_col = col.as_any().downcast_ref::<Int8Array>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
                             column_data.push(&JsValue::from(typed_col.value(ridx)));
@@ -92,12 +99,49 @@ impl ArrowAccessor {
                             column_data.push(&JsValue::NULL);
                         }
                     }
-                },
+                }
+                DataType::Int16 => {
+                    let typed_col = col.as_any().downcast_ref::<Int16Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
+                DataType::Int32 => {
+                    let typed_col = col.as_any().downcast_ref::<Int32Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
+                DataType::Int64 => {
+                    let typed_col = col.as_any().downcast_ref::<Int64Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
+                DataType::Float64 => {
+                    let typed_col = col.as_any().downcast_ref::<Float64Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
                 DataType::Date32(DateUnit::Day) => {
-                    let typed_col = col
-                        .as_any()
-                        .downcast_ref::<Date32Array>()
-                        .unwrap();
+                    let typed_col = col.as_any().downcast_ref::<Date32Array>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
                             // Construct a new `Date()` object in the browser's local
@@ -115,7 +159,7 @@ impl ArrowAccessor {
                             column_data.push(&JsValue::NULL);
                         }
                     }
-                },
+                }
                 DataType::Timestamp(TimeUnit::Millisecond, _) => {
                     let typed_col = col
                         .as_any()
@@ -128,18 +172,13 @@ impl ArrowAccessor {
                             column_data.push(&JsValue::NULL);
                         }
                     }
-                },
+                }
                 DataType::Dictionary(ref key_type, _) => match key_type.as_ref() {
                     DataType::Int32 => {
-                        let dict_array = col
-                            .as_any()
-                            .downcast_ref::<Int32DictionaryArray>()
-                            .unwrap();
+                        let dict_array =
+                            col.as_any().downcast_ref::<Int32DictionaryArray>().unwrap();
                         let values = dict_array.values();
-                        let strings = values
-                            .as_any()
-                            .downcast_ref::<StringArray>()
-                            .unwrap();
+                        let strings = values.as_any().downcast_ref::<StringArray>().unwrap();
                         for ridx in 0..nrows {
                             if col.is_valid(ridx) {
                                 let key = dict_array.keys_array().value(ridx) as usize;
@@ -157,7 +196,7 @@ impl ArrowAccessor {
             column_paths.push(name.clone());
             column_indices.insert(name.clone(), cidx);
             data.push(&column_data);
-        };
+        }
 
         ArrowAccessor {
             column_paths,
