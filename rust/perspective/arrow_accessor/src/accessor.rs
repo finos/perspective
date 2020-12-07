@@ -6,6 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+#![cfg(target_arch = "wasm32")]
+
 use std::collections::HashMap;
 
 use arrow::array::*;
@@ -17,6 +19,8 @@ use chrono::NaiveDate;
 use js_sys::{Array, Date};
 use wasm_bindgen::prelude::*;
 
+// A struct that allows the user to read out an Arrow record batch as a
+// 2D array through Rust's WASM bindings.
 pub struct ArrowAccessor {
     pub column_paths: Vec<String>,
     pub column_indices: HashMap<String, usize>,
@@ -24,8 +28,9 @@ pub struct ArrowAccessor {
 }
 
 impl ArrowAccessor {
-    // Create a new arrow accessor by converting each column in the record
-    // batch into a vector of `JsValue`s, ready to be passed into Javascript.
+    // Create a new arrow accessor by reading in a RecordBatch and converting
+    // it to a 2D Javascript array, where each inner array is the data from
+    // a single column.
     pub fn new(batch: Box<RecordBatch>, batch_schema: SchemaRef) -> Self {
         let num_columns = batch.num_columns();
         let mut column_paths: Vec<String> = Vec::with_capacity(num_columns);
@@ -84,6 +89,7 @@ impl ArrowAccessor {
                     let typed_col = col.as_any().downcast_ref::<UInt64Array>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
+                            // no i64/u64 in wasm - coerce to float
                             column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
                         } else {
                             column_data.push(&JsValue::NULL);
@@ -124,7 +130,18 @@ impl ArrowAccessor {
                     let typed_col = col.as_any().downcast_ref::<Int64Array>().unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
+                            // no i64/u64 in wasm - coerce to float
                             column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
+                        } else {
+                            column_data.push(&JsValue::NULL);
+                        }
+                    }
+                }
+                DataType::Float32 => {
+                    let typed_col = col.as_any().downcast_ref::<Float32Array>().unwrap();
+                    for ridx in 0..nrows {
+                        if col.is_valid(ridx) {
+                            column_data.push(&JsValue::from(typed_col.value(ridx)));
                         } else {
                             column_data.push(&JsValue::NULL);
                         }
@@ -154,7 +171,7 @@ impl ArrowAccessor {
                                 value.month0() as i32,
                                 value.day() as i32,
                             );
-                            column_data.push(&JsValue::from(JsValue::from(dt.value_of())));
+                            column_data.push(&JsValue::from(dt.value_of()));
                         } else {
                             column_data.push(&JsValue::NULL);
                         }
@@ -167,6 +184,7 @@ impl ArrowAccessor {
                         .unwrap();
                     for ridx in 0..nrows {
                         if col.is_valid(ridx) {
+                            // no i64/u64 in wasm - coerce to float
                             column_data.push(&JsValue::from(typed_col.value(ridx) as f64));
                         } else {
                             column_data.push(&JsValue::NULL);
@@ -193,6 +211,7 @@ impl ArrowAccessor {
                 },
                 dtype => panic!("Unexpected data type {:?}", dtype),
             };
+
             column_paths.push(name.clone());
             column_indices.insert(name.clone(), cidx);
             data.push(&column_data);

@@ -15,7 +15,6 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = {version = "^0.2.63", features = ["nightly"]}
-serde_json = "1.0.59"
 js-sys = "0.3.45"
 chrono = "0.4.19"
 
@@ -31,7 +30,6 @@ rev = "c2bffc4b8f5c1cc9885fb227a1d359c82d5de2f5"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
-criterion = "0.3.3"
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
@@ -39,7 +37,3 @@ opt-level = "s"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["-O3", "--enable-mutable-globals"]
-
-[[bench]]
-name = "native_benchmark"
-harness = false
