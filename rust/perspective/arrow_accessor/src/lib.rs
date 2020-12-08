@@ -59,7 +59,6 @@ pub fn load_arrow_stream(buffer: Box<[u8]>) -> Box<ArrowAccessor> {
 // the ArrowAccessor instance.
 #[wasm_bindgen]
 pub fn accessor_make(buffer: Box<[u8]>) -> *mut ArrowAccessor {
-    set_panic_hook();
     let accessor = load_arrow_stream(buffer);
     Box::into_raw(accessor)
 }
@@ -94,4 +93,10 @@ pub fn accessor_drop(accessor: *mut ArrowAccessor) {
             Box::from_raw(accessor);
         };
     }
+}
+
+// Rust panic! will call into the JS console on WASM instantiation.
+#[wasm_bindgen(start)]
+pub fn main_js() {
+    set_panic_hook();
 }

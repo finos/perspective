@@ -107,6 +107,7 @@ function compileCPP(packageName) {
     }
 }
 
+// eslint-disable-next-line no-unused-vars
 function compileRust() {
     const base_dir = path.join(__dirname, "..", "rust", "perspective", "arrow-data-slice");
     const node_modules_dir = path.join(__dirname, "..", "node_modules");
@@ -143,11 +144,6 @@ try {
     }
 
     lerna();
-
-    if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-        console.log("Compiling Rust `arrow-data-slice` module");
-        compileRust();
-    }
 } catch (e) {
     console.log(e.message);
     process.exit(1);

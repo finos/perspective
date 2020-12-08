@@ -8,6 +8,7 @@
  */
 #![cfg(target_arch = "wasm32")]
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use arrow::array::{
@@ -15,19 +16,12 @@ use arrow::array::{
     Int32Array, Int64Array, Int8Array, TimestampMillisecondArray, UInt16Array, UInt32Array,
     UInt64Array, UInt8Array,
 };
-
 use arrow::datatypes::*;
 use arrow::record_batch::RecordBatch;
 use arrow::ipc::writer::{IpcWriteOptions, StreamWriter};
-use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
-
-use js_sys::*;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
-
-use arrow_accessor::log;
 
 
 // Generate an Arrow record batch, only including a string column if 

@@ -28,9 +28,10 @@ pub struct ArrowAccessor {
 }
 
 impl ArrowAccessor {
-    // Create a new arrow accessor by reading in a RecordBatch and converting
-    // it to a 2D Javascript array, where each inner array is the data from
-    // a single column.
+    // Convert every column in the Arrow record batch into a Javascript
+    // array that matches the output of Perspective's data serialization
+    // methods, i.e. datetime/dates should return Unix timestamps in
+    // milliseconds since epoch, i64/u64 should be coerced to float, etc.
     pub fn new(batch: Box<RecordBatch>, batch_schema: SchemaRef) -> Self {
         let num_columns = batch.num_columns();
         let mut column_paths: Vec<String> = Vec::with_capacity(num_columns);

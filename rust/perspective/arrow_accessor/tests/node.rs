@@ -14,7 +14,6 @@ use arrow::array::{Array, Date32Array, TimestampMillisecondArray};
 use chrono::{Datelike, NaiveDate, NaiveDateTime};
 
 use js_sys::{Array as JsArray, Date};
-use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 
