@@ -6,11 +6,13 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import random
 import pandas as pd
 import numpy as np
+from perspective import PerspectiveCppError
 from perspective.table import Table
 from datetime import date, datetime
-from pytest import mark
+from pytest import mark, raises
 
 
 def compare_delta(received, expected):
@@ -1397,3 +1399,202 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(column_pivots=["c"])
         assert view.expand(0) == 0
+
+    # view config validation
+
+    def test_invalid_column_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(columns=["x"])
+        assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
+
+    def test_invalid_column_should_throw_and_updates_should_work(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(columns=["x"])
+        assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
+
+        for i in range(100):
+            tbl.update(data)
+            # force call to _process which should shake out invalid column ptrs
+            tbl.size()
+
+        view2 = tbl.view()
+        assert view2.num_rows() == 202
+
+    def test_invalid_column_aggregate_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(columns=["x"], aggregates={"x": "sum"})
+
+        assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
+
+    def test_invalid_column_aggregate_should_throw_and_updates_should_work(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(columns=["x"], aggregates={"x": "sum"})
+
+        assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
+
+        for i in range(100):
+            tbl.update(data)
+            # force call to _process which should shake out invalid column ptrs
+            tbl.size()
+
+        view2 = tbl.view()
+        assert view2.num_rows() == 202
+
+    def test_invalid_row_pivot_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(row_pivots=["x"])
+        assert str(ex.value) == "Invalid column 'x' found in View row_pivots.\n"
+
+    def test_invalid_column_pivot_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(column_pivots=["x"])
+        assert str(ex.value) == "Invalid column 'x' found in View column_pivots.\n"
+
+    def test_invalid_filters_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(filter=[["x", "==", "abc"]])
+        assert str(ex.value) == "Could not get dtype for column `x` as it does not exist in the schema.\n"
+
+    def test_invalid_sorts_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(sort=[["x", "desc"]])
+        assert str(ex.value) == "Invalid column 'x' found in View sorts.\n"
+
+    def test_invalid_columns_not_in_computed_should_throw(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(
+                columns=["x"],
+                computed_columns=[
+                    {
+                        "column": "abc",
+                        "computed_function_name": "uppercase",
+                        "inputs": ["a"]
+                    }
+                ]
+            )
+        assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
+
+    def test_should_not_throw_valid_computed_columns(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        view = tbl.view(
+            columns=["abc"],
+            computed_columns=[
+                {
+                    "column": "abc",
+                    "computed_function_name": "uppercase",
+                    "inputs": ["c"]
+                }
+            ]
+        )
+
+        assert view.schema() == {
+            "abc": str
+        }
+
+    def test_should_not_throw_valid_computed_columns_config(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        view = tbl.view(
+            aggregates={
+                "abc": "dominant"
+            },
+            columns=["abc"],
+            sort=[["abc", "desc"]],
+            filter=[["abc", "==", "A"]],
+            row_pivots=["abc"],
+            column_pivots=["abc"],
+            computed_columns=[
+                {
+                    "column": "abc",
+                    "computed_function_name": "uppercase",
+                    "inputs": ["c"]
+                }
+            ]
+        )
+
+        assert view.schema() == {
+            "abc": str
+        }
+
+    def test_should_not_throw_ancestor_computed(self):
+        cc = [
+            {
+                "column": "exp(Discount)",
+                "computed_function_name": "exp",
+                "inputs": ["Discount"],
+            },
+            {
+                "column": "(Profit * exp(Discount))",
+                "computed_function_name": "*",
+                "inputs": ["Profit", "exp(Discount)"],
+            },
+            {
+                "column": "(Sales + (Profit * exp(Discount)))",
+                "computed_function_name": "+",
+                "inputs": ["Sales", "(Profit * exp(Discount))"],
+            },
+            {
+                "column": "(Profit * Discount)",
+                "computed_function_name": "*",
+                "inputs": ["Profit", "Discount"],
+            },
+            {
+                "column": "sqrt(Row ID)",
+                "computed_function_name": "sqrt",
+                "inputs": ["Row ID"],
+            },
+            {
+                "column": "((Profit * Discount) * sqrt(Row ID))",
+                "computed_function_name": "*",
+                "inputs": ["(Profit * Discount)", "sqrt(Row ID)"],
+            },
+            {
+                "column": "((Sales + (Profit * exp(Discount))) - ((Profit * Discount) * sqrt(Row ID)))",
+                "computed_function_name": "-",
+                "inputs": [
+                    "(Sales + (Profit * exp(Discount)))",
+                    "((Profit * Discount) * sqrt(Row ID))",
+                ],
+            },
+        ]
+
+        table = Table({
+            "Discount": [random.random() for i in range(10)],
+            "Profit": [random.random() for i in range(10)],
+            "Row ID": [random.random() for i in range(10)],
+            "Sales": [random.random() for i in range(10)],
+        })
+
+        view = table.view(
+            columns=["sqrt(Row ID)"],
+            filter=[["((Profit * Discount) * sqrt(Row ID))", ">", 0]],
+            sort=[["exp(Discount)", "desc"]],
+            aggregates={"sqrt(Row ID)": "avg"},
+            computed_columns=cc,
+            row_pivots=["((Sales + (Profit * exp(Discount))) - ((Profit * Discount) * sqrt(Row ID)))"],
+            column_pivots=["((Sales + (Profit * exp(Discount))) - ((Profit * Discount) * sqrt(Row ID)))"]
+        )
+
+        assert view.num_columns() == 20
