@@ -91,6 +91,8 @@ Table::get_computed_schema(
     for (const auto& computed : computed_columns) {
         bool skip = false;
         std::string name = std::get<0>(computed);
+        t_computed_function_name computed_function_name = std::get<1>(computed);
+        std::vector<std::string> input_columns = std::get<2>(computed);
 
         // Cannot overwrite real columns - this column and all columns to its
         // right are invalidated.
@@ -101,17 +103,7 @@ Table::get_computed_schema(
                 << "` with a computed column."
                 << std::endl;
             break;
-        } else if (master_table_schema.has_column(name)) {
-            // The computed column we are looking for already exists and is not
-            // a "real" column, so use the type that has already been checked
-            // and move on to the next computed column.
-            computed_column_names.push_back(name);
-            computed_column_types.push_back(master_table_schema.get_dtype(name));
-            continue;
-        } 
-
-        t_computed_function_name computed_function_name = std::get<1>(computed);
-        std::vector<std::string> input_columns = std::get<2>(computed);
+        }
 
         // Validate that all input columns for each computed column exist.
         std::vector<t_dtype> input_types;
@@ -154,39 +146,65 @@ Table::get_computed_schema(
             // this column depends on a column that does not exist, so it
             // does not need to be typechecked.
             continue;
-        } else {
-            // Type check the computation.
-            t_computation computation = t_computed_column::get_computation(
-                computed_function_name, input_types);
+        }
 
-            if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
-                // Build error message and continue to the next computed column.
-                std::vector<t_dtype> expected_dtypes = 
-                    t_computed_column::get_computation_input_types(computed_function_name);
+        // Inputs are valid - get the computation and its expected types.
+        t_computation computation = t_computed_column::get_computation(
+            computed_function_name, input_types);
 
-                std::stringstream ss;
-                ss
-                    << "Error: `"
-                    << computed_function_name_to_string(computed_function_name)
-                    << "`"
-                    << " expected input column types: [ ";
-                for (t_dtype dtype : expected_dtypes) {
-                    ss << "`" << get_dtype_descr(dtype) << "` ";
-                }
-                ss << "], but received: [ ";
-                for (t_dtype dtype : input_types) {
-                    ss << "`" << get_dtype_descr(dtype) << "` ";
-                }
-                ss << "]." << std::endl;
-                std::cerr << ss.str();
-                continue;
+        // The computed column we are looking for already exists and is not
+        // a "real" column, but we need to check whether we are overwriting
+        // it with the same dtype - if the new column type is different,
+        // this column is invalid.
+        if (master_table_schema.has_column(name)) {
+            t_dtype existing_dtype = master_table_schema.get_dtype(name);
+
+            // Invalid - trying to overwrite a column with a different type.
+            if (existing_dtype != computation.m_return_type) {
+                std::cerr 
+                    << "Cannot overwrite computed column '"
+                    << name
+                    << "' with a column of a different type."
+                    << std::endl;
+            } else {
+                // Valid - replacing it with the same type.
+                computed_column_names.push_back(name);
+                computed_column_types.push_back(existing_dtype);
             }
 
-            t_dtype output_column_type = computation.m_return_type;
-
-            computed_column_names.push_back(name);
-            computed_column_types.push_back(output_column_type);
+            // No need to type check - column already valid or is invalid.
+            continue;
         }
+
+        // Type check the computation by taking the string function name
+        // and input types and try to match it to a valid computation enum.
+        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
+            // Build error message and continue to the next computed column.
+            std::vector<t_dtype> expected_dtypes = 
+                t_computed_column::get_computation_input_types(computed_function_name);
+
+            std::stringstream ss;
+            ss
+                << "Error: `"
+                << computed_function_name_to_string(computed_function_name)
+                << "`"
+                << " expected input column types: [";
+            for (t_dtype dtype : expected_dtypes) {
+                ss << "'" << get_dtype_descr(dtype) << "' ";
+            }
+            ss << "], but received: [";
+            for (t_dtype dtype : input_types) {
+                ss << "'" << get_dtype_descr(dtype) << "' ";
+            }
+            ss << "]." << std::endl;
+            std::cerr << ss.str();
+            continue;
+        }
+
+        t_dtype output_column_type = computation.m_return_type;
+
+        computed_column_names.push_back(name);
+        computed_column_types.push_back(output_column_type);
     }
 
     t_schema computed_schema(computed_column_names, computed_column_types);

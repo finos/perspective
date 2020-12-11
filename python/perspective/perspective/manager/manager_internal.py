@@ -144,7 +144,7 @@ class _PerspectiveManagerInternal(object):
         except (PerspectiveError, PerspectiveCppError) as error:
             # Log errors and return them to the client
             error_string = str(error)
-            message = self._make_error_message(msg["id"], error_string)
+            error_message = self._make_error_message(msg["id"], error_string)
             logging.error("[PerspectiveManager._process] %s", error_string)
             post_callback(self._message_to_json(msg["id"], error_message))
 

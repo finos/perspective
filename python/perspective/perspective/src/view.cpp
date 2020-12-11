@@ -156,6 +156,7 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
          */
         std::vector<t_dtype> input_types(input_columns.size());
 
+        // If the input columns are invalid, an error will be thrown here.
         for (auto i = 0; i < input_columns.size(); ++i) {
             input_types[i] = schema->get_dtype(input_columns[i]);
         }
@@ -163,31 +164,45 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         t_computation computation = t_computed_column::get_computation(
             computed_function_name, input_types);
         
+        // Throw an exception if the computation is invalid - the UI will
+        // prevent users from saving invalidly-typed computations.
         if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
-            std::cerr 
-                << "Could not build computed column definition for `" 
-                << computed_column_name 
-                << "`" 
-                << std::endl;
-            continue;
+            // Get actual input types
+            auto valid_input_types = t_computed_column::get_computation_input_types(computed_function_name);
+            std::stringstream ss;
+            ss << "View creation failed: could not build computed column '"
+               << computed_column_name
+               << "' as the input column types are invalid."
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
 
         t_dtype output_column_type = computation.m_return_type;
 
-        // Add the column to the schema if the column does not already
-        // exist in the schema.
-        if (schema->get_colidx_safe(computed_column_name) == -1) {
+        // If the computed column does not overwrite a "real" column, add it
+        // to the schema, otherwise throw an exception. The viewer UI will
+        // prevent users from overwriting "real" columns, so the only case
+        // here is when views are created programatically, where we should
+        // fail fast and report the error cleanly.
+        if (!schema->has_column(computed_column_name)) {
             schema->add_column(computed_column_name, output_column_type);
-        }
 
-        // Add the computed column to the config.
-        auto tp = std::make_tuple(
-            computed_column_name,
-            computed_function_name,
-            input_columns,
-            computation);
+            // Add the computed column to the config.
+            auto tp = std::make_tuple(
+                computed_column_name,
+                computed_function_name,
+                input_columns,
+                computation);
 
-        computed_columns.push_back(tp);
+            computed_columns.push_back(tp);
+        } else {
+            std::stringstream ss;
+            ss << "View creation failed: cannot overwrite Table column '"
+               << computed_column_name
+               << "' with a computed column."
+               << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }        
     }
 
     // construct filters with filter terms, and fill the vector of tuples

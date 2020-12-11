@@ -1488,7 +1488,7 @@ class TestView(object):
                 computed_columns=[
                     {
                         "column": "abc",
-                        "computed_function_name": "uppercase",
+                        "computed_function_name": "exp",
                         "inputs": ["a"]
                     }
                 ]
