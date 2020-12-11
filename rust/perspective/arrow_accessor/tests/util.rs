@@ -24,11 +24,11 @@ use chrono::NaiveDateTime;
 use wasm_bindgen::JsValue;
 
 
-// Generate an Arrow record batch, only including a string column if 
-// with_string_column is true as the StreamWriter doesn't seem to write
-// dictionary arrays properly - they cannot be parsed in Rust or in pyarrow.
-pub fn make_arrow(with_string_column: bool) -> Box<RecordBatch> {
-    let mut arrays: Vec<ArrayRef> = vec![
+// Generate an Arrow record batch of all types that can be converted.
+pub fn make_arrow() -> Box<RecordBatch> {
+    let strings = vec!["abc", "def", "abc", "hij", "klm"];
+    let dict_array: DictionaryArray<Int32Type> = strings.into_iter().collect();
+    let arrays: Vec<ArrayRef> = vec![
         Arc::new(UInt8Array::from(vec![
             123,
             u8::MIN,
@@ -118,16 +118,11 @@ pub fn make_arrow(with_string_column: bool) -> Box<RecordBatch> {
                 .timestamp(),
         ])),
         Arc::new(BooleanArray::from(vec![true, false, true, false, true])),
+        Arc::new(dict_array)
     ];
 
-    if with_string_column {
-        let strings = vec!["abc", "def", "abc", "hij", "klm"];
-        let dict_array: DictionaryArray<Int32Type> = strings.into_iter().collect();
-        arrays.push(Arc::new(dict_array));
-    }
-
     // Arrow schema created using `Field`
-    let mut schema = Schema::new(vec![
+    let schema = Schema::new(vec![
         Field::new("a", DataType::UInt8, false),
         Field::new("b", DataType::UInt16, false),
         Field::new("c", DataType::UInt32, false),
@@ -141,16 +136,12 @@ pub fn make_arrow(with_string_column: bool) -> Box<RecordBatch> {
         Field::new("k", DataType::Date32(DateUnit::Day), false),
         Field::new("l", DataType::Timestamp(TimeUnit::Millisecond, None), false),
         Field::new("m", DataType::Boolean, false),
-    ]);
-
-    if with_string_column {
-        let dict_field = Field::new(
+        Field::new(
             "n",
             DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
             false,
-        );
-        schema = Schema::try_merge(&vec!(schema, Schema::new(vec![dict_field]))).unwrap();
-    }
+        )
+    ]);
 
     let schema_ref = SchemaRef::new(schema);
 
@@ -169,12 +160,11 @@ pub fn make_arrow(with_string_column: bool) -> Box<RecordBatch> {
     }
 }
 
-// Generate an Arrow record batch with null values in columns, only including
-// a string column if with_string_column is true as the StreamWriter doesn't
-// seem to write dictionary arrays properly - they cannot be parsed in
-// Rust or in pyarrow at the moment.
-pub fn make_arrow_nullable(with_string_column: bool) -> Box<RecordBatch> {
-    let mut arrays: Vec<ArrayRef> = vec![
+// Generate an Arrow record batch with null values in columns.
+pub fn make_arrow_nullable() -> Box<RecordBatch> {
+    let strings = vec![None, Some("def"), Some("abc"), Some("hij"), None];
+    let dict_array: DictionaryArray<Int32Type> = strings.into_iter().collect();
+    let arrays: Vec<ArrayRef> = vec![
         Arc::new(UInt8Array::from(vec![
             None,
             Some(u8::MIN),
@@ -260,16 +250,11 @@ pub fn make_arrow_nullable(with_string_column: bool) -> Box<RecordBatch> {
             None,
         ])),
         Arc::new(BooleanArray::from(vec![None, Some(false), Some(true), Some(false), None])),
+        Arc::new(dict_array)
     ];
 
-    if with_string_column {
-        let strings = vec![None, Some("def"), Some("abc"), Some("hij"), None];
-        let dict_array: DictionaryArray<Int32Type> = strings.into_iter().collect();
-        arrays.push(Arc::new(dict_array));
-    }
-
     // Arrow schema created using `Field`
-    let mut schema = Schema::new(vec![
+    let schema = Schema::new(vec![
         Field::new("a", DataType::UInt8, true),
         Field::new("b", DataType::UInt16, true),
         Field::new("c", DataType::UInt32, true),
@@ -283,16 +268,12 @@ pub fn make_arrow_nullable(with_string_column: bool) -> Box<RecordBatch> {
         Field::new("k", DataType::Date32(DateUnit::Day), true),
         Field::new("l", DataType::Timestamp(TimeUnit::Millisecond, None), true),
         Field::new("m", DataType::Boolean, true),
-    ]);
-
-    if with_string_column {
-        let dict_field = Field::new(
+        Field::new(
             "n",
             DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
             true,
-        );
-        schema = Schema::try_merge(&vec!(schema, Schema::new(vec![dict_field]))).unwrap();
-    }
+        )
+    ]);
 
     let schema_ref = SchemaRef::new(schema);
 

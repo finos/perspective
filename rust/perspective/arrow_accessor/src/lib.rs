@@ -36,7 +36,6 @@ pub fn set_panic_hook() {
 pub fn load_arrow_stream(buffer: Box<[u8]>) -> Box<ArrowAccessor> {
     let cursor = Cursor::new(buffer);
     let reader = StreamReader::try_new(cursor).unwrap();
-    let schema = reader.schema();
 
     // Iterate over record batches, and collect them into a vector of
     // heap-allocated batches.
@@ -48,7 +47,7 @@ pub fn load_arrow_stream(buffer: Box<[u8]>) -> Box<ArrowAccessor> {
         .collect::<Vec<Box<RecordBatch>>>();
 
     if let [batch] = &batches[..] {
-        Box::new(ArrowAccessor::new(batch.clone(), schema))
+        Box::new(ArrowAccessor::new(batch.clone()))
     } else {
         panic!("Arrow should only contain a single record batch.")
     }

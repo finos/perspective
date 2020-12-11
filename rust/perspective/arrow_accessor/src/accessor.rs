@@ -32,7 +32,8 @@ impl ArrowAccessor {
     // array that matches the output of Perspective's data serialization
     // methods, i.e. datetime/dates should return Unix timestamps in
     // milliseconds since epoch, i64/u64 should be coerced to float, etc.
-    pub fn new(batch: Box<RecordBatch>, batch_schema: SchemaRef) -> Self {
+    pub fn new(batch: Box<RecordBatch>) -> Self {
+        let schema = batch.schema();
         let num_columns = batch.num_columns();
         let mut column_paths: Vec<String> = Vec::with_capacity(num_columns);
         let mut column_indices: HashMap<String, usize> = HashMap::new();
@@ -40,7 +41,7 @@ impl ArrowAccessor {
 
         for cidx in 0..num_columns {
             let col = batch.column(cidx);
-            let name = batch_schema.field(cidx).name();
+            let name = schema.field(cidx).name();
             let dtype = col.data_type();
             let nrows = col.len();
 

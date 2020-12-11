@@ -26,7 +26,6 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 
 [dependencies.arrow]
 git = "https://github.com/apache/arrow"
-rev = "c2bffc4b8f5c1cc9885fb227a1d359c82d5de2f5"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"

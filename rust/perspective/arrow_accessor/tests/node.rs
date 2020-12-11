@@ -28,18 +28,18 @@ use crate::util::*;
 
 #[wasm_bindgen_test]
 fn load_arrow_from_batch() {
-    let batch = make_arrow(true);
-    let accessor = ArrowAccessor::new(batch.clone(), batch.schema());
+    let batch = make_arrow();
+    let accessor = ArrowAccessor::new(batch.clone());
     let boxed = Box::new(accessor);
-    compare_arrow(boxed, true);
+    compare_arrow(boxed);
 }
 
 #[wasm_bindgen_test]
 fn load_arrow_from_batch_nullable() {
-    let batch = make_arrow_nullable(true);
-    let accessor = ArrowAccessor::new(batch.clone(), batch.schema());
+    let batch = make_arrow_nullable();
+    let accessor = ArrowAccessor::new(batch.clone());
     let boxed = Box::new(accessor);
-    compare_arrow_nullable(boxed, true);
+    compare_arrow_nullable(boxed);
 }
 
 /**
@@ -48,18 +48,18 @@ fn load_arrow_from_batch_nullable() {
 
 #[wasm_bindgen_test]
 fn load_arrow_from_stream() {
-    let batch = make_arrow(false);
+    let batch = make_arrow();
     let buffer = arrow_to_arraybuffer(batch);
     let accessor = load_arrow_stream(buffer);
-    compare_arrow(accessor, false);
+    compare_arrow(accessor);
 }
 
 #[wasm_bindgen_test]
 fn load_nullable_arrow_from_stream() {
-    let batch = make_arrow_nullable(false);
+    let batch = make_arrow_nullable();
     let buffer = arrow_to_arraybuffer(batch);
     let accessor = load_arrow_stream(buffer);
-    compare_arrow_nullable(accessor, false);
+    compare_arrow_nullable(accessor);
 }
 
 /**
@@ -68,14 +68,14 @@ fn load_nullable_arrow_from_stream() {
 
 #[wasm_bindgen_test]
 fn get_data_from_accessor() {
-    let batch = make_arrow(false);
+    let batch = make_arrow();
     let buffer = arrow_to_arraybuffer(batch);
     let accessor_ptr: *mut ArrowAccessor = accessor_make(buffer);
     let data = accessor_get_data(accessor_ptr);
 
     // Convert to JsArray
     let array_data = JsArray::from(&data);
-    assert_eq!(array_data.length(), 13);
+    assert_eq!(array_data.length(), 14);
     let col = JsArray::from(&data.get(0 as u32));
     assert_eq!(col.length(), 5);
 
@@ -89,12 +89,12 @@ fn get_data_from_accessor() {
 
 #[wasm_bindgen_test]
 fn get_column_paths_from_accessor() {
-    let batch = make_arrow(false);
+    let batch = make_arrow();
     let buffer = arrow_to_arraybuffer(batch);
     let accessor_ptr: *mut ArrowAccessor = accessor_make(buffer);
     let column_paths = accessor_get_column_paths(accessor_ptr);
     let expected = vec![
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
     ]
     .into_iter()
     .map(|item| JsValue::from(item))
@@ -107,22 +107,17 @@ fn get_column_paths_from_accessor() {
 
 #[wasm_bindgen_test]
 fn drop_accessor() {
-    let batch = make_arrow(false);
+    let batch = make_arrow();
     let buffer = arrow_to_arraybuffer(batch);
     let accessor_ptr: *mut ArrowAccessor = accessor_make(buffer);
     accessor_drop(accessor_ptr);
 }
 
-fn compare_arrow(accessor: Box<ArrowAccessor>, with_string_column: bool) {
-    let mut paths = vec![
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+fn compare_arrow(accessor: Box<ArrowAccessor>) {
+    let paths = vec![
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
     ];
-    let mut num_cols = 13;
-
-    if with_string_column {
-        paths.push("n");
-        num_cols = 14;
-    }
+    let num_cols = 14;
 
     assert_eq!(accessor.column_paths, paths);
 
@@ -293,16 +288,11 @@ fn compare_arrow(accessor: Box<ArrowAccessor>, with_string_column: bool) {
     }
 }
 
-fn compare_arrow_nullable(accessor: Box<ArrowAccessor>, with_string_column: bool) {
-    let mut paths = vec![
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+fn compare_arrow_nullable(accessor: Box<ArrowAccessor>) {
+    let paths = vec![
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
     ];
-    let mut num_cols = 13;
-
-    if with_string_column {
-        paths.push("n");
-        num_cols = 14;
-    }
+    let num_cols = 14;
 
     assert_eq!(accessor.column_paths, paths);
 
