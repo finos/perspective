@@ -315,6 +315,50 @@ utils.with_server({}, () => {
             });
 
             // Functionality
+            test.capture("A type-invalid expression should show an error message", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    "uppercase('Sales')",
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            // TODO: unskip and assert content of error message
+            test.skip("An expression with invalid inputs should show an error message", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    "'aaaa' + 'Sales'",
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            // TODO: unskip and assert content of error message
+            test.skip("An expression that overwrites a real column should show an error message", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    "'Profit' + 'Profit' as 'Sales'",
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
             test.capture("Typing enter should save a valid expression", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");

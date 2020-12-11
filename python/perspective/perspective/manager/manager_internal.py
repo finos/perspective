@@ -141,9 +141,11 @@ class _PerspectiveManagerInternal(object):
                 self._views[msg["view_name"]] = new_view
             elif cmd == "table_method" or cmd == "view_method":
                 self._process_method_call(msg, post_callback, client_id)
-        except (PerspectiveError, PerspectiveCppError) as e:
-            # Catch errors and return them to client
-            error_message = self._make_error_message(msg["id"], str(e))
+        except (PerspectiveError, PerspectiveCppError) as error:
+            # Log errors and return them to the client
+            error_string = str(error)
+            message = self._make_error_message(msg["id"], error_string)
+            logging.error("[PerspectiveManager._process] %s", error_string)
             post_callback(self._message_to_json(msg["id"], error_message))
 
     def _process_method_call(self, msg, post_callback, client_id):
@@ -235,7 +237,9 @@ class _PerspectiveManagerInternal(object):
                     message = self._make_message(msg["id"], result)
                     post_callback(self._message_to_json(msg["id"], message))
         except Exception as error:
-            message = self._make_error_message(msg["id"], str(error))
+            error_string = str(error)
+            message = self._make_error_message(msg["id"], error_string)
+            logging.error("[PerspectiveManager._process_method_call] %s", error_string)
             post_callback(self._message_to_json(msg["id"], message))
 
     def _process_subscribe(self, msg, table_or_view, post_callback, client_id):
@@ -290,7 +294,9 @@ class _PerspectiveManagerInternal(object):
             else:
                 logging.info("callback not found for remote call {}".format(msg))
         except Exception as error:
-            message = self._make_error_message(msg["id"], str(error))
+            error_string = str(error)
+            message = self._make_error_message(msg["id"], error_string)
+            logging.error("[PerspectiveManager._process_subscribe] %s", error_string)
             post_callback(self._message_to_json(msg["id"], message))
 
     def _process_bytes(self, binary, msg, post_callback):
