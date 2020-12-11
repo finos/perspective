@@ -314,7 +314,8 @@ utils.with_server({}, () => {
                 await page.keyboard.press("Enter");
             });
 
-            // Functionality
+            // Functionality - make sure the UI will validate error cases so
+            // the engine is not affected.
             test.capture("A type-invalid expression should show an error message", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");
@@ -329,8 +330,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            // TODO: unskip and assert content of error message
-            test.skip("An expression with invalid inputs should show an error message", async page => {
+            test.capture("An expression with invalid inputs should show an error message", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
@@ -344,13 +344,37 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            // TODO: unskip and assert content of error message
-            test.skip("An expression that overwrites a real column should show an error message", async page => {
+            test.capture("An expression that overwrites a real column should show an error message", async page => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
                     "'Profit' + 'Profit' as 'Sales'",
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("An expression that overwrites a computed column with a different type should show an error message", async page => {
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_type(
+                    "'Profit' + 'Sales' as 'Computed'",
+                    "perspective-viewer",
+                    "perspective-computed-expression-widget",
+                    "perspective-expression-editor",
+                    ".perspective-expression-editor__edit_area"
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.press("Enter");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+
+                await page.shadow_type(
+                    'uppercase("Category") as "Computed"',
                     "perspective-viewer",
                     "perspective-computed-expression-widget",
                     "perspective-expression-editor",

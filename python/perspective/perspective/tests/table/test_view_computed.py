@@ -5,8 +5,10 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
+from pytest import raises
 from datetime import date, datetime
-from perspective.table import Table
+from perspective import Table, PerspectiveCppError
 
 
 class TestViewComputed(object):
@@ -33,6 +35,165 @@ class TestViewComputed(object):
             "computed": [6, 8, 10, 12],
         }
         assert view.computed_schema() == {"computed": float}
+
+    def test_view_computed_invalid_type_should_throw(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        with raises(PerspectiveCppError) as ex:
+            table.view(
+                computed_columns=[
+                    {
+                        "column": "computed",
+                        "computed_function_name": "uppercase",
+                        "inputs": ["a"],
+                    }
+                ]
+            )
+        assert str(ex.value) == "View creation failed: could not build computed column 'computed' as the input column types are invalid.\n"
+
+    def test_view_computed_should_not_overwrite_real(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        with raises(PerspectiveCppError) as ex:
+            table.view(
+                computed_columns=[
+                    {
+                        "column": "a",  # invalid - col already exists
+                        "computed_function_name": "+",
+                        "inputs": ["a", "b"],
+                    }
+                ]
+            )
+        assert str(ex.value) == "View creation failed: cannot overwrite Table column 'a' with a computed column.\n"
+
+    def test_view_computed_should_not_overwrite_real_dependencies(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        with raises(PerspectiveCppError) as ex:
+            table.view(
+                computed_columns=[
+                    {
+                        "column": "computed",
+                        "computed_function_name": "+",
+                        "inputs": ["a", "b"],
+                    },
+                    {
+                        "column": "computed2",
+                        "computed_function_name": "sqrt",
+                        "inputs": ["computed"],
+                    },
+                    {
+                        "column": "a",  # invalid
+                        "computed_function_name": "+",
+                        "inputs": ["computed", "computed2"],
+                    },
+                    {
+                        "column": "computed3",  # will be skipped
+                        "computed_function_name": "+",
+                        "inputs": ["a", "computed2"],
+                    },
+                    {
+                        "column": "computed4",  # will not be skipped
+                        "computed_function_name": "+",
+                        "inputs": ["computed", "computed2"],
+                    }
+                ]
+            )
+        assert str(ex.value) == "View creation failed: cannot overwrite Table column 'a' with a computed column.\n"
+
+    def test_view_computed_dependencies(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "computed",
+                    "computed_function_name": "+",
+                    "inputs": ["a", "b"],
+                },
+                {
+                    "column": "computed2",
+                    "computed_function_name": "sqrt",
+                    "inputs": ["computed"],
+                },
+                {
+                    "column": "computed3",
+                    "computed_function_name": "exp",
+                    "inputs": ["computed"],
+                },
+                {
+                    "column": "computed4",
+                    "computed_function_name": "pow2",
+                    "inputs": ["computed3"],
+                },
+            ]
+        )
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float,
+            "computed2": float,
+            "computed3": float,
+            "computed4": float,
+        }
+
+        assert view.computed_schema() == {
+            "computed": float,
+            "computed2": float,
+            "computed3": float,
+            "computed4": float,
+        }
+
+    def test_view_computed_dependencies_do_not_cross_over_different_views(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        view = table.view(
+            computed_columns=[
+                {
+                    "column": "computed",
+                    "computed_function_name": "+",
+                    "inputs": ["a", "b"],
+                },
+                {
+                    "column": "computed2",
+                    "computed_function_name": "sqrt",
+                    "inputs": ["computed"],
+                },
+                {
+                    "column": "computed3",
+                    "computed_function_name": "exp",
+                    "inputs": ["computed"],
+                },
+                {
+                    "column": "computed4",
+                    "computed_function_name": "pow2",
+                    "inputs": ["computed3"],
+                },
+            ]
+        )
+        assert view.schema() == {
+            "a": int,
+            "b": int,
+            "computed": float,
+            "computed2": float,
+            "computed3": float,
+            "computed4": float,
+        }
+
+        assert view.computed_schema() == {
+            "computed": float,
+            "computed2": float,
+            "computed3": float,
+            "computed4": float,
+        }
+
+        with raises(PerspectiveCppError) as ex:
+            table.view(
+                computed_columns=[
+                    {
+                        "column": "computed5",
+                        "computed_function_name": "pow2",
+                        "inputs": ["computed3"],
+                    },
+                ]
+            )
+
+        assert str(ex.value) == "Could not get dtype for column `computed3` as it does not exist in the schema.\n"
 
     def test_view_computed_create_no_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})

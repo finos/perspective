@@ -120,6 +120,91 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Should not be able to create multiple computed column in multiple `view()`s with the same name and different types.", async function() {
+            const table = perspective.table(common.int_float_data);
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "computed",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+            const schema = await view.schema();
+            expect(schema).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                computed: "float"
+            });
+
+            expect(() =>
+                table.view({
+                    computed_columns: [
+                        {
+                            column: "computed",
+                            computed_function_name: "uppercase",
+                            inputs: ["y"]
+                        }
+                    ]
+                })
+            ).toThrow();
+
+            // Earlier view should not break
+            const result = await view.to_columns();
+
+            expect(result).toEqual({
+                w: [1.5, 2.5, 3.5, 4.5],
+                x: [1, 2, 3, 4],
+                y: ["a", "b", "c", "d"],
+                z: [true, false, true, false],
+                computed: [2.5, 4.5, 6.5, 8.5]
+            });
+
+            view.delete();
+            table.delete();
+        });
+
+        it("A new view should not reference computed columns it did not create.", async function() {
+            const table = perspective.table(common.int_float_data);
+            const view = table.view({
+                computed_columns: [
+                    {
+                        column: "computed",
+                        computed_function_name: "+",
+                        inputs: ["w", "x"]
+                    }
+                ]
+            });
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            expect(() => {
+                table.view({
+                    columns: ["computed", "x"]
+                });
+            }).toThrow();
+            view.delete();
+            table.delete();
+        });
+
+        it("A view should not be able to overwrite table columns with a computed column.", async function() {
+            const table = perspective.table(common.int_float_data);
+            expect(() => {
+                table.view({
+                    computed_columns: [
+                        {
+                            column: "x",
+                            computed_function_name: "+",
+                            inputs: ["x", "y"]
+                        }
+                    ]
+                });
+            }).toThrow();
+            table.delete();
+        });
+
         it("Should be able to create multiple computed columns in `view()`", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({

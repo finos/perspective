@@ -54,7 +54,7 @@
     "Computed_Expressions_On_restore,_computed_expressions_in_classic_syntax_are_parsed_correctly_": "563f8c45e0ec32bc4b07d30ed5f0086e",
     "superstore_adds_computed_column_via_attribute": "f2fa526d6f0c168a47ab272bb7ae5771",
     "superstore_user_defined_aggregates_maintained_on_computed_columns": "c7aa2902feb512ceb1e1487de80878ff",
-    "__GIT_COMMIT__": "4500cfd6cee1b3b6fa266c4e843bf00577abad5c",
+    "__GIT_COMMIT__": "b83d6ac3ffddf11c7efbe73494a6c1a4e06a94b4",
     "blank_Handles_reloading_with_a_schema_": "9d171ff4c95a7f31eff2e7127b8caedf",
     "superstore_doesn_t_leak_tables_": "5bb762b2860eb5af067bb83afbca3264",
     "superstore_doesn_t_leak_elements_": "5bb762b2860eb5af067bb83afbca3264",
@@ -78,5 +78,8 @@
     "superstore_replaces_all_rows_": "03995f23192c53d36160ab55127ff5c0",
     "blank_When_transferables_are_enabled,_transfers_an_arrow_in_load_": "dcfab9d5536933ba80b87b503985f398",
     "blank_When_transferables_are_enabled,_transfers_an_arrow_in_update_": "dcfab9d5536933ba80b87b503985f398",
-    "Computed_Expressions_A_type-invalid_expression_should_show_an_error_message": "e03a4b9a23540a6684827a13ea5e6a8e"
+    "Computed_Expressions_A_type-invalid_expression_should_show_an_error_message": "e03a4b9a23540a6684827a13ea5e6a8e",
+    "Computed_Expressions_An_expression_with_invalid_inputs_should_show_an_error_message": "1b855c2069cc817903fe03f105fe36e8",
+    "Computed_Expressions_An_expression_that_overwrites_a_real_column_should_show_an_error_message": "869cdfa4d961688724b83d2498d23ef1",
+    "Computed_Expressions_An_expression_that_overwrites_a_computed_column_with_a_different_type_should_show_an_error_message": "e6258611a5776a0e529ec8df24f25683"
 }

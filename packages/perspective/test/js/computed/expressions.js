@@ -449,7 +449,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Should be able to create multiple computed column in multiple `view()`s with the same name", async function() {
+        it("Should be able to create multiple computed column in multiple `view()`s with the same name and the same type", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
                 computed_columns: ['"w" + "x" as "float + int"']
