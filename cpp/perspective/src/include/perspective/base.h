@@ -62,6 +62,15 @@ const t_index INVALID_INDEX = -1;
 #define CHAR_BIT 8
 #endif
 
+/**
+ * @brief Given an error message, throw the error in the binding language:
+ * 
+ * WASM: throws an `Error()` with the error message.
+ * Python: throws a `PerspectiveCppException` with the error message.
+ * 
+ * @param message 
+ * @return PERSPECTIVE_EXPORT 
+ */
 PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
 
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;

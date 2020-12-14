@@ -73,24 +73,20 @@ utils.with_server({}, () => {
                 {preserve_hover: true}
             );
 
-            test.run("treemap parent button shows formatted date", async page => {
+            test.skip("treemap parent button shows formatted date", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#config_button");
-                await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Mode", "Segment"]'), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date", "Ship Mode"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+
+                // Click on the chart, wait for the animation to render,
+                // and then try to get rid of the tooltip by moving the
+                // mouse again.
                 await page.mouse.click(500, 200);
-                const result = await page.waitFor(
-                    element => {
-                        let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector("#goto-parent");
-                        if (elem) {
-                            return elem.textContent.includes("Second Class");
-                        }
-                    },
-                    {},
-                    viewer
-                );
-                return !!result;
+                await page.waitFor(500);
+                await page.mouse.move(0, 0);
+                await page.waitFor(500);
             });
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}

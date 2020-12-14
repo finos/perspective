@@ -24,19 +24,17 @@
         <div id="container"></div>
 
         <script>
-
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'superstore.csv', true);
-            xhr.onload = function () { 
-                window.__CSV__ = xhr.response;
+            (async () => {
+                const req = await fetch("superstore.csv");
+                const csv = await req.text();
                 window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
-                container.appendChild(window.__WIDGET__.node);
-                window.__WIDGET__.load(perspective.worker().table(xhr.response));
+                document.getElementById("container").appendChild(window.__WIDGET__.node);
+                const worker = perspective.worker();
+                const table = await worker.table(csv);
+                window.__WIDGET__.load(table); 
                 window.__WIDGET__.plugin = "datagrid";
-            }
-            xhr.send(null);
-
+                console.log(window.__WIDGET__);
+            })();
         </script>
-
     </body>
 </html>

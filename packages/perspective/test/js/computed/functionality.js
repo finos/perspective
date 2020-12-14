@@ -17,8 +17,8 @@ const common = require("./common.js");
 module.exports = perspective => {
     describe("Functionality", function() {
         it("Should be able to create a computed column in `view()`", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -34,8 +34,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to create a chained computed column in `view()`", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 columns: ["col2"],
                 computed_columns: [
                     {
@@ -57,13 +57,13 @@ module.exports = perspective => {
         });
 
         it("Should be able to create a computed column in `view()` from schema, and updates propagate", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "integer",
                 y: "string",
                 z: "boolean"
             });
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -86,13 +86,13 @@ module.exports = perspective => {
         });
 
         it("Should be able to create chained computed columns in `view()` from schema, and updates propagate", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "integer",
                 y: "string",
                 z: "boolean"
             });
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -120,9 +120,10 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Should not be able to create multiple computed column in multiple `view()`s with the same name and different types.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+        it("Should not be able to create multiple computed column in multiple `view()`s with the same name and different types.", async function(done) {
+            expect.assertions(3);
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "computed",
@@ -140,8 +141,8 @@ module.exports = perspective => {
                 computed: "float"
             });
 
-            expect(() =>
-                table.view({
+            table
+                .view({
                     computed_columns: [
                         {
                             column: "computed",
@@ -150,7 +151,13 @@ module.exports = perspective => {
                         }
                     ]
                 })
-            ).toThrow();
+                .catch(e => {
+                    // TODO: this error propagates further than we want to,
+                    // but it is a case that is prevented by the UI. As we
+                    // re-write and refactor the next iteration of computed
+                    // columns, make sure to check this test case.
+                    expect(e.message).toMatch("Abort(): Setting non string column");
+                });
 
             // Earlier view should not break
             const result = await view.to_columns();
@@ -165,11 +172,13 @@ module.exports = perspective => {
 
             view.delete();
             table.delete();
+            done();
         });
 
-        it("A new view should not reference computed columns it did not create.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+        it("A new view should not reference computed columns it did not create.", async function(done) {
+            expect.assertions(2);
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "computed",
@@ -180,19 +189,23 @@ module.exports = perspective => {
             });
             const result = await view.to_columns();
             expect(result["computed"]).toEqual([2.5, 4.5, 6.5, 8.5]);
-            expect(() => {
-                table.view({
+            table
+                .view({
                     columns: ["computed", "x"]
+                })
+                .catch(e => {
+                    expect(e.message).toMatch("Abort(): Invalid column 'computed' found in View columns.\n");
+                    view.delete();
+                    table.delete();
+                    done();
                 });
-            }).toThrow();
-            view.delete();
-            table.delete();
         });
 
-        it("A view should not be able to overwrite table columns with a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            expect(() => {
-                table.view({
+        it("A view should not be able to overwrite table columns with a computed column.", async function(done) {
+            expect.assertions(1);
+            const table = await perspective.table(common.int_float_data);
+            table
+                .view({
                     computed_columns: [
                         {
                             column: "x",
@@ -200,14 +213,17 @@ module.exports = perspective => {
                             inputs: ["x", "y"]
                         }
                     ]
+                })
+                .catch(e => {
+                    expect(e.message).toMatch("Abort(): View creation failed: could not build computed column 'x' as the input column types are invalid.\n");
+                    table.delete();
+                    done();
                 });
-            }).toThrow();
-            table.delete();
         });
 
         it("Should be able to create multiple computed columns in `view()`", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -229,8 +245,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to create multiple computed columns with unique names in multiple `view()`s", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "float + int",
@@ -249,7 +265,7 @@ module.exports = perspective => {
                     }
                 ]
             });
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "float / int",
@@ -314,8 +330,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to create multiple computed columns in multiple `view()`s, and arbitarily delete views.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "float + int",
@@ -324,7 +340,7 @@ module.exports = perspective => {
                     }
                 ]
             });
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "float - int",
@@ -383,8 +399,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to create multiple computed columns in multiple `view()`s, and delete preceding views without affecting later columns.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "float + int",
@@ -394,7 +410,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "float + int",
@@ -460,9 +476,9 @@ module.exports = perspective => {
         });
 
         it("Multiple views inheriting the same computed columns with the same names should not conflict", async function() {
-            const table = perspective.table(common.int_float_data);
+            const table = await perspective.table(common.int_float_data);
 
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "computed",
@@ -480,7 +496,7 @@ module.exports = perspective => {
                 computed: "float"
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "computed",
@@ -504,7 +520,7 @@ module.exports = perspective => {
                 computed2: "float"
             });
 
-            const view3 = table.view({
+            const view3 = await table.view({
                 computed_columns: [
                     {
                         column: "computed",
@@ -544,8 +560,8 @@ module.exports = perspective => {
         });
 
         it("A view should be able to create a computed column with the same name as another deleted view's computed columns.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -559,7 +575,7 @@ module.exports = perspective => {
             expect(result["int + float"]).toEqual([2.5, 4.5, 6.5, 8.5]);
             view.delete();
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -577,8 +593,8 @@ module.exports = perspective => {
         });
 
         it("A view without computed columns should not serialize computed columns from other views.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -592,7 +608,7 @@ module.exports = perspective => {
             expect(result["int + float"]).toEqual([2.5, 4.5, 6.5, 8.5]);
             view.delete();
 
-            const view2 = table.view();
+            const view2 = await table.view();
 
             const result2 = await view2.to_json();
             expect(result2).toEqual(common.int_float_data);
@@ -624,11 +640,11 @@ module.exports = perspective => {
                     inputs: ["w", "x"]
                 }
             ];
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({computed_columns: [computed[0]]});
-            const view2 = table.view({computed_columns: [computed[0], computed[1]]});
-            const view3 = table.view({computed_columns: [computed[0], computed[1], computed[2]]});
-            const view4 = table.view({computed_columns: computed});
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({computed_columns: [computed[0]]});
+            const view2 = await table.view({computed_columns: [computed[0], computed[1]]});
+            const view3 = await table.view({computed_columns: [computed[0], computed[1], computed[2]]});
+            const view4 = await table.view({computed_columns: computed});
 
             const schema = await view.schema();
             const schema2 = await view2.schema();
@@ -681,8 +697,8 @@ module.exports = perspective => {
         });
 
         it.skip("Should be able to create multiple computed column in multiple `view()`s with the same name", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "float + int",
@@ -691,7 +707,7 @@ module.exports = perspective => {
                     }
                 ]
             });
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "float + int",
@@ -745,8 +761,9 @@ module.exports = perspective => {
         });
 
         it("A new view should not inherit computed columns if not created.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            expect.assertions(2);
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -757,18 +774,22 @@ module.exports = perspective => {
             });
             const result = await view.to_columns();
             expect(result["int + float"]).toEqual([2.5, 4.5, 6.5, 8.5]);
-            expect(() => {
-                table.view({
+
+            try {
+                await table.view({
                     columns: ["int + float", "x"]
                 });
-            }).toThrow();
+            } catch (e) {
+                expect(e.message).toEqual("Abort(): Invalid column 'int + float' found in View columns.\n");
+            }
+
             view.delete();
             table.delete();
         });
 
         it("The view's underlying table should not have a mutated schema.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -790,8 +811,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to show a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 columns: ["int + float"],
                 computed_columns: [
                     {
@@ -808,8 +829,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to hide a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 columns: ["x"],
                 computed_columns: [
                     {
@@ -830,8 +851,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to row pivot on a non-computed column and get correct results for the computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 row_pivots: ["w"],
                 computed_columns: [
                     {
@@ -855,8 +876,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to row pivot on a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 row_pivots: ["int + float"],
                 computed_columns: [
                     {
@@ -880,8 +901,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to column pivot on a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 column_pivots: ["int + float"],
                 computed_columns: [
                     {
@@ -919,8 +940,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to row + column pivot on a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 row_pivots: ["int + float"],
                 column_pivots: ["int + float"],
                 computed_columns: [
@@ -960,12 +981,12 @@ module.exports = perspective => {
         });
 
         it("Should be able to aggregate a numeric computed column.", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: [100, 200, 300, 400],
                 z: [1.5, 2.5, 3.5, 4.5]
             });
-            const view = table.view({
+            const view = await table.view({
                 row_pivots: ["comp"],
                 aggregates: {
                     comp: "median",
@@ -992,11 +1013,11 @@ module.exports = perspective => {
         });
 
         it("Should be able to aggregate a string computed column.", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: ["a", "a", "c", "a"],
                 y: ["w", "w", "y", "w"]
             });
-            const view = table.view({
+            const view = await table.view({
                 row_pivots: ["comp"],
                 aggregates: {
                     comp: "distinct count"
@@ -1021,10 +1042,10 @@ module.exports = perspective => {
         });
 
         it("Should be able to aggregate a date computed column.", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: [new Date(2019, 0, 15), new Date(2019, 0, 30), new Date(2019, 1, 15)]
             });
-            const view = table.view({
+            const view = await table.view({
                 row_pivots: ["comp"],
                 aggregates: {
                     comp: "distinct count"
@@ -1048,12 +1069,12 @@ module.exports = perspective => {
         });
 
         it("Should be able to weighted mean on a computed column.", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: [100, 200, 300, 400],
                 z: [1.5, 2.5, 3.5, 4.5]
             });
-            const view = table.view({
+            const view = await table.view({
                 row_pivots: ["comp"],
                 aggregates: {
                     x: ["weighted mean", "comp"],
@@ -1080,8 +1101,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to filter on a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 filter: [["int + float", ">", 6.5]],
                 computed_columns: [
                     {
@@ -1104,8 +1125,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to sort on a computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 sort: [["int + float", "desc"]],
                 computed_columns: [
                     {
@@ -1128,8 +1149,8 @@ module.exports = perspective => {
         });
 
         it("Should be able to sort on a hidden computed column.", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 columns: ["w"],
                 sort: [["int + float", "desc"]],
                 computed_columns: [
@@ -1150,7 +1171,7 @@ module.exports = perspective => {
 
         describe("Table Computed Schema", function() {
             it("Should show computed column types in table computed schema.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
@@ -1194,7 +1215,7 @@ module.exports = perspective => {
             });
 
             it("Should skip a invalid column due to type error, as well as all columns that depend on the invalid column.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"],
@@ -1236,7 +1257,7 @@ module.exports = perspective => {
             });
 
             it("Should skip a invalid column due to invalid column name, as well as all columns that depend on the invalid column.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"],
@@ -1280,7 +1301,7 @@ module.exports = perspective => {
 
         describe("Table Computed Function Input Types", function() {
             it("Should return correct types for numeric functions", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
@@ -1292,7 +1313,7 @@ module.exports = perspective => {
             });
 
             it("Should return correct types for string functions", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
@@ -1304,7 +1325,7 @@ module.exports = perspective => {
             });
 
             it("Should return correct types for date/time functions", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
@@ -1318,12 +1339,12 @@ module.exports = perspective => {
 
         describe("View Computed Schema", function() {
             it("Column types in view computed schema on 0-sided view.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const view = table.view({
+                const view = await table.view({
                     computed_columns: [
                         {
                             column: "(a ^ 2)",
@@ -1365,12 +1386,12 @@ module.exports = perspective => {
             });
 
             it("Should show ALL columns in view computed schema regardless of custom columns.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const view = table.view({
+                const view = await table.view({
                     columns: ["wb"],
                     computed_columns: [
                         {
@@ -1413,12 +1434,12 @@ module.exports = perspective => {
             });
 
             it("Aggregated types in view computed schema on 1-sided view.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const view = table.view({
+                const view = await table.view({
                     row_pivots: ["def"],
                     computed_columns: [
                         {
@@ -1461,12 +1482,12 @@ module.exports = perspective => {
             });
 
             it("Aggregated types in view computed schema on 1-sided view with custom aggregates.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const view = table.view({
+                const view = await table.view({
                     aggregates: {
                         upper: "any"
                     },
@@ -1512,12 +1533,12 @@ module.exports = perspective => {
             });
 
             it("Aggregated types in view computed schema on 2-sided view.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const view = table.view({
+                const view = await table.view({
                     row_pivots: ["def"],
                     column_pivots: ["wb"],
                     computed_columns: [
@@ -1561,12 +1582,12 @@ module.exports = perspective => {
             });
 
             it("Aggregated types in view computed schema on 2-sided column-only view.", async function() {
-                const table = perspective.table({
+                const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const view = table.view({
+                const view = await table.view({
                     column_pivots: ["def"],
                     computed_columns: [
                         {

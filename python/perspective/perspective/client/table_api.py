@@ -6,6 +6,8 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import tornado
+
 from functools import partial
 from .dispatch import async_queue, subscribe, unsubscribe
 from .view_api import view as make_view
@@ -25,9 +27,9 @@ def table(client, data, name, index=None, limit=None):
 
     msg = {"cmd": "table", "name": name, "args": [data], "options": options}
 
-    proxy = PerspectiveTableProxy(client, name)
-    client.post(msg)
-    return proxy
+    future = tornado.concurrent.Future()
+    client.post(msg, future)
+    return future
 
 
 class PerspectiveTableProxy(object):

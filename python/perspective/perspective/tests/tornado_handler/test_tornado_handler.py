@@ -12,6 +12,7 @@ import tornado
 from tornado import gen
 from datetime import datetime
 
+from ...core.exception import PerspectiveError
 from ...table import Table
 from ...manager import PerspectiveManager
 from ...tornado_handler import PerspectiveTornadoHandler, websocket
@@ -92,6 +93,19 @@ class TestPerspectiveTornadoHandler(object):
         assert size == 10
 
     @pytest.mark.gen_test(run_sync=False)
+    def test_tornado_handler_make_table(self, app, http_client, http_port):
+        client = yield self.websocket_client(http_port)
+        table = yield client.table(data)
+        size = yield table.size()
+
+        assert size == 10
+
+        table.update(data)
+
+        size2 = yield table.size()
+        assert size2 == 20
+
+    @pytest.mark.gen_test(run_sync=False)
     def test_tornado_handler_table_update(self, app, http_client, http_port):
         table_name = str(random.random())
         _table = Table(data)
@@ -118,7 +132,7 @@ class TestPerspectiveTornadoHandler(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
 
         size = yield table.size()
 
@@ -153,7 +167,7 @@ class TestPerspectiveTornadoHandler(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
 
         size = yield table.size()
 
@@ -185,7 +199,7 @@ class TestPerspectiveTornadoHandler(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
 
         size = yield table.size()
 
@@ -226,7 +240,7 @@ class TestPerspectiveTornadoHandler(object):
 
         table.remove([i for i in range(5)])
 
-        view = table.view(columns=["a"])
+        view = yield table.view(columns=["a"])
         output = yield view.to_dict()
 
         assert output == {"a": [i for i in range(5, 10)]}
@@ -241,12 +255,28 @@ class TestPerspectiveTornadoHandler(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view(columns=["a"])
+        view = yield table.view(columns=["a"])
         output = yield view.to_dict()
 
         assert output == {
             "a": [i for i in range(10)],
         }
+
+    @pytest.mark.gen_test(run_sync=False)
+    def test_tornado_handler_create_view_errors(
+        self, app, http_client, http_port, sentinel
+    ):
+        table_name = str(random.random())
+        _table = Table(data)
+        MANAGER.host_table(table_name, _table)
+
+        client = yield self.websocket_client(http_port)
+        table = client.open_table(table_name)
+
+        with pytest.raises(PerspectiveError) as exc:
+            yield table.view(columns=["abcde"])
+
+        assert str(exc.value) == "Invalid column 'abcde' found in View columns.\n"
 
     @pytest.mark.gen_test(run_sync=False)
     def test_tornado_handler_create_view_to_arrow(
@@ -258,7 +288,7 @@ class TestPerspectiveTornadoHandler(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
         output = yield view.to_arrow()
         expected = yield table.schema()
 
@@ -274,7 +304,7 @@ class TestPerspectiveTornadoHandler(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
 
         output = yield view.to_arrow()
 

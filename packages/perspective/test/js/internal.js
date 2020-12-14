@@ -25,7 +25,7 @@ module.exports = (perspective, mode) => {
             if (perspective.sync_module) {
                 perspective = perspective.sync_module();
             }
-            var table = perspective.table(test_null_arrow.slice());
+            var table = await perspective.table(test_null_arrow.slice());
             let schema, stypes;
             let types = [];
             try {

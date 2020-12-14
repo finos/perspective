@@ -60,7 +60,7 @@ function newRows(total_rows) {
 
 async function init_dynamic({table_size, update_size, tick_rate}) {
     // Create a `table`.
-    const table = worker.table(newRows(table_size), {limit: table_size});
+    const table = await worker.table(newRows(table_size), {limit: table_size});
 
     // The `table` needs to be registered to a name with the Perspective
     // `WebSocketServer` in order for the client to get a proxy handle to it.
@@ -79,8 +79,8 @@ async function init_dynamic({table_size, update_size, tick_rate}) {
  */
 
 async function newArrow(total_rows) {
-    const table = worker.table(newRows(total_rows));
-    const vw = table.view();
+    const table = await worker.table(newRows(total_rows));
+    const vw = await table.view();
     const arrow = await vw.to_arrow();
     vw.delete();
     table.delete();
@@ -96,7 +96,7 @@ async function populate_cache(cache_entries) {
 
 async function init_cached({table_size, tick_rate, cache_entries}) {
     await populate_cache(cache_entries);
-    const table = worker.table(newRows(table_size), {limit: table_size});
+    const table = await worker.table(newRows(table_size), {limit: table_size});
     (function postRow() {
         const entry = __CACHE__[Math.floor(Math.random() * __CACHE__.length)];
         table.update(entry);

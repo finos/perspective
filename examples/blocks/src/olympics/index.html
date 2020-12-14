@@ -69,7 +69,7 @@
         const datasource = async () => {
             const request = fetch(URL);
             const worker = perspective.worker();
-            const table = worker.table(SCHEMA);
+            const table = await worker.table(SCHEMA);
             const response = await request;
             const json = await response.json();
             table.update(json);

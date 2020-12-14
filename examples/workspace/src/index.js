@@ -19,7 +19,7 @@ const datasource = async () => {
     const resp = await req;
     const buffer = await resp.arrayBuffer();
     const worker = perspective.shared_worker();
-    return worker.table(buffer);
+    return await worker.table(buffer);
 };
 
 const DEFAULT_LAYOUT = {

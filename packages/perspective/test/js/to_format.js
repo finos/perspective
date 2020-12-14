@@ -25,8 +25,8 @@ const pivoted_output = [
 module.exports = perspective => {
     describe("data slice", function() {
         it("should filter out invalid start rows", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 5
             });
@@ -36,8 +36,8 @@ module.exports = perspective => {
         });
 
         it("should filter out invalid start columns", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_col: 5
             });
@@ -47,8 +47,8 @@ module.exports = perspective => {
         });
 
         it("should filter out invalid start rows & columns", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 5,
                 start_col: 5
@@ -59,8 +59,8 @@ module.exports = perspective => {
         });
 
         it("should filter out invalid start rows based on view", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 filter: [["float", ">", 3.5]]
             });
 
@@ -76,8 +76,8 @@ module.exports = perspective => {
         });
 
         it("should filter out invalid start columns based on view", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 columns: ["float", "int"]
             });
 
@@ -91,8 +91,8 @@ module.exports = perspective => {
         });
 
         it("should filter out invalid start rows & columns based on view", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 columns: ["float", "int"],
                 filter: [["float", ">", 3.5]]
             });
@@ -106,8 +106,8 @@ module.exports = perspective => {
         });
 
         it("should respect start/end rows", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 2,
                 end_row: 3
@@ -120,8 +120,8 @@ module.exports = perspective => {
         });
 
         it("should respect end rows when larger than data size", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 2,
                 end_row: 6
@@ -137,8 +137,8 @@ module.exports = perspective => {
         });
 
         it("should respect start/end columns", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_columns({
                 start_col: 2,
                 end_col: 3
@@ -150,8 +150,8 @@ module.exports = perspective => {
         });
 
         it("should floor float start rows", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 1.5
             });
@@ -166,8 +166,8 @@ module.exports = perspective => {
         });
 
         it("should ceil float end rows", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 end_row: 1.5
             });
@@ -185,8 +185,8 @@ module.exports = perspective => {
         });
 
         it("should floor/ceil float start/end rows", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 2.9,
                 end_row: 2.4
@@ -199,8 +199,8 @@ module.exports = perspective => {
         });
 
         it("should ceil float end rows when larger than data size", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_json({
                 start_row: 2,
                 end_row: 5.5
@@ -216,8 +216,8 @@ module.exports = perspective => {
         });
 
         it("should floor/ceil float start/end columns", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let json = await view.to_columns({
                 start_col: 2.6,
                 end_col: 2.4
@@ -229,8 +229,8 @@ module.exports = perspective => {
         });
 
         it("one-sided views should have row paths", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"]
             });
             let json = await view.to_json();
@@ -242,8 +242,8 @@ module.exports = perspective => {
         });
 
         it("one-sided views with start_col > 0 should have row paths", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"]
             });
             let json = await view.to_json({start_col: 1});
@@ -255,8 +255,8 @@ module.exports = perspective => {
         });
 
         it("one-sided column-only views should not have row paths", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 column_pivots: ["int"]
             });
             let json = await view.to_json();
@@ -268,11 +268,11 @@ module.exports = perspective => {
         });
 
         it("column-only views should not have header rows", async function() {
-            let table = perspective.table([
+            let table = await perspective.table([
                 {x: 1, y: "a"},
                 {x: 2, y: "b"}
             ]);
-            let view = table.view({
+            let view = await table.view({
                 column_pivots: ["x"]
             });
             let json = await view.to_json();
@@ -285,11 +285,11 @@ module.exports = perspective => {
         });
 
         it("column-only views should return correct windows of data", async function() {
-            let table = perspective.table([
+            let table = await perspective.table([
                 {x: 1, y: "a"},
                 {x: 2, y: "b"}
             ]);
-            let view = table.view({
+            let view = await table.view({
                 column_pivots: ["x"]
             });
             let json = await view.to_json({
@@ -301,8 +301,8 @@ module.exports = perspective => {
         });
 
         it("two-sided views should have row paths", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"],
                 column_pivots: ["string"]
             });
@@ -315,8 +315,8 @@ module.exports = perspective => {
         });
 
         it("two-sided views with start_col > 0 should have row paths", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"],
                 column_pivots: ["string"]
             });
@@ -329,8 +329,8 @@ module.exports = perspective => {
         });
 
         it("two-sided sorted views with start_col > 0 should have row paths", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"],
                 column_pivots: ["string"],
                 sort: [["string", "desc"]]
@@ -346,8 +346,8 @@ module.exports = perspective => {
 
     describe("to_json", function() {
         it("should emit same number of column names as number of pivots", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"],
                 column_pivots: ["float", "string"],
                 sort: [["int", "asc"]]
@@ -362,8 +362,8 @@ module.exports = perspective => {
         });
 
         it("should return dates in native form by default", async function() {
-            let table = perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
-            let view = table.view();
+            let table = await perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
+            let view = await table.view();
             let json = await view.to_json();
             expect(json).toEqual([{datetime: 1465776000000}, {datetime: 1465862400000}]);
             view.delete();
@@ -371,8 +371,8 @@ module.exports = perspective => {
         });
 
         it("should return dates in readable format on passing string in options", async function() {
-            let table = perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
-            let view = table.view();
+            let table = await perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
+            let view = await table.view();
             let json = await view.to_json({formatted: true});
             expect(json).toEqual([{datetime: "6/13/2016"}, {datetime: "6/14/2016"}]);
             view.delete();
@@ -380,8 +380,8 @@ module.exports = perspective => {
         });
 
         it("should return datetimes in readable format on passing string in options", async function() {
-            let table = perspective.table([{datetime: new Date(2016, 0, 1, 0, 30)}, {datetime: new Date(2016, 5, 15, 19, 20)}]);
-            let view = table.view();
+            let table = await perspective.table([{datetime: new Date(2016, 0, 1, 0, 30)}, {datetime: new Date(2016, 5, 15, 19, 20)}]);
+            let view = await table.view();
             let json = await view.to_json({formatted: true});
             expect(json).toEqual([{datetime: "1/1/2016, 12:30:00 AM"}, {datetime: "6/15/2016, 7:20:00 PM"}]);
             view.delete();
@@ -391,8 +391,8 @@ module.exports = perspective => {
 
     describe("leaves_only flag", function() {
         it("only emits leaves when leaves_only is set", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({
                 row_pivots: ["int"]
             });
             let json = await view.to_json({leaves_only: true});
@@ -410,17 +410,17 @@ module.exports = perspective => {
     describe("to_arrow()", function() {
         it("serializes boolean arrays correctly", async function() {
             // prevent regression in boolean parsing
-            let table = perspective.table({
+            let table = await perspective.table({
                 bool: [true, false, true, false, true, false, false]
             });
-            let view = table.view();
+            let view = await table.view();
             let arrow = await view.to_arrow();
             let json = await view.to_json();
 
             expect(json).toEqual([{bool: true}, {bool: false}, {bool: true}, {bool: false}, {bool: true}, {bool: false}, {bool: false}]);
 
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
             expect(json2).toEqual(json);
 
@@ -431,13 +431,13 @@ module.exports = perspective => {
         });
 
         it("does not break when booleans are undefined", async function() {
-            let table = perspective.table([
+            let table = await perspective.table([
                 {int: 1, bool: true},
                 {int: 2, bool: false},
                 {int: 3, bool: true},
                 {int: 4, bool: undefined}
             ]);
-            let view = table.view();
+            let view = await table.view();
             let arrow = await view.to_arrow();
             let json = await view.to_json();
 
@@ -448,8 +448,8 @@ module.exports = perspective => {
                 {int: 4, bool: null}
             ]);
 
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
             expect(json2).toEqual(json);
 
@@ -460,8 +460,8 @@ module.exports = perspective => {
         });
 
         it("arrow output respects start/end rows", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let arrow = await view.to_arrow({
                 start_row: 1,
                 end_row: 2
@@ -469,8 +469,8 @@ module.exports = perspective => {
             let json2 = await view.to_json();
             //expect(arrow.byteLength).toEqual(1010);
 
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json = await view2.to_json();
             expect(json).toEqual(json2.slice(1, 2));
 
@@ -481,14 +481,14 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 0-sided", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let arrow = await view.to_arrow();
             let json2 = await view.to_json();
             //expect(arrow.byteLength).toEqual(1010);
 
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json = await view2.to_json();
             expect(json).toEqual(json2);
 
@@ -499,14 +499,14 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 0-sided, with row range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
             let json2 = await view.to_json({start_row: 1, end_row: 3});
             // expect(arrow.byteLength).toEqual(908);
 
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json = await view2.to_json();
             expect(json).toEqual(json2);
             expect(json.length).toEqual(2);
@@ -518,14 +518,14 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 0-sided, with col range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view();
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view();
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let json2 = await view.to_json({start_col: 1, end_col: 3});
             // expect(arrow.byteLength).toEqual(908);
 
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json = await view2.to_json();
             expect(json).toEqual(json2);
             expect(json.length).toEqual(4);
@@ -537,12 +537,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 1-sided", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -559,12 +559,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 1-sided with row range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"]});
             let json = await view.to_json({start_row: 1, end_row: 3});
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -581,12 +581,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 1-sided with col range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"]});
             let json = await view.to_json({start_col: 1, end_col: 3});
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -603,12 +603,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 2-sided", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"], column_pivots: ["int"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -625,12 +625,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 2-sided with row range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"], column_pivots: ["int"]});
             let json = await view.to_json({start_row: 1, end_row: 3});
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -647,12 +647,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 2-sided with col range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"], column_pivots: ["int"]});
             let json = await view.to_json({start_col: 1, end_col: 3});
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -669,12 +669,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 2-sided column only", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({column_pivots: ["string"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({column_pivots: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -691,12 +691,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 2-sided column only row range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({column_pivots: ["string"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({column_pivots: ["string"]});
             let json = await view.to_json({start_row: 1, end_row: 3});
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -713,12 +713,12 @@ module.exports = perspective => {
         });
 
         it("Transitive arrow output 2-sided column only col range", async function() {
-            let table = perspective.table(int_float_string_data);
-            let view = table.view({column_pivots: ["string"]});
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({column_pivots: ["string"]});
             let json = await view.to_json({start_col: 1, end_col: 3});
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
-            let table2 = perspective.table(arrow);
-            let view2 = table2.view();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
             let json2 = await view2.to_json();
 
             expect(json2).toEqual(
@@ -737,8 +737,8 @@ module.exports = perspective => {
         describe("to_format with index", function() {
             describe("0-sided", function() {
                 it("should return correct pkey for unindexed table", async function() {
-                    let table = perspective.table(int_float_string_data);
-                    let view = table.view();
+                    let table = await perspective.table(int_float_string_data);
+                    let view = await table.view();
                     let json = await view.to_json({
                         start_row: 0,
                         end_row: 1,
@@ -752,8 +752,8 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for float indexed table", async function() {
-                    let table = perspective.table(int_float_string_data, {index: "float"});
-                    let view = table.view();
+                    let table = await perspective.table(int_float_string_data, {index: "float"});
+                    let view = await table.view();
                     let json = await view.to_json({
                         start_row: 0,
                         end_row: 1,
@@ -767,8 +767,8 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for string indexed table", async function() {
-                    let table = perspective.table(int_float_string_data, {index: "string"});
-                    let view = table.view();
+                    let table = await perspective.table(int_float_string_data, {index: "string"});
+                    let view = await table.view();
                     let json = await view.to_json({
                         start_row: 0,
                         end_row: 1,
@@ -788,8 +788,8 @@ module.exports = perspective => {
                         {int: 2, datetime: new Date()}
                     ];
                     data[1].datetime.setDate(data[1].datetime.getDate() + 1);
-                    let table = perspective.table(data, {index: "datetime"});
-                    let view = table.view();
+                    let table = await perspective.table(data, {index: "datetime"});
+                    let view = await table.view();
                     let json = await view.to_json({
                         start_row: 1,
                         end_row: 2,
@@ -801,8 +801,8 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for all rows + columns on an unindexed table", async function() {
-                    let table = perspective.table(int_float_string_data);
-                    let view = table.view();
+                    let table = await perspective.table(int_float_string_data);
+                    let view = await table.view();
                     let json = await view.to_json({
                         index: true
                     });
@@ -815,8 +815,8 @@ module.exports = perspective => {
                 });
 
                 it("should return correct pkey for all rows + columns on an indexed table", async function() {
-                    let table = perspective.table(int_float_string_data, {index: "string"});
-                    let view = table.view();
+                    let table = await perspective.table(int_float_string_data, {index: "string"});
+                    let view = await table.view();
                     let json = await view.to_json({
                         index: true
                     });
@@ -833,8 +833,8 @@ module.exports = perspective => {
 
         describe("0-sided column subset", function() {
             it("should return correct pkey for unindexed table", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     columns: ["int", "datetime"]
                 });
                 let json = await view.to_json({
@@ -850,8 +850,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for float indexed table", async function() {
-                let table = perspective.table(int_float_string_data, {index: "float"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "float"});
+                let view = await table.view({
                     columns: ["float", "int"]
                 });
                 let json = await view.to_json({
@@ -867,8 +867,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for string indexed table", async function() {
-                let table = perspective.table(int_float_string_data, {index: "string"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "string"});
+                let view = await table.view({
                     columns: ["string", "datetime"]
                 });
                 let json = await view.to_json({
@@ -890,8 +890,8 @@ module.exports = perspective => {
                     {int: 2, datetime: new Date()}
                 ];
                 data[1].datetime.setDate(data[1].datetime.getDate() + 1);
-                let table = perspective.table(data, {index: "datetime"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "datetime"});
+                let view = await table.view({
                     columns: ["int"]
                 });
                 let json = await view.to_json({
@@ -905,8 +905,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for all rows + columns on an unindexed table", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     columns: ["int"]
                 });
                 let json = await view.to_json({
@@ -921,8 +921,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for all rows + columns on an indexed table", async function() {
-                let table = perspective.table(int_float_string_data, {index: "string"});
-                let view = table.view();
+                let table = await perspective.table(int_float_string_data, {index: "string"});
+                let view = await table.view();
                 let json = await view.to_json({
                     index: true
                 });
@@ -938,8 +938,8 @@ module.exports = perspective => {
 
         describe("0-sided column subset invalid bounds", function() {
             it("should return correct pkey for unindexed table, invalid column", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     columns: ["int"]
                 });
                 let json = await view.to_json({
@@ -955,8 +955,8 @@ module.exports = perspective => {
             });
 
             it("should not return pkey for unindexed table, invalid row", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     columns: ["int"]
                 });
                 let json = await view.to_json({
@@ -970,8 +970,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for float indexed table, invalid column", async function() {
-                let table = perspective.table(int_float_string_data, {index: "float"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "float"});
+                let view = await table.view({
                     columns: ["float"]
                 });
                 let json = await view.to_json({
@@ -987,8 +987,8 @@ module.exports = perspective => {
             });
 
             it("should not return pkey for float indexed table, invalid row", async function() {
-                let table = perspective.table(int_float_string_data, {index: "float"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "float"});
+                let view = await table.view({
                     columns: ["float"]
                 });
                 let json = await view.to_json({
@@ -1004,8 +1004,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for string indexed table, invalid column", async function() {
-                let table = perspective.table(int_float_string_data, {index: "string"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "string"});
+                let view = await table.view({
                     columns: ["string"]
                 });
                 let json = await view.to_json({
@@ -1021,8 +1021,8 @@ module.exports = perspective => {
             });
 
             it("should not return pkey for string indexed table, invalid row", async function() {
-                let table = perspective.table(int_float_string_data, {index: "string"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "string"});
+                let view = await table.view({
                     columns: ["string"]
                 });
                 let json = await view.to_json({
@@ -1044,8 +1044,8 @@ module.exports = perspective => {
                     {int: 2, datetime: new Date()}
                 ];
                 data[1].datetime.setDate(data[1].datetime.getDate() + 1);
-                let table = perspective.table(data, {index: "datetime"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "datetime"});
+                let view = await table.view({
                     columns: ["int"]
                 });
                 let json = await view.to_json({
@@ -1072,8 +1072,8 @@ module.exports = perspective => {
                     {int: 2, datetime: new Date()}
                 ];
                 data[1].datetime.setDate(data[1].datetime.getDate() + 1);
-                let table = perspective.table(data, {index: "datetime"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "datetime"});
+                let view = await table.view({
                     columns: ["int"]
                 });
                 let json = await view.to_json({
@@ -1089,8 +1089,8 @@ module.exports = perspective => {
 
         describe("0-sided sorted", function() {
             it("should return correct pkey for unindexed table", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     sort: [["float", "desc"]]
                 });
                 let json = await view.to_json({
@@ -1106,8 +1106,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for float indexed table", async function() {
-                let table = perspective.table(int_float_string_data, {index: "float"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "float"});
+                let view = await table.view({
                     sort: [["float", "desc"]]
                 });
                 let json = await view.to_json({
@@ -1123,8 +1123,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for string indexed table", async function() {
-                let table = perspective.table(int_float_string_data, {index: "string"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "string"});
+                let view = await table.view({
                     sort: [["float", "desc"]]
                 });
                 let json = await view.to_json({
@@ -1147,8 +1147,8 @@ module.exports = perspective => {
                     {int: 100, datetime: new Date()}
                 ];
                 data[1].datetime.setDate(data[1].datetime.getDate() + 1);
-                let table = perspective.table(data, {index: "datetime"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "datetime"});
+                let view = await table.view({
                     sort: [["int", "desc"]]
                 });
                 let json = await view.to_json({
@@ -1163,8 +1163,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for all rows + columns on an unindexed table", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     sort: [["float", "asc"]]
                 });
                 let json = await view.to_json({
@@ -1179,8 +1179,8 @@ module.exports = perspective => {
             });
 
             it("should return correct pkey for all rows + columns on an indexed table", async function() {
-                let table = perspective.table(int_float_string_data, {index: "string"});
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data, {index: "string"});
+                let view = await table.view({
                     sort: [["float", "desc"]]
                 });
                 let json = await view.to_json({
@@ -1198,8 +1198,8 @@ module.exports = perspective => {
 
         describe("1-sided", function() {
             it("should generate pkeys of aggregated rows for 1-sided", async function() {
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     row_pivots: ["int"]
                 });
                 let json = await view.to_json({
@@ -1216,8 +1216,8 @@ module.exports = perspective => {
         describe("2-sided", function() {
             it.skip("should generate pkey for 2-sided", async function() {
                 // 2-sided implicit pkeys do not work
-                let table = perspective.table(int_float_string_data);
-                let view = table.view({
+                let table = await perspective.table(int_float_string_data);
+                let view = await table.view({
                     row_pivots: ["int"],
                     column_pivots: ["float"]
                 });

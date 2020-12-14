@@ -11,7 +11,7 @@ const datasource = async () => {
     const resp = await req;
     const buffer = await resp.arrayBuffer();
     const worker = window.perspective.shared_worker();
-    return worker.table(buffer);
+    return await worker.table(buffer);
 };
 
 window.addEventListener("WebComponentsReady", async function() {

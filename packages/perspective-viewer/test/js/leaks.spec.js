@@ -33,9 +33,9 @@ utils.with_server({}, () => {
                     }
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(
-                        element =>
+                        async element =>
                             element.load(
-                                window.__WORKER__.table(
+                                await window.__WORKER__.table(
                                     window.__CSV__
                                         .split("\n")
                                         .slice(0, 10)

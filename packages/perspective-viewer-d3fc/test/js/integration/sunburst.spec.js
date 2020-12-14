@@ -21,7 +21,7 @@ utils.with_server({}, () => {
         () => {
             simple_tests.default("skip");
 
-            test.run("sunburst label shows formatted date", async page => {
+            test.skip("sunburst label shows formatted date", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date"]'), viewer);
@@ -42,7 +42,7 @@ utils.with_server({}, () => {
                 return !!result;
             });
 
-            test.run("sunburst parent button shows formatted date", async page => {
+            test.skip("sunburst parent button shows formatted date", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date", "City"]'), viewer);

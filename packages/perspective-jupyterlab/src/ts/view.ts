@@ -262,7 +262,10 @@ export class PerspectiveView extends DOMWidgetView {
              * passed by the user, and create a new table on the client end.
              */
             const data = msg.data["data"];
-            this.pWidget.load(this.client_worker.table(data, table_options));
+            const client_table: Promise<Table> = this.client_worker.table(data, table_options);
+            client_table.then(table => {
+                this.pWidget.load(table);
+            });
         } else {
             if (this.pWidget.server && msg.data["table_name"]) {
                 /**
@@ -272,68 +275,60 @@ export class PerspectiveView extends DOMWidgetView {
                 const table = this.perspective_client.open_table(msg.data["table_name"]);
                 this.pWidget.load(table);
             } else if (msg.data["table_name"]) {
-                // Get a remote view handle from the Jupyter kernel, and
-                // create a client-side table using the view handle.
+                // Get a remote table handle from the Jupyter kernel, and mirror
+                // the table on the client, setting up editing if necessary.
                 const kernel_table: Table = this.perspective_client.open_table(msg.data["table_name"]);
-                const kernel_view: View = kernel_table.view();
-
-                // If the widget is editable, set up client/server editing
-                if (this.pWidget.editable) {
-                    let client_table: Table;
-                    let client_view: View;
-
+                const kernel_view: Promise<View> = kernel_table.view();
+                kernel_view.then(kernel_view => {
                     kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
-                        client_table = this.client_worker.table(arrow, table_options);
-                        client_view = client_table.view();
+                        // Create a client side table
+                        this.client_worker.table(arrow, table_options).then(client_table => {
+                            if (this.pWidget.editable) {
+                                // Set up client/server editing
+                                client_table.view().then(client_view => {
+                                    let client_edit_port: number, server_edit_port: number;
 
-                        let client_edit_port: number, server_edit_port: number;
-
-                        // Create ports on the client and kernel.
-                        Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(ports => {
-                            client_edit_port = ports[1];
-                            server_edit_port = ports[2];
-                        });
-
-                        /**
-                         * When the client updates, if the update comes through
-                         * the edit port then forward it to the server.
-                         */
-                        client_view.on_update(
-                            updated => {
-                                if (updated.port_id === client_edit_port) {
-                                    kernel_table.update(updated.delta, {
-                                        port_id: server_edit_port
+                                    // Create ports on the client and kernel.
+                                    Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(outs => {
+                                        client_edit_port = outs[1];
+                                        server_edit_port = outs[2];
                                     });
-                                }
-                            },
-                            {mode: "row"}
-                        );
 
-                        /**
-                         * If the server updates, and the edit is not coming
-                         * from the server edit port, then synchronize state
-                         * with the client.
-                         */
-                        kernel_view.on_update(
-                            updated => {
-                                if (updated.port_id !== server_edit_port) {
-                                    client_table.update(updated.delta); // any port, we dont care
-                                }
-                            },
-                            {mode: "row"}
-                        );
-                    });
-                } else {
-                    // Just load the view into the widget, everything else
-                    // is handled.
+                                    // When the client updates, if the update
+                                    // comes through the edit port then forward
+                                    // it to the server.
+                                    client_view.on_update(
+                                        updated => {
+                                            if (updated.port_id === client_edit_port) {
+                                                kernel_table.update(updated.delta, {
+                                                    port_id: server_edit_port
+                                                });
+                                            }
+                                        },
+                                        {mode: "row"}
+                                    );
 
-                    // TODO this should likely be removed
-                    kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
-                        const table = this.client_worker.table(arrow, table_options);
-                        this.pWidget.load(table);
-                        kernel_view.on_update(updated => table.update(updated.delta), {mode: "row"});
+                                    // If the server updates, and the edit is
+                                    // not coming from the server edit port,
+                                    // then synchronize state with the client.
+                                    kernel_view.on_update(
+                                        updated => {
+                                            if (updated.port_id !== server_edit_port) {
+                                                client_table.update(updated.delta); // any port, we dont care
+                                            }
+                                        },
+                                        {mode: "row"}
+                                    );
+                                });
+                            } else {
+                                // Load the table and mirror updates from the
+                                // kernel.
+                                this.pWidget.load(client_table);
+                                kernel_view.on_update(updated => client_table.update(updated.delta), {mode: "row"});
+                            }
+                        });
                     });
-                }
+                });
             } else {
                 throw new Error(`PerspectiveWidget cannot load data from kernel message: ${JSON.stringify(msg)}`);
             }

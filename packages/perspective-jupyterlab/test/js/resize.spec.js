@@ -20,7 +20,7 @@ utils.with_server({}, () => {
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 },
-                {wait_for_update: false}
+                {}
             );
 
             test.capture(
@@ -37,7 +37,7 @@ utils.with_server({}, () => {
                     });
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 },
-                {wait_for_update: false}
+                {}
             );
 
             test.capture(
@@ -49,7 +49,7 @@ utils.with_server({}, () => {
                     });
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 },
-                {wait_for_update: false}
+                {}
             );
         },
         {root: path.join(__dirname, "..", "..")}

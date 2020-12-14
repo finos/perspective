@@ -532,7 +532,6 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(
                     element =>
                         element.setAttribute(
@@ -544,6 +543,7 @@ utils.with_server({}, () => {
                         ),
                     viewer
                 );
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.reset(), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });

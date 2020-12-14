@@ -103,14 +103,18 @@ export class DomElement extends PerspectiveElement {
 
                 // If `name` is in computed columns, recreate the current
                 // viewer's computed columns.
-                const view = this._table.view({
-                    row_pivots: [name],
-                    columns: [],
-                    computed_columns: computed_names.includes(name) ? computed_columns : []
-                });
+                this._table
+                    .view({
+                        row_pivots: [name],
+                        columns: [],
+                        computed_columns: computed_names.includes(name) ? computed_columns : []
+                    })
+                    .then(async view => {
+                        // set as a property so we can delete it after the
+                        // autocomplete choices are set.
+                        this._filter_view = view;
+                        let nrows = await view.num_rows();
 
-                view.num_rows()
-                    .then(async nrows => {
                         if (nrows < 100000) {
                             // Autocomplete
                             const json = await view.to_json({
@@ -122,7 +126,9 @@ export class DomElement extends PerspectiveElement {
                         }
                     })
                     .finally(() => {
-                        view.delete();
+                        // Clean up the View on the Emscripten heap.
+                        this._filter_view.delete();
+                        delete this._filter_view;
                     });
             }
         }

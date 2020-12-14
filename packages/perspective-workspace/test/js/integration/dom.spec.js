@@ -48,7 +48,7 @@ utils.with_server({paths: PATHS}, () => {
                         });
                         await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
                     },
-                    {wait_for_update: false, timeout: 30000}
+                    {timeout: 30000}
                 );
             });
 
@@ -65,7 +65,7 @@ utils.with_server({paths: PATHS}, () => {
                         });
                         await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
                     },
-                    {wait_for_update: false, timeout: 30000}
+                    {timeout: 30000}
                 );
 
                 test.capture(
@@ -84,7 +84,7 @@ utils.with_server({paths: PATHS}, () => {
                         });
                         await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
                     },
-                    {wait_for_update: false, timeout: 30000}
+                    {timeout: 30000}
                 );
 
                 test.capture(
@@ -100,7 +100,7 @@ utils.with_server({paths: PATHS}, () => {
                         });
                         await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
                     },
-                    {wait_for_update: false, timeout: 30000}
+                    {timeout: 30000}
                 );
 
                 test.capture(
@@ -114,7 +114,7 @@ utils.with_server({paths: PATHS}, () => {
                         });
                         await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
                     },
-                    {wait_for_update: false, timeout: 30000}
+                    {timeout: 30000}
                 );
             });
         },

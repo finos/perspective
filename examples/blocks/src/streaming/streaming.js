@@ -1,4 +1,3 @@
-
 var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
 
 var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
@@ -20,19 +19,18 @@ function newRows() {
     return rows;
 }
 
-window.addEventListener("WebComponentsReady", function() {
-    
+window.addEventListener("WebComponentsReady", async function() {
     // Get element from the DOM.
     var elem = document.getElementsByTagName("perspective-viewer")[0];
-    
+
     // Create a new Perspective WebWorker instance.
     var worker = perspective.worker();
-    
+
     // Create a new Perspective table in our `worker`, and limit it it 500 rows.
-    var table = worker.table(newRows(), {
+    var table = await worker.table(newRows(), {
         limit: 500
     });
-    
+
     // Load the `table` in the `<perspective-viewer>` DOM reference.
     elem.load(table);
 
