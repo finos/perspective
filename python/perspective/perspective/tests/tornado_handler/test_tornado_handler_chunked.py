@@ -68,7 +68,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
         output = yield view.to_arrow()
         expected = yield table.schema()
 
@@ -84,7 +84,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
 
         output = yield view.to_arrow()
 
@@ -108,7 +108,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
 
         client = yield self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = table.view()
+        view = yield table.view()
 
         output_fut = view.to_arrow()
         size3 = yield view.num_rows()

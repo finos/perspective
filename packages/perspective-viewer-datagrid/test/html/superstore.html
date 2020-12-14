@@ -40,8 +40,9 @@
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'superstore.csv', true);
             xhr.onload = function () { 
-                const table = perspective.worker().table(xhr.response);
-                document.getElementsByTagName('perspective-viewer')[0].load(table); 
+                perspective.worker().table(xhr.response).then(table => {
+                    document.getElementsByTagName('perspective-viewer')[0].load(table); 
+                });
             }
             xhr.send(null);
 

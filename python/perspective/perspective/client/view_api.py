@@ -5,6 +5,8 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import tornado
+
 from random import random
 from functools import partial
 from .dispatch import async_queue, subscribe, unsubscribe
@@ -22,8 +24,9 @@ def view(
     computed_columns=None,
 ):
     """Create a new View by posting a message to the Perspective server
-    implementation through `client`, returning a `PerspectiveViewProxy`
-    object whose API must be called with `await` or `yield`.
+    implementation through `client`, returning a Future that will resolve to a
+    `PerspectiveViewProxy` object whose API must be called with `await` or
+    `yield`, or an Exception if the View creation failed.
     """
     name = str(random())
 
@@ -44,9 +47,9 @@ def view(
         "config": config,
     }
 
-    proxy = PerspectiveViewProxy(client, name)
-    client.post(msg)
-    return proxy
+    future = tornado.concurrent.Future()
+    client.post(msg, future)
+    return future
 
 
 class PerspectiveViewProxy(object):

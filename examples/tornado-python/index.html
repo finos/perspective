@@ -68,7 +68,7 @@
             /**
              * Create a `View` on the server.
              */
-            const server_view = server_table.view();
+            const server_view = await server_table.view();
 
             /**
              * When a `View` is passed into `table()` to create a new `Table`,
@@ -88,7 +88,7 @@
              * synchronization between server and client, see
              * `client_server_editing.html`.
              */
-            const table = worker.table(server_view, {
+            const table = await worker.table(server_view, {
                 index: await server_table.get_index()
             });
             

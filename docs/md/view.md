@@ -12,19 +12,19 @@ instance via the `view()` method with a set of
 [`View` configuration parameters](https://perspective.finos.org/docs/obj/perspective.html#module_perspective..table+view):
 
 ```javascript
-const table = perspective.table({
+const table = await perspective.table({
     id: [1, 2, 3, 4],
     name: ["a", "b", "c", "d"]
 });
 
-const view = table.view({columns: ["name"]});
-const json = view.to_json();
+const view = await table.view({columns: ["name"]});
+const json = await view.to_json();
 
 view.delete();
 ```
 
 ```python
-const table = perspective.table({
+const table = perspective.Table({
     "id": [1, 2, 3, 4],
     "name": ["a", "b", "c", "d"]
 });
@@ -55,7 +55,7 @@ it as you need - Perspective conserves memory by relying on a single `table()`
 to power multiple `view()`s concurrently:
 
 ```javascript
-const view = table.view({
+const view = await table.view({
     columns: ["Sales"],
     aggregates: {Sales: "sum"},
     row_pivot: ["Region", "Country"],
@@ -88,7 +88,7 @@ pivot of `["State", "City", "Neighborhood"]` shows the values for each
 neighborhood, which are grouped by City, which are in turn grouped by State.
 
 ```javascript
-const view = table.view({row_pivots: ["a", "c"]});
+const view = await table.view({row_pivots: ["a", "c"]});
 ```
 
 ```python
@@ -120,7 +120,7 @@ each state.  In Perspective, column pivots are represented as an array of string
 column names to pivot:
 
 ```javascript
-const view = table.view({column_pivots: ["a", "c"]});
+const view = await table.view({column_pivots: ["a", "c"]});
 ```
 
 ```python
@@ -157,7 +157,7 @@ applied to columns in the `View` constructor using a dictionary of column
 name to aggregate function name:
 
 ```javascript
-const view = table.view({
+const view = await table.view({
     aggregates: {
         a: "avg",
         b: "distinct count"
@@ -197,7 +197,7 @@ as well as control the order in which columns appear to the user.  This is
 represented in Perspective as an array of string column names:
 
 ```javascript
-const view = table.view({
+const view = await table.view({
     columns: ["a"]
 });
 ```
@@ -230,7 +230,7 @@ When `column-pivots` are applied, the additional sort directions `"col asc"` and
 `"col desc"` will determine the order of pivot columns groups.
 
 ```javascript
-const view = table.view({
+const view = await table.view({
     sort: [["a", "asc"]]
 });
 ```
@@ -266,7 +266,7 @@ inner array being a string column name, a string filter operator, and a filter
 operand in the type of the column:
 
 ```javascript
-const view = table.view({
+const view = await table.view({
     filter: [["a", "<", 100]]
 });
 ```
@@ -329,9 +329,9 @@ by serializing the `View` to an arrow and setting up an `on_update` callback:
 
 ```javascript
 const worker1 = perspective.worker();
-const table = worker.table(data);
-const view = table.view({filter: [["State", "==", "Texas"]]});
-const table2 = worker.table(view);
+const table = await worker.table(data);
+const view = await table.view({filter: [["State", "==", "Texas"]]});
+const table2 = await worker.table(view);
 
 table.update([{State: "Texas", City: "Austin"}]);
 ```

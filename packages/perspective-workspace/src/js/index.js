@@ -63,7 +63,7 @@ import injectedStyles from "../less/injected.less";
  * auto-wired into all matching `<perspective-viewer>`s immediately:
  *
  * ```javascript
- * workspace.tables.set("superstore", worker.table(my_data));
+ * workspace.tables.set("superstore", await worker.table(my_data));
  * ```
  *
  *
@@ -135,7 +135,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * workspace.restore(JSON.parse(localStorage.get("CONFIG"));
      *
      * // Add `Table` separately.
-     * workspace.tables.set("superstore", worker.table(data));
+     * workspace.tables.set("superstore", await worker.table(data));
      */
     restore(layout) {
         return this.workspace.restore(layout);

@@ -13,9 +13,9 @@ import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
-window.addEventListener("WebComponentsReady", () => {
+window.addEventListener("WebComponentsReady", async () => {
     const worker = perspective.worker();
-    const table = worker.table([
+    const table = await worker.table([
         {x: 1, y: 2},
         {x: 2, y: 2}
     ]);

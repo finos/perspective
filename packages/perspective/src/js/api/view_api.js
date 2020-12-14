@@ -8,7 +8,6 @@
  */
 
 import {subscribe, unsubscribe, async_queue} from "./dispatch.js";
-import {bindall} from "../utils.js";
 
 /**
  * Construct a proxy for the view object by creating a "view" message and
@@ -19,17 +18,29 @@ import {bindall} from "../utils.js";
  * @param {*} config
  */
 export function view(worker, table_name, config) {
-    this._worker = worker;
-    //this._config = config;
-    this._name = Math.random() + "";
-    var msg = {
-        cmd: "view",
-        view_name: this._name,
-        table_name: table_name,
-        config: config
-    };
-    this._worker.post(msg);
-    bindall(this);
+    return new Promise((resolve, reject) => {
+        this._worker = worker;
+        this._name = Math.random() + "";
+
+        this._worker.post(
+            {
+                cmd: "view",
+                view_name: this._name,
+                table_name: table_name,
+                config: config
+            },
+            () => {
+                // Resolve the Promise with this function, which is a proxy
+                // view that dispatches all view methods to the backend, i.e.
+                // a Web Worker or a Python/Node Perspective server. Because
+                // arrow functions automatically capture `this` from the
+                // surrounding scope, there is no need to explicitly bind the
+                // resolving value to `this`.
+                resolve(this);
+            },
+            reject
+        );
+    });
 }
 
 /**

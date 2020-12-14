@@ -34,8 +34,8 @@ let partial_change_nonseq = [
 ];
 
 async function match_delta(perspective, delta, expected) {
-    let table = perspective.table(delta);
-    let view = table.view();
+    let table = await perspective.table(delta);
+    let view = await table.view();
     let json = await view.to_json();
     expect(json).toEqual(expected);
     view.delete();
@@ -46,8 +46,8 @@ module.exports = perspective => {
     describe("Row delta", function() {
         describe("0-sided row delta", function() {
             it("returns changed rows", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view();
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view();
                 view.on_update(
                     async function(updated) {
                         const expected = [
@@ -65,7 +65,7 @@ module.exports = perspective => {
             });
 
             it("returns changed rows from schema", async function(done) {
-                let table = perspective.table(
+                let table = await perspective.table(
                     {
                         x: "integer",
                         y: "string",
@@ -73,7 +73,7 @@ module.exports = perspective => {
                     },
                     {index: "x"}
                 );
-                let view = table.view();
+                let view = await table.view();
                 view.on_update(
                     async function(updated) {
                         const expected = [
@@ -97,8 +97,8 @@ module.exports = perspective => {
             });
 
             it("returns added rows", async function(done) {
-                let table = perspective.table(data);
-                let view = table.view();
+                let table = await perspective.table(data);
+                let view = await table.view();
                 view.on_update(
                     async function(updated) {
                         const expected = [
@@ -116,12 +116,12 @@ module.exports = perspective => {
             });
 
             it("returns added rows from schema", async function(done) {
-                let table = perspective.table({
+                let table = await perspective.table({
                     x: "integer",
                     y: "string",
                     z: "boolean"
                 });
-                let view = table.view();
+                let view = await table.view();
                 view.on_update(
                     async function(updated) {
                         await match_delta(perspective, updated.delta, data);
@@ -135,8 +135,8 @@ module.exports = perspective => {
             });
 
             it("returns deleted columns", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view();
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view();
                 view.on_update(
                     async function(updated) {
                         const expected = [
@@ -157,8 +157,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in sorted context", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     sort: [["x", "desc"]]
                 });
                 view.on_update(
@@ -178,7 +178,7 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in sorted context from schema", async function(done) {
-                let table = perspective.table(
+                let table = await perspective.table(
                     {
                         x: "integer",
                         y: "string",
@@ -186,7 +186,7 @@ module.exports = perspective => {
                     },
                     {index: "x"}
                 );
-                let view = table.view({
+                let view = await table.view({
                     sort: [["x", "desc"]]
                 });
                 view.on_update(
@@ -214,12 +214,12 @@ module.exports = perspective => {
             });
 
             it("returns added rows in filtered context from schema", async function(done) {
-                let table = perspective.table({
+                let table = await perspective.table({
                     x: "integer",
                     y: "string",
                     z: "boolean"
                 });
-                let view = table.view({
+                let view = await table.view({
                     filter: [["x", ">", 3]]
                 });
                 view.on_update(
@@ -235,8 +235,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in non-sequential update", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view();
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view();
                 view.on_update(
                     async function(updated) {
                         const expected = partial_change_nonseq;
@@ -253,9 +253,9 @@ module.exports = perspective => {
 
         describe("0-sided row delta, randomized column order", function() {
             it("returns changed rows", async function(done) {
-                let table = perspective.table(data, {index: "x"});
+                let table = await perspective.table(data, {index: "x"});
                 let columns = _.shuffle(await table.columns());
-                let view = table.view({
+                let view = await table.view({
                     columns: columns
                 });
                 view.on_update(
@@ -275,7 +275,7 @@ module.exports = perspective => {
             });
 
             it("returns changed rows from schema", async function(done) {
-                let table = perspective.table(
+                let table = await perspective.table(
                     {
                         x: "integer",
                         y: "string",
@@ -284,7 +284,7 @@ module.exports = perspective => {
                     {index: "x"}
                 );
                 let columns = _.shuffle(await table.columns());
-                let view = table.view({
+                let view = await table.view({
                     columns: columns
                 });
                 view.on_update(
@@ -310,9 +310,9 @@ module.exports = perspective => {
             });
 
             it("returns added rows", async function(done) {
-                let table = perspective.table(data);
+                let table = await perspective.table(data);
                 let columns = _.shuffle(await table.columns());
-                let view = table.view({
+                let view = await table.view({
                     columns: columns
                 });
                 view.on_update(
@@ -332,13 +332,13 @@ module.exports = perspective => {
             });
 
             it("returns added rows from schema", async function(done) {
-                let table = perspective.table({
+                let table = await perspective.table({
                     x: "integer",
                     y: "string",
                     z: "boolean"
                 });
                 let columns = _.shuffle(await table.columns());
-                let view = table.view({
+                let view = await table.view({
                     columns: columns
                 });
                 view.on_update(
@@ -354,9 +354,9 @@ module.exports = perspective => {
             });
 
             it("returns deleted columns", async function(done) {
-                let table = perspective.table(data, {index: "x"});
+                let table = await perspective.table(data, {index: "x"});
                 let columns = _.shuffle(await table.columns());
-                let view = table.view({
+                let view = await table.view({
                     columns: columns
                 });
                 view.on_update(
@@ -379,9 +379,9 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in non-sequential update", async function(done) {
-                let table = perspective.table(data, {index: "x"});
+                let table = await perspective.table(data, {index: "x"});
                 let columns = _.shuffle(await table.columns());
-                let view = table.view({
+                let view = await table.view({
                     columns: columns
                 });
                 view.on_update(
@@ -400,8 +400,8 @@ module.exports = perspective => {
 
         describe("0-sided row delta, column order subset", function() {
             it("returns changed rows", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     columns: ["y"]
                 });
                 view.on_update(
@@ -418,7 +418,7 @@ module.exports = perspective => {
             });
 
             it("returns changed rows from schema", async function(done) {
-                let table = perspective.table(
+                let table = await perspective.table(
                     {
                         x: "integer",
                         y: "string",
@@ -426,7 +426,7 @@ module.exports = perspective => {
                     },
                     {index: "x"}
                 );
-                let view = table.view({
+                let view = await table.view({
                     columns: ["z"]
                 });
                 view.on_update(
@@ -448,8 +448,8 @@ module.exports = perspective => {
             });
 
             it("returns added rows", async function(done) {
-                let table = perspective.table(data);
-                let view = table.view({
+                let table = await perspective.table(data);
+                let view = await table.view({
                     columns: ["y"]
                 });
                 view.on_update(
@@ -466,12 +466,12 @@ module.exports = perspective => {
             });
 
             it("returns added rows from schema", async function(done) {
-                let table = perspective.table({
+                let table = await perspective.table({
                     x: "integer",
                     y: "string",
                     z: "boolean"
                 });
-                let view = table.view({
+                let view = await table.view({
                     columns: ["z"]
                 });
                 view.on_update(
@@ -487,8 +487,8 @@ module.exports = perspective => {
             });
 
             it("returns deleted rows", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     columns: ["y"]
                 });
                 view.on_update(
@@ -508,8 +508,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in non-sequential update", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     columns: ["y"]
                 });
                 view.on_update(
@@ -527,8 +527,8 @@ module.exports = perspective => {
 
         describe("1-sided row delta", function() {
             it("returns changed rows", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
@@ -549,8 +549,8 @@ module.exports = perspective => {
             });
 
             it("returns nothing when updated data is not in pivot", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
@@ -567,8 +567,8 @@ module.exports = perspective => {
             });
 
             it("returns added rows", async function(done) {
-                let table = perspective.table(data);
-                let view = table.view({
+                let table = await perspective.table(data);
+                let view = await table.view({
                     row_pivots: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
@@ -590,8 +590,8 @@ module.exports = perspective => {
             });
 
             it("returns deleted columns", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
@@ -613,8 +613,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in non-sequential update", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"}
                 });
@@ -638,8 +638,8 @@ module.exports = perspective => {
 
         describe("2-sided row delta", function() {
             it("returns changed rows when updated data in row pivot", async function(done) {
-                let table = perspective.table(data, {index: "y"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "y"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["x"]
                 });
@@ -661,8 +661,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows when updated data in column pivot", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["z"]
                 });
@@ -684,8 +684,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows when updated data in row and column pivot", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["z"]
                 });
@@ -707,8 +707,8 @@ module.exports = perspective => {
             });
 
             it("returns nothing when updated data is not in pivot", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["x"],
                     aggregates: {y: "distinct count", z: "distinct count"}
@@ -726,8 +726,8 @@ module.exports = perspective => {
             });
 
             it("returns added rows", async function(done) {
-                let table = perspective.table(data);
-                let view = table.view({
+                let table = await perspective.table(data);
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["x"]
                 });
@@ -749,8 +749,8 @@ module.exports = perspective => {
             });
 
             it("returns deleted columns", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["x"],
                     aggregates: {y: "unique"},
@@ -779,8 +779,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in non-sequential update", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     row_pivots: ["y"],
                     column_pivots: ["x"],
                     aggregates: {y: "distinct count", z: "distinct count"}
@@ -804,8 +804,8 @@ module.exports = perspective => {
             });
 
             it("returns changed rows in column-only pivots", async function(done) {
-                let table = perspective.table(data, {index: "x"});
-                let view = table.view({
+                let table = await perspective.table(data, {index: "x"});
+                let view = await table.view({
                     column_pivots: ["x"]
                 });
                 view.on_update(

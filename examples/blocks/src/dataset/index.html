@@ -203,12 +203,12 @@
 
         const new_row = () => assign((name, x) => CELL_ARGS[name](x));
 
-        const gen_data = () => {
+        const gen_data = async () => {
             reset_strings_cache();
             let nrows = num_rows.value;
             let rows = [];
             const batch_size = Math.floor(nrows / num_batches.value);
-            const tbl = WORKER.table(new_schema());
+            const tbl = await WORKER.table(new_schema());
             (function batch() {
                 while (nrows > 0) {
                     rows.push(new_row());
@@ -228,7 +228,7 @@
 
         const make_run_click_callback = (state) => async () => {
             const old_table = state.table;
-            state.table = gen_data();
+            state.table = await gen_data();
             window.viewer.load(state.table);
             if (old_table) {
                 old_table.delete();

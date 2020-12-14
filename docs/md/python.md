@@ -387,11 +387,11 @@ _*index.html*_
     const server_table = websocket.open_table("data_source_one");
 
     // Create a new view
-    const server_view = table.view();
+    const server_view = await table.view();
 
     // Create a Table on the client using `perspective.worker()`
     const worker = perspective.worker();
-    const client_table = worker.table(view);
+    const client_table = await worker.table(view);
 
     // Load the client table in the `<perspective-viewer>`.
     document.getElementById("viewer").load(client_table);

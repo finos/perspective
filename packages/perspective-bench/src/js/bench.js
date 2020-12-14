@@ -70,8 +70,8 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
     let table = undefined;
     if (options.read && fs.existsSync(`${benchmark_name}.arrow`)) {
         const buffer = fs.readFileSync(`${benchmark_name}.arrow`, null).buffer;
-        table = perspective.table(buffer);
-        const view = table.view({row_pivots: ["version"], columns: []});
+        table = await perspective.table(buffer);
+        const view = await table.view({row_pivots: ["version"], columns: []});
         const json = await view.to_json();
         version_index = json.length;
     }
@@ -99,11 +99,11 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
     bins = bins.map(result => ({...result, version, version_index}));
     version_index++;
     if (table === undefined) {
-        table = perspective.table(bins);
+        table = await perspective.table(bins);
     } else {
         table.update(bins);
     }
-    const view = table.view();
+    const view = await table.view();
     const arrow = await view.to_arrow();
     view.delete();
     fs.writeFileSync(path.join(process.cwd(), `${benchmark_name}.arrow`), new Buffer(arrow), "binary");

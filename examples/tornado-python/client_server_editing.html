@@ -58,7 +58,7 @@
             // Get handles to the `Table` on the server, and create a
             // `view()` on the server.
             const server_table = websocket.open_table("data_source_one");
-            const server_view = server_table.view();
+            const server_view = await server_table.view();
             
             // Serialize the current state of the view to an arrow, and create
             // a Table on the client that has the same index as the Table
@@ -66,10 +66,8 @@
             //
             // Client/server editing does not work on an unindexed Table.
             const arrow = await server_view.to_arrow();
-            const client_table = worker.table(arrow, {
-                index: await server_table.get_index()
-            });
-            const client_view = client_table.view();// client -> server
+            const client_table = await worker.table(arrow, {index: "Row ID"});
+            const client_view = await client_table.view();// client -> server
 
             await viewer.load(client_table);
 

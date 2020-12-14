@@ -103,8 +103,8 @@ Once added to your page, you can access the Javascript API through the
 
 ```javascript
 const worker = perspective.worker();
-const table = worker.table({A: [1, 2, 3]});
-const view = table.view({sort: [["A", "desc"]]});
+const table = await worker.table({A: [1, 2, 3]});
+const view = await table.view({sort: [["A", "desc"]]});
 ```
 
 Or create a `<perspective-viewer>` in HTML:
@@ -112,14 +112,16 @@ Or create a `<perspective-viewer>` in HTML:
 ```html
 <perspective-viewer columns="['Sales', 'Profit']">`
   <script>
-    document.addEventListener("WebComponentsReady", function() {
+    document.addEventListener("WebComponentsReady", async function() {
       const data = {
         Sales: [500, 1000, 1500],
         Profit: [100.25, 200.5, 300.75]
       };
       // The `<perspective-viewer>` HTML element exposes the viewer API
+      const worker = perspective.worker();
+      const table = await worker.table(data);
       const el = document.getElementsByTagName("perspective-viewer")[0];
-      el.load(data);
+      el.load(table);
     });
   </script>
 </perspective-viewer>
@@ -361,7 +363,7 @@ Perspective will not infer these types for you, so you'll need to create your
 table [from a schema](#loading-data-with-table) to use them:
 
 ```javascript
-const table = worker.table({volume: "integer", price: "price"});
+const table = await worker.table({volume: "integer", price: "price"});
 table.update([{volume: 10, price: 100.75}]);
 ```
 
@@ -479,7 +481,7 @@ the `load()` method.
 
 ```javascript
 // Create a new worker, then a new table on that worker.
-const table = perspective.worker().table(data);
+const table = await perspective.worker().table(data);
 
 // Bind a viewer element to this table.
 viewer.load(table);
@@ -500,7 +502,7 @@ var view2 = document.getElementById("view2");
 var worker = perspective.worker();
 
 // Create a table in this worker
-var table = worker.table(data);
+var table = await worker.table(data);
 
 // Load the same table in 2 different <perspective-viewer>s
 view1.load(table);
@@ -552,8 +554,8 @@ elem.load(server_table);
 // this view in its own `table`, as well as its updates transferred to the
 // browser using Apache Arrow.
 const worker = perspective.worker();
-const server_view = server_table.view();
-const client_table = worker.table(server_view);
+const server_view = await server_table.view();
+const client_table = await worker.table(server_view);
 elem.load(client_table);
 ```
 

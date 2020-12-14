@@ -33,7 +33,7 @@ const worker = perspective.shared_worker();
  * tables just as you would on a locally created table.
  */
 const server_table = websocket.open_table("data_source_one");
-const server_view = server_table.view();
+const server_view = await server_table.view();
 
 // All viewers are based on the same table, which then feed edits back to a
 // table on the server with a schema.
@@ -60,7 +60,7 @@ const datasource = async function() {
     const arrow = await server_view.to_arrow();
 
     // Create a table in browser memory.
-    const table = worker.table(arrow, {index: "Row ID"});
+    const table = await worker.table(arrow, {index: "Row ID"});
 
     // Clears the progress bar and overlay - added for user experience.
     console.log(`Finished load in: ${performance.now() - load_start}`);
@@ -78,7 +78,7 @@ const datasource = async function() {
 const setup_handlers = async () => {
     const viewers = window.workspace.querySelectorAll("perspective-viewer");
     const client_table = viewers[0].table;
-    const client_view = client_table.view();
+    const client_view = await client_table.view();
 
     for (const viewer of viewers) {
         PORTS.push(await viewer.getEditPort());

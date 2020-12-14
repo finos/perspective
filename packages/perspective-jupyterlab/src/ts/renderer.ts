@@ -82,14 +82,19 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 // don't handle other mimetypes for now
                 throw "Not handled";
             }
-            this._table = perspective.worker().table(data);
-            if (this._psp.viewer.table === undefined) {
-                // construct new table
-                this._psp.viewer.load(this._table);
-            } else {
-                // replace existing table for whatever reason
-                this._psp.replace(this._table);
-            }
+            perspective
+                .worker()
+                .table(data)
+                .then((table: any) => {
+                    this._table = table;
+                    if (this._psp.viewer.table === undefined) {
+                        // construct new table
+                        this._psp.viewer.load(this._table);
+                    } else {
+                        // replace existing table for whatever reason
+                        this._psp.replace(this._table);
+                    }
+                });
         } catch {
             baddialog();
         }
@@ -102,7 +107,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         if (this._monitor) {
             this._monitor.dispose();
         }
-        this._psp.delete(true);
+        this._psp.delete();
         super.dispose();
     }
 

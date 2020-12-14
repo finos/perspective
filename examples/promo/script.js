@@ -203,7 +203,7 @@ async function script(page) {
 }
 
 async function main() {
-    const browser = await await puppeteer.launch({
+    const browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
         args: [`--window-size=${1200},${800}`]

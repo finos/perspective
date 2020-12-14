@@ -17,9 +17,9 @@ module.exports = perspective => {
                 {name: "Krusty", value: 1}
             ];
 
-            var table = perspective.table(dataWithNulls);
+            var table = await perspective.table(dataWithNulls);
 
-            var view = table.view({
+            var view = await table.view({
                 row_pivots: ["name"],
                 aggregates: {name: "distinct count"}
             });
@@ -47,10 +47,10 @@ module.exports = perspective => {
                 {name: "Krusty", value: 1}
             ];
 
-            var table = perspective.table(dataWithNull1);
+            var table = await perspective.table(dataWithNull1);
             table.update(dataWithNull2);
 
-            var view = table.view({
+            var view = await table.view({
                 row_pivots: ["name"],
                 aggregates: {name: "distinct count"}
             });
@@ -76,9 +76,9 @@ module.exports = perspective => {
                 {name: "Marge", value: null}
             ];
 
-            var table = perspective.table(dataWithNull1);
+            var table = await perspective.table(dataWithNull1);
 
-            var view = table.view({
+            var view = await table.view({
                 row_pivots: ["name"],
                 aggregates: {value: "avg"}
             });
@@ -97,8 +97,8 @@ module.exports = perspective => {
 
         it("aggregates nulls correctly", async function() {
             const data = [{x: "AAAAAAAAAAAAAA"}, {x: "AAAAAAAAAAAAAA"}, {x: "AAAAAAAAAAAAAA"}, {x: null}, {x: null}, {x: "BBBBBBBBBBBBBB"}, {x: "BBBBBBBBBBBBBB"}, {x: "BBBBBBBBBBBBBB"}];
-            const tbl = perspective.table(data);
-            const view = tbl.view({row_pivots: ["x"]});
+            const tbl = await perspective.table(data);
+            const view = await tbl.view({row_pivots: ["x"]});
 
             const result = await view.to_json();
             expect(result).toEqual([

@@ -18,7 +18,7 @@ let TABLE;
 
 describe("Computed Expression Parser", () => {
     beforeAll(async () => {
-        TABLE = perspective.table({
+        TABLE = await perspective.table({
             a: [1, 2, 3]
         });
         const computed_functions = await TABLE.get_computed_functions();

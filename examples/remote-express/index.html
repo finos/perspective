@@ -55,7 +55,7 @@
             // Create a `table` from this, owned by the local WebWorker.
             // Data is transferred from `view` to the local WebWorker, both
             // the current state and all future updates, as Arrows.
-            // const table = worker.table(view, {limit: 10000});
+            // const table = await worker.table(view, {limit: 10000});
             
             // Load this in the `<perspective-viewer>`.
             document.getElementById('view1').load(table);
