@@ -114,7 +114,6 @@ def server(queue, is_async):
     manager = perspective.PerspectiveManager()
     table = get_table()
     manager.host_table("data_source_one", table)
-    manager.host_view("view_one", table.view())
 
     if is_async:
         thread = threading.Thread(target=perspective_thread, args=(manager,))

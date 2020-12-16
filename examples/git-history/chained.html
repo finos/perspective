@@ -41,7 +41,8 @@
         window.addEventListener('WebComponentsReady', async function() {
             var elem = document.getElementById('view1');
             var client = perspective.websocket();
-            let view = client.open_view('data_source_one');
+            let table = client.open_table('data_source');
+            let view = table.view();
             let arrow = await view.to_arrow();
             elem.load(perspective.worker().table(arrow));
         });
