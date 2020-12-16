@@ -426,7 +426,32 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
-
+        
+        it("abs sum", async function() {
+            var table = perspective.table([
+                {x: 3, y: 1},
+                {x: 2, y: 1},
+                {x: null, y: 1},
+                {x: null, y: 1},
+                {x: -4, y: 2},
+                {x: null, y: 2}
+            ]);
+            var view = table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "abs sum"}
+            });
+            var answer = [
+                {__ROW_PATH__: [], x: 1},
+                {__ROW_PATH__: [1], x: 5},
+                {__ROW_PATH__: [2], x: 4}
+            ];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+        
         it("mean after update", async function() {
             var table = perspective.table([
                 {x: 3, y: 1},
@@ -553,6 +578,31 @@ module.exports = perspective => {
             var answer = [
                 {__ROW_PATH__: [], x: 12},
                 {__ROW_PATH__: [1], x: 7},
+                {__ROW_PATH__: [2], x: 5}
+            ];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
+        });
+        
+        it("abs sum", async function() {
+            var table = perspective.table([
+                {x: 3, y: 1},
+                {x: 2, y: 1},
+                {x: -1, y: 1},
+                {x: -1, y: 1},
+                {x: -2, y: 2},
+                {x: -3, y: 2}
+            ]);
+            var view = table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "abs sum"}
+            });
+            var answer = [
+                {__ROW_PATH__: [], x: 2},
+                {__ROW_PATH__: [1], x: 3},
                 {__ROW_PATH__: [2], x: 5}
             ];
             let result = await view.to_json();
