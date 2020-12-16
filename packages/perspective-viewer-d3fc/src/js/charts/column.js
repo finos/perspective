@@ -88,7 +88,8 @@ columnChart.plugin = {
     type: "d3_y_bar",
     name: "Y Bar Chart",
     max_cells: 1000,
-    max_columns: 50
+    max_columns: 50,
+    render_warning: true
 };
 
 export default columnChart;

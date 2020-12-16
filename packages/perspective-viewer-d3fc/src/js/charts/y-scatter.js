@@ -96,7 +96,8 @@ yScatter.plugin = {
     type: "d3_y_scatter",
     name: "Y Scatter Chart",
     max_cells: 4000,
-    max_columns: 50
+    max_columns: 50,
+    render_warning: true
 };
 
 export default yScatter;

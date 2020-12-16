@@ -11,6 +11,7 @@ const path = require("path");
 
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
+const render_warning_tests = require("@finos/perspective-viewer/test/js/render_warning_tests.js");
 
 const {withTemplate} = require("./simple-template");
 
@@ -23,6 +24,7 @@ utils.with_server({}, () => {
         "bar.html",
         () => {
             simple_tests.default();
+            render_warning_tests.default("d3_y_bar");
         },
         {root: path.join(__dirname, "..", "..", "..")}
     );
@@ -31,6 +33,7 @@ utils.with_server({}, () => {
         "bar-x.html",
         () => {
             simple_tests.default();
+            render_warning_tests.default("d3_x_bar");
         },
         {root: path.join(__dirname, "..", "..", "..")}
     );
@@ -39,6 +42,7 @@ utils.with_server({}, () => {
         "bar-themed.html",
         () => {
             simple_tests.default();
+            render_warning_tests.default("d3_y_bar");
         },
         {root: path.join(__dirname, "..", "..", "..")}
     );
