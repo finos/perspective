@@ -139,9 +139,9 @@ def validate_filters(filters):
                             )
                 else:
                     if item.__class__.__name__ == "date":
-                        f[i] = item.strftime('%m/%d/%Y')
+                        f[i] = item.strftime("%m/%d/%Y")
                     elif isinstance(item, datetime):
-                        f[i] = item.strftime('%Y-%m-%d %H:%M:%S')
+                        f[i] = item.strftime("%Y-%m-%d %H:%M:%S")
         return filters
     else:
         raise PerspectiveError(
