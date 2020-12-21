@@ -61,7 +61,7 @@ def deconstruct_pandas(data, kwargs=None):
             optional members `columns`, `row_pivots`, and `column_pivots`.
     """
     kwargs = kwargs or {}
-    kwargs = {'columns': [], 'row_pivots': [], 'column_pivots': []}
+    kwargs = {"columns": [], "row_pivots": [], "column_pivots": []}
 
     # Decompose Period index to timestamps
     if isinstance(data.index, pd.PeriodIndex):
@@ -69,14 +69,18 @@ def deconstruct_pandas(data, kwargs=None):
 
     # convert categories to str
     if isinstance(data, pd.DataFrame):
-        if hasattr(pd, 'CategoricalDtype'):
+        if hasattr(pd, "CategoricalDtype"):
             for k, v in data.dtypes.items():
                 if isinstance(v, pd.CategoricalDtype):
                     data[k] = data[k].astype(str)
 
-    if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex) and isinstance(data.index, pd.MultiIndex):
+    if (
+        isinstance(data, pd.DataFrame)
+        and isinstance(data.columns, pd.MultiIndex)
+        and isinstance(data.index, pd.MultiIndex)
+    ):
         # Row and col pivots
-        kwargs['row_pivots'].extend([str(c) for c in data.index.names])
+        kwargs["row_pivots"].extend([str(c) for c in data.index.names])
 
         # Two strategies
         if None in data.columns.names:
@@ -94,20 +98,20 @@ def deconstruct_pandas(data, kwargs=None):
             # row_pivots = ['Country', 'Region']
             # column_pivots = ['State', 'Quantity']
             # columns = ['Discount', 'Sales']
-            existent = kwargs['row_pivots'] + data.columns.names
+            existent = kwargs["row_pivots"] + data.columns.names
             for c in data.columns.names:
                 if c is not None:
-                    kwargs['column_pivots'].append(c)
+                    kwargs["column_pivots"].append(c)
                     data = data.stack()
             data = pd.DataFrame(data).reset_index()
 
             for new_column in data.columns:
                 if new_column not in existent:
-                    kwargs['columns'].append(new_column)
+                    kwargs["columns"].append(new_column)
         else:
             # In this case, we have no need as the values is just a single entry
             # e.g. pt = pd.pivot_table(df, values = 'Discount', index=['Country','Region'], columns = ['Category', 'Segment'])
-            for _ in kwargs['row_pivots']:
+            for _ in kwargs["row_pivots"]:
                 # unstack row pivots
                 data = data.unstack()
             data = pd.DataFrame(data)
@@ -120,22 +124,41 @@ def deconstruct_pandas(data, kwargs=None):
         new_names = list(data.index.names)
         for j, val in enumerate(data.index.names):
             if val is None:
-                new_names[j] = 'index' if i == 0 else 'index-{}'.format(i)
+                new_names[j] = "index" if i == 0 else "index-{}".format(i)
                 i += 1
                 # kwargs['row_pivots'].append(str(new_names[j]))
             else:
-                if str(val) not in kwargs['row_pivots']:
-                    kwargs['column_pivots'].append(str(val))
+                if str(val) not in kwargs["row_pivots"]:
+                    kwargs["column_pivots"].append(str(val))
 
         # Finally, remap any values columns to have column name 'value'
         data.index.names = new_names
         data = data.reset_index()  # copy
-        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] + kwargs['columns'] else "value" for c in data.columns]
-        kwargs['columns'].extend(["value" for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] + kwargs['columns']])
+        data.columns = [
+            str(c)
+            if c
+            in ["index"]
+            + kwargs["row_pivots"]
+            + kwargs["column_pivots"]
+            + kwargs["columns"]
+            else "value"
+            for c in data.columns
+        ]
+        kwargs["columns"].extend(
+            [
+                "value"
+                for c in data.columns
+                if c
+                not in ["index"]
+                + kwargs["row_pivots"]
+                + kwargs["column_pivots"]
+                + kwargs["columns"]
+            ]
+        )
     elif isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
         # Col pivots
         if data.index.name:
-            kwargs['row_pivots'].append(str(data.index.name))
+            kwargs["row_pivots"].append(str(data.index.name))
             push_row_pivot = False
         else:
             push_row_pivot = True
@@ -146,32 +169,43 @@ def deconstruct_pandas(data, kwargs=None):
         new_names = list(data.index.names)
         for j, val in enumerate(data.index.names):
             if val is None:
-                new_names[j] = 'index' if i == 0 else 'index-{}'.format(i)
+                new_names[j] = "index" if i == 0 else "index-{}".format(i)
                 i += 1
                 if push_row_pivot:
-                    kwargs['row_pivots'].append(str(new_names[j]))
+                    kwargs["row_pivots"].append(str(new_names[j]))
             else:
-                if str(val) not in kwargs['row_pivots']:
-                    kwargs['column_pivots'].append(str(val))
+                if str(val) not in kwargs["row_pivots"]:
+                    kwargs["column_pivots"].append(str(val))
 
         data.index.names = new_names
-        data.columns = [str(c) if c in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots'] else "value" for c in data.columns]
-        kwargs['columns'].extend(["value" for c in data.columns if c not in ['index'] + kwargs['row_pivots'] + kwargs['column_pivots']])
+        data.columns = [
+            str(c)
+            if c in ["index"] + kwargs["row_pivots"] + kwargs["column_pivots"]
+            else "value"
+            for c in data.columns
+        ]
+        kwargs["columns"].extend(
+            [
+                "value"
+                for c in data.columns
+                if c not in ["index"] + kwargs["row_pivots"] + kwargs["column_pivots"]
+            ]
+        )
 
     elif isinstance(data, pd.DataFrame) and isinstance(data.index, pd.MultiIndex):
         # Row pivots
-        kwargs['row_pivots'].extend(list(data.index.names))
+        kwargs["row_pivots"].extend(list(data.index.names))
         data = data.reset_index()  # copy
 
     if isinstance(data, pd.DataFrame):
         # flat df
-        if 'index' not in [str(c).lower() for c in data.columns]:
-            data = data.reset_index(col_fill='index')
+        if "index" not in [str(c).lower() for c in data.columns]:
+            data = data.reset_index(col_fill="index")
 
-        if not kwargs['columns']:
+        if not kwargs["columns"]:
             # might already be set in row+col pivot df
-            kwargs['columns'].extend([str(c) for c in data.columns])
-            data.columns = kwargs['columns']
+            kwargs["columns"].extend([str(c) for c in data.columns])
+            data.columns = kwargs["columns"]
 
     if isinstance(data, pd.Series):
         # Series
