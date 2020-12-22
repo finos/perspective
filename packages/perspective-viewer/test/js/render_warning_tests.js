@@ -98,8 +98,8 @@ exports.default = function(plugin_name, columns) {
         await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Row ID"]'), viewer);
-        await page.shadow_click("perspective-viewer", ".plugin_information__action");
         await page.waitForSelector("perspective-viewer:not([updating])");
+        await page.shadow_click("perspective-viewer", ".plugin_information__action");
         await page.evaluate(element => element.setAttribute("column-pivots", '["Profit"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
     });
