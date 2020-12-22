@@ -426,7 +426,7 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
-        
+
         it("abs sum", async function() {
             var table = perspective.table([
                 {x: 3, y: 1},
@@ -451,7 +451,7 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
-        
+
         it("mean after update", async function() {
             var table = perspective.table([
                 {x: 3, y: 1},
@@ -585,7 +585,7 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
-        
+
         it("abs sum", async function() {
             var table = perspective.table([
                 {x: 3, y: 1},
