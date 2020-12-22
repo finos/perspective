@@ -106,7 +106,7 @@ jobs:
     - bash: yarn
       displayName: 'Install Deps'
 
-    - bash: python -m pip install "black==20.8b1" flake8-black
+    - bash: python -m pip install -U "black==20.8b1" flake8-black pip
       condition: and(succeeded(), ne(variables['python.version'], '2.7'))
       displayName: 'Install Python deps'
 
@@ -181,7 +181,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install numpy "pyarrow>=0.16.0,<1"
+        python -m pip install -U numpy "pyarrow>=0.16.0,<1" pip
       displayName: "Python deps"
 
     - script: npm install -g yarn
@@ -204,94 +204,6 @@ jobs:
         BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/"
         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/include"
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/libs"
-
-# - job: 'MacOS_Mojave'
-#   pool:
-#     vmImage: 'macos-10.14'
-
-#   strategy:
-#     matrix:
-#       Python37:
-#         python.version: '3.7'
-#         python_flag: ''
-#         artifact_name: 'cp37-cp37m-macosx_10_14_x86_64'
-
-#       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
-#         Python27:
-#           python.version: '2.7'
-#           python_flag: '--python2'
-#           artifact_name: 'cp27-cp27m-macosx_10_14_x86_64'
-
-#         Python36:
-#           python.version: '3.6'
-#           python_flag: '--python36'
-#           artifact_name: 'cp36-cp36m-macosx_10_14_x86_64'
-
-#         Python38:
-#           python.version: '3.8'
-#           python_flag: '--python38'
-#           artifact_name: 'cp38-cp38-macosx_10_14_x86_64'
-
-#   steps:
-#     # only build python37 if not a release
-#     - ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['python_flag'], '')) }}:
-
-#       - task: UsePythonVersion@0
-#         inputs:
-#           versionSpec: '$(python.version)'
-#           architecture: 'x64'
-
-#       - task: NodeTool@0
-#         inputs:
-#           versionSpec: '12.x'
-
-#       - script: |
-#           brew install boost
-#         displayName: "System deps"
-
-#       - script: |
-#           which python
-#           python --version
-#           which python$(python.version)
-#         displayName: "Which python"
-
-#       - script: |
-#           python -m pip install delocate wheel numpy "black==20.8b1" flake8-black "pyarrow>=0.16.0,<1"
-#         displayName: "Python deps"
-
-#       - script: npm install -g yarn
-#         displayName: "Install Yarn"
-
-#       - script: yarn
-#         displayName: 'Install Deps'
-
-#       - script: yarn build_python --ci $(python_flag)
-#         displayName: 'build'
-
-#       - task: PublishTestResults@2
-#         condition: succeededOrFailed()
-#         inputs:
-#           testResultsFiles: 'python/perspective/python_junit.xml'
-#           testRunTitle: 'Publish test results for Python $(python.version)'
-
-#       - task: PublishCodeCoverageResults@1
-#         inputs: 
-#           codeCoverageTool: Cobertura
-#           summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-
-#       # Build a python wheel for Mac 10.14
-#       - bash: yarn _wheel_python --ci $(python_flag) --macos
-#         displayName: 'Build wheel'
-
-#       # Test the wheel
-#       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
-#         displayName: 'Test Mac Wheel'
-
-#       # Save the artifact to Azure storage
-#       - task: PublishPipelineArtifact@1
-#         inputs:
-#           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
-#           artifactName: '$(artifact_name)'
 
 - job: 'MacOS_Catalina'
   pool:
@@ -342,7 +254,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install delocate wheel numpy "pyarrow>=0.16.0,<1"
+        python -m pip install -U delocate wheel numpy "pyarrow>=0.16.0,<1" pip
       displayName: "Python deps"
 
     - script: npm install -g yarn
