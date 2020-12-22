@@ -1,8 +1,9 @@
 window.addEventListener("WebComponentsReady", function() {
-    
+    const worker = window.perspective.worker();
+
     // Get `dropArea` element from the DOM.
     var dropArea = document.getElementById("drop-area");
-    
+
     // Get `input` element from the DOM.
     var input = document.getElementById("fileElem");
 
@@ -68,21 +69,21 @@ window.addEventListener("WebComponentsReady", function() {
         let reader = new FileReader();
         reader.onload = function(fileLoadedEvent) {
             let txt = fileLoadedEvent.target.result;
-            
+
             // Remove the `dropArea` from the DOM.
             const parent = dropArea.parentElement;
             parent.removeChild(dropArea);
-            
+
             // Create a `<perspective-viewer>` and append it to the DOM.
-            let psp = document.createElement("perspective-viewer");
+            const psp = document.createElement("perspective-viewer");
             parent.appendChild(psp);
-            
+
             // Load the CSV data into `<perspective-viewer>`.
-            psp.load(txt);
+            const table = worker.table(txt);
+            psp.load(table);
         };
-        
+
         // Read the contents of the CSV - triggering the onload when finished.
         reader.readAsText(file);
     }
 });
-

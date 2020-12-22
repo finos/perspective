@@ -4,7 +4,7 @@
     "version": "0.5.6",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
-        "start": "node server.js",
+        "start": "mkdirp dist && node server.js",
         "clean": "rimraf dist",
         "dist": "node dist.js"
     },

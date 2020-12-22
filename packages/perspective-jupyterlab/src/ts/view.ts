@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 /* eslint-disable @typescript-eslint/camelcase */
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
@@ -31,6 +32,9 @@ export class PerspectiveView extends DOMWidgetView {
     // if there is a port_id, join it with the pending binary so on_update
     // callbacks work correctly
     _pending_port_id: number;
+
+    // If client mode, the WebWorker reference.
+    _client_worker: PerspectiveWorker;
 
     _createElement(tagName: string): HTMLElement {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
@@ -232,6 +236,13 @@ export class PerspectiveView extends DOMWidgetView {
         }
     }
 
+    get client_worker(): PerspectiveWorker {
+        if (!this._client_worker) {
+            this._client_worker = perspective.worker();
+        }
+        return this._client_worker;
+    }
+
     /**
      * Given a message that commands the widget to load a dataset or table,
      * process it.
@@ -247,7 +258,7 @@ export class PerspectiveView extends DOMWidgetView {
              * passed by the user, and create a new table on the client end.
              */
             const data = msg.data["data"];
-            this.pWidget.load(data, table_options);
+            this.pWidget.load(this.client_worker.table(data, table_options));
         } else {
             if (this.pWidget.server && msg.data["table_name"]) {
                 /**
@@ -255,25 +266,20 @@ export class PerspectiveView extends DOMWidgetView {
                  * the client for server mode Perspective.
                  */
                 const table = this.perspective_client.open_table(msg.data["table_name"]);
-                this.pWidget.load(table, table_options);
+                this.pWidget.load(table);
             } else if (msg.data["table_name"]) {
-                /**
-                 * Get a remote table handle from the Jupyter kernel, and
-                 * create a view on that handle to run Perspective in
-                 * distributed mode.
-                 */
+                // Get a remote view handle from the Jupyter kernel, and
+                // create a client-side table using the view handle.
                 const kernel_table: Table = this.perspective_client.open_table(msg.data["table_name"]);
                 const kernel_view: View = kernel_table.view();
 
                 // If the widget is editable, set up client/server editing
                 if (this.pWidget.editable) {
-                    let worker: PerspectiveWorker;
                     let client_table: Table;
                     let client_view: View;
 
                     kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
-                        worker = perspective.worker();
-                        client_table = worker.table(arrow, table_options);
+                        client_table = this.client_worker.table(arrow, table_options);
                         client_view = client_table.view();
 
                         let client_edit_port: number, server_edit_port: number;
@@ -314,11 +320,18 @@ export class PerspectiveView extends DOMWidgetView {
                         );
                     });
                 } else {
-                    /**
-                     * Just load the view into the widget, as the load
-                     * semantics are handled by Perspective.
-                     */
-                    this.pWidget.load(kernel_view, table_options);
+                    // Just load the view into the widget, everything else
+                    // is handled.
+
+                    // TODO this should likely be removed
+                    kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
+                        const table = this.client_worker.table(arrow, table_options);
+                        this.pWidget.load(table);
+                        kernel_view.on_update(
+                            updated => table.update(updated.delta),
+                            {mode: "row"}
+                        );
+                    });
                 }
             } else {
                 throw new Error(`PerspectiveWidget cannot load data from kernel message: ${JSON.stringify(msg)}`);

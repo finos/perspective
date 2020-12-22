@@ -529,22 +529,6 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * This element's `perspective` worker instance. This property is not
-     * reflected as an HTML attribute, and is readonly; it can be effectively
-     * set however by calling the `load() method with a `perspective.table`
-     * instance from the preferred worker.
-     *
-     * @readonly
-     * @example
-     * let elem = document.getElementById('my_viewer');
-     * let table = elem.worker.table([{x:1, y:2}]);
-     * elem.load(table);
-     */
-    get worker() {
-        return this._get_worker();
-    }
-
-    /**
      * This element's `perspective.table` instance.
      *
      * @readonly
@@ -569,16 +553,13 @@ class PerspectiveViewer extends ActionElement {
      * element, its internal `perspective.table` will also be deleted.
      *
      * @async
-     * @param {any} data The data to load.  Works with the same input types
-     * supported by `perspective.table`.
+     * @param {any} data The data to load, as a `perspective.Table` or
+     * `Promise<perspective.Table>`.
      * @returns {Promise<void>} A promise which resolves once the data is loaded
      * and a `perspective.view` has been created.
      * @fires module:perspective_viewer~PerspectiveViewer#perspective-click
      * PerspectiveViewer#perspective-view-update
      * ]);
-     * @example <caption>Load CSV</caption>
-     * const my_viewer = document.getElementById('#my_viewer');
-     * my_viewer.load("x,y\n1,a\n2,b");
      * @example <caption>Load perspective.table</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
@@ -588,7 +569,7 @@ class PerspectiveViewer extends ActionElement {
      * const tbl = async () => perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
      */
-    async load(data, options) {
+    async load(data) {
         let table;
         if (data instanceof Promise) {
             table = await data;
@@ -599,35 +580,13 @@ class PerspectiveViewer extends ActionElement {
             if (data.type === "table") {
                 table = data;
             } else {
-                table = this.worker.table(data, options);
-                table._owner_viewer = this;
+                throw new Error(`Unrecognized input type ${typeof data}.  Please use a \`perspective.Table()\``);
             }
         }
         if (this.isConnected) {
             await this._load_table(table);
         } else {
             this._table = table;
-        }
-    }
-
-    /**
-     * Updates this element's `perspective.table` with new data.
-     *
-     * @param {any} data The data to load.  Works with the same input types
-     * supported by `perspective.table.update`.
-     * @fires PerspectiveViewer#perspective-view-update
-     * @example
-     * const my_viewer = document.getElementById('#my_viewer');
-     * my_viewer.update([
-     *     {x: 1, y: 'a'},
-     *     {x: 2, y: 'b'}
-     * ]);
-     */
-    update(data) {
-        if (this._table === undefined) {
-            this.load(data);
-        } else {
-            this._table.update(data);
         }
     }
 
@@ -660,21 +619,20 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * Deletes this element's data and clears it's internal state (but not its
-     * user state).  This (or the underlying `perspective.table`'s equivalent
-     * method) must be called in order for its memory to be reclaimed.
+     * Deletes this element and clears it's internal state (but not its
+     * user state).  This (or the underlying `perspective.view`'s equivalent
+     * method) must be called in order for its memory to be reclaimed, as well
+     * as the recipcorcal method on the `perspective.table` which this viewer is
+     * bound to.
      *
-     * @param {Boolean} delete_table Should a delete call also be made to the
-     * underlying `table()`.
      * @returns {Promise<Boolean>} Whether or not this call resulted in the
      * underlying `perspective.table` actually being deleted.
      */
-    delete(delete_table = true) {
-        let x = this._clear_state(delete_table);
+    delete() {
+        let x = this._clear_state();
         if (this._plugin.delete) {
             this._plugin.delete.call(this);
         }
-        window.removeEventListener("load", this._resize_handler);
         window.removeEventListener("resize", this._resize_handler);
         return x;
     }
@@ -761,20 +719,6 @@ class PerspectiveViewer extends ActionElement {
         while (this.hasAttribute("updating")) {
             await this._updating_promise;
         }
-    }
-
-    /**
-     * Clears the rows in the current {@link table}.
-     */
-    clear() {
-        this._table?.clear();
-    }
-
-    /**
-     * Replaces all rows in the current {@link table}.
-     */
-    replace(data) {
-        this._table ? this._table.replace(data) : this._load(data);
     }
 
     /**
