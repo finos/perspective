@@ -14,6 +14,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
+    <script src="perspective.js"></script>
     <script src="perspective-viewer.js"></script>
     <script src="perspective-viewer-datagrid.js"></script>
     <script src="perspective-viewer-d3fc.js"></script>
@@ -34,7 +35,9 @@
             el.restore(JSON.parse(localStorage.getItem("layout")));
             const req = await fetch("benchmark.arrow");
             const arrow = await req.arrayBuffer();
-            el.load(arrow);
+            const worker = perspective.worker();
+            const table = worker.table(arrow);
+            el.load(table);
             el.toggleConfig();
         });
     </script>

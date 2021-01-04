@@ -572,11 +572,11 @@ These can be directly linked in your HTML:
 ### Loading data into `<perspective-viewer>`
 
 Data can be loaded into `<perspective-viewer>` in the form of a `Table()` via
-the `load()` method. 
+the `load()` method.
 
 ```javascript
 // Create a new worker, then a new table on that worker.
-var table = perspective.worker().table(data);
+const table = perspective.worker().table(data);
 
 // Bind a viewer element to this table.
 viewer.load(table);
@@ -590,18 +590,19 @@ has loaded:
 
 ```javascript
 document.addEventListener("WebComponentsReady", function() {
-    var data = [
+    const data = [
         {x: 1, y: "a", z: true},
         {x: 2, y: "b", z: false},
         {x: 3, y: "c", z: true},
         {x: 4, y: "d", z: false}
     ];
 
-    var viewer = document.getElementById("view1");
-    viewer.load(data);
+    const viewer = document.getElementById("view1");
+    const table = perspective.worker().table(data);
+    viewer.load(table);
 
     // Add new row
-    viewer.update([{x: 5, y: "e", z: true}]);
+    table.update([{x: 5, y: "e", z: true}]);
 });
 ```
 

@@ -73,6 +73,7 @@ Once added to your page, you can access the Javascript API through the
 `perspective` symbol:
 
 ```javascript
+// Create Perspective's Web Worker, and then create a Table using your data.
 const worker = perspective.worker();
 const table = worker.table({A: [1, 2, 3]});
 const view = table.view({sort: [["A", "desc"]]});
@@ -90,7 +91,11 @@ Or create a `<perspective-viewer>` in HTML:
       };
       // The `<perspective-viewer>` HTML element exposes the viewer API
       const el = document.getElementsByTagName("perspective-viewer")[0];
-      el.load(data);
+
+      // Create a `Table` from the Perspective worker.
+      const worker = perspective.worker();
+      const table = worker.table(data);
+      el.load(table);
     });
   </script>
 </perspective-viewer>
