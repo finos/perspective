@@ -29,7 +29,7 @@ class Footer extends React.Component {
                     <div>
                         <h5>Docs</h5>
                         <a href={"/docs/md/installation.html"}>Installation</a>
-                        <a href={"/docs/md/js.html"}>Javascript User Guide</a>
+                        <a href={"/docs/md/js.html"}>JavaScript User Guide</a>
                         <a href={"/docs/md/python.html"}>Python User Guide</a>
                         <a href={"/docs/obj/perspective.html"}>Perspective API</a>
                         <a href={"/docs/obj/perspective-viewer.html"}>Perspective Viewer API</a>

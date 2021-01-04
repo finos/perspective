@@ -1,14 +1,14 @@
 ---
 id: js
-title: Javascript User Guide
+title: JavaScript User Guide
 ---
 
-Perspective's Javascript library offers a flexible, intuitive UI on top of a
+Perspective's JavaScript library offers a flexible, intuitive UI on top of a
 fast, powerful streaming data engine. Developers are able to pick and
 choose the modules they require for their use case, and users are presented
 with a clean user interface through which to analyze data.
 
-This document offers an overview of the Javascript library, providing:
+This document offers an overview of the JavaScript library, providing:
 
 - A quick start guide for integrating Perspective in your application
 - An overview of Perspective's module structure
@@ -36,7 +36,7 @@ which modules they need for their specific use case. The main modules are:
 
 `<perspective-viewer>` by itself only implements a trivial debug renderer, which
 prints the currently configured `view()` as a CSV. Plugin modules for popular
-Javascript libraries such as [d3fc](https://d3fc.io/) are packaged separately
+JavaScript libraries, such as [d3fc](https://d3fc.io/), are packaged separately
 and must be imported individually.
 
 Perspective offers these plugin modules:
@@ -49,7 +49,7 @@ Perspective offers these plugin modules:
   library.
 
 Also available are these legacy modules; though no longer under development,
-they are compatible with perspective versions < 1.0.0:
+they are compatible with Perspective versions < 1.0.0:
 
 - `@finos/perspective-viewer-hypergrid`  
   A `<perspective-viewer>` plugin for
@@ -58,21 +58,21 @@ they are compatible with perspective versions < 1.0.0:
 - `@finos/perspective-viewer-highcharts`  
   [DEPRECATED] A `<perspective-viewer>` plugin for
   [HighCharts](https://github.com/highcharts/highcharts). This plugin has a
-  `highcharts` as a peerDependency, and requires a
+  `highcharts` as a `peerDependency` and requires a
   [mixed commercial license](https://shop.highsoft.com/).
 
 When imported after `@finos/perspective-viewer`, the plugin modules will
 register themselves automatically, and the renderers they export will be
 available in the `view` dropdown in the `<perspective-viewer>` UI.
 
-Developers can choose to opt into the features, bundle size inflation and
+Developers can choose to opt into the features, bundle size inflation, and
 licensing for these dependencies as needed.
 
 ### What modules should I import?
 
-Depending on your requirements, you may need just one, or all Perspective
-modules. Some basic guidelines to help you decide what is most appropriate for
-your project:
+Depending on your requirements, you may need just one, or all, Perspective
+modules. Here are some basic guidelines to help you decide what is most appropriate
+for your project:
 
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
@@ -82,7 +82,7 @@ your project:
 - For Perspective as a simple, browser-based data visualization widget, you
   will need to import:
 
-  - `@finos/perspective`, as detailed [here](#perspective-library)
+  - `@finos/perspective`, detailed [here](#perspective-library)
   - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
   - `@finos/perspective-viewer-datagrid` for data grids
   - `@finos/perspective-viewer-d3fc` for charting
@@ -96,7 +96,7 @@ your project:
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate,
 filter and sort operations for tabular data. The engine can be instantiated in
-process, or in a Web Worker (browser only); in both cases, `perspective` exports
+process or in a Web Worker (browser only); in both cases, `perspective` exports
 a nearly identical API.
 
 It exports Perspective's data interfaces:
@@ -110,12 +110,12 @@ It exports Perspective's data interfaces:
   - `view()`s also live in a Web Worker when used in a browser.
   - A single `table()` may have many `view()`s attached at once.
 
-`@finos/perspective` also exports process management functions such as
+`@finos/perspective` also exports process management functions, such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in node.js). See the [API documentation](/obj/perspective.html) for a complete
+(in Node.js). See the [API documentation](/obj/perspective.html) for a complete
 reference on all exported methods.
 
-This module is a dependency of `@finos/perspective-viewer`, and is not needed if
+This module is a dependency of `@finos/perspective-viewer` and is not needed if
 you only intend to use `<perspective-viewer>` to visualize simple data.
 
 ### Importing in the browser
@@ -134,7 +134,7 @@ const perspective = require("@finos/perspective");
 ```
 
 `@finos/perspective` also comes with a pre-built bundle which exports the global
-`perspective` module name in vanilla Javascript, when e.g. importing
+`perspective` module name in vanilla JavaScript, e.g. when importing
 [via a CDN](/docs/md/installation.html#from-cdn).
 
 ```html
@@ -144,8 +144,8 @@ const perspective = require("@finos/perspective");
 #### Instantiating a new `worker()`
 
 Once imported, you'll need to instantiate a `perspective` engine via the
-`worker()` method. This will create a new WebWorker (browser) or
-Process (Node.js), and load the WebAssembly binary; all calculation and data
+`worker()` method. This will create a new Web Worker (browser) or
+Process (Node.js) and load the WebAssembly binary; all calculation and data
 accumulation will occur in this separate process.
 
 ```javascript
@@ -160,7 +160,7 @@ interact with your data in each instance.
 ### Importing in Node.js
 
 The Node.js runtime for the `@finos/perspective` module runs in-process by
-default, and does not implement a `child_process` interface. Hence, there is no
+default and does not implement a `child_process` interface. Hence, there is no
 `worker()` method, and the module object itself directly exports the full
 `perspective` API.
 
@@ -278,7 +278,7 @@ Appended rows that exceed the `limit` overwrite old rows starting at position 0.
 
 #### Unset values via `null`
 
-Any value on a `table()` can be unset using the Javascript value `null`.
+Any value on a `table()` can be unset using the JavaScript value `null`.
 
 Values may be unset on construction, as any `null` in the dataset will be
 treated as an unset value. Values can also be explicitly unset via `update()`
@@ -359,9 +359,9 @@ async function print_data() {
 
 ### Deleting a `table()` or `view()`
 
-Unlike standard Javascript objects, Perspective objects such as `table()` and
-`view()` store their associated data in the WebAssembly heap. Due of this, and
-the current lack of a hook into the Javascript runtime's garbage collector from
+Unlike standard JavaScript objects, Perspective objects such as `table()` and
+`view()` store their associated data in the WebAssembly heap. Because of this, as
+well as the current lack of a hook into the JavaScript runtime's garbage collector from
 WebAssembly, the memory allocated to these Perspective objects does not
 automatically get cleaned up when the object falls out of scope.
 
@@ -416,11 +416,11 @@ via a `perspective.config.js` or `perspective.config.json` file in your
 project's root or parent path, or via the `"perspective"` key in your project's
 `package.json`.
 
-Note that, while in Node.js this config file is read at runtime, for the browser
+Note that, while in Node.js, this config file is read at runtime; for the browser,
 this file must be read at compile time (handled automatically via
 [`@finos/perspective-webpack-plugin`](https://github.com/finos/perspective/tree/master/packages/perspective-webpack-plugin)).
 
-Thus, to update it you must either rebuild your code, or supply the JSON
+Thus, to update it, you must either rebuild your code, or supply the JSON
 configuration object to the `worker()` constructor on initialization.
 
 ```javascript
@@ -488,7 +488,7 @@ module.exports = {
 `perspective` library and formatting its output to the provided visualization
 plugins.
 
-If you are using babel or another build environment which supports ES6 modules,
+If you are using Babel or another build environment which supports ES6 modules,
 you only need to import the `perspective-viewer` libraries somewhere in your
 application - these modules export nothing, but rather register the components
 for use within your site's regular HTML:
@@ -518,8 +518,8 @@ standard HTML on your site. A simple example:
 ### Theming
 
 Theming is supported in `perspective-viewer` and its accompanying plugins.
-A number of themes come bundled with `perspective-viewer`, and you can import
-any of these themes directly into your app and the `perspective-viewer`s
+A number of themes come bundled with `perspective-viewer`; you can import
+any of these themes directly into your app, and the `perspective-viewer`s
 will be themed accordingly:
 
 ```javascript
@@ -560,7 +560,7 @@ _*index.html*_
 If you choose not to bundle the themes yourself, they are available through
 the [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 
-These can be directly linked in your HTML:
+These can be directly linked in your HTML file:
 
 ```html
 <link
@@ -633,9 +633,9 @@ table.update([{x: 5, y: "e", z: true}]);
 ### Remote Perspective via `WebSocketServer()` and Node.js
 
 For exceptionally large datasets, a `<perspective-viewer>` can be bound to a
-`perspective.table()` instance running in node.js remotely, rather than creating
+`perspective.table()` instance running in Node.js remotely, rather than creating
 one in a Web Worker and downloading the entire data set. This trades off network
-bandwidth and server resource requirements, for a smaller browser memory and CPU
+bandwidth and server resource requirements for a smaller browser memory and CPU
 footprint.
 
 In Node.js:
@@ -679,9 +679,9 @@ elem.load(client_table);
 
 `<perspective-viewer>` instances bound in this way are otherwise no different
 than `<perspective-viewer>`s which rely on a Web Worker, and can even share a
-host application with Web Worker bound `table()`s. The same `promise` based API
-is used to communicate with the server instantiated `view()`, only in this case
-it is over a Web Socket.
+host application with Web Worker-bound `table()`s. The same `promise`-based API
+is used to communicate with the server-instantiated `view()`, only in this case
+it is over a websocket.
 
 ### Remote Perspective via `perspective-python` and Tornado
 
@@ -708,7 +708,7 @@ MANAGER.host_table("data_source", TABLE)
 
 app = tornado.web.Application([
     (r"/", MainHandler),
-    # create a websocket endpoint that the client Javascript can access
+    # create a websocket endpoint that the client JavaScript can access
     (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
 ])
 
@@ -718,7 +718,7 @@ loop = tornado.ioloop.IOLoop.current()
 loop.start()
 ```
 
-The Javascript implementation of this does not require Webpack or any bundler,
+The JavaScript implementation of this does not require Webpack or any bundler,
 and can be achieved in a single HTML file:
 
 _*index.html*_
@@ -734,10 +734,10 @@ _*index.html*_
 
     /* `table` is a proxy for the `Table` we created on the server.
 
-        All operations that are possible through the Javascript API are possible
+        All operations that are possible through the JavaScript API are possible
         on the Python API as well, thus calling `view()`, `schema()`, `update()`
         etc. on `const table` will pass those operations to the Python `Table`,
-        execute the commands, and return the result back to Javascript.*/
+        execute the commands, and return the result back to JavaScript.*/
     const table = websocket.open_table("data_source_one");
 
     // Load this in the `<perspective-viewer>`.
@@ -748,7 +748,7 @@ _*index.html*_
 
 Any operation performed on the `<perspective-viewer>` instance or on
 `const table` will be forwarded to Python, which will execute the operation and
-return the results back to Javascript.
+return the results back to JavaScript.
 
 ### Setting & reading `perspective-viewer` configuration via attributes
 
@@ -820,15 +820,15 @@ elem.addEventListener("perspective-update-complete", function(event) {
 
 ### Click events
 
-Whenever a `<perspective-viewer>`'s grid or chart are clicked, a
+Whenever a `<perspective-viewer>`'s grid or chart is clicked, a
 `perspective-click` DOM event is fired containing a detail object with `config`,
-`column_names` and `row`.
+`column_names`, and `row`.
 
 The `config` object contains an array of `filters` that can be applied to a
 `<perspective-viewer>` through the use of `restore()` updating it to show the
 filtered subset of data.
 
-The `column_names` property contains an array of matching columns and the `row`
+The `column_names` property contains an array of matching columns, and the `row`
 property returns the associated row data.
 
 ```javascript

@@ -3,12 +3,12 @@ id: installation
 title: Installation
 ---
 
-## Javascript
+## JavaScript
 
 Because Perspective uses both WebAssembly and Web Workers, each of which place
 constraints on how assets and scripts must be loaded, the installation process
-for Perspective in a Javascript environment is more complex than most "pure"
-Javascript libraries.
+for Perspective in a JavaScript environment is more complex than most "pure"
+JavaScript libraries.
 
 ### From NPM
 
@@ -20,12 +20,12 @@ via NPM:
 $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
 ```
 
-#### An important note about Hosting
+#### An important note about hosting
 
 All uses of Perspective from NPM require the browser to have access to
 Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
 `.js` scripts. By default, Perspective [inlines](https://github.com/finos/perspective/pull/870)
-these assets into the `.js` scripts, and delivers them in one file. This has no
+these assets into the `.js` scripts and delivers them in one file. This has no
 performance impact, but does increase asset load time. Any non-trivial application
 should make use of `@finos/perspective-webpack-plugin`, which automatically
 splits the assets into separate files and downloads them when the bundling
@@ -36,7 +36,7 @@ step runs.
 When importing `perspective` from NPM modules for a browser application, you
 should use `@finos/perspective-webpack-plugin` to manage the `.worker.*.js` and
 `.wasm` assets for you. The plugin handles downloading and packaging
-Perspective's additional assets, and is easy to set up in your `webpack.config`:
+Perspective's additional assets and is easy to set up in your `webpack.config`:
 
 ```javascript
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
@@ -55,7 +55,7 @@ module.exports = {
 
 Perspective can be loaded directly from
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer), which is the easiest
-way to get started with Perspective in the browser, and absolutely perfect
+way to get started with Perspective in the browser and perfect
 for spinning up quick instances of `perspective-viewer`. An example is
 demonstrated in [`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
 which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
@@ -69,7 +69,7 @@ Add these scripts to your `.html`'s `<head>` section:
 <script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
 ```
 
-Once added to your page, you can access the Javascript API through the
+Once added to your page, you can access the JavaScript API through the
 `perspective` symbol:
 
 ```javascript
@@ -126,8 +126,8 @@ pip install perspective-python
 If you are installing from a source distribution (sdist), make sure you have
 CMake and Boost headers present on your machine:
 
-- CMake (version 3.15.4 or higher)
-- Boost Headers (version 1.67)
+- [CMake](https://cmake.org/) (version 3.15.4 or higher)
+- [Boost Headers](https://www.boost.org/) (version 1.67)
 
 Try installing in verbose mode:
 
@@ -139,15 +139,15 @@ The most common culprits are:
 
 - CMake version too old
 - Boost headers are missing or too old
-- PyArrow not installed prior to installing perspective
+- PyArrow not installed prior to installing Perspective
 
-Additionally, due to PEP-518 and build isolation, its possible that the version of PyArrow that pip uses to build perspective-python is different from the one you have installed. To disable this, pass the `--no-build-isolation` flag to pip.
+Additionally, due to PEP-518 and build isolation, it is possible that the version of PyArrow that `pip` uses to build `perspective-python` is different from the one you have installed. To disable this, pass the `--no-build-isolation` flag to `pip`.
 
 #### Wheels PyArrow linkage
 
-Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.17.1 for Python 3.* and PyArrow==0.16.0 for Python 2.7.
+Because we compile Apache Arrow from source to WebAssembly via Emscripten, we have a tight coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.17.1 for Python 3.* and PyArrow==0.16.0 for Python 2.7.
 
-To ignore compiled wheels and install from source with pip, install via
+To ignore compiled wheels and install from source with `pip`, install via
 
 ```bash
 pip install --no-binary perspective-python
@@ -161,8 +161,8 @@ transformations/visualizations of various data formats within JupyterLab.
 
 <img src="https://perspective.finos.org/img/jupyterlab.png"></img>
 
-To use the JupyterLab plugin, make sure you have installed `perspective-python`
-and then install the extension from the Jupyter lab extension directory:
+To use the JupyterLab plugin, make sure you have installed `perspective-python`, 
+and then install the extension from the JupyterLab extension directory:
 
 ```bash
 jupyter labextension install @finos/perspective-jupyterlab
@@ -178,7 +178,7 @@ jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 For hackers, contributors, and masochists, Perspective can be installed directly
 from source available on [Github](https://github.com/finos/perspective). Doing
-so is quite a bit more complex than a standard pure Javascript NPM package, so
+so is quite a bit more complex than a standard pure JavaScript NPM package, so
 if you're not looking to hack on Perspective itself, you are likely better off
 choosing the CDN or NPM methods above. See the
 [developer docs](development.html) for details.
