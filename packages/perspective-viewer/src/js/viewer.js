@@ -89,7 +89,6 @@ class PerspectiveViewer extends ActionElement {
         this._register_ids();
         this._register_callbacks();
         this._register_view_options();
-        this._register_data_attribute();
         this.toggleConfig();
         this._check_loaded_table();
     }

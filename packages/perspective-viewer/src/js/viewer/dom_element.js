@@ -504,18 +504,6 @@ export class DomElement extends PerspectiveElement {
         render(options(current_renderers), this._vis_selector);
     }
 
-    // sets state
-    _register_data_attribute() {
-        // TODO this feature needs to become a real attribute.
-        if (this.getAttribute("data")) {
-            let data = this.getAttribute("data");
-            try {
-                data = JSON.parse(data);
-            } catch (e) {}
-            this.load(data);
-        }
-    }
-
     _autocomplete_choices(json) {
         const choices = [];
         for (let i = 1; i < json.length; i++) {
