@@ -14,7 +14,7 @@ sure the newcomer experience is as straightforward as possible, but some things
 might not work the way you're used to!
 
 Perspective is organized as a
-[monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md),
+[monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md)
 and uses [lerna](https://lernajs.io/) to manage dependencies. The
 `@finos/perspective` modules has an additional, unmanaged dependency—the
 [Emscripten](https://github.com/kripken/emscripten) compiler, which is used to
