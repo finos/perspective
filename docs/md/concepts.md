@@ -29,8 +29,8 @@ a `View`:
 For language-specific guidance, API documentation, or quick-start user guides,
 use the sidebar to find the documentation for the language of choice. Though
 the way these concepts operate in practice may vary slightly across different
-languages based on nuance, the concepts documented here hold true across all
-implementations of the Perspective library.
+languages, the concepts documented here hold true across all implementations of
+the Perspective library.
 
 <!--truncate-->
 
@@ -108,7 +108,7 @@ A `Table` can be initialized in two ways:
   empty.
 - With a dataset in a supported format;  in this case, a `schema` is inferred
   from the dataset's structure upon initialization.  Perspective supports a
-  variety of table-like data structures in Python and Javascript such as CSV,
+  variety of table-like data structures in Python and JavaScript such as CSV,
   `pandas.DataFrame` and JSON; see the language specific API documentation for
   a comprehensive list of supported formats.
 
@@ -151,7 +151,7 @@ some column values `undefined`, and _removes_ to delete a row by `index`.
 
 Once a `Table` has been created, it can be updated with new data conforming to
 the `Table`'s `schema`. The dataset used for `update()` must conform with the
-formats supported by Perspective, and cannot be a `schema` (as the `schema`
+formats supported by Perspective and cannot be a `schema` (as the `schema`
 is immutable).
 
 If a `Table` was initialized with a `schema` instead of a dataset, use `update`
@@ -217,10 +217,10 @@ with an array of primary key values indicating which rows should be removed.
 
 Due to Perspective's runtime composition, it is important to clean up resources
 that might have been created by the engine in C++ but cannot be reached by the
-binding language's garbage collector (Javascript, Python etc.)
+binding language's garbage collector (JavaScript, Python etc.)
 
 The `Table`'s `delete` method guarantees the cleanup of all resources associated
-with a `Table`, which is _especially important_ in Javascript, as the JS garbage
+with a `Table`, which is _especially important_ in JavaScript, as the JS garbage
 collector [cannot automatically clean up](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html#memory-management)
 objects created in C++ through Emscripten.
 
@@ -266,7 +266,7 @@ view.delete();
 ```
 
 `View` objects are immutable with respect to the arguments provided to the
-`view()` method;  to change these parameters, you must create a new `View` on
+`view()` method. To change these parameters, you must create a new `View` on
 the same `Table`. However, `View`s are live with respect to the `Table`'s data,
 and will (within a conflation window) update with the latest state as its
 parent's state updates, including incrementally recalculating all aggregates,
@@ -323,13 +323,13 @@ what you see.
 ### Row Pivots
 
 A row pivot _groups_ the dataset by the unique values of each column used as a
-row pivot - a close analogue in SQL would be the `GROUP BY` statement.
+row pivot. A close analogue to this would be the `GROUP BY` statement in SQL.
 
 The underlying dataset is aggregated to show the values belonging to
 each group, and a total row is calculated for each group, showing the currently
 selected aggregated value (e.g. `sum`) of the column. Row pivots are useful for
 hierarchies, categorizing data and attributing values, i.e. showing the number
-of units sold based on State and City.
+of units sold based on state and city.
 
 In Perspective, row pivots are represented as an array of string column names
 which will be applied as row pivots:
@@ -392,7 +392,7 @@ column pivots are also easily transposable in `perspective-viewer`.
 ### Aggregates
 
 Aggregates perform a calculation over an entire column, and are displayed when
-one or more [Row Pivots](#row-pivots) are applied to the `View`. Aggregates can
+one or more [row pivots](#row-pivots) are applied to the `View`. Aggregates can
 be specified by the user, or Perspective will use the following sensible default
 aggregates based on column type:
 
@@ -401,7 +401,7 @@ aggregates based on column type:
 
 Perspective provides a large selection of aggregate functions that can be
 applied to columns in the `View` constructor using a dictionary of column
-name to aggregate function name:
+names to aggregate function names:
 
 ```javascript
 const view = table.view({
