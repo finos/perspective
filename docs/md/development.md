@@ -257,7 +257,7 @@ supported.
 
 Verbosity in the tests can be enabled with the `--verbose` flag.
 
-#### Timezones in Python Tests
+#### Time zones in Python Tests
 
 Python tests are configured to use the `UTC` time zone. If running tests locally,
 you might find that datetime-related tests fail to assert the correct values. To
