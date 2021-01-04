@@ -156,7 +156,7 @@ build on Windows 10, enable
 (WSL) and install the Linux distribution of your choice.
 
 Create symbolic links to easily access Windows directories and projects modified
-via Windows. This way you can modify any of the Perspective files using your
+via Windows. This way, you can modify any of the Perspective files using your
 favorite editors on Windows and build via Linux.
 
 Follow the Linux specific instructions to install Emscripten and all
