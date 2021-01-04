@@ -228,7 +228,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Should be able to create multiple computed columns in multiple `view()`s", async function() {
+        it("Should be able to create multiple computed columns with unique names in multiple `view()`s", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
                 computed_columns: [
@@ -236,15 +236,30 @@ module.exports = perspective => {
                         column: "float + int",
                         computed_function_name: "+",
                         inputs: ["w", "x"]
+                    },
+                    {
+                        column: "float - int",
+                        computed_function_name: "-",
+                        inputs: ["w", "x"]
+                    },
+                    {
+                        column: "float * int",
+                        computed_function_name: "*",
+                        inputs: ["w", "x"]
                     }
                 ]
             });
             const view2 = table.view({
                 computed_columns: [
                     {
-                        column: "float - int",
-                        computed_function_name: "-",
+                        column: "float / int",
+                        computed_function_name: "/",
                         inputs: ["w", "x"]
+                    },
+                    {
+                        column: "int * float",
+                        computed_function_name: "*",
+                        inputs: ["x", "w"]
                     }
                 ]
             });
@@ -257,7 +272,9 @@ module.exports = perspective => {
                 x: "integer",
                 y: "string",
                 z: "boolean",
-                "float + int": "float"
+                "float + int": "float",
+                "float - int": "float",
+                "float * int": "float"
             });
 
             expect(schema2).toEqual({
@@ -265,7 +282,8 @@ module.exports = perspective => {
                 x: "integer",
                 y: "string",
                 z: "boolean",
-                "float - int": "float"
+                "float / int": "float",
+                "int * float": "float"
             });
 
             const result = await view.to_columns();
@@ -276,7 +294,9 @@ module.exports = perspective => {
                 x: [1, 2, 3, 4],
                 y: ["a", "b", "c", "d"],
                 z: [true, false, true, false],
-                "float + int": [2.5, 4.5, 6.5, 8.5]
+                "float + int": [2.5, 4.5, 6.5, 8.5],
+                "float - int": [0.5, 0.5, 0.5, 0.5],
+                "float * int": [1.5, 5, 10.5, 18]
             });
 
             expect(result2).toEqual({
@@ -284,7 +304,8 @@ module.exports = perspective => {
                 x: [1, 2, 3, 4],
                 y: ["a", "b", "c", "d"],
                 z: [true, false, true, false],
-                "float - int": [0.5, 0.5, 0.5, 0.5]
+                "float / int": [1.5, 1.25, 1.1666666666666667, 1.125],
+                "int * float": [1.5, 5, 10.5, 18]
             });
 
             view2.delete();
@@ -333,6 +354,9 @@ module.exports = perspective => {
             });
 
             view.delete();
+
+            // force a process()
+            expect(await table.size()).toEqual(4);
 
             const schema2 = await view2.schema();
 
@@ -407,6 +431,9 @@ module.exports = perspective => {
             view.delete();
 
             const schema2 = await view2.schema();
+
+            // force a process()
+            expect(await table.size()).toEqual(4);
 
             expect(schema2).toEqual({
                 w: "float",
@@ -549,7 +576,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("A view without computed columns should break when serializing after another view with a computed column is deleted.", async function() {
+        it("A view without computed columns should not serialize computed columns from other views.", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
                 computed_columns: [
@@ -802,7 +829,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Should be able to row pivot on a non-computed column and get correct results.", async function() {
+        it("Should be able to row pivot on a non-computed column and get correct results for the computed column.", async function() {
             const table = perspective.table(common.int_float_data);
             const view = table.view({
                 row_pivots: ["w"],

@@ -1479,6 +1479,13 @@ class TestView(object):
             tbl.view(sort=[["x", "desc"]])
         assert str(ex.value) == "Invalid column 'x' found in View sorts.\n"
 
+    def test_should_throw_on_first_invalid(self):
+        data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
+        tbl = Table(data)
+        with raises(PerspectiveCppError) as ex:
+            tbl.view(row_pivots=["a"], column_pivots=["c"], filter=[["a", ">", 1]], aggregates={"a": "avg"}, sort=[["x", "desc"]])
+        assert str(ex.value) == "Invalid column 'x' found in View sorts.\n"
+
     def test_invalid_columns_not_in_computed_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
