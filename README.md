@@ -19,7 +19,7 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
 - A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](https://webassembly.org/), with read/write/stream support for [Apache Arrow](https://arrow.apache.org/).
 
-- A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
+- A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a Web Worker and/or WebSocket data engine host for stable interactivity at high frequency.
 
 - A customizable HTML Data Grid plugin, and a Chart plugin built on [D3FC](https://d3fc.io/).
 
@@ -45,7 +45,7 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
 * [Project Site](https://perspective.finos.org/)
 * [Installation](https://perspective.finos.org/docs/md/installation.html)
-* [Javascript User's Guide](https://perspective.finos.org/docs/md/js.html)
+* [JavaScript User's Guide](https://perspective.finos.org/docs/md/js.html)
 * [Python User's Guide](https://perspective.finos.org/docs/md/python.html)
 * [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
 * [Conceptual Overview](https://perspective.finos.org/docs/md/concepts.html)
