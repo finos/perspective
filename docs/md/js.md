@@ -36,7 +36,7 @@ which modules they need for their specific use case. The main modules are:
 
 `<perspective-viewer>` by itself only implements a trivial debug renderer, which
 prints the currently configured `view()` as a CSV. Plugin modules for popular
-JavaScript libraries such as [d3fc](https://d3fc.io/) are packaged separately
+JavaScript libraries, such as [d3fc](https://d3fc.io/), are packaged separately
 and must be imported individually.
 
 Perspective offers these plugin modules:
@@ -49,7 +49,7 @@ Perspective offers these plugin modules:
   library.
 
 Also available are these legacy modules; though no longer under development,
-they are compatible with perspective versions < 1.0.0:
+they are compatible with Perspective versions < 1.0.0:
 
 - `@finos/perspective-viewer-hypergrid`  
   A `<perspective-viewer>` plugin for
@@ -58,21 +58,21 @@ they are compatible with perspective versions < 1.0.0:
 - `@finos/perspective-viewer-highcharts`  
   [DEPRECATED] A `<perspective-viewer>` plugin for
   [HighCharts](https://github.com/highcharts/highcharts). This plugin has a
-  `highcharts` as a `peerDependency`, and requires a
+  `highcharts` as a `peerDependency` and requires a
   [mixed commercial license](https://shop.highsoft.com/).
 
 When imported after `@finos/perspective-viewer`, the plugin modules will
 register themselves automatically, and the renderers they export will be
 available in the `view` dropdown in the `<perspective-viewer>` UI.
 
-Developers can choose to opt into the features, bundle size inflation and
+Developers can choose to opt into the features, bundle size inflation, and
 licensing for these dependencies as needed.
 
 ### What modules should I import?
 
-Depending on your requirements, you may need just one, or all Perspective
-modules. Some basic guidelines to help you decide what is most appropriate for
-your project:
+Depending on your requirements, you may need just one, or all, Perspective
+modules. Here are some basic guidelines to help you decide what is most appropriate
+for your project:
 
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
@@ -96,7 +96,7 @@ your project:
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate,
 filter and sort operations for tabular data. The engine can be instantiated in
-process, or in a Web Worker (browser only); in both cases, `perspective` exports
+process or in a Web Worker (browser only); in both cases, `perspective` exports
 a nearly identical API.
 
 It exports Perspective's data interfaces:
@@ -110,12 +110,12 @@ It exports Perspective's data interfaces:
   - `view()`s also live in a Web Worker when used in a browser.
   - A single `table()` may have many `view()`s attached at once.
 
-`@finos/perspective` also exports process management functions such as
+`@finos/perspective` also exports process management functions, such as
 `worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in node.js). See the [API documentation](/obj/perspective.html) for a complete
+(in Node.js). See the [API documentation](/obj/perspective.html) for a complete
 reference on all exported methods.
 
-This module is a dependency of `@finos/perspective-viewer`, and is not needed if
+This module is a dependency of `@finos/perspective-viewer` and is not needed if
 you only intend to use `<perspective-viewer>` to visualize simple data.
 
 ### Importing in the browser
@@ -134,7 +134,7 @@ const perspective = require("@finos/perspective");
 ```
 
 `@finos/perspective` also comes with a pre-built bundle which exports the global
-`perspective` module name in vanilla JavaScript, when e.g. importing
+`perspective` module name in vanilla JavaScript, e.g. when importing
 [via a CDN](/docs/md/installation.html#from-cdn).
 
 ```html
@@ -145,7 +145,7 @@ const perspective = require("@finos/perspective");
 
 Once imported, you'll need to instantiate a `perspective` engine via the
 `worker()` method. This will create a new Web Worker (browser) or
-Process (Node.js), and load the WebAssembly binary; all calculation and data
+Process (Node.js) and load the WebAssembly binary; all calculation and data
 accumulation will occur in this separate process.
 
 ```javascript
