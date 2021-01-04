@@ -25,7 +25,7 @@ $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/persp
 All uses of Perspective from NPM require the browser to have access to
 Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
 `.js` scripts. By default, Perspective [inlines](https://github.com/finos/perspective/pull/870)
-these assets into the `.js` scripts, and delivers them in one file. This has no
+these assets into the `.js` scripts and delivers them in one file. This has no
 performance impact, but does increase asset load time. Any non-trivial application
 should make use of `@finos/perspective-webpack-plugin`, which automatically
 splits the assets into separate files and downloads them when the bundling
