@@ -5,19 +5,19 @@ title: Python User Guide
 
 Perspective for Python uses the exact same C++ data engine used by the
 [WebAssembly version](https://perspective.finos.org/docs/md/js.html). The
-library consists of many of the same abstractions and API as in Javascript,
+library consists of many of the same abstractions and API as in JavaScript,
 as well as Python-specific data loading support for [NumPy](https://numpy.org/),
 [Pandas](https://pandas.pydata.org/) (and
-[Apache Arrow](https://arrow.apache.org/), as in Javascript).
+[Apache Arrow](https://arrow.apache.org/), as in JavaScript).
 
 Additionally, `perspective-python` provides a session manager suitable for
 integration into server systems such as
 [Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html), which
 allows fully _virtual_ Perspective tables to be interacted with by multiple
-`<perspective-viewer>` in a Web Browser.
+`<perspective-viewer>` in a web browser.
 
 As `<perspective-viewer>` will only consume the data necessary to render the
-current screen, this runtime mode allows _ludicrous_ _size_ datasets with
+current screen, this runtime mode allows _ludicrously-sized_ datasets with
 instant-load after they've been manifest on the server (at the expense of
 network latency on UI interaction).
 
@@ -29,10 +29,10 @@ makes it simple to extend a Tornado server with virtual Perspective support.
 The `perspective` module exports several tools:
 
 - `Table`, the table constructor for Perspective, which implements the `table`
-  and `view` API in the same manner as the Javascript library.
+  and `view` API in the same manner as the JavaScript library.
 - `PerspectiveWidget` the JupyterLab widget for interactive visualization.
 - `PerspectiveTornadoHandler`, an integration with [Tornado](https://www.tornadoweb.org/)
-that interfaces seamlessly with `<perspective-viewer>` in Javascript.
+that interfaces seamlessly with `<perspective-viewer>` in JavaScript.
 - `PerspectiveManager` the session manager for a shared server deployment of
 `perspective-python`.
 
@@ -50,7 +50,7 @@ on GitHub.
 ## `Table`
 
 A `Table` can be created from a dataset or a schema, the specifics of which are
-[discussed](#loading-data-with-table) in the Javascript section of the user's
+[discussed](#loading-data-with-table) in the JavaScript section of the user's
 guide. In Python, however, Perspective supports additional data types that are
 commonly used when processing data:
 
@@ -59,7 +59,7 @@ commonly used when processing data:
 - `bytes` (encoding an Apache Arrow)
 - `objects` (either extracting a repr or via reference)
 
-A `Table` is created in a similar fashion to its Javascript equivalent:
+A `Table` is created in a similar fashion to its JavaScript equivalent:
 
 ```python
 from datetime import date, datetime
@@ -88,7 +88,7 @@ row_data = view.to_records()
 
 ### Pandas & Numpy Support
 
-Perspective supports dictionaries of 1-dimensional `numpy.ndarray`, as well as
+Perspective supports dictionaries of one-dimensional `numpy.ndarray`, as well as
 structured arrays and record arrays. When passing in dictionaries of NumPy
 arrays, make sure that your dataset contains only NumPy arrays, and not a
 mixture of arrays and Python lists — this will raise an exception. Numpy
@@ -114,7 +114,7 @@ table = perspective.Table(data, index="index")
 
 ### Schemas & Supported Data Types
 
-Unlike Javascript, where schemas must be created using string representations of
+Unlike JavaScript, where schemas must be created using string representations of
 their types, `perspective-python` leverages Python's type system for schema
 creation.
 
@@ -136,13 +136,13 @@ and even valid millisecond/seconds from epoch timestamps. Similarly, updating
 string columns with integer data will cause a cast to string, updating floats
 with ints cause a float cast, and etc.
 
-Type inference works similarly—a column that contains `pandas.Timestamp`
+Type inference works similarly: a column that contains `pandas.Timestamp`
 objects will have its type inferred as `datetime`, which allows it to be updated
 with any of the datetime types that were just mentioned. Thus, Perspective is
 aware of the basic type primitives that it supports, but agnostic towards the
 actual Python `type` of the data that it receives.
 
-Type inference can also leverage python converters, e.g. `__int__`, `__float__`, etc.
+Type inference can also leverage Python converters, e.g. `__int__`, `__float__`, etc.
 
 #### Loading Custom Objects
 
@@ -151,23 +151,23 @@ implementing `_psp_repr_` to return `object`. Perspective stores a reference
 to your object as an unsigned 64-bit integer (e.g. a pointer), and uses  `__repr__`
 (or `_psp_repr` if implemented) to represent the object.
 
-You can customize how perspective extracts data from your objects by implementing these
+You can customize how Perspective extracts data from your objects by implementing these
 two methods into your object:
 
 - `_psp_repr_`: Since `__repr__` can only return strings, this lets you return other values
-- `_psp_dtype_`: perpspective will look at this to determine how to cast your objects' repr.
+- `_psp_dtype_`: Perpspective will look at this to determine how to cast your objects' repr.
 
 #### Time Zone Handling
 
 - ["Naive"](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects)
   datetimes are assumed to be local time.
 - ["Aware"](https://docs.python.org/3/library/datetime.html#aware-and-naive-objects)
-  datetimes use the timezone specified in the `tzinfo`.
+  datetimes use the time zone specified in the `tzinfo`.
 
-All `datetime` columns (regardless of input timezone) are output to the user as
+All `datetime` columns (regardless of input time zone) are output to the user as
 `datetime.datetime` objects in _local time_ according to the Python runtime.
 
-This behavior is consistent with Perspective's behavior in Javascript. For more
+This behavior is consistent with Perspective's behavior in JavaScript. For more
 details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
 of `perspective-python` semantics around time zone handling.
 
@@ -175,7 +175,7 @@ of `perspective-python` semantics around time zone handling.
 
 - Naive `pandas.Timestamp` objects are _always_ treated as UTC times, and will
   be converted to local time when output to the user.
-- Aware `pandas.Timestamp` objects use the timezone specified in `tzinfo`. Use
+- Aware `pandas.Timestamp` objects use the time zone specified in `tzinfo`. Use
   `tz_localize` or `tz_convert` to provide the `Timestamp` with a time zone.
 
 ### Callbacks and Events
@@ -216,7 +216,7 @@ Callbacks defined with a lambda function cannot be removed, as lambda functions 
 
 `PerspectiveManager` offers an interface for hosting multiple
 `perspective.Table` and `perspective.View` instances, extending their
-interfaces to operate with the [Javascript library](/docs/md/js.html) over a
+interfaces to operate with the [JavaScript library](/docs/md/js.html) over a
 websocket connection.
 
 `PerspectiveManager` is required to enable `perspective-python` to
@@ -235,7 +235,7 @@ server performance.  There are a few important differences when running
 
   * Calls to methods like `update()` will return immediately, and the reciprocal 
     `on_update()` callbacks will be invoked on an event later scheduled.  Calls
-    to other methods which require an up-to-date object however will still
+    to other methods which require an up-to-date object, but will still
     synchronously apply the pending update.
   * Updates will be _conflated_ when multiple calls to `update()` occur before
     the scheduled application.  In such cases, you may receive a single
@@ -264,7 +264,7 @@ thread.start()
 `PerspectiveManager` has the ability to "host" `perspective.Table` and
 `perspective.View` instances. Hosted tables/views can have their methods
 called from other sources than the Python server, i.e. by a `perspective-viewer` running
-in a Javascript client over the network, interfacing with `perspective-python` through
+in a JavaScript client over the network, interfacing with `perspective-python` through
 the websocket API.
 
 The server has full control of all hosted `Table` and `View`
@@ -305,7 +305,7 @@ table = Table(data)
 manager.host_table("data_source", table)
 ```
 
-The `name` provided is important, as it enables Perspective in Javascript to look
+The `name` provided is important, as it enables Perspective in JavaScript to look
 up a `Table` and get a handle to it over the network. This enables
 several powerful server/client implementations of Perspective, as explained in
 the next section.
@@ -313,7 +313,7 @@ the next section.
 ### Distributed Mode
 
 Using Tornado and [`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
-as well as `Perspective`'s Javascript library, we can set up "distributed"
+as well as `Perspective`'s JavaScript library, we can set up "distributed"
 Perspective instances that allows multiple browser `perspective-viewer`
 clients to read from a common `perspective-python` server. In exchange for sending the
 entire dataset to the client on initialization, server load is reduced and
@@ -355,7 +355,7 @@ MANAGER.host_table("data_source", TABLE)
 
 app = tornado.web.Application([
     (r"/", MainHandler),
-    # create a websocket endpoint that the client Javascript can access
+    # create a websocket endpoint that the client JavaScript can access
     (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
 ])
 
@@ -424,10 +424,10 @@ _*index.html*_
 
     /* `table` is a proxy for the `Table` we created on the server.
 
-        All operations that are possible through the Javascript API are possible
+        All operations that are possible through the JavaScript API are possible
         on the Python API as well, thus calling `view()`, `schema()`, `update()`
         etc. on `const table` will pass those operations to the Python `Table`,
-        execute the commands, and return the result back to Javascript.*/
+        execute the commands, and return the result back to JavaScript.*/
     const table = websocket.open_table("data_source_one");
 
     // Load this in the `<perspective-viewer>`.
@@ -470,7 +470,7 @@ As well as keyword arguments specific to `PerspectiveWidget` itself:
   in Python, or if it sends data to the front-end WebAssembly engine for
   processing.
 
-Several Enums are provided to make lookup of specific plugin types, aggregate
+Several enums are provided to make lookup of specific plugin types, aggregate
 types, etc. much easier:
 
 - [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py)
@@ -505,9 +505,9 @@ defaults to client mode when initializing the widget.
 
 A widget is created through the `PerspectiveWidget` constructor, which takes as
 its first, required parameter a `perspective.Table`, a dataset, a schema, or
-`None`, which serves as a special value that tells the Widget to defer loading
-any data until later. In maintaining consistency with the Javascript API,
-Widgets cannot be created with empty dictionaries or lists—`None` should be used
+`None`, which serves as a special value that tells the widget to defer loading
+any data until later. In maintaining consistency with the JavaScript API,
+widgets cannot be created with empty dictionaries or lists—`None` should be used
 if the intention is to await data for loading later on.
 
 A widget can be constructed from a dataset:
@@ -550,8 +550,8 @@ has a dataset, and the new data has different columns to the old one, then the
 widget state (pivots, sort, etc.) is cleared to prevent applying settings on
 columns that don't exist.
 
-Like `__init__`, load accepts a `perspective.Table`, a dataset, or a schema. If
-running in client mode, `load` defers to the browser's Perspective engine. This
+Like `__init__`, `load()` accepts a `perspective.Table`, a dataset, or a schema. If
+running in client mode, `load()` defers to the browser's Perspective engine. This
 means that loading Python-only datasets, especially ones that cannot be
 serialized into JSON, may cause some issues.
 
@@ -581,7 +581,7 @@ widget.table.size() # True
 ```
 
 Calling `replace(data)` on the widget with new data will remove the table's old
-data, and replace it with the new dataset, while preserving all widget state.
+data and replace it with the new dataset while preserving all widget states.
 
 ```python
 widget.replace(df2)
@@ -606,16 +606,16 @@ widget.plugin  # "datagrid"
 Perspective ships with a pre-built Tornado handler that makes integration with
 `tornado.websockets` extremely easy. This allows you to run an instance of
 `Perspective` on a server using Python, open a websocket to a `Table`, and
-access the `Table` in Javascript and through `<perspective-viewer>`.
+access the `Table` in JavaScript and through `<perspective-viewer>`.
 
 All instructions sent to the `Table` are processed in Python, which executes the
-commands, and returns its output through the websocket back to Javascript.
+commands, and returns its output through the websocket back to JavaScript.
 
 ### Python setup
 
 To use the handler, we need to first have an instance of a `Table` and a
-`PerspectiveManager`—the manager acts as the interface between the Javascript
-and the Python layers, implementing a JSON API that allows the two Perspective
+`PerspectiveManager`. The manager acts as the interface between the JavaScript
+and Python layers, implementing a JSON API that allows the two Perspective
 runtimes to communicate.
 
 ```python
@@ -628,7 +628,7 @@ Once the manager has been created, create a `Table` instance and call
 and allows the manager to send instructions to the Table.
 
 The name that you host the table under is important—it acts as a unique accessor
-on the Javascript side, which will look for a Table hosted at the websocket with
+on the JavaScript side, which will look for a Table hosted at the websocket with
 the name you specify.
 
 ```python
@@ -637,14 +637,14 @@ MANAGER.host_table("data_source_one", TABLE)
 ```
 
 After the manager and table setup is complete, create a websocket endpoint and
-provide it a reference to PerspectiveTornadoHandler. You must provide the
+provide it a reference to `PerspectiveTornadoHandler`. You must provide the
 configuration object in the route tuple, and it must contain `manager`, which is
 a reference to the `PerspectiveManager` you just created.
 
 ```python
 app = tornado.web.Application([
     (r"/", MainHandler),
-    # create a websocket endpoint that the client Javascript can access
+    # create a websocket endpoint that the client JavaScript can access
     (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
 ])
 ```
@@ -655,10 +655,10 @@ where the server is hosted. See
 [Tornado docs](https://www.tornadoweb.org/en/stable/websocket.html#tornado.websocket.WebSocketHandler.check_origin)
 for more details.
 
-### Javascript setup
+### JavaScript setup
 
 Once the server is up and running, you can access the Table you just hosted
-using `perspective.websocket` and `open_table()`. First create a client that
+using `perspective.websocket` and `open_table()`. First, create a client that
 expects a Perspective server to accept connections at the specified URL:
 
 ```javascript
@@ -672,10 +672,10 @@ const table = websocket.open_table("data_source_one");
 ```
 
 `table` is a proxy for the `Table` we created on the server. All operations that
-are possible through the Javascript API are possible on the Python API as well,
-thus calling `view()`, `schema()`, `update()` etc on `const table` will pass
+are possible through the JavaScript API are possible on the Python API as well,
+thus calling `view()`, `schema()`, `update()` etc. on `const table` will pass
 those operations to the Python `Table`, execute the commands, and return the
-result back to Javascript. Similarly, providing this `table` to a
+result back to JavaScript. Similarly, providing this `table` to a
 `<perspective-viewer>` instance will allow virtual rendering:
 
 ```javascript
@@ -685,7 +685,7 @@ viewer.toggleConfig();
 
 `perspective.websocket` expects a Websocket URL where it will send instructions.
 When `open_table` is called, the name to a hosted Table is passed through, and a
-request is sent through the socket to fetch the Table. No actual Table instance
+request is sent through the socket to fetch the Table. No actual `Table` instance
 is passed inbetween the runtimes; all instructions are proxied through
 websockets.
 
