@@ -360,8 +360,8 @@ async function print_data() {
 ### Deleting a `table()` or `view()`
 
 Unlike standard JavaScript objects, Perspective objects such as `table()` and
-`view()` store their associated data in the WebAssembly heap. Due of this, and
-the current lack of a hook into the JavaScript runtime's garbage collector from
+`view()` store their associated data in the WebAssembly heap. Because of this, as
+well as the current lack of a hook into the JavaScript runtime's garbage collector from
 WebAssembly, the memory allocated to these Perspective objects does not
 automatically get cleaned up when the object falls out of scope.
 
