@@ -101,6 +101,22 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc)
 
+if (PSP_PYTHON_BUILD)
+    set(ARROW_SRCS
+        ${ARROW_SRCS}
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/formatting.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fast-dtoa.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fixed-dtoa.cc
+    )
+endif()
+
 set_property(SOURCE util/io_util.cc
            APPEND_STRING
            PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
