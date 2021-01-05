@@ -1,3 +1,5 @@
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 set(ARROW_SRCS
@@ -163,6 +165,12 @@ target_link_libraries(arrow
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${ARROW_TEST_LINK_TOOLCHAIN})
+
+# python 2.7 build needs -lrt, otherwise we get an "undefined symbol:
+# clock_gettime" error. TODO: remove this one if we don't need it
+# if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
+#     target_link_libraries(arrow rt)
+# endif()
 
 find_package(Flatbuffers)
 

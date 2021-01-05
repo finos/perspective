@@ -61,12 +61,12 @@ try {
     // Create a wheel
     if (MANYLINUX_VERSION) {
         // install deps
-        
+
         // These are system deps that may only be in place from pep-517/518 so lets
         // reinstall them to be sure
         cmd += `${PYTHON} -m pip install 'numpy>=1.13.1' 'pyarrow>=0.16.0,<1' && `;
 
-        // remove the build folder so we completely rebuild (and pick up the 
+        // remove the build folder so we completely rebuild (and pick up the
         // libs we just installed above, since this build method won't use
         // pep-517/518)
         cmd += `rm -rf build/ &&`;

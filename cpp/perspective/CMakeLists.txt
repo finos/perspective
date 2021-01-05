@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7.2)
 project(psp)
 
 set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 
 set(CMAKE_CXX_STANDARD 14)
@@ -630,6 +631,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		else()
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
+
+		# python 2.7 build needs -lrt, otherwise we get an "undefined symbol:
+		# clock_gettime" error.
+		if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
+			target_link_libraries(psp rt)
+			target_link_libraries(binding rt)
+		endif()
+
 
 		target_link_libraries(psp arrow)
 		target_link_libraries(binding arrow)
