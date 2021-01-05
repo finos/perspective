@@ -202,7 +202,10 @@ jobs:
     - script: yarn
       displayName: 'Install Deps'
 
-    - script: yarn build_python  --ci $(python_flag)
+    - script: choco install flatc
+      displayName: "Install Flatbuffers"
+
+    - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
       env:
         # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
@@ -216,6 +219,7 @@ jobs:
         BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/"
         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/include"
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/libs"
+        CMAKE_TOOLCHAIN_FILE: "C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 - job: 'MacOS_Catalina'
   pool:
