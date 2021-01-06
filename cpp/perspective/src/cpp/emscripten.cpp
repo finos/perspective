@@ -81,8 +81,27 @@ namespace binding {
         } else {
             return false;
         }
-        tm local_tm = *localtime(&tt);
-        (*out) = t_date(local_tm.tm_year + 1900, local_tm.tm_mon, local_tm.tm_mday);
+
+        // TODO: Perspective stores date/datetime in UTC, so if we use
+        // `std::localtime` here, the value will be localized *twice*: once
+        // here and once when the date is exported. I think this is what is
+        // happening; changing `localtime` to `gmtime` fixed date filtering
+        // so that typing in "03/01/2020" actually filters down to "03/01/2020"
+        // and not "02/29/2020" because the value in the table was converted
+        // localized to 02/29/2020 7pm EST from 03/01/2020 12AM UTC.
+        //
+        // what i am not certain about - the previous implementation of this
+        // function in `jsdate_to_t_date` gets the ymd in local time as well
+        // straight from the date object. HOWEVER this issue was present in
+        // 0.4.8 - which leads me to believe that this has been an issue all
+        // along.
+        //
+        // we should maybe have a separate node test process that runs with
+        // TZ="US-Eastern" or something like that to assert the timezone
+        // differences.
+        // ...I think...
+        tm utc_tm = *std::gmtime(&tt);
+        (*out) = t_date(utc_tm.tm_year + 1900, utc_tm.tm_mon, utc_tm.tm_mday);
         return true;
     }
 
