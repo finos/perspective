@@ -143,19 +143,26 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     def load(self, data, **options):
         """Given a ``perspective.Table``, a ``perspective.View``,
         or data that can be handled by ``perspective.Table``, pass it to the
-        viewer.
+        viewer.  Like `__init__`, load accepts a `perspective.Table`, a dataset,
+        or a schema. If running in client mode, `load` defers to the browser's
+        Perspective engine. This means that loading Python-only datasets,
+        especially ones that cannot be serialized into JSON, may cause some
+        issues.
 
-        ``load()`` resets the state of the viewer:
+        ``load()`` resets the state of the viewer :
 
-        If a ``perspective.Table`` is loaded, ``**options`` is ignored as the
-        options already set on the ``Table`` take precedence.
+        * If a ``perspective.Table`` has already been  loaded, ``**options`` is
+          ignored as the options already set on the ``Table`` take precedence.
 
-        If a ``perspective.View`` is loaded, the options on the
-        ``perspective.Table`` linked to the view take precedence.
+        * If a ``perspective.View`` is loaded, the options on the
+          ``perspective.Table`` linked to the view take precedence.
 
         If data is passed in, a ``perspective.Table`` is automatically created
         by this method, and the options passed to ``**config`` are extended to
-        the new Table.
+        the new Table.  If the widget already has a dataset, and the new data
+        has different columns to the old one, then the widget state (pivots,
+        sort, etc.) is cleared to prevent applying settings on columns that
+        don't exist.
 
         Args:
             data (:obj:`Table`|:obj:`View`|:obj:`dict`|:obj:`list`|:obj:`pandas.DataFrame`|:obj:`bytes`|:obj:`str`): a
@@ -181,6 +188,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             >>> viewer.load(data, index="a") # viewer state is reset
             >>> viewer2 = PerspectiveViewer()
             >>> viewer2.load(tbl.view())
+
         """
         name = options.pop("name", str(random()))
 
@@ -249,6 +257,11 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     def reset(self):
         """Resets the viewer's attributes and state, but does not delete or
         modify the underlying `Table`.
+
+        Example:
+            widget = PerspectiveWidget(data, row_pivots=["date"], plugin=Plugin.XBAR)
+            widget.reset()
+            widget.plugin  #
         """
         self.row_pivots = []
         self.column_pivots = []

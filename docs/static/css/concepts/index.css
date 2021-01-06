@@ -1,8 +1,9 @@
 perspective-viewer {
     display: block;
-    height: 500px;
+    height: 375px;
     flex: 1;
     border: 1px solid #ccc;
+    box-shadow: 0 5px 5px rgba(0,0,0,0.2);
 }
 
 #grid {
@@ -12,6 +13,21 @@ perspective-viewer {
 
 #grid perspective-viewer {
     margin-left: 3px;
+}
+
+.next {
+    display: none;
+}
+
+a:hover .language {
+    text-decoration: line-through;
+    text-decoration-color: #999;
+}
+
+a:hover .next {
+    text-decoration: none;
+    display: inline-block;
+    color: #999;
 }
 
 @media (max-width: 1500px) { 

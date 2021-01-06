@@ -1333,8 +1333,9 @@ export default function(Module) {
 
     /**
      * Create a new {@link module:perspective~view} from this table with a
-     * specified configuration. For a conceptual understanding of the
-     * configuration options, see the [Conceptual Overview](https://perspective.finos.org/docs/md/installation.html).
+     * specified configuration. For a better understanding of the View
+     * configuration options, see the
+     * [Documentation](https://perspective.finos.org/docs/md/view.html).
      *
      * @param {Object} [config] The configuration object for this
      * {@link module:perspective~view}.

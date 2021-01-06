@@ -28,32 +28,12 @@ class Footer extends React.Component {
                     </a>
                     <div>
                         <h5>Docs</h5>
-                        <a href={"/docs/md/installation.html"}>Installation</a>
-                        <a href={"/docs/md/js.html"}>JavaScript User Guide</a>
+                        <a href={"/docs/md/js.html"}>Javascript User Guide</a>
                         <a href={"/docs/md/python.html"}>Python User Guide</a>
                         <a href={"/docs/obj/perspective.html"}>Perspective API</a>
                         <a href={"/docs/obj/perspective-viewer.html"}>Perspective Viewer API</a>
                         <a href={"/docs/obj/perspective-python-table.html"}>Perspective Python API</a>
                     </div>
-                    {/* <div>
-            <h5>Community</h5>
-            <a href={this.pageUrl('users.html', this.props.language)}>
-              User Showcase
-            </a>
-            <a
-              href="http://stackoverflow.com/questions/tagged/"
-              target="_blank"
-              rel="noreferrer noopener">
-              Stack Overflow
-            </a>
-            <a href="https://discordapp.com/">Project Chat</a>
-            <a
-              href="https://twitter.com/"
-              target="_blank"
-              rel="noreferrer noopener">
-              Twitter
-            </a>
-          </div> */}
                     <div>
                         <h5>More</h5>
                         <a href={this.props.config.baseUrl + "blog"}>Blog</a>

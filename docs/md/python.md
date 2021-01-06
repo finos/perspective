@@ -41,11 +41,58 @@ Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
 handler.
 
 For an understanding of Perspective's core concepts, see the
-[Conceptual Overview](/docs/md/concepts.html). For API documentation, see the
+[Table](/docs/md/table.html), [View](/docs/md/view.html), and [Data Binding](/docs/md/server.html) documentation. For API documentation, see the
 [Python API](/docs/obj/perspective-python.html).
 
-For example code, see the [Python examples directory](https://github.com/finos/perspective/tree/master/python/perspective/examples)
-on GitHub.
+[More Examples](https://github.com/finos/perspective/tree/master/examples)
+are available on GitHub.
+
+## Installation
+
+`perspective-python` contains full bindings to the Perspective API, a JupyterLab
+widget, and a [Tornado](http://www.tornadoweb.org/en/stable/) WebSocket handler
+that allows you to host Perspective using server-side Python.
+
+In addition to supporting row/columnar formats of data using `dict` and `list`,
+`pandas.DataFrame`, dictionaries of NumPy arrays, NumPy structured arrays, and
+NumPy record arrays are all supported in `perspective-python`.
+
+`perspective-python` can be installed from `pip`:
+
+```bash
+pip install perspective-python
+```
+
+#### Wheels PyArrow linkage
+
+Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.17.1 for Python 3.* and PyArrow==0.16.0 for Python 2.7.
+
+To ignore compiled wheels and install from source with pip, install via
+
+```bash
+pip install --no-binary perspective-python
+```
+
+### Jupyterlab
+
+<iframe width='500' height='294' src="https://www.youtube.com/embed/IO-HJsGdleE?&theme=dark&autohide=1&modestbranding=1&showinfo=0&rel=0" frameBorder="0"></iframe><br/>
+
+
+`PerspectiveWidget` is a JupyterLab widget that implements the same API as
+`<perspective-viewer>`, allowing for fast, intuitive
+transformations/visualizations of various data formats within JupyterLab.
+To use it, make sure you have installed `perspective-python`
+and then install the extension from the Jupyter lab extension directory
+
+```bash
+jupyter labextension install @finos/perspective-jupyterlab
+```
+
+If the widget does not display, you might be missing the [ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension). Install it from the extension directory:
+
+```bash
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+```
 
 ## `Table`
 
@@ -75,6 +122,7 @@ data = pd.DataFrame({
     "datetime": [datetime.now() for i in range(100)],
     "string": [str(i) for i in range(100)]
 })
+
 table = perspective.Table(data, index="float")
 ```
 
@@ -116,9 +164,7 @@ table = perspective.Table(data, index="index")
 
 Unlike JavaScript, where schemas must be created using string representations of
 their types, `perspective-python` leverages Python's type system for schema
-creation.
-
-A schema can be created with the following types:
+creation.  A schema can be created with the following types:
 
 - `int` (and `long` in Python 2)
 - `float`
@@ -127,22 +173,6 @@ A schema can be created with the following types:
 - `datetime.datetime`
 - `str` (and `unicode` in Python 2)
 - `object`
-
-Once the `Table` has been created with a schema, however, Perspective will cast
-the data that it ingests to conform with the schema. This allows for a lot of
-flexibility; a column that is typed as a `datetime`, for example, can be updated
-with `date` objects, `datetime` objects, `pandas.Timestamp`, `numpy.datetime64`,
-and even valid millisecond/seconds from epoch timestamps. Similarly, updating
-string columns with integer data will cause a cast to string, updating floats
-with ints cause a float cast, and etc.
-
-Type inference works similarly: a column that contains `pandas.Timestamp`
-objects will have its type inferred as `datetime`, which allows it to be updated
-with any of the datetime types that were just mentioned. Thus, Perspective is
-aware of the basic type primitives that it supports, but agnostic towards the
-actual Python `type` of the data that it receives.
-
-Type inference can also leverage Python converters, e.g. `__int__`, `__float__`, etc.
 
 #### Loading Custom Objects
 
@@ -210,16 +240,16 @@ view.remove_update(update_callback)
 view.remove_delete(delete_callback)
 ```
 
-Callbacks defined with a lambda function cannot be removed, as lambda functions have no identifier.
+Callbacks defined with a lambda function cannot be removed, as lambda functions
+have no identifier.
 
 ## `PerspectiveManager`
 
 `PerspectiveManager` offers an interface for hosting multiple
 `perspective.Table` and `perspective.View` instances, extending their
 interfaces to operate with the [JavaScript library](/docs/md/js.html) over a
-websocket connection.
-
-`PerspectiveManager` is required to enable `perspective-python` to
+websocket connection.  `PerspectiveManager` is required to enable
+`perspective-python` to
 [operate remotely](/docs/md/js.html#remote-perspective-via-perspective-python-and-tornado)
 using a websocket API.
 
@@ -310,36 +340,20 @@ up a `Table` and get a handle to it over the network. This enables
 several powerful server/client implementations of Perspective, as explained in
 the next section.
 
-### Distributed Mode
+### Client/Server Replicated Mode
 
 Using Tornado and [`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
 as well as `Perspective`'s JavaScript library, we can set up "distributed"
 Perspective instances that allows multiple browser `perspective-viewer`
-clients to read from a common `perspective-python` server. In exchange for sending the
-entire dataset to the client on initialization, server load is reduced and
-client performance is not network-dependent.
-
-[Example](https://github.com/finos/perspective/tree/master/examples/tornado-python)
+clients to read from a common `perspective-python` server, as in the 
+[Tornado Example Project](https://github.com/finos/perspective/tree/master/examples/tornado-python).
 
 This architecture works by maintaining two `Tables`—one on the server, and one
 on the client that mirrors the server's `Table` automatically using `on_update`.
 All updates to the table on the server are automatically applied to each client,
 which makes this architecture a natural fit for streaming dashboards and other
-distributed use-cases.
-
-Because the `Table` is mirrored, the user gets all the performance benefits of
-Perspective in WebAssembly, and can examine server-hosted datasets with zero
-network lag on their interactions.
-
-In conjunction with [Async Mode](#async-mode), distributed Perspective offers
-consistently high performance over large numbers of clients and large datasets.
-As server dataset sizes increase, the initial load time of a client will
-increase, but once the data is loaded there is no network lag visible to the
-user.
-
-Using the [tornado-python](https://github.com/finos/perspective/tree/master/examples/tornado-python)
-example, one can easily create a distributed Perspective server using
-`server.py` and `index.html`:
+distributed use-cases.  In conjunction with [Async Mode](#async-mode), distributed Perspective offers consistently high performance over large numbers of clients
+and large datasets.
 
 _*server.py*_
 
@@ -399,41 +413,25 @@ _*index.html*_
 For a more complex example that offers distributed editing of the server
 dataset, see [client_server_editing.html](https://github.com/finos/perspective/blob/master/examples/tornado-python/client_server_editing.html).
 
-### Server Mode
-
-An alternative architecture uses a single `Table` on the Python server, which
-allows hosting of _massive_ datasets with minimal client resource usage. This
-comes at the expense of client-side performance, as all operations must be
-proxied over the network to the server.
+### Server-only Mode
 
 The server setup is identical to [Distributed Mode](#distributed-mode) above,
 but instead of creating a view, the client calls `load(server_table)`:
 In Python, use `PerspectiveManager` and `PerspectiveTornadoHandler` to create
-a websocket server that exposes a `Table`:
-
-_*index.html*_
+a websocket server that exposes a `Table`.  In this example, `table` is a proxy
+for the `Table` we created on the server.  All API methods are available on
+_proxies_, the.g.us calling `view()`, `schema()`, `update()`  on `table` will
+pass those operations to the Python `Table`, execute the commands, and return
+the result back to Javascript.
 
 ```html
 <perspective-viewer id="viewer" editable></perspective-viewer>
+```
 
-<script>
-  window.addEventListener("WebComponentsReady", async function () {
-    // Create a client that expects a Perspective server
-    // to accept connections at the specified URL.
-    const websocket = perspective.websocket("ws://localhost:8888/websocket");
-
-    /* `table` is a proxy for the `Table` we created on the server.
-
-        All operations that are possible through the JavaScript API are possible
-        on the Python API as well, thus calling `view()`, `schema()`, `update()`
-        etc. on `const table` will pass those operations to the Python `Table`,
-        execute the commands, and return the result back to JavaScript.*/
-    const table = websocket.open_table("data_source_one");
-
-    // Load this in the `<perspective-viewer>`.
-    document.getElementById("viewer").load(table);
-  });
-</script>
+```javascript
+const websocket = perspective.websocket("ws://localhost:8888/websocket");
+const table = websocket.open_table("data_source_one");
+document.getElementById("viewer").load(table);
 ```
 
 ## `PerspectiveWidget`
@@ -442,163 +440,56 @@ Building on top of the API provided by `perspective.Table`, the
 `PerspectiveWidget` is a JupyterLab plugin that offers the entire functionality
 of Perspective within the Jupyter environment. It supports the same API
 semantics of `<perspective-viewer>`, along with the additional data types
-supported by `perspective.Table`.
-
-Additionally, when created with `client=true` as a keyword argument to
-`__init__`, it can be used without accessing the built C++ binary.
-
-Similar to the viewer API, `PerspectiveWidget` takes keyword arguments that
-transform the `View` under ownership:
-
-- `plugin`
-- `row_pivots`
-- `column_pivots`
-- `columns`
-- `aggregates`
-- `sort`
-- `filters`
-
-Arguments that will be passed to the `Table` constructor if a dataset or schema
-is passed in:
-
-- [`index`](#index-and-limit)
-- [`limit`](#index-and-limit)
-
-As well as keyword arguments specific to `PerspectiveWidget` itself:
-
-- `client`: a boolean that determines whether the Widget will depend on `Table`
-  in Python, or if it sends data to the front-end WebAssembly engine for
-  processing.
-
-Several enums are provided to make lookup of specific plugin types, aggregate
-types, etc. much easier:
-
-- [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py)
-  : aggregate operations
-- [`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py)
-  : sort directions
-- [`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py)
-  : plugins (grid/chart types, etc.)
-
-These can be used as replacements to string values in the API:
+supported by `perspective.Table`.   `PerspectiveWidget` takes keyword arguments
+for the managed `View`;  additioanl arguments `index` and `limit`  will be
+passed to the `Table`.  For convenience are the [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py),
+[`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py),
+and
+[`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py)
+enums, which can be used as replacements to string values in the API:
 
 ```python
 from perspective import PerspectiveWidget, Aggregate, Sort, Plugin
 w = perspective.PerspectiveWidget(
-    data, plugin=Plugin.XBAR, aggregates={"datetime": Aggregate.ANY})
-w.sort = [["date", Sort.DESC]]
+    data,
+    plugin=Plugin.XBAR, 
+    aggregates={"datetime": Aggregate.ANY},
+    sort=[["date", Sort.DESC]]
+)
 ```
-
-### Client Mode
-
-For certain systems, it may be difficult or infeasible to build the C++ library
-for Perspective, which `perspective.Table` depends on. However, we can leverage
-`Perspective.js` in the browser to provide the same widget experience to users.
-If created with `client=true`, `PerspectiveWidget` will serialize the data to
-the best of its ability and pass it off to the browser's Perspective engine to
-load.
-
-If `perspective-python` cannot find the built C++ libraries, it automatically
-defaults to client mode when initializing the widget.
 
 ### Creating a widget
 
 A widget is created through the `PerspectiveWidget` constructor, which takes as
 its first, required parameter a `perspective.Table`, a dataset, a schema, or
-`None`, which serves as a special value that tells the widget to defer loading
-any data until later. In maintaining consistency with the JavaScript API,
-widgets cannot be created with empty dictionaries or lists—`None` should be used
-if the intention is to await data for loading later on.
-
-A widget can be constructed from a dataset:
+`None`, which serves as a special value that tells the Widget to defer loading
+any data until later. In maintaining consistency with the Javascript API,
+Widgets cannot be created with empty dictionaries or lists—`None` should be used
+if the intention is to await data for loading later on.  A widget can be
+constructed from a dataset:
 
 ```python
 from perspective import PerspectiveWidget, Table
-widget = PerspectiveWidget(data, row_pivots=["date"])
+PerspectiveWidget(data, row_pivots=["date"])
 ```
 
-Or a schema:
+.. or a schema:
 
 ```python
-widget = PerspectiveWidget({"a": int, "b": str})
+PerspectiveWidget({"a": int, "b": str})
 ```
 
-Or an instance of a `perspective.Table`:
+.. or an instance of a `perspective.Table`:
 
 ```python
 table = Table(data)
-widget = PerspectiveWidget(table)
+PerspectiveWidget(table)
 ```
 
-Or `None`:
+.. or `None`:
 
 ```python
-widget = PerspectiveWidget(None)
-```
-
-Once the widget has been created, simply call it in order to render the widget's
-front-end `<perspective-viewer>`:
-
-```python
-widget
-```
-
-### `load()`
-
-Calling `load()` on the widget provides it with a dataset. If the widget already
-has a dataset, and the new data has different columns to the old one, then the
-widget state (pivots, sort, etc.) is cleared to prevent applying settings on
-columns that don't exist.
-
-Like `__init__`, `load()` accepts a `perspective.Table`, a dataset, or a schema. If
-running in client mode, `load()` defers to the browser's Perspective engine. This
-means that loading Python-only datasets, especially ones that cannot be
-serialized into JSON, may cause some issues.
-
-```python
-widget = PerspectiveWidget(None)
-widget.load(data)
-```
-
-### `update()`
-
-Call `update()` on the widget to update it with new data. When called in client
-mode, this method serializes the data and passes it off to the Perspective
-engine running in the browser.
-
-```python
-widget.update(data)
-```
-
-### `clear()` and `replace()`
-
-Calling `clear()` on the widget will remove all data from the underlying
-`Table`, but preserve all user-applied settings to the widget.
-
-```python
-widget.clear()
-widget.table.size() # True
-```
-
-Calling `replace(data)` on the widget with new data will remove the table's old
-data and replace it with the new dataset while preserving all widget states.
-
-```python
-widget.replace(df2)
-```
-
-Both methods do not change the schema of the Table, so new data must conform to
-the schema.
-
-### `reset()`
-
-Call `reset()` on the widget to return it to an unpivoted, unmodified state. The
-`Table` that contains the widget's data is not affected.
-
-```python
-widget = PerspectiveWidget(data, row_pivots=["date"], plugin=Plugin.XBAR)
-widget.reset()
-widget.plugin  # "datagrid"
+PerspectiveWidget(None)
 ```
 
 ## `PerspectiveTornadoHandler`
@@ -606,10 +497,9 @@ widget.plugin  # "datagrid"
 Perspective ships with a pre-built Tornado handler that makes integration with
 `tornado.websockets` extremely easy. This allows you to run an instance of
 `Perspective` on a server using Python, open a websocket to a `Table`, and
-access the `Table` in JavaScript and through `<perspective-viewer>`.
-
-All instructions sent to the `Table` are processed in Python, which executes the
-commands, and returns its output through the websocket back to JavaScript.
+access the `Table` in JavaScript and through `<perspective-viewer>`.  All
+instructions sent to the `Table` are processed in Python, which executes the
+commands, and returns its output through the websocket back to Javascript.
 
 ### Python setup
 
@@ -680,7 +570,6 @@ result back to JavaScript. Similarly, providing this `table` to a
 
 ```javascript
 viewer.load(table);
-viewer.toggleConfig();
 ```
 
 `perspective.websocket` expects a Websocket URL where it will send instructions.

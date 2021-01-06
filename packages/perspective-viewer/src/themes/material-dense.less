@@ -10,12 +10,7 @@
  @import "../less/fonts";
  @import (reference) "material";
 
- perspective-viewer, .perspective-viewer-material-dense{
-    .perspective-viewer-material();
-    .perspective-viewer-material-dense-base();
- }
-
-.perspective-viewer-material-dense-base(){
+.perspective-viewer-material-dense-base {
    --side_panel--padding: 12px 12px 12px 10px;
    --top_panel--padding: 0px 0px 12px 0px;
    --column-drop-label--margin: -10px 0px 0px 0px;
@@ -26,5 +21,10 @@
    --active-column--height: 45px;
    --column-drop-label--font-size: 8px;
    --column_selector--width: 24px;
+}
+
+perspective-viewer, .perspective-viewer-material-dense {
+   .perspective-viewer-material();
+   .perspective-viewer-material-dense-base();
 }
  
