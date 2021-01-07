@@ -94,7 +94,7 @@ export class DomElement extends PerspectiveElement {
         if (filter) {
             row.setAttribute("filter", filter);
 
-            if (type === "string") {
+            if (type === "string" || type === "date" || type === "datetime") {
                 // Get all unique values for the column - because all options
                 // must be valid column names, recreate computed columns
                 // if the filter column is a computed column.
@@ -109,7 +109,7 @@ export class DomElement extends PerspectiveElement {
                     computed_columns: computed_names.includes(name) ? computed_columns : []
                 });
                 view.to_json().then(json => {
-                    row.choices(this._autocomplete_choices(json));
+                    row.choices(this._autocomplete_choices(json, type));
                 });
                 view.delete();
             }
@@ -515,12 +515,16 @@ export class DomElement extends PerspectiveElement {
         render(options(current_renderers), this._vis_selector);
     }
 
-    _autocomplete_choices(json) {
+    _autocomplete_choices(json, type) {
         const choices = [];
         for (let i = 1; i < json.length; i++) {
             const row_path = json[i].__ROW_PATH__;
             if (Array.isArray(row_path) && row_path.length > 0 && row_path[0]) {
-                choices.push(row_path[0]);
+                let choice = row_path[0];
+                if (type === "date" || type === "datetime") {
+                    choice = new Date(choice).toLocaleString();
+                }
+                choices.push(choice);
             }
         }
         return choices;
