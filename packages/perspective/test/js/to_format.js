@@ -373,7 +373,7 @@ module.exports = perspective => {
         it("should return dates in readable format on passing string in options", async function() {
             let table = perspective.table([{datetime: new Date("2016-06-13")}, {datetime: new Date("2016-06-14")}]);
             let view = table.view();
-            let json = await view.to_json({date_format: "en-US"});
+            let json = await view.to_json({formatted: true});
             expect(json).toEqual([{datetime: "6/13/2016"}, {datetime: "6/14/2016"}]);
             view.delete();
             table.delete();

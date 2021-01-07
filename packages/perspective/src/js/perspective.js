@@ -410,11 +410,7 @@ export default function(Module) {
         const end_col = options.end_col;
         const hidden = this._num_hidden();
 
-        let date_format;
-        if (options.date_format) {
-            date_format = new Intl.DateTimeFormat(options.date_format);
-        }
-
+        const is_formatted = options.formatted;
         const get_pkeys = !!options.index;
         const get_ids = !!options.id;
         const leaves_only = !!options.leaves_only;
@@ -452,6 +448,7 @@ export default function(Module) {
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
                 const col_type = schema[col_name];
+                const type_config = get_type_config(col_type);
                 if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
@@ -469,10 +466,14 @@ export default function(Module) {
                     continue;
                 } else {
                     let value = get_from_data_slice(slice, ridx, cidx);
-                    if ((col_type === "datetime" || col_type === "date") && value !== undefined) {
-                        if (date_format) {
+                    if (is_formatted && value !== null && value !== undefined) {
+                        if (col_type === "datetime" || col_type === "date") {
+                            // TODO Annoyingly, CSV occupies the gray area of
+                            // needing formatting _just_ for Date and Datetime -
+                            // e.g., 10000 will format as CSV `"10,000.00"
+                            // Otherwise, this would not need to be conditional.
                             value = new Date(value);
-                            value = date_format.format(value);
+                            value = value.toLocaleString("en-us", type_config.format);
                         }
                     }
                     formatter.setColumnValue(data, row, col_name, value);
