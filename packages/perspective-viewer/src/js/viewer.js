@@ -749,7 +749,7 @@ class PerspectiveViewer extends ActionElement {
      */
     async download(flat = false) {
         const view = flat ? this._table.view() : this._view;
-        const csv = await view.to_csv();
+        const csv = await view.to_csv({formatted: true});
         const element = document.createElement("a");
         const binStr = csv;
         const len = binStr.length;
@@ -758,7 +758,7 @@ class PerspectiveViewer extends ActionElement {
             arr[i] = binStr.charCodeAt(i);
         }
         const blob = new Blob([arr]);
-        element.setAttribute("href", URL.createObjectURL(blob));
+        element.setAttribute("href", window.URL.createObjectURL(blob));
         element.setAttribute("download", "perspective.csv");
         element.style.display = "none";
         document.body.appendChild(element);
@@ -776,7 +776,7 @@ class PerspectiveViewer extends ActionElement {
     copy(flat = false) {
         let data;
         const view = flat ? this._table.view() : this._view;
-        view.to_csv()
+        view.to_csv({formatted: true})
             .then(csv => {
                 data = csv;
             })

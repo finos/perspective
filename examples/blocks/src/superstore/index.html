@@ -35,7 +35,7 @@
       
         <script>
 
-            const URL = "/node_modules/superstore-arrow/superstore.arrow";
+            const DATA_URL = "/node_modules/superstore-arrow/superstore.arrow";
                         
             async function get_layout() {
                 const req = await fetch("layout.json");
@@ -44,7 +44,7 @@
             }
 
             const datasource = async () => {
-                const request = fetch(URL);
+                const request = fetch(DATA_URL);
                 const worker = perspective.worker();
                 const response = await request;
                 const buffer = await response.arrayBuffer();
