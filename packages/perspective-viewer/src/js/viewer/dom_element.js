@@ -95,8 +95,19 @@ export class DomElement extends PerspectiveElement {
             row.setAttribute("filter", filter);
 
             if (type === "string") {
-                // Get all unique values for the column
-                const view = this._table.view({row_pivots: [name], columns: []});
+                // Get all unique values for the column - because all options
+                // must be valid column names, recreate computed columns
+                // if the filter column is a computed column.
+                const computed_columns = this._get_view_parsed_computed_columns();
+                const computed_names = computed_columns.map(x => x.column);
+
+                // If `name` is in computed columns, recreate the current
+                // viewer's computed columns.
+                const view = this._table.view({
+                    row_pivots: [name],
+                    columns: [],
+                    computed_columns: computed_names.includes(name) ? computed_columns : []
+                });
                 view.to_json().then(json => {
                     row.choices(this._autocomplete_choices(json));
                 });

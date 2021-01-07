@@ -371,6 +371,8 @@ class ComputedExpressionWidget extends HTMLElement {
 
     @throttlePromise
     async _type_check_expression(computed_schema, expected_types) {
+        // TODO: refactor this to encompass all checks for invalid columns,
+        // invalid inputs, invalid names etc.
         const parsed = this._parsed_expression || [];
         const invalid = [];
 

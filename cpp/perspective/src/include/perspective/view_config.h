@@ -15,6 +15,7 @@
 #include <perspective/scalar.h>
 #include <perspective/computed.h>
 #include <tsl/ordered_map.h>
+#include <unordered_set>
 #include <tuple>
 
 namespace perspective {
@@ -55,6 +56,14 @@ public:
      * @param schema
      */
     void init(std::shared_ptr<t_schema> schema);
+
+    /**
+     * @brief Validate the view config to make sure that no invalid columns
+     * have been specified. If an invalid column is present, call
+     * PSP_COMPLAIN_AND_ABORT, which will abort() in WASM and raise an
+     * exception in Python.
+     */
+    void validate(std::shared_ptr<t_schema> schema);
 
     /**
      * @brief Add filter terms manually, as the filter term must be calculated from the value
