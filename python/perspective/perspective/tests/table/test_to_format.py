@@ -13,6 +13,7 @@ import pytz
 from io import StringIO
 from datetime import date, datetime
 from perspective.table import Table
+from pytest import mark
 IS_WIN = os.name == 'nt'
 
 
@@ -904,7 +905,7 @@ class TestToFormat(object):
 
     def test_to_csv_date(self):
         today = date.today()
-        dt_str = today.strftime("%Y/%m/%d 00:00:00")
+        dt_str = today.strftime("%Y-%m-%d")
         data = [{"a": today, "b": 2}, {"a": today, "b": 4}]
         tbl = Table(data)
         assert tbl.schema()["a"] == date
@@ -914,40 +915,40 @@ class TestToFormat(object):
         else:
             assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
-    def test_to_csv_date_ignore_custom_format(self):
+    @mark.skip(reason="pandas does not support date-specific formated in the date_format kwarg")
+    def test_to_csv_date_formatted(self):
         today = date.today()
-        dt_str = today.strftime("%Y")
+        dt_str = today.strftime("%Y/%m/%d")
         data = [{"a": today, "b": 2}, {"a": today, "b": 4}]
         tbl = Table(data)
         assert tbl.schema()["a"] == date
         view = tbl.view()
-        # date_format only applies to `datetime`
         if IS_WIN:
-            assert view.to_csv(date_format="%Y") == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+            assert view.to_csv(formatted=True) == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
         else:
-            assert view.to_csv(date_format="%Y") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+            assert view.to_csv(formatted=True) == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_datetime(self):
+        dt = datetime(2019, 3, 15, 20, 30, 59, 6000)
+        dt_str = dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        if IS_WIN:
+            assert view.to_csv() == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+        else:
+            assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+
+    def test_to_csv_datetime_formatted(self):
         dt = datetime(2019, 3, 15, 20, 30, 59, 6000)
         dt_str = dt.strftime("%Y/%m/%d %H:%M:%S")
         data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
         tbl = Table(data)
         view = tbl.view()
         if IS_WIN:
-            assert view.to_csv() == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
+            assert view.to_csv(formatted=True) == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
         else:
-            assert view.to_csv() == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
-
-    def test_to_csv_datetime_custom_format(self):
-        dt = datetime(2019, 3, 15, 20, 30, 59, 6000)
-        dt_str = dt.strftime("%H:%M:%S")
-        data = [{"a": dt, "b": 2}, {"a": dt, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        if IS_WIN:
-            assert view.to_csv(date_format="%H:%M:%S") == ",a,b\r\n0,{},2\r\n1,{},4\r\n".format(dt_str, dt_str)
-        else:
-            assert view.to_csv(date_format="%H:%M:%S") == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
+            assert view.to_csv(formatted=True) == ",a,b\n0,{},2\n1,{},4\n".format(dt_str, dt_str)
 
     def test_to_csv_bool(self):
         data = [{"a": True, "b": False}, {"a": True, "b": False}]

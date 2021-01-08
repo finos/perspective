@@ -558,8 +558,17 @@ class View(object):
         Returns:
             :obj:`str`: A CSV-formatted string containing the serialized data.
         """
+        date_format = None
+
+        # Handle to_csv calls from `<perspective-viewer>`, which uses the
+        # JavaScript Intl.DateTimeFormat API that takes a locale instead of a
+        # string format.
+        # TODO This should move to portable code.
+        if options.pop("formatted", False):
+            date_format = "%Y/%m/%d %H:%M:%S"
+
         return self.to_df(**options).to_csv(
-            date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"),
+            date_format=date_format,
             line_terminator="\r\n" if os.name == "nt" else "\n",
         )
 
