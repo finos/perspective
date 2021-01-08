@@ -18,7 +18,8 @@
         "packages/*",
         "examples/*",
         "docs",
-        "python/perspective"
+        "python/perspective",
+        "rust/perspective"
     ],
     "devDependencies": {
         "@babel/cli": "^7.8.4",
