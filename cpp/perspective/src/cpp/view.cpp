@@ -524,8 +524,12 @@ View<CTX_T>::data_slice_to_arrow(
     std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
     // From the data slice, get all the metadata we need
     t_get_data_extents extents = data_slice->get_data_extents();
+
     std::int32_t start_col = extents.m_scol;
     std::int32_t end_col = extents.m_ecol;
+    
+    // TODO: col_offset needs to be removed in order for __ROW_PATH__ to be
+    // implemented.
     std::int32_t col_offset = data_slice->get_col_offset();
     start_col += col_offset;
 
@@ -548,8 +552,23 @@ View<CTX_T>::data_slice_to_arrow(
         t_dtype dtype = get_column_dtype(cidx);
         std::string name;
 
+        // TODO: 1. emit __INDEX__ (this should be pretty easy)
+        // TODO: 2 .emit __ID__
+        // TODO: 3. emit row_path as arrow array
         if (sides() > 1) {
             name = join_column_names(col_path, m_separator);
+            // if (name == "__ROW_PATH__") {
+                /**
+                 * TODO: this needs to be a list type with content of mixed
+                 * types, which isn't actually allowed in arrow. We can pass
+                 * back a list of strings, but this defeats formatting and a
+                 * host of other things that depend on the __ROW_PATH__ being
+                 * objects with concrete types.
+                 * 
+                 * FIXME: figure out an alternative encoding for row_path that
+                 * can be communicated via arrow.
+                 */
+            // }
         } else {
             name = col_path.at(col_path.size() - 1).to_string();
         }
