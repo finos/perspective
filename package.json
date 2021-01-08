@@ -123,6 +123,7 @@
         "lint:eslint": "eslint \"packages/*/src/**/*.js\" \"packages/*/test/**/*.js\" \"examples/*/*.js\"",
         "lint_:tslint": "eslint \"packages/*/src/**/*.ts\" \"packages/*/test/**/*.ts\" \"examples/*/*.ts\"",
         "lint:python": "node scripts/lint_python.js",
+        "lint:rust": "node scripts/lint_rust.js",
         "fix:es": "npm run lint:eslint -- --fix",
         "fix:md": "prettier docs/md/*.md --prose-wrap=always --write",
         "fix:cpp": "node scripts/fix_cpp.js",
@@ -130,6 +131,7 @@
         "fix:html": "html-beautify packages/**/src/html/*.html -r",
         "fix:json": "prettier --tab-width 4 --write **/package.json",
         "fix:python": "node scripts/lint_python.js --fix",
+        "fix:rust": "node scripts/lint_rust.js --fix",
         "fix": "npm-run-all --silent fix:*",
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js",
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py"
