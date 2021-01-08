@@ -659,8 +659,9 @@ null or undefined.
 
 #### table.view([config]) ⇒ <code>view</code>
 Create a new [view](#module_perspective..view) from this table with a
-specified configuration. For a conceptual understanding of the
-configuration options, see the [Conceptual Overview](https://perspective.finos.org/docs/md/installation.html).
+specified configuration. For a better understanding of the View
+configuration options, see the
+[Documentation](https://perspective.finos.org/docs/md/view.html).
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Returns**: <code>view</code> - A new [view](#module_perspective..view) object for the
