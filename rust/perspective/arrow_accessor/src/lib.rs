@@ -78,7 +78,8 @@ pub fn accessor_get_data(accessor: *mut ArrowAccessor) -> Array {
 #[wasm_bindgen]
 pub fn accessor_get_column_paths(accessor: *mut ArrowAccessor) -> Vec<JsValue> {
     let accessor = unsafe { accessor.as_mut().unwrap() };
-    accessor.column_paths
+    accessor
+        .column_paths
         .iter()
         .map(|path| JsValue::from(path))
         .collect::<Vec<JsValue>>()
@@ -88,7 +89,7 @@ pub fn accessor_get_column_paths(accessor: *mut ArrowAccessor) -> Vec<JsValue> {
 #[wasm_bindgen]
 pub fn accessor_drop(accessor: *mut ArrowAccessor) {
     if !accessor.is_null() {
-        unsafe { 
+        unsafe {
             Box::from_raw(accessor);
         };
     }

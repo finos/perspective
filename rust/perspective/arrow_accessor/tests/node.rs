@@ -94,7 +94,7 @@ fn get_column_paths_from_accessor() {
     let accessor_ptr: *mut ArrowAccessor = accessor_make(buffer);
     let column_paths = accessor_get_column_paths(accessor_ptr);
     let expected = vec![
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
     ]
     .into_iter()
     .map(|item| JsValue::from(item))
@@ -115,7 +115,7 @@ fn drop_accessor() {
 
 fn compare_arrow(accessor: Box<ArrowAccessor>) {
     let paths = vec![
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
     ];
     let num_cols = 14;
 
@@ -290,7 +290,7 @@ fn compare_arrow(accessor: Box<ArrowAccessor>) {
 
 fn compare_arrow_nullable(accessor: Box<ArrowAccessor>) {
     let paths = vec![
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n",
     ];
     let num_cols = 14;
 

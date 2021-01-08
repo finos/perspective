@@ -17,12 +17,11 @@ use arrow::array::{
     UInt64Array, UInt8Array,
 };
 use arrow::datatypes::*;
-use arrow::record_batch::RecordBatch;
 use arrow::ipc::writer::{IpcWriteOptions, StreamWriter};
+use arrow::record_batch::RecordBatch;
 
 use chrono::NaiveDateTime;
 use wasm_bindgen::JsValue;
-
 
 // Generate an Arrow record batch of all types that can be converted.
 pub fn make_arrow() -> Box<RecordBatch> {
@@ -90,14 +89,14 @@ pub fn make_arrow() -> Box<RecordBatch> {
             f32::MIN_POSITIVE,
             f32::MAX,
             123.456789,
-            456.789123
+            456.789123,
         ])),
         Arc::new(Float64Array::from(vec![
             f64::MIN,
             f64::MIN_POSITIVE,
             f64::MAX,
             123.456789,
-            456.789123
+            456.789123,
         ])),
         Arc::new(Date32Array::from(vec![18000, 18100, 18200, 18300, 18400])),
         Arc::new(TimestampMillisecondArray::from(vec![
@@ -118,7 +117,7 @@ pub fn make_arrow() -> Box<RecordBatch> {
                 .timestamp(),
         ])),
         Arc::new(BooleanArray::from(vec![true, false, true, false, true])),
-        Arc::new(dict_array)
+        Arc::new(dict_array),
     ];
 
     // Arrow schema created using `Field`
@@ -140,7 +139,7 @@ pub fn make_arrow() -> Box<RecordBatch> {
             "n",
             DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
             false,
-        )
+        ),
     ]);
 
     let schema_ref = SchemaRef::new(schema);
@@ -156,7 +155,7 @@ pub fn make_arrow() -> Box<RecordBatch> {
 
     match try_batch {
         Ok(batch) => Box::new(batch),
-        Err(err) => panic!(err)
+        Err(err) => panic!(err),
     }
 }
 
@@ -170,87 +169,105 @@ pub fn make_arrow_nullable() -> Box<RecordBatch> {
             Some(u8::MIN),
             Some(u8::MAX),
             Some(u8::MAX),
-            None
+            None,
         ])),
         Arc::new(UInt16Array::from(vec![
             None,
             Some(u16::MIN),
             Some(u16::MAX),
             Some(u16::MAX),
-            None
+            None,
         ])),
         Arc::new(UInt32Array::from(vec![
             None,
             Some(u32::MIN),
             Some(u32::MAX),
             Some(u32::MAX),
-            None
+            None,
         ])),
         Arc::new(UInt64Array::from(vec![
             None,
             Some(u64::MIN),
             Some(u64::MAX),
             Some(u64::MAX),
-            None
+            None,
         ])),
         Arc::new(Int8Array::from(vec![
             None,
             Some(i8::MIN),
             Some(i8::MAX),
             Some(i8::MAX),
-            None
+            None,
         ])),
         Arc::new(Int16Array::from(vec![
             None,
             Some(i16::MIN),
             Some(i16::MAX),
             Some(i16::MAX),
-            None
+            None,
         ])),
         Arc::new(Int32Array::from(vec![
             None,
             Some(i32::MIN),
             Some(i32::MAX),
             Some(i32::MAX),
-            None
+            None,
         ])),
         Arc::new(Int64Array::from(vec![
             None,
             Some(i64::MIN),
             Some(i64::MAX),
             Some(i64::MAX),
-            None
+            None,
         ])),
         Arc::new(Float32Array::from(vec![
             None,
             Some(f32::MIN),
             Some(f32::MIN_POSITIVE),
             Some(f32::MAX),
-            None
+            None,
         ])),
         Arc::new(Float64Array::from(vec![
             None,
             Some(f64::MIN),
             Some(f64::MIN_POSITIVE),
             Some(f64::MAX),
-            None
+            None,
         ])),
-        Arc::new(Date32Array::from(vec![None, Some(18100), Some(18200), Some(18300), None])),
+        Arc::new(Date32Array::from(vec![
+            None,
+            Some(18100),
+            Some(18200),
+            Some(18300),
+            None,
+        ])),
         Arc::new(TimestampMillisecondArray::from(vec![
             None,
-            Some(NaiveDateTime::parse_from_str("2020-02-29 22:55:45", "%Y-%m-%d %H:%M:%S")
-                .unwrap()
-                .timestamp()),
-            Some(NaiveDateTime::parse_from_str("2020-03-30 05:12:45", "%Y-%m-%d %H:%M:%S")
-                .unwrap()
-                .timestamp()),
-            Some(NaiveDateTime::parse_from_str("2020-04-01 09:59:45", "%Y-%m-%d %H:%M:%S")
-                .unwrap()
-                .timestamp()),
+            Some(
+                NaiveDateTime::parse_from_str("2020-02-29 22:55:45", "%Y-%m-%d %H:%M:%S")
+                    .unwrap()
+                    .timestamp(),
+            ),
+            Some(
+                NaiveDateTime::parse_from_str("2020-03-30 05:12:45", "%Y-%m-%d %H:%M:%S")
+                    .unwrap()
+                    .timestamp(),
+            ),
+            Some(
+                NaiveDateTime::parse_from_str("2020-04-01 09:59:45", "%Y-%m-%d %H:%M:%S")
+                    .unwrap()
+                    .timestamp(),
+            ),
             None,
         ])),
-        Arc::new(BooleanArray::from(vec![None, Some(false), Some(true), Some(false), None])),
-        Arc::new(dict_array)
+        Arc::new(BooleanArray::from(vec![
+            None,
+            Some(false),
+            Some(true),
+            Some(false),
+            None,
+        ])),
+        Arc::new(dict_array),
     ];
 
     // Arrow schema created using `Field`
@@ -272,7 +289,7 @@ pub fn make_arrow_nullable() -> Box<RecordBatch> {
             "n",
             DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8)),
             true,
-        )
+        ),
     ]);
 
     let schema_ref = SchemaRef::new(schema);
@@ -288,7 +305,7 @@ pub fn make_arrow_nullable() -> Box<RecordBatch> {
 
     match try_batch {
         Ok(batch) => Box::new(batch),
-        Err(err) => panic!(err)
+        Err(err) => panic!(err),
     }
 }
 
@@ -297,7 +314,8 @@ pub fn arrow_to_arraybuffer(batch: Box<RecordBatch>) -> Box<[u8]> {
     let opts = IpcWriteOptions::try_new(64, false, arrow::ipc::MetadataVersion::V4).unwrap();
 
     {
-        let mut writer = StreamWriter::try_new_with_options(&mut buffer, &batch.schema(), opts).unwrap();
+        let mut writer =
+            StreamWriter::try_new_with_options(&mut buffer, &batch.schema(), opts).unwrap();
         writer.write(&batch).unwrap();
         writer.finish().unwrap();
     }
