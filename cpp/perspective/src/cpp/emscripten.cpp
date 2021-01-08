@@ -1089,14 +1089,6 @@ namespace binding {
         apachearrow::ArrowLoader arrow_loader;
         std::uintptr_t ptr;
 
-        std::tm res;
-        char* ret = strptime("3/1/2020, 12:30:55 AM", "%m/%d/%Y, %I:%M:%S %p", &res);
-        if (ret != NULLPTR) {
-            // parses to 2020/3/1 12:30:55, which is incorrect
-            // should parse to 2020/3/1 00:30:55
-            std::cout << "SSSSstrptime: " << res.tm_year + 1900 << "/" << res.tm_mon + 1 << "/" << res.tm_mday << " " << res.tm_hour << ":" << res.tm_min << ":" << res.tm_sec << std::endl;
-        }
-
         // Determine metadata
         bool is_delete = op == OP_DELETE;
 

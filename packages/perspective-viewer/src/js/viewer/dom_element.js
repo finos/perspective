@@ -517,13 +517,18 @@ export class DomElement extends PerspectiveElement {
 
     _autocomplete_choices(json, type) {
         const choices = [];
+        const type_config = get_type_config(type);
+
         for (let i = 1; i < json.length; i++) {
             const row_path = json[i].__ROW_PATH__;
             if (Array.isArray(row_path) && row_path.length > 0 && row_path[0]) {
                 let choice = row_path[0];
+
                 if (type === "date" || type === "datetime") {
-                    choice = new Date(choice).toLocaleString();
+                    choice = new Date(choice);
+                    choice = choice.toLocaleString("en-US", type_config.format);
                 }
+
                 choices.push(choice);
             }
         }

@@ -1417,6 +1417,21 @@ export default function(Module) {
             }
         }
 
+        // convert date/datetime filters to Date() objects, so they are parsed
+        // as local time
+        if (config.filter.length > 0) {
+            const table_schema = this.schema();
+            for (let filter of config.filter) {
+                const dtype = table_schema[filter[0]];
+                const is_compare = filter[1] !== perspective.FILTER_OPERATORS.isNull && filter[1] !== perspective.FILTER_OPERATORS.isNotNull;
+                if (is_compare && (dtype === "date" || dtype === "datetime")) {
+                    // new Date() accepts strings and new Date() objects, so no
+                    // need to type check here.
+                    filter[2] = new Date(filter[2]);
+                }
+            }
+        }
+
         let name = Math.random() + "";
         let sides;
 

@@ -162,17 +162,10 @@ namespace apachearrow {
 
     int64_t
     parseAsArrowTimestamp(const std::string& input) {
-        std::cout << "parsing: " << input << std::endl;
         for (auto candidate : DATE_PARSERS) {
             int64_t datetime;
             if (candidate->operator()(
                     input.c_str(), input.size(), arrow::TimeUnit::MILLI, &datetime)) {
-                std::tm res;
-                char* ret = strptime(input.c_str(), "%m/%d/%Y, %I:%M:%S %p", &res);
-                if (ret != NULLPTR) {
-                    std::cout << "strptime: " << res.tm_year + 1900 << "/" << res.tm_mon + 1 << "/" << res.tm_mday << " " << res.tm_hour << ":" << res.tm_min << ":" << res.tm_sec << std::endl;
-                }
-                std::cout << "parsed: " << datetime << std::endl;
                 return datetime;
             }
         }

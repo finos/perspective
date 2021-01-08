@@ -69,7 +69,7 @@
     "superstore_sorts_by_a_hidden_column_": "3213055bb3f02e8a889a6b5dd3888e7d",
     "superstore_sorts_by_a_numeric_column_": "052052c4cbbb787417ffcd3066b7fd53",
     "superstore_filters_by_a_numeric_column_": "1ca66d76cb980d704b02c49f15b63b8f",
-    "superstore_filters_by_a_datetime_column_": "9f09bdba0a81968a6b8a776c16053797",
+    "superstore_filters_by_a_datetime_column_": "dc3647fd34b1c492949107670e43bfd9",
     "superstore_highlights_invalid_filter_": "08bcfe85294601215c7a3ff615aa528b",
     "superstore_sorts_by_an_alpha_column_": "405370214ee975d003def318787868d1",
     "superstore_displays_visible_columns_": "a19d6196607e9846a1abdf2d163e100c",
@@ -81,5 +81,16 @@
     "Computed_Expressions_A_type-invalid_expression_should_show_an_error_message": "e03a4b9a23540a6684827a13ea5e6a8e",
     "Computed_Expressions_An_expression_with_invalid_inputs_should_show_an_error_message": "1b855c2069cc817903fe03f105fe36e8",
     "Computed_Expressions_An_expression_that_overwrites_a_real_column_should_show_an_error_message": "869cdfa4d961688724b83d2498d23ef1",
-    "Computed_Expressions_An_expression_that_overwrites_a_computed_column_with_a_different_type_should_show_an_error_message": "e6258611a5776a0e529ec8df24f25683"
+    "Computed_Expressions_An_expression_that_overwrites_a_computed_column_with_a_different_type_should_show_an_error_message": "e6258611a5776a0e529ec8df24f25683",
+    "filters_autocomplete_on_date_column": "c42e7c51f5d62a9f418bffa0098f3c70",
+    "filters_autocomplete_on_datetime_column": "59671faa3412d97ee8c52325af1b1ce1",
+    "filters_equals_on_date_column": "7f1c40e6ac047026aec614efbdbebb88",
+    "filters_equals_ISO_string_on_datetime_column": "d10ac353dfe747f18559e18aac927488",
+    "filters_equals_US_locale_string_on_datetime_column": "5f2f6281519d6bdc5073ea30f93a3e53",
+    "filters_greater_than_on_date_column": "da5f8957099c037662997468d72ece42",
+    "filters_greater_than_ISO_string_on_datetime_column": "778b1a35ee2d85ff64d234163ab47eb3",
+    "filters_greater_than_US_locale_string_on_datetime_column": "e80b9b03c78d631c06fe665454e015a7",
+    "filters_less_than_on_date_column": "fc7e9e5f8b146bbacd1690e0ab4eab07",
+    "filters_less_than_ISO_string_on_datetime_column": "80197f069ef247b184a4b08e5a61f043",
+    "filters_less_than_US_locale_string_on_datetime_column": "092b086f782985ffc87cb285dcfbb239"
 }

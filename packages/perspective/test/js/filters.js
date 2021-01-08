@@ -41,6 +41,26 @@ var r_date_range_data = [
     {w: +new Date(1543644060000), x: 4, y: "d", z: false}
 ];
 
+const datetime_data = [
+    {x: new Date(2019, 1, 28, 23, 59, 59)}, // 2019/02/28 23:59:59 GMT-0500
+    {x: new Date(2020, 1, 29, 0, 0, 1)}, // 2020/02/29 00:00:01 GMT-0500
+    {x: new Date(2020, 2, 8, 1, 59, 59)}, // 2020/03/8 01:59:59 GMT-0400
+    {x: new Date(2020, 2, 8, 2, 0, 1)}, // 2020/03/8 02:00:01 GMT-0500
+    {x: new Date(2020, 9, 1, 15, 11, 55)}, // 2020/10/01 15:30:55 GMT-0400
+    {x: new Date(2020, 10, 1, 19, 29, 55)}, // 2020/11/01 19:30:55 GMT-0400
+    {x: new Date(2020, 11, 31, 7, 42, 55)} // 2020/12/31 07:30:55 GMT-0500
+];
+
+const datetime_data_local = [
+    {x: new Date(2019, 1, 28, 23, 59, 59).toLocaleString()}, // 2019/02/28 23:59:59 GMT-0500
+    {x: new Date(2020, 1, 29, 0, 0, 1).toLocaleString()}, // 2020/02/29 00:00:01 GMT-0500
+    {x: new Date(2020, 2, 8, 1, 59, 59).toLocaleString()}, // 2020/03/8 01:59:59 GMT-0400
+    {x: new Date(2020, 2, 8, 2, 0, 1).toLocaleString()}, // 2020/03/8 02:00:01 GMT-0500
+    {x: new Date(2020, 9, 1, 15, 11, 55).toLocaleString()}, // 2020/10/01 15:30:55 GMT-0400
+    {x: new Date(2020, 10, 1, 19, 29, 55).toLocaleString()}, // 2020/11/01 19:30:55 GMT-0400
+    {x: new Date(2020, 11, 31, 7, 42, 55).toLocaleString()} // 2020/12/31 07:30:55 GMT-0500
+];
+
 module.exports = perspective => {
     describe("Filters", function() {
         describe("GT & LT", function() {
@@ -251,6 +271,44 @@ module.exports = perspective => {
                 expect(json).toEqual(rdata.slice(0, 3));
                 view.delete();
                 table.delete();
+            });
+
+            it("w == datetime as Date() object", async function() {
+                const table = perspective.table(datetime_data);
+                expect(await table.schema()).toEqual({
+                    x: "datetime"
+                });
+                const view = table.view({
+                    filter: [["x", "==", datetime_data[0]["x"]]]
+                });
+                expect(await view.num_rows()).toBe(1);
+                let data = await view.to_json();
+                data = data.map(d => {
+                    d.x = new Date(d.x);
+                    return d;
+                });
+                expect(data).toEqual(datetime_data.slice(0, 1));
+                await view.delete();
+                await table.delete();
+            });
+
+            it("w == datetime as US locale string", async function() {
+                const table = perspective.table(datetime_data);
+                expect(await table.schema()).toEqual({
+                    x: "datetime"
+                });
+                const view = table.view({
+                    filter: [["x", "==", datetime_data_local[0]["x"]]]
+                });
+                expect(await view.num_rows()).toBe(1);
+                let data = await view.to_json();
+                data = data.map(d => {
+                    d.x = new Date(d.x);
+                    return d;
+                });
+                expect(data).toEqual(datetime_data.slice(0, 1));
+                await view.delete();
+                await table.delete();
             });
         });
 
