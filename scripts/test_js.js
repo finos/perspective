@@ -10,6 +10,7 @@
 const {bash, execute, getarg, docker} = require("./script_utils.js");
 const fs = require("fs");
 
+const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
 const IS_PUPPETEER = !!getarg("--private-puppeteer");
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
@@ -32,6 +33,9 @@ function silent(x) {
     return bash`output=$(${x}); ret=$?; echo "\${output}"; exit $ret`;
 }
 
+/**
+ * Run tests for all packages in parallel.
+ */
 function jest() {
     return bash`
         PSP_SATURATE=${!!getarg("--saturate")} 
@@ -42,10 +46,26 @@ function jest() {
         --rootDir=.
         --config=packages/perspective-test/jest.all.config.js 
         --color
-        --verbose 
+        --verbose
         --maxWorkers=50%
+        --testPathIgnorePatterns='timezone'
         ${getarg("--bail") && "--bail"}
         ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
+        --testNamePattern="${get_regex()}"`;
+}
+
+/**
+ * Run timezone tests in a new Node process.
+ */
+function jest_timezone() {
+    return bash`
+        node_modules/.bin/lerna exec 
+        --concurrency 1 
+        --no-bail
+        --scope="@finos/perspective" 
+        -- 
+        yarn test_timezone:run
+        ${DEBUG_FLAG}
         --testNamePattern="${get_regex()}"`;
 }
 
@@ -71,11 +91,16 @@ try {
                 --scope="@finos/${PACKAGE}"`;
         }
         if (getarg("--quiet")) {
+            console.log("-- Running Perspective.js timezone test suite in quiet mode");
+            execute(silent(jest_timezone()));
             console.log("-- Running test suite in quiet mode");
             execute(silent(jest()));
         } else if (process.env.PACKAGE) {
-            const debug = getarg("--debug") ? "" : "--silent";
-            console.log("-- Running test suite in individual mode");
+            console.log(`-- Running "${PACKAGE}" test suite`);
+            if (PACKAGE === "perspective") {
+                console.log("-- Running Perspective.js timezone test suite");
+                execute(jest_timezone());
+            }
             execute`
                 PSP_SATURATE=${!!getarg("--saturate")}
                 PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
@@ -87,10 +112,12 @@ try {
                 --scope="@finos/${PACKAGE}" 
                 -- 
                 yarn test:run
-                ${debug}
+                ${DEBUG_FLAG}
                 ${getarg("--interactive") && "--runInBand"}
                 --testNamePattern="${get_regex()}"`;
         } else {
+            console.log("-- Running Perspective.js timezone test suite");
+            execute(jest_timezone());
             console.log("-- Running test suite in fast mode");
             execute(jest());
         }
