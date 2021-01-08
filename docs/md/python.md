@@ -75,9 +75,6 @@ pip install --no-binary perspective-python
 
 ### Jupyterlab
 
-<iframe width='500' height='294' src="https://www.youtube.com/embed/IO-HJsGdleE?&theme=dark&autohide=1&modestbranding=1&showinfo=0&rel=0" frameBorder="0"></iframe><br/>
-
-
 `PerspectiveWidget` is a JupyterLab widget that implements the same API as
 `<perspective-viewer>`, allowing for fast, intuitive
 transformations/visualizations of various data formats within JupyterLab.
