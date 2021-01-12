@@ -218,6 +218,19 @@ public:
 
     void get_path(t_uindex idx, std::vector<t_tscalar>& path) const;
 
+    /**
+     * @brief Returns flattened, null-padded row paths for the given vector of
+     * row indices. Thus, row pivots of ["Region", "State", "City"] returns
+     * [
+     *  ["South", null, null],
+     *  [null, "Texas", null],
+     *  [null, null, "Houston"]
+     * ]
+     * 
+     * @param row_indices
+     */
+    std::vector<std::vector<t_tscalar>> get_paths(const std::vector<t_index>& row_indices) const;
+
     std::vector<std::vector<t_tscalar>> get_paths_by_pivots(t_index num_rows) const;
 
     void get_sortby_path(t_uindex idx, std::vector<t_tscalar>& path) const;

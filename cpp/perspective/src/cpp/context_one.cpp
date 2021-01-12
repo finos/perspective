@@ -275,6 +275,39 @@ t_ctx1::get_row_path(t_index idx) const {
 }
 
 std::vector<std::vector<t_tscalar>>
+t_ctx1::get_row_paths(t_index start_row, t_index end_row) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+
+    auto ext = sanitize_get_data_extents(
+        get_row_count(), get_column_count(), start_row, end_row, 0, 1);
+
+    // Cannot start at row 0 - it is the total row, and will cause undefined
+    // behavior if we try to lookup.
+    if (ext.m_srow == 0) {
+        ext.m_srow++;
+    }
+
+    t_index num_rows = ext.m_erow - ext.m_srow;
+
+    if (num_rows == 0) return {};
+
+    std::vector<t_index> row_indices;
+    row_indices.resize(num_rows);
+
+    t_index counter = 0;
+
+    for (auto ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
+        // translate node indices into their index on the sparse tree - when
+        // a context is sorted, etc., the order of row path indices change.
+        row_indices[counter] = m_traversal->get_tree_index(ridx);
+        counter++;
+    }
+
+    return m_tree->get_paths(row_indices);
+}
+
+std::vector<std::vector<t_tscalar>>
 t_ctx1::get_row_paths_by_pivots() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");

@@ -1420,12 +1420,45 @@ t_stree::get_path(t_uindex idx, std::vector<t_tscalar>& rval) const {
 }
 
 std::vector<std::vector<t_tscalar>>
+t_stree::get_paths(const std::vector<t_index>& row_indices) const {
+    std::vector<std::vector<t_tscalar>> rval;
+    auto num_pivots = m_pivots.size();
+
+    if (num_pivots == 0) return rval;
+
+    rval.resize(num_pivots);
+
+    auto num_rows = row_indices.size();
+
+    // each pivot column needs its own path vector.
+    for (auto i = 0; i < num_pivots; ++i) {
+        std::vector<t_tscalar> path;
+        path.resize(num_rows);
+        rval[i] = path;
+    }
+
+    t_index counter = 0;
+
+    for (auto ridx : row_indices) {
+        iter_by_idx iter = m_nodes->get<by_idx>().find(ridx);
+
+        // find the number of treenodes between the node and the root, i.e.
+        // what level is this row pivoted to?
+        auto path_count = get_ancestry_count(iter->m_pidx);
+        rval[path_count][counter] = iter->m_value;
+
+        counter++;
+    }
+
+    return rval;
+}
+
+std::vector<std::vector<t_tscalar>>
 t_stree::get_paths_by_pivots(t_index num_rows) const {
     std::vector<std::vector<t_tscalar>> rval;
     auto num_pivots = m_pivots.size();
 
     if (num_pivots == 0) return rval;
-    rval.reserve(num_pivots);
     rval.resize(num_pivots);
 
     // each pivot column needs its own path vector.

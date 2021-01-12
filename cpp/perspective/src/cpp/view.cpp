@@ -542,17 +542,20 @@ View<CTX_T>::data_slice_to_arrow(
     std::vector<std::shared_ptr<arrow::Field>> fields;
 
     std::int32_t num_columns = end_col - start_col;
+    fields.reserve(num_columns);
+    vectors.reserve(num_columns);
 
-    std::vector<std::vector<t_tscalar>> row_paths;
+    // std::vector<std::vector<t_tscalar>> row_paths;
 
-    if (sides() == 1) {
-        row_paths = get_row_paths_by_pivots();
-        fields.reserve(num_columns + row_paths.size());
-        vectors.reserve(num_columns + row_paths.size());
-    } else {
-        fields.reserve(num_columns);
-        vectors.reserve(num_columns);
-    }
+    // if (sides() == 1) {
+    //     row_paths = get_row_paths_by_pivots();
+    //     fields.reserve(num_columns + row_paths.size());
+    //     vectors.reserve(num_columns + row_paths.size());
+
+    //     // generate row_path columns
+    // } else {
+        
+    // }
 
     for (std::int32_t cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
