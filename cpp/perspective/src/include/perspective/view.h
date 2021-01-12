@@ -19,6 +19,7 @@
 #include <perspective/data_slice.h>
 #include <perspective/table.h>
 #include <perspective/view_config.h>
+#include <perspective/arrow_writer.h>
 #include <cstddef>
 #include <memory>
 #include <map>
@@ -169,6 +170,30 @@ public:
     data_slice_to_arrow(
         std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
+    /**
+     * @brief Convert a `t_column` to an arrow array, and push it into the
+     * `arrow_vectors` and `arrow_fields` vectors.
+     * 
+     * @param arrow_vectors 
+     * @param arrow_fields 
+     * @param data_slice 
+     * @param column_name 
+     * @param column_dtype 
+     * @param cidx 
+     * @param stride 
+     * @param extents 
+     */
+    void
+    column_to_arrow(
+        std::vector<std::shared_ptr<arrow::Array>>& arrow_vectors,
+        std::vector<std::shared_ptr<arrow::Field>>& arrow_fields,
+        const std::vector<t_tscalar>& slice,
+        const std::string& column_name,
+        t_dtype column_dtype,
+        t_uindex cidx,
+        t_uindex stride,
+        t_get_data_extents extents) const;
+
     // Delta calculation
     bool _get_deltas_enabled() const;
     void _set_deltas_enabled(bool enabled_state);
@@ -225,6 +250,7 @@ public:
     std::vector<t_sortspec> get_sort() const;
     std::vector<t_computed_column_definition> get_computed_columns() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
+    std::vector<std::vector<t_tscalar>> get_row_paths_by_pivots() const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
     t_dtype get_column_dtype(t_uindex idx) const;
     bool is_column_only() const;
