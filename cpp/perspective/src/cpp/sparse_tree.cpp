@@ -1350,6 +1350,25 @@ t_stree::get_ancestry(t_uindex idx) const {
     return rval;
 }
 
+t_uindex
+t_stree::get_ancestry_count(t_uindex idx) const {
+    t_uindex count = 0;
+
+    if (idx == 0)
+        // node is a root node
+        return count;
+
+    while (idx > 0) {
+        iter_by_idx iter = m_nodes->get<by_idx>().find(idx);
+
+        // access the node's parent
+        idx = iter->m_pidx;
+        count++;
+    }
+
+    return count;
+}
+
 t_index
 t_stree::get_sibling_idx(t_index p_ptidx, t_index p_nchild, t_uindex c_ptidx) const {
     t_by_pidx_ipair iterators = m_nodes->get<by_pidx>().equal_range(p_ptidx);
@@ -1396,7 +1415,37 @@ t_stree::get_path(t_uindex idx, std::vector<t_tscalar>& rval) const {
             break;
         }
     }
+
     return;
+}
+
+std::vector<std::vector<t_tscalar>>
+t_stree::get_paths_by_pivots(t_index num_rows) const {
+    std::vector<std::vector<t_tscalar>> rval;
+    auto num_pivots = m_pivots.size();
+
+    if (num_pivots == 0) return rval;
+    rval.reserve(num_pivots);
+    rval.resize(num_pivots);
+
+    // each pivot column needs its own path vector.
+    for (auto i = 0; i < num_pivots; ++i) {
+        std::vector<t_tscalar> path;
+        path.resize(num_rows);
+        rval[i] = path;
+    }
+
+    // start at 1 - 0 is always null because it is the total row.
+    for (auto ridx = 1; ridx < num_rows; ++ridx) {
+        iter_by_idx iter = m_nodes->get<by_idx>().find(ridx);
+
+        // find the number of treenodes between the node and the root, i.e.
+        // what level is this row pivoted to?
+        auto path_count = get_ancestry_count(iter->m_pidx);
+        rval[path_count][ridx] = iter->m_value;
+    }
+
+    return rval;
 }
 
 t_uindex

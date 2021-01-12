@@ -547,12 +547,16 @@ View<CTX_T>::data_slice_to_arrow(
         vectors.reserve(num_columns);
     }
 
+    // auto paths = data_slice->get_row_path();
+
+    // std::cout << paths << std::endl;
+
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
         std::string name;
 
-        // TODO: 1. emit __INDEX__ (this should be pretty easy)
+        // TODO: 1. emit __INDEX__: need some sort of homogenous list type 
         // TODO: 2 .emit __ID__
         // TODO: 3. emit row_path as arrow array
         if (sides() > 1) {

@@ -36,6 +36,17 @@ public:
     t_tscalar get_aggregate_name(t_uindex idx) const;
     std::vector<t_aggspec> get_aggregates() const;
     std::vector<t_tscalar> get_row_path(t_index idx) const;
+
+    /**
+     * @brief Returns a vector of scalar vectors which represent the flattened
+     * row paths for each column in the pivot in order, i.e. row pivots of
+     * ["Region", "State", "City"] returns
+     * vector(["East", ...], ["Texas", ...], ["Houston", ...]).
+     * 
+     * @return std::vector<std::vector<t_tscalar>> 
+     */
+    std::vector<std::vector<t_tscalar>> get_row_paths_by_pivots() const;
+
     void set_depth(t_depth depth);
 
     t_index get_row_idx(const std::vector<t_tscalar>& path) const;

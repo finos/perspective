@@ -274,6 +274,15 @@ t_ctx1::get_row_path(t_index idx) const {
     return ctx_get_path(m_tree, m_traversal, idx);
 }
 
+std::vector<std::vector<t_tscalar>>
+t_ctx1::get_row_paths_by_pivots() const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_index num_rows = get_row_count();
+    if (num_rows == 0) return {};
+    return m_tree->get_paths_by_pivots(num_rows);
+}
+
 void
 t_ctx1::reset_sortby() {
     PSP_TRACE_SENTINEL();
