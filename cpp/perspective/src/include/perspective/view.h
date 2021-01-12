@@ -173,7 +173,7 @@ public:
     /**
      * @brief Convert a `t_column` to an arrow array, and push it into the
      * `arrow_vectors` and `arrow_fields` vectors.
-     * 
+     *
      * @param arrow_vectors 
      * @param arrow_fields 
      * @param data_slice 
@@ -181,7 +181,7 @@ public:
      * @param column_dtype 
      * @param cidx 
      * @param stride 
-     * @param extents 
+     * @param extents
      */
     void
     column_to_arrow(
@@ -241,6 +241,19 @@ public:
      */
     std::shared_ptr<t_data_slice<CTX_T>> get_row_delta() const;
 
+    /**
+     * @brief Returns flattened, null-padded row paths for the given start
+     * and end rows. i.e. row pivots of ["Region", "State", "City"] returns
+     * [
+     *  ["South", null, null],
+     *  [null, "Texas", null],
+     *  [null, null, "Houston"]
+     * ]
+     * 
+     */
+    std::vector<std::vector<t_tscalar>> get_row_paths(
+        std::int32_t start_row, std::int32_t end_row) const;
+
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::vector<std::string> get_row_pivots() const;
@@ -250,7 +263,6 @@ public:
     std::vector<t_sortspec> get_sort() const;
     std::vector<t_computed_column_definition> get_computed_columns() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
-    std::vector<std::vector<t_tscalar>> get_row_paths_by_pivots() const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
     t_dtype get_column_dtype(t_uindex idx) const;
     bool is_column_only() const;

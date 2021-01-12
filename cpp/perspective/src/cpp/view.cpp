@@ -542,20 +542,60 @@ View<CTX_T>::data_slice_to_arrow(
     std::vector<std::shared_ptr<arrow::Field>> fields;
 
     std::int32_t num_columns = end_col - start_col;
-    fields.reserve(num_columns);
-    vectors.reserve(num_columns);
 
-    // std::vector<std::vector<t_tscalar>> row_paths;
+    std::vector<std::vector<t_tscalar>> row_paths;
 
-    // if (sides() == 1) {
-    //     row_paths = get_row_paths_by_pivots();
-    //     fields.reserve(num_columns + row_paths.size());
-    //     vectors.reserve(num_columns + row_paths.size());
+    if (sides() == 1) {
+        row_paths = get_row_paths(extents.m_srow, extents.m_erow);
 
-    //     // generate row_path columns
-    // } else {
-        
-    // }
+        // number of paths, AKA number of row pivots
+        auto num_row_paths = row_paths.size();
+
+        fields.reserve(num_columns + num_row_paths);
+        vectors.reserve(num_columns + num_row_paths);
+
+        // number of rows inside each path, AKA (end row - start row) of the
+        // whole dataset requested.
+        auto row_path_num_rows = extents.m_erow - extents.m_srow;
+
+        // Generate a dummy data extent - num_rows is the same for every
+        // flattened row path, and num_columns is always 1. This allows us
+        // to reuse the column->arrow conversion methods without having to
+        // define a conditional for how to read the data.
+        t_get_data_extents row_path_extents;
+
+        row_path_extents.m_srow = 0;
+        row_path_extents.m_erow = row_path_num_rows;
+        row_path_extents.m_scol = 0;
+        row_path_extents.m_ecol = 1;
+
+        // need the table schema and row pivots to get each pivot's dtype
+        const t_schema table_schema = m_table->get_schema();
+
+        t_uindex counter = 0;
+
+        // generate row_path columns
+        for (const std::vector<t_tscalar>& path : row_paths) {
+            const std::string& pivot_name = m_row_pivots[counter];
+
+            std::cout << pivot_name << ": " << path << std::endl;
+
+            column_to_arrow(
+                vectors,
+                fields,
+                path,
+                "__ROW_PATH_" + std::to_string(counter),
+                table_schema.get_dtype(pivot_name),
+                0, // 1 column per path vector, always get column at idx 0
+                1, // 1 column per path vector, stride == num_columns
+                extents);
+
+            counter++;
+        }
+    } else {
+        fields.reserve(num_columns);
+        vectors.reserve(num_columns);
+    }
 
     for (std::int32_t cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
@@ -869,25 +909,29 @@ View<CTX_T>::get_row_path(t_uindex idx) const {
 
 template <>
 std::vector<std::vector<t_tscalar>>
-View<t_ctx0>::get_row_paths_by_pivots() const {
+View<t_ctx0>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
     return std::vector<std::vector<t_tscalar>>();
 }
 
 template <>
 std::vector<std::vector<t_tscalar>>
-View<t_ctxunit>::get_row_paths_by_pivots() const {
+View<t_ctxunit>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
     return std::vector<std::vector<t_tscalar>>();
 }
 
 template <>
 std::vector<std::vector<t_tscalar>>
-View<t_ctx1>::get_row_paths_by_pivots() const {
-    return m_ctx->get_row_paths_by_pivots();
+View<t_ctx1>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
+    return m_ctx->get_row_paths(start_row, end_row);
 }
 
 template <>
 std::vector<std::vector<t_tscalar>>
-View<t_ctx2>::get_row_paths_by_pivots() const {
+View<t_ctx2>::get_row_paths(
+    std::int32_t start_row, std::int32_t end_row) const {
     return std::vector<std::vector<t_tscalar>>();
 }
 

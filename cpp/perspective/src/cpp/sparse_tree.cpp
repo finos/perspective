@@ -1440,6 +1440,11 @@ t_stree::get_paths(const std::vector<t_index>& row_indices) const {
     t_index counter = 0;
 
     for (auto ridx : row_indices) {
+        if (ridx == 0) {
+            // 0 is total row, need to always skip.
+            continue;
+        }
+
         iter_by_idx iter = m_nodes->get<by_idx>().find(ridx);
 
         // find the number of treenodes between the node and the root, i.e.

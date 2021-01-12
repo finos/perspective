@@ -58,7 +58,7 @@ public:
      * 
      * @return std::vector<std::vector<t_tscalar>> 
      */
-    std::vector<std::vector<t_tscalar>> get_row_paths_by_pivots() const;
+    std::vector<std::vector<t_tscalar>> get_all_row_paths() const;
 
     void set_depth(t_depth depth);
 
