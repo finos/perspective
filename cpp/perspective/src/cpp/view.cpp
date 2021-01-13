@@ -569,14 +569,27 @@ View<CTX_T>::data_slice_to_arrow(
         row_path_extents.m_scol = 0;
         row_path_extents.m_ecol = 1;
 
-        // need the table schema and row pivots to get each pivot's dtype
+        // need table schema and row pivots to get each pivot's dtype
         const t_schema table_schema = m_table->get_schema();
 
-        t_uindex counter = 0;
+        // and the context schema as well, if the pivot is a computed col
+        const t_schema ctx_schema = m_ctx->get_schema();
+
+        t_uindex row_path_idx = 0;
 
         // generate row_path columns
         for (const std::vector<t_tscalar>& path : row_paths) {
-            const std::string& pivot_name = m_row_pivots[counter];
+            const std::string& pivot_name = m_row_pivots[row_path_idx];
+            t_dtype pivot_type;
+
+            if (!table_schema.has_column(pivot_name)) {
+                // TODO: make this more bulletproof, or figure out a cleaner
+                // way to get the dtype of a computed column because it won't
+                // be in the underlying table schema.
+                pivot_type = ctx_schema.get_dtype(pivot_name);
+            } else {
+                pivot_type = table_schema.get_dtype(pivot_name);
+            }
 
             std::cout << pivot_name << ": " << path << std::endl;
 
@@ -584,13 +597,13 @@ View<CTX_T>::data_slice_to_arrow(
                 vectors,
                 fields,
                 path,
-                "__ROW_PATH_" + std::to_string(counter),
-                table_schema.get_dtype(pivot_name),
+                "__ROW_PATH_" + pivot_name + "_" + std::to_string(row_path_idx),
+                pivot_type,
                 0, // 1 column per path vector, always get column at idx 0
                 1, // 1 column per path vector, stride == num_columns
                 extents);
 
-            counter++;
+            row_path_idx++;
         }
     } else {
         fields.reserve(num_columns);

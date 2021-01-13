@@ -1437,22 +1437,51 @@ t_stree::get_paths(const std::vector<t_index>& row_indices) const {
         rval[i] = path;
     }
 
-    t_index counter = 0;
+    t_index path_row = 0;
 
     for (auto ridx : row_indices) {
         if (ridx == 0) {
-            // 0 is total row, need to always skip.
+            // Skip total row, and start writing at row 1.
+            path_row++;
             continue;
         }
 
-        iter_by_idx iter = m_nodes->get<by_idx>().find(ridx);
+        // Get the entire row path for this row - TODO: there might be a faster
+        // way to do it, but we call this method for every row anyway in the
+        // current implementation, and we pass it across the WASM/JS boundary
+        // and convert the scalars to JS values, so it is probably faster
+        // already.
+        std::vector<t_tscalar> rp;
+        get_path(ridx, rp);
 
-        // find the number of treenodes between the node and the root, i.e.
-        // what level is this row pivoted to?
-        auto path_count = get_ancestry_count(iter->m_pidx);
-        rval[path_count][counter] = iter->m_value;
+        auto path_idx = rp.size() - 1;
 
-        counter++;
+        /**
+         * Transpose the row path matrix:
+         * 
+         * [a]
+         * [1, a]
+         * [x, 1, a]
+         * 
+         * becomes:
+         * 
+         * [a, a, a]
+         * [null, 1, 1]
+         * [null, null, x]
+         * 
+         * where each path array is of the same length and type, and can be
+         * transposed back to the original mixed-type representation:
+         * 
+         * [a, null, null]
+         * [a, 1, null]
+         * [a, 1, x]
+         */
+        for (auto pivot_idx = 0; pivot_idx < rp.size(); ++pivot_idx) {
+            rval[pivot_idx][path_row] = rp[path_idx];
+            path_idx--;
+        }
+
+        path_row++;
     }
 
     return rval;
