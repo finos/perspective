@@ -1,10 +1,11 @@
 [package]
-name = "arrow_accessor"
-version = "0.1.0"
+name = "perspective"
+version = "0.6.0"
 description = "A module that allows arrow binaries to be read out into Javascript as a 2-dimensional array of columnar data."
 authors = ["The Perspective Authors"]
 edition = "2018"
 repository = "https://github.com/finos/perspective"
+license = "Apache-2.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -13,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = {version = "^0.2.63", features = ["nightly"]}
+wasm-bindgen = "^0.2.63"
 js-sys = "0.3.45"
 chrono = "0.4.19"
 

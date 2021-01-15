@@ -594,9 +594,7 @@ if (PSP_WASM_BUILD)
 	target_link_libraries(psp arrow)
 
 	add_executable(perspective.async src/cpp/emscripten.cpp)
-
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
-
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")

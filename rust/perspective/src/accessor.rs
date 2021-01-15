@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-#![cfg(target_arch = "wasm32")]
+// #![cfg(target_arch = "wasm32")]
 
 use std::collections::HashMap;
 

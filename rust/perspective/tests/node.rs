@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-#![cfg(target_arch = "wasm32")]
+// #![cfg(target_arch = "wasm32")]
 
 mod util;
 
@@ -17,8 +17,8 @@ use js_sys::{Array as JsArray, Date};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 
-use arrow_accessor::accessor::ArrowAccessor;
-use arrow_accessor::*;
+use perspective::accessor::ArrowAccessor;
+use perspective::*;
 
 use crate::util::*;
 
