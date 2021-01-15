@@ -643,7 +643,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# building minimal arrow.
 		if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
 			target_link_libraries(psp rt)
-			target_link_libraries(binding rt)
 		endif()
 
 		# Link against minimal arrow static library

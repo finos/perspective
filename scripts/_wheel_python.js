@@ -62,9 +62,9 @@ try {
     if (MANYLINUX_VERSION) {
         // install deps
 
-        // These are system deps that may only be in place from pep-517/518 so lets
-        // reinstall them to be sure
-        cmd += `${PYTHON} -m pip install 'numpy>=1.13.1' 'pyarrow>=0.16.0,<1' && `;
+        // These are system deps that may only be in place from pep-517/518 so
+        // lets reinstall them to be sure
+        cmd += `${PYTHON} -m pip install 'numpy>=1.13.1' && `;
 
         // remove the build folder so we completely rebuild (and pick up the
         // libs we just installed above, since this build method won't use
@@ -83,8 +83,8 @@ try {
         }
         cmd += `&& ${PYTHON_INTERPRETER} -m auditwheel -v show ./dist/*.whl && ${PYTHON_INTERPRETER} -m auditwheel -v repair -L .lib ./dist/*.whl`;
     } else if (IS_MACOS) {
-        // Don't need to do any cleaning here since we will reuse the cmake cache
-        // and pyarrow/numpy paths from the pep-517/518 build in build_python.js
+        // Don't need to do any cleaning here since we will reuse the cmake
+        // cache and numpy paths from the pep-517/518 build in build_python.js
         cmd += `${PYTHON} setup.py bdist_wheel`;
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
     } else {
