@@ -219,7 +219,6 @@ jobs:
         BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/"
         BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/include"
         BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/libs"
-        CMAKE_TOOLCHAIN_FILE: "C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 - job: 'MacOS_Catalina'
   pool:
