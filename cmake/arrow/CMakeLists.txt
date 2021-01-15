@@ -1,5 +1,3 @@
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 set(ARROW_SRCS
@@ -117,6 +115,12 @@ if (PSP_PYTHON_BUILD)
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fast-dtoa.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fixed-dtoa.cc
     )
+
+    if(WIN32)
+        set(ARROW_SRCS
+            ${ARROW_SRCS}
+            ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/musl/strptime.c)
+    endif()
 endif()
 
 set_property(SOURCE util/io_util.cc
