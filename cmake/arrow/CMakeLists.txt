@@ -152,13 +152,17 @@ set(FBS_SRC
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
 
 include_directories(src)
+
+# Build Arrow as a static library
 set(ARROW_BUILD_STATIC ON)
 if (PSP_WASM_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
+
 add_library(arrow STATIC ${ARROW_SRCS})
+
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
 
@@ -169,12 +173,6 @@ target_link_libraries(arrow
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${ARROW_TEST_LINK_TOOLCHAIN})
-
-# python 2.7 build needs -lrt, otherwise we get an "undefined symbol:
-# clock_gettime" error. TODO: remove this one if we don't need it
-# if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
-#     target_link_libraries(arrow rt)
-# endif()
 
 find_package(Flatbuffers)
 
