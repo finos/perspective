@@ -1,8 +1,7 @@
 const path = require("path");
 const common = require("./common.config.js");
-const {minimizer} = require("./minimizer.js");
 
-module.exports = common({build_worker: true}, config =>
+module.exports = common({}, config =>
     Object.assign(config, {
         entry: "./dist/esm/perspective.parallel.js",
         output: {
@@ -10,10 +9,8 @@ module.exports = common({build_worker: true}, config =>
             library: "perspective",
             libraryTarget: "umd",
             libraryExport: "default",
+            chunkFilename: "perspective.chunk_[id].js",
             path: path.resolve(__dirname, "../../dist/umd")
-        },
-        optimization: {
-            minimizer: minimizer
         }
     })
 );

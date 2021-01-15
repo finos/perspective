@@ -7,7 +7,7 @@
  *
  */
 
-import load_perspective from "../../dist/obj/psp.async.js";
+import load_perspective from "@finos/perspective-cpp";
 import perspective from "./perspective.js";
 
 let _perspective_instance;

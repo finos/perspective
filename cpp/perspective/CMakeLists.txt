@@ -228,6 +228,7 @@ if (PSP_WASM_BUILD)
 		--memory-init-file 0 \
 		-Wall \
 		-s NO_EXIT_RUNTIME=1 \
+		-fcolor-diagnostics \
 		-s NO_FILESYSTEM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
 		-s MODULARIZE=1 \
@@ -595,7 +596,7 @@ if (PSP_WASM_BUILD)
 
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
-	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
+	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)

@@ -22,8 +22,5 @@
         "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^0.6.0",
         "core-js": "^3.6.4"
-    },
-    "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.6.0"
     }
 }

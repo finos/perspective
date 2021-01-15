@@ -31,6 +31,13 @@ module.exports = {
             }
         ]
     },
+    stats: {
+        modules: false,
+        hash: false,
+        version: false,
+        builtAt: false,
+        entrypoints: false
+    },
     devServer: {
         contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../../node_modules/superstore-arrow")]
     },

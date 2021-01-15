@@ -21,12 +21,12 @@ const process = require("process");
 
 const path = require("path");
 
-const load_perspective = require("./psp.async.js").default;
+const load_perspective = require("./perspective.cpp.js").default;
 
 // eslint-disable-next-line no-undef
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = require("./psp.async.wasm.js").default;
+const buffer = fs.readFileSync(require.resolve("@finos/perspective-cpp/dist/build/perspective.cpp.wasm")).buffer;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {

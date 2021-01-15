@@ -1,0 +1,14 @@
+{
+    "name": "@finos/perspective-cpp",
+    "author": "The Perspective Authors",
+    "license": "Apache-2.0",
+    "version": "0.6.0",
+    "main": "./dist/build/perspective.cpp.js",
+    "scripts": {
+        "build": "mkdirp dist && yarn emsdk-run yarn make",
+        "make": "cd dist && CLICOLOR_FORCE=1 emcmake cmake ../ -DCMAKE_BUILD_TYPE=release && CLICOLOR_FORCE=1 emmake make -j8",
+        "test": ":",
+        "test:run": ":",
+        "test:build": ":"
+    }
+}

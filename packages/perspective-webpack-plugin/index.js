@@ -7,23 +7,20 @@
  *
  */
 
-const PSP_WORKER_LOADER = require.resolve("./src/js/psp-worker-loader");
-const WASM_LOADER = require.resolve("./src/js/wasm-loader.js");
-const PSP_WORKER_COMPILER_LOADER = require.resolve("./src/js/psp-worker-compiler-loader.js");
 const {get_config} = require("@finos/perspective/dist/esm/config");
+const path = require("path");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
         this.options = Object.assign(
             {},
             {
-                load_path: [/@finos[\\/]perspective/, __dirname.replace("-webpack-plugin", "")],
-                workerLoaderOptions: {
-                    name: "[name].worker.js"
-                },
-                wasmLoaderOptions: {
-                    name: "[name]"
-                }
+                load_path: [path.join(require.resolve("@finos/perspective"), "..", "..", ".."), path.join(require.resolve("@finos/perspective-cpp"), "..", "..", "..")],
+                workerName: "[name].js",
+                wasmName: "[name].wasm",
+                inlineWasm: false,
+                inlineWorker: false,
+                inline: false
             },
             options
         );
@@ -32,64 +29,50 @@ class PerspectiveWebpackPlugin {
     apply(compiler) {
         const compilerOptions = compiler.options;
         const moduleOptions = compilerOptions.module || (compilerOptions.module = {});
-
         const rules = [];
-
-        if (!this.options.inline) {
-            rules.push({
-                test: /perspective\.inline\.js/,
-                include: this.options.load_path,
-                use: [
-                    {
-                        loader: require.resolve("./src/js/switch-inline-loader.js")
-                    }
-                ]
-            });
-
-            if (compilerOptions.target !== "node") {
-                rules.push({
-                    test: /__node\.js$/,
-                    include: this.options.load_path,
-                    use: [
-                        {
-                            loader: require.resolve("./src/js/null-loader.js")
-                        }
-                    ]
-                });
+        rules.push({
+            test: /perspective\.worker\.js$/,
+            type: "javascript/auto",
+            include: this.options.load_path,
+            use: {
+                loader: "worker-loader",
+                options: {
+                    filename: this.options.workerName,
+                    inline: (this.options.inline || this.options.inlineWorker) && "no-fallback"
+                }
             }
-        }
+        });
 
-        if (this.options.build_worker) {
+        if (!(this.options.inline || this.options.inlineWasm)) {
             rules.push({
-                test: /perspective\.wasm\.js$/,
+                test: /perspective\.cpp\.wasm$/,
+                type: "javascript/auto",
                 include: this.options.load_path,
-                use: [
-                    {
-                        loader: PSP_WORKER_LOADER,
-                        options: Object.assign({}, this.options.workerLoaderOptions, {compiled: true})
-                    },
-                    {
-                        loader: PSP_WORKER_COMPILER_LOADER,
-                        options: {name: "[name].worker.js"}
+                use: {
+                    loader: "file-loader",
+                    options: {
+                        name: this.options.wasmName
                     }
-                ]
+                }
             });
         } else {
             rules.push({
-                test: /perspective\.wasm\.js$/,
+                test: /perspective\.cpp\.wasm$/,
+                type: "javascript/auto",
                 include: this.options.load_path,
-                use: {
-                    loader: PSP_WORKER_LOADER,
-                    options: this.options.workerLoaderOptions
-                }
+                loader: "arraybuffer-loader"
             });
         }
 
-        rules.push({
-            test: /\.js$/,
-            loader: "source-map-loader",
-            exclude: [/node_modules\/chevrotain/]
-        });
+        if (compilerOptions.target !== "node") {
+            compilerOptions.node = compilerOptions.node || {};
+            compilerOptions.node.fs = "empty";
+
+            compilerOptions.resolve = compilerOptions.resolve || {};
+            compilerOptions.resolve.fallback = compilerOptions.resolve.fallback || {};
+            compilerOptions.resolve.fallback.path = false;
+            compilerOptions.resolve.fallback.fs = false;
+        }
 
         const perspective_config = get_config();
         if (perspective_config) {
@@ -107,15 +90,6 @@ class PerspectiveWebpackPlugin {
                 ]
             });
         }
-
-        rules.push({
-            test: /psp\.async\.wasm\.js$/,
-            include: this.options.load_path,
-            use: {
-                loader: WASM_LOADER,
-                options: this.options.wasmLoaderOptions
-            }
-        });
 
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }

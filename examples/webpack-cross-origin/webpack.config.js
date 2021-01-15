@@ -15,23 +15,20 @@ module.exports = {
     entry: "./src/index.js",
     mode: "development",
     output: {
-        filename: "public/bundle.js",
-        publicPath: "http://localhost:8080/"
+        filename: "cdn/bundle.js",
+        publicPath: "http://localhost:5150/"
     },
     plugins: [
         new HtmlWebPackPlugin({
             title: "Perspective Webpack Cross-Origin Example",
             template: "./src/index.html",
-            filename: "public/index.html",
+            filename: "app/index.html",
             inject: "head"
         }),
         new PerspectivePlugin({
-            wasmLoaderOptions: {
-                name: "[hash].wasm"
-            },
-            workerLoaderOptions: {
-                name: "[hash].worker.[ext]"
-            }
+            wasmName: "cdn/test.[hash].wasm",
+            workerName: "cdn/test.[hash].worker.js",
+            inlineWorker: true
         })
     ],
     module: {

@@ -15,7 +15,12 @@ module.exports = {
         index: "./src/ts/psp_widget.ts"
     },
     resolve: {
-        extensions: [".ts", ".js"]
+        extensions: [".ts", ".js"],
+        fallback: {
+            path: false,
+            fs: false,
+            crypto: false
+        }
     },
     performance: {
         hints: false,

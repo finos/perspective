@@ -29,7 +29,7 @@ $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/persp
 ```
 
 Perspective requires the browser to have access to
-Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
+Perspective's `.worker.js` and `.wasm` assets _in addition_ to the bundled
 `.js` scripts. By default, Perspective <a href="https://github.com/finos/perspective/pull/870">inlines</a>
 these assets into the `.js` scripts, and delivers them in one file. This has no
 runtime performance impact, but does increase asset load time. Most apps
