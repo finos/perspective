@@ -432,7 +432,13 @@ message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 # Build arrow dependencies
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
-psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+
+# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
+# headers accessible. The actual flatc executable is installed using
+# Chocolatey for our Azure Windows job.
+if (WIN32)
+	psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+endif()
 
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
@@ -586,14 +592,14 @@ if (PSP_WASM_BUILD)
 	add_executable(perspective.async src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
+
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
-		# Look for the binary using @loader_path (relative to binary location) instead of @rpath
-		# and include arrow in @rpath so it can be found by libbinding/libpsp
+		# Look for the binary using @loader_path (relative to binary location)
         set(CMAKE_MACOSX_RPATH TRUE)
         set(CMAKE_SKIP_BUILD_RPATH FALSE)
 		set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
@@ -632,16 +638,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
 
-		# python 2.7 build needs -lrt, otherwise we get an "undefined symbol:
-		# clock_gettime" error.
+		# python 2.7 build on manylinux needs -lrt for access to time functions,
+		# otherwise we get an "undefined symbol: clock_gettime" error when
+		# building minimal arrow.
 		if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
 			target_link_libraries(psp rt)
 			target_link_libraries(binding rt)
 		endif()
 
-
+		# Link against minimal arrow static library
 		target_link_libraries(psp arrow)
-		target_link_libraries(binding arrow)
 
 		target_link_libraries(psp tbb)
 		target_link_libraries(binding tbb)
@@ -656,10 +662,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 
 		if(WIN32)
-			# inline arrow dlls
-			# file(GLOB ARROW_DLLS "${PYTHON_PYARROW_LIBRARY_DIR}/*.dll")
-
-			# add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${ARROW_DLLS} ${PSP_PYTHON_SRC}/table/)
 			if(NOT TBB_FOUND)
 				add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tbb> ${PSP_PYTHON_SRC}/table/)
 			endif()
@@ -667,8 +669,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 	else()
 		add_library(psp SHARED ${WASM_SOURCE_FILES})
-
-		# Link perspective against custom-built minimal arrow
 		target_link_libraries(psp arrow)
 	endif()
 
