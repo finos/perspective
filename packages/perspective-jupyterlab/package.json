@@ -35,8 +35,8 @@
         "@finos/perspective-viewer": "^0.6.0",
         "@finos/perspective-viewer-d3fc": "^0.6.0",
         "@finos/perspective-viewer-datagrid": "^0.6.0",
-        "@jupyter-widgets/base": "^3.0.0",
-        "@jupyterlab/application": "^2.0.0",
+        "@jupyter-widgets/base": "^3.0.0 || ^4.0.0",
+        "@jupyterlab/application": "^3.0.0",
         "@lumino/application": "^1.7.3",
         "@lumino/widgets": "^1.9.3"
     },
