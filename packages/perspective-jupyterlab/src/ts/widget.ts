@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 import {Message} from "@lumino/messaging";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 
@@ -33,7 +34,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
      * Any custom lumino widget used inside a Jupyter widget should override
      * the processMessage function like this.
      */
-    processMessage(msg: Message) {
+    processMessage(msg: Message): void {
         super.processMessage(msg);
         this._view.processPhosphorMessage(msg);
     }
@@ -43,7 +44,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
      *
      * This causes the view to be destroyed as well with 'remove'
      */
-    dispose() {
+    dispose(): void {
         if (this.isDisposed) {
             return;
         }
