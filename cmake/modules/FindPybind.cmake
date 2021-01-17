@@ -1,4 +1,4 @@
-# Find the Python PyArrow package
+# Find the Python PyBind package
 # PYTHON_PYBIND_INCLUDE_DIR
 # PYTHON_PYBIND_FOUND
 # will be set by this script

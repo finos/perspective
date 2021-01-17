@@ -22,26 +22,48 @@
 # FLATBUFFERS_INCLUDE_DIR, directory containing headers
 # FLATBUFFERS_STATIC_LIB, path to flatbuffers's static library
 # FLATBUFFERS_COMPILER, path to flatc compiler
+#
+# TODO: [01-15-2021] now that we use Flatbuffers on all platforms, it might be
+# a good time to figure out how we can install Flatbuffers as a dependency
+# inside our CMakeLists (we would just need to build the flatc executable
+# before our Arrow build starts). Right now, I've put in some hacks to make
+# sure our Windows build works on Azure by pre-installing flatc (like we do on
+# all other platforms), and then pulling down the headers for Windows so they
+# can be included.
 
 # this might fail
 # https://gitlab.kitware.com/cmake/cmake/issues/19120
-find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
-  PATHS ${FLATBUFFERS_ROOT}/include
-  HINTS /usr/local /usr/local/flatbuffers /usr/local/Homebrew /usr ~/homebrew/ /usr/local/include /usr/local/flatbuffers/include /usr/include ~/homebrew/include
-  NO_CMAKE_SYSTEM_PATH
-  NO_SYSTEM_ENVIRONMENT_PATH)
+if (WIN32)
+  find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
+    PATHS ${FLATBUFFERS_ROOT}/include)
 
-find_program(FLATBUFFERS_COMPILER flatc
-  PATHS ${FLATBUFFERS_ROOT}/bin
-  HINTS /usr/local/bin /usr/bin /usr/local/Homebrew/bin ~/homebrew/bin
-  NO_CMAKE_SYSTEM_PATH
-  NO_SYSTEM_ENVIRONMENT_PATH)
+  find_program(FLATBUFFERS_COMPILER flatc
+    PATHS ${FLATBUFFERS_ROOT}/bin)
+else()
+  find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
+    PATHS ${FLATBUFFERS_ROOT}/include
+    HINTS /usr/local /usr/local/flatbuffers /usr/local/Homebrew /usr ~/homebrew/ /usr/local/include /usr/local/flatbuffers/include /usr/include ~/homebrew/include
+    NO_CMAKE_SYSTEM_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH)
 
-if(NOT ${FLATBUFFERS_INCLUDE_DIR})
-  # HACK
-  set(FLATBUFFERS_INCLUDE_DIR /usr/local/include)
+  find_program(FLATBUFFERS_COMPILER flatc
+    PATHS ${FLATBUFFERS_ROOT}/bin
+    HINTS /usr/local/bin /usr/bin /usr/local/Homebrew/bin ~/homebrew/bin
+    NO_CMAKE_SYSTEM_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH)
+
+  if(NOT ${FLATBUFFERS_INCLUDE_DIR})
+    # HACK
+    set(FLATBUFFERS_INCLUDE_DIR /usr/local/include)
+  endif()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(FLATBUFFERS REQUIRED_VARS
-  FLATBUFFERS_INCLUDE_DIR FLATBUFFERS_COMPILER)
+
+if (WIN32)
+  find_package_handle_standard_args(Flatbuffers REQUIRED_VARS
+    FLATBUFFERS_INCLUDE_DIR FLATBUFFERS_COMPILER)
+else()
+  find_package_handle_standard_args(FLATBUFFERS REQUIRED_VARS
+    FLATBUFFERS_INCLUDE_DIR FLATBUFFERS_COMPILER)
+endif()

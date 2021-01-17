@@ -101,6 +101,28 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc)
 
+if (PSP_PYTHON_BUILD)
+    set(ARROW_SRCS
+        ${ARROW_SRCS}
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/formatting.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fast-dtoa.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fixed-dtoa.cc
+    )
+
+    if(WIN32)
+        set(ARROW_SRCS
+            ${ARROW_SRCS}
+            ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/musl/strptime.c)
+    endif()
+endif()
+
 set_property(SOURCE util/io_util.cc
            APPEND_STRING
            PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
@@ -130,13 +152,17 @@ set(FBS_SRC
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
 
 include_directories(src)
+
+# Build Arrow as a static library
 set(ARROW_BUILD_STATIC ON)
 if (PSP_WASM_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
+
 add_library(arrow STATIC ${ARROW_SRCS})
+
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
 

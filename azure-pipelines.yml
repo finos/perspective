@@ -193,7 +193,7 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install -U numpy "pyarrow>=0.16.0,<1" pip
+        python -m pip install -U numpy "pyarrow>=2" pip
       displayName: "Python deps"
 
     - script: npm install -g yarn
@@ -202,7 +202,10 @@ jobs:
     - script: yarn
       displayName: 'Install Deps'
 
-    - script: yarn build_python  --ci $(python_flag)
+    - script: choco install flatc
+      displayName: "Install Flatbuffers"
+
+    - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
       env:
         # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
@@ -256,7 +259,7 @@ jobs:
         versionSpec: '12.x'
 
     - script: |
-        brew install boost
+        brew install boost flatbuffers
       displayName: "System deps"
 
     - script: |
@@ -266,8 +269,15 @@ jobs:
       displayName: "Which python"
 
     - script: |
-        python -m pip install -U delocate wheel numpy "pyarrow>=0.16.0,<1" pip
-      displayName: "Python deps"
+        python -m pip install -U delocate wheel numpy "pyarrow>=2" pip
+      displayName: "Python 3 deps"
+      condition: eq(variables['python_flag'], '')
+    
+    # Last released PyArrow version on Python 2 is 0.16.0
+    - script: |
+        python -m pip install -U delocate wheel numpy "pyarrow==0.16.0" pip
+      displayName: "Python 2 deps"
+      condition: eq(variables['python_flag'], '--python2')
 
     - script: npm install -g yarn
       displayName: "Install Yarn"

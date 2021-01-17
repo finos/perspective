@@ -42,9 +42,9 @@ function (psp_build_message message)
 	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${message}")
 endfunction()
 
-###############################
-# Helper to grab dependencies #
-###############################
+###################################################
+# Helper to grab dependencies from remote sources #
+###################################################
 function (psp_build_dep name cmake_file)
 	if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
 		psp_build_message("${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
@@ -69,7 +69,7 @@ function (psp_build_dep name cmake_file)
 	endif()
 
 	if(${name} STREQUAL arrow)
-		# Overwrite arrow's CMakeLists with our custom, minimal one
+		# Overwrite arrow's CMakeLists with our custom, minimal CMakeLists.
 		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
 		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/config.h ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ COPYONLY)
 		add_subdirectory(${CMAKE_BINARY_DIR}/arrow-src/cpp/
@@ -222,9 +222,6 @@ if (PSP_WASM_BUILD)
     # Include this docker-only directory.
 	include_directories("/boost_includes")
 
-    # Build Rapidjson as it is used in the minimal arrow to be built later.
-	psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
-
 	set(EXTENDED_FLAGS " \
 		--bind \
 		--source-map-base ./build/ \
@@ -315,7 +312,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 	endif()
 
+	# Boost is a system dependency and must be present and built on the system.
 	find_package(Boost REQUIRED)
+
 	if(NOT Boost_FOUND)
 		message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
 	else()
@@ -323,7 +322,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
 
+	# TBB is a dependency that we can build as part of our build process, so it
+	# does not necessarily have to be present before Perspective is built.
 	find_package(TBB)
+
 	if(NOT TBB_FOUND)
 		psp_build_message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
 		psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
@@ -415,17 +417,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			psp_build_message("${Cyan}Numpy found: ${PYTHON_NUMPY_INCLUDE_DIR}${ColorReset}")
 			include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 		endif()
-
-		find_package(PyArrow REQUIRED)
-
-		if(NOT PYTHON_PYARROW_FOUND)
-			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
-		else()
-			psp_build_message("${Cyan}PyArrow found: PYTHON_PYARROW_INCLUDE_DIR - ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
-			psp_build_message("${Cyan}Using pre-built ${PYTHON_PYARROW_PYTHON_SHARED_LIBRARY} ${PYTHON_PYARROW_ARROW_SHARED_LIBRARY} from: ${PYTHON_PYARROW_LIBRARY_DIR}${ColorReset}")
-			include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
-			link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
-		endif()
 		#####################
 	endif()
 endif()
@@ -435,21 +426,29 @@ psp_build_dep("date" "${PSP_CMAKE_MODULE_PATH}/date.txt.in")
 psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
-# For WASM/CPP build, build minimal arrow from source
-if (NOT PSP_PYTHON_BUILD)
-	# build arrow + dependencies from source for Emscripten and C++
-	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
+# Build minimal arrow for both Emscripten and Python
+message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
-	psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
-	psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
+# Build arrow dependencies
+psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
+psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
 
-	find_package(Flatbuffers)
-	if(NOT FLATBUFFERS_FOUND)
-		message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
-	else()
-		psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-		include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
-	endif()
+# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
+# headers accessible. The actual flatc executable is installed using
+# Chocolatey for our Azure Windows job.
+if (WIN32)
+	psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+endif()
+
+# Build minimal arrow itself
+psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
+
+find_package(Flatbuffers)
+if(NOT FLATBUFFERS_FOUND)
+	message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+else()
+	psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+	include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
 #####################
@@ -593,14 +592,14 @@ if (PSP_WASM_BUILD)
 	add_executable(perspective.async src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
+
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
-		# Look for the binary using @loader_path (relative to binary location) instead of @rpath
-		# and include arrow in @rpath so it can be found by libbinding/libpsp
+		# Look for the binary using @loader_path (relative to binary location)
         set(CMAKE_MACOSX_RPATH TRUE)
         set(CMAKE_SKIP_BUILD_RPATH FALSE)
 		set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
@@ -635,25 +634,19 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 			# .dll not importable
 			set_property(TARGET binding PROPERTY SUFFIX .pyd)
-        elseif (MACOS OR NOT MANYLINUX)
-			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
-
-			# Add a relative path to search for PyArrow - when Perspective is
-			# installed from a wheel, PyArrow may not be in the same directory
-			# as the PyArrow which was used to build the wheel.
-			#
-			# Assuming that both Pyarrow and Perspective are installed in
-			# `site-packages`, the relative search path should be able to pick
-            # up pyarrow. This is only enabled for *nix (non-manylinux), as `auditwheel`
-			# will not delocate libarrow properly if it is in the rpath.
-            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
-            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path} ${module_origin_path}../../pyarrow/ ${PYTHON_PYARROW_LIBRARY_DIR} ${PSP_PYTHON_ARROWINSTALLDIR})
 		else()
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
 
-		target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
-		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
+		# python 2.7 build on manylinux needs -lrt for access to time functions,
+		# otherwise we get an "undefined symbol: clock_gettime" error when
+		# building minimal arrow.
+		if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
+			target_link_libraries(psp rt)
+		endif()
+
+		# Link against minimal arrow static library
+		target_link_libraries(psp arrow)
 
 		target_link_libraries(psp tbb)
 		target_link_libraries(binding tbb)
@@ -668,10 +661,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 
 		if(WIN32)
-			# inline arrow dlls
-			file(GLOB ARROW_DLLS "${PYTHON_PYARROW_LIBRARY_DIR}/*.dll")
-
-			add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${ARROW_DLLS} ${PSP_PYTHON_SRC}/table/)
 			if(NOT TBB_FOUND)
 				add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tbb> ${PSP_PYTHON_SRC}/table/)
 			endif()
@@ -679,8 +668,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 	else()
 		add_library(psp SHARED ${WASM_SOURCE_FILES})
-
-		# Link perspective against custom-built minimal arrow
 		target_link_libraries(psp arrow)
 	endif()
 

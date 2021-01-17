@@ -47,29 +47,32 @@ yarn start simple
 #### Docker
 
 [Docker](https://docs.docker.com/install/) images with pre-built development
-environments are provided for the Javascript and Python libraries.
+environments are provided for the Python libraries.
 
 To build Perspective using Docker, select the option in `yarn setup`.
+
+### System Dependencies
+
+`Perspective.js` and `perspective-python` **require** the following system dependencies to be installed:
+
+- [CMake](https://cmake.org/) (version 3.15.4 or higher)
+- [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not header-only)
+- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
 
 ## `Perspective.js`
 
 To build the JavaScript library, which includes WebAssembly compilation,
 [Emscripten](https://github.com/kripken/emscripten) and its prerequisites are
-required. A Docker image is provided with the correct environment and
-prerequisites.
+required.
 
-#### System Dependencies
-
-Perspective requires some system dependencies to be installed before it can be
-built using Emscripten:
-
-- [CMake](https://cmake.org/) (version 3.15.4 or higher)
-- [Boost](https://www.boost.org/) (version 1.67 or higher)
-- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+`Perspective.js` specifies its Emscripten version dependency in `package.json`,
+and the correct version of Emscripten will be installed with other JS
+dependencies by running `yarn`.
 
 #### Building via local EMSDK
 
-To build using local Emscripten,
+To build using an Emscripten install on your local system and not the
+Emscripten bundled with Perspective in its `package.json`,
 [install](https://emscripten.org/docs/getting_started/downloads.html) the
 Emscripten SDK, then activate and export the latest `emsdk` environment via
 [`emsdk_env.sh`](https://github.com/juj/emsdk):
@@ -78,14 +81,14 @@ Emscripten SDK, then activate and export the latest `emsdk` environment via
 source emsdk/emsdk_env.sh
 ```
 
-We currently use Emscripten version `1.39.13` — deviating from this specific
+We currently use Emscripten version `2.0.6` — deviating from this specific
 version of Emscripten can introduce various errors that are extremely difficult
 to debug.
 
 To install this specific version of Emscripten:
 
 ```bash
-./emsdk install 1.39.13
+./emsdk install 2.0.6
 ```
 
 ## `perspective-python`
@@ -103,14 +106,6 @@ To build the Python 2 version of the library, use the `--python2` flag:
 ```bash
 yarn build --python2
 ```
-
-### System Dependencies
-
-`perspective-python` requires the following system dependencies to be installed before it can be
-built from source:
-
-- [CMake](https://cmake.org/) (version 3.15.4 or higher)
-- [Boost](https://www.boost.org/) (version 1.67 or higher)
 
 ## System-Specific Instructions
 
@@ -175,7 +170,7 @@ You can run the test suite simply with the standard NPM command, which will both
 build the test suite for every package and run them.
 
 ```bash
-yarn test
+yarn test [--debug]
 ```
 
 A test name regex can be passed to `jest` via the same `-t` flag:
@@ -243,10 +238,7 @@ Verbosity in the tests can be enabled with the `--verbose` flag.
 ### Troubleshooting installation from source
 
 If you are installing from a source distribution (sdist), make sure you have
-CMake and Boost headers present on your machine:
-
-- CMake (version 3.15.4 or higher)
-- Boost Headers (version 1.67)
+the [System Dependencies](#system-dependencies) installed.
 
 Try installing in verbose mode:
 
@@ -258,13 +250,7 @@ The most common culprits are:
 
 - CMake version too old
 - Boost headers are missing or too old
-- PyArrow not installed prior to installing perspective
-
-Additionally, due to PEP-518 and build isolation, its possible that the version
-of PyArrow that pip uses to build perspective-python is different from the one
-you have installed. To disable this, pass the `--no-build-isolation` flag to
-pip.
-
+- Flatbuffers not installed prior to installing Perspective
 #### Timezones in Python Tests
 
 Python tests are configured to use the `UTC` time zone. If running tests locally,

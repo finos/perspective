@@ -10,7 +10,6 @@ from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 from distutils.version import LooseVersion
-from distutils import sysconfig
 from codecs import open
 
 import io
@@ -49,7 +48,6 @@ requires = [
     "future>=0.16.0",
     "numpy>=1.13.1",
     "pandas>=0.22.0",
-    "pyarrow>=0.16.0,<1",
     "python-dateutil>=2.8.0",
     "six>=1.11.0",
     "tornado>=4.5.3",
@@ -69,6 +67,7 @@ requires_dev_py2 = [
     "flake8>=3.7.8",
     "mock",
     "pybind11>=2.4.0",
+    "pyarrow>=0.16.0",
     "pytest>=4.3.0",
     "pytest-cov>=2.6.1",
     "pytest-check-links",
@@ -146,14 +145,6 @@ class PSPBuild(build_ext):
             "-DPSP_PYTHON_VERSION={}".format(PYTHON_VERSION),
             "-DPython_ADDITIONAL_VERSIONS={}".format(PYTHON_VERSION),
             "-DPython_FIND_VERSION={}".format(PYTHON_VERSION),
-            "-DPSP_PYTHON_ARROWINSTALLDIR={}".format(
-                os.environ.get(
-                    "PSP_PYTHON_ARROWINSTALLDIR",
-                    os.path.join(sysconfig.get_python_lib(), "pyarrow").replace(
-                        "\\", "/"
-                    ),
-                )
-            ),
             "-DPython_EXECUTABLE={}".format(sys.executable).replace("\\", "/"),
             "-DPython_ROOT_DIR={}".format(sys.prefix).replace("\\", "/"),
             "-DPython_ROOT={}".format(sys.prefix).replace("\\", "/"),
