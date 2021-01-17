@@ -9,12 +9,8 @@
 
 const {execute} = require("./script_utils.js");
 
-function lerna() {
-    execute`lerna run build --loglevel silent --scope="@finos/${process.env.PACKAGE}"`;
-}
-
 try {
-    lerna();
+    execute`lerna run build --loglevel silent --scope="@finos/${process.env.PACKAGE}"`;
 } catch (e) {
     console.log(e.message);
     process.exit(1);

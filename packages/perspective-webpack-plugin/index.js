@@ -15,12 +15,13 @@ class PerspectiveWebpackPlugin {
         this.options = Object.assign(
             {},
             {
-                load_path: [path.join(require.resolve("@finos/perspective"), "..", "..", ".."), path.join(require.resolve("@finos/perspective-cpp"), "..", "..", "..")],
-                workerName: "[name].js",
-                wasmName: "[name].wasm",
+                inline: false,
                 inlineWasm: false,
                 inlineWorker: false,
-                inline: false
+                wasmPath: path.dirname(require.resolve("@finos/perspective/package.json")),
+                workerPath: path.dirname(require.resolve("@finos/perspective-cpp/package.json")),
+                wasmName: "[name].wasm",
+                workerName: "[name].js"
             },
             options
         );
@@ -33,7 +34,7 @@ class PerspectiveWebpackPlugin {
         rules.push({
             test: /perspective\.worker\.js$/,
             type: "javascript/auto",
-            include: this.options.load_path,
+            include: this.options.workerPath,
             use: {
                 loader: "worker-loader",
                 options: {
@@ -47,7 +48,7 @@ class PerspectiveWebpackPlugin {
             rules.push({
                 test: /perspective\.cpp\.wasm$/,
                 type: "javascript/auto",
-                include: this.options.load_path,
+                include: this.options.wasmPath,
                 use: {
                     loader: "file-loader",
                     options: {
@@ -59,19 +60,28 @@ class PerspectiveWebpackPlugin {
             rules.push({
                 test: /perspective\.cpp\.wasm$/,
                 type: "javascript/auto",
-                include: this.options.load_path,
+                include: this.options.wasmPath,
                 loader: "arraybuffer-loader"
             });
         }
 
+        // Perspective does not specialize the emscripten build because we want
+        // to only perform it once for all 3 possible values of the
+        // `ENVIRONMENT` flag, as an optimization of developer wall time.
+        // This has the side effect that some unused code is emitted which
+        // imports `"fs"` and `"path"`.
+        // [emsdk docs on ENVIRONMENT](https://github.com/emscripten-core/emscripten/blob/master/src/settings.js#L526)
         if (compilerOptions.target !== "node") {
+            // webpack 4
             compilerOptions.node = compilerOptions.node || {};
             compilerOptions.node.fs = "empty";
+            compilerOptions.node.path = "empty";
 
+            // webpack 5
             compilerOptions.resolve = compilerOptions.resolve || {};
             compilerOptions.resolve.fallback = compilerOptions.resolve.fallback || {};
-            compilerOptions.resolve.fallback.path = false;
             compilerOptions.resolve.fallback.fs = false;
+            compilerOptions.resolve.fallback.path = false;
         }
 
         const perspective_config = get_config();
