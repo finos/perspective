@@ -27,12 +27,17 @@
             "tabWidth": 4,
             "bracketSpacing": false
         }],
+
+        "max-len": ["error", 200],
         "no-const-assign": "error",
         "no-this-before-super": "error",
         "no-undef": "error",
         "no-unreachable": "error",
         "no-unused-vars": "error",
         "constructor-super": "error",
-        "valid-typeof": "error"
+        "valid-typeof": "error",
+
+        "@typescript-eslint/camelcase": "off",
+        "@typescript-eslint/ban-ts-ignore": "off"
     }
 }
