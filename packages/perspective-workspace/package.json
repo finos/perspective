@@ -51,6 +51,7 @@
     "devDependencies": {
         "@finos/perspective-test": "^0.6.0",
         "babel-loader": "^8.0.6",
-        "babel-runtime": "^6.26.0"
+        "babel-runtime": "^6.26.0",
+        "lodash.clonedeep": "^4.5.0"
     }
 }
