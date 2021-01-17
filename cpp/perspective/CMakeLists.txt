@@ -634,6 +634,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 			# .dll not importable
 			set_property(TARGET binding PROPERTY SUFFIX .pyd)
+		elseif (MACOS OR NOT MANYLINUX)
+			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+			set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
+			set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
 		else()
 			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		endif()
