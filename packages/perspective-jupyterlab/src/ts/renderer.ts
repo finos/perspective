@@ -36,7 +36,7 @@ const baddialog = (): void => {
 
 export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
     constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, type: IPerspectiveDocumentType = "csv") {
-        super({content: new PerspectiveWidget("test"), context: options.context, reveal: options.reveal});
+        super({content: new PerspectiveWidget("Perspective"), context: options.context, reveal: options.reveal});
 
         this._psp = this.content;
         this._type = type;
@@ -54,9 +54,13 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
     private _update(): void {
         try {
-            if (this._type === "csv" || this._type === "arrow") {
+            if (this._type === "csv") {
                 // load csv directly
                 const data: string = this._context.model.toString();
+                this._psp._update(data);
+            } else if (this._type === "arrow") {
+                // load arrow directly
+                const data = Uint8Array.from(atob(this._context.model.toString()), c => c.charCodeAt(0)).buffer;
                 this._psp._update(data);
             } else if (this._type === "json") {
                 const data = this._context.model.toJSON();
@@ -145,11 +149,25 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         readOnly: true
     });
 
+    try {
+        app.docRegistry.addFileType({
+            name: "arrow",
+            displayName: "arrow",
+            extensions: [".arrow"],
+            mimeTypes: ["application/octet-stream"],
+            contentType: "file",
+            fileFormat: "base64"
+        });
+    } catch {
+        // do nothing
+    }
+
     const factoryarrow = new PerspectiveArrowFactory({
         name: FACTORY_ARROW,
         fileTypes: ["arrow"],
         defaultFor: ["arrow"],
-        readOnly: true
+        readOnly: true,
+        modelName: "base64"
     });
 
     const trackercsv = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
