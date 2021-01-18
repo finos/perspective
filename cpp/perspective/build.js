@@ -11,7 +11,8 @@ try {
     process.env.CLICOLOR_FORCE = 1;
     execSync(`emcmake cmake ${__dirname} -DCMAKE_BUILD_TYPE=${env}`, {cwd, stdio});
     execSync(`emmake make -j${os.cpus().length}`, {cwd, stdio});
-    execSync(`cpx build/**/* ../build`, {cwd, stdio});
+    execSync(`cpx esm/**/* ../esm`, {cwd, stdio});
+    execSync(`cpx cjs/**/* ../cjs`, {cwd, stdio});
 } catch (e) {
     console.error(e);
     process.exit(1);

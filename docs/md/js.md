@@ -73,16 +73,10 @@ module.exports = {
         {
             test: /perspective\.cpp\.wasm$/,
             type: "javascript/auto",
-            include: path.dirname(require.resolve("@finos/perspective-cpp")),
+            include: path.dirname(require.resolve("@finos/perspective")),
             loader: "file-loader"
         }
-    ],
-    resolve: {
-        fallback: {
-            fs: false,
-            path: false
-        }
-    }
+    ]
 };
 ```
 

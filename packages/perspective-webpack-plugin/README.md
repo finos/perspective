@@ -50,17 +50,7 @@ module.exports = {
             include: path.dirname(require.resolve("@finos/perspective-cpp")),
             loader: "file-loader"
         }
-    ],
-    resolve: {
-        // ...
-
-        fallback: {
-            // ...
-
-            fs: false,
-            path: false
-        }
-    }
+    ]
 };
 ```
 

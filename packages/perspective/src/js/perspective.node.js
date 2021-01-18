@@ -20,12 +20,12 @@ const WebSocket = require("ws");
 const process = require("process");
 const path = require("path");
 
-const load_perspective = require("./@finos/perspective-cpp").default;
+const load_perspective = require("./@finos/perspective-cpp/dist/cjs/perspective.cpp.js").default;
 
 // eslint-disable-next-line no-undef
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = fs.readFileSync(require.resolve("./@finos/perspective-cpp/dist/build/perspective.cpp.wasm")).buffer;
+const buffer = fs.readFileSync(require.resolve("./@finos/perspective-cpp/dist/cjs/perspective.cpp.wasm")).buffer;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {

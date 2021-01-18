@@ -13,7 +13,7 @@ try {
     execute`mkdirp docs/build docs/obj`;
     const project = process.env.PSP_PROJECT;
     if (!project || project === "js" || project === "python") {
-        execute`lerna run docs --silent --stream --scope=@finos/${process.env.PACKAGE}`;
+        execute`lerna run docs --stream --scope=@finos/${process.env.PACKAGE}`;
     }
 } catch (e) {
     console.log(e.message);

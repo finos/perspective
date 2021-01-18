@@ -15,7 +15,7 @@ const {WebSocketClient} = require("./websocket/client");
 import {override_config} from "../../dist/esm/config/index.js";
 
 import wasm_worker from "./perspective.worker.js";
-import wasm from "./@finos/perspective-cpp/dist/build/perspective.cpp.wasm";
+import wasm from "./@finos/perspective-cpp/dist/esm/perspective.cpp.wasm";
 
 // eslint-disable-next-line max-len
 const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While \

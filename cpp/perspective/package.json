@@ -4,9 +4,10 @@
     "author": "The Perspective Authors",
     "license": "Apache-2.0",
     "version": "0.6.0",
-    "main": "./dist/build/perspective.cpp.js",
+    "main": "./dist/esm/perspective.cpp.js",
     "files": [
-        "dist/build/**/*"
+        "dist/esm/**/*",
+        "dist/cjs/**/*"
     ],
     "scripts": {
         "build": "yarn emsdk-run node ./build.js",
