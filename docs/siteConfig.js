@@ -34,8 +34,8 @@ const siteConfig = {
             image: "https://bl.ocks.org/texodus/raw/c42f3189699bd29cf20bbe7dce767b07/62d75a47e049602312ba2597bfd37eb032b156f0/thumbnail.png",
             infoLink: "https://bl.ocks.org/texodus/c42f3189699bd29cf20bbe7dce767b07",
             caption: "Styled"
-        }, 
-        
+        },
+
         {
             pinned: true,
             image: "https://bl.ocks.org/texodus/raw/45b868833c9f456bd39a51e606412c5d/e590d237a5237790694946018680719c9fef56cb/thumbnail.png ",
@@ -72,7 +72,7 @@ const siteConfig = {
             image: "https://perspective.finos.org/img/jupyterlab.png",
             infoLink: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
             caption: "JupyterLab"
-        },
+        }
     ],
     copyright: "Copyright © " + new Date().getFullYear() + " Perspective Authors",
     highlight: {
@@ -92,7 +92,7 @@ const siteConfig = {
         "https://fonts.googleapis.com/css?family=Open+Sans",
         "https://fonts.googleapis.com/css?family=Public+Sans",
         "https://fonts.googleapis.com/css?family=Roboto+Mono",
-        "https://fonts.googleapis.com/css?family=Source+Code+Pro:900&display=swap"
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@900"
     ],
     onPageNav: "separate",
     ogImage: "img/perspective.png",

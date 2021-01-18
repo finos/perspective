@@ -140,21 +140,24 @@ const PerspectiveBlock = props => {
     );
 };
 
-
 const YoutubeBlock = props => {
     const block = props.children[0];
     let beforeImage, afterImage;
     const url = "https://www.youtube.com/embed/IO-HJsGdleE?&theme=dark&autohide=1&modestbranding=1&showinfo=0&rel=0";
     if (block.imageAlign === "right") {
         afterImage = (
-            <div className="blockImage">   
-                <div className="youtube"><iframe width='500' height='294' src={url} frameBorder="0"></iframe></div>             
+            <div className="blockImage">
+                <div className="youtube">
+                    <iframe width="500" height="294" src={url} frameBorder="0"></iframe>
+                </div>
             </div>
         );
     } else {
         beforeImage = (
-            <div className="blockImage">   
-                <div className="youtube"><iframe width='500' height='294' src={url} frameBorder="0"></iframe></div>             
+            <div className="blockImage">
+                <div className="youtube">
+                    <iframe width="500" height="294" src={url} frameBorder="0"></iframe>
+                </div>
             </div>
         );
     }
@@ -276,26 +279,26 @@ export and persist Perspective visualizations _interactively_.
 
 const Jupyter = props => (
     <YoutubeBlock id="demo1">
-    {[
-        {
-            content: PYTHON_TEXT,
-            imageAlign: "right"
-        }
-    ]}
+        {[
+            {
+                content: PYTHON_TEXT,
+                imageAlign: "right"
+            }
+        ]}
     </YoutubeBlock>
 );
 
 const JS_TEXT = `
-## Javascript
+## Web Browser
 Query-driven dashboards built on Perspective
 [Custom Elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements)
-are completely user-configurable, and easy to integrate into any application
-framework.
+of JavaScript are completely user-configurable, and easy to integrate into any
+web application framework.
 
 Using Perspective's simple _relational_ grammar, elements like 
 \`<perspective-workspace>\` can be _symmetrically_ configured, by API or
 through the User Interface, and emit dataset-aware Events for scriptable
-interactivity.  Web Applications built on Perspective
+interactivity.  Web Applications built in JavaScript with Perspective
 Custom Elements can be re-hydrated from their serialized state, driven
 from external Events, or persisted to any store.  Workspaces can mix
 virtual, server-side Python data with in-browser client data seamlessly, and
@@ -304,10 +307,9 @@ and saved.
 
 To achieve Desktop-like performance in the Browser, Perspective for JavaScript
 relies on [WebAssembly](https://webassembly.org/) for excellent
-_query calculation_ performance, and [Apache Arrow](https://arrow.apache.org/)
-for its conservative _memory footprint_ and high-performance
-_data serialization_.
-`
+_query calculation_ time, and [Apache Arrow](https://arrow.apache.org/)
+for its conservative _memory footprint_ and efficient _data serialization_.
+`;
 const Javascript = props => (
     <Block id="javascript">
         {[
@@ -342,43 +344,41 @@ const GetStarted = props => (
 );
 
 const Testimonials = props => {
-    return ( 
+    return (
         <div className="testimonials">
-            <Container padding={['bottom', 'top']}>
-            <GridBlock
-                align="center"
-                contents={[
-                {
-                    image: `https://bl.ocks.org/texodus/raw/803de90736a3641ad91c5c7a1b49d0a7/preview.png`,
-                    infoLink: "https://bl.ocks.org/texodus/803de90736a3641ad91c5c7a1b49d0a7",
-                    imageAlign: 'top',
-                    title: 'Superstore <br/><font size="2">Static Apache Arrow Example</font>',
-                },
-                {
-                    content:
-                    '*Open source contributions to the React Native docs have skyrocketed after our move to Docusaurus. The docs are now hosted on a small repo in plain markdown, with none of the clutter that a typical static site generator would require. Thanks Slash!*',
-                    image: `${siteConfig.baseUrl}img/hector-ramos.png`,
-                    imageAlign: 'top',
-                    imageAlt: 'Hector Ramos',
-                    title:
-                    'Hector Ramos <br/><font size="2">Lead React Native Advocate</font>',
-                },
-                {
-                    content:
-                    '*Docusaurus has been a great choice for the ReasonML family of projects. It makes our documentation consistent, i18n-friendly, easy to maintain, and friendly for new contributors.*',
-                    image: `${siteConfig.baseUrl}img/ricky-vetter.jpg`,
-                    imageAlign: 'top',
-                    imageAlt: 'Ricky Vetter',
-                    title:
-                    'Ricky Vetter <br/><font size="2">ReasonReact Developer</font>',
-                },
-                ]}
-                layout="threeColumn"
-            />
+            <Container padding={["bottom", "top"]}>
+                <GridBlock
+                    align="center"
+                    contents={[
+                        {
+                            image: `https://bl.ocks.org/texodus/raw/803de90736a3641ad91c5c7a1b49d0a7/preview.png`,
+                            infoLink: "https://bl.ocks.org/texodus/803de90736a3641ad91c5c7a1b49d0a7",
+                            imageAlign: "top",
+                            title: 'Superstore <br/><font size="2">Static Apache Arrow Example</font>'
+                        },
+                        {
+                            content:
+                                "*Open source contributions to the React Native docs have skyrocketed after our move to Docusaurus. The docs are now hosted on a small repo in plain markdown, with none of the clutter that a typical static site generator would require. Thanks Slash!*",
+                            image: `${siteConfig.baseUrl}img/hector-ramos.png`,
+                            imageAlign: "top",
+                            imageAlt: "Hector Ramos",
+                            title: 'Hector Ramos <br/><font size="2">Lead React Native Advocate</font>'
+                        },
+                        {
+                            content:
+                                "*Docusaurus has been a great choice for the ReasonML family of projects. It makes our documentation consistent, i18n-friendly, easy to maintain, and friendly for new contributors.*",
+                            image: `${siteConfig.baseUrl}img/ricky-vetter.jpg`,
+                            imageAlign: "top",
+                            imageAlt: "Ricky Vetter",
+                            title: 'Ricky Vetter <br/><font size="2">ReasonReact Developer</font>'
+                        }
+                    ]}
+                    layout="threeColumn"
+                />
             </Container>
         </div>
-    )
-}
+    );
+};
 
 const Showcase = props => {
     if ((siteConfig.users || []).length === 0) {
