@@ -12,7 +12,7 @@
 #include <perspective/base.h>
 #include <perspective/context_base.h>
 #include <perspective/sort_specification.h>
-#include <perspective/histogram.h>
+
 #include <perspective/sym_table.h>
 #include <perspective/traversal.h>
 #include <perspective/flat_traversal.h>

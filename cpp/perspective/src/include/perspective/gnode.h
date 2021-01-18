@@ -16,7 +16,6 @@
 #include <perspective/context_handle.h>
 #include <perspective/pivot.h>
 #include <perspective/env_vars.h>
-#include <perspective/custom_column.h>
 #include <perspective/rlookup.h>
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
@@ -173,8 +172,6 @@ public:
     std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> get_pkeys() const;
-
-    std::vector<t_custom_column> get_custom_columns() const;
 
     void set_pool_cleanup(std::function<void()> cleanup);
     bool was_updated() const;
@@ -396,7 +393,6 @@ private:
     std::map<std::string, t_ctx_handle> m_contexts;
     std::shared_ptr<t_gstate> m_gstate;
     std::chrono::high_resolution_clock::time_point m_epoch;
-    std::vector<t_custom_column> m_custom_columns;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
 

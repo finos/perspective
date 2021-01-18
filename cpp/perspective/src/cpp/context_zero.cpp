@@ -13,7 +13,7 @@
 #include <perspective/context_zero.h>
 #include <perspective/flat_traversal.h>
 #include <perspective/sym_table.h>
-#include <perspective/logtime.h>
+
 #include <perspective/filter_utils.h>
 
 namespace perspective {
@@ -80,7 +80,7 @@ void
 t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     const t_data_table& prev, const t_data_table& curr, const t_data_table& transitions,
     const t_data_table& existed) {
-    psp_log_time(repr() + " notify.enter");
+
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
     std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
@@ -130,13 +130,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
             // add the pkey for row delta
             add_delta_pkey(pkey);
         }
-        psp_log_time(repr() + " notify.has_filter_path.updated_traversal");
-
         m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
-
-        psp_log_time(repr() + " notify.has_filter_path.exit");
-
-        return;
     }
 
     // Context does not have filters applied
@@ -165,11 +159,11 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         add_delta_pkey(pkey);
     }
 
-    psp_log_time(repr() + " notify.no_filter_path.updated_traversal");
+    
 
     m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
-    psp_log_time(repr() + " notify.no_filter_path.exit");
+    
 }
 
 /**

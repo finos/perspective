@@ -18,7 +18,7 @@
 #include <perspective/mask.h>
 #include <perspective/tracing.h>
 #include <perspective/env_vars.h>
-#include <perspective/logtime.h>
+
 #include <perspective/utils.h>
 
 #ifdef PSP_ENABLE_PYTHON
@@ -930,7 +930,7 @@ void
 t_gnode::notify_contexts(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    psp_log_time(repr() + "notify_contexts.enter");
+    
     t_index num_ctx = m_contexts.size();
     std::vector<t_ctx_handle> ctxhvec(num_ctx);
 
@@ -974,7 +974,7 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
         );
     #endif
 
-    psp_log_time(repr() + "notify_contexts.exit");
+    
 }
 
 /******************************************************************************
@@ -1352,11 +1352,6 @@ t_gnode::_get_pkeyed_table() const {
 std::shared_ptr<t_data_table>
 t_gnode::get_pkeyed_table_sptr() const {
     return m_gstate->get_pkeyed_table();
-}
-
-std::vector<t_custom_column>
-t_gnode::get_custom_columns() const {
-    return m_custom_columns;
 }
 
 void

@@ -24,7 +24,6 @@ SUPPRESS_WARNINGS_VC(4503)
 #include <perspective/pivot.h>
 #include <perspective/aggspec.h>
 #include <perspective/step_delta.h>
-#include <perspective/min_max.h>
 #include <perspective/mask.h>
 #include <perspective/sym_table.h>
 #include <perspective/data_table.h>
