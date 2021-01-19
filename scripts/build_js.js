@@ -10,7 +10,9 @@
 const {execute} = require("./script_utils.js");
 
 try {
-    execute`lerna run build --loglevel silent --scope="@finos/${process.env.PACKAGE}"`;
+    const scope = process.env.PACKAGE && process.env.PACKAGE !== "" ? `{${process.env.PACKAGE}}` : "*";
+
+    execute`lerna run build ${scope !== "*" ? "--stream" : "--loglevel silent"} --scope="@finos/${scope}"`;
 } catch (e) {
     console.log(e.message);
     process.exit(1);

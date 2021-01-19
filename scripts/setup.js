@@ -74,15 +74,30 @@ async function choose_docker() {
 async function focus_package() {
     const new_config = await inquirer.prompt([
         {
-            type: "expand",
+            type: "checkbox",
             name: "PACKAGE",
-            message: "Focus NPM package?",
-            default: CONFIG["PACKAGE"] || "h",
+            message: "Focus NPM package(s)?",
+            default: () => {
+                if (CONFIG["PACKAGE"]) {
+                    return CONFIG["PACKAGE"].split(",");
+                } else {
+                    return [""];
+                }
+            },
+            filter: answer => {
+                if (!answer || answer.length === 8) {
+                    return "";
+                } else {
+                    return answer;
+                }
+            },
+            loop: false,
+            pageSize: 12,
             choices: [
                 {
-                    key: "a",
-                    name: "(all)",
-                    value: ""
+                    key: "c",
+                    name: "perspective-cpp",
+                    value: "perspective-cpp"
                 },
                 {
                     key: "p",
@@ -99,21 +114,10 @@ async function focus_package() {
                     name: "perspective-viewer-datagrid",
                     value: "perspective-viewer-datagrid"
                 },
-
-                {
-                    key: "g",
-                    name: "perspective-viewer-hypergrid",
-                    value: "perspective-viewer-hypergrid"
-                },
                 {
                     key: "d",
                     name: "perspective-viewer-d3fc",
                     value: "perspective-viewer-d3fc"
-                },
-                {
-                    key: "c",
-                    name: "perspective-viewer-highcharts",
-                    value: "perspective-viewer-highcharts"
                 },
                 {
                     key: "o",

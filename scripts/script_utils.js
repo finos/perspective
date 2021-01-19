@@ -70,22 +70,14 @@ const execute = cmd => {
     }
 };
 
-const execute_throw = cmd => {
-    if (process.argv.indexOf("--debug") > -1) {
-        console.log(`$ ${cmd}`);
-    }
-    execSync(cmd, {stdio: "inherit"});
-};
-
 const execute_return = async cmd => {
     if (process.argv.indexOf("--debug") > -1) {
         console.log(`$ ${cmd}`);
     }
 
     const ex = promisify(require("child_process").exec);
-
     return await ex(cmd);
-}
+};
 
 /*******************************************************************************
  *
