@@ -19,12 +19,11 @@ import "!!style-loader!css-loader!less-loader!../less/index.less";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
-import {JupyterFrontEndPlugin} from "@jupyterlab/application";
 import {perspectiveRenderers} from "./renderer";
 import {PerspectiveJupyterPlugin} from "./plugin";
 
 /**
  * Export the renderer as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [PerspectiveJupyterPlugin, perspectiveRenderers];
+const plugins = [PerspectiveJupyterPlugin, perspectiveRenderers];
 export default plugins;
