@@ -95,16 +95,21 @@ class TestUpdateArrow(object):
     @mark.skip
     def test_update_arrow_updates_dict_partial_file(self):
         tbl = None
+        v = None
 
         with open(DICT_ARROW, mode='rb') as src:
             tbl = Table(src.read(), index="a")
-            tbl.update(src.read())
-            assert tbl.size() == 2
+            v = tbl.view()
+            assert v.num_rows() == 2
+            assert v.to_dict() == {
+                "a": ["abc", "def"],
+                "b": ["klm", "hij"]
+            }
 
         with open(DICT_UPDATE_ARROW, mode='rb') as partial:
             tbl.update(partial.read())
-            assert tbl.size() == 4
-            assert tbl.view().to_dict() == {
+            v.num_rows() == 4
+            assert v.to_dict() == {
                 "a": ["abc", "def", "update1", "update2"],
                 "b": ["klm", "hij", None, "update4"]
             }

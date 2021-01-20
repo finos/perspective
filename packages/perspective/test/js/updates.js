@@ -1576,7 +1576,7 @@ module.exports = perspective => {
     });
 
     describe("implicit index", function() {
-        it("should apply single partial update on unindexed table using row id from '__INDEX__'", async function() {
+        it("should partial update on unindexed table", async function() {
             let table = perspective.table(data);
             table.update([
                 {
@@ -1591,6 +1591,73 @@ module.exports = perspective => {
             expected[2]["y"] = "new_string";
 
             expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it("should partial update on unindexed table, column dataset", async function() {
+            let table = perspective.table(data);
+            table.update({
+                __INDEX__: [2],
+                y: ["new_string"]
+            });
+
+            let view = table.view();
+            let result = await view.to_json();
+
+            // does not unset any values
+            expect(result).toEqual([
+                {x: 1, y: "a", z: true},
+                {x: 2, y: "b", z: false},
+                {x: 3, y: "new_string", z: true},
+                {x: 4, y: "d", z: false}
+            ]);
+            view.delete();
+            table.delete();
+        });
+
+        it("should partial update and unset on unindexed table", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 2,
+                    y: "new_string",
+                    z: null
+                }
+            ]);
+
+            let view = table.view();
+            let result = await view.to_json();
+
+            // does not unset any values
+            expect(result).toEqual([
+                {x: 1, y: "a", z: true},
+                {x: 2, y: "b", z: false},
+                {x: 3, y: "new_string", z: null},
+                {x: 4, y: "d", z: false}
+            ]);
+            view.delete();
+            table.delete();
+        });
+
+        it("should partial update and unset on unindexed table, column dataset", async function() {
+            let table = perspective.table(data);
+            table.update({
+                __INDEX__: [0, 2],
+                y: [undefined, "new_string"],
+                z: [null, undefined]
+            });
+
+            let view = table.view();
+            let result = await view.to_json();
+
+            // does not unset any values
+            expect(result).toEqual([
+                {x: 1, y: "a", z: null},
+                {x: 2, y: "b", z: false},
+                {x: 3, y: "new_string", z: true},
+                {x: 4, y: "d", z: false}
+            ]);
             view.delete();
             table.delete();
         });
