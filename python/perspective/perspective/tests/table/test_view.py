@@ -545,6 +545,72 @@ class TestView(object):
         view = tbl.view(sort=[["a", "desc"]], columns=["b"])
         assert view.to_records() == [{"b": 4}, {"b": 2}]
 
+    def test_view_sort_avg_nan(self):
+        data = {
+            "w": [3.5, 4.5, None, None, None, None, 1.5, 2.5],
+            "x": [1, 2, 3, 4, 4, 3, 2, 1],
+            "y": ["a", "b", "c", "d", "e", "f", "g", "h"]
+        }
+        tbl = Table(data)
+        view = tbl.view(
+            columns=["x", "w"],
+            row_pivots=["y"],
+            sort=[["w", "asc"]],
+            aggregates={
+                "w": "avg",
+                "x": "unique"
+            },
+        )
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+            "w": [3, None, None, None, None, 1.5, 2.5, 3.5, 4.5],
+            "x": [None, 3, 4, 4, 3, 2, 1, 1, 2]
+        }
+
+    def test_view_sort_sum_nan(self):
+        data = {
+            "w": [3.5, 4.5, None, None, None, None, 1.5, 2.5],
+            "x": [1, 2, 3, 4, 4, 3, 2, 1],
+            "y": ["a", "b", "c", "d", "e", "f", "g", "h"]
+        }
+        tbl = Table(data)
+        view = tbl.view(
+            columns=["x", "w"],
+            row_pivots=["y"],
+            sort=[["w", "asc"]],
+            aggregates={
+                "w": "sum",
+                "x": "unique"
+            },
+        )
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+            "w": [12, 0, 0, 0, 0, 1.5, 2.5, 3.5, 4.5],
+            "x": [None, 3, 4, 4, 3, 2, 1, 1, 2]
+        }
+
+    def test_view_sort_unique_nan(self):
+        data = {
+            "w": [3.5, 4.5, None, None, None, None, 1.5, 2.5],
+            "x": [1, 2, 3, 4, 4, 3, 2, 1],
+            "y": ["a", "b", "c", "d", "e", "f", "g", "h"]
+        }
+        tbl = Table(data)
+        view = tbl.view(
+            columns=["x", "w"],
+            row_pivots=["y"],
+            sort=[["w", "asc"]],
+            aggregates={
+                "w": "unique",
+                "x": "unique"
+            },
+        )
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+            "w": [None, None, None, None, None, 1.5, 2.5, 3.5, 4.5],
+            "x": [None, 3, 4, 4, 3, 2, 1, 1, 2]
+        }
+
     # filter
 
     def test_view_filter_int_eq(self):

@@ -149,11 +149,47 @@ describe("Update", async () => {
                 table = worker.table(data.arrow.slice());
                 view = table.view();
 
-                let test_data = await static_view[`to_${name}`]({end_row: 500});
+                const test_data = await static_view[`to_${name}`]({end_row: 500});
+
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
-                        await table.size();
+                        await view.num_rows();
+                    }
+                });
+            });
+
+            describe("ctx0 sorted", async () => {
+                table = worker.table(data.arrow.slice());
+                view = table.view({
+                    sort: [["Customer Name", "desc"]]
+                });
+
+                const test_data = await static_view[`to_${name}`]({end_row: 500});
+
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await view.num_rows();
+                    }
+                });
+            });
+
+            describe("ctx0 sorted deep", async () => {
+                table = worker.table(data.arrow.slice());
+                //table_indexed = worker.table(data.arrow.slice(), {index: "Row ID"});
+                view = table.view({
+                    sort: [
+                        ["Customer Name", "desc"],
+                        ["Order Date", "asc"]
+                    ]
+                });
+
+                const test_data = await static_view[`to_${name}`]({end_row: 500});
+                benchmark(name, async () => {
+                    for (let i = 0; i < 5; i++) {
+                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        await view.num_rows();
                     }
                 });
             });
@@ -168,7 +204,7 @@ describe("Update", async () => {
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
-                        await table.size();
+                        await view.num_rows();
                     }
                 });
             });
@@ -182,7 +218,7 @@ describe("Update", async () => {
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
-                        await table.size();
+                        await view.num_rows();
                     }
                 });
             });
@@ -197,7 +233,7 @@ describe("Update", async () => {
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
-                        await table.size();
+                        await view.num_rows();
                     }
                 });
             });
@@ -212,7 +248,7 @@ describe("Update", async () => {
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
-                        await table.size();
+                        await view.num_rows();
                     }
                 });
             });
@@ -226,7 +262,7 @@ describe("Update", async () => {
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
                         table.update(test_data.slice ? test_data.slice() : test_data);
-                        await table.size();
+                        await view.num_rows();
                     }
                 });
             });
@@ -367,6 +403,54 @@ describe("View", async () => {
 
                         benchmark(`view`, async () => {
                             view = table.view(config);
+                            await view.schema();
+                        });
+                    });
+
+                    describe(`${cat} sorted`, async () => {
+                        let view;
+
+                        afterEach(async () => {
+                            await view.delete();
+                        });
+
+                        benchmark(`sorted float asc`, async () => {
+                            view = table.view({
+                                aggregate,
+                                row_pivot,
+                                column_pivot,
+                                sort: [["Sales", "asc"]]
+                            });
+                            await view.schema();
+                        });
+
+                        benchmark(`sorted float desc`, async () => {
+                            view = table.view({
+                                aggregate,
+                                row_pivot,
+                                column_pivot,
+                                sort: [["Sales", "asc"]]
+                            });
+                            await view.schema();
+                        });
+
+                        benchmark(`sorted str asc`, async () => {
+                            view = table.view({
+                                aggregate,
+                                row_pivot,
+                                column_pivot,
+                                sort: [["Customer Name", "asc"]]
+                            });
+                            await view.schema();
+                        });
+
+                        benchmark(`sorted str desc`, async () => {
+                            view = table.view({
+                                aggregate,
+                                row_pivot,
+                                column_pivot,
+                                sort: [["Customer Name", "desc"]]
+                            });
                             await view.schema();
                         });
                     });

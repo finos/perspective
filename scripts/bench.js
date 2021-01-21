@@ -10,8 +10,6 @@
 const {execute} = require("./script_utils.js");
 
 const args = process.argv.slice(2);
-const LIMIT = args.indexOf("--limit");
-const IS_DELTA = args.indexOf("--delta");
 
 if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
     function docker() {
@@ -22,15 +20,6 @@ if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
         }
         cmd += " perspective/puppeteer nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench";
 
-        if (LIMIT !== -1) {
-            let limit = args[LIMIT + 1];
-            cmd += ` --limit ${limit}`;
-        }
-
-        if (IS_DELTA !== -1) {
-            console.log("Running benchmarking suite for delta - only comparing results within master.");
-            cmd += " --delta";
-        }
         return cmd;
     }
 
