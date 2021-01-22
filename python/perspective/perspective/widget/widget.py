@@ -12,6 +12,7 @@ import numpy
 import pandas
 import json
 
+from re import match
 from datetime import date, datetime
 from functools import partial
 from ipywidgets import Widget
@@ -49,24 +50,6 @@ def _type_to_string(t):
         )
 
 
-def _serialize_datetime(values):
-    """For a list of values, stringify the `date` and `datetime` values
-    using strftime."""
-    cleaned = []
-
-    for v in values:
-        if type(v) is datetime:
-            # isinstance(datetime, date) will always return True, so
-            # do a type comparison instead.
-            cleaned.append(v.strftime("%Y-%m-%d %H:%M:%S"))
-        elif type(v) is date:
-            cleaned.append(v.strftime("%Y-%m-%d"))
-        else:
-            cleaned.append(v)
-
-    return cleaned
-
-
 def _serialize(data):
     """In client mode, PerspectiveWidget will normalize the data before
     passing it to the front-end.
@@ -81,12 +64,12 @@ def _serialize(data):
                 raise PerspectiveError(
                     "Received {} in list dataset, expected `dict`!".format(type(row))
                 )
-
-            for k in six.iterkeys(row):
-                if type(row[k]) is datetime:
-                    row[k] = row[k].strftime("%Y-%m-%d %H:%M:%S.%f")
-                elif type(row[k]) is date:
-                    row[k] = row[k].strftime("%Y-%m-%d")
+            for k, v in six.iteritems(row):
+                # isinstance(datetime, date) will always return True, so
+                # do a type comparison instead.
+                if type(v) is date:
+                    # Convert to datetime() which is parsable
+                    row[k] = datetime(v.year, v.month, v.day)
         return data
     elif isinstance(data, dict):
         formatted = data
@@ -105,9 +88,12 @@ def _serialize(data):
                 }
                 break
 
-        for column_name in six.iterkeys(formatted):
-            # Replace `datetime.datetime` and `datetime.date` with string
-            formatted[column_name] = _serialize_datetime(formatted[column_name])
+        for column_name, values in six.iteritems(formatted):
+            # Remove `datetime.date` values
+            formatted[column_name] = [
+                datetime(v.year, v.month, v.day) if type(v) is date else v
+                for v in values
+            ]
 
         return formatted
     elif isinstance(data, numpy.ndarray):
@@ -120,9 +106,12 @@ def _serialize(data):
         columns = [data[col].tolist() for col in data.dtype.names]
         formatted = dict(zip(data.dtype.names, columns))
 
-        for column_name in six.iterkeys(formatted):
-            # Replace `datetime.datetime` and `datetime.date` with string
-            formatted[column_name] = _serialize_datetime(formatted[column_name])
+        for column_name, values in six.iteritems(formatted):
+            # Remove `datetime.date` values
+            formatted[column_name] = [
+                datetime(v.year, v.month, v.day) if type(v) is date else v
+                for v in values
+            ]
 
         return formatted
     elif isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
@@ -137,11 +126,16 @@ def _serialize(data):
             # `numpy.issubdtype` - match strings here instead.
             str_dtype = str(column.dtype)
             if "datetime64" in str_dtype:
+                # Convert datetime/date to string depending on the unit
+                unit = match(r"\[.+\]", str_dtype) or "ms"
+
                 # Convert all datetimes to string for serializing
-                d[name] = column.dt.strftime("%Y-%m-%d %H:%M:%S").tolist()
+                d[name] = numpy.datetime_as_string(column.values, unit=unit).tolist()
             elif str_dtype == "object":
-                # Replace `datetime.datetime` and `datetime.date` with string
-                d[name] = _serialize_datetime(values)
+                d[name] = [
+                    datetime(v.year, v.month, v.day) if type(v) is date else v
+                    for v in values
+                ]
             else:
                 d[name] = values.tolist()
         return d
