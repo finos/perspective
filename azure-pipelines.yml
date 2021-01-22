@@ -256,7 +256,7 @@ jobs:
         versionSpec: '12.x'
 
     - script: |
-        brew install boost flatbuffers
+        brew install boost
       displayName: "System deps"
 
     - script: |
