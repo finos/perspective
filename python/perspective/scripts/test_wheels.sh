@@ -78,10 +78,6 @@ source ./bin/activate
 echo "${PYTHON_INTERPRETER} virtualenv activated"
 cd ..
 
-echo "Upgrading pip for ${PYTHON_INTERPRETER}..."
-${PYTHON_INTERPRETER} -m pip install --upgrade pip
-
-echo "Looking for wheels..."
 cd ${HERE}/../wheelhouse
 
 # Look for wheels based on Python version/platform
@@ -93,14 +89,12 @@ IFS=${SAVEIFS}
 
 for wheel in ${WHEELS_LIST}; do
     echo "Installing ${wheel}..."
-    ${PYTHON_INTERPRETER} -m pip install --force-reinstall ${wheel}
+    pip install --force-reinstall ${wheel}
 
     echo "-----------------------"
     echo "Testing ${wheel}"
 
     IS_LIBPSP=$(${PYTHON_INTERPRETER} -c "import perspective;print(perspective.is_libpsp())")
-
-    echo "-----------------------"
 
     if [ "${IS_LIBPSP}" != "True" ]; then
         echo "${wheel} failed to import with error: ${IS_LIBPSP}"
