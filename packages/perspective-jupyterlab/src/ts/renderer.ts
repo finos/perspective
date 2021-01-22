@@ -13,9 +13,6 @@ import {IThemeManager, WidgetTracker, Dialog, showDialog} from "@jupyterlab/appu
 import {ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget} from "@jupyterlab/docregistry";
 import {PerspectiveWidget} from "./psp_widget";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective");
-
 /**
  * The name of the factories that creates widgets.
  */
@@ -42,8 +39,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         super({content: new PerspectiveWidget("Perspective"), context: options.context, reveal: options.reveal});
 
         this._psp = this.content;
-        this._table = undefined;
-
         this._type = type;
         this._context = options.context;
 
@@ -59,18 +54,20 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
     private _update(): void {
         try {
-            let data;
             if (this._type === "csv") {
                 // load csv directly
-                data = this._context.model.toString();
+                const data: string = this._context.model.toString();
+                this._psp._update(data);
             } else if (this._type === "arrow") {
                 // load arrow directly
-                data = Uint8Array.from(atob(this._context.model.toString()), c => c.charCodeAt(0)).buffer;
+                const data = Uint8Array.from(atob(this._context.model.toString()), c => c.charCodeAt(0)).buffer;
+                this._psp._update(data);
             } else if (this._type === "json") {
-                data = this._context.model.toJSON();
+                const data = this._context.model.toJSON();
+
                 if (Array.isArray(data) && data.length > 0) {
                     // already is records form, load directly
-                    data = data as Array<object>;
+                    this._psp._update(data as Array<object>);
                 } else {
                     // Column-oriented or single records JSON
                     // don't handle for now, just need to implement
@@ -81,14 +78,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
             } else {
                 // don't handle other mimetypes for now
                 throw "Not handled";
-            }
-            this._table = perspective.worker().table(data);
-            if (this._psp.viewer.table === undefined) {
-                // construct new table
-                this._psp.viewer.load(this._table);
-            } else {
-                // replace existing table for whatever reason
-                this._psp.replace(this._table);
             }
         } catch {
             baddialog();
@@ -102,7 +91,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         if (this._monitor) {
             this._monitor.dispose();
         }
-        this._psp.delete(true);
         super.dispose();
     }
 
@@ -113,7 +101,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
     private _type: IPerspectiveDocumentType;
     private _context: DocumentRegistry.Context;
     private _psp: PerspectiveWidget;
-    private _table: any;
     private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null = null;
 }
 
