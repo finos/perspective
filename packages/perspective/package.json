@@ -10,9 +10,6 @@
     "publishConfig": {
         "access": "public"
     },
-    "engines": {
-        "node": ">=12"
-    },
     "files": [
         "dist/**/*",
         "index.d.ts",
