@@ -16,9 +16,6 @@ import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} fro
 
 import {HTMLPerspectiveViewerElement, Pivots, Aggregates, Sort, ComputedColumns, PerspectiveViewerOptions, Filters, Columns} from "@finos/perspective-viewer";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective");
-
 let _increment = 0;
 
 export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
@@ -153,20 +150,14 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
     _update(data: TableData): void {
-        if (this.viewer.table === undefined) {
-            this.viewer.load(perspective.worker().table(data));
-        } else {
-            this.viewer.table.update(data);
-        }
+        this.viewer.table.update(data);
     }
 
     /**
      * Removes all rows from the viewer's table. Does not reset viewer state.
      */
     clear(): void {
-        if (this.viewer.table !== undefined) {
-            this.viewer.table.clear();
-        }
+        this.viewer.table.clear();
     }
 
     /**
@@ -176,11 +167,7 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
     replace(data: TableData): void {
-        if (this.viewer.table !== undefined) {
-            this.viewer.table.replace(data);
-        } else {
-            this.viewer.load(perspective.worker().table(data));
-        }
+        this.viewer.table.replace(data);
     }
 
     /**
