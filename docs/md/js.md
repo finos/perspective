@@ -740,10 +740,14 @@ const fs = require("fs");
 // module's directory.
 const host = new WebSocketServer({assets: [__dirname], port: 8080});
 
-// Read an arrow file from the file system and host it as a named table.
+// Read an arrow file from the file system and load it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
 const tbl = table(arr);
 host.host_table("table_one", tbl);
+
+// Or host a view
+const view = tbl.view({filter: [["State", "==", "Texas"]]});
+host.host_view("view_one", view);
 ```
 
 In the browser:
@@ -756,16 +760,11 @@ const websocket = perspective.websocket(window.location.origin.replace("http", "
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
 // live on the server.
-const server_table = websocket.open_table("table_one");
-elem.load(server_table);
+elem.load(websocket.open_table("table_one"));
 
-// Or load data from a table using a view. The browser now also has a copy of
-// this view in its own `table`, as well as its updates transferred to the
-// browser using Apache Arrow.
-const worker = perspective.worker();
-const server_view = server_table.view();
-const client_table = worker.table(server_view);
-elem.load(client_table);
+// Or load data from a view.  The browser now also has a copy of this view in
+// its own `table`, as well as its updates.  Transfer uses Arrows.
+elem.load(websocket.open_view("view_one"));
 ```
 
 `<perspective-viewer>` instances bound in this way are otherwise no different

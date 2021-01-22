@@ -72,6 +72,14 @@ class TestViewer:
         assert viewer.columns == ["a"]
         assert viewer.table.size() == 1
 
+    def test_viewer_load_view(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer()
+        view = table.view()
+        viewer.load(view)
+        assert viewer._view == view
+        assert viewer.table == table
+
     def test_viewer_load_clears_state(self):
         table = Table({"a": [1, 2, 3]})
         viewer = PerspectiveViewer(dark=True, row_pivots=["a"])
@@ -203,6 +211,17 @@ class TestViewer:
         assert viewer.table_name is None
         assert viewer.table is None
 
+    def test_viewer_delete_view(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer.load(table.view())
+        assert viewer.filters == [["a", "==", 2]]
+        viewer.delete()
+        assert viewer._perspective_view_name is None
+        assert viewer._view is None
+        assert viewer.table_name is None
+        assert viewer.table is None
+
     def test_viewer_delete_without_table(self):
         table = Table({"a": [1, 2, 3]})
         viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
@@ -211,6 +230,8 @@ class TestViewer:
         viewer.delete(delete_table=False)
         assert viewer.table_name is not None
         assert viewer.table is not None
+        assert viewer._perspective_view_name is not None
+        assert viewer._view is not None
         assert viewer.filters == []
 
     def test_save_restore(self):

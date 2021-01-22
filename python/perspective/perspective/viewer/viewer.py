@@ -24,7 +24,6 @@ from ..libpsp import is_libpsp
 
 if is_libpsp():
     from ..libpsp import Table, View, PerspectiveManager
-    from ..core.exception import PerspectiveError
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -122,6 +121,11 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # attached PerspectiveManager
         self.table_name = None
 
+        # If `is_libpsp()` and the viewer has a Table, an internal view will be
+        # created to allow remote clients to host their own table that listens
+        # to updates from this table.
+        self._perspective_view_name = None
+
         # Viewer configuration
         self.plugin = validate_plugin(plugin)
         self.columns = validate_columns(columns) or []
@@ -139,6 +143,13 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     def table(self):
         """Returns the ``perspective.Table`` under management by the viewer."""
         return self.manager.get_table(self.table_name)
+
+    @property
+    def _view(self):
+        """Returns the internal ``perspective.View`` under management by the
+        viewer, which has no bearing to the view that is displayed in the
+        widget."""
+        return self.manager.get_view(self._perspective_view_name)
 
     def load(self, data, **options):
         """Given a ``perspective.Table``, a ``perspective.View``,
@@ -187,7 +198,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         if isinstance(data, Table):
             table = data
         elif isinstance(data, View):
-            raise PerspectiveError("Only `Table` or data can be loaded.")
+            table = data._table
         else:
             table = Table(data, **options)
 
@@ -203,6 +214,16 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             self.columns = table.columns()
 
         self.table_name = name
+
+        # If a `perspective.View` is loaded, then use it as the view that
+        # new clients will be built from. Otherwise, create a new view.
+        VIEW = data if isinstance(data, View) else table.view()
+
+        # Create a view from the table, and host it with the manager so it can
+        # be accessed remotely. This view should not be deleted or changed,
+        # and remains private to the viewer.
+        self._perspective_view_name = str(random())
+        self.manager.host_view(self._perspective_view_name, VIEW)
 
     def update(self, data):
         """Update the table under management by the viewer with new data.
@@ -270,6 +291,10 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 deleted. Defaults to True.
         """
         if delete_table:
+            if self._view:
+                self._view.delete()
+                self._perspective_view_name = None
+
             self.table.delete()
             self.manager._tables.pop(self.table_name)
             self.table_name = None

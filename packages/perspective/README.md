@@ -31,8 +31,6 @@ For more information, see the
         * [.remove_delete(callback)](#module_perspective..view+remove_delete)
     * [~table](#module_perspective..table)
         * [new table()](#new_module_perspective..table_new)
-        * [.get_index()](#module_perspective..table+get_index)
-        * [.get_limit()](#module_perspective..table+get_limit)
         * [.clear()](#module_perspective..table+clear)
         * [.replace()](#module_perspective..table+replace)
         * [.delete()](#module_perspective..table+delete)
@@ -284,7 +282,6 @@ serialize.
     - .end_col <code>number</code> - The ending column index from which to
 serialize.
 
-
 * * *
 
 <a name="module_perspective..view+col_to_js_typed_array"></a>
@@ -418,6 +415,8 @@ receives an object with two keys: `port_id`, indicating which port the
 update was triggered on, and `delta`, whose value is dependent on the
 `mode` parameter:
     - "none" (default): `delta` is `undefined`.
+    - "cell": `delta` is the new data for each updated cell, serialized
+         to JSON format.
     - "row": `delta` is an Arrow of the updated rows.
 
 **Example**  
@@ -480,8 +479,6 @@ view.remove_delete(callback);
 
 * [~table](#module_perspective..table)
     * [new table()](#new_module_perspective..table_new)
-    * [.get_index()](#module_perspective..table+get_index)
-    * [.get_limit()](#module_perspective..table+get_limit)
     * [.clear()](#module_perspective..table+clear)
     * [.replace()](#module_perspective..table+replace)
     * [.delete()](#module_perspective..table+delete)
@@ -512,26 +509,6 @@ by invoking the [table](#module_perspective..table) factory method, either
 on the perspective module object, or an a
 [module:perspective~worker](module:perspective~worker) instance.
 
-
-* * *
-
-<a name="module_perspective..table+get_index"></a>
-
-#### table.get\_index()
-Returns the user-specified index column for this
-[table](#module_perspective..table) or null if an index is not set.
-
-**Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-
-* * *
-
-<a name="module_perspective..table+get_limit"></a>
-
-#### table.get\_limit()
-Returns the user-specified limit column for this
-[table](#module_perspective..table) or null if an limit is not set.
-
-**Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 
 * * *
 
@@ -576,8 +553,9 @@ invoked.
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Params**
 
-- callback <code>function</code> - A callback function with no parameters
-     that will be invoked on `delete()`.
+- callback <code>function</code> - A callback function invoked on delete.  The
+    parameter to this callback shares a structure with the return type of
+    [module:perspective~table#to_json](module:perspective~table#to_json).
 
 
 * * *

@@ -26,6 +26,16 @@ async def make_view_arrow(client):
     return [end]
 
 
+async def open_view_arrow(client):
+    """Test how long it takes to open a remote view and retrieve an arrow"""
+    view = client.open_view("view_one")
+    start = time.time()
+    arrow = await view.to_arrow(end_row=ARROW_LENGTH)
+    end = time.time() - start
+    assert len(arrow) > 0
+    return [end]
+
+
 if __name__ == "__main__":
     """To allow your test script to run within the benchmark harness,
     import and create a `PerspectiveTornadoBenchmark`, and call its
@@ -46,3 +56,6 @@ if __name__ == "__main__":
     logging.info("Create view, request arrow length %d", ARROW_LENGTH)
     runner = PerspectiveTornadoBenchmark(make_view_arrow)
     runner.run()
+    logging.info("Open view, request arrow length %d", ARROW_LENGTH)
+    runner2 = PerspectiveTornadoBenchmark(open_view_arrow)
+    runner2.run()

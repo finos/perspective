@@ -31,6 +31,7 @@ def perspective_thread(manager):
     with open(file_path, mode="rb") as file:
         table = Table(file.read(), index="Row ID")
         manager.host_table("data_source_one", table)
+        manager.host_view("view_one", table.view())
     psp_loop.start()
 
 

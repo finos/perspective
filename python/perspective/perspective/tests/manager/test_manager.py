@@ -23,6 +23,7 @@ class TestPerspectiveManager(object):
     def post(self, msg):
         '''boilerplate callback to simulate a client's `post()` method.'''
         msg = json.loads(msg)
+        print("self.post:", msg)
         assert msg["id"] is not None
 
     def validate_post(self, msg, expected=None):
@@ -40,6 +41,22 @@ class TestPerspectiveManager(object):
             "a": int,
             "b": str
         }
+
+    def test_manager_host_view(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_view("view1", view)
+        assert manager.get_view("view1").to_dict() == data
+
+    def test_manager_host_table_or_view(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host(table, name="table1")
+        manager.host(view, name="view1")
+        assert manager.get_table("table1").size() == 3
+        assert manager.get_view("view1").to_dict() == data
 
     def test_manager_host_invalid(self):
         manager = PerspectiveManager()
@@ -120,13 +137,28 @@ class TestPerspectiveManager(object):
             "b": ["c"]
         }
 
+    def test_manager_create_view(self):
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": []}
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager._process(message, self.post)
+        assert manager.get_view("view1").schema() == {
+            "a": int,
+            "b": str
+        }
+
     def test_locked_manager_create_view(self):
-        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": []}
         manager = PerspectiveManager(lock=True)
         table = Table(data)
+        view = table.view()
         manager.host_table("table1", table)
+        manager.host_view("view1", view)
         manager._process(message, self.post)
-        assert manager._get_view("view1").schema() == {
+        assert manager.get_view("view1").schema() == {
             "a": int,
             "b": str
         }
@@ -297,24 +329,26 @@ class TestPerspectiveManager(object):
         message = {"id": 1, "name": "table1", "cmd": "table_method", "method": "schema", "args": [False]}
         manager = PerspectiveManager()
         table = Table(data)
+        view = table.view()
         manager.host_table("table1", table)
+        manager.host_view("view1", view)
         manager._process(message, post_callback)
 
     def test_manager_view_schema(self):
         post_callback = partial(self.validate_post, expected={
-            "id": 2,
+            "id": 1,
             "data": {
                 "a": "integer",
                 "b": "integer"
             }
         })
 
-        make_view_message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"row_pivots": ["a"]}}
-        message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "schema", "args": [False]}
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": [False]}
         manager = PerspectiveManager()
         table = Table(data)
+        view = table.view(row_pivots=["a"])
         manager.host_table("table1", table)
-        manager._process(make_view_message, self.post)
+        manager.host_view("view1", view)
         manager._process(message, post_callback)
 
     def test_manager_table_computed_schema(self):
@@ -344,6 +378,7 @@ class TestPerspectiveManager(object):
         table = Table(data)
         view = table.view()
         manager.host_table("table1", table)
+        manager.host_view("view1", view)
         manager._process(message, post_callback)
 
     def test_manager_table_get_computation_input_types(self):
@@ -361,29 +396,31 @@ class TestPerspectiveManager(object):
         }
         manager = PerspectiveManager()
         table = Table(data)
+        view = table.view()
         manager.host_table("table1", table)
+        manager.host_view("view1", view)
         manager._process(message, post_callback)
 
     def test_manager_view_computed_schema(self):
         post_callback = partial(self.validate_post, expected={
-            "id": 2,
+            "id": 1,
             "data": {
                 "abc": "float"
             }
         })
 
-        make_view_message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"computed_columns": [
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "computed_schema", "args": [False]}
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view(computed_columns=[
             {
                 "column": "abc",
                 "computed_function_name": "+",
                 "inputs": ["a", "a"]
             }
-        ]}}
-        message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "computed_schema", "args": [False]}
-        manager = PerspectiveManager()
-        table = Table(data)
+        ])
         manager.host_table("table1", table)
-        manager._process(make_view_message, self.post)
+        manager.host_view("view1", view)
         manager._process(message, post_callback)
 
     # serialization
@@ -918,7 +955,7 @@ class TestPerspectiveManager(object):
         make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager._process(make_view, self.post)
 
-        view = manager._get_view("view1")
+        view = manager.get_view("view1")
         view.on_delete(delete_callback)
 
         delete_view = {"id": 3, "name": "view1", "cmd": "view_method", "method": "delete"}
@@ -940,7 +977,7 @@ class TestPerspectiveManager(object):
         make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager._process(make_view, self.post)
 
-        view = manager._get_view("view1")
+        view = manager.get_view("view1")
         view.on_delete(delete_callback)
         view.remove_delete(delete_callback)
 

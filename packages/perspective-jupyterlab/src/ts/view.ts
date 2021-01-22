@@ -242,30 +242,21 @@ export class PerspectiveView extends DOMWidgetView {
         const table_options = msg.data["options"] || {};
 
         if (this.pWidget.client) {
-            /**
-             * In client mode, retrieve the serialized data and the options
-             * passed by the user, and create a new table on the client end.
-             */
+            // In client mode, retrieve the serialized data and the options
+            // passed by the user, and create a new table on the client end.
             const data = msg.data["data"];
             this.pWidget.load(data, table_options);
         } else {
             if (this.pWidget.server && msg.data["table_name"]) {
-                /**
-                 * Get a remote table handle, and load the remote table in
-                 * the client for server mode Perspective.
-                 */
+                // Get a remote table handle, and load the remote table in
+                // the client.
                 const table = this.perspective_client.open_table(msg.data["table_name"]);
                 this.pWidget.load(table, table_options);
-            } else if (msg.data["table_name"]) {
-                /**
-                 * Get a remote table handle from the Jupyter kernel, and
-                 * create a view on that handle to run Perspective in
-                 * distributed mode.
-                 */
+            } else if (msg.data["table_name"] && msg.data["view_name"]) {
+                // Get a remote view handle from the Jupyter kernel, and
+                // create a client-side table using the view handle.
                 const kernel_table: Table = this.perspective_client.open_table(msg.data["table_name"]);
-                const kernel_view: View = kernel_table.view();
-
-                console.log(kernel_view);
+                const kernel_view: View = this.perspective_client.open_view(msg.data["view_name"]);
 
                 // If the widget is editable, set up client/server editing
                 if (this.pWidget.editable) {
@@ -281,21 +272,16 @@ export class PerspectiveView extends DOMWidgetView {
                         let client_edit_port: number, server_edit_port: number;
 
                         // Create ports on the client and kernel.
-                        Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(ports => {
-                            client_edit_port = ports[1];
-                            server_edit_port = ports[2];
-
-                            console.log(ports[1], ports[2]);
+                        Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(outs => {
+                            client_edit_port = outs[1];
+                            server_edit_port = outs[2];
                         });
 
-                        /**
-                         * When the client updates, if the update comes through
-                         * the edit port then forward it to the server.
-                         */
+                        // When the client updates, if the update comes through
+                        // the edit port then forward it to the server.
                         client_view.on_update(
                             updated => {
                                 if (updated.port_id === client_edit_port) {
-                                    console.log("CLIENT UPDATE");
                                     kernel_table.update(updated.delta, {
                                         port_id: server_edit_port
                                     });
@@ -304,15 +290,12 @@ export class PerspectiveView extends DOMWidgetView {
                             {mode: "row"}
                         );
 
-                        /**
-                         * If the server updates, and the edit is not coming
-                         * from the server edit port, then synchronize state
-                         * with the client.
-                         */
+                        // If the server updates, and the edit is not coming
+                        // from the server edit port, then synchronize state
+                        // with the client.
                         kernel_view.on_update(
                             updated => {
                                 if (updated.port_id !== server_edit_port) {
-                                    console.log("KERNEL UPDATE");
                                     client_table.update(updated.delta); // any port, we dont care
                                 }
                             },
@@ -320,10 +303,8 @@ export class PerspectiveView extends DOMWidgetView {
                         );
                     });
                 } else {
-                    /**
-                     * Just load the view into the widget, as the load
-                     * semantics are handled by Perspective.
-                     */
+                    // Just load the view into the widget, everything else
+                    // is handled.
                     this.pWidget.load(kernel_view, table_options);
                 }
             } else {

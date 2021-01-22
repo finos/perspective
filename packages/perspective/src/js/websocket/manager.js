@@ -186,6 +186,18 @@ export class WebSocketManager extends Server {
     }
 
     /**
+     * Expose a Perspective `view` through the WebSocket, allowing
+     * it to be accessed by a unique name from a client.  Hosted objects
+     * are automatically `eject`ed when their `delete()` method is called.
+     *
+     * @param {String} name
+     * @param {perspective.view} view `view` to host.
+     */
+    host_view(name, view) {
+        this._host(this._views, name, view);
+    }
+
+    /**
      * Cease hosting a `table` on this server.  Hosted objects
      * are automatically `eject`ed when their `delete()` method is called.
      *

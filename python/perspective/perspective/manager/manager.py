@@ -11,6 +11,7 @@ import string
 from functools import partial
 from ..core.exception import PerspectiveError
 from ..table import Table
+from ..table.view import View
 from .session import PerspectiveSession
 from .manager_internal import _PerspectiveManagerInternal
 
@@ -26,14 +27,14 @@ class PerspectiveManager(_PerspectiveManagerInternal):
     The core functionality resides in `process()`, which receives
     JSON-serialized messages from a client (implemented by `perspective-viewer`
     in the browser), executes the commands in the message, and returns the
-    results of those commands back to the `post_callback`. Table instances
-    should be passed to the manager using `host_table` - this allows server
-    code to call Table APIs natively instead of proxying them through the
-    Manager. Because Perspective is designed to be used in a shared context,
-    i.e. multiple clients all accessing the same `Table`, PerspectiveManager
-    comes with the context of `sessions` - an encapsulation of the actions
-    and resources used by a single connection to Perspective, which can be
-    cleaned up after the connection is closed.
+    results of those commands back to the `post_callback`. Table/View instances
+    should be passed to the manager using `host_table` or `host_view` - this
+    allows server code to call Table/View APIs natively instead of proxying
+    them through the Manager. Because Perspective is designed to be used in a
+    shared context, i.e. multiple clients all accessing the same `Table`,
+    PerspectiveManager comes with the context of `sessions` - an
+    encapsulation of the actions and resources used by a single connection
+    to Perspective, which can be cleaned up after the connection is closed.
 
     - When a client connects, for example through a websocket, a new session
         should be spawned using `new_session()`.
@@ -52,7 +53,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
 
     def lock(self):
         """Block messages that can mutate the state of :obj:`~perspective.Table`
-        objects under management.
+         and :obj:`~perspective.View` objects under management.
 
         All ``PerspectiveManager`` objects exposed over the internet should be
         locked to prevent content from being mutated by clients.
@@ -61,25 +62,33 @@ class PerspectiveManager(_PerspectiveManagerInternal):
 
     def unlock(self):
         """Unblock messages that can mutate the state of
-        :obj:`~perspective.Table` objects under management."""
+        :obj:`~perspective.Table` and :obj:`~perspective.View` objects under
+        management."""
         self._lock = False
 
     def host(self, item, name=None):
-        """Given a :obj:`~perspective.Table`, place it under management and
-        allow operations on it to be passed through the Manager instance.
+        """Given a :obj:`~perspective.Table` or :obj:`~perspective.View`,
+        place it under management and allow operations on it to be passed
+        through the Manager instance.
 
         Args:
-            item (:obj:`~perspective.Table`) : a Table to be managed.
+            table_or_view (:obj:`~perspective.Table`/:obj:`~perspective.View`) :
+                a Table or View to be managed.
 
         Keyword Args:
             name (:obj:`str`) : an optional name to allow retrieval through
-                ``get_table``. A name will be generated if not provided.
+                ``get_table`` or ``get_view``. A name will be generated if not
+                provided.
         """
         name = name or gen_name()
         if isinstance(item, Table):
             self.host_table(name, item)
+        elif isinstance(item, View):
+            self.host_view(name, item)
         else:
-            raise PerspectiveError("Only `Table()` instances can be hosted.")
+            raise PerspectiveError(
+                "Only `Table()` and `View()` instances can be hosted."
+            )
 
     def host_table(self, name, table):
         """Given a reference to a `Table`, manage it and allow operations on it
@@ -99,9 +108,19 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         self._tables[name] = table
         return name
 
+    def host_view(self, name, view):
+        """Given a :obj:`~perspective.View`, add it to the manager's views
+        container.
+        """
+        self._views[name] = view
+
     def get_table(self, name):
         """Return a table under management by name."""
         return self._tables.get(name, None)
+
+    def get_view(self, name):
+        """Return a view under management by name."""
+        return self._views.get(name, None)
 
     def new_session(self):
         return PerspectiveSession(self)

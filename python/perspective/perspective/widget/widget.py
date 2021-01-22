@@ -536,7 +536,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             # kernel and the front-end proxies pivots, sorts, data requests
             # etc. to the kernel and does not run a Table in the front-end.
             msg_data = {"table_name": self.table_name}
-        elif self.table_name is not None:
+        elif self._perspective_view_name is not None:
             # If a view is hosted by the widget's manager (by default),
             # run Perspective in client-server mode: a Table will be created
             # in the front-end that mirrors the Table hosted in the kernel,
@@ -544,6 +544,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             # and the server.
             msg_data = {
                 "table_name": self.table_name,
+                "view_name": self._perspective_view_name,
                 "options": {},
             }
 

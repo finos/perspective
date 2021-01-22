@@ -47,9 +47,10 @@
             const worker = perspective.worker();
             worker.initialize_profile_thread();
 
-            // Open a `Table` that is hosted on the server. All instructions
-            // will be proxied to the server `Table` - no calculations are
-            // done on the client.
+            // Get a proxy for a view named "data_source_one", registered on
+            // the server with a reciprocal call to `host_view()`.
+            // No data is transferred, `view` is a virtual handle for data on
+            // the server.
             const table = websocket.open_table('remote_table');
 
             // Create a `table` from this, owned by the local WebWorker.

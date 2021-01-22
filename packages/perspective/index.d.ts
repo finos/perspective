@@ -147,6 +147,7 @@ declare module "@finos/perspective" {
 
     export class WebSocketClient {
         open_table(name: string): Table;
+        open_view(name: string): View;
         terminate(): void;
         initialize_profile_thread(): void;
         send(msg: any): void;
@@ -162,6 +163,7 @@ declare module "@finos/perspective" {
     export class WebSocketManager {
         add_connection(ws: ws): void;
         host_table(name: string, table: Table): void;
+        host_view(name: string, view: View): void;
         eject_table(name: string): void;
         eject_view(name: string): void;
     }

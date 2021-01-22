@@ -96,22 +96,24 @@ describe("PerspectiveView", function() {
             });
         });
 
-        it("Should handle a well-formed table message from the kernel", async function() {
+        it("Should handle a well-formed table/view message from the kernel", async function() {
             const table_name = uuid();
+            const view_name = uuid();
             view = await manager.create_view(model)();
             view._handle_message({
                 id: -2,
                 type: "table",
                 data: {
-                    table_name: table_name
+                    table_name: table_name,
+                    view_name: view_name
                 }
             });
 
             const mock_client = PerspectiveJupyterClient.mock.instances[0];
 
-            // `open_table` should be called correctly
-            const open_table_arg = mock_client.open_table.mock.calls[0][0];
-            expect(open_table_arg).toEqual(table_name);
+            // `open_view` should be called correctly
+            const open_view_arg = mock_client.open_view.mock.calls[0][0];
+            expect(open_view_arg).toEqual(view_name);
 
             const send_arg = mock_client.send.mock.calls[0][0];
             expect(send_arg).toEqual({
@@ -120,14 +122,16 @@ describe("PerspectiveView", function() {
             });
         });
 
-        it("Should handle a well-formed table message with index from the kernel", async function() {
+        it("Should handle a well-formed table/view message with index from the kernel", async function() {
             const table_name = uuid();
+            const view_name = uuid();
             view = await manager.create_view(model)();
             view._handle_message({
                 id: -2,
                 type: "table",
                 data: {
                     table_name: table_name,
+                    view_name: view_name,
                     options: {
                         index: "a"
                     }
@@ -136,9 +140,9 @@ describe("PerspectiveView", function() {
 
             const mock_client = PerspectiveJupyterClient.mock.instances[0];
 
-            // `open_table` should be called correctly
-            const open_table_arg = mock_client.open_table.mock.calls[0][0];
-            expect(open_table_arg).toEqual(table_name);
+            // `open_view` should be called correctly
+            const open_view_arg = mock_client.open_view.mock.calls[0][0];
+            expect(open_view_arg).toEqual(view_name);
 
             const send_arg = mock_client.send.mock.calls[0][0];
             expect(send_arg).toEqual({
@@ -147,14 +151,16 @@ describe("PerspectiveView", function() {
             });
         });
 
-        it("Should handle a well-formed table message with limit from the kernel", async function() {
+        it("Should handle a well-formed view message with limit from the kernel", async function() {
             const table_name = uuid();
+            const view_name = uuid();
             view = await manager.create_view(model)();
             view._handle_message({
                 id: -2,
                 type: "table",
                 data: {
                     table_name: table_name,
+                    view_name: view_name,
                     options: {
                         limit: 1000
                     }
@@ -163,9 +169,9 @@ describe("PerspectiveView", function() {
 
             const mock_client = PerspectiveJupyterClient.mock.instances[0];
 
-            // `open_table` should be called correctly
-            const open_table_arg = mock_client.open_table.mock.calls[0][0];
-            expect(open_table_arg).toEqual(table_name);
+            // `open_view` should be called correctly
+            const open_view_arg = mock_client.open_view.mock.calls[0][0];
+            expect(open_view_arg).toEqual(view_name);
 
             const send_arg = mock_client.send.mock.calls[0][0];
             expect(send_arg).toEqual({

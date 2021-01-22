@@ -35,6 +35,12 @@
       "node_modules/react/README": {
         "title": "node_modules/react/README"
       },
+      "obj/perspective-python": {
+        "title": "perspective-python API"
+      },
+      "obj/perspective-viewer": {
+        "title": "perspective-viewer API"
+      },
       "obj/perspective": {
         "title": "perspective API"
       },

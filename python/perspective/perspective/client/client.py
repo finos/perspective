@@ -11,6 +11,7 @@ from random import random
 from ..core.exception import PerspectiveError
 from .table_api import PerspectiveTableProxy
 from .table_api import table as make_table
+from .view_api import PerspectiveViewProxy
 
 
 class PerspectiveClient(object):
@@ -43,6 +44,10 @@ class PerspectiveClient(object):
     def open_table(self, name):
         """Return a proxy Table to a `Table` hosted in a server somewhere."""
         return PerspectiveTableProxy(self, name)
+
+    def open_view(self, name):
+        """Return a proxy View to a `View` hosted in a server somewhere."""
+        return PerspectiveViewProxy(self, name)
 
     def _handle(self, msg):
         """Given a response from the Perspective server, resolve the Future

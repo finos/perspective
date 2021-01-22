@@ -14,9 +14,11 @@ data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
 
 
 class TestPerspectiveSession(object):
+
     def post(self, msg):
         '''boilerplate callback to simulate a client's `post()` method.'''
         msg = json.loads(msg)
+        print("self.post: ", msg)
         assert msg["id"] is not None
 
     def validate_post(self, msg, expected=None):
@@ -47,7 +49,7 @@ class TestPerspectiveSession(object):
 
         # make sure the client ID is attached to the new view
         assert len(manager._views.keys()) == 1
-        assert manager._get_view("view1")._client_id == client_id
+        assert manager.get_view("view1")._client_id == client_id
 
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
 
@@ -85,7 +87,7 @@ class TestPerspectiveSession(object):
             assert key in manager_views
 
         for i, session in enumerate(sessions):
-            view = manager._get_view("view" + str(i))
+            view = manager.get_view("view" + str(i))
             assert view._client_id == session.client_id
 
         # arbitrarily do an update
@@ -116,7 +118,7 @@ class TestPerspectiveSession(object):
 
         # make sure the client ID is attached to the new view
         assert len(manager._views.keys()) == 1
-        assert manager._get_view("view1")._client_id == client_id
+        assert manager.get_view("view1")._client_id == client_id
 
         def callback(updated):
             assert updated["port_id"] == 0
@@ -182,7 +184,7 @@ class TestPerspectiveSession(object):
             assert key in manager_views
 
         for i, session in enumerate(sessions):
-            view = manager._get_view("view" + str(i))
+            view = manager.get_view("view" + str(i))
             assert view._client_id == session.client_id
 
         def callback(updated):

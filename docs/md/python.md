@@ -302,44 +302,31 @@ of `PerspectiveManager` with a string name and the instance to be hosted:
 ```python
 manager = PerspectiveManager()
 table = Table(data)
+view = table.view()
 manager.host_table("data_source", table)
+manager.host_view("view_1", view)
 ```
 
 The `name` provided is important, as it enables Perspective in Javascript to look
-up a `Table` and get a handle to it over the network. This enables
+up a `Table`/`View` and get a handle to it over the network. This enables
 several powerful server/client implementations of Perspective, as explained in
 the next section.
 
-### Distributed Mode
+### Using a hosted `Table` in Javascript
 
 Using Tornado and [`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
-as well as `Perspective`'s Javascript library, we can set up "distributed"
-Perspective instances that allows multiple browser `perspective-viewer`
-clients to read from a common `perspective-python` server. In exchange for sending the
-entire dataset to the client on initialization, server load is reduced and
-client performance is not network-dependent.
+as well as `Perspective`'s Javascript library, we can create a client/server
+architecture that hosts and transforms _massive_ datasets with minimal
+client resource usage.
 
-[Example](https://github.com/finos/perspective/tree/master/examples/tornado-python)
+Perspective's design allows a `table()` created in Javascript to _proxy_ its
+operations to a `Table` created in Python, which executes the operations in
+the Python kernel, and returns the results of the operation to the browser.
+All of this is _enabled_ through `PerspectiveManager`, which handles messaging,
+processing method calls, serializing outputs for the network, etc.
 
-This architecture works by maintaining two `Tables`—one on the server, and one
-on the client that mirrors the server's `Table` automatically using `on_update`.
-All updates to the table on the server are automatically applied to each client,
-which makes this architecture a natural fit for streaming dashboards and other
-distributed use-cases.
-
-Because the `Table` is mirrored, the user gets all the performance benefits of
-Perspective in WebAssembly, and can examine server-hosted datasets with zero
-network lag on their interactions.
-
-In conjunction with [Async Mode](#async-mode), distributed Perspective offers
-consistently high performance over large numbers of clients and large datasets.
-As server dataset sizes increase, the initial load time of a client will
-increase, but once the data is loaded there is no network lag visible to the
-user.
-
-Using the [tornado-python](https://github.com/finos/perspective/tree/master/examples/tornado-python)
-example, one can easily create a distributed Perspective server using
-`server.py` and `index.html`:
+In Python, use `PerspectiveManager` and `PerspectiveTornadoHandler` to create
+a websocket server that exposes a `Table`:
 
 _*server.py*_
 
@@ -348,7 +335,7 @@ from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 # Create an instance of PerspectiveManager, and host a Table
 MANAGER = PerspectiveManager()
-TABLE = Table(data)
+TABLE = Table(large_dataset)
 
 # The Table is exposed at `localhost:8888/websocket` with the name `data_source`
 MANAGER.host_table("data_source", TABLE)
@@ -365,51 +352,13 @@ loop = tornado.ioloop.IOLoop.current()
 loop.start()
 ```
 
-Instead of calling `load(server_table)`, create a `View` using `server_table`
-and pass that into `viewer.load()`. This will automatically register an
-`on_update` callback that synchronizes state between the server and the client.
+`PerspectiveTornadoHandler`, as outlined in the [docs](/docs/md/python.html#perspectivetornadohandler),
+takes a `PerspectiveManager` instance exposes it over a websocket at the URL
+specified. This allows a `table()` in Javascript to access the `Table` in
+Python and read data from it.
 
-_*index.html*_
-
-```html
-<perspective-viewer id="viewer" editable></perspective-viewer>
-
-<script>
-  window.addEventListener("WebComponentsReady", async function () {
-    // Create a client that expects a Perspective server
-    // to accept connections at the specified URL.
-    const websocket = perspective.websocket("ws://localhost:8888/websocket");
-
-    // Get a handle to the Table on the server
-    const server_table = websocket.open_table("data_source_one");
-
-    // Create a new view
-    const server_view = table.view();
-
-    // Create a Table on the client using `perspective.worker()`
-    const worker = perspective.worker();
-    const client_table = worker.table(view);
-
-    // Load the client table in the `<perspective-viewer>`.
-    document.getElementById("viewer").load(client_table);
-  });
-</script>
-```
-
-For a more complex example that offers distributed editing of the server
-dataset, see [client_server_editing.html](https://github.com/finos/perspective/blob/master/examples/tornado-python/client_server_editing.html).
-
-### Server Mode
-
-An alternative architecture uses a single `Table` on the Python server, which
-allows hosting of _massive_ datasets with minimal client resource usage. This
-comes at the expense of client-side performance, as all operations must be
-proxied over the network to the server.
-
-The server setup is identical to [Distributed Mode](#distributed-mode) above,
-but instead of creating a view, the client calls `load(server_table)`:
-In Python, use `PerspectiveManager` and `PerspectiveTornadoHandler` to create
-a websocket server that exposes a `Table`:
+Most importantly, the client code in Javascript does not require Webpack or any
+bundler, and can be implemented in a single HTML file:
 
 _*index.html*_
 
@@ -435,6 +384,45 @@ _*index.html*_
   });
 </script>
 ```
+
+### Using a hosted `View` in Javascript
+
+An alternative client/server architecture using `PerspectiveTornadoHandler` and
+`PerspectiveManager` involves hosting a `View`, and creating a new `table()` in
+Javascript on top of the Python `View`.
+
+When the `table()` is created in Javascript, it serializes the Python `View`'s
+data into Arrow, transfers it into the Javascript `table()`, and sets up an
+`on_update` callback to `update()` the Table whenever the Python `View`'s
+`Table` updates.
+
+Implementing the server in Python is extremely similar to the implementation
+described in the last section.
+
+Replace `host_table` with `host_view`:
+
+```python
+# we have an instance of `PerspectiveManager`
+TABLE = Table(data)
+VIEW = TABLE.view()
+MANAGER.host_view("view_one", VIEW)
+
+# Continue with Tornado setup
+```
+
+Changes to the client code are also minimal. Use `open_view` instead of
+`open_table`:
+
+```javascript
+// const websocket has been defined already
+const view = websocket.open_view("view_one");
+const table = perspective.table(view);
+// continue with loading the table into `<perspective-viewer>
+```
+
+The benefit of this design is that only new updates will be sent to the client,
+efficiently serialized in the Apache Arrow format. In exchange for sending the
+entire dataset to the client on initialization, it reduces load on the server.
 
 ## `PerspectiveWidget`
 

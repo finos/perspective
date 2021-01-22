@@ -52,23 +52,16 @@
              * state is automatically synchronized between the two.
              * 
              * To create a Perspective client running in "distributed mode",
-             * host a `Table` in the Python server, create a `Table` on the
-             * client through a `View` on the server. This synchronizes the
-             * server's `Table` with the client's `Table`.
+             * host a `View` in the Python server and create a `Table` in the
+             * client using a proxy to the hosted `View`.
              */
             const worker = perspective.worker();
 
             /**
-             * `server_table` is a proxy to the hosted `Table` in the Python
-             * server. All public API methods are available through this
-             * proxied table.
+             * `view` is a proxy to the hosted `View` in the Python server. All
+             * public API methods are available through this proxied view.
              */
-            const server_table = websocket.open_table("data_source_one");
-
-            /**
-             * Create a `View` on the server.
-             */
-            const server_view = server_table.view();
+            const view = websocket.open_view('view_one');
 
             /**
              * When a `View` is passed into `table()` to create a new `Table`,
@@ -81,16 +74,11 @@
              * `Table` and its data (and associated viewer) are still fully
              * functional, but will not be kept up-to-date with server state.
              * 
-             * Use `table.get_index()` in order to create a `Table` on the
-             * client that has the exact same settings as the server.
-             * 
              * For a more complex example of manually controlling state
              * synchronization between server and client, see
              * `client_server_editing.html`.
              */
-            const table = worker.table(server_view, {
-                index: await server_table.get_index()
-            });
+            const table = worker.table(view);
             
             // Load the local table in the `<perspective-viewer>`.
             document.getElementById('viewer').load(table);

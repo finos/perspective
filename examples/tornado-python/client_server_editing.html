@@ -55,20 +55,17 @@
             const websocket = perspective.websocket("ws://localhost:8080/websocket");
             const worker = perspective.shared_worker();
 
-            // Get handles to the `Table` on the server, and create a
-            // `view()` on the server.
+            // Get handles to both the `Table` and `View`, as we manually set
+            // up the client/server editing.
             const server_table = websocket.open_table("data_source_one");
-            const server_view = server_table.view();
+            const server_view = websocket.open_view("view_one");
             
             // Serialize the current state of the view to an arrow, and create
             // a Table on the client that has the same index as the Table
-            // on the server using `get_index()`.
-            //
-            // Client/server editing does not work on an unindexed Table.
+            // on the server. Client/server editing does not work on an
+            // unindexed Table.
             const arrow = await server_view.to_arrow();
-            const client_table = worker.table(arrow, {
-                index: await server_table.get_index()
-            });
+            const client_table = worker.table(arrow, {index: "Row ID"});
             const client_view = client_table.view();// client -> server
 
             await viewer.load(client_table);

@@ -50,10 +50,6 @@ class _PerspectiveManagerInternal(object):
         # special message flow.
         self._pending_binary = None
 
-    def _get_view(self, name):
-        """Return a view under management by name."""
-        return self._views.get(name, None)
-
     def _process(self, msg, post_callback, client_id=None):
         """Given a message from the client, process it through the Perspective
         engine.

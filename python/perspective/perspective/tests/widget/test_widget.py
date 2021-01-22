@@ -31,6 +31,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {}
             }
         }
@@ -45,6 +46,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
                     "index": "a"
                 }
@@ -102,6 +104,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {}
             }
         }
@@ -129,6 +132,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
                     "index": "a"
                 }
@@ -146,6 +150,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
                     "index": "a"
                 }
@@ -162,6 +167,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {}
             }
         }
@@ -176,15 +182,38 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
                 "options": {
                     "index": "a"
                 }
             }
         }
 
+    def test_widget_load_view(self):
+        table = Table({"a": np.arange(0, 50)})
+        view = table.view()
+        widget = PerspectiveWidget(view, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name,
+                "view_name": widget._perspective_view_name,
+                "options": {}
+            }
+        }
+
     def test_widget_load_table_ignore_limit(self):
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, limit=1)
+        assert widget.table.size() == 50
+
+    def test_widget_load_view_ignore_limit(self):
+        table = Table({"a": np.arange(0, 50)})
+        view = table.view()
+        widget = PerspectiveWidget(view, plugin="x_bar", limit=1)
         assert widget.table.size() == 50
 
     def test_widget_pass_index(self):
@@ -206,6 +235,19 @@ class TestWidget:
     def test_widget_load_table_server(self):
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, server=True)
+        load_msg = widget._make_load_message()
+        assert load_msg.to_dict() == {
+            "id": -2,
+            "type": "table",
+            "data": {
+                "table_name": widget.table_name
+            }
+        }
+
+    def test_widget_load_view_server(self):
+        table = Table({"a": np.arange(0, 50)})
+        view = table.view()
+        widget = PerspectiveWidget(view, server=True)
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
             "id": -2,
@@ -277,4 +319,18 @@ class TestWidget:
         })
         widget.post = MethodType(mocked_post, widget)
         widget.delete()
+        assert widget._view is None
+        assert widget.table is None
+
+    def test_widget_delete_view(self):
+        data = {"a": np.arange(0, 50)}
+        table = Table(data)
+        view = table.view()
+        widget = PerspectiveWidget(view)
+        mocked_post = partial(mock_post, assert_msg={
+            "cmd": "delete"
+        })
+        widget.post = MethodType(mocked_post, widget)
+        widget.delete()
+        assert widget._view is None
         assert widget.table is None
