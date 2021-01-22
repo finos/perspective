@@ -7,7 +7,7 @@
  *
  */
 
-import {get_type_config, get_types} from "@finos/perspective/dist/esm/config";
+import {get_type_config, get_types} from "@finos/perspective";
 
 export function get_style(elem, name) {
     let value;

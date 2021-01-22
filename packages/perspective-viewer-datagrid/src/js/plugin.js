@@ -7,7 +7,7 @@
  *
  */
 
-import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
+import {registerPlugin} from "@finos/perspective-viewer";
 
 import "regular-table";
 import {createModel, configureRegularTable, formatters} from "regular-table/dist/examples/perspective.js";

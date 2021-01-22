@@ -8,7 +8,7 @@
  */
 import {select} from "d3";
 import {getGroupValues, getSplitValues, getDataValues} from "./selectionData";
-import {get_type_config} from "@finos/perspective/dist/esm/config";
+import {get_type_config} from "@finos/perspective";
 
 export function generateHtml(tooltipDiv, data, settings) {
     const tooltipValues = getGroupValues(data, settings)

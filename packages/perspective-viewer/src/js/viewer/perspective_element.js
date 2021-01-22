@@ -11,8 +11,7 @@ import debounce from "lodash/debounce";
 import isEqual from "lodash/isEqual";
 import {html, render} from "lit-html";
 
-import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
-import {get_type_config} from "@finos/perspective/dist/esm/config";
+import perspective, {get_type_config} from "@finos/perspective";
 import {CancelTask} from "./cancel_task.js";
 
 import {StateElement} from "./state_element.js";

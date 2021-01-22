@@ -7,7 +7,7 @@
  *
  */
 
-import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
+import {registerPlugin} from "@finos/perspective-viewer";
 import charts from "../charts/charts";
 import "./polyfills/index";
 import "./template";

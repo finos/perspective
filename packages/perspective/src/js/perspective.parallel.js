@@ -8,13 +8,12 @@
  */
 
 import * as defaults from "./config/constants.js";
-import {get_config} from "./config";
+import {override_config, get_config, get_type_config, get_types} from "./config";
 import {Client} from "./api/client.js";
 const {WebSocketClient} = require("./websocket/client");
 
 import wasm_worker from "./perspective.wasm.js";
 import wasm from "./psp.async.wasm.js";
-import {override_config} from "../../dist/esm/config/index.js";
 
 // eslint-disable-next-line max-len
 const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While Perspective's runtime performance is not affected, you may see smaller assets size and faster engine initial load time using "@finos/perspective-webpack-plugin" to build your application.
@@ -182,3 +181,7 @@ for (let prop of Object.keys(defaults)) {
 }
 
 export default mod;
+export {
+    get_type_config,
+    get_types
+}

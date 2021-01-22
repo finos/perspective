@@ -7,7 +7,7 @@
  *
  */
 
-import {get_type_config} from "@finos/perspective/dist/esm/config";
+import {get_type_config} from "@finos/perspective";
 import {dragend} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
 

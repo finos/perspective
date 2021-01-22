@@ -10,7 +10,7 @@
 import "@webcomponents/webcomponentsjs";
 import "./polyfill.js";
 
-import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, invertPromise, throttlePromise} from "./utils.js";
+import {registerTemplate, bindTemplate, json_attribute, array_attribute, copy_to_clipboard, invertPromise, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
 import "./autocomplete_widget.js";
@@ -596,7 +596,7 @@ class PerspectiveViewer extends ActionElement {
     @throttlePromise
     async notifyResize(immediate) {
         const resized = await this._check_responsive_layout();
-        if (!resized && !document.hidden && this.offsetParent) {
+        if (!resized && !document.hidden && this.offsetParent && this._plugin) {
             await this._plugin.resize.call(this, immediate);
         }
     }
@@ -848,3 +848,8 @@ class PerspectiveViewer extends ActionElement {
  * @event module:perspective_viewer~PerspectiveViewer#perspective-view-update
  * @type {String}
  */
+
+export { 
+    bindTemplate,
+    registerTemplate
+}

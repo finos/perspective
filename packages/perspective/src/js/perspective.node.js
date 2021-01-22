@@ -191,3 +191,5 @@ module.exports.websocket = websocket;
 module.exports.perspective_assets = perspective_assets;
 module.exports.WebSocketServer = WebSocketServer;
 module.exports.WebSocketManager = WebSocketManager;
+module.exports.get_type_config = require("./config").get_type_config;
+module.exports.get_types = require("./config").get_types;
