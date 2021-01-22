@@ -43,10 +43,7 @@ var freq = 1,
     elem;
 
 function update() {
-    var viewport_height = document.documentElement.clientHeight;
-    if (viewport_height - window.scrollY > 0) {
-        elem.update([newRow(), newRow(), newRow()]);
-    }
+    elem.update([newRow(), newRow(), newRow()]);
     if (freq === 0) {
         setTimeout(update, 3000);
         freqdir = 1;
@@ -170,12 +167,11 @@ window.addEventListener("WebComponentsReady", function() {
         const psp2 = document.querySelector("#get_started perspective-viewer");
         const tbl2 = worker.table(arrow.slice());
         psp2.load(tbl2);
-        psp2.toggleConfig();
         psp2.restore({
             plugin: "d3_heatmap",
-            "column-pivots": ["Sub-Category"],
-            "row-pivots": ["State"],
-            sort: [["Sales","desc"],["Profit","col desc"]],
+            "row-pivots": ["Sub-Category"],
+            "column-pivots": ["State"],
+            sort: [["Sales", "col asc"]],
             columns: ["Profit"],
             aggregates: {Profit: "low"}
         });
