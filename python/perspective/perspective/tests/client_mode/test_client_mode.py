@@ -128,7 +128,7 @@ class TestClient(object):
         assert perspective.is_libpsp() is False
         data = pd.DataFrame({
             "a": [date(2020, i, 1) for i in range(1, 13)]
-        }, dtype="datetime64[ns]")
+        }, dtype="datetime64[D]")
         widget = perspective.PerspectiveWidget(data)
         assert hasattr(widget, "table") is False
         assert widget._data == {
