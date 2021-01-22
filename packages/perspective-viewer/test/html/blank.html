@@ -10,9 +10,9 @@
 <!DOCTYPE html>
 <html>
     <head>
- 
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer.js"></script>
+        
+        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+        <script src="perspective-viewer.js" preload></script>
 
         <link rel='stylesheet' href="demo.css">
 
@@ -25,7 +25,7 @@
 
         <script>
 
-            window.WORKER = perspective.worker();
+            document.querySelector('perspective-viewer').removeAttribute('updating');
 
         </script>
 

@@ -11,7 +11,7 @@
 
 import "@finos/perspective-viewer";
 
-import {Table, TableData} from "@finos/perspective";
+import {Table, TableData, TableOptions, View} from "@finos/perspective";
 import {Message} from "@lumino/messaging";
 import {Widget} from "@lumino/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
@@ -138,12 +138,12 @@ export class PerspectiveWidget extends Widget {
     }
 
     /**
-     * Load a `perspective.table` into the viewer.
+     * Load either a `perspective.table` into the viewer.
      *
-     * @param table A `perspective.table` object.
+     * @param table a `perspective.table` object.
      */
-    load(table: Table): void {
-        this.viewer.load(table);
+    load(table: TableData | Table | View, options?: TableOptions): void {
+        this.viewer.load(table, options);
     }
 
     /**
@@ -152,14 +152,14 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
     _update(data: TableData): void {
-        this.viewer.table.update(data);
+        this.viewer.update(data);
     }
 
     /**
      * Removes all rows from the viewer's table. Does not reset viewer state.
      */
     clear(): void {
-        this.viewer.table.clear();
+        this.viewer.clear();
     }
 
     /**
@@ -169,7 +169,7 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
     replace(data: TableData): void {
-        this.viewer.table.replace(data);
+        this.viewer.replace(data);
     }
 
     /**

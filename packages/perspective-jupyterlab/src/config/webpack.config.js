@@ -8,6 +8,7 @@
  */
 
 const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
@@ -23,6 +24,7 @@ module.exports = {
         maxAssetSize: 512000
     },
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
+    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
     module: {
         rules: [
             {

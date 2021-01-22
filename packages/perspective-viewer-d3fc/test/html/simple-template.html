@@ -11,7 +11,7 @@
 <html>
     <head>
 
-        <script src="perspective.js"></script>
+        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
         <script src="perspective-viewer.js"></script>
         <script src="perspective-viewer-d3fc.js"></script>
     
@@ -31,8 +31,7 @@
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'superstore.csv', true);
             xhr.onload = function () { 
-                const table = perspective.worker().table(xhr.response);
-                document.getElementsByTagName('perspective-viewer')[0].load(table);  
+                document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
             }
             xhr.send(null);
 

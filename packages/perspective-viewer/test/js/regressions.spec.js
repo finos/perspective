@@ -38,9 +38,8 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.evaluate(
                         (viewer, data, schema) => {
-                            const table = window.WORKER.table(schema);
-                            viewer.load(table);
-                            table.update(data);
+                            viewer.load(schema);
+                            viewer.update(data);
                         },
                         viewer,
                         getData(2, 1),
@@ -51,9 +50,8 @@ utils.with_server({}, () => {
 
                     await page.evaluate(
                         (viewer, data, schema) => {
-                            const table = window.WORKER.table(schema);
-                            viewer.load(table);
-                            table.update(data);
+                            viewer.load(schema);
+                            viewer.update(data);
                         },
                         viewer,
                         getData(3, 2),
@@ -72,8 +70,7 @@ utils.with_server({}, () => {
                     const byte_length = await page.evaluate(
                         async (viewer, data) => {
                             const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
-                            const table = window.WORKER.table(arrow);
-                            viewer.load(table);
+                            viewer.load(arrow);
                             // force _process to run - otherwise reading
                             // bytelength will return the un-transfered arrow.
                             await viewer.table.size();
@@ -100,10 +97,9 @@ utils.with_server({}, () => {
                     const arrow = arrows.int_float_str_arrow.slice();
                     const byte_length = await page.evaluate(
                         async (viewer, data, schema) => {
-                            const table = window.WORKER.table(schema);
-                            viewer.load(table);
+                            viewer.load(schema);
                             const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
-                            table.update(arrow);
+                            viewer.update(arrow);
                             // force _process to run - otherwise reading
                             // bytelength will return the un-transfered arrow.
                             await viewer.table.size();

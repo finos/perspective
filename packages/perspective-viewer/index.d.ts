@@ -8,12 +8,16 @@
  */
 
 import React from "react";
-import {Table, View} from "@finos/perspective";
+import {Table, TableData, TableOptions, Schema} from "@finos/perspective";
 
 export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, HTMLElement {
-    load(data: Table): void;
+    load(data: TableData | Table | View, options?: TableOptions): void;
+    load(schema: Schema, options?: TableOptions): void;
+    update(data: TableData): void;
     notifyResize(): void;
     delete(delete_table: boolean): Promise<void>;
+    clear(): void;
+    replace(data: TableData): void;
     flush(): Promise<void>;
     getEditPort(): Promise<number>;
     toggleConfig(): void;
@@ -22,7 +26,6 @@ export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, 
     restore(x: any): Promise<void>;
     restyleElement(): void;
     readonly table?: Table;
-    readonly view?: View;
 }
 interface ComputedColumn {
     column: string;

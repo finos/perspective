@@ -111,8 +111,7 @@
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
             const data = await fetch("/node_modules/superstore-arrow/superstore.arrow");
             const arr = await data.arrayBuffer();
-            const table = perspective.worker().table(arr.slice());
-            await viewer.load(table);
+            await viewer.load(arr.slice());
             viewer.toggleConfig();
 
             let max = -Infinity;

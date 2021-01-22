@@ -126,8 +126,6 @@ declare module "@finos/perspective" {
 
     export type Table = {
         columns(): Array<string>;
-        clear(): Promise<void>;
-        replace(data: TableData): Promise<void>;
         delete(): Promise<void>;
         on_delete(callback: Function): void;
         computed_schema(): Promise<Schema>;
