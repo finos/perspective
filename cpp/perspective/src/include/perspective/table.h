@@ -66,14 +66,10 @@ public:
     t_uindex size() const;
 
     /**
-     * @brief The schema of the underlying `t_data_table`, which contains the
-     * `psp_pkey`, `psp_op` and `psp_pkey` meta columns, and none of the
-     * computed columns that are created by views on this table. For a
-     * `t_schema` with all computed columns created by all views, use
-     * `m_gnode->get_table_sptr()->get_schema()`.
+     * @brief The schema of the underlying `t_data_table`, which contains the `psp_pkey`,
+     * `psp_op` and `psp_pkey` meta columns.
      *
-     * The output schema is generally subject to further processing before
-     * it can be used, as meta columns need to be removed.
+     * The output schema is generally subject to further processing before it is human-readable.
      *
      * @return t_schema
      */

@@ -1431,11 +1431,8 @@ namespace binding {
 
             t_dtype output_column_type = computation.m_return_type;
 
-            // Add the column to the schema if the column does not already
-            // exist in the schema.
-            if (schema->get_colidx_safe(computed_column_name) == -1) {
-                schema->add_column(computed_column_name, output_column_type);
-            }
+            // Add the column to the schema.
+            schema->add_column(computed_column_name, output_column_type);
 
             // Add the computed column to the config.
             auto tp = std::make_tuple(
