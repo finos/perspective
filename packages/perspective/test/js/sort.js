@@ -20,6 +20,12 @@ const data2 = {
     y: ["a", "b", "c", "d", "e", "f", "g", "h"]
 };
 
+const data3 = {
+    w: [3.5, 4.5, null, null, null, null, 1.5, 2.5],
+    x: [1, 2, 3, 4, 4, 3, 2, 1],
+    y: ["a", "a", "a", "a", "b", "b", "b", "b"]
+};
+
 module.exports = perspective => {
     describe("Sorts", function() {
         describe("With nulls", () => {
@@ -223,6 +229,113 @@ module.exports = perspective => {
 
                     view.delete();
                     table.delete();
+                });
+
+                describe("Multiple hidden sort", () => {
+                    it("sum", async function() {
+                        var table = perspective.table(data3);
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "sum"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            w: [12, 8, 4],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+
+                    it("sum of floats", async function() {
+                        var table = perspective.table({
+                            w: [3.25, 4.51, null, null, null, null, 1.57, 2.59],
+                            x: [1, 2, 3, 4, 4, 3, 2, 1],
+                            y: ["a", "a", "a", "a", "b", "b", "b", "b"]
+                        });
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "sum"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            w: [11.92, 7.76, 4.16],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+
+                    it("unique", async function() {
+                        var table = perspective.table(data3);
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "unique"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            w: [null, null, null],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+
+                    it("avg", async function() {
+                        var table = perspective.table(data3);
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "avg"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            // 4 and 2 are the avg of the non-null rows
+                            w: [3, 4, 2],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
                 });
             });
         });
