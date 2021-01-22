@@ -521,9 +521,8 @@ str_to_filter_op(const std::string& str) {
     } else if (str == "is not null" || str == "is not None") {
         return t_filter_op::FILTER_OP_IS_NOT_NULL;
     } else {
-        std::stringstream ss;
-        ss << "Unknown filter operator string: `" << str << std::endl;
-        PSP_COMPLAIN_AND_ABORT(ss.str());
+        PSP_COMPLAIN_AND_ABORT("Encountered unknown filter operation.");
+        // use and as default
         return t_filter_op::FILTER_OP_AND;
     }
 }
@@ -541,9 +540,7 @@ str_to_sorttype(const std::string& str) {
     } else if (str == "desc abs" || str == "col desc abs") {
         return SORTTYPE_DESCENDING_ABS;
     } else {
-        std::stringstream ss;
-        ss << "Unknown sort type string: `" << str << std::endl;
-        PSP_COMPLAIN_AND_ABORT(ss.str());
+        PSP_COMPLAIN_AND_ABORT("Encountered unknown sort type string");
         return SORTTYPE_DESCENDING;
     }
 }
