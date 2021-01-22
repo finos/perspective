@@ -195,15 +195,11 @@ jobs:
       env:
         # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
         # https://github.com/actions/virtual-environments/issues/687
-        #
         # 06/18/2020 - seems like boost got moved to `x86_64` inside
         # the boost folder, which broke builds for a bit.
-        #
-        # 11/24/2020 - boost 1.69 was removed, so update to 1.72:
-        # https://github.com/actions/virtual-environments/issues/1847
-        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/"
-        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/include"
-        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/libs"
+        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/"
+        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/include"
+        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.69.0/x86_64/libs"
 
 # - job: 'MacOS_Mojave'
 #   pool:
