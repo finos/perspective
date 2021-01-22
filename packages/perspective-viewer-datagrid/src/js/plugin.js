@@ -14,7 +14,6 @@ import {createModel, configureRegularTable, formatters} from "regular-table/dist
 import MATERIAL_STYLE from "../less/regular_table.less";
 
 import {configureRowSelectable, deselect} from "./row_selection.js";
-import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
 
@@ -49,7 +48,6 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
         model = await createModel(regular, table, view);
         configureRegularTable(regular, model);
         await configureRowSelectable.call(model, regular, viewer);
-        await configureClick.call(model, regular, viewer);
         await configureEditable.call(model, regular, viewer);
         await configureSortable.call(model, regular, viewer);
         INSTALLED.set(regular, model);
@@ -159,7 +157,7 @@ class DatagridPlugin {
 }
 
 /**
- * Appends the default table CSS to `<head>`, should be run once on module
+ * Appends the default tbale CSS to `<head>`, should be run once on module
  * import.
  *
  */
