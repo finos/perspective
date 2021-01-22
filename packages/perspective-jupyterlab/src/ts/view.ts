@@ -7,8 +7,7 @@
  *
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+/* eslint-disable @typescript-eslint/camelcase */
 import {isEqual} from "underscore";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 import {PerspectiveWorker, Table, View} from "@finos/perspective";
@@ -24,7 +23,6 @@ const perspective = require("@finos/perspective");
  * the DOM.
  */
 export class PerspectiveView extends DOMWidgetView {
-    // @ts-ignore
     pWidget: PerspectiveJupyterWidget; // this should be pWidget, but temporarily calling it pWidget for widgets incompatibilities
     perspective_client: PerspectiveJupyterClient;
 
@@ -38,7 +36,7 @@ export class PerspectiveView extends DOMWidgetView {
     // If client mode, the WebWorker reference.
     _client_worker: PerspectiveWorker;
 
-    _createElement(): HTMLElement {
+    _createElement(tagName: string): HTMLElement {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
@@ -57,10 +55,8 @@ export class PerspectiveView extends DOMWidgetView {
                     : this.model.get("dark"),
             editable: this.model.get("editable"),
             bindto: this.el,
-            // @ts-ignore
             view: this
         });
-        // @ts-ignore
         this.perspective_client = new PerspectiveJupyterClient(this);
         return this.pWidget.node;
     }
@@ -331,7 +327,10 @@ export class PerspectiveView extends DOMWidgetView {
                     kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
                         const table = this.client_worker.table(arrow, table_options);
                         this.pWidget.load(table);
-                        kernel_view.on_update(updated => table.update(updated.delta), {mode: "row"});
+                        kernel_view.on_update(
+                            updated => table.update(updated.delta),
+                            {mode: "row"}
+                        );
                     });
                 }
             } else {

@@ -1,12 +1,3 @@
-/******************************************************************************
- *
- * Copyright (c) 2018, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
-
 import {ActivityMonitor} from "@jupyterlab/coreutils";
 import {ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin} from "@jupyterlab/application";
 import {IThemeManager, WidgetTracker, Dialog, showDialog} from "@jupyterlab/apputils";
@@ -24,7 +15,7 @@ const RENDER_TIMEOUT = 1000;
 type IPerspectiveDocumentType = "csv" | "json";
 
 // create here to reuse for exception handling
-const baddialog = (): void => {
+const baddialog = () => {
     showDialog({
         body: "Perspective could not render the data",
         buttons: [Dialog.okButton({label: "Dismiss"})],
@@ -51,18 +42,18 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         });
     }
 
-    private _update(): void {
+    private _update() {
         try {
             if (this._type === "csv") {
                 // load csv directly
                 const data: string = this._context.model.toString();
                 this._psp._update(data);
             } else if (this._type === "json") {
-                const data = this._context.model.toJSON();
+                const data = this._context.model.toJSON() as any;
 
                 if (Array.isArray(data) && data.length > 0) {
                     // already is records form, load directly
-                    this._psp._update(data as Array<object>);
+                    this._psp._update(data);
                 } else {
                     // Column-oriented or single records JSON
                     // don't handle for now, just need to implement
@@ -116,6 +107,17 @@ export class PerspectiveJSONFactory extends ABCWidgetFactory<IDocumentWidget<Per
         return new PerspectiveDocumentWidget({context}, "json");
     }
 }
+
+/**
+ * The perspective extension for files
+ */
+export const perspectiveRenderers: JupyterFrontEndPlugin<void> = {
+    activate: activate,
+    id: "@finos/perspective-jupyterlab:renderers",
+    requires: [],
+    optional: [ILayoutRestorer, IThemeManager],
+    autoStart: true
+};
 
 /**
  * Activate cssviewer extension for CSV files
@@ -173,8 +175,8 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         });
 
         if (ftcsv) {
-            widget.title.iconClass = ftcsv.iconClass || "";
-            widget.title.iconLabel = ftcsv.iconLabel || "";
+            widget.title.iconClass = ftcsv.iconClass!;
+            widget.title.iconLabel = ftcsv.iconLabel!;
         }
     });
 
@@ -187,13 +189,13 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         });
 
         if (ftjson) {
-            widget.title.iconClass = ftjson.iconClass || "";
-            widget.title.iconLabel = ftjson.iconLabel || "";
+            widget.title.iconClass = ftjson.iconClass!;
+            widget.title.iconLabel = ftjson.iconLabel!;
         }
     });
 
     // Keep the themes up-to-date.
-    const updateThemes = (): void => {
+    const updateThemes = () => {
         const isLight = themeManager && themeManager.theme ? themeManager.isLight(themeManager.theme) : true;
         trackercsv.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
             pspDocWidget.psp.dark = !isLight;
@@ -207,14 +209,3 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         themeManager.themeChanged.connect(updateThemes);
     }
 }
-
-/**
- * The perspective extension for files
- */
-export const perspectiveRenderers: JupyterFrontEndPlugin<void> = {
-    activate: activate,
-    id: "@finos/perspective-jupyterlab:renderers",
-    requires: [],
-    optional: [ILayoutRestorer, IThemeManager],
-    autoStart: true
-};

@@ -7,6 +7,8 @@
  *
  */
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import "@finos/perspective-viewer";
 
 import {Table, TableData} from "@finos/perspective";
