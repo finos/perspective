@@ -66,8 +66,8 @@ prerequisites.
 Perspective requires some system dependencies to be installed before it can be
 built using local Emscripten:
 
-- [CMake](https://cmake.org/) (version 3.15.4 or higher)
-- [Boost](https://www.boost.org/) (version 1.67 or higher)
+- Boost (version 1.67)
+- CMake (version 3.15.4 or higher)
 - [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
 
 #### Building via EMSDK
@@ -111,8 +111,9 @@ yarn build_python --python2
 `perspective-python` requires the following system dependencies to be installed before it can be
 built from source:
 
+- [Boost](https://www.boost.org/) (version 1.67)
 - [CMake](https://cmake.org/) (version 3.15.4 or higher)
-- [Boost](https://www.boost.org/) (version 1.67 or higher)
+- TBB
 
 ## System-Specific Instructions
 
@@ -123,6 +124,7 @@ Install system dependencies through Homebrew:
 ```bash
 brew install cmake
 brew install boost@1.67
+brew install tbb
 brew install flatbuffers
 ```
 
