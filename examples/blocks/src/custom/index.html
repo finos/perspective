@@ -2,24 +2,27 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron">                                 
-    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.dark.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron">
+    <link rel='stylesheet'
+          href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/umd/material-dense.dark.css">
 
-    <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-    <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-    <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@finos/perspective/dist/umd/perspective.js"></script>
+
 </head>
 
 <body>
-    <perspective-viewer 
-        plugin="datagrid" 
+<perspective-viewer
+        plugin="datagrid"
         columns='["Profit","Sub-Category","State","Sales","Category","Order Date","Quantity"]'>
-    </perspective-viewer>
+</perspective-viewer>
 
-    <script>
+<script>
 
         function hue(value, min, max) {
             const norm = "0" + Math.abs(Math.round(255 * (Math.min(Math.max(value, min), max) / (max - min)))).toString(16);
@@ -77,14 +80,15 @@
                 const name = metadata.value;
                 const span = document.createElement("span")
                 const img = document.createElement("img");
-                img.onload = () => {
-                    img.onload = undefined;
-                    const data = getBase64Image(img);
-                    img.src = data;
-                }
+<!--                img.onload = () => {-->
+<!--                    img.onload = undefined;-->
+<!--                    const data = getBase64Image(img);-->
+<!--                    img.src = data;-->
+<!--                }-->
+<!--            img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);-->
                 img.setAttribute("crossorigin", "anonymous")
-                img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
-   
+                img.setAttribute("src", `http://flags.ox3.in/svg/us/${states[clean_name].toLowerCase()}.svg`);
+                img.setAttribute("width", `32px`);
                 td.textContent = "";
                 span.appendChild(img)
                 td.appendChild(span);
@@ -106,12 +110,12 @@
                 return obj;
             }, {});
         }
-
         window.addEventListener('DOMContentLoaded', async function () {
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
-            const data = await fetch("/node_modules/superstore-arrow/superstore.arrow");
+            var worker = perspective.worker()
+            const data = await fetch("https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.arrow");
             const arr = await data.arrayBuffer();
-            const table = perspective.worker().table(arr.slice());
+            const table = worker.table(arr.slice());
             await viewer.load(table);
             viewer.toggleConfig();
 
@@ -140,7 +144,7 @@
                 const cache = clone_img_cache();
                 for (const td of datagrid.querySelectorAll("td")) {
                     const metadata = datagrid.getMeta(td);
-                    
+
                     let type;
                     if (metadata.x >= 0) {
                         const column_path = column_paths[metadata.x];
@@ -221,9 +225,9 @@
             "Wyoming": "WY"
         };
 
-    </script>
 
-    <style>
+</script>
+<style>
         perspective-viewer td {
             height: 24px;
         }
@@ -281,7 +285,7 @@
         perspective-viewer td.integer {
             width: 100px;
         }
-        
+
         perspective-viewer {
              flex: 1;
         }
@@ -317,7 +321,8 @@
                 touch-action: none;
             }
         }
-    </style>
+
+</style>
 </body>
 
 </html>
