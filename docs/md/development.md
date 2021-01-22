@@ -170,7 +170,7 @@ You can run the test suite simply with the standard NPM command, which will both
 build the test suite for every package and run them.
 
 ```bash
-yarn test [--debug]
+yarn test
 ```
 
 A test name regex can be passed to `jest` via the same `-t` flag:
@@ -238,7 +238,10 @@ Verbosity in the tests can be enabled with the `--verbose` flag.
 ### Troubleshooting installation from source
 
 If you are installing from a source distribution (sdist), make sure you have
-the [System Dependencies](#system-dependencies) installed.
+CMake and Boost headers present on your machine:
+
+- CMake (version 3.15.4 or higher)
+- Boost Headers (version 1.67)
 
 Try installing in verbose mode:
 
@@ -250,7 +253,13 @@ The most common culprits are:
 
 - CMake version too old
 - Boost headers are missing or too old
-- Flatbuffers not installed prior to installing Perspective
+- PyArrow not installed prior to installing perspective
+
+Additionally, due to PEP-518 and build isolation, its possible that the version
+of PyArrow that pip uses to build perspective-python is different from the one
+you have installed. To disable this, pass the `--no-build-isolation` flag to
+pip.
+
 #### Timezones in Python Tests
 
 Python tests are configured to use the `UTC` time zone. If running tests locally,
