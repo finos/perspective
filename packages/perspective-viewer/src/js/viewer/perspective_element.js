@@ -300,15 +300,6 @@ export class PerspectiveElement extends StateElement {
     }
 
     async get_maxes() {
-        // If the plugin is set to not render a warning, i.e. after the user
-        // selects "Render all points", then return null for max_cols/max_rows.
-        if (typeof this._plugin.max_columns !== "undefined" && this._plugin.render_warning === false) {
-            return {
-                max_cols: null,
-                max_rows: null
-            };
-        }
-
         let max_cols, max_rows;
         const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
         const schema_columns = Object.keys(schema || {}).length || 1;

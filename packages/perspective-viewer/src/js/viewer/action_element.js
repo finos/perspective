@@ -369,7 +369,10 @@ export class ActionElement extends DomElement {
         this._plugin_information_action.addEventListener("click", () => {
             this._debounce_update({ignore_size_check: true, limit_points: false});
             this._plugin_information.classList.add("hidden");
-            this._plugin.render_warning = false;
+        });
+
+        this._plugin_information_action_close.addEventListener("click", () => {
+            this._plugin_information.classList.add("hidden");
         });
     }
 }

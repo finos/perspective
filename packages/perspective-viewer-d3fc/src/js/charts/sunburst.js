@@ -76,7 +76,6 @@ sunburst.plugin = {
     name: "Sunburst",
     max_cells: 7500,
     max_columns: 50,
-    render_warning: true,
     initial: {
         type: "number",
         count: 1,

@@ -27,8 +27,7 @@ describe(PerspectiveElement, () => {
                 get: () => {
                     return {
                         max_columns,
-                        max_cells,
-                        render_warning: true
+                        max_cells
                     };
                 }
             });

@@ -71,7 +71,6 @@ treemap.plugin = {
     name: "Treemap",
     max_cells: 5000,
     max_columns: 50,
-    render_warning: true,
     initial: {
         type: "number",
         count: 1,

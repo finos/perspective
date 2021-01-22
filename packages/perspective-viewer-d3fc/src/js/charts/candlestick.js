@@ -15,7 +15,6 @@ candlestick.plugin = {
     name: "Candlestick Chart",
     max_cells: 4000,
     max_columns: 50,
-    render_warning: true,
     initial: {
         type: "number",
         count: 4,
