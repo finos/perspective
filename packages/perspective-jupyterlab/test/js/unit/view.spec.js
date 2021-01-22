@@ -97,15 +97,8 @@ describe("PerspectiveView", function() {
         });
 
         it("Should handle a well-formed table message from the kernel", async function() {
-            view = await manager.create_view(model)();
-            const mock_client = PerspectiveJupyterClient.mock.instances[0];
-            mock_client.open_table.mockReturnValue({
-                view: jest.fn()
-            });
-
-            // Mock the output of open_table() so `view()` is valid
-
             const table_name = uuid();
+            view = await manager.create_view(model)();
             view._handle_message({
                 id: -2,
                 type: "table",
@@ -113,6 +106,8 @@ describe("PerspectiveView", function() {
                     table_name: table_name
                 }
             });
+
+            const mock_client = PerspectiveJupyterClient.mock.instances[0];
 
             // `open_table` should be called correctly
             const open_table_arg = mock_client.open_table.mock.calls[0][0];
@@ -126,13 +121,8 @@ describe("PerspectiveView", function() {
         });
 
         it("Should handle a well-formed table message with index from the kernel", async function() {
-            view = await manager.create_view(model)();
-            const mock_client = PerspectiveJupyterClient.mock.instances[0];
-            mock_client.open_table.mockReturnValue({
-                view: jest.fn()
-            });
-
             const table_name = uuid();
+            view = await manager.create_view(model)();
             view._handle_message({
                 id: -2,
                 type: "table",
@@ -143,6 +133,8 @@ describe("PerspectiveView", function() {
                     }
                 }
             });
+
+            const mock_client = PerspectiveJupyterClient.mock.instances[0];
 
             // `open_table` should be called correctly
             const open_table_arg = mock_client.open_table.mock.calls[0][0];
@@ -156,13 +148,8 @@ describe("PerspectiveView", function() {
         });
 
         it("Should handle a well-formed table message with limit from the kernel", async function() {
-            view = await manager.create_view(model)();
-            const mock_client = PerspectiveJupyterClient.mock.instances[0];
-            mock_client.open_table.mockReturnValue({
-                view: jest.fn()
-            });
-
             const table_name = uuid();
+            view = await manager.create_view(model)();
             view._handle_message({
                 id: -2,
                 type: "table",
@@ -173,6 +160,8 @@ describe("PerspectiveView", function() {
                     }
                 }
             });
+
+            const mock_client = PerspectiveJupyterClient.mock.instances[0];
 
             // `open_table` should be called correctly
             const open_table_arg = mock_client.open_table.mock.calls[0][0];

@@ -100,7 +100,7 @@ different visualization on load or transform the dataset, use the viewer's attri
 ```
 
 For more details about the full attribute API, see the
-[`<perspective-viewer>`](#setting--reading-viewer-configuration-via-attributes)section of this user guide.
+[`<perspective-viewer>`](/js.html#setting--reading-viewer-configuration-via-attributes)section of this user guide.
 
 ## Module Structure
 
