@@ -155,8 +155,7 @@ window.addEventListener("WebComponentsReady", function() {
 
     get_arrow(function(arrow) {
         const psp1 = document.querySelector("#demo1 perspective-viewer");
-        const tbl1 = worker.table(arrow.slice());
-        psp1.load(tbl1);
+        psp1.load(arrow.slice());
         psp1.restore({
             "row-pivots": ["Sub-Category"],
             "column-pivots": ["Segment"],
@@ -165,8 +164,7 @@ window.addEventListener("WebComponentsReady", function() {
         });
 
         const psp2 = document.querySelector("#get_started perspective-viewer");
-        const tbl2 = worker.table(arrow.slice());
-        psp2.load(tbl2);
+        psp2.load(arrow);
         psp2.restore({
             plugin: "d3_heatmap",
             "row-pivots": ["Sub-Category"],
