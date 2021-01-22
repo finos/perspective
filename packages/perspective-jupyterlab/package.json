@@ -32,6 +32,7 @@
         "version": "yarn build"
     },
     "dependencies": {
+        "@finos/perspective": "^0.6.0",
         "@finos/perspective-viewer": "^0.6.0",
         "@finos/perspective-viewer-d3fc": "^0.6.0",
         "@finos/perspective-viewer-datagrid": "^0.6.0",
