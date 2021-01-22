@@ -148,6 +148,7 @@ namespace apachearrow {
         arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
         arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
         arrow::TimestampParser::MakeStrptime("%d %m %Y"),
+        // TODO: time type column
         arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
 
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{

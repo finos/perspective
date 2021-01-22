@@ -108,10 +108,22 @@ export class DomElement extends PerspectiveElement {
                     columns: [],
                     computed_columns: computed_names.includes(name) ? computed_columns : []
                 });
-                view.to_json().then(json => {
-                    row.choices(this._autocomplete_choices(json, type));
-                });
-                view.delete();
+
+                view.num_rows()
+                    .then(async nrows => {
+                        if (nrows < 100000) {
+                            // Autocomplete
+                            const json = await view.to_json({
+                                end_row: 10
+                            });
+                            row.choices(this._autocomplete_choices(json, type));
+                        } else {
+                            console.warn(`perspective-viewer did not generate autocompletion results - ${nrows} is greater than limit of 100,000 rows.`);
+                        }
+                    })
+                    .finally(() => {
+                        view.delete();
+                    });
             }
         }
 

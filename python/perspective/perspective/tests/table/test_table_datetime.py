@@ -1076,7 +1076,7 @@ if os.name != 'nt':
         def test_table_row_pivot_datetime_row_path_UTC(self):
             """Make sure that string datetimes generated in Python are in
             UTC if the timezone is UTC.
-            
+
             Set the timezone before creating the table so that the local
             datetime is in the intended timezone, as this test asserts that
             paths in the same timezone are not edited to UTC."""
