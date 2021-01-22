@@ -18,11 +18,10 @@ import {PerspectiveWidget} from "./psp_widget";
  */
 const FACTORY_CSV = "CSVPerspective";
 const FACTORY_JSON = "JSONPerspective";
-const FACTORY_ARROW = "ArrowPerspective";
 
 const RENDER_TIMEOUT = 1000;
 
-type IPerspectiveDocumentType = "csv" | "json" | "arrow";
+type IPerspectiveDocumentType = "csv" | "json";
 
 // create here to reuse for exception handling
 const baddialog = (): void => {
@@ -54,7 +53,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
     private _update(): void {
         try {
-            if (this._type === "csv" || this._type === "arrow") {
+            if (this._type === "csv") {
                 // load csv directly
                 const data: string = this._context.model.toString();
                 this._psp._update(data);
@@ -119,15 +118,6 @@ export class PerspectiveJSONFactory extends ABCWidgetFactory<IDocumentWidget<Per
 }
 
 /**
- * A widget factory for arrow widgets.
- */
-export class PerspectiveArrowFactory extends ABCWidgetFactory<IDocumentWidget<PerspectiveWidget>> {
-    protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<PerspectiveWidget> {
-        return new PerspectiveDocumentWidget({context}, "arrow");
-    }
-}
-
-/**
  * Activate cssviewer extension for CSV files
  */
 function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeManager: IThemeManager | null): void {
@@ -145,23 +135,12 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         readOnly: true
     });
 
-    const factoryarrow = new PerspectiveArrowFactory({
-        name: FACTORY_ARROW,
-        fileTypes: ["arrow"],
-        defaultFor: ["arrow"],
-        readOnly: true
-    });
-
     const trackercsv = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
         namespace: "csvperspective"
     });
 
     const trackerjson = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
         namespace: "jsonperspective"
-    });
-
-    const trackerarrow = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
-        namespace: "arrowperspective"
     });
 
     if (restorer) {
@@ -177,26 +156,17 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
             args: widget => ({path: widget.context.path, factory: FACTORY_JSON}),
             name: widget => widget.context.path
         });
-
-        void restorer.restore(trackerarrow, {
-            command: "docmanager:open",
-            args: widget => ({path: widget.context.path, factory: FACTORY_ARROW}),
-            name: widget => widget.context.path
-        });
     }
 
     app.docRegistry.addWidgetFactory(factorycsv);
     app.docRegistry.addWidgetFactory(factoryjson);
-    app.docRegistry.addWidgetFactory(factoryarrow);
 
     const ftcsv = app.docRegistry.getFileType("csv");
     const ftjson = app.docRegistry.getFileType("json");
-    const ftarrow = app.docRegistry.getFileType("arrow");
 
     factorycsv.widgetCreated.connect((sender, widget) => {
         // Track the widget.
         void trackercsv.add(widget);
-
         // Notify the widget tracker if restore data needs to update.
         widget.context.pathChanged.connect(() => {
             void trackercsv.save(widget);
@@ -211,7 +181,6 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
     factoryjson.widgetCreated.connect((sender, widget) => {
         // Track the widget.
         void trackerjson.add(widget);
-
         // Notify the widget tracker if restore data needs to update.
         widget.context.pathChanged.connect(() => {
             void trackerjson.save(widget);
@@ -223,21 +192,6 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         }
     });
 
-    factoryarrow.widgetCreated.connect((sender, widget) => {
-        // Track the widget.
-        void trackerarrow.add(widget);
-
-        // Notify the widget tracker if restore data needs to update.
-        widget.context.pathChanged.connect(() => {
-            void trackerarrow.save(widget);
-        });
-
-        if (ftarrow) {
-            widget.title.iconClass = ftarrow.iconClass || "";
-            widget.title.iconLabel = ftarrow.iconLabel || "";
-        }
-    });
-
     // Keep the themes up-to-date.
     const updateThemes = (): void => {
         const isLight = themeManager && themeManager.theme ? themeManager.isLight(themeManager.theme) : true;
@@ -245,9 +199,6 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
             pspDocWidget.psp.dark = !isLight;
         });
         trackerjson.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
-            pspDocWidget.psp.dark = !isLight;
-        });
-        trackerarrow.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
             pspDocWidget.psp.dark = !isLight;
         });
     };
