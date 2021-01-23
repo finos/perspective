@@ -80,12 +80,6 @@
                 const name = metadata.value;
                 const span = document.createElement("span")
                 const img = document.createElement("img");
-<!--                img.onload = () => {-->
-<!--                    img.onload = undefined;-->
-<!--                    const data = getBase64Image(img);-->
-<!--                    img.src = data;-->
-<!--                }-->
-<!--            img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);-->
                 img.setAttribute("crossorigin", "anonymous")
                 img.setAttribute("src", `http://flags.ox3.in/svg/us/${states[clean_name].toLowerCase()}.svg`);
                 img.setAttribute("width", `32px`);
