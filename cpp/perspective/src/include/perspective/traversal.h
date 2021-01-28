@@ -113,6 +113,15 @@ private:
     std::shared_ptr<std::vector<t_tvnode>> m_nodes;
 };
 
+/**
+ * @brief Sort implementation for `t_ctx1` and `t_ctx2` contexts.
+ * 
+ * @tparam SRC_T 
+ * @param config 
+ * @param sortby 
+ * @param src 
+ * @param ctx2 
+ */
 template <typename SRC_T>
 void
 t_traversal::sort_by(const t_config& config, const std::vector<t_sortspec>& sortby,

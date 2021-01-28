@@ -14,8 +14,332 @@ const data = {
     z: [true, false, true, false, true, false, true, false]
 };
 
+const data2 = {
+    w: [3.5, 4.5, null, null, null, null, 1.5, 2.5],
+    x: [1, 2, 3, 4, 4, 3, 2, 1],
+    y: ["a", "b", "c", "d", "e", "f", "g", "h"]
+};
+
+const data3 = {
+    w: [3.5, 4.5, null, null, null, null, 1.5, 2.5],
+    x: [1, 2, 3, 4, 4, 3, 2, 1],
+    y: ["a", "a", "a", "a", "b", "b", "b", "b"]
+};
+
 module.exports = perspective => {
     describe("Sorts", function() {
+        describe("With nulls", () => {
+            it("asc", async function() {
+                var table = perspective.table(data2);
+                var view = table.view({
+                    columns: ["x", "w"],
+                    sort: [["w", "asc"]]
+                });
+
+                const json = await view.to_columns();
+                expect(json).toEqual({
+                    w: [null, null, null, null, 1.5, 2.5, 3.5, 4.5],
+                    x: [3, 4, 4, 3, 2, 1, 1, 2]
+                });
+
+                view.delete();
+                table.delete();
+            });
+
+            it("desc", async function() {
+                var table = perspective.table(data2);
+                var view = table.view({
+                    columns: ["x", "w"],
+                    sort: [["w", "desc"]]
+                });
+
+                const json = await view.to_columns();
+                expect(json).toEqual({
+                    w: [4.5, 3.5, 2.5, 1.5, null, null, null, null],
+                    x: [2, 1, 1, 2, 3, 4, 4, 3]
+                });
+
+                view.delete();
+                table.delete();
+            });
+
+            it("asc datetime", async function() {
+                var table = perspective.table({
+                    w: [new Date(2020, 0, 1, 12, 30, 45), new Date(2020, 0, 1), null, null, null, null, new Date(2008, 0, 1, 12, 30, 45), new Date(2020, 12, 1, 12, 30, 45)],
+                    x: [1, 2, 3, 4, 4, 3, 2, 1],
+                    y: ["a", "b", "c", "d", "e", "f", "g", "h"]
+                });
+
+                var view = table.view({
+                    columns: ["x", "w"],
+                    sort: [["w", "asc"]]
+                });
+
+                const json = await view.to_columns();
+                expect(json).toEqual({
+                    w: [
+                        null,
+                        null,
+                        null,
+                        null,
+                        new Date(2008, 0, 1, 12, 30, 45).getTime(),
+                        new Date(2020, 0, 1).getTime(),
+                        new Date(2020, 0, 1, 12, 30, 45).getTime(),
+                        new Date(2020, 12, 1, 12, 30, 45).getTime()
+                    ],
+                    x: [3, 4, 4, 3, 2, 2, 1, 1]
+                });
+
+                view.delete();
+                table.delete();
+            });
+
+            it("desc datetime", async function() {
+                var table = perspective.table({
+                    w: [new Date(2020, 0, 1, 12, 30, 45), new Date(2020, 0, 1), null, null, null, null, new Date(2008, 0, 1, 12, 30, 45), new Date(2020, 12, 1, 12, 30, 45)],
+                    x: [1, 2, 3, 4, 4, 3, 2, 1],
+                    y: ["a", "b", "c", "d", "e", "f", "g", "h"]
+                });
+
+                var view = table.view({
+                    columns: ["x", "w"],
+                    sort: [["w", "desc"]]
+                });
+
+                const json = await view.to_columns();
+                expect(json).toEqual({
+                    w: [
+                        new Date(2020, 12, 1, 12, 30, 45).getTime(),
+                        new Date(2020, 0, 1, 12, 30, 45).getTime(),
+                        new Date(2020, 0, 1).getTime(),
+                        new Date(2008, 0, 1, 12, 30, 45).getTime(),
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    x: [1, 1, 2, 2, 3, 4, 4, 3]
+                });
+
+                view.delete();
+                table.delete();
+            });
+        });
+
+        describe("With aggregates", function() {
+            describe("aggregates, in a sorted column with nulls", async function() {
+                it("sum", async function() {
+                    var table = perspective.table(data2);
+                    var view = table.view({
+                        columns: ["x", "w"],
+                        row_pivots: ["y"],
+                        aggregates: {
+                            w: "sum",
+                            x: "unique"
+                        },
+                        sort: [["w", "asc"]]
+                    });
+
+                    const json = await view.to_columns();
+                    expect(json).toEqual({
+                        __ROW_PATH__: [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+                        w: [12, 0, 0, 0, 0, 1.5, 2.5, 3.5, 4.5],
+                        x: [null, 3, 4, 4, 3, 2, 1, 1, 2]
+                    });
+
+                    view.delete();
+                    table.delete();
+                });
+
+                it("sum of floats", async function() {
+                    var table = perspective.table({
+                        w: [3.25, 4.51, null, null, null, null, 1.57, 2.59],
+                        x: [1, 2, 3, 4, 4, 3, 2, 1],
+                        y: ["a", "b", "c", "d", "e", "f", "g", "h"]
+                    });
+                    var view = table.view({
+                        columns: ["x", "w"],
+                        row_pivots: ["y"],
+                        aggregates: {
+                            w: "sum",
+                            x: "unique"
+                        },
+                        sort: [["w", "asc"]]
+                    });
+
+                    const json = await view.to_columns();
+                    expect(json).toEqual({
+                        __ROW_PATH__: [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+                        w: [11.92, 0, 0, 0, 0, 1.57, 2.59, 3.25, 4.51],
+                        x: [null, 3, 4, 4, 3, 2, 1, 1, 2]
+                    });
+
+                    view.delete();
+                    table.delete();
+                });
+
+                it("unique", async function() {
+                    var table = perspective.table(data2);
+                    var view = table.view({
+                        columns: ["x", "w"],
+                        row_pivots: ["y"],
+                        aggregates: {
+                            w: "unique",
+                            x: "unique"
+                        },
+                        sort: [["w", "asc"]]
+                    });
+
+                    const json = await view.to_columns();
+                    expect(json).toEqual({
+                        __ROW_PATH__: [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+                        w: [null, null, null, null, null, 1.5, 2.5, 3.5, 4.5],
+                        x: [null, 3, 4, 4, 3, 2, 1, 1, 2]
+                    });
+
+                    view.delete();
+                    table.delete();
+                });
+
+                it("avg", async function() {
+                    var table = perspective.table(data2);
+                    var view = table.view({
+                        columns: ["x", "w"],
+                        row_pivots: ["y"],
+                        aggregates: {
+                            w: "avg",
+                            x: "unique"
+                        },
+                        sort: [["w", "asc"]]
+                    });
+
+                    const json = await view.to_columns();
+                    expect(json).toEqual({
+                        __ROW_PATH__: [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+                        w: [3, null, null, null, null, 1.5, 2.5, 3.5, 4.5],
+                        x: [null, 3, 4, 4, 3, 2, 1, 1, 2]
+                    });
+
+                    // Broken result:
+                    // {
+                    //     __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"]],
+                    //     w: [3, 3.5, 4.5, null, null, null, null, 1.5, 2.5],
+                    //     x: [null, 1, 2, 3, 4, 4, 3, 2, 1]
+                    // };
+
+                    view.delete();
+                    table.delete();
+                });
+
+                describe("Multiple hidden sort", () => {
+                    it("sum", async function() {
+                        var table = perspective.table(data3);
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "sum"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            w: [12, 8, 4],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+
+                    it("sum of floats", async function() {
+                        var table = perspective.table({
+                            w: [3.25, 4.51, null, null, null, null, 1.57, 2.59],
+                            x: [1, 2, 3, 4, 4, 3, 2, 1],
+                            y: ["a", "a", "a", "a", "b", "b", "b", "b"]
+                        });
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "sum"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            w: [11.92, 7.76, 4.16],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+
+                    it("unique", async function() {
+                        var table = perspective.table(data3);
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "unique"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            w: [null, null, null],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+
+                    it("avg", async function() {
+                        var table = perspective.table(data3);
+                        var view = table.view({
+                            columns: ["x", "w"],
+                            row_pivots: ["y"],
+                            aggregates: {
+                                w: "avg"
+                            },
+                            sort: [
+                                ["x", "desc"],
+                                ["w", "desc"]
+                            ]
+                        });
+
+                        const json = await view.to_columns();
+                        expect(json).toEqual({
+                            __ROW_PATH__: [[], ["a"], ["b"]],
+                            // 4 and 2 are the avg of the non-null rows
+                            w: [3, 4, 2],
+                            x: [20, 10, 10]
+                        });
+
+                        view.delete();
+                        table.delete();
+                    });
+                });
+            });
+        });
+
         describe("On hidden columns", function() {
             it("Column path should not emit hidden sorts", async function() {
                 var table = perspective.table(data);
