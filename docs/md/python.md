@@ -68,8 +68,10 @@ pip install perspective-python
 `PerspectiveWidget` is a JupyterLab widget that implements the same API as
 `<perspective-viewer>`, allowing for fast, intuitive
 transformations/visualizations of various data formats within JupyterLab.
-To use it, make sure you have installed `perspective-python`
-and then install the extension from the Jupyter lab extension directory
+
+`PerspectiveWidget` is compatible with Jupyterlab 3. To use it, make sure you
+have installed `perspective-python` and then install the extension from the
+Jupyter lab extension directory:
 
 ```bash
 jupyter labextension install @finos/perspective-jupyterlab

@@ -203,7 +203,6 @@ ol li {
 ol li::before {
     content: counter(list-counter) ".";
     font-weight: bold;
-    font-size: 2rem;
     margin-right: 0.5rem;
     font-family: "Public Sans", Arial, Helvetica, sans-serif;
     line-height: 1;
