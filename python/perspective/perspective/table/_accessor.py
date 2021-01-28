@@ -328,21 +328,34 @@ class _PerspectiveAccessor(object):
         return deconstruct_numpy(data, mask)
 
     def _has_column(self, ridx, name):
-        """Given a column name, validate that it is in the row.
+        """Given a row index and a column name, validate that the column exists
+        in the row.
 
         This allows differentiation between value is None (unset) and value not
-        in row (no-op).
+        in row (no-op), which is important to prevent unintentional overwriting
+        of values during a partial update.
 
         Args:
-            ridx (int)
-            name (str)
+            ridx (:obj:`int`)
+            name (:obj:`str`)
 
         Returns:
             bool: True if column is in row, or if column belongs to pkey/op
                 columns required by the engine. False otherwise.
         """
-        if self._format != 0 or name in ("psp_pkey", "psp_okey", "psp_op"):
-            # no partial updates available on meta column, schema, dict updates
+        if self._format == 2 or name in ("psp_pkey", "psp_okey", "psp_op"):
+            # Schemas and reserved column names are always present.
             return True
+        elif self._format == 1:
+            # For dicts of lists, check whether the column is set in the dict
+            # itself. Because there is no way to specify an `undefined` value
+            # in Python, whether the column exists in the dict is enough for
+            # us to determine whether to write the column or not.
+            return name in self._data_or_schema
         else:
+            # For row-oriented datasets, check whether the specified row
+            # contains the column. This is important for datasets where
+            # a column might not be set at a given row, such as:
+            # [{a: 1, b: 2, c: 3}, {a: 2}], where we do not want to set values
+            # for columns "b" and "c" at row 1.
             return name in self._data_or_schema[ridx]
