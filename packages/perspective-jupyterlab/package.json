@@ -43,7 +43,6 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.6.0",
-        "@finos/perspective-webpack-plugin": "^0.6.0",
         "@jupyter-widgets/base-manager": "^1.0.0-alpha.0",
         "@types/jest": "^23.3.9",
         "@types/node": "^11.11.0",

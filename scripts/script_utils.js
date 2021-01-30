@@ -8,6 +8,7 @@
  */
 
 require("dotenv").config({path: "./.perspectiverc"});
+process.env.FORCE_COLOR = true;
 
 const execSync = require("child_process").execSync;
 const _path = require("path");
@@ -53,23 +54,20 @@ function cut_first(f) {
         .join(" ");
 }
 
-const execute = cmd => {
-    try {
-        if (process.argv.indexOf("--debug") > -1) {
-            console.log(`$ ${cmd}`);
-        }
-        execSync(cmd, {stdio: "inherit"});
-    } catch (e) {
-        console.error("\n" + e.message);
-        process.exit(1);
-    }
-};
-
 const execute_throw = cmd => {
     if (process.argv.indexOf("--debug") > -1) {
         console.log(`$ ${cmd}`);
     }
     execSync(cmd, {stdio: "inherit"});
+};
+
+const execute = cmd => {
+    try {
+        execute_throw(cmd);
+    } catch (e) {
+        console.error("\n" + e.message);
+        process.exit(1);
+    }
 };
 
 const execute_return = async cmd => {
@@ -78,9 +76,8 @@ const execute_return = async cmd => {
     }
 
     const ex = promisify(require("child_process").exec);
-
     return await ex(cmd);
-}
+};
 
 /*******************************************************************************
  *

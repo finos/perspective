@@ -228,6 +228,7 @@ if (PSP_WASM_BUILD)
 		--memory-init-file 0 \
 		-Wall \
 		-s NO_EXIT_RUNTIME=1 \
+		-fcolor-diagnostics \
 		-s NO_FILESYSTEM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
 		-s MODULARIZE=1 \
@@ -261,7 +262,7 @@ if (PSP_WASM_BUILD)
 			")
 	endif()
 
-	set(ASYNC_MODE_FLAGS "-s -s BINARYEN_ASYNC_COMPILATION=1 -s WASM=1")
+	set(ASYNC_MODE_FLAGS "")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	if(WIN32)
 		if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
@@ -289,9 +290,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 				")
 		endif()
 	endif()
-	set(SYNC_MODE_FLAGS "")
 	set(ASYNC_MODE_FLAGS "")
-	set(ASMJS_MODE_FLAGS "")
 
 	if (WIN32)
 		# BOOST_ROOT has been removed on Windows VMs in Azure:
@@ -586,16 +585,24 @@ message("${BUILD_MESSAGE}\n")
 if (PSP_WASM_BUILD)
 	add_library(psp ${WASM_SOURCE_FILES})
 	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
-	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
+	set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
 	target_link_libraries(psp arrow)
 
-	add_executable(perspective.async src/cpp/emscripten.cpp)
-	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
-	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
+	# "esm/erspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
+	add_executable(perspective_esm src/cpp/emscripten.cpp)
+	target_link_libraries(perspective_esm psp "-s ENVIRONMENT=worker -s EXPORT_ES6=1")
+	target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
+	set_target_properties(perspective_esm PROPERTIES COMPILE_FLAGS "-s ENVIRONMENT=worker -s EXPORT_ES6=1")
+	set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
+	set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective.cpp")
 
-	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
-	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
-	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
+	# "cjs/perspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
+	add_executable(perspective_cjs src/cpp/emscripten.cpp)
+	target_link_libraries(perspective_cjs psp "-s ENVIRONMENT=node")
+	target_compile_definitions(perspective_cjs PRIVATE PSP_ENABLE_WASM=1)
+	set_target_properties(perspective_cjs PROPERTIES COMPILE_FLAGS "-s ENVIRONMENT=node")
+	set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./cjs/")
+	set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)

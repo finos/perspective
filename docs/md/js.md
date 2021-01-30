@@ -29,7 +29,7 @@ $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/persp
 ```
 
 Perspective requires the browser to have access to
-Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
+Perspective's `.worker.js` and `.wasm` assets _in addition_ to the bundled
 `.js` scripts. By default, Perspective <a href="https://github.com/finos/perspective/pull/870">inlines</a>
 these assets into the `.js` scripts, and delivers them in one file. This has no
 runtime performance impact, but does increase asset load time. Most apps
@@ -39,7 +39,7 @@ these files correctly form your existing Webpack configuration.
 ### Webpack Plugin
 
 When importing `perspective` from NPM modules for a browser application, you
-should use `@finos/perspective-webpack-plugin` to manage the `.worker.*.js` and
+should use `@finos/perspective-webpack-plugin` to manage the `.worker.js` and
 `.wasm` assets for you. The plugin handles downloading and packaging
 Perspective's additional assets, and is easy to set up in your `webpack.config`:
 
@@ -53,6 +53,30 @@ module.exports = {
         path: "build"
     },
     plugins: [new PerspectivePlugin()]
+};
+```
+
+Otherwise, you'll need to configure your `webpack.config.js` to handle these
+`perspective` assets correctly.  ~`@finos/perspective-webpack-plugin` itself
+uses a combination of `worker-loader` and `file-loader`, which can be easily
+modified as needed:
+
+```javascript
+module.exports = {
+    rules: [
+        {
+            test: /perspective\.worker\.js$/,
+            type: "javascript/auto",
+            include: path.dirname(require.resolve("@finos/perspective")),
+            loader: "worker-loader"
+        },
+        {
+            test: /perspective\.cpp\.wasm$/,
+            type: "javascript/auto",
+            include: path.dirname(require.resolve("@finos/perspective")),
+            loader: "file-loader"
+        }
+    ]
 };
 ```
 

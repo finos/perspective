@@ -1,10 +1,8 @@
 const path = require("path");
-const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
+const cssnano = require("cssnano");
 const plugins = [];
 
-function common({build_worker, no_minify, inline} = {}) {
-    plugins.push(new PerspectivePlugin({build_worker: build_worker, workerLoaderOptions: {inline, name: "[name].worker.js"}, wasmLoaderOptions: {inline, name: "[name]"}}));
+function common({no_minify, inline} = {}) {
     return {
         mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG || no_minify ? "development" : process.env.NODE_ENV || "production",
         plugins: plugins,
@@ -13,7 +11,23 @@ function common({build_worker, no_minify, inline} = {}) {
                 {
                     test: /\.less$/,
                     exclude: /node_modules\/(?!regular-table)/,
-                    use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2, skipWarn: true}}, {loader: "less-loader"}]
+                    use: [
+                        {loader: "css-loader"},
+                        {
+                            loader: "postcss-loader",
+                            options: {
+                                postcssOptions: {
+                                    minimize: true,
+                                    plugins: [
+                                        cssnano({
+                                            preset: "lite"
+                                        })
+                                    ]
+                                }
+                            }
+                        },
+                        {loader: "less-loader"}
+                    ]
                 },
                 {
                     test: /\.(html)$/,
@@ -24,41 +38,46 @@ function common({build_worker, no_minify, inline} = {}) {
                 },
                 {
                     test: /\.(arrow)$/,
+                    type: "javascript/auto",
                     use: {
                         loader: "arraybuffer-loader",
                         options: {}
                     }
+                },
+                inline
+                    ? {
+                          test: /perspective\.cpp\.wasm$/,
+                          type: "javascript/auto",
+                          loader: "arraybuffer-loader"
+                      }
+                    : {
+                          test: /perspective\.cpp\.wasm$/,
+                          type: "javascript/auto",
+                          loader: "file-loader",
+                          options: {name: "[name].[ext]"}
+                      },
+                {
+                    test: /perspective\.worker\.js$/,
+                    type: "javascript/auto",
+                    loader: "worker-loader",
+                    options: {
+                        inline: "no-fallback"
+                    }
                 }
             ]
         },
-        devtool: "source-map",
-        node: {
-            fs: "empty",
-            Buffer: false
+        resolve: {
+            fallback: {
+                crypto: false
+            }
         },
+        devtool: "source-map",
         performance: {
             hints: false,
             maxEntrypointSize: 512000,
             maxAssetSize: 512000
         },
-        stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
-        optimization: {
-            minimizer: [
-                new TerserPlugin({
-                    terserOptions: {
-                        output: {
-                            ascii_only: true
-                        },
-                        keep_infinity: true
-                    },
-                    cache: true,
-                    parallel: true,
-                    test: /\.js(\?.*)?$/i,
-                    exclude: /(node|wasm|asmjs)/,
-                    sourceMap: true
-                })
-            ]
-        }
+        stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false}
     };
 }
 

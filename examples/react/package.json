@@ -19,7 +19,7 @@
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.6.0",
-        "@types/react": "^16.9.17",
+        "@types/react": "^16.8.6",
         "@types/react-dom": "^16.9.4",
         "css-loader": "^0.28.7",
         "html-webpack-plugin": "^3.2.0",
@@ -27,6 +27,6 @@
         "style-loader": "^0.18.2",
         "ts-loader": "^6.2.1",
         "typescript": "^3.7.4",
-        "webpack-dev-server": "^3.8.0"
+        "webpack-dev-server": "^3.11.2"
     }
 }
