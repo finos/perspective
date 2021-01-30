@@ -33,6 +33,7 @@ utils.with_server({}, () => {
                 await await page.shadow_click("perspective-viewer", "#config_button");
                 await page.evaluate(element => element.setAttribute("filters", '[["v", "==", "11/1/2020"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("equals ISO string on datetime column", async page => {
@@ -43,6 +44,7 @@ utils.with_server({}, () => {
                     element.setAttribute("filters", '[["w", "==", "' + dt + '"]]');
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("equals US locale string on datetime column", async page => {
@@ -52,6 +54,7 @@ utils.with_server({}, () => {
                     element.setAttribute("filters", '[["w", "==", "12/01/2020, 11:30:55 PM"]]');
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("greater than on date column", async page => {
@@ -59,6 +62,7 @@ utils.with_server({}, () => {
                 await await page.shadow_click("perspective-viewer", "#config_button");
                 await page.evaluate(element => element.setAttribute("filters", '[["v", ">", "03/01/2020"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("greater than ISO string on datetime column", async page => {
@@ -69,6 +73,7 @@ utils.with_server({}, () => {
                     element.setAttribute("filters", '[["w", ">", "' + dt + '"]]');
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("greater than US locale string on datetime column", async page => {
@@ -78,6 +83,7 @@ utils.with_server({}, () => {
                     element.setAttribute("filters", '[["w", ">", "10/01/2020, 03:30:55 PM"]]');
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("less than on date column", async page => {
@@ -85,6 +91,7 @@ utils.with_server({}, () => {
                 await await page.shadow_click("perspective-viewer", "#config_button");
                 await page.evaluate(element => element.setAttribute("filters", '[["v", "<", "10/01/2020"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("less than ISO string on datetime column", async page => {
@@ -95,6 +102,7 @@ utils.with_server({}, () => {
                     element.setAttribute("filters", '[["w", "<", "' + dt + '"]]');
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("less than US locale string on datetime column", async page => {
@@ -104,6 +112,7 @@ utils.with_server({}, () => {
                     element.setAttribute("filters", '[["w", "<", "10/01/2020, 03:30:55 PM"]]');
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
         },
         {root: path.join(__dirname, "..", "..")}

@@ -63,6 +63,7 @@ exports.default = function(method = "capture") {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("filters", '[["Sales", ">", 500]]'), viewer);
+        await page.evaluate(() => document.activeElement.blur());
     });
 
     test[method]("filters by a datetime column.", async page => {
@@ -70,12 +71,14 @@ exports.default = function(method = "capture") {
         await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("filters", '[["Order Date", ">", "01/01/2012"]]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
+        await page.evaluate(() => document.activeElement.blur());
     });
 
     test[method]("highlights invalid filter.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("filters", '[["Sales", "==", null]]'), viewer);
+        await page.evaluate(() => document.activeElement.blur());
     });
 
     test[method]("sorts by an alpha column.", async page => {

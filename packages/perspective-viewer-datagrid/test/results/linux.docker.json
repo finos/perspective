@@ -8,7 +8,7 @@
     "superstore_sorts_by_a_hidden_column_": "a4b2f7179bdb07728465f5f2a510c512",
     "superstore_sorts_by_a_numeric_column_": "880ea680df9bc48415450553735c2a6c",
     "superstore_filters_by_a_numeric_column_": "45d824114c57a56b990fe637f5514330",
-    "superstore_filters_by_a_datetime_column_": "8afd9453f05f0d17679f67fede9c16d6",
+    "superstore_filters_by_a_datetime_column_": "4ebf21eead875f46e1470714ef79ba3d",
     "superstore_highlights_invalid_filter_": "452e3d6d1fb9fcb18bfc6a3b6ef021ff",
     "superstore_sorts_by_an_alpha_column_": "7d4a5cde8d795e020eec5e27763eacbd",
     "superstore_displays_visible_columns_": "e2f92ee6e81b832b526e4d262577eb4e",
@@ -16,5 +16,5 @@
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "7e269a544b300a204b82806f32bef31b",
     "superstore_perspective_dispatches_perspective-click_event_with_correct_details": "7e269a544b300a204b82806f32bef31b",
     "superstore_perspective_dispatches_perspective-click_event_with_correct_details_when_filter_is_set": "797a084f6e159cc9dc2f62dcd8b50609",
-    "__GIT_COMMIT__": "6ebb74ab5cc1d3d5bdcf127ec0db8452f1987a45"
+    "__GIT_COMMIT__": "9d639ae6762c8c55c998a623cbc6ef5b68f98ef7"
 }

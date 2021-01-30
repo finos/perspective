@@ -28,6 +28,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                 await page.evaluate(element => element.setAttribute("filters", '[["Product ID", "==", "FUR-BO-10001798"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
                 const result = await page.waitFor(
                     element => {
                         let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".segment");
@@ -48,6 +49,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                 await page.evaluate(element => element.setAttribute("filters", '[["Product ID", "==", "FUR-BO-10001798"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
                 await page.mouse.click(500, 400);
                 const result = await page.waitFor(
                     element => {

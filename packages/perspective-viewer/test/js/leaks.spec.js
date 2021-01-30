@@ -82,6 +82,7 @@ utils.with_server({}, () => {
                     }
                     await page.evaluate(element => element.setAttribute("filters", '[["Sales", "<", 10]]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(() => document.activeElement.blur());
                 },
                 {timeout: 60000}
             );

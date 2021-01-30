@@ -7,7 +7,7 @@
  *
  */
 
-const {bash, execute, execute_throw, getarg, docker} = require("./script_utils.js");
+const {bash, execute, getarg, docker} = require("./script_utils.js");
 const fs = require("fs");
 
 const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
@@ -83,6 +83,7 @@ function jest_timezone() {
     return bash`
         node_modules/.bin/lerna exec 
         --concurrency 1 
+        --no-bail
         --scope="@finos/perspective" 
         -- 
         yarn test_timezone:run
@@ -114,18 +115,18 @@ try {
         if (getarg("--quiet")) {
             // Run all tests with suppressed output.
             console.log("-- Running test suite in quiet mode");
-            execute_throw(silent(jest_timezone()));
+            execute(silent(jest_timezone()));
             execute(silent(jest_all()));
         } else if (process.env.PACKAGE) {
             // Run tests for a single package.
             if (PACKAGE === "perspective") {
-                execute_throw(jest_timezone());
+                execute(jest_timezone());
             }
             execute(jest_single());
         } else {
             // Run all tests with full output.
             console.log("-- Running test suite in fast mode");
-            execute_throw(jest_timezone());
+            execute(jest_timezone());
             execute(jest_all());
         }
     }

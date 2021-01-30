@@ -687,6 +687,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Computed", "==", "2 Monday"]]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Order Date"])), viewer);
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("computed expression column aggregates should persist.", async page => {
