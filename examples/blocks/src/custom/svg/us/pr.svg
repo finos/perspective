@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="900"
+	height="600"
+	viewBox="0 0 45 30">
+<rect id="red_stripes" width="45" height="30" fill="#ed0000"/>
+<path id="white_stripes" stroke="white" stroke-width="6" d="M0,9 h 45 m -45,12 h 45"/>
+<path id="blue_triangle" d="M0,0L25.98076,15L0,30z" fill="#0050f0"/>
+<comment>the star is in the center of gravity of the triangle, so the x-pos is irrational (tan(30 deg) * 15)</comment>
+<g id="star" fill="white" transform="translate(8.6602540378443864676372317075294,15) scale(5)">
+  <g id="cone">
+    <polygon id="triangle" points="0,0 0,1 .5,1" transform="translate(0,-1) rotate(18)"/>
+    <use xlink:href="#triangle" transform="scale(-1,1)"/>
+  </g>
+  <use xlink:href="#cone" transform="rotate(72)"/>
+  <use xlink:href="#cone" transform="rotate(-72)"/>
+  <use xlink:href="#cone" transform="rotate(144)"/>
+  <use xlink:href="#cone" transform="rotate(-144)"/>
+</g>
+</svg>

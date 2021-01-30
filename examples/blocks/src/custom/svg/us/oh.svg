@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="520" height="320" viewBox="0 0 26 16">
+<defs>
+<g id="s">
+<g id="f">
+<g id="t">
+<path d="M0,-4.625V-4h0.3z" transform="rotate(18,0,-4.625)" fill="#fff" id="o"/>
+<use xlink:href="#o" transform="scale(-1,1)"/>
+</g>
+<use xlink:href="#t" transform="rotate(72,0,-4)"/>
+</g>
+<use xlink:href="#t" transform="rotate(-72,0,-4)"/>
+<use xlink:href="#f" transform="rotate(144,0,-4)"/>
+</g>
+<clipPath id="c">
+<path d="M0,16V0L26,3 20,8 26,13z"/>
+</clipPath>
+</defs>
+<g fill="#fff" stroke="#c1133d" clip-path="url(#c)">
+<path d="M26,3 0,0V16L26,13" stroke-width="4"/>
+<path d="M0,8H26" stroke-width="2"/>
+</g>
+<path d="M0,0V16L16,8z" fill="#001c5a"/>
+<!--          16/(1+sqrt(5)) v   -->
+<g transform="translate(4.944272,8)">
+<circle r="3" fill="#fff"/>
+<circle r="2" fill="#c1133d"/>
+<g id="g">
+<use xlink:href="#s"/>
+<use xlink:href="#s" transform="rotate(30)"/>
+<use xlink:href="#s" transform="rotate(-60)"/>
+<g id="h">
+<use xlink:href="#s" transform="rotate(-30)"/>
+<!--                     -30deg +/- arccos(71/72) v v  -->
+<use xlink:href="#s" y="-2" transform="rotate(-39.560384)"/>
+<use xlink:href="#s" y="-2" transform="rotate(-20.439616)"/>
+</g>
+</g>
+<use xlink:href="#g" transform="rotate(240)"/>
+<use xlink:href="#h" transform="rotate(120)"/>
+<use xlink:href="#s" transform="rotate(150)"/>
+<use xlink:href="#s" y="-4" transform="rotate(90)"/>
+</g>
+</svg>

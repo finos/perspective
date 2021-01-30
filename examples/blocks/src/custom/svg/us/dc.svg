@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="400">
+	<rect width="800" height="400" fill="#fff"/>
+	<g id="s" transform="translate(200,60)" fill="#e81b39">
+		<g id="c">
+			<path id="t" d="M 0,-40 V 0 H 20 z" transform="rotate(18 0,-40)"/>
+			<use xlink:href="#t" transform="scale(-1,1)"/>
+		</g>
+		<use xlink:href="#c" transform="rotate(72)"/>
+		<use xlink:href="#c" transform="rotate(144)"/>
+		<use xlink:href="#c" transform="rotate(216)"/>
+		<use xlink:href="#c" transform="rotate(288)"/>
+	</g>
+	<use xlink:href="#s" x="200"/>
+	<use xlink:href="#s" x="400"/>
+	<rect id="b" y="120" height="80" width="800" fill="#e81b39"/>
+	<use xlink:href="#b" y="120"/>
+</svg>

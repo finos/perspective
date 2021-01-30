@@ -1,0 +1,24 @@
+<?xml version="1.0" standalone="no"?>
+<svg viewBox="0 0 360 240" width="750" height="500"
+xmlns="http://www.w3.org/2000/svg" version="1.1"
+xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<path id="cross" transform="scale(.24)" d="M0,215 a32 32 0 0 0 32 -32 v-16 h31 a32 32 0 0 0 0 -64 h-31 V32 H231 v31 a32 32 0 0 0 64 0 v-31 h28 a32 32 0 0 0 32 -32 L0,0 z"/>
+</defs>
+<g id="q1">
+<rect width="180" height="120"/>
+<path fill="#EAAB00" d="M0,120 v-100 l30,20 v80 h30 v-120 h30 v120 h30 v-120 h30 v120 h30 v-20 L30,0 v40 L150,120 z"/>
+</g>
+<g id="q2">
+<rect fill="#fff" x="180" width="180" height="120"/>
+<path fill="#981E32" d="M270,0 h90 v60 h-180 v60 h90 z"/>
+<g transform="translate(270,60)">
+<use fill="#981E32" xlink:href="#cross"/>
+<use fill="#fff" transform="scale(-1 1)" xlink:href="#cross"/>
+<use fill="#fff" transform="scale(1 -1)" xlink:href="#cross"/>
+<use fill="#981E32" transform="scale(-1)" xlink:href="#cross"/>
+</g>
+</g>
+<use id="q3" x="-180" y="120" xlink:href="#q2"/>
+<use id="q4" x="180" y="120" xlink:href="#q1"/>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1416" height="1000">
+<title>Flag of Alaska</title>
+<defs><g id="star5" fill="#ffb612"><g id="cone"><polygon id="triangle" points="0,0 0,1 .5,1" transform="translate(0,-1) rotate(18)"/><use xlink:href="#triangle" transform="scale(-1,1)"/></g><use xlink:href="#cone" transform="rotate(72)"/><use xlink:href="#cone" transform="rotate(-72)"/><use xlink:href="#cone" transform="rotate(144)"/><use xlink:href="#cone" transform="rotate(-144)"/></g></defs>
+<rect width="1416" height="1000" fill="#0F204B"/>
+<use xlink:href="#star5" transform="translate(1158,182)scale(52)"/>
+<use id="star" xlink:href="#star5" transform="translate(229,396)scale(31)"/><use xlink:href="#star" x="167" y="62"/><use xlink:href="#star" x="250" y="151"/><use xlink:href="#star" x="334" y="244"/><use xlink:href="#star" x="584" y="333"/><use xlink:href="#star" x="323" y="375"/><use xlink:href="#star" x="511" y="437"/></svg>

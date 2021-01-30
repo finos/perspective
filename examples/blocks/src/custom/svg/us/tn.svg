@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="300" viewBox="0,0 240,144">
+	<desc>Flag of Tenessee, United States</desc>
+	<rect width="222" height="144" fill="#c00"/>
+	<rect x="222" width="3" height="144" fill="#fff"/>
+	<rect x="225" width="15" height="144" fill="#002d65"/>
+	<g transform="translate(111,72)">
+		<circle r="39" fill="#fff"/>
+		<circle r="36" fill="#002d65"/>
+		<g id="star" transform="rotate(18) translate(0,18.5)" fill="#fff">
+			<g id="c">
+				<path id="t" d="M 0,-17 V 0 H 8.5" transform="rotate(18 0,-17)"/>
+				<use xlink:href="#t" transform="scale(-1,1)"/>
+			</g>
+			<use xlink:href="#c" transform="rotate(72)"/>
+			<use xlink:href="#c" transform="rotate(144)"/>
+			<use xlink:href="#c" transform="rotate(216)"/>
+			<use xlink:href="#c" transform="rotate(288)"/>
+		</g>
+		<use xlink:href="#star" transform="rotate(120)"/>
+		<use xlink:href="#star" transform="rotate(240)"/>
+	</g>
+</svg>

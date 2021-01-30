@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200">
+<!-- Created per specification at http://www.50states.com/flag/coflag.htm by Robert Fleming -->
+ <rect width="1800" height="1200" fill="#002868"/>
+ <rect width="1800" height="400" y="400" fill="white"/>
+ <!-- 76 + 180*sqrt(55)/36 ~= 113.1 -->
+ <path d="M1130.81,750A400,400 0 1,1 1130.81,450L760,600Z" fill="#bf0a30"/>
+ <circle cx="760" cy="600" r="200" fill="gold"/>
+</svg>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="600" viewBox="0 0 1107 738">
+<defs>
+	<path id="s" transform="scale(3)" fill="#fff" d="M0,-1 L0.58779,0.80902 L-0.95106,-0.30902 L0.95106,-0.30902 L-0.58779,0.80902z"/>
+	<clipPath id="canton"><path d="M0,0h60.5v60.5h-60.5z"/></clipPath>
+</defs>
+<rect fill="#bf0a30" width="1107" height="738"/>
+<g clip-path="url(#canton)" transform="scale(8)">
+	<path stroke="#fff" stroke-width="12" d="M0,0L60,60M0,60L60,0"/>
+	<path stroke="#002868" stroke-width="9" d="M0,0L60,60M0,60L60,0"/>
+	<g id="s6">
+		<use xlink:href="#s" x="6" y="6"/>
+		<use xlink:href="#s" x="14" y="14"/>
+		<use xlink:href="#s" x="22" y="22"/>
+		<use xlink:href="#s" x="38" y="38"/>
+		<use xlink:href="#s" x="46" y="46"/>
+		<use xlink:href="#s" x="54" y="54"/>
+	</g>
+	<use xlink:href="#s6" transform="scale(-1,1)" x="-60"/>
+	<use xlink:href="#s" x="30" y="30"/>
+</g>
+<path fill="#fff" d="M480,0H1107V492H0v-12H480z"/>
+<rect fill="#002868" x="492" width="615" height="246"/>
+</svg>

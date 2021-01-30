@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect fill="#ffd700" width="1200" height="800"/>
+<g transform="translate(600,400)" stroke="#bf0a30">
+<path id="lin" d="M157.344,38.2812H-157.344M191.375,12.75H-191.375M191.375-12.75H-191.375M157.344-38.2812H-157.344" stroke-width="17" stroke-linecap="round"/>
+<use transform="rotate(90)" xlink:href="#lin"/>
+<circle fill="#ffd700" r="64.3125" stroke-width="10.625"/></g></svg>
