@@ -13,7 +13,7 @@
 #include <perspective/extract_aggregate.h>
 #include <perspective/sparse_tree.h>
 #include <perspective/tree_context_common.h>
-#include <perspective/logtime.h>
+
 #include <perspective/traversal.h>
 
 namespace perspective {
@@ -364,7 +364,7 @@ void
 t_ctx2::notify(const t_data_table& flattened, const t_data_table& delta,
     const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
     const t_data_table& existed) {
-    psp_log_time(repr() + " notify.enter");
+    
     for (t_uindex tree_idx = 0, loop_end = m_trees.size(); tree_idx < loop_end; ++tree_idx) {
         if (is_rtree_idx(tree_idx)) {
             notify_sparse_tree(rtree(), m_rtraversal, true, m_config.get_aggregates(),
@@ -385,7 +385,7 @@ t_ctx2::notify(const t_data_table& flattened, const t_data_table& delta,
     if (!m_sortby.empty()) {
         sort_by(m_sortby);
     }
-    psp_log_time(repr() + " notify.exit");
+    
 }
 
 t_uindex

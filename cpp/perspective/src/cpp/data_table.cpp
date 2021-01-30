@@ -16,7 +16,7 @@
 #include <perspective/scalar.h>
 #include <perspective/tracing.h>
 #include <perspective/utils.h>
-#include <perspective/logtime.h>
+
 #include <sstream>
 namespace perspective {
 

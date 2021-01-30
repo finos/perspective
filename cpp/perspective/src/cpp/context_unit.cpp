@@ -13,7 +13,7 @@
 #include <perspective/context_unit.h>
 #include <perspective/flat_traversal.h>
 #include <perspective/sym_table.h>
-#include <perspective/logtime.h>
+
 #include <perspective/filter_utils.h>
 
 namespace perspective {

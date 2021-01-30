@@ -13,7 +13,7 @@
 #include <perspective/storage.h>
 #include <perspective/exports.h>
 #include <perspective/scalar.h>
-#include <perspective/histogram.h>
+
 #include <perspective/mask.h>
 #include <perspective/compat.h>
 #include <perspective/vocab.h>

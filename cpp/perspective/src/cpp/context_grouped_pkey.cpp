@@ -15,7 +15,6 @@
 #include <perspective/sparse_tree.h>
 #include <perspective/tree_context_common.h>
 #include <perspective/sparse_tree_node.h>
-#include <perspective/logtime.h>
 #include <perspective/traversal.h>
 #include <perspective/env_vars.h>
 #include <perspective/filter_utils.h>
@@ -273,13 +272,13 @@ void
 t_ctx_grouped_pkey::sort_by(const std::vector<t_sortspec>& sortby) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    psp_log_time(repr() + " sort_by.enter");
+    
     m_sortby = sortby;
     if (m_sortby.empty()) {
         return;
     }
     m_traversal->sort_by(m_config, sortby, *this);
-    psp_log_time(repr() + " sort_by.exit");
+    
 }
 
 void
@@ -606,7 +605,7 @@ t_ctx_grouped_pkey::rebuild() {
         }
     }
 
-    psp_log_time(repr() + " rebuild.post_queue");
+    
     auto aggtable = m_tree->_get_aggtable();
     aggtable->extend(nrows + 1);
 
@@ -641,11 +640,11 @@ t_ctx_grouped_pkey::rebuild() {
 
     set_expansion_state(expansion_state);
 
-    psp_log_time(repr() + " rebuild.pre_sortby");
+    
     if (!m_sortby.empty()) {
         m_traversal->sort_by(m_config, m_sortby, *this);
     }
-    psp_log_time(repr() + " rebuild.exit");
+    
 }
 
 void
@@ -657,9 +656,9 @@ void
 t_ctx_grouped_pkey::notify(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    psp_log_time(repr() + " notify.enter");
+    
     rebuild();
-    psp_log_time(repr() + " notify.exit");
+    
 }
 
 // aggregates should be presized to be same size

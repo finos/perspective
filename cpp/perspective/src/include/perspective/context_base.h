@@ -14,7 +14,6 @@
 #include <perspective/config.h>
 #include <perspective/schema.h>
 #include <perspective/exports.h>
-#include <perspective/min_max.h>
 #include <perspective/tracing.h>
 #include <perspective/pivot.h>
 #include <perspective/step_delta.h>

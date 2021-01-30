@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.7.2)
 project(psp)
 
 set(CMAKE_BUILD_TYPE "Release")
-
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -12,7 +10,6 @@ if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
 endif()
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
-set(PSP_ARROW_VERSION 0.16.0)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
     set(MACOS OFF)
@@ -27,14 +24,13 @@ else()
     set(LINUX ON)
 endif()
 
-
 ## Helper function
 function(string_starts_with str search)
-  string(FIND "${str}" "${search}" out)
-  if("${out}" EQUAL 0)
-    return(true)
-  endif()
-  return(false)
+	string(FIND "${str}" "${search}" out)
+	if("${out}" EQUAL 0)
+		return(true)
+	endif()
+	return(false)
 endfunction()
 
 set(BUILD_MESSAGE "")
@@ -474,8 +470,8 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/base_impl_wasm.cpp
 	${PSP_CPP_SRC}/src/cpp/base_impl_win.cpp
 	${PSP_CPP_SRC}/src/cpp/binding.cpp
-	${PSP_CPP_SRC}/src/cpp/build_filter.cpp
-	#${PSP_CPP_SRC}/src/cpp/calc_agg_dtype.cpp
+	# ${PSP_CPP_SRC}/src/cpp/build_filter.cpp
+	# ${PSP_CPP_SRC}/src/cpp/calc_agg_dtype.cpp
 	${PSP_CPP_SRC}/src/cpp/column.cpp
 	${PSP_CPP_SRC}/src/cpp/comparators.cpp
 	${PSP_CPP_SRC}/src/cpp/compat.cpp
@@ -493,7 +489,6 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/context_two.cpp
 	${PSP_CPP_SRC}/src/cpp/context_zero.cpp
 	${PSP_CPP_SRC}/src/cpp/context_unit.cpp
-	${PSP_CPP_SRC}/src/cpp/custom_column.cpp
 	${PSP_CPP_SRC}/src/cpp/data.cpp
 	${PSP_CPP_SRC}/src/cpp/data_slice.cpp
 	${PSP_CPP_SRC}/src/cpp/data_table.cpp
@@ -508,10 +503,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/get_data_extents.cpp
 	${PSP_CPP_SRC}/src/cpp/gnode.cpp
 	${PSP_CPP_SRC}/src/cpp/gnode_state.cpp
-	${PSP_CPP_SRC}/src/cpp/histogram.cpp
-	${PSP_CPP_SRC}/src/cpp/logtime.cpp
 	${PSP_CPP_SRC}/src/cpp/mask.cpp
-	${PSP_CPP_SRC}/src/cpp/min_max.cpp
 	${PSP_CPP_SRC}/src/cpp/multi_sort.cpp
 	${PSP_CPP_SRC}/src/cpp/none.cpp
 	${PSP_CPP_SRC}/src/cpp/path.cpp
@@ -559,7 +551,6 @@ set(WASM_SOURCE_FILES ${SOURCE_FILES}
 	${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
 	${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
 )
-
 
 set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
