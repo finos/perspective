@@ -1,9 +1,9 @@
 {
     "candlestick_filter_by_a_single_instrument_": "d3ef6be674cc045b4c8551f111281f78",
-    "candlestick_filter_to_date_range_": "a08755a828b3ab52426cb306c04ad0d7",
-    "__GIT_COMMIT__": "6ebb74ab5cc1d3d5bdcf127ec0db8452f1987a45",
+    "candlestick_filter_to_date_range_": "dee07d412eaffc97d7a5959f04aafa4d",
+    "__GIT_COMMIT__": "7a330890b5728a283618c5cd6d84c3d81a50f5f1",
     "ohlc_filter_by_a_single_instrument_": "ed4232a783fbd733ce9267ddda98b7f0",
-    "ohlc_filter_to_date_range_": "96db579b0cb0fa173ed7e6d4d9539fa2",
+    "ohlc_filter_to_date_range_": "7bc84fa17dc87433f364bd479d343cef",
     "scatter_shows_a_grid_without_any_settings_applied_": "8677946ab48f16a376c421500d59e6c0",
     "scatter_pivots_by_a_row_": "a4dd9b7daff4e639fb7a56b01d2f4990",
     "scatter_pivots_by_two_rows_": "cf59f774c819f3f38a202af3cb95f4bf",

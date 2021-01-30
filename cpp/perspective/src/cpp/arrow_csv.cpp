@@ -144,15 +144,18 @@ namespace apachearrow {
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_PARSERS{
         std::make_shared<CustomISO8601Parser>(),
         arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
+        arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"), // US locale string
         arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
         arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
         arrow::TimestampParser::MakeStrptime("%d %m %Y"),
+        // TODO: time type column
         arrow::TimestampParser::MakeStrptime("%H:%M:%S.%f")};
 
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
         std::make_shared<UnixTimestampParser>(),
         std::make_shared<CustomISO8601Parser>(),
         arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
+        arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"), // US locale string
         arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
         arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
         arrow::TimestampParser::MakeStrptime("%d %m %Y"),

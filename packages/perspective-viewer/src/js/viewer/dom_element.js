@@ -94,7 +94,7 @@ export class DomElement extends PerspectiveElement {
         if (filter) {
             row.setAttribute("filter", filter);
 
-            if (type === "string") {
+            if (type === "string" || type === "date" || type === "datetime") {
                 // Get all unique values for the column - because all options
                 // must be valid column names, recreate computed columns
                 // if the filter column is a computed column.
@@ -108,10 +108,22 @@ export class DomElement extends PerspectiveElement {
                     columns: [],
                     computed_columns: computed_names.includes(name) ? computed_columns : []
                 });
-                view.to_json().then(json => {
-                    row.choices(this._autocomplete_choices(json));
-                });
-                view.delete();
+
+                view.num_rows()
+                    .then(async nrows => {
+                        if (nrows < 100000) {
+                            // Autocomplete
+                            const json = await view.to_json({
+                                end_row: 10
+                            });
+                            row.choices(this._autocomplete_choices(json, type));
+                        } else {
+                            console.warn(`perspective-viewer did not generate autocompletion results - ${nrows} is greater than limit of 100,000 rows.`);
+                        }
+                    })
+                    .finally(() => {
+                        view.delete();
+                    });
             }
         }
 
@@ -515,12 +527,21 @@ export class DomElement extends PerspectiveElement {
         render(options(current_renderers), this._vis_selector);
     }
 
-    _autocomplete_choices(json) {
+    _autocomplete_choices(json, type) {
         const choices = [];
+        const type_config = get_type_config(type);
+
         for (let i = 1; i < json.length; i++) {
             const row_path = json[i].__ROW_PATH__;
             if (Array.isArray(row_path) && row_path.length > 0 && row_path[0]) {
-                choices.push(row_path[0]);
+                let choice = row_path[0];
+
+                if (type === "date" || type === "datetime") {
+                    choice = new Date(choice);
+                    choice = choice.toLocaleString("en-US", type_config.format);
+                }
+
+                choices.push(choice);
             }
         }
         return choices;
