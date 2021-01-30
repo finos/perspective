@@ -91,6 +91,34 @@ To install this specific version of Emscripten:
 ./emsdk install 2.0.6
 ```
 
+### `perspective-jupyterlab`
+
+To install the Jupyterlab plugin from your local working directory, give
+`jupyter labextension install` the path to the `perspective-jupyterlab`
+package:
+
+```bash
+jupyter labextension install ./packages/perspective-jupyterlab
+```
+
+Afterwards, you should see it listed as a "local extension" when you run
+`jupyter labextension list`.
+
+Because we do not inline Perspective into the Jupyterlab plugin, your local
+changes will not show up in Jupyterlab **unless** you use `yarn link`
+according to the directions below:
+
+1. Ensure that your Jupyterlab is built by running `jupyter lab build`.
+2. Inside each directory in `packages`, run [`yarn link`](https://classic.yarnpkg.com/en/docs/cli/link).
+This will create a symlink to your local build that we will use inside Jupyterlab.
+3. From the Perspective root, run `yarn jlab_link`. This is a script that will
+find your Jupyterlab installation and tell Jupyterlab to use these symlinks
+when it looks for Perspective packages, instead of fetching them from NPM.
+4. When you make a local change, make sure you run `yarn build` **and**
+`jupyter lab build` so that it fetches the newest changes.
+5. Whenever you run `jupyter lab clean`, you will need to run `yarn jlab_link`
+again to re-register the symlinks.
+
 ## `perspective-python`
 
 To build the Python library, first configure your project to Python via
@@ -272,11 +300,6 @@ your changes to preserve them for future comparison.
 ```bash
 yarn bench
 ```
-
-Use the `--limit <NUMBER>` flag to control the number of Perspective versions
-that the benchmark suite will run, where `<NUMBER>` is an integer greater
-than 0. If `<NUMBER>` cannot be parsed, is 0, or is greater than the number of
-versions, the benchmark suite will run all previous versions of Perspective.
 
 The benchmarks report and `results.json` show a histogram of current
 performance, as well as that of the previous `results.json`. Running this should

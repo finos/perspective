@@ -42,16 +42,16 @@ var freq = 1,
     freqdir = 1,
     elem;
 
-function update() {
+function update(table) {
     var viewport_height = document.documentElement.clientHeight;
     if (viewport_height - window.scrollY > 0) {
-        elem.update([newRow(), newRow(), newRow()]);
+        table.update([newRow(), newRow(), newRow()]);
     }
     if (freq === 0) {
-        setTimeout(update, 3000);
+        setTimeout(() => update(table), 3000);
         freqdir = 1;
     } else {
-        setTimeout(update, Math.max(20, 200 / freq));
+        setTimeout(() => update(table), Math.max(20, 200 / freq));
     }
     if (freq > 60) {
         freqdir = -1;
@@ -138,13 +138,13 @@ window.addEventListener("WebComponentsReady", function() {
         data.push(newRow());
     }
     elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
-    var worker = elem.worker;
+    var worker = perspective.worker();
     var tbl = worker.table(data, {index: "id"});
     elem.load(tbl);
     elem._toggle_config();
 
     setTimeout(function() {
-        update(0);
+        update(tbl, 0);
     });
 
     document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
@@ -175,7 +175,10 @@ window.addEventListener("WebComponentsReady", function() {
             plugin: "d3_heatmap",
             "column-pivots": ["Sub-Category"],
             "row-pivots": ["State"],
-            sort: [["Sales","desc"],["Profit","col desc"]],
+            sort: [
+                ["Sales", "desc"],
+                ["Profit", "col desc"]
+            ],
             columns: ["Profit"],
             aggregates: {Profit: "low"}
         });

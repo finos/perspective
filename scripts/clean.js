@@ -21,8 +21,7 @@ function clean_screenshots() {
             execute`lerna exec --scope="@finos/${process.env.PACKAGE}" -- yarn rimraf screenshots`;
         } catch (e) {}
     } else {
-        execute`lerna exec --scope="@finos/*" -- mkdirp screenshots`;
-        execute`lerna run clean:screenshots --ignore-missing --scope="@finos/${process.env.PACKAGE}"`;
+        execute`lerna run clean:screenshots --scope="@finos/${process.env.PACKAGE}"`;
     }
 }
 

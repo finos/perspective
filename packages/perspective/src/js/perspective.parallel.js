@@ -12,31 +12,22 @@ import {get_config} from "./config";
 import {Client} from "./api/client.js";
 const {WebSocketClient} = require("./websocket/client");
 
-import wasm_worker from "./perspective.wasm.js";
-import wasm from "./psp.async.wasm.js";
 import {override_config} from "../../dist/esm/config/index.js";
 
-// eslint-disable-next-line max-len
-const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While Perspective's runtime performance is not affected, you may see smaller assets size and faster engine initial load time using "@finos/perspective-webpack-plugin" to build your application.
+import wasm_worker from "./perspective.worker.js";
+import wasm from "./@finos/perspective-cpp/dist/esm/perspective.cpp.wasm";
 
+// eslint-disable-next-line max-len
+const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While \
+Perspective's runtime performance is not affected, you may see smaller assets \
+size and faster engine initial load time using "file-loader" to build your
+application.
 https://perspective.finos.org/docs/md/js.html`;
 
 /**
  * Singleton WASM file download cache.
  */
 const override = new (class {
-    _fetch(url) {
-        return new Promise(resolve => {
-            let wasmXHR = new XMLHttpRequest();
-            wasmXHR.open("GET", url, true);
-            wasmXHR.responseType = "arraybuffer";
-            wasmXHR.onload = () => {
-                resolve(wasmXHR.response);
-            };
-            wasmXHR.send(null);
-        });
-    }
-
     worker() {
         return wasm_worker();
     }
@@ -46,7 +37,8 @@ const override = new (class {
             console.warn(INLINE_WARNING);
             this._wasm = wasm;
         } else {
-            this._wasm = await this._fetch(wasm);
+            const req = await fetch(wasm);
+            this._wasm = await req.arrayBuffer();
         }
         return this._wasm;
     }
@@ -115,7 +107,7 @@ class WebWorkerClient extends Client {
         if (!this._worker.transferable) {
             console.warn("Transferable support not detected");
         } else {
-            console.log("Transferable support detected");
+            console.debug("Transferable support detected");
         }
     }
 }

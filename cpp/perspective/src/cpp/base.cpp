@@ -22,10 +22,14 @@ namespace perspective {
 void
 psp_abort(const std::string& message) {
 #ifdef PSP_ENABLE_WASM
-    std::cerr << "Abort(): " << message << std::endl;
+    std::string error = "Abort(): " + message;
+    const char* error_cstr = error.c_str();
+
     EM_ASM({
-        throw new Error('abort()');
-    });
+        // copy string out from heap
+        // https://emscripten.org/docs/api_reference/emscripten.h.html#c.EM_ASM
+        throw new Error(UTF8ToString($0));
+    }, error_cstr);
 #else
     throw PerspectiveException(message.c_str());
 #endif

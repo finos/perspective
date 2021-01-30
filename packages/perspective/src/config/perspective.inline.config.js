@@ -1,6 +1,5 @@
 const path = require("path");
 const common = require("./common.config.js");
-const {minimizer} = require("./minimizer.js");
 
 module.exports = common({inline: true}, config =>
     Object.assign(config, {
@@ -10,10 +9,8 @@ module.exports = common({inline: true}, config =>
             library: "perspective",
             libraryTarget: "umd",
             libraryExport: "default",
+            chunkFilename: "perspective.inline.chunk_[id].js",
             path: path.resolve(__dirname, "../../dist/umd")
-        },
-        optimization: {
-            minimizer: minimizer
         }
     })
 );

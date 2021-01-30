@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const cssnano = require("cssnano");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const common = require("@finos/perspective/src/config/common.config.js");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
@@ -20,9 +21,6 @@ function reducer(obj, key, val) {
 module.exports = common({}, config => {
     config.plugins.push(
         new MiniCssExtractPlugin({
-            splitChunks: {
-                chunks: "all"
-            },
             filename: "[name].css"
         })
     );
@@ -46,7 +44,24 @@ module.exports = common({}, config => {
 
     config.module.rules.push({
         test: /themes[\\/].+?\.less$/,
-        use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", "less-loader"]
+        use: [
+            {loader: MiniCssExtractPlugin.loader},
+            "css-loader",
+            {
+                loader: "postcss-loader",
+                options: {
+                    postcssOptions: {
+                        minimize: true,
+                        plugins: [
+                            cssnano({
+                                preset: "lite"
+                            })
+                        ]
+                    }
+                }
+            },
+            "less-loader"
+        ]
     });
 
     return Object.assign(config, {

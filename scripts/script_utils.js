@@ -8,11 +8,14 @@
  */
 
 require("dotenv").config({path: "./.perspectiverc"});
+process.env.FORCE_COLOR = true;
 
 const execSync = require("child_process").execSync;
 const _path = require("path");
 const fs = require("fs");
 const rimraf = require("rimraf");
+const {promisify} = require("util");
+
 const isWin = process.platform === "win32";
 
 /*******************************************************************************
@@ -51,23 +54,29 @@ function cut_first(f) {
         .join(" ");
 }
 
+const execute_throw = cmd => {
+    if (process.argv.indexOf("--debug") > -1) {
+        console.log(`$ ${cmd}`);
+    }
+    execSync(cmd, {stdio: "inherit"});
+};
+
 const execute = cmd => {
     try {
-        if (process.argv.indexOf("--debug") > -1) {
-            console.log(`$ ${cmd}`);
-        }
-        execSync(cmd, {stdio: "inherit"});
+        execute_throw(cmd);
     } catch (e) {
         console.error("\n" + e.message);
         process.exit(1);
     }
 };
 
-const execute_throw = cmd => {
+const execute_return = async cmd => {
     if (process.argv.indexOf("--debug") > -1) {
         console.log(`$ ${cmd}`);
     }
-    execSync(cmd, {stdio: "inherit"});
+
+    const ex = promisify(require("child_process").exec);
+    return await ex(cmd);
 };
 
 /*******************************************************************************
@@ -185,6 +194,18 @@ exports.execute = (strings, ...args) => execute(Array.isArray(strings) ? bash(st
  * execute`run -t${1} -u"${undefined}" task`;
  */
 exports.execute_throw = (strings, ...args) => execute_throw(Array.isArray(strings) ? bash(strings, ...args) : strings);
+
+/**
+ * Just like `execute`, except it will return the output of the command
+ * it runs.
+ *
+ * @async
+ * @param {string} expression a bash command to be templated.
+ * @returns {string} A command with the missing argument's flags removed.
+ * @example
+ * execute`run -t${1} -u"${undefined}" task`;
+ */
+exports.execute_return = async (strings, ...args) => await execute_return(Array.isArray(strings) ? bash(strings, ...args) : strings);
 
 /**
  * Returns the value after this command-line flag, or `true` if it is the last

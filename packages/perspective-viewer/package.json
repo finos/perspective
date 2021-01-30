@@ -54,7 +54,7 @@
     "dependencies": {
         "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^0.6.0",
-        "@types/react": "^16.9.17",
+        "@types/react": "^16.8.6",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
@@ -68,7 +68,6 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.6.0",
-        "@finos/perspective-webpack-plugin": "^0.6.0",
         "jsverify": "^0.8.4"
     }
 }

@@ -1,0 +1,19 @@
+{
+    "name": "@finos/perspective-cpp",
+    "private": true,
+    "author": "The Perspective Authors",
+    "license": "Apache-2.0",
+    "version": "0.6.0",
+    "main": "./dist/esm/perspective.cpp.js",
+    "files": [
+        "dist/esm/**/*",
+        "dist/cjs/**/*"
+    ],
+    "scripts": {
+        "build": "yarn emsdk-run node ./build.js",
+        "clean": "rimraf dist/cpp/build",
+        "test": ":",
+        "test:run": ":",
+        "test:build": ":"
+    }
+}

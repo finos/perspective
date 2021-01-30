@@ -37,7 +37,66 @@ class TestUpdate(object):
         tbl.update([{"a": "abc", "b": 456}])
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
 
-    def test_update_partial_cols_not_in_schema(self):
+    def test_update_partial_add_row(self):
+        tbl = Table([{"a": "abc", "b": 123}], index="a")
+        tbl.update([{"a": "abc", "b": 456}, {"a": "def"}])
+        assert tbl.view().to_records() == [{"a": "abc", "b": 456}, {"a": "def", "b": None}]
+
+    def test_update_partial_noop(self):
+        tbl = Table([{"a": "abc", "b": 1, "c": 2}], index="a")
+        tbl.update([{"a": "abc", "b": 456}])
+        assert tbl.view().to_records() == [{"a": "abc", "b": 456, "c": 2}]
+
+    def test_update_partial_unset(self):
+        tbl = Table([{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": 4}], index="a")
+        tbl.update([{"a": "abc"}, {"a": "def", "c": None}])
+        assert tbl.view().to_records() == [{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": None}]
+
+    def test_update_columnar_partial_add_row(self):
+        tbl = Table([{"a": "abc", "b": 123}], index="a")
+
+        tbl.update({
+            "a": ["abc", "def"],
+            "b": [456, None]
+        })
+
+        assert tbl.view().to_records() == [{"a": "abc", "b": 456}, {"a": "def", "b": None}]
+
+    def test_update_columnar_partial_noop(self):
+        tbl = Table([{"a": "abc", "b": 1, "c": 2}], index="a")
+
+        # no-op because "c" is not in the update dataset
+        tbl.update({
+            "a": ["abc"],
+            "b": [456]
+        })
+
+        assert tbl.view().to_records() == [{"a": "abc", "b": 456, "c": 2}]
+
+    def test_update_columnar_partial_unset(self):
+        tbl = Table([{"a": "abc", "b": 1, "c": 2}, {"a": "def", "b": 3, "c": 4}], index="a")
+
+        tbl.update({
+            "a": ["abc"],
+            "b": [None]
+        })
+
+        assert tbl.view().to_records() == [{"a": "abc", "b": None, "c": 2}, {"a": "def", "b": 3, "c": 4}]
+
+    def test_update_partial_subcolumn(self):
+        tbl = Table([{"a": "abc", "b": 123, "c": 456}], index="a")
+        tbl.update([{"a": "abc", "c": 1234}])
+        assert tbl.view().to_records() == [{"a": "abc", "b": 123, "c": 1234}]
+
+    def test_update_partial_subcolumn_dict(self):
+        tbl = Table([{"a": "abc", "b": 123, "c": 456}], index="a")
+        tbl.update({
+            "a": ["abc"],
+            "c": [1234]
+        })
+        assert tbl.view().to_records() == [{"a": "abc", "b": 123, "c": 1234}]
+
+    def test_update_partial_cols_more_columns_than_table(self):
         tbl = Table([{"a": "abc", "b": 123}], index="a")
         tbl.update([{"a": "abc", "b": 456, "c": 789}])
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
@@ -306,13 +365,28 @@ class TestUpdate(object):
         }])
         assert view.to_records() == [{"a": 3, "b": 15}, {"a": 2, "b": 3}]
 
-    def test_update_implicit_index_dict_should_unset(self):
+    def test_update_implicit_index_dict_noop(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data)
         view = tbl.view()
+
+        # "b" does not exist in dataset, so no-op
         tbl.update({
             "__INDEX__": [0],
-            "a": [3]
+            "a": [3],
+        })
+        assert view.to_records() == [{"a": 3, "b": 2}, {"a": 2, "b": 3}]
+
+    def test_update_implicit_index_dict_unset_with_null(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
+        tbl = Table(data)
+        view = tbl.view()
+        
+        # unset because "b" is null
+        tbl.update({
+            "__INDEX__": [0],
+            "a": [3],
+            "b": [None]
         })
         assert view.to_records() == [{"a": 3, "b": None}, {"a": 2, "b": 3}]
 
