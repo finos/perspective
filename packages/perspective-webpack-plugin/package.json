@@ -24,7 +24,6 @@
         "worker-loader": "^3.0.7"
     },
     "peerDependencies": {
-        "@finos/perspective": "^0.6.0",
-        "webpack": "^5.14.0"
+        "@finos/perspective": "^0.6.0"
     }
 }
