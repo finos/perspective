@@ -111,41 +111,58 @@ export class ActionElement extends DomElement {
      * @param {*} event
      */
     _save_computed_expression(event) {
-        const expression = event.detail.expression;
+        let expression = event.detail.expression;
 
-        // `computed-columns` stores the raw expression typed by the user.
-        let computed_columns = this._get_view_computed_columns();
+        // // `computed-columns` stores the raw expression typed by the user.
+        // let computed_columns = this._get_view_computed_columns();
 
-        if (computed_columns.includes(expression)) {
+        // if (computed_columns.includes(expression)) {
+        //     console.warn(`"${expression}" was not applied because it already exists.`);
+        //     return;
+        // }
+
+        // computed_columns.push(expression);
+
+        // this.setAttribute("computed-columns", JSON.stringify(computed_columns));
+
+        let expressions = this._get_view_expressions();
+
+        if (expressions.includes(expression)) {
             console.warn(`"${expression}" was not applied because it already exists.`);
             return;
         }
 
-        computed_columns.push(expression);
+        if (expression.includes("$''")) {
+            throw new Error("Expression cannot reference empty column $''!");
+        }
 
-        this.setAttribute("computed-columns", JSON.stringify(computed_columns));
+        expressions.push(expression);
+
+        console.log(expressions);
+
+        this.setAttribute("expressions", JSON.stringify(expressions));
     }
 
     async _type_check_computed_expression(event) {
-        const parsed = event.detail.parsed_expression || [];
-        if (parsed.length === 0) {
-            this._computed_expression_widget._type_check_expression({});
-            return;
-        }
-        const functions = {};
-        for (const col of parsed) {
-            functions[col.column] = col.computed_function_name;
-        }
-        const schema = await this._table.computed_schema(parsed);
-        // Look at the failing values, and get their expected types
-        const expected_types = {};
-        for (const key in functions) {
-            if (!schema[key]) {
-                expected_types[key] = await this._table.get_computation_input_types(functions[key]);
-            }
-        }
+        // const parsed = event.detail.parsed_expression || [];
+        // if (parsed.length === 0) {
+        //     this._computed_expression_widget._type_check_expression({});
+        //     return;
+        // }
+        // const functions = {};
+        // for (const col of parsed) {
+        //     functions[col.column] = col.computed_function_name;
+        // }
+        // const schema = await this._table.computed_schema(parsed);
+        // // Look at the failing values, and get their expected types
+        // const expected_types = {};
+        // for (const key in functions) {
+        //     if (!schema[key]) {
+        //         expected_types[key] = await this._table.get_computation_input_types(functions[key]);
+        //     }
+        // }
 
-        this._computed_expression_widget._type_check_expression(schema, expected_types);
+        // this._computed_expression_widget._type_check_expression(schema, expected_types);
     }
 
     /**

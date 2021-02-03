@@ -23,6 +23,98 @@ using uint64 = std::uint64_t;
 using float32 = float;
 using float64 = double;
 
+template <typename T>
+col<T>::col(std::shared_ptr<t_data_table> data_table, const tsl::hopscotch_set<std::string>& input_columns)
+    : m_schema(nullptr)
+    , m_input_columns(std::move(input_columns))
+    , m_columns({})
+    , m_ridxs({}) {
+        // TODO: move into init()?
+        for (const auto& column_name : input_columns) {
+            m_columns[column_name] = data_table->get_column(column_name);
+            m_ridxs[column_name] = 0;
+        }
+    }
+
+template <typename T>
+col<T>::col(std::shared_ptr<t_schema> schema)
+    : m_schema(schema)
+    , m_columns({})
+    , m_ridxs({}) {}
+
+template <typename T>
+col<T>::~col() {}
+
+template <typename T>
+T col<T>::next(
+    const std::string& column_name) {
+    std::cout << "NOT IMPLEMENTED" << std::endl;
+    std::string error = "next<T>() Not implemented!\n";
+    PSP_COMPLAIN_AND_ABORT(error);
+}
+
+template <>
+t_tscalar col<t_tscalar>::next(
+    const std::string& column_name) {
+    t_uindex ridx = m_ridxs[column_name];
+    t_tscalar rval = m_columns[column_name]->get_scalar(ridx);
+    m_ridxs[column_name] += 1;
+    return rval;
+}
+
+template <typename T>
+T col<T>::operator()(t_parameter_list parameters) {
+    auto num_params = parameters.size();
+
+    if (num_params == 0) {
+        std::stringstream ss;
+        ss << "Expression error: col() function cannot be empty." << std::endl;
+        std::cout << ss.str();
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+
+    t_string_view param = t_string_view(parameters[0]);
+    std::string column_name(param.begin(), param.size());
+
+    if (m_schema != nullptr) {
+        t_tscalar rval;
+        // scalar is valid here, as operations would fail and return
+        // none if the inputs are not valid scalars.
+        rval.m_status = STATUS_VALID;
+        rval.m_type = m_schema->get_dtype(column_name);
+        m_input_columns.insert(column_name);
+        return rval;
+    }
+
+    return next(column_name);
+}
+
+template <typename T>
+toupper<T>::toupper() {}
+
+template <typename T>
+toupper<T>::~toupper() {}
+
+template <>
+t_tscalar toupper<t_tscalar>::operator()(t_parameter_list parameters) {
+     auto num_params = parameters.size();
+
+    if (num_params == 0) {
+        std::stringstream ss;
+        ss << "Expression error: col() function cannot be empty." << std::endl;
+        std::cout << ss.str();
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+
+    t_string_view param = t_string_view(parameters[0]);
+    std::string s(param.begin(), param.size());
+    t_tscalar rval;
+    boost::to_upper(s);
+    rval.set(s.c_str());
+    std::cout << "toupper: " << rval.repr() << std::endl;
+    return rval;
+}
+
 /**
  * @brief Generate all type permutations for a numeric function that takes one
  * parameter. Return value from numeric functions are always `double`.
@@ -892,6 +984,10 @@ void month_of_year<DTYPE_TIME>(
     // Get the month string and write into the output column
     output_column->set_nth(idx, months_of_year[month]);
 }
+
+// Explicitly instantiate all exprtk functions
+template struct col<t_tscalar>;
+template struct toupper<t_tscalar>;
 
 } // end namespace computed_function
 } // end namespace perspective

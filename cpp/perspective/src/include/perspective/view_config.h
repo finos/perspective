@@ -14,6 +14,7 @@
 #include <perspective/raw_types.h>
 #include <perspective/scalar.h>
 #include <perspective/computed.h>
+#include <perspective/computed_expression.h>
 #include <tsl/ordered_map.h>
 #include <unordered_set>
 #include <tuple>
@@ -46,6 +47,7 @@ public:
         const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
         const std::vector<t_computed_column_definition>& computed_columns,
+        const std::vector<t_computed_expression>& expressions,
         const std::string& filter_op,
         bool column_only);
 
@@ -96,6 +98,8 @@ public:
     std::vector<t_sortspec> get_col_sortspec() const;
 
     std::vector<t_computed_column_definition> get_computed_columns() const;
+
+    std::vector<t_computed_expression> get_expressions() const;
 
     t_filter_op get_filter_op() const;
 
@@ -162,6 +166,7 @@ private:
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> m_filter;
     std::vector<std::vector<std::string>> m_sort;
     std::vector<t_computed_column_definition> m_computed_columns;
+    std::vector<t_computed_expression> m_expressions;
 
     /**
      * @brief The ordered list of aggregate columns:

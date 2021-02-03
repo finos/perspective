@@ -350,6 +350,11 @@ namespace binding {
         std::shared_ptr<Table> table,
         std::vector<std::vector<T>> j_computed_columns);
 
+    t_schema
+    get_table_expression_schema(
+        std::shared_ptr<Table> table,
+        const std::vector<std::string>& j_expressions);
+
     /**
      * @brief Given a string that resolves to a valid computed function name,
      * return a vector of its accepted input column types.

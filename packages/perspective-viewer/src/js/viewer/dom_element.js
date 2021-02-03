@@ -239,6 +239,49 @@ export class DomElement extends PerspectiveElement {
         }
     }
 
+    _update_expressions_view(expressions) {
+        const columns = this._get_view_all_column_names();
+        const active = this._get_view_active_column_names();
+
+        if (expressions.length === 0) {
+            return;
+        }
+
+        let added_count = 0;
+
+        const attr = JSON.parse(this.getAttribute("columns")) || [];
+        let reset_columns_attr = false;
+
+        for (const expr of expressions) {
+            console.log(expr);
+
+            // If the column already exists or is already in the active DOM,
+            // don't add it to the inactive DOM
+            const should_add = !columns.includes(expr) && !active.includes(expr);
+
+            if (!should_add) {
+                continue;
+            }
+
+            // TODO: needs a way to pre-type check columns, OR update this
+            // column view after the view is created.
+            let type = "float";
+
+            const row = this._new_row(expr, type, null, null, null, expr);
+            this._inactive_columns.insertBefore(row, this._inactive_columns.childNodes[0] || null);
+            added_count++;
+        }
+
+        if (reset_columns_attr) {
+            this._update_column_view(attr, true);
+        } else {
+            // Remove collapse so that new inactive columns show up
+            if (added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
+                this._inactive_columns.parentElement.classList.remove("collapse");
+            }
+        }
+    }
+
     /**
      * Given two sets of computed columns, remove columns that are present in
      * `old_computed_columns` but not `new_computed_columns`, and return a

@@ -41,7 +41,7 @@ import {COMPUTED_EXPRESSION_PARSER} from "./computed_expressions/computed_expres
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "computed-columns", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
+const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "computed-columns", "expressions", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
 
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to
@@ -81,7 +81,7 @@ class PerspectiveViewer extends ActionElement {
         this._show_warnings = true;
         this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
-        this._computed_expression_parser = COMPUTED_EXPRESSION_PARSER;
+        // this._computed_expression_parser = COMPUTED_EXPRESSION_PARSER;
         this._edit_port = null;
         this._edit_port_lock = invertPromise();
         window.addEventListener("resize", this._resize_handler);
@@ -223,18 +223,18 @@ class PerspectiveViewer extends ActionElement {
 
             let parsed_computed_columns = [];
 
-            for (const column of computed_columns) {
-                if (typeof column === "string") {
-                    // Either validated through the UI or here. If a `table`
-                    // has not been loaded when the parsing happens,
-                    // the column will be skipped.
-                    if (this._computed_expression_parser.is_initialized) {
-                        parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(column));
-                    }
-                } else {
-                    parsed_computed_columns.push(column);
-                }
-            }
+            // for (const column of computed_columns) {
+            //     if (typeof column === "string") {
+            //         // Either validated through the UI or here. If a `table`
+            //         // has not been loaded when the parsing happens,
+            //         // the column will be skipped.
+            //         if (this._computed_expression_parser.is_initialized) {
+            //             parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(column));
+            //         }
+            //     } else {
+            //         parsed_computed_columns.push(column);
+            //     }
+            // }
 
             // Attempt to validate the parsed computed columns against the Table
             let computed_schema = {};
@@ -270,6 +270,36 @@ class PerspectiveViewer extends ActionElement {
             this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
 
             this._update_computed_column_view(computed_schema);
+            this.dispatchEvent(new Event("perspective-config-update"));
+            await this._debounce_update();
+            resolve();
+        })();
+    }
+
+    @array_attribute
+    "expressions"(expressions) {
+        const resolve = this._set_updating();
+
+        (async () => {
+            if (this._computed_expression_widget.style.display !== "none") {
+                this._computed_expression_widget._close_expression_widget();
+            }
+            if (expressions === null || expressions === undefined || expressions.length === 0) {
+                // Remove computed columns from the DOM, and reset the config
+                // to exclude all computed columns.
+                if (this.hasAttribute("expressions")) {
+                    this.removeAttribute("expressions");
+                    // TODO: remove expression columns from all uses.
+                    resolve();
+                    return;
+                }
+                expressions = [];
+            }
+
+            // TODO: move this into `_new_view()` or create a new method that
+            // can access the state of the view itself without breaking the
+            // relative structure and organization of the module.
+            this._update_expressions_view(expressions);
             this.dispatchEvent(new Event("perspective-config-update"));
             await this._debounce_update();
             resolve();

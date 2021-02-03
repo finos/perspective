@@ -160,7 +160,8 @@ export default function(Module) {
             this.view_config.column_pivots.length === 0 &&
             this.view_config.filter.length === 0 &&
             this.view_config.sort.length === 0 &&
-            this.view_config.computed_columns.length === 0;
+            this.view_config.computed_columns.length === 0 &&
+            this.view_config.expressions.length === 0;
 
         if (this.is_unit_context) {
             this._View = __MODULE__.make_view_unit(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
@@ -1016,6 +1017,7 @@ export default function(Module) {
         this.columns = config.columns;
         this.filter = config.filter || [];
         this.sort = config.sort || [];
+        this.expressions = config.expressions || [];
         this.computed_columns = config.computed_columns || [];
         this.filter_op = config.filter_op || "and";
         this.row_pivot_depth = config.row_pivot_depth;
@@ -1073,6 +1075,20 @@ export default function(Module) {
             // make this input_columns
             computed_vector.push_back(computed.inputs);
             vector.push_back(computed_vector);
+        }
+        return vector;
+    };
+
+    view_config.prototype.get_expressions = function() {
+        let vector = __MODULE__.make_2d_val_vector();
+        console.log("get_expressions", this.expressions);
+        for (let expression of this.expressions) {
+            let inner = __MODULE__.make_val_vector();
+            console.log("get_expressions:inner:", expression);
+            for (let val of expression) {
+                inner.push_back(val);
+            }
+            vector.push_back(inner);
         }
         return vector;
     };
@@ -1315,6 +1331,35 @@ export default function(Module) {
         return new_schema;
     };
 
+    table.prototype.expression_schema = function(expressions, override = true) {
+        const new_schema = {};
+
+        if (!expressions || expressions.length === 0) return new_schema;
+
+        let vector = __MODULE__.make_string_vector();
+        vector = fill_vector(vector, expressions);
+
+        let expression_schema = __MODULE__.get_table_expression_schema(this._Table, vector);
+        let columns = expression_schema.columns();
+        let types = expression_schema.types();
+
+        for (let key = 0; key < columns.size(); key++) {
+            const name = columns.get(key);
+            const type = types.get(key);
+            if (override && this.overridden_types[name]) {
+                new_schema[name] = this.overridden_types[name];
+            } else {
+                new_schema[name] = get_column_type(type.value);
+            }
+        }
+
+        expression_schema.delete();
+        columns.delete();
+        types.delete();
+
+        return new_schema;
+    };
+
     /**
      * Given a computed function name, return an array of strings containing
      * the expected input column types for the computed function.
@@ -1440,10 +1485,62 @@ export default function(Module) {
         config.filter = config.filter || [];
         config.sort = config.sort || [];
         config.computed_columns = config.computed_columns || [];
+        config.expressions = config.expressions || [];
+
+        const table_schema = this.schema();
+
+        /**
+         * Transform an expression string into a vector that internally provides
+         * the engine with more metadata in order to efficiently compute the
+         * expression:
+         *
+         * v[0]: the expression string as typed by the user
+         * v[1]: the expression string with $'column' replaced with col0, col1,
+         *  etc., which allows for faster lookup of column values.
+         * v[2]: a map of column keys (col0, col1) to actual column names,
+         *  which will be used in the engine to look up column values.
+         */
+        if (config.expressions.length > 0) {
+            let validated_expressions = [];
+
+            for (let expression_string of config.expressions) {
+                if (expression_string.includes("$''")) {
+                    throw new Error("Expression cannot reference empty column $''!");
+                }
+
+                // Map of column names to column IDs, so that we generate
+                // column IDs correctly without collision.
+                let cname_map = {};
+
+                // Map of column IDs to column names, so the engine can look
+                // up the right column internally without more transforms.
+                let column_id_map = {};
+                let running_cidx = 0;
+
+                // TODO: probably validate columns here as well? although
+                // if the front-end validates through get_expression_schema
+                // then we probably can just take the input as is.
+                let parsed_expression_string = expression_string.replace(/\$'(.*?[^\\])'/g, (_, cname) => {
+                    if (cname_map[cname] === undefined) {
+                        let column_id = `COLUMN${running_cidx}`;
+                        cname_map[cname] = column_id;
+                        column_id_map[column_id] = cname;
+                    }
+
+                    running_cidx++;
+                    return cname_map[cname];
+                });
+
+                validated_expressions.push([expression_string, parsed_expression_string, column_id_map]);
+            }
+
+            config.expressions = validated_expressions;
+        }
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
             config.columns = this.columns();
+
             if (config.computed_columns.length > 0) {
                 for (let col of config.computed_columns) {
                     config.columns.push(col.column);
@@ -1454,7 +1551,6 @@ export default function(Module) {
         // convert date/datetime filters to Date() objects, so they are parsed
         // as local time
         if (config.filter.length > 0) {
-            const table_schema = this.schema();
             for (let filter of config.filter) {
                 const dtype = table_schema[filter[0]];
                 const is_compare = filter[1] !== perspective.FILTER_OPERATORS.isNull && filter[1] !== perspective.FILTER_OPERATORS.isNotNull;

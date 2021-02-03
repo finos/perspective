@@ -1485,6 +1485,37 @@ namespace binding {
             }
         }
 
+        auto js_expressions = config.call<std::vector<std::vector<t_val>>>("get_expressions");
+        std::vector<t_computed_expression> expressions;
+        expressions.reserve(js_expressions.size());
+
+        for (const std::vector<t_val>& expr : js_expressions) {
+            // not a public API, so we are sure the correct elements
+            // are present in the vector.
+            std::string expression_string = expr[0].as<std::string>();
+            std::string parsed_expression_string = expr[1].as<std::string>();
+            std::vector<std::pair<std::string, std::string>> column_ids;
+
+            // Read the Javascript map of column IDs to column names, and
+            // convert them into string pairs. This guarantees iteration
+            // order at the cost of constant time access (which we don't use).
+            t_val j_column_id_keys = t_val::global("Object").call<t_val>("keys", expr[2]);
+            auto column_id_keys = vecFromArray<t_val, std::string>(j_column_id_keys);
+            column_ids.resize(column_id_keys.size());
+
+            for (t_uindex cidx = 0; cidx < column_id_keys.size(); ++cidx) {
+                const std::string& column_id = column_id_keys[cidx];
+                column_ids[cidx] = std::pair<std::string, std::string>(column_id, expr[2][column_id].as<std::string>());
+            }
+
+            // If the expression cannot be parsed, it will abort() here.
+            t_computed_expression expression = t_computed_expression_parser::precompute(
+                expression_string, parsed_expression_string, column_ids, schema);
+
+            expressions.push_back(expression);
+            schema->add_column(expression_string, expression.get_dtype());
+        }
+
         // create the `t_view_config`
         auto view_config = std::make_shared<t_view_config>(
             row_pivots,
@@ -1494,6 +1525,7 @@ namespace binding {
             filter,
             sort,
             computed_columns,
+            expressions,
             filter_op,
             column_only);
 
@@ -1538,8 +1570,9 @@ namespace binding {
         auto filter_op = view_config->get_filter_op();
         auto fterm = view_config->get_fterm();
         auto computed_columns = view_config->get_computed_columns();
+        auto expressions = view_config->get_expressions();
 
-        auto cfg = t_config(columns, fterm, filter_op, computed_columns);
+        auto cfg = t_config(columns, fterm, filter_op, computed_columns, expressions);
         auto ctx_unit = std::make_shared<t_ctxunit>(*(schema.get()), cfg);
         ctx_unit->init();
 
@@ -1564,8 +1597,9 @@ namespace binding {
         auto fterm = view_config->get_fterm();
         auto sortspec = view_config->get_sortspec();
         auto computed_columns = view_config->get_computed_columns();
+        auto expressions = view_config->get_expressions();
 
-        auto cfg = t_config(columns, fterm, filter_op, computed_columns);
+        auto cfg = t_config(columns, fterm, filter_op, computed_columns, expressions);
         auto ctx0 = std::make_shared<t_ctx0>(*(schema.get()), cfg);
         ctx0->init();
         ctx0->sort_by(sortspec);
@@ -1589,9 +1623,10 @@ namespace binding {
         auto sortspec = view_config->get_sortspec();
         auto row_pivot_depth = view_config->get_row_pivot_depth();
         auto computed_columns = view_config->get_computed_columns();
+        auto expressions = view_config->get_expressions();
 
         auto cfg = t_config(
-            row_pivots, aggspecs, fterm, filter_op, computed_columns);
+            row_pivots, aggspecs, fterm, filter_op, computed_columns, expressions);
         auto ctx1 = std::make_shared<t_ctx1>(*(schema.get()), cfg);
 
         ctx1->init();
@@ -1626,11 +1661,12 @@ namespace binding {
         auto row_pivot_depth = view_config->get_row_pivot_depth();
         auto column_pivot_depth = view_config->get_column_pivot_depth();
         auto computed_columns = view_config->get_computed_columns();
+        auto expressions = view_config->get_expressions();
 
         t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
         auto cfg = t_config(
-            row_pivots, column_pivots, aggspecs, total, fterm, filter_op, computed_columns, column_only);
+            row_pivots, column_pivots, aggspecs, total, fterm, filter_op, computed_columns, expressions, column_only);
         auto ctx2 = std::make_shared<t_ctx2>(*(schema.get()), cfg);
 
         ctx2->init();
@@ -1701,6 +1737,27 @@ namespace binding {
         return computed_schema;
     }
 
+    t_schema
+    get_table_expression_schema(
+        std::shared_ptr<Table> table,
+        const std::vector<std::string>& j_expressions
+    ) {
+        t_schema expression_schema;
+        // std::shared_ptr<t_schema> table_schema = std::make_shared<t_schema>(table->get_schema());
+
+        // for (const auto& expression : j_expressions) {
+        //     t_dtype dtype = t_computed_expression_parser::get_expression_dtype(expression, table_schema);
+        //     if (dtype == DTYPE_NONE) {
+        //         std::cout << "[get_table_expression_schema] " << expression << " resolves to a column of invalid type." << std::endl;
+        //         continue;
+        //     }
+
+        //     expression_schema.add_column(expression, dtype);
+        // }
+
+        return expression_schema;
+    }
+
     std::vector<t_dtype>
     get_computation_input_types(const std::string& computed_function_name) {
         t_computed_function_name function = str_to_computed_function_name(computed_function_name);
@@ -1761,6 +1818,7 @@ int
 main(int argc, char** argv) {
 // seed the computations vector
 t_computed_column::make_computations();
+t_computed_expression_parser::init();
 
 // clang-format off
 EM_ASM({
@@ -1815,7 +1873,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * View
      */
     // Bind a View for each context type
-
     class_<View<t_ctxunit>>("View_ctxunit")
         .constructor<
             std::shared_ptr<Table>,
@@ -1948,6 +2005,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
             const std::vector<t_computed_column_definition>&,
+            const std::vector<t_computed_expression>&,
             const std::string,
             bool>()
         .smart_ptr<std::shared_ptr<t_view_config>>("shared_ptr<t_view_config>")
@@ -2090,7 +2148,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .field("rows_changed", &t_stepdelta::rows_changed)
         .field("columns_changed", &t_stepdelta::columns_changed)
         .field("cells", &t_stepdelta::cells);
-
 
     /******************************************************************************
      *
@@ -2239,6 +2296,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_to_val", &scalar_to_val);
     function("get_computed_functions", &get_computed_functions);
     function("get_table_computed_schema", &get_table_computed_schema<t_val>);
+    function("get_table_expression_schema", &get_table_expression_schema);
     function("get_computation_input_types", &get_computation_input_types);
     function("is_valid_datetime", &is_valid_datetime);
 }

@@ -73,6 +73,9 @@ function (psp_build_dep name cmake_file)
 			EXCLUDE_FROM_ALL)
 
 		include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/)
+	elseif(${name} STREQUAL exprtk)
+		# no cmakelists - just include the header
+		include_directories(${CMAKE_BINARY_DIR}/${name}-src)
 	else()
 		add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
 			${CMAKE_BINARY_DIR}/${name}-build
@@ -252,9 +255,10 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
-			-flto \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
+
+		# TODO: -flto
 	endif()
 
 	set(ASYNC_MODE_FLAGS "")
@@ -445,6 +449,8 @@ else()
 	include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
+# Build exprtk for computed expression parsing
+psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 #####################
 
 set(CMAKE_C_FLAGS " \
@@ -479,6 +485,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
 	${PSP_CPP_SRC}/src/cpp/computed.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_column_map.cpp
+	${PSP_CPP_SRC}/src/cpp/computed_expression.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_function.cpp
 	${PSP_CPP_SRC}/src/cpp/config.cpp
 	${PSP_CPP_SRC}/src/cpp/context_base.cpp

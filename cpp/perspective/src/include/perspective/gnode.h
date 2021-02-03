@@ -22,6 +22,7 @@
 #include <perspective/process_state.h>
 #include <perspective/computed.h>
 #include <perspective/computed_column_map.h>
+#include <perspective/computed_expression.h>
 #include <perspective/computed_function.h>
 #include <tsl/ordered_map.h>
 #ifdef PSP_ENABLE_PYTHON
@@ -131,7 +132,23 @@ public:
      */
     void remove_input_port(t_uindex port_id);
 
+    /**
+     * @brief Given a new context, register it with the gnode, compute and
+     * add its computed expression columns, and add its expressions to the
+     * `m_expression_map` managed by the gnode.
+     * 
+     * @param name 
+     * @param type 
+     * @param ptr 
+     */
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
+
+    /**
+     * @brief Remove a context by name from the gnode, and remove its
+     * computed expression columns from `m_expression_map`.
+     * 
+     * @param name 
+     */
     void _unregister_context(const std::string& name);
 
     const t_data_table* get_table() const;
@@ -285,6 +302,33 @@ protected:
      */
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
+    
+    /******************************************************************************
+     *
+     * Computed Column Operations
+     */
+    void _compute_expressions(
+        std::vector<std::shared_ptr<t_data_table>> tables);
+
+    void _recompute_expressions(
+        std::shared_ptr<t_data_table> tbl,
+        std::shared_ptr<t_data_table> flattened,
+        const std::vector<t_rlookup>& changed_rows);
+
+    /**
+     * @brief Add each expression to `m_expression_map` if it does not
+     * already exist.
+     * 
+     * @param expressions 
+     */
+    void _register_expressions(const std::vector<t_computed_expression>& expressions);
+
+    /**
+     * @brief Remove expressions from the `m_expression_map`.
+     * 
+     * @param expressions 
+     */
+    void _unregister_expressions(const std::vector<t_computed_expression>& expressions);
 
     /**
      * @brief For all valid computed columns registered with the gnode,
@@ -378,6 +422,9 @@ private:
 
     t_computed_column_map m_computed_column_map;
 
+    // track all expressions on this gnode
+    tsl::ordered_map<std::string, t_computed_expression> m_expression_map;
+
     bool m_init;
     t_uindex m_id;
 
@@ -443,7 +490,6 @@ t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_
     const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
     const t_data_table& existed) {
     auto ctx_config = ctx->get_config();
-    auto computed_columns = ctx_config.get_computed_columns();
 
     ctx->step_begin();
     // Flattened has the computed columns at this point, as it has

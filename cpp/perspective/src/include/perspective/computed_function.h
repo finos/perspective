@@ -15,9 +15,12 @@
 #include <perspective/raw_types.h>
 #include <perspective/scalar.h>
 #include <perspective/column.h>
+#include <perspective/data_table.h>
+#include <perspective/exprtk.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
 #include <date/date.h>
+#include <tsl/hopscotch_set.h>
 
 namespace perspective {
 
@@ -31,6 +34,49 @@ namespace perspective {
  * 
  */
 namespace computed_function {
+    
+/**
+ * @brief A custom exprtk function that reaches into a column and returns the
+ * value of the next row. Basically like an iterator but slow and bad, and this
+ * should be fully deleted with a better implementation of "get a value from
+ * a column". Unfortunately, because ExprTk UDFs don't allow vector return
+ * this seems like a logical first step.
+ * 
+ * @tparam T 
+ */
+template <typename T>
+struct col : public exprtk::igeneric_function<T> {
+    typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
+    typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
+    typedef typename t_generic_type::string_view t_string_view;
+
+    col(std::shared_ptr<t_data_table> data_table, const tsl::hopscotch_set<std::string>& input_columns);
+    col(std::shared_ptr<t_schema> schema);
+
+    ~col();
+
+    T next(const std::string& column_name);
+
+    T operator()(t_parameter_list parameters);
+
+    std::shared_ptr<t_schema> m_schema;
+    tsl::hopscotch_set<std::string> m_input_columns;
+    std::map<std::string, std::shared_ptr<t_column>> m_columns;
+    std::map<std::string, t_uindex> m_ridxs;
+};
+
+template <typename T>
+struct toupper : public exprtk::igeneric_function<T> {
+    typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
+    typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
+    typedef typename t_generic_type::string_view t_string_view;
+
+    toupper();
+
+    ~toupper();
+
+    T operator()(t_parameter_list parameters);
+};
 
 /**
  * @brief Generate headers for numeric computations with one operand.

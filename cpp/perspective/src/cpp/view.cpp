@@ -53,6 +53,7 @@ View<CTX_T>::View(
     m_filter = m_view_config->get_fterm();
     m_sort = m_view_config->get_sortspec();
     m_computed_columns = m_view_config->get_computed_columns();
+    m_expressions = m_view_config->get_expressions();
 
     // Add hidden columns used in sorts to the `m_hidden_sort` vector.
     if (m_sort.size() > 0) {
@@ -360,6 +361,15 @@ View<CTX_T>::computed_schema() const {
         }
     }
 
+    for (const auto& expr : m_expressions) {
+        std::string expression_string = expr.get_expression_string();
+        new_schema[expression_string] = dtype_to_str(expr.get_dtype());
+
+        if (m_row_pivots.size() > 0 && !is_column_only()) {
+            new_schema[expression_string] = _map_aggregate_types(expression_string, new_schema[expression_string]);
+        }
+    }
+
     return new_schema;
 }
 
@@ -385,6 +395,12 @@ View<t_ctx0>::computed_schema() const {
     for (const auto& c : m_computed_columns) {
         std::string name = std::get<0>(c);
         new_schema[name] = dtype_to_str(types[name]);
+    }
+
+    // TODO: remove the old computed API
+    for (const auto& expr : m_expressions) {
+        std::string expression_string = expr.get_expression_string();
+        new_schema[expression_string] = dtype_to_str(expr.get_dtype());
     }
 
     return new_schema;
@@ -819,6 +835,12 @@ template <typename CTX_T>
 std::vector<t_computed_column_definition>
 View<CTX_T>::get_computed_columns() const {
     return m_computed_columns;
+}
+
+template <typename CTX_T>
+std::vector<t_computed_expression>
+View<CTX_T>::get_expressions() const {
+    return m_expressions;
 }
 
 template <>

@@ -165,11 +165,11 @@ export class PerspectiveElement extends StateElement {
         this._clear_state();
         this._table = table;
 
-        if (!this._computed_expression_parser.is_initialized) {
-            // Use metadata from the `Table` to construct the expression parser
-            const computed_functions = await table.get_computed_functions();
-            this._computed_expression_parser.init(computed_functions);
-        }
+        // if (!this._computed_expression_parser.is_initialized) {
+        //     // Use metadata from the `Table` to construct the expression parser
+        //     const computed_functions = await table.get_computed_functions();
+        //     this._computed_expression_parser.init(computed_functions);
+        // }
 
         let [cols, schema] = await Promise.all([table.columns(), table.schema(true)]);
 
@@ -474,6 +474,8 @@ export class PerspectiveElement extends StateElement {
         // setAttribute callback.
         const computed_columns = this._get_view_parsed_computed_columns();
 
+        const expressions = this._get_view_expressions();
+
         const config = {
             filter: filters,
             row_pivots: row_pivots,
@@ -481,7 +483,8 @@ export class PerspectiveElement extends StateElement {
             aggregates: aggregates,
             columns: columns,
             sort: sort,
-            computed_columns: computed_columns
+            computed_columns: computed_columns,
+            expressions: expressions
         };
 
         if (this._task) {

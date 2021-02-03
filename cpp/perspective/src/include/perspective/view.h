@@ -97,6 +97,17 @@ public:
     std::map<std::string, std::string> computed_schema() const;
 
     /**
+     * @brief The expression schema of this View. An expression schema is an 
+     * std::map, the keys of which are the columns of this View, and the values 
+     * are their string type names. If this View is aggregated, these will be 
+     * the aggregated types; otherwise these types will be the same as the
+     * columns in the underlying Table.
+     *
+     * @return std::map<std::string, std::string>
+     */
+    std::map<std::string, std::string> expression_schema() const;
+
+    /**
      * @brief The column names of this View. If the View is aggregated, the
      * individual column names will be joined with a separator character
      * specified by the user, or defaulting to "|".
@@ -231,6 +242,7 @@ public:
     std::vector<t_fterm> get_filter() const;
     std::vector<t_sortspec> get_sort() const;
     std::vector<t_computed_column_definition> get_computed_columns() const;
+    std::vector<t_computed_expression> get_expressions() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
     t_dtype get_column_dtype(t_uindex idx) const;
@@ -273,6 +285,7 @@ private:
     std::vector<t_sortspec> m_sort;
     std::vector<std::string> m_hidden_sort;
     std::vector<t_computed_column_definition> m_computed_columns;
+    std::vector<t_computed_expression> m_expressions;
     bool m_column_only;
     t_uindex m_row_offset;
     t_uindex m_col_offset;

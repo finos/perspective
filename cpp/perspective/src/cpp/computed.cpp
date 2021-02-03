@@ -284,6 +284,7 @@ t_computed_column::apply_computation(
     const std::vector<std::shared_ptr<t_column>>& table_columns,
     std::shared_ptr<t_column> output_column,
     t_computation computation) {
+    auto start = std::chrono::high_resolution_clock::now(); 
     std::uint32_t end = table_columns[0]->size();
     auto arity = table_columns.size();
 
@@ -372,6 +373,9 @@ t_computed_column::apply_computation(
             }
         }
     }
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); 
+    std::cout << "computed: " << duration.count() << std::endl;
 }
 
 void

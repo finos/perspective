@@ -40,6 +40,7 @@ class ComputedExpressionWidget extends HTMLElement {
         // Implement the `reposition` method, and bind it to the autocomplete
         // instance instead of the widget instance.
         this._autocomplete.reposition = this._position_autocomplete.bind(this);
+        this._enable_save_button();
     }
 
     /**
@@ -99,75 +100,77 @@ class ComputedExpressionWidget extends HTMLElement {
      * @param {String} expression
      */
     render_expression(expression) {
-        // Call `tokenize()` and not `lex()`, as `lex` cleans whitespace
-        // tokens and we need whitespace tokens to render the expressions.
-        const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
+        return `<span class="psp-expression__">${expression}</span>`;
 
-        // Track a sorted array of integer offsets into the expression, and
-        // a map of offsets to tokens. This allows us to render errors (which
-        // aren't in the list of parsed tokens) inline with valid tokens.
-        let offsets = [];
-        let token_map = {};
+        // // Call `tokenize()` and not `lex()`, as `lex` cleans whitespace
+        // // tokens and we need whitespace tokens to render the expressions.
+        // const lex_result = this._computed_expression_parser._lexer.tokenize(expression);
 
-        for (const token of lex_result.tokens) {
-            token_map[token.startOffset] = token;
-            offsets.push(token.startOffset);
-        }
+        // // Track a sorted array of integer offsets into the expression, and
+        // // a map of offsets to tokens. This allows us to render errors (which
+        // // aren't in the list of parsed tokens) inline with valid tokens.
+        // let offsets = [];
+        // let token_map = {};
 
-        for (const error of lex_result.errors) {
-            token_map[error.offset] = error;
-            offsets.push(error.offset);
-        }
+        // for (const token of lex_result.tokens) {
+        //     token_map[token.startOffset] = token;
+        //     offsets.push(token.startOffset);
+        // }
 
-        offsets = offsets.sort((a, b) => a - b);
+        // for (const error of lex_result.errors) {
+        //     token_map[error.offset] = error;
+        //     offsets.push(error.offset);
+        // }
 
-        const output = [];
-        const names = this._get_view_all_column_names();
+        // offsets = offsets.sort((a, b) => a - b);
 
-        // track the last non-whitespace token
-        let last_token;
+        // const output = [];
+        // const names = this._get_view_all_column_names();
 
-        for (const offset of offsets) {
-            const token = token_map[offset];
+        // // track the last non-whitespace token
+        // let last_token;
 
-            // errors have `message` set, whereas valid tokens do not
-            const is_error = token.message;
+        // for (const offset of offsets) {
+        //     const token = token_map[offset];
 
-            let content = "";
-            let class_name = "fragment";
+        //     // errors have `message` set, whereas valid tokens do not
+        //     const is_error = token.message;
 
-            if (is_error) {
-                // grab the full text of the error
-                content = expression.slice(token.offset, token.offset + token.length);
-                class_name = "errored";
-            } else {
-                content = token.image;
+        //     let content = "";
+        //     let class_name = "fragment";
 
-                if (tokenMatcher(token, FunctionTokenType)) {
-                    class_name = "function";
-                } else if (tokenMatcher(token, OperatorTokenType)) {
-                    class_name = "operator";
-                } else if (tokenMatcher(token, ColumnName)) {
-                    const column_name = token.payload;
-                    const exists = names.includes(column_name);
-                    class_name = `column_name ${exists ? this._get_type(column_name) : ""}`;
+        //     if (is_error) {
+        //         // grab the full text of the error
+        //         content = expression.slice(token.offset, token.offset + token.length);
+        //         class_name = "errored";
+        //     } else {
+        //         content = token.image;
 
-                    // only mark as red if the column is not an alias AND does
-                    // not exist in the dataset.
-                    if ((!exists && !last_token) || (!exists && last_token && !tokenMatcher(last_token, As))) {
-                        class_name = "errored";
-                    }
-                }
+        //         if (tokenMatcher(token, FunctionTokenType)) {
+        //             class_name = "function";
+        //         } else if (tokenMatcher(token, OperatorTokenType)) {
+        //             class_name = "operator";
+        //         } else if (tokenMatcher(token, ColumnName)) {
+        //             const column_name = token.payload;
+        //             const exists = names.includes(column_name);
+        //             class_name = `column_name ${exists ? this._get_type(column_name) : ""}`;
 
-                if (!tokenMatcher(token, Whitespace)) {
-                    last_token = token;
-                }
-            }
+        //             // only mark as red if the column is not an alias AND does
+        //             // not exist in the dataset.
+        //             if ((!exists && !last_token) || (!exists && last_token && !tokenMatcher(last_token, As))) {
+        //                 class_name = "errored";
+        //             }
+        //         }
 
-            output.push(`<span class="psp-expression__${class_name}">${content}</span>`);
-        }
+        //         if (!tokenMatcher(token, Whitespace)) {
+        //             last_token = token;
+        //         }
+        //     }
 
-        return output.join("");
+        //     output.push(`<span class="psp-expression__${class_name}">${content}</span>`);
+        // }
+
+        // return output.join("");
     }
 
     /**
@@ -218,153 +221,154 @@ class ComputedExpressionWidget extends HTMLElement {
     async _validate_expression(ev) {
         this._autocomplete.clear();
         const expression = ev.detail.text;
+        this._enable_save_button();
 
         if (expression.length === 0) {
             this._clear_error();
             return;
         }
 
-        try {
-            // Use this just for validation. On anything short of a massive
-            // expression, this should have no performance impact as we
-            // share an instance of the parser throughout the viewer.
-            this._parsed_expression = this._computed_expression_parser.parse(expression);
-        } catch (e) {
-            // Show autocomplete OR error, but not both
-            this._clear_error();
-            this._disable_save_button();
+        // try {
+        //     // Use this just for validation. On anything short of a massive
+        //     // expression, this should have no performance impact as we
+        //     // share an instance of the parser throughout the viewer.
+        //     this._parsed_expression = this._computed_expression_parser.parse(expression);
+        // } catch (e) {
+        //     // Show autocomplete OR error, but not both
+        //     this._clear_error();
+        //     this._disable_save_button();
 
-            // Generate a list of tokens from the expression, cleaning out
-            // whitespace tokens and without throwing any errors.
-            const lex_result = this._computed_expression_parser.lex(expression);
+        //     // Generate a list of tokens from the expression, cleaning out
+        //     // whitespace tokens and without throwing any errors.
+        //     const lex_result = this._computed_expression_parser.lex(expression);
 
-            // Check if the expression has a fragment of a column name,
-            // i.e. if it's been opened with a quote but not closed
-            const name_fragments = expression.match(/(["'])[\s\w()]*?$/);
-            const has_name_fragments = name_fragments && name_fragments.length > 0 && !/['"]\s/.test(name_fragments[0]);
+        //     // Check if the expression has a fragment of a column name,
+        //     // i.e. if it's been opened with a quote but not closed
+        //     const name_fragments = expression.match(/(["'])[\s\w()]*?$/);
+        //     const has_name_fragments = name_fragments && name_fragments.length > 0 && !/['"]\s/.test(name_fragments[0]);
 
-            // Get the last non-whitespace token from the lexer result
-            const last_token = this._computed_expression_parser.get_last_token(lex_result);
-            let show_column_names = has_name_fragments;
+        //     // Get the last non-whitespace token from the lexer result
+        //     const last_token = this._computed_expression_parser.get_last_token(lex_result);
+        //     let show_column_names = has_name_fragments;
 
-            if (last_token) {
-                // Check if the last token is a column name - if so, don't show
-                // autocomplete as we don't want to show autocomplete after a
-                // completed column name.
-                const is_column_name = tokenMatcher(last_token, ColumnName);
+        //     if (last_token) {
+        //         // Check if the last token is a column name - if so, don't show
+        //         // autocomplete as we don't want to show autocomplete after a
+        //         // completed column name.
+        //         const is_column_name = tokenMatcher(last_token, ColumnName);
 
-                // Don't show if last token is a parenthesis, as that indicates
-                // a closed logical block.
-                const is_paren = tokenMatcher(last_token, RightParen);
+        //         // Don't show if last token is a parenthesis, as that indicates
+        //         // a closed logical block.
+        //         const is_paren = tokenMatcher(last_token, RightParen);
 
-                // And not if the last token is `as/AS`, as that indicates a
-                // custom column name supplied by the user.
-                const is_alias = tokenMatcher(last_token, As);
+        //         // And not if the last token is `as/AS`, as that indicates a
+        //         // custom column name supplied by the user.
+        //         const is_alias = tokenMatcher(last_token, As);
 
-                // If the last token is an operator, force autocomplete to show.
-                const is_operator = tokenMatcher(last_token, OperatorTokenType);
+        //         // If the last token is an operator, force autocomplete to show.
+        //         const is_operator = tokenMatcher(last_token, OperatorTokenType);
 
-                // Show column names if the last token is an operator,
-                // OR if the last input is a column name fragment and the
-                // last token is not a column name, a paren, or an alias.
-                show_column_names = is_operator || (show_column_names && !is_column_name && !is_paren && !is_alias);
-            }
+        //         // Show column names if the last token is an operator,
+        //         // OR if the last input is a column name fragment and the
+        //         // last token is not a column name, a paren, or an alias.
+        //         show_column_names = is_operator || (show_column_names && !is_column_name && !is_paren && !is_alias);
+        //     }
 
-            // Get autocomplete suggestions from Chevrotain
-            let suggestions = [];
+        //     // Get autocomplete suggestions from Chevrotain
+        //     let suggestions = [];
 
-            // Filter down those suggestions by an input type, if possible
-            let input_types, match_types;
+        //     // Filter down those suggestions by an input type, if possible
+        //     let input_types, match_types;
 
-            // Go to the last function or operator token present in the
-            // entire expression, and use it to calculate input types.
-            const last_function_or_operator = this._computed_expression_parser.get_last_token_with_types([FunctionTokenType, OperatorTokenType], lex_result);
+        //     // Go to the last function or operator token present in the
+        //     // entire expression, and use it to calculate input types.
+        //     const last_function_or_operator = this._computed_expression_parser.get_last_token_with_types([FunctionTokenType, OperatorTokenType], lex_result);
 
-            if (last_function_or_operator) {
-                input_types = last_function_or_operator.tokenType.input_types;
-                match_types = true;
-            } else if (last_token && tokenMatcher(last_token, ColumnName)) {
-                // get functions and operators that take the column type
-                // as input, but don't check whether return types match
-                input_types = [this._get_type(last_token.payload)];
-                match_types = false;
-            }
+        //     if (last_function_or_operator) {
+        //         input_types = last_function_or_operator.tokenType.input_types;
+        //         match_types = true;
+        //     } else if (last_token && tokenMatcher(last_token, ColumnName)) {
+        //         // get functions and operators that take the column type
+        //         // as input, but don't check whether return types match
+        //         input_types = [this._get_type(last_token.payload)];
+        //         match_types = false;
+        //     }
 
-            suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types, match_types);
+        //     suggestions = this._computed_expression_parser.get_autocomplete_suggestions(expression, lex_result, input_types, match_types);
 
-            if (show_column_names) {
-                let column_names;
+        //     if (show_column_names) {
+        //         let column_names;
 
-                if (last_function_or_operator) {
-                    // create a list of function/operator suggestions followed
-                    // by column names of the correct input type.
-                    column_names = this._get_view_column_names_by_types(input_types);
-                } else {
-                    // Show all column names
-                    column_names = this._get_view_all_column_names();
-                }
+        //         if (last_function_or_operator) {
+        //             // create a list of function/operator suggestions followed
+        //             // by column names of the correct input type.
+        //             column_names = this._get_view_column_names_by_types(input_types);
+        //         } else {
+        //             // Show all column names
+        //             column_names = this._get_view_all_column_names();
+        //         }
 
-                // Convert list of names into objects with `label` and `value`
-                let column_name_suggestions = this._make_column_name_suggestions(column_names);
+        //         // Convert list of names into objects with `label` and `value`
+        //         let column_name_suggestions = this._make_column_name_suggestions(column_names);
 
-                // Filter down by `startsWith` and `contains`, putting the
-                // more exact matches first.
-                if (has_name_fragments) {
-                    const fragment = name_fragments[0].substring(1);
-                    const exact_matches = [];
-                    const fuzzy_matches = [];
+        //         // Filter down by `startsWith` and `contains`, putting the
+        //         // more exact matches first.
+        //         if (has_name_fragments) {
+        //             const fragment = name_fragments[0].substring(1);
+        //             const exact_matches = [];
+        //             const fuzzy_matches = [];
 
-                    for (const suggestion of column_name_suggestions) {
-                        const column_name = suggestion.label.toLowerCase();
-                        const partial = fragment.toLowerCase();
+        //             for (const suggestion of column_name_suggestions) {
+        //                 const column_name = suggestion.label.toLowerCase();
+        //                 const partial = fragment.toLowerCase();
 
-                        if (column_name.startsWith(partial)) {
-                            exact_matches.push(suggestion);
-                        } else if (column_name.includes(partial)) {
-                            fuzzy_matches.push(suggestion);
-                        }
-                    }
+        //                 if (column_name.startsWith(partial)) {
+        //                     exact_matches.push(suggestion);
+        //                 } else if (column_name.includes(partial)) {
+        //                     fuzzy_matches.push(suggestion);
+        //                 }
+        //             }
 
-                    column_name_suggestions = exact_matches.concat(fuzzy_matches);
-                }
+        //             column_name_suggestions = exact_matches.concat(fuzzy_matches);
+        //         }
 
-                if (last_function_or_operator) {
-                    suggestions = suggestions.concat(column_name_suggestions);
-                } else {
-                    suggestions = column_name_suggestions;
-                }
+        //         if (last_function_or_operator) {
+        //             suggestions = suggestions.concat(column_name_suggestions);
+        //         } else {
+        //             suggestions = column_name_suggestions;
+        //         }
 
-                // Render column names inside autocomplete
-                const markup = this.make_autocomplete_markup(suggestions);
-                this._autocomplete.render(markup);
-                return;
-            } else {
-                if (suggestions.length > 0) {
-                    // Show autocomplete and not error box
-                    const markup = this.make_autocomplete_markup(suggestions);
-                    this._autocomplete.render(markup);
-                    return;
-                } else if (last_token && tokenMatcher(last_token, As)) {
-                    // don't show error if last token is alias
-                    return;
-                } else {
-                    // Expression is syntactically valid but unparsable
-                    const message = e.message ? e.message : JSON.stringify(e);
-                    this._set_error(message, this._error);
-                    return;
-                }
-            }
-        }
+        //         // Render column names inside autocomplete
+        //         const markup = this.make_autocomplete_markup(suggestions);
+        //         this._autocomplete.render(markup);
+        //         return;
+        //     } else {
+        //         if (suggestions.length > 0) {
+        //             // Show autocomplete and not error box
+        //             const markup = this.make_autocomplete_markup(suggestions);
+        //             this._autocomplete.render(markup);
+        //             return;
+        //         } else if (last_token && tokenMatcher(last_token, As)) {
+        //             // don't show error if last token is alias
+        //             return;
+        //         } else {
+        //             // Expression is syntactically valid but unparsable
+        //             const message = e.message ? e.message : JSON.stringify(e);
+        //             this._set_error(message, this._error);
+        //             return;
+        //         }
+        //     }
+        // }
 
-        // Take the parsed expression and type check it on the viewer,
-        // which will call `_type_check_expression()` with a computed_schema.
-        const event = new CustomEvent("perspective-computed-expression-type-check", {
-            detail: {
-                parsed_expression: this._parsed_expression
-            }
-        });
+        // // Take the parsed expression and type check it on the viewer,
+        // // which will call `_type_check_expression()` with a computed_schema.
+        // const event = new CustomEvent("perspective-computed-expression-type-check", {
+        //     detail: {
+        //         parsed_expression: this._parsed_expression
+        //     }
+        // });
 
-        this.dispatchEvent(event);
+        // this.dispatchEvent(event);
 
         return;
     }
