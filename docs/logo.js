@@ -27,9 +27,9 @@ class PerspectiveLogo extends HTMLElement {
         }
         let content = `
 :host .inner {
-    line-height: initial;
-    margin-bottom: -0.28em;
-    margin-top: -0.35em;
+    line-height: 0.67em;
+    height: 0.71em;
+    margin-right: -0.05em
 }
 
 :host .outer {
@@ -41,16 +41,15 @@ class PerspectiveLogo extends HTMLElement {
     position: relative;
     ${x}color: rgb(249, 249, 249);
     ${y}color: #242526;
-    font-family: "Source Code Pro";
+    font-family: "Orbitron";
     font-weight: bold;
-    font-size: 2em;
+    font-size: 1.2em;
     padding: 24px;
-    letter-spacing: -0.166em;
 }
 
 :host span {
-    padding-left: 0.05em;
-    margin-left: -0.05em;
+    padding-left: 0.2em;
+    margin-left: -0.2em;
     ${x}color: #242526;
     ${y}color: rgb(249, 249, 249);
 }`;

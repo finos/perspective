@@ -10,7 +10,9 @@
         "src/**/*",
         "index.js"
     ],
-    "scripts": {},
+    "scripts": {
+        "build": "echo 'No build'"
+    },
     "jest": {},
     "repository": {
         "type": "git",

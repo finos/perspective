@@ -10,9 +10,9 @@
 const {execute} = require("./script_utils.js");
 
 try {
-    const scope = process.env.PACKAGE && process.env.PACKAGE !== "" ? `{${process.env.PACKAGE}}` : "*";
+    let scope = process.env.PACKAGE && process.env.PACKAGE !== "" ? `${process.env.PACKAGE}` : "*";
 
-    execute`lerna run build ${scope !== "*" ? "--stream" : "--loglevel silent"} --scope="@finos/${scope}"`;
+    execute`lerna exec --scope="@finos/${scope}" -- yarn build`;
 } catch (e) {
     console.log(e.message);
     process.exit(1);

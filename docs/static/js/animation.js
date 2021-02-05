@@ -138,7 +138,7 @@ window.addEventListener("WebComponentsReady", function() {
         data.push(newRow());
     }
     elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
-    var worker = perspective.worker();
+    var worker = window.perspective.worker();
     var tbl = worker.table(data, {index: "id"});
     elem.load(tbl);
     elem._toggle_config();
