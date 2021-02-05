@@ -44,6 +44,7 @@
 }
 
 .psp-text-field__input + label {
+    width: 0px;
     height: var(--column--height, auto);
     line-height: 17px;
     box-sizing: border-box;
@@ -134,12 +135,11 @@
         #inactive_columns {
             display: flex;
             flex-direction: column;
-            flex: 0 1 auto;
             width: 100%;
         }
 
-        #inactive_columns {
-            flex: 1 1 auto;
+        #active_columns {
+            flex: 0 1 50%;
         }
 
         #sub_columns {
@@ -196,10 +196,7 @@
             }
 
             perspective-row:last-child {
-                --row_draggable-border-width: var(
-                    --row_draggable-border-last-child-width,
-                    0 0 1px 0
-                );
+                --row_draggable-border-color: var(--row_draggable-last-child-border-color, var(--inactive--color, #ccc));
             }
 
             perspective-row[drop-target] {
@@ -210,9 +207,7 @@
                 --row_draggable_children-opacity: 0;
                 pointer-events: none;
             }
-        }
-
-        #active_columns {
+       
             &.one_lock,
             &.two_lock {
                 perspective-row:first-child {
@@ -227,13 +222,17 @@
                     --is_visible--cursor: normal;
                 }
             }
-        }
-
-        #active_columns {
+        
             perspective-row:only-child {
                 --active--color: #ccc;
                 --is_visible--cursor: normal;
             }
+        }
+
+        #inactive_columns perspective-row:not(.active) {
+            --row_draggable-border-width: 0 0 1px 0;
+            margin-bottom: 2px;
+            --row_draggable-border-color: transparent;
         }
 
         #active_columns,
@@ -259,7 +258,6 @@
         position: relative;
         overflow-y: hidden;
         width: 100%;
-        padding-top: 20px;
         margin: var(--column-container--margin, 8px);
         min-height: 36px;
 

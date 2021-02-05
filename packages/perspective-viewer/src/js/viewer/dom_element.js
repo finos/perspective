@@ -159,7 +159,6 @@ export class DomElement extends PerspectiveElement {
 
         row.addEventListener("row-drag", () => {
             this.classList.add("dragging");
-            this._active_columns.style.overflow = "hidden";
             this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute("name") === name);
             if (this._original_index !== -1) {
                 this._drop_target_hover = this._active_columns.children[this._original_index];
@@ -169,7 +168,6 @@ export class DomElement extends PerspectiveElement {
             }
         });
         row.addEventListener("row-dragend", () => {
-            this._active_columns.style.overflow = "auto";
             this.classList.remove("dragging");
         });
 
@@ -229,8 +227,8 @@ export class DomElement extends PerspectiveElement {
             this._update_column_view(attr, true);
         } else {
             // Remove collapse so that new inactive columns show up
-            if (added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
-                this._inactive_columns.parentElement.classList.remove("collapse");
+            if (added_count > 0 && this._columns_container.classList.contains("collapse")) {
+                this._columns_container.classList.remove("collapse");
             }
         }
     }
@@ -295,9 +293,9 @@ export class DomElement extends PerspectiveElement {
         const lis = this._get_view_inactive_columns();
 
         if (pop_cols.length === lis.length) {
-            this._inactive_columns.parentElement.classList.add("collapse");
+            this._columns_container.classList.add("collapse");
         } else {
-            this._inactive_columns.parentElement.classList.remove("collapse");
+            this._columns_container.classList.remove("collapse");
         }
     }
 
@@ -319,9 +317,9 @@ export class DomElement extends PerspectiveElement {
         const pop_cols = columns.filter(x => typeof x !== "undefined" && x !== null);
         const lis = this._get_view_inactive_columns();
         if (pop_cols.length === lis.length) {
-            this._inactive_columns.parentElement.classList.add("collapse");
+            this._columns_container.classList.add("collapse");
         } else {
-            this._inactive_columns.parentElement.classList.remove("collapse");
+            this._columns_container.classList.remove("collapse");
         }
         lis.forEach(x => {
             const index = pop_cols.indexOf(x.getAttribute("name"));
@@ -519,6 +517,7 @@ export class DomElement extends PerspectiveElement {
         this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
         this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
         this._resize_bar = this.shadowRoot.querySelector("#resize_bar");
+        this._columns_container = this.shadowRoot.querySelector("#columns_container");
     }
 
     // sets state, manipulates DOM
