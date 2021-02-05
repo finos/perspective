@@ -263,9 +263,9 @@ export class PerspectiveElement extends StateElement {
         }
 
         if (cols.length === shown.filter(x => cols.indexOf(x) > -1).length) {
-            this._inactive_columns.parentElement.classList.add("collapse");
+            this._columns_container.classList.add("collapse");
         } else {
-            this._inactive_columns.parentElement.classList.remove("collapse");
+            this._columns_container.classList.remove("collapse");
         }
 
         this._show_column_container();

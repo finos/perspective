@@ -2,4 +2,5 @@
 docs/* linguist-documentation
 python/perspective/notebooks/* linguist-documentation
 python/perspective/docs/* linguist-documentation
+results/*.json linguist-documentation
 *.js text eol=lf

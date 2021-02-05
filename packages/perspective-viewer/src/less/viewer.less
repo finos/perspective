@@ -81,7 +81,6 @@
         display: none;
     }
     .psp-icon {
-        color: #999;
         &:hover {
             cursor: pointer;
         }
@@ -100,10 +99,9 @@
     }
     .psp-title__columnName {
         display: flex;
-        margin-left: 34px;
+        margin-left: 24px;
         margin-top: 3px;
         font-size: 12px;
-        color: #666;
     }
     .side_panel-action:hover {
         cursor: pointer;
@@ -141,7 +139,7 @@
     #filters #psp_row {
         display: inline;
     }
-    ul {
+    .psp-text-field ul {
         min-height: 20px;
     }
     #active_columns perspective-row {
@@ -178,7 +176,6 @@
             opacity: var(--inactive-column--opacity, 1);
             transition: opacity 0.3s; // --row_draggable--transition: margin-left 0.5s;
             &.active {
-                --row_draggable--margin: 0px 0px 0px 10px;
                 opacity: 0;
                 height: 0 !important;
                 overflow: hidden;
@@ -188,20 +185,35 @@
     .columns_horizontal #sub_columns.collapse #side_panel__actions {
         margin-top: 0px;
     }
+    .columns_horizontal .collapse #sub_columns #side_panel__actions {
+        margin-top: 0px;
+    }
     #sub_columns {
-        min-height: 33.3%;
-        flex-shrink: 100000;
         display: flex;
         flex-direction: column;
         overflow-x: hidden;
         width: 100%;
+        flex: 0 1 auto;
+        min-height: 35px;
         &.collapse {
-            #inactive_columns {
-                display: none;
-            }
+            flex: 0 1 auto;
             flex-shrink: 0;
-            min-height: 64px;
+            min-height: 0px;
         }
+    }
+    #app.columns_horizontal #sub_columns {
+        flex: 0 1 50%;
+        #inactive_columns {
+            flex: 0 1 auto;
+        }
+    }
+    #app:not(.columns_horizontal) #columns_container:not(.collapse) #active_columns {
+        max-height: 60%;
+    }
+    #columns_container.collapse #sub_columns {
+        flex: 0 1 auto;
+        flex-shrink: 0;
+        min-height: 0px;
     }
     .column {
         display: flex;
