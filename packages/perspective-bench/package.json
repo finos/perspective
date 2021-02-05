@@ -20,6 +20,7 @@
         "url": "https://github.com/finos/perspective/packages/perspective-bench"
     },
     "scripts": {
+        "build": "echo 'No build'",
         "prebench": "mkdirp build",
         "bench": "node bench/versions.js"
     },

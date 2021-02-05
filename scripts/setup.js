@@ -18,6 +18,9 @@ const CONFIG = new Proxy(
         constructor() {
             this.config = [];
             this._values = require("dotenv").config({path: "./.perspectiverc"}).parsed || {};
+            if (this._values.PACKAGE && this._values.PACKAGE.startsWith("@")) {
+                this._values.PACKAGE = this._values.PACKAGE.slice(2, this._values.PACKAGE.length - 1).replace(/\|/g, ",");
+            }
         }
 
         add(new_config) {
@@ -137,6 +140,9 @@ async function focus_package() {
             ]
         }
     ]);
+    if (Array.isArray(new_config.PACKAGE) && new_config.PACKAGE.length > 0) {
+        new_config.PACKAGE = `@(${new_config.PACKAGE.join("|")})`;
+    }
     CONFIG.add(new_config);
     await javascript_options();
 }

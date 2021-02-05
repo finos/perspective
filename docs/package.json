@@ -6,6 +6,7 @@
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
         "start": "npm run build:arrow && npm run theme && docusaurus-start",
+        "build": "echo 'No build'",
         "build:logo": "webpack --config logo.config.js --color",
         "build:arrow": "cpx ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
         "docs": "npm run build:arrow && npm run build:logo && npm run theme && docusaurus-build",
