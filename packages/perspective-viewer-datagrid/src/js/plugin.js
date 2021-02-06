@@ -10,7 +10,7 @@
 import {registerPlugin} from "@finos/perspective-viewer/dist/esm/utils.js";
 
 import "regular-table";
-import {createModel, configureRegularTable, formatters} from "regular-table/dist/examples/perspective.js";
+import {createModel, configureRegularTable, formatters} from "./regular_table_handlers.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 
 import {configureRowSelectable, deselect} from "./row_selection.js";
@@ -32,8 +32,6 @@ function lock(body) {
         try {
             lock = new Promise(x => (resolve = x));
             await body.apply(this, args);
-        } catch (e) {
-            throw e;
         } finally {
             lock = undefined;
             resolve();
@@ -59,7 +57,7 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
     }
 
     try {
-        const draw = regular.draw({swap: true});
+        const draw = regular.draw({invalid_columns: true});
         if (!model._preserve_focus_state) {
             regular.scrollTop = 0;
             regular.scrollLeft = 0;
@@ -71,7 +69,9 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
 
         await draw;
     } catch (e) {
-        console.error(e);
+        if (e.message !== "View is not initialized") {
+            throw e;
+        }
     }
 });
 
@@ -122,16 +122,20 @@ class DatagridPlugin {
             model._num_rows = await model._view.num_rows();
             await datagrid.draw();
         } catch (e) {
-            return;
+            if (e.message !== "View is not initialized") {
+                throw e;
+            }
         }
     }
 
     static async create(div, view) {
-        const datagrid = get_or_create_datagrid(this, div);
         try {
+            const datagrid = get_or_create_datagrid(this, div);
             await datagridPlugin(datagrid, this, view);
         } catch (e) {
-            return;
+            if (e.message !== "View is not initialized") {
+                throw e;
+            }
         }
     }
 
@@ -141,7 +145,9 @@ class DatagridPlugin {
             try {
                 await datagrid.draw();
             } catch (e) {
-                return;
+                if (e.message !== "View is not initialized") {
+                    throw e;
+                }
             }
         }
     }

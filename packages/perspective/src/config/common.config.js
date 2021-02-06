@@ -8,6 +8,11 @@ function common({no_minify, inline} = {}) {
         plugins: plugins,
         module: {
             rules: [
+                // {
+                //     test: /\.js$/,
+                //     enforce: "pre",
+                //     use: ["source-map-loader"]
+                // },
                 {
                     test: /\.less$/,
                     exclude: /node_modules\/(?!regular-table)/,
