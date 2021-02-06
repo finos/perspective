@@ -196,6 +196,33 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("x == 1, rolling updates", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    columns: ["x"],
+                    filter: [["x", "==", 1]]
+                });
+                let json = await view.to_json();
+                expect(json).toEqual([{x: 1}]);
+
+                for (let i = 0; i < 5; i++) {
+                    table.update([{x: 1}]);
+                }
+
+                expect(await view.to_columns()).toEqual({
+                    x: [1, 1, 1, 1, 1, 1]
+                });
+
+                table.update([{x: 2}]);
+
+                expect(await view.to_columns()).toEqual({
+                    x: [1, 1, 1, 1, 1, 1]
+                });
+
+                view.delete();
+                table.delete();
+            });
+
             it("x == 5", async function() {
                 var table = perspective.table(data);
                 var view = table.view({

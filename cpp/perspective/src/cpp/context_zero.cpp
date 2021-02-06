@@ -131,6 +131,8 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
             add_delta_pkey(pkey);
         }
         m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
+
+        return;
     }
 
     // Context does not have filters applied
