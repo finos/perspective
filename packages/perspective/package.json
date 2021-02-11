@@ -5,8 +5,8 @@
     "main": "dist/cjs/perspective.node.js",
     "unpkg": "dist/umd/perspective.js",
     "jsdelivr": "dist/umd/perspective.js",
-    "browser": "dist/esm/perspective.parallel.js",
-    "module": "dist/esm/perspective.parallel.js",
+    "browser": "dist/umd/perspective.inline.js",
+    "module": "dist/umd/perspective.inline.js",
     "publishConfig": {
         "access": "public"
     },

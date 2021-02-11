@@ -42,6 +42,11 @@ function common({no_minify, inline} = {}) {
                     }
                 },
                 {
+                    test: /\.js$/,
+                    exclude: /node_modules\/(?!regular-table)/,
+                    loader: "source-map-loader"
+                },
+                {
                     test: /\.(arrow)$/,
                     type: "javascript/auto",
                     use: {

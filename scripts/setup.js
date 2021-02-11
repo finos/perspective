@@ -140,8 +140,12 @@ async function focus_package() {
             ]
         }
     ]);
-    if (Array.isArray(new_config.PACKAGE) && new_config.PACKAGE.length > 0) {
-        new_config.PACKAGE = `@(${new_config.PACKAGE.join("|")})`;
+    if (Array.isArray(new_config.PACKAGE)) {
+        if (new_config.PACKAGE.length > 0) {
+            new_config.PACKAGE = `@(${new_config.PACKAGE.join("|")})`;
+        } else {
+            new_config.PACKAGE = undefined;
+        }
     }
     CONFIG.add(new_config);
     await javascript_options();
