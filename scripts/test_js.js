@@ -8,10 +8,11 @@
  */
 
 const {bash, execute, getarg, docker} = require("./script_utils.js");
+const minimatch = require("minimatch");
 const fs = require("fs");
 
 const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
-const IS_PUPPETEER = !!getarg("--private-puppeteer");
+const IS_INSIDE_PUPPETEER = !!getarg("--private-puppeteer");
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
@@ -100,7 +101,7 @@ function get_regex() {
 }
 
 try {
-    if (!IS_PUPPETEER && !IS_LOCAL_PUPPETEER) {
+    if (!IS_INSIDE_PUPPETEER && !IS_LOCAL_PUPPETEER) {
         execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
         execute`yarn --silent clean --screenshots`;
@@ -114,18 +115,18 @@ try {
         }
         if (getarg("--quiet")) {
             // Run all tests with suppressed output.
-            console.log("-- Running test suite in quiet mode");
+            console.log("-- Running jest in quiet mode");
             execute(silent(jest_timezone()));
             execute(silent(jest_all()));
         } else if (process.env.PACKAGE) {
             // Run tests for a single package.
-            if (PACKAGE === "perspective") {
+            if (minimatch("perspective", PACKAGE)) {
                 execute(jest_timezone());
             }
             execute(jest_single());
         } else {
             // Run all tests with full output.
-            console.log("-- Running test suite in fast mode");
+            console.log("-- Running jest in fast mode");
             execute(jest_timezone());
             execute(jest_all());
         }
