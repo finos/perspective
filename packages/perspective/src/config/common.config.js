@@ -81,6 +81,9 @@ function common({no_minify, inline} = {}) {
                 crypto: false
             }
         },
+        experiments: {
+            syncWebAssembly: true
+        },
         devtool: "source-map",
         performance: {
             hints: false,

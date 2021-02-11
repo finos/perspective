@@ -12,6 +12,10 @@ import {PerspectiveJupyterWidget} from "../../../src/ts/widget";
 import {ManagerBase} from "@jupyter-widgets/base-manager";
 import {uuid} from "@jupyter-widgets/base";
 
+jest.mock("@finos/perspective-vieux/pkg/perspective_vieux_bg.wasm", () => {
+    return {set_panic_hook: () => {}};
+});
+
 jest.mock("../../../src/ts/widget");
 
 let numComms = 0;

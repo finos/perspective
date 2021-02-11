@@ -54,6 +54,9 @@ module.exports = {
             }
         ]
     },
+    experiments: {
+        syncWebAssembly: true
+    },
     output: {
         filename: "[name].js",
         libraryTarget: "umd",

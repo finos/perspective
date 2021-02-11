@@ -392,10 +392,7 @@
         font-weight: 300;
     }
 
-    #config_button,
-    #reset_button,
-    #download_button,
-    #copy_button {
+    #config_button {
         font-weight: normal;
         font-family: var(--button--font-family, Arial);
         color: var(--inactive--color, #999);
@@ -413,35 +410,10 @@
         content: var(--settings-button--content, "\1f527");
     }
 
-    #reset_button:before {
-        font-feature-settings: "liga";
-        content: var(--reset_button--before, "Reset");
-    }
-
     #close_button:before {
         font-family: var(--button--font-family, Arial);
         font-feature-settings: "liga";
         content: var(--close_button--before, "Close");
-    }
-
-    #download_button:before {
-        font-feature-settings: "liga";
-        content: var(--download_button--before, "Save");
-    }
-
-    #copy_button:before {
-        font-feature-settings: "liga";
-        content: var(--copy_button--before, "Copy");
-    }
-
-    #menubar {
-        display: none;
-        flex-direction: column;
-        padding-top: 55px;
-    }
-
-    #app.show_menu #menubar {
-        display: flex;
     }
 
     ul {

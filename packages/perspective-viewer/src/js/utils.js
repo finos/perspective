@@ -168,15 +168,6 @@ function _attribute(_default) {
     };
 }
 
-export function copy_to_clipboard(csv) {
-    let element = document.createElement("textarea");
-    document.body.appendChild(element);
-    element.value = csv;
-    element.select();
-    document.execCommand("copy");
-    document.body.removeChild(element);
-}
-
 /**
  * Just like `setTimeout` except it returns a promise which resolves after the
  * callback has (also resolved).

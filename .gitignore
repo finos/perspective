@@ -169,3 +169,10 @@ junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
+rust/perspective-view/target
+rust/perspective-view/pkg
+rust/perspective-view/target2
+rust/perspective-vieux/pkg
+
+rust/perspective-vieux/target
+rust/perspective-vieux/target2

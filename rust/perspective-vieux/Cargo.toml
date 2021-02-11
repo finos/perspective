@@ -1,0 +1,86 @@
+[package]
+name = "perspective_vieux"
+version = "0.6.2"
+authors = ["Andrew Stein <steinlink@gmail.com>"]
+edition = "2018"
+description = "A frontend for Perspective"
+repository = "https://github.com/finos/perspective"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/rust/lib.rs"
+
+[features]
+default = ["wee_alloc", "console_error_panic_hook"]
+
+[dependencies]
+# serde = { version = "1.0", features = ["derive"] }
+wasm-bindgen = { version = "0.2.63" } #, features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.20"
+js-intern = "0.3.1"
+yew = "0.17.3"
+typed-html = { git = "https://github.com/bodil/typed-html", rev = "4c13ecca" }
+num-format = "0.4.0"
+futures = "0.3.12"
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.6", optional = true }
+
+# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
+# compared to the default allocator's ~10K. It is slower than the default
+# allocator, however.
+#
+# Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
+wee_alloc = { version = "0.4.5", optional = true }
+
+[dependencies.web-sys]
+version = "0.3.46"
+features = [
+    # "Performance",
+    "Blob",
+    "Clipboard",
+    "CssStyleDeclaration", 
+    "CustomEvent",
+    "Document",
+    "Element",
+    # "DomTokenList",
+    "Event",
+    "EventTarget",
+    "EventListener",
+    # "DocumentFragment",
+    "HtmlCollection",
+    "HtmlElement",
+    "HtmlTextAreaElement",
+    "KeyboardEvent",
+    # "MouseEvent",
+    "MutationObserver",
+    "MutationObserverInit",
+    "MutationRecord",
+    "Navigator",
+    "Node",
+    "NodeList",
+    # "TouchEvent",
+    # "TouchList",
+    # "Touch",
+    # "WheelEvent",
+    "ShadowRoot",
+    "ShadowRootMode",
+    "ShadowRootInit",
+    "Url",
+    "Window"
+]
+
+
+[dependencies.js-sys]
+version = "0.3"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.13"
+
+[profile.release]
+opt-level = "z"
+lto = true

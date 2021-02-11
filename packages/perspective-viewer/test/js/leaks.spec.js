@@ -26,23 +26,21 @@ utils.with_server({}, () => {
                         viewer = await page.$("perspective-viewer");
                         await page.evaluate(async element => {
                             element.delete();
-                            document.innerHTML = "<perspective-viewer></perspective-viewer>";
+                            document.body.innerHTML = "<perspective-viewer></perspective-viewer>";
                             await document.getElementsByTagName("perspective-viewer")[0].load(window.__TABLE__);
                         }, viewer);
                         await page.waitForSelector("perspective-viewer:not([updating])");
                     }
                     await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(
-                        async element =>
-                            element.load(
-                                await window.__WORKER__.table(
-                                    window.__CSV__
-                                        .split("\n")
-                                        .slice(0, 10)
-                                        .join("\n")
-                                )
-                            ),
-                        viewer
+                    await page.evaluate(async () =>
+                        document.getElementsByTagName("perspective-viewer")[0].load(
+                            window.__WORKER__.table(
+                                window.__CSV__
+                                    .split("\n")
+                                    .slice(0, 10)
+                                    .join("\n")
+                            )
+                        )
                     );
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 },

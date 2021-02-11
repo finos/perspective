@@ -10,11 +10,6 @@
 <template id="perspective-viewer">
 
     <div id="app">
-        <div id="menubar">
-            <div id="copy_button" class="noselect button" title="Copy CSV"></div>
-            <div id="download_button" class="noselect button" title="Download CSV"></div>
-            <div id="reset_button" class="noselect button" title="Reset Viewer"></div>
-        </div>
         <div id='side_panel' class="column fixed noselect">
             <div id="vis_selector_container">
                 <select id="vis_selector">
@@ -25,7 +20,9 @@
                 <div id="sub_columns">
                     <ul id='inactive_columns'></ul>
                     <div id="side_panel__actions" style="visibility: hidden">
-                        <div id="add-computed-expression" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
+                        <div id="add-computed-expression" class="side_panel-action"><span
+                                class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New
+                                Column</span></div>
                     </div>
                 </div>
                 <perspective-computed-expression-widget></perspective-computed-expression-widget>
@@ -87,6 +84,8 @@
             </div>
         </div>
 
+        <perspective-statusbar></perspective-statusbar>
     </div>
+
 
 </template>

@@ -12,29 +12,16 @@ import {dragend, column_dragend, column_dragleave, column_dragover, column_drop,
 import {DomElement} from "./dom_element.js";
 
 export class ActionElement extends DomElement {
-    _show_context_menu(event) {
-        this.shadowRoot.querySelector("#app").classList.toggle("show_menu");
-        event.stopPropagation();
-        event.preventDefault();
-        return false;
-    }
-
-    _hide_context_menu() {
-        this.shadowRoot.querySelector("#app").classList.remove("show_menu");
-    }
-
     async _toggle_config(event) {
         if (!event || event.button !== 2) {
             this._show_config = !this._show_config;
-            this._hide_context_menu();
             const panel = this.shadowRoot.querySelector("#pivot_chart_container");
             if (!this._show_config) {
                 await this._pre_resize(
                     panel.clientWidth + this._side_panel.clientWidth,
                     panel.clientHeight + this._top_panel.clientHeight,
                     () => {
-                        this._side_panel.style.display = "none";
-                        this._top_panel.style.display = "none";
+                        this._app.classList.remove("settings-open");
                         this.removeAttribute("settings");
                     },
                     () => this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}))
@@ -45,8 +32,7 @@ export class ActionElement extends DomElement {
                         this.toggleAttribute("settings", true);
                     },
                     () => {
-                        this._side_panel.style.display = "flex";
-                        this._top_panel.style.display = "flex";
+                        this._app.classList.add("settings-open");
                         this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
                     }
                 );
@@ -355,15 +341,11 @@ export class ActionElement extends DomElement {
         this._computed_expression_widget.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
         this._computed_expression_widget.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
         this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
-        this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
-        this._reset_button.addEventListener("click", this.reset.bind(this));
-        this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
-        this._download_button.addEventListener("click", event => this.download(event.shiftKey));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._drop_target.addEventListener("dragover", dragover.bind(this));
         this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
         this._resize_bar.addEventListener("dblclick", this._reset_sidepanel.bind(this));
-
+        this._status_bar.addEventListener("perspective-statusbar-reset", this.reset.bind(this));
         this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
 
         this._plugin_information_action.addEventListener("click", () => {

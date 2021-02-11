@@ -15,6 +15,9 @@ module.exports = common({}, config => {
             library: "perspective-workspace",
             libraryTarget: "commonjs2",
             path: path.resolve(__dirname, "../dist/cjs")
+        },
+        experiments: {
+            syncWebAssembly: true
         }
     });
 });

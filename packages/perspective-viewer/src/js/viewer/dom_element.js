@@ -498,6 +498,7 @@ export class DomElement extends PerspectiveElement {
 
     // setup functions
     _register_ids() {
+        this._app = this.shadowRoot.querySelector("#app");
         this._aggregate_selector = this.shadowRoot.querySelector("#aggregate_selector");
         this._vis_selector = this.shadowRoot.querySelector("#vis_selector");
         this._filters = this.shadowRoot.querySelector("#filters");
@@ -512,9 +513,6 @@ export class DomElement extends PerspectiveElement {
         this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
         this._drop_target = this.shadowRoot.querySelector("#drop_target");
         this._config_button = this.shadowRoot.querySelector("#config_button");
-        this._reset_button = this.shadowRoot.querySelector("#reset_button");
-        this._download_button = this.shadowRoot.querySelector("#download_button");
-        this._copy_button = this.shadowRoot.querySelector("#copy_button");
         this._side_panel = this.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
@@ -524,6 +522,7 @@ export class DomElement extends PerspectiveElement {
         this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
         this._resize_bar = this.shadowRoot.querySelector("#resize_bar");
         this._columns_container = this.shadowRoot.querySelector("#columns_container");
+        this._status_bar = this.shadowRoot.querySelector("perspective-statusbar");
     }
 
     // sets state, manipulates DOM

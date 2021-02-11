@@ -28,9 +28,10 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
+        "build:internal": "npm-pack-here -t ../../rust/perspective-vieux -d dist/esm --updateRelativeNodeModulesDirectory=false",
         "build:webpack:umd": "webpack --color --config src/config/umd.config.js",
         "build:rollup:esm": "rollup --config src/config/rollup.config.js",
-        "build": "npm-run-all --silent build:rollup:esm build:webpack:umd",
+        "build": "npm-run-all --silent build:internal build:rollup:esm build:webpack:umd",
         "watch": "webpack --color --watch --config src/config/view.config.js",
         "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd",
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --color 2>&1",
@@ -67,6 +68,7 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.6.2",
+        "@finos/perspective-vieux": "^0.6.2",
         "jsverify": "^0.8.4"
     }
 }

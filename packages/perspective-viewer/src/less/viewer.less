@@ -9,6 +9,7 @@
 
 @import "./column_labels.less";
 @import "./variables.less";
+@import "./status_bar.less";
 
 :host:hover #config_button {
     opacity: 1;
@@ -109,6 +110,29 @@
     * {
         box-sizing: border-box;
         line-height: 1.42857143;
+    }
+    #app {
+        #side_panel {
+            display: none;
+        }
+        #top_panel {
+            display: none;
+        }
+        perspective-statusbar {
+            display: none;
+        }
+    }
+    #app.settings-open {
+        padding-bottom: 36px;
+        #side_panel {
+            display: flex;
+        }
+        #top_panel {
+            display: flex;
+        }
+        perspective-statusbar {
+            display: flex;
+        }
     }
     #app {
         display: flex;

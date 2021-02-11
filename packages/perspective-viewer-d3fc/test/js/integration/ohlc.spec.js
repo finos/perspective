@@ -21,6 +21,7 @@ utils.with_server({}, () => {
             test.capture("filter by a single instrument.", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Name", "==", "BARC"]]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(() => document.activeElement.blur());
             });
 
@@ -29,6 +30,7 @@ utils.with_server({}, () => {
                 await page.shadow_click("perspective-viewer", "#config_button");
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Name"]'), viewer);
                 await page.evaluate(element => element.setAttribute("filters", '[["Date", ">", "2019-01-01"]]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(() => document.activeElement.blur());
             });
         },
