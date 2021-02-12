@@ -132,14 +132,14 @@ function get_arrow(callback) {
     xhr.send(null);
 }
 
-window.addEventListener("WebComponentsReady", function() {
+window.addEventListener("WebComponentsReady", async function() {
     var data = [];
     for (var x = 0; x < 100; x++) {
         data.push(newRow());
     }
     elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
     var worker = window.perspective.worker();
-    var tbl = worker.table(data, {index: "id"});
+    var tbl = await worker.table(data, {index: "id"});
     elem.load(tbl);
     elem._toggle_config();
 
@@ -156,9 +156,9 @@ window.addEventListener("WebComponentsReady", function() {
 
     select("#grid");
 
-    get_arrow(function(arrow) {
+    get_arrow(async function(arrow) {
         const psp1 = document.querySelector("#demo1 perspective-viewer");
-        const tbl1 = worker.table(arrow.slice());
+        const tbl1 = await worker.table(arrow.slice());
         psp1.load(tbl1);
         psp1.restore({
             "row-pivots": ["Sub-Category"],
@@ -168,7 +168,7 @@ window.addEventListener("WebComponentsReady", function() {
         });
 
         const psp2 = document.querySelector("#get_started perspective-viewer");
-        const tbl2 = worker.table(arrow.slice());
+        const tbl2 = await worker.table(arrow.slice());
         psp2.load(tbl2);
         psp2.toggleConfig();
         psp2.restore({

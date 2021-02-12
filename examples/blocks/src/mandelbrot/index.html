@@ -307,8 +307,8 @@
             if (state.view) {
                 state.view.delete();
             }
-            state.table = worker.table(SCHEMA);
-            state.view = state.table.view();
+            state.table = await worker.table(SCHEMA);
+            state.view = await state.table.view();
             mandelbrot(state.table, state.view, ...[
                 "xmin", 
                 "xmax", 

@@ -23,23 +23,25 @@ function error_to_json(error) {
 
 /**
  * The base class for Perspective's async API. It initializes and keeps track of
- * tables, views, and processes messages from the user into Perspective.
+ * tables, views, and processes messages from the user into the Perspective
+ * engine.
  *
  * Child classes must implement the `post()` interface, which defines how the
- * worker sends messages.
+ * server sends messages to the client. The implementation of `Server` for
+ * Web Workers can be found in `perspective.js`, and an implementation for
+ * Node.JS can be found in `perspective.node.js`.
  */
 export class Server {
     constructor(perspective) {
         this.perspective = perspective;
         this._tables = {};
         this._views = {};
-
         this._callback_cache = new Map();
     }
 
     /**
-     * `Server` must be extended and the `post` method implemented before it can
-     * be initialized.
+     * `Server` must be extended and the `post` method implemented before the
+     * server can successfully be initialized.
      */
     init(msg) {
         if (msg.config) {
@@ -48,25 +50,14 @@ export class Server {
         this.post(msg);
     }
 
-    post() {
-        throw new Error("post() not implemented!");
-    }
-
     /**
-     * Garbage collect un-needed views.
+     * Send a message from the Perspective server to the Perspective client -
+     * this method must be implemented before the server can be used.
+     *
+     * @param {Object} msg a message to be sent to the client.
      */
-    clear_views(client_id) {
-        for (let key of Object.keys(this._views)) {
-            if (this._views[key].client_id === client_id) {
-                try {
-                    this._views[key].delete();
-                } catch (e) {
-                    console.error(e);
-                }
-                delete this._views[key];
-            }
-        }
-        console.debug(`GC ${Object.keys(this._views).length} views in memory`);
+    post(msg) {
+        throw new Error(`Posting ${msg} failed - post() not implemented!`);
     }
 
     /**
@@ -88,14 +79,57 @@ export class Server {
                 break;
             case "table":
                 if (typeof msg.args[0] === "undefined") {
+                    // Cache messages for when a table is created but not fully
+                    // initialized, i.e. in the case when a table is created
+                    // from a view, as the view needs to be serialized to an
+                    // arrow before the table will be ready.
                     this._tables[msg.name] = [];
                 } else {
-                    const msgs = this._tables[msg.name];
-                    this._tables[msg.name] = this.perspective.table(msg.args[0], msg.options);
-                    if (msgs) {
-                        for (const msg of msgs) {
-                            this.process(msg);
+                    try {
+                        const msgs = this._tables[msg.name];
+                        const table = this.perspective.table(msg.args[0], msg.options);
+
+                        // When using the Node server, the `table()` constructor
+                        // returns a Promise, but in the Web Worker version,
+                        // table() synchronously returns an instance of a Table.
+                        if (table && table.then) {
+                            table
+                                .then(table => {
+                                    this._tables[msg.name] = table;
+
+                                    // Process cached messages for this table.
+                                    if (msgs) {
+                                        for (const msg of msgs) {
+                                            this.process(msg);
+                                        }
+                                    }
+
+                                    // Resolve the promise to return a Table.
+                                    this.post({
+                                        id: msg.id,
+                                        data: msg.name
+                                    });
+                                })
+                                .catch(error => this.process_error(msg, error));
+                        } else {
+                            this._tables[msg.name] = table;
+
+                            // Process cached messages for this table.
+                            if (msgs) {
+                                for (const msg of msgs) {
+                                    this.process(msg);
+                                }
+                            }
+
+                            // Resolve the promise to return a Table.
+                            this.post({
+                                id: msg.id,
+                                data: msg.name
+                            });
                         }
+                    } catch (error) {
+                        this.process_error(msg, error);
+                        return;
                     }
                 }
                 break;
@@ -121,18 +155,61 @@ export class Server {
                 break;
             case "view":
                 const tableMsgQueue = this._tables[msg.table_name];
+
                 if (tableMsgQueue && Array.isArray(tableMsgQueue)) {
+                    // If the table is not initialized, defer this message for
+                    // until after the table is initialized, and create a new
+                    // message queue for the uninitialized view.
                     tableMsgQueue.push(msg);
                     this._views[msg.view_name] = [];
                 } else {
-                    // create a new view and track it with `client_id`
-                    const msgs = this._views[msg.view_name];
-                    this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
-                    this._views[msg.view_name].client_id = client_id;
-                    if (msgs) {
-                        for (const msg of msgs) {
-                            this.process(msg);
+                    // Create a new view and resolve the Promise on the client
+                    // with the name of the view, which the client will use to
+                    // construct a new view proxy.
+                    try {
+                        const msgs = this._views[msg.view_name];
+
+                        // When using the Node server, the `view()` constructor
+                        // returns a Promise, but in the Web Worker version,
+                        // view() synchronously returns an instance of a View.
+                        const view = this._tables[msg.table_name].view(msg.config);
+
+                        if (view && view.then) {
+                            view.then(view => {
+                                this._views[msg.view_name] = view;
+                                this._views[msg.view_name].client_id = client_id;
+
+                                // Process cached messages for the view.
+                                if (msgs) {
+                                    for (const msg of msgs) {
+                                        this.process(msg);
+                                    }
+                                }
+
+                                this.post({
+                                    id: msg.id,
+                                    data: msg.view_name
+                                });
+                            }).catch(error => this.process_error(msg, error));
+                        } else {
+                            this._views[msg.view_name] = view;
+                            this._views[msg.view_name].client_id = client_id;
+
+                            // Process cached messages for the view.
+                            if (msgs) {
+                                for (const msg of msgs) {
+                                    this.process(msg);
+                                }
+                            }
+
+                            this.post({
+                                id: msg.id,
+                                data: msg.view_name
+                            });
                         }
+                    } catch (error) {
+                        this.process_error(msg, error);
+                        return;
                     }
                 }
                 break;
@@ -140,17 +217,8 @@ export class Server {
     }
 
     /**
-     * Send an error to the client.
-     */
-    process_error(msg, error) {
-        this.post({
-            id: msg.id,
-            error: error_to_json(error)
-        });
-    }
-
-    /**
-     * Execute a subscription to a Perspective event.
+     * Execute a subscription to a Perspective event, such as `on_update` or
+     * `on_delete`.
      */
     process_subscribe(msg, obj) {
         try {
@@ -196,28 +264,10 @@ export class Server {
         }
     }
 
-    process_method_call_response(msg, result) {
-        if (msg.method === "delete") {
-            delete this._views[msg.name];
-        }
-        if (msg.method === "to_arrow") {
-            this.post(
-                {
-                    id: msg.id,
-                    data: result
-                },
-                [result]
-            );
-        } else {
-            this.post({
-                id: msg.id,
-                data: result
-            });
-        }
-    }
-
     /**
-     * Given a call to a table or view method, process it.
+     * Given a message that calls a table or view method, call the method and
+     * return the result to the client, or return an error message to the
+     * client.
      *
      * @param {Object} msg
      */
@@ -254,5 +304,58 @@ export class Server {
             this.process_error(msg, error);
             return;
         }
+    }
+
+    /**
+     * Send the response from a method call back to the client, using
+     * transferables if the response is an Arrow binary.
+     * @param {Object} msg
+     * @param {*} result
+     */
+    process_method_call_response(msg, result) {
+        if (msg.method === "delete") {
+            delete this._views[msg.name];
+        }
+        if (msg.method === "to_arrow") {
+            this.post(
+                {
+                    id: msg.id,
+                    data: result
+                },
+                [result]
+            );
+        } else {
+            this.post({
+                id: msg.id,
+                data: result
+            });
+        }
+    }
+
+    /**
+     * Send an error to the client.
+     */
+    process_error(msg, error) {
+        this.post({
+            id: msg.id,
+            error: error_to_json(error)
+        });
+    }
+
+    /**
+     * Garbage collect un-needed views.
+     */
+    clear_views(client_id) {
+        for (let key of Object.keys(this._views)) {
+            if (this._views[key].client_id === client_id) {
+                try {
+                    this._views[key].delete();
+                } catch (e) {
+                    console.error(e);
+                }
+                delete this._views[key];
+            }
+        }
+        console.debug(`GC ${Object.keys(this._views).length} views in memory`);
     }
 }

@@ -32,7 +32,7 @@ const generator = function(length = 100, start = 0) {
 
 describe("Invariant computed expressions", function() {
     beforeAll(async () => {
-        TABLE = perspective.table({
+        TABLE = await perspective.table({
             a: [1, 2, 3]
         });
         const computed_functions = await TABLE.get_computed_functions();
@@ -51,13 +51,13 @@ describe("Invariant computed expressions", function() {
      */
     describe("Properties of real numbers", () => {
         jsc.property("x + y + z == z + y + x", generator(), async data => {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" + "y" as "temp" + "z" as "first"')
             });
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"z" + "y" as "temp2" + "x" as "second"')
             });
 
@@ -70,13 +70,13 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("x + (y + z) == (x + y) + z", generator(), async data => {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" + ("y" + "z") as "first"')
             });
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('("x" + "y") + "z" as "second"')
             });
 
@@ -88,13 +88,13 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("x - x + x == x + x - x", generator(), async data => {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" - "x" as "temp" + "x" as "first"')
             });
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" + "x" as "temp2" - "x" as "second"')
             });
 
@@ -106,13 +106,13 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("x * y * z == z * y * x", generator(), async data => {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" * "y" as "temp" * "z" as "first"')
             });
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"z" * "y" as "temp2" * "x" as "second"')
             });
 
@@ -124,13 +124,13 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("x * (y * z) == (x * y) * z", generator(), async data => {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" * ("y" * "z") as "first"')
             });
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('("x" * "y") * "z" as "second"')
             });
 
@@ -142,7 +142,7 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("invert(x) * x == x * invert(x)", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -151,11 +151,11 @@ describe("Invariant computed expressions", function() {
 
             table.update(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('invert("x") * "x" as "first"')
             });
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"x" * invert("x")')
             });
 
@@ -172,7 +172,7 @@ describe("Invariant computed expressions", function() {
 
     describe("Boolean operators with associativity", () => {
         jsc.property("x + y * z == z * y + x", generator(), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -187,7 +187,7 @@ describe("Invariant computed expressions", function() {
                 COMPUTED_EXPRESSION_PARSER.parse('"(x + (y * z))" == "((z * y) + x)" as "final"')
             ];
 
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: computed_columns.flat()
             });
 
@@ -200,7 +200,7 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("x + y * z != (x + y) * z", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -215,7 +215,7 @@ describe("Invariant computed expressions", function() {
                 COMPUTED_EXPRESSION_PARSER.parse('"(x + (y * z))" != "((x + y) * z)" as "final"')
             ];
 
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: computed_columns.flat()
             });
 
@@ -230,7 +230,7 @@ describe("Invariant computed expressions", function() {
 
     describe("Operator precedence", () => {
         jsc.property("w + x - y * z / w == w + x - ((y * z) / w)", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -239,13 +239,13 @@ describe("Invariant computed expressions", function() {
 
             table.update(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - "y" * "z" / "w"')
             });
 
             const r1 = await v1.to_columns();
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - (("y" * "z") / "w")')
             });
 
@@ -259,7 +259,7 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("w + x * y ^ z == w + x * (y ^ z)", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -268,13 +268,13 @@ describe("Invariant computed expressions", function() {
 
             table.update(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - "y" * "z" / "w"')
             });
 
             const r1 = await v1.to_columns();
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - (("y" * "z") / "w")')
             });
 
@@ -288,7 +288,7 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("w + x - pow2(y) * z == w + x - (pow2(y) * z)", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -297,13 +297,13 @@ describe("Invariant computed expressions", function() {
 
             table.update(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - pow2("y") * "z"')
             });
 
             const r1 = await v1.to_columns();
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" - (pow2("y") * "z")')
             });
 
@@ -317,7 +317,7 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("log(w + x - y * z / w) == log(w + x - ((y * z) / w))", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -326,13 +326,13 @@ describe("Invariant computed expressions", function() {
 
             table.update(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('log("w" + "x" - "y" * "z" / "w")')
             });
 
             const r1 = await v1.to_columns();
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('log("w" + "x" - (("y" * "z") / "w"))')
             });
 
@@ -346,7 +346,7 @@ describe("Invariant computed expressions", function() {
         });
 
         jsc.property("w + x == y - z == (w + x) == (y - z)", generator(100, 2), async data => {
-            const table = perspective.table({
+            const table = await perspective.table({
                 w: "float",
                 x: "float",
                 y: "float",
@@ -355,13 +355,13 @@ describe("Invariant computed expressions", function() {
 
             table.update(data);
 
-            const v1 = table.view({
+            const v1 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('"w" + "x" == "y" - "z"')
             });
 
             const r1 = await v1.to_columns();
 
-            const v2 = table.view({
+            const v2 = await table.view({
                 computed_columns: COMPUTED_EXPRESSION_PARSER.parse('("w" + "x") == ("y" - "z")')
             });
 

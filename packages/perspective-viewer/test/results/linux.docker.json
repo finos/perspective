@@ -54,7 +54,7 @@
     "Computed_Expressions_On_restore,_computed_expressions_in_classic_syntax_are_parsed_correctly_": "563f8c45e0ec32bc4b07d30ed5f0086e",
     "superstore_adds_computed_column_via_attribute": "f2fa526d6f0c168a47ab272bb7ae5771",
     "superstore_user_defined_aggregates_maintained_on_computed_columns": "c7aa2902feb512ceb1e1487de80878ff",
-    "__GIT_COMMIT__": "053769dd92a8efc508da0645cda1cab8cc8bb34e",
+    "__GIT_COMMIT__": "c82f23beeaf2a2c796bd056728fc9094c03ac733",
     "blank_Handles_reloading_with_a_schema_": "e206352c788a61bd199bde57ea6d9be6",
     "superstore_doesn_t_leak_tables_": "5bb762b2860eb5af067bb83afbca3264",
     "superstore_doesn_t_leak_elements_": "440df30588a66f664cb40d20a0ff0386",
@@ -92,5 +92,6 @@
     "filters_greater_than_US_locale_string_on_datetime_column": "b75f4474cd4f32f53ef614059ae89b8a",
     "filters_less_than_on_date_column": "0e8fa6a2232cda74ea9799e7bd096f42",
     "filters_less_than_ISO_string_on_datetime_column": "065d9acd5e72d9959ede2f11f853bc5a",
-    "filters_less_than_US_locale_string_on_datetime_column": "c2c4ad9505b651cd3e94d5778b32fa34"
+    "filters_less_than_US_locale_string_on_datetime_column": "c2c4ad9505b651cd3e94d5778b32fa34",
+    "blank_Should_load_a_promise_to_a_table_": "b5177dbb73cb526019cdc1747617349a"
 }

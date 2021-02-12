@@ -29,7 +29,7 @@ window.addEventListener("load", async () => {
 
     const resp = await req;
     const buffer = await resp.arrayBuffer();
-    const table = worker.table(buffer);
+    const table = await worker.table(buffer);
 
     viewer.load(table);
 

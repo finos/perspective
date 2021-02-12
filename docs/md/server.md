@@ -46,7 +46,7 @@ compatible format (JSON, CSV or Apache Arrow).
 
 ```javascript
 const worker = perspective.worker();
-const table = worker.table(csv);
+const table = await worker.table(csv);
 
 const viewer = document.createElement("perspective-viewer");
 document.body.appendChild(viewer);
@@ -100,9 +100,10 @@ then _replicates_ the server-side Table.
 ```javascript
 const websocket = perspective.websocket("ws://localhost:8080");
 const server_table = websocket.open("my_table");
+const server_view = await server_table.view();
 
 const worker = perspective.worker();
-const client_table = worker.table(server_table.view());
+const client_table = await worker.table(server_view);
 
 const viewer = document.createElement("perspective-viewer");
 document.body.appendChild(viewer);

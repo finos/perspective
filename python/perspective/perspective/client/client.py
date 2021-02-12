@@ -11,6 +11,7 @@ from random import random
 from ..core.exception import PerspectiveError
 from .table_api import PerspectiveTableProxy
 from .table_api import table as make_table
+from .view_api import PerspectiveViewProxy
 
 
 class PerspectiveClient(object):
@@ -72,7 +73,18 @@ class PerspectiveClient(object):
                 if msg["data"].get("error"):
                     future.set_exception(PerspectiveError(msg["data"]["error"]))
                 else:
-                    future.set_result(msg["data"]["data"])
+                    cmd = handler.get("cmd", None)
+
+                    if cmd == "view":
+                        future.set_result(
+                            PerspectiveViewProxy(self, msg["data"]["data"])
+                        )
+                    elif cmd == "table":
+                        future.set_result(
+                            PerspectiveTableProxy(self, msg["data"]["data"])
+                        )
+                    else:
+                        future.set_result(msg["data"]["data"])
 
             if not keep_alive:
                 del self._handlers[msg["data"]["id"]]
@@ -86,10 +98,19 @@ class PerspectiveClient(object):
         """Given a message and an associated `Future` object, store the future
         and send the message to the server."""
         self._msg_id += 1
+
         if future:
             handler = {
                 "future": future,
             }
+
+            # Handle table and view case here, because we can't reliably set
+            # a custom resolve handler like we can do in JS.
+            cmd = msg.get("cmd", None)
+
+            if cmd == "view" or cmd == "table":
+                handler["cmd"] = cmd
+
             self._handlers[self._msg_id] = handler
         elif keep_alive:
             handler = {

@@ -65,7 +65,7 @@ utils.with_server({paths: PATHS}, () => {
                     await page.mouse.click(80, 100);
                     await page.waitFor(1000);
                 },
-                {wait_for_update: false, timeout: 30000}
+                {timeout: 30000}
             );
             test.capture(
                 "selection is disabled if no linked viewers",
@@ -82,7 +82,7 @@ utils.with_server({paths: PATHS}, () => {
                     await page.mouse.click(80, 100);
                     await page.waitFor(1000);
                 },
-                {wait_for_update: false, timeout: 30000}
+                {timeout: 30000}
             );
             test.capture(
                 "selection is disabled if grid has no row-pivots",
@@ -99,7 +99,7 @@ utils.with_server({paths: PATHS}, () => {
                     await page.mouse.click(80, 100);
                     await page.waitFor(1000);
                 },
-                {wait_for_update: false, timeout: 30000}
+                {timeout: 30000}
             );
         },
         {root: TEST_ROOT}

@@ -25,7 +25,7 @@ const get_random_int = function(min, max) {
 module.exports = perspective => {
     describe("ports", function() {
         it("Should create port IDs in incremental order", async function() {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
             const port_ids = [];
             for (let i = 0; i < 10; i++) {
                 port_ids.push(await table.make_port());
@@ -35,7 +35,7 @@ module.exports = perspective => {
         });
 
         it("Should create port IDs in incremental order and allow updates on each port", async function() {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
@@ -56,7 +56,7 @@ module.exports = perspective => {
                 );
             }
 
-            const view = table.view();
+            const view = await table.view();
             const output = await view.to_columns();
 
             expect(await table.size()).toEqual(14);
@@ -75,7 +75,7 @@ module.exports = perspective => {
         });
 
         it("Should create port IDs in incremental order and allow updates on each port, indexed", async function() {
-            const table = perspective.table(data, {index: "w"});
+            const table = await perspective.table(data, {index: "w"});
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
@@ -98,7 +98,7 @@ module.exports = perspective => {
 
             expect(await table.size()).toEqual(4);
 
-            const view = table.view();
+            const view = await table.view();
             const output = await view.to_columns();
             expect(output).toEqual(data);
 
@@ -107,7 +107,7 @@ module.exports = perspective => {
         });
 
         it("Should create port IDs in incremental order and allow random arbitrary updates on each port, indexed", async function() {
-            const table = perspective.table(data, {index: "w"});
+            const table = await perspective.table(data, {index: "w"});
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
@@ -130,7 +130,7 @@ module.exports = perspective => {
 
             expect(await table.size()).toEqual(4);
 
-            const view = table.view();
+            const view = await table.view();
             const output = await view.to_columns();
             expect(output).toEqual(data);
 
@@ -182,7 +182,7 @@ module.exports = perspective => {
 
         describe("View notifications from different ports", function() {
             it("All views should be notified by appends on all ports", async function() {
-                const table = perspective.table(data);
+                const table = await perspective.table(data);
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -191,13 +191,13 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
-                const view2 = table.view({
+                const view2 = await table.view({
                     row_pivots: ["w"]
                 });
 
-                const view3 = table.view({
+                const view3 = await table.view({
                     row_pivots: ["w"],
                     column_pivots: ["x"]
                 });
@@ -288,7 +288,7 @@ module.exports = perspective => {
             });
 
             it("All views should be notified by partial updates on all ports", async function() {
-                const table = perspective.table(data, {index: "w"});
+                const table = await perspective.table(data, {index: "w"});
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -297,13 +297,13 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
-                const view2 = table.view({
+                const view2 = await table.view({
                     row_pivots: ["w"]
                 });
 
-                const view3 = table.view({
+                const view3 = await table.view({
                     row_pivots: ["w"],
                     column_pivots: ["x"]
                 });
@@ -372,7 +372,7 @@ module.exports = perspective => {
 
         describe("on_update notifications from different ports", function() {
             it("All calls to on_update should contain the port ID", async function(done) {
-                const table = perspective.table(data);
+                const table = await perspective.table(data);
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -381,7 +381,7 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
                 // because no updates were called in port 0, start at 1
                 let last_port_id = 1;
@@ -410,7 +410,7 @@ module.exports = perspective => {
             });
 
             it("Only the port that was updated should be notified in on_update", async function(done) {
-                const table = perspective.table(data);
+                const table = await perspective.table(data);
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -419,7 +419,7 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
                 const port_id = get_random_int(1, 9);
 
@@ -442,7 +442,7 @@ module.exports = perspective => {
             });
 
             it("All ports should be notified in creation order, regardless of what order the update is called.", async function(done) {
-                const table = perspective.table(data);
+                const table = await perspective.table(data);
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -451,7 +451,7 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
                 let last_port_id = 0;
                 let num_updates = 0;
@@ -484,8 +484,8 @@ module.exports = perspective => {
             });
 
             it("On update callbacks should be able to ignore updates from certain ports.", async function(done) {
-                const table = perspective.table(data);
-                const update_table = perspective.table(await table.schema());
+                const table = await perspective.table(data);
+                const update_table = await perspective.table(await table.schema());
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -494,7 +494,7 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
                 let last_port_id = 0;
                 let num_updates = 0;
@@ -509,7 +509,7 @@ module.exports = perspective => {
 
                         if (last_port_id == 10 && num_updates === 10) {
                             expect(await update_table.size()).toEqual(6);
-                            const update_view = update_table.view();
+                            const update_view = await update_table.view();
                             const result = await update_view.to_columns();
                             expect(result).toEqual({
                                 w: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
@@ -548,7 +548,7 @@ module.exports = perspective => {
 
         describe("deltas", function() {
             it("Deltas should be unique to each port", async function(done) {
-                const table = perspective.table(data);
+                const table = await perspective.table(data);
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -557,14 +557,14 @@ module.exports = perspective => {
 
                 expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-                const view = table.view();
+                const view = await table.view();
 
                 let update_count = 0;
 
                 view.on_update(
                     async function(updated) {
-                        const _t = perspective.table(updated.delta);
-                        const _v = _t.view();
+                        const _t = await perspective.table(updated.delta);
+                        const _v = await _t.view();
                         const result = await _v.to_columns();
 
                         if (updated.port_id == first_port) {
@@ -627,8 +627,8 @@ module.exports = perspective => {
 
         describe("Cross-table port operations", function() {
             it("Should allow a client-server round trip without loops", async function(done) {
-                const client_table = perspective.table(data);
-                const server_table = perspective.table(data);
+                const client_table = await perspective.table(data);
+                const server_table = await perspective.table(data);
                 const client_port = await client_table.make_port();
 
                 // "get rid" of a random number of ports by creating them
@@ -640,7 +640,7 @@ module.exports = perspective => {
 
                 expect(client_port).toBeLessThan(server_port);
 
-                const client_view = client_table.view();
+                const client_view = await client_table.view();
 
                 let CLIENT_TO_SERVER_UPDATES = 0;
 
@@ -658,7 +658,7 @@ module.exports = perspective => {
                     {mode: "row"}
                 );
 
-                const server_view = server_table.view();
+                const server_view = await server_table.view();
 
                 server_view.on_update(
                     async updated => {
@@ -685,8 +685,8 @@ module.exports = perspective => {
             });
 
             it("Should allow a client-server round trip without loops and server updates", async function(done) {
-                const client_table = perspective.table(data);
-                const server_table = perspective.table(data);
+                const client_table = await perspective.table(data);
+                const server_table = await perspective.table(data);
                 const client_port = await client_table.make_port();
 
                 // "get rid" of a random number of ports by creating them
@@ -698,7 +698,7 @@ module.exports = perspective => {
 
                 expect(client_port).toBeLessThan(server_port);
 
-                const client_view = client_table.view();
+                const client_view = await client_table.view();
 
                 let CLIENT_TO_SERVER_UPDATES = 0;
 
@@ -716,7 +716,7 @@ module.exports = perspective => {
                     {mode: "row"}
                 );
 
-                const server_view = server_table.view();
+                const server_view = await server_table.view();
 
                 server_view.on_update(
                     async updated => {
@@ -749,9 +749,9 @@ module.exports = perspective => {
             });
 
             it("Should allow multi client-server round trips without loops", async function(done) {
-                const client_table = perspective.table(data, {index: "w"});
-                const client_table2 = perspective.table(data, {index: "w"});
-                const server_table = perspective.table(data, {index: "w"});
+                const client_table = await perspective.table(data, {index: "w"});
+                const client_table2 = await perspective.table(data, {index: "w"});
+                const server_table = await perspective.table(data, {index: "w"});
                 const client_port = await client_table.make_port();
                 const client_port2 = await client_table2.make_port();
 
@@ -771,8 +771,8 @@ module.exports = perspective => {
                 // port numbers can be equal between clients
                 expect(client_port2).toEqual(client_port);
 
-                const client_view = client_table.view();
-                const client_view2 = client_table2.view();
+                const client_view = await client_table.view();
+                const client_view2 = await client_table2.view();
 
                 client_view.on_update(
                     async updated => {
@@ -808,7 +808,7 @@ module.exports = perspective => {
                     {mode: "row"}
                 );
 
-                const server_view = server_table.view();
+                const server_view = await server_table.view();
 
                 // Simulate multiple connections to the server
                 server_view.on_update(

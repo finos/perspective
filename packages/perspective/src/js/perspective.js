@@ -134,7 +134,7 @@ export default function(Module) {
      *
      * @example
      * // Returns a new View, pivoted in the row space by the "name" column.
-     * table.view({row_pivots: ["name"]});
+     * await table.view({row_pivots: ["name"]});
      *
      * @class
      * @hideconstructor
@@ -275,7 +275,7 @@ export default function(Module) {
      *
      * @example
      * // Create a view
-     * const view = table.view({
+     * const view = await table.view({
      *      columns: ["a", "b"]
      * });
      * const schema = await view.schema(); // {a: "float", b: "string"}
@@ -311,7 +311,7 @@ export default function(Module) {
      *
      * @example
      * // Create a view with computed columns
-     * const view = table.view({
+     * const view = await table.view({
      *      computed_columns: [{
      *          column: "x + y",
      *          computed_function_name: "+",
@@ -1361,7 +1361,7 @@ export default function(Module) {
      * desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
      *
      * @example
-     * var view = table.view({
+     * const view = await table.view({
      *      row_pivots: ["region"],
      *      columns: ["region"],
      *      aggregates: {"region": "dominant"},
@@ -1369,8 +1369,9 @@ export default function(Module) {
      *      sort: [["value", "asc"]]
      * });
      *
-     * @returns {view} A new {@link module:perspective~view} object for the
-     * supplied configuration, bound to this table
+     * @returns {Promise<view>} A Promise that resolves to a new
+     * {@link module:perspective~view} object for the supplied configuration,
+     * bound to this table.
      */
     table.prototype.view = function(_config = {}) {
         _call_process(this._Table.get_id());
@@ -1677,12 +1678,12 @@ export default function(Module) {
          *
          * @example
          * // Creating a table directly from node
-         * var table = perspective.table([{x: 1}, {x: 2}]);
+         * const table = await perspective.table([{x: 1}, {x: 2}]);
          *
          * @example
          * // Creating a table from a Web Worker (instantiated via the worker()
          * method).
-         * var table = worker.table([{x: 1}, {x: 2}]);
+         * const table = await worker.table([{x: 1}, {x: 2}]);
          *
          * @param {Object<string, Array>|Object<string,
          *     string>|Array<Object>|string} data The input data for this table.
@@ -1703,7 +1704,9 @@ export default function(Module) {
          *     in the order they were inserted. `limit` cannot be applied at
          *     the same time as `index`.
          *
-         * @returns {table} A new {@link module:perspective~table} object.
+         * @returns {Promise<table>} A Promise that will resolve to a new
+         * {@link module:perspective~table} object, or be rejected if an error
+         * happens during Table construction.
          */
         table: function(data, options) {
             options = options || {};

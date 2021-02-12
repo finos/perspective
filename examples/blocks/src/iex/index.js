@@ -23,7 +23,7 @@ async function run(input, string, wrap = false, index = null) {
         table.clear();
         table.update(data);
     } else {
-        table = worker.table(data);
+        table = await worker.table(data);
         TABLES.set(string, table);
     }
     return table;

@@ -134,7 +134,7 @@ declare module "@finos/perspective" {
         schema(): Promise<Schema>;
         size(): Promise<number>;
         update(data: TableData, options?: {port_id?: number}): void;
-        view(config?: ViewConfig): View;
+        view(config?: ViewConfig): Promise<View>;
         make_port(): number;
     };
 
@@ -144,7 +144,7 @@ declare module "@finos/perspective" {
     }
 
     export type PerspectiveWorker = {
-        table(data: TableData | View, options?: TableOptions): Table;
+        table(data: TableData | View, options?: TableOptions): Promise<Table>;
     };
 
     export class WebSocketClient {
@@ -179,7 +179,7 @@ declare module "@finos/perspective" {
         TYPE_AGGREGATES: ValuesByType;
         TYPE_FILTERS: ValuesByType;
         SORT_ORDERS: SortOrders;
-        table(data_or_schema: TableData | Schema, options?: TableOptions): Table;
+        table(data_or_schema: TableData | Schema, options?: TableOptions): Promise<Table>;
         worker(): PerspectiveWorker;
         shared_worker(): PerspectiveWorker;
         websocket(url: string): WebSocketClient;

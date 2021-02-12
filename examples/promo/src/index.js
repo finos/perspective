@@ -52,7 +52,7 @@ function newRows(n = 5) {
 }
 
 window.addEventListener("load", async () => {
-    const table = worker.table(newRows(3000), {limit: 3000});
+    const table = await worker.table(newRows(3000), {limit: 3000});
     const workspace = document.createElement("perspective-workspace");
     document.body.appendChild(workspace);
     workspace.tables.set("rtdata", table);

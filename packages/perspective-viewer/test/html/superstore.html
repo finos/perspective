@@ -30,8 +30,9 @@
             xhr.onload = function () { 
                 window.__CSV__ = xhr.response;
                 window.__WORKER__ = perspective.worker();
-                const table = window.__WORKER__.table(xhr.response);
-                document.getElementsByTagName('perspective-viewer')[0].load(table); 
+                perspective.worker().table(xhr.response).then(table => {
+                    document.getElementsByTagName('perspective-viewer')[0].load(table); 
+                });
             }
             xhr.send(null);
 

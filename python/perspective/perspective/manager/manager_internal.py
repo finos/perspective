@@ -132,14 +132,26 @@ class _PerspectiveManagerInternal(object):
                     self._tables[msg["name"]] = Table(
                         data_or_schema, **msg.get("options", {})
                     )
+
+                    # Return the Table's name to the front end so it can be
+                    # resolved.
+                    message = self._make_message(msg["id"], msg["name"])
+                    post_callback(self._message_to_json(msg["id"], message))
                 except IndexError:
                     self._tables[msg["name"]] = []
             elif cmd == "view":
-                # create a new view and track it with the assigned client_id.
+                # Create a new view and notify the client the view has been
+                # created by sending the view name back.
                 new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
                 new_view._client_id = client_id
                 self._views[msg["view_name"]] = new_view
+
+                # Return the View's name to the front end so it can be
+                # resolved.
+                message = self._make_message(msg["id"], msg["view_name"])
+                post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table_method" or cmd == "view_method":
+                # Call the method on the table/view instance
                 self._process_method_call(msg, post_callback, client_id)
         except (PerspectiveError, PerspectiveCppError) as error:
             # Log errors and return them to the client

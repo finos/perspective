@@ -283,23 +283,6 @@ for your local OS.
     }
 };
 
-test.run = function run(name, body, viewport = null) {
-    let _url = page_url;
-    test(name, async () => {
-        if (viewport !== null)
-            await page.setViewport({
-                width: viewport.width,
-                height: viewport.height
-            });
-
-        await new Promise(setTimeout);
-        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
-        await page.waitForSelector("perspective-viewer:not([updating])");
-        const body_results = await body(page);
-        expect(body_results).toBe(true);
-    });
-};
-
 const OLD_SETTINGS = {};
 
 expect.extend({

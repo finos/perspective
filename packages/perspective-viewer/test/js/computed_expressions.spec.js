@@ -532,7 +532,6 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'sqrt(("Sales" * "Profit"))');
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(
                     element =>
                         element.setAttribute(
@@ -544,6 +543,7 @@ utils.with_server({}, () => {
                         ),
                     viewer
                 );
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.reset(), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
@@ -687,6 +687,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Computed", "==", "2 Monday"]]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Order Date"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(() => document.activeElement.blur());
             });
 

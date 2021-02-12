@@ -48,7 +48,7 @@
                 const worker = perspective.worker();
                 const response = await request;
                 const buffer = await response.arrayBuffer();
-                return worker.table(buffer);
+                return await worker.table(buffer);
             };
 
             window.addEventListener("load", async () => {

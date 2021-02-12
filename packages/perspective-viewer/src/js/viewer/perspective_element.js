@@ -487,14 +487,15 @@ export class PerspectiveElement extends StateElement {
             computed_columns: computed_columns
         };
 
-        if (this._view) {
-            this._view.remove_update(this._view_updater);
-            this._view.delete();
-            this._view = undefined;
-        }
-
         try {
-            this._view = this._table.view(config);
+            const _view = await this._table.view(config);
+            if (this._view) {
+                this._view.remove_update(this._view_updater);
+                this._view.delete();
+                this._view = undefined;
+            }
+
+            this._view = _view;
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
         } catch (e) {
@@ -512,6 +513,9 @@ export class PerspectiveElement extends StateElement {
 
         try {
             const {max_cols, max_rows} = await this.get_maxes();
+            if (task.cancelled) {
+                return;
+            }
             if (!ignore_size_check) {
                 await this._warn_render_size_exceeded(max_cols, max_rows);
             }

@@ -30,11 +30,11 @@ const pivot_data = [
 module.exports = perspective => {
     describe("computed updates", function() {
         it("Dependent column update appends should notify computed columns, arity 1", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: ["A", "B", "C", "D"]
             });
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "lowercase",
@@ -55,14 +55,14 @@ module.exports = perspective => {
         });
 
         it("Dependent column updates should notify computed columns, arity 1", async function() {
-            const table = perspective.table(
+            const table = await perspective.table(
                 {
                     x: [1, 2, 3, 4],
                     y: ["A", "B", "C", "D"]
                 },
                 {index: "x"}
             );
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "lowercase",
@@ -83,12 +83,12 @@ module.exports = perspective => {
         });
 
         it("Dependent column appends with missing columns should notify computed columns, arity 1", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: [1.5, 2.5, 3.5, 4.5],
                 z: ["a", "b", "c", "d"]
             });
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "upper",
@@ -115,11 +115,11 @@ module.exports = perspective => {
         });
 
         it("Dependent column update appends should notify computed columns, pivoted arity 1", async function() {
-            const table = perspective.table({
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: ["A", "B", "C", "C"]
             });
-            const view = table.view({
+            const view = await table.view({
                 row_pivots: ["lowercase"],
                 computed_columns: [
                     {
@@ -152,8 +152,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column appends should notify computed columns, arity 2", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -174,8 +174,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column updates on all column updates should notify computed columns, arity 2", async function() {
-            const table = perspective.table(common.int_float_data, {index: "x"});
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data, {index: "x"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -207,8 +207,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column appends should notify computed columns on different views, arity 2", async function() {
-            const table = perspective.table(common.int_float_data);
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -218,7 +218,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "int - float",
@@ -245,8 +245,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column updates should notify computed columns on different views, arity 2.", async function() {
-            const table = perspective.table(common.int_float_data, {index: "x"});
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data, {index: "x"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -256,7 +256,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "int - float",
@@ -283,8 +283,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column updates should notify `all` computed columns on different views, arity 2.", async function() {
-            const table = perspective.table(common.int_float_data, {index: "x"});
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data, {index: "x"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "col1",
@@ -299,7 +299,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "col3",
@@ -335,8 +335,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column update with `null` should notify computed columns on different views, arity 2.", async function() {
-            const table = perspective.table(common.int_float_data, {index: "x"});
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data, {index: "x"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -346,7 +346,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "int - float",
@@ -373,8 +373,8 @@ module.exports = perspective => {
         });
 
         it("Dependent column update with `null` should notify chained computed columns on different views, arity 2.", async function() {
-            const table = perspective.table(common.int_float_data, {index: "x"});
-            const view = table.view({
+            const table = await perspective.table(common.int_float_data, {index: "x"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -389,7 +389,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "int - float",
@@ -425,7 +425,7 @@ module.exports = perspective => {
         });
 
         it("Updating with `null` should clear the output computed column.", async function() {
-            const table = perspective.table(
+            const table = await perspective.table(
                 {
                     w: [1.5, 2.5, 3.5, 4.5],
                     x: [1, 2, 3, 4],
@@ -433,7 +433,7 @@ module.exports = perspective => {
                 },
                 {index: "x"}
             );
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -459,7 +459,7 @@ module.exports = perspective => {
         });
 
         it("Updating with `undefined` should not clear the output computed column.", async function() {
-            const table = perspective.table(
+            const table = await perspective.table(
                 {
                     w: [1.5, 2.5, 3.5, 4.5],
                     x: [1, 2, 3, 4],
@@ -467,7 +467,7 @@ module.exports = perspective => {
                 },
                 {index: "x"}
             );
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "int + float",
@@ -499,8 +499,8 @@ module.exports = perspective => {
                 y: "string",
                 z: "boolean"
             };
-            const table = perspective.table(meta, {index: "y"});
-            const view = table.view({
+            const table = await perspective.table(meta, {index: "y"});
+            const view = await table.view({
                 columns: ["y", "ratio"],
                 computed_columns: [
                     {
@@ -533,8 +533,8 @@ module.exports = perspective => {
         });
 
         it("Should recompute after partial update using `__INDEX__`", async function() {
-            const table = perspective.table({x: "integer", y: "integer"});
-            const view = table.view({
+            const table = await perspective.table({x: "integer", y: "integer"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -562,8 +562,8 @@ module.exports = perspective => {
         });
 
         it("Partial update without a new value shouldn't change computed output", async function() {
-            const table = perspective.table(data);
-            const view = table.view({
+            const table = await perspective.table(data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -589,8 +589,8 @@ module.exports = perspective => {
         });
 
         it("partial update on single computed source column", async function() {
-            const table = perspective.table(data);
-            const view = table.view({
+            const table = await perspective.table(data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -613,8 +613,8 @@ module.exports = perspective => {
         });
 
         it("partial update on non-contiguous computed source columns", async function() {
-            const table = perspective.table(data);
-            const view = table.view({
+            const table = await perspective.table(data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -639,8 +639,8 @@ module.exports = perspective => {
         });
 
         it("partial update on non-contiguous computed source columns, indexed table", async function() {
-            const table = perspective.table(data, {index: "x"});
-            const view = table.view({
+            const table = await perspective.table(data, {index: "x"});
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -665,8 +665,8 @@ module.exports = perspective => {
         });
 
         it("multiple partial update on single computed source column", async function() {
-            const table = perspective.table(data);
-            const view = table.view({
+            const table = await perspective.table(data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -701,8 +701,8 @@ module.exports = perspective => {
         });
 
         it("multiple computed columns with updates on source columns", async function() {
-            const table = perspective.table(data);
-            const view = table.view({
+            const table = await perspective.table(data);
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -711,7 +711,7 @@ module.exports = perspective => {
                     }
                 ]
             });
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "add",
@@ -747,9 +747,9 @@ module.exports = perspective => {
         });
 
         it("propagate updates to all computed columns", async function() {
-            const table = perspective.table(data, {index: "x"});
+            const table = await perspective.table(data, {index: "x"});
 
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -759,7 +759,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "add",
@@ -769,7 +769,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view3 = table.view({
+            const view3 = await table.view({
                 computed_columns: [
                     {
                         column: "subtract",
@@ -810,9 +810,9 @@ module.exports = perspective => {
         });
 
         it("propagate appends to all computed columns", async function() {
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
 
-            const view = table.view({
+            const view = await table.view({
                 computed_columns: [
                     {
                         column: "multiply",
@@ -822,7 +822,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view2 = table.view({
+            const view2 = await table.view({
                 computed_columns: [
                     {
                         column: "add",
@@ -832,7 +832,7 @@ module.exports = perspective => {
                 ]
             });
 
-            const view3 = table.view({
+            const view3 = await table.view({
                 computed_columns: [
                     {
                         column: "subtract",
@@ -875,8 +875,8 @@ module.exports = perspective => {
 
     describe("Computed updates with row pivots", function() {
         it("should update on dependent columns, add", async function() {
-            const table = perspective.table(pivot_data);
-            const view = table.view({
+            const table = await perspective.table(pivot_data);
+            const view = await table.view({
                 columns: ["computed", "int"],
                 aggregates: {
                     computed: "sum"
@@ -909,8 +909,8 @@ module.exports = perspective => {
         });
 
         it("should update on dependent columns, subtract", async function() {
-            const table = perspective.table(pivot_data);
-            const view = table.view({
+            const table = await perspective.table(pivot_data);
+            const view = await table.view({
                 columns: ["computed", "int"],
                 row_pivots: ["computed"],
                 computed_columns: [
@@ -941,9 +941,9 @@ module.exports = perspective => {
         });
 
         it("should update on dependent columns, multiply", async function() {
-            const table = perspective.table(pivot_data);
+            const table = await perspective.table(pivot_data);
 
-            const view = table.view({
+            const view = await table.view({
                 columns: ["computed", "int"],
                 row_pivots: ["computed"],
                 computed_columns: [
@@ -974,9 +974,9 @@ module.exports = perspective => {
         });
 
         it("should update on dependent columns, divide", async function() {
-            const table = perspective.table(pivot_data);
+            const table = await perspective.table(pivot_data);
 
-            const view = table.view({
+            const view = await table.view({
                 columns: ["computed", "int"],
                 row_pivots: ["computed"],
                 computed_columns: [
@@ -1009,8 +1009,8 @@ module.exports = perspective => {
 
     describe("Partial update with null", function() {
         it("Update over null should recalculate", async function() {
-            const table = perspective.table(pivot_data, {index: "int"});
-            const view = table.view({
+            const table = await perspective.table(pivot_data, {index: "int"});
+            const view = await table.view({
                 columns: ["computed", "int", "float"],
                 computed_columns: [
                     {
@@ -1036,9 +1036,9 @@ module.exports = perspective => {
         });
 
         it("Update with null should unset", async function() {
-            const table = perspective.table(pivot_data, {index: "int"});
+            const table = await perspective.table(pivot_data, {index: "int"});
 
-            const view = table.view({
+            const view = await table.view({
                 columns: ["computed", "int", "float"],
                 computed_columns: [
                     {
@@ -1064,7 +1064,7 @@ module.exports = perspective => {
         });
 
         it("Undefined should be a no-op on computed columns", async function() {
-            const table = perspective.table(
+            const table = await perspective.table(
                 [
                     {int: 1, float: 2.25, string: "a", datetime: new Date()},
                     {int: 2, float: 3.5, string: "b", datetime: new Date()},
@@ -1073,7 +1073,7 @@ module.exports = perspective => {
                 ],
                 {index: "int"}
             );
-            const view = table.view({
+            const view = await table.view({
                 columns: ["computed", "int", "float"],
                 computed_columns: [
                     {

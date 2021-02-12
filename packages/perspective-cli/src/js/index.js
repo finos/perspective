@@ -30,7 +30,7 @@ async function convert(filename, options) {
         file = JSON.parse(file);
     } catch {}
     let tbl = table(file);
-    let view = tbl.view();
+    let view = await tbl.view();
     let out;
     options.format = options.format || "arrow";
     if (options.format === "csv") {

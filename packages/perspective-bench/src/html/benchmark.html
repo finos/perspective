@@ -45,7 +45,7 @@
             const req = await fetch("benchmark.arrow");
             const arrow = await req.arrayBuffer();
             const worker = perspective.worker();
-            const table = worker.table(arrow);
+            const table = await worker.table(arrow);
             el.load(table);
             el.toggleConfig();
         });

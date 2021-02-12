@@ -652,7 +652,7 @@ namespace binding {
     std::vector<t_dtype>
     get_data_types(t_val data, std::int32_t format, const std::vector<std::string>& names) {
         if (names.size() == 0) {
-            PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
+            PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!\n");
         }
 
         std::vector<t_dtype> types;

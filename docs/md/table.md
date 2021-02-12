@@ -29,7 +29,7 @@ var data = [
     {x: 4, y: "d", z: false}
 ];
 
-const table1 = worker.table(data);
+const table1 = await worker.table(data);
 ```
 
 ```python
@@ -40,7 +40,7 @@ data = [
     {"x": 4, "y": "d", "z": False}
 ];
 
-table1 = perspective.table(data)
+table1 = perspective.Table(data)
 ```
 
 ## Schema and Types
@@ -58,7 +58,7 @@ var schema = {
     z: "boolean"
 };
 
-const table2 = worker.table(schema);
+const table2 = await worker.table(schema);
 ```
 
 ```python
@@ -73,7 +73,7 @@ schema = {
     "f": str
 }
 
-table2 = perspective.table(schema)
+table2 = perspective.Table(schema)
 ```
 
 When passing data directly to the `table()` constructor, the type of each
@@ -106,11 +106,11 @@ To create an indexed `Table`, provide the `index` property with a string column
 name to be used as an index:
 
 ```javascript
-const indexed_table = perspective.table(data, {index: "a"});
+const indexed_table = await perspective.table(data, {index: "a"});
 ```
 
 ```python
-indexed_table = perspective.table(data, index="a");
+indexed_table = perspective.Table(data, index="a");
 ```
 
 Initializing a `Table` with a `limit` sets the total number of rows the `Table`
@@ -120,11 +120,11 @@ oldest rows in the `Table`.  To create a `Table` with a `limit`, provide the
 `limit` property with an integer indicating the maximum rows:
 
 ```javascript
-const limit_table = perspective.table(data, {limit: 1000});
+const limit_table = await perspective.table(data, {limit: 1000});
 ```
 
 ```python
-limit_table = perspective.table(data, limit=1000);
+limit_table = perspective.Table(data, limit=1000);
 ```
 
 > `limit` cannot be used in conjunction with `index`.
@@ -141,14 +141,14 @@ const schema = {
     b: "float"
 };
 
-const table = perspective.table(schema);
+const table = await perspective.table(schema);
 table.update(new_data);
 ```
 
 ```python
 schema = {"a": int, "b": float}
 
-table = perspective.table(schema)
+table = perspective.Table(schema)
 table.update(new_data)
 ```
 

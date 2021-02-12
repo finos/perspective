@@ -13,7 +13,7 @@ import {Table, View} from "@finos/perspective";
 export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, HTMLElement {
     load(data: Table): void;
     notifyResize(): void;
-    delete(delete_table: boolean): Promise<void>;
+    delete(): Promise<void>;
     flush(): Promise<void>;
     getEditPort(): Promise<number>;
     toggleConfig(): void;

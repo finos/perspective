@@ -561,7 +561,7 @@ class PerspectiveViewer extends ActionElement {
      * ]);
      * @example <caption>Load perspective.table</caption>
      * const my_viewer = document.getElementById('#my_viewer');
-     * const tbl = perspective.table("x,y\n1,a\n2,b");
+     * const tbl = await perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
      * @example <caption>Load Promise<perspective.table></caption>
      * const my_viewer = document.getElementById('#my_viewer');
@@ -621,7 +621,7 @@ class PerspectiveViewer extends ActionElement {
      * Deletes this element and clears it's internal state (but not its
      * user state).  This (or the underlying `perspective.view`'s equivalent
      * method) must be called in order for its memory to be reclaimed, as well
-     * as the recipcorcal method on the `perspective.table` which this viewer is
+     * as the reciprocal method on the `perspective.table` which this viewer is
      * bound to.
      *
      * @returns {Promise<Boolean>} Whether or not this call resulted in the
@@ -748,7 +748,7 @@ class PerspectiveViewer extends ActionElement {
      * @memberof PerspectiveViewer
      */
     async download(flat = false) {
-        const view = flat ? this._table.view() : this._view;
+        const view = flat ? await this._table.view() : this._view;
         const csv = await view.to_csv({formatted: true});
         const element = document.createElement("a");
         const binStr = csv;
@@ -775,15 +775,30 @@ class PerspectiveViewer extends ActionElement {
      */
     copy(flat = false) {
         let data;
-        const view = flat ? this._table.view() : this._view;
-        view.to_csv({formatted: true})
-            .then(csv => {
-                data = csv;
-            })
-            .catch(err => {
-                console.error(err);
-                data = "";
-            });
+
+        if (flat) {
+            let view = this._table.view();
+            view.then(view => view.to_csv({formatted: true}))
+                .then(csv => {
+                    data = csv;
+                })
+                .catch(err => {
+                    console.error(err);
+                    data = "";
+                });
+            view.delete();
+        } else {
+            this._view
+                .to_csv({formatted: true})
+                .then(csv => {
+                    data = csv;
+                })
+                .catch(err => {
+                    console.error(err);
+                    data = "";
+                });
+        }
+
         let count = 0;
         let f = () => {
             if (typeof data !== "undefined") {

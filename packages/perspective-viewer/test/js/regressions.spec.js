@@ -37,8 +37,8 @@ utils.with_server({}, () => {
 
                     const viewer = await page.$("perspective-viewer");
                     await page.evaluate(
-                        (viewer, data, schema) => {
-                            const table = window.WORKER.table(schema);
+                        async (viewer, data, schema) => {
+                            const table = await window.WORKER.table(schema);
                             viewer.load(table);
                             table.update(data);
                         },
@@ -50,8 +50,8 @@ utils.with_server({}, () => {
                     await page.shadow_click("perspective-viewer", "#config_button");
 
                     await page.evaluate(
-                        (viewer, data, schema) => {
-                            const table = window.WORKER.table(schema);
+                        async (viewer, data, schema) => {
+                            const table = await window.WORKER.table(schema);
                             viewer.load(table);
                             table.update(data);
                         },
@@ -72,7 +72,7 @@ utils.with_server({}, () => {
                     const byte_length = await page.evaluate(
                         async (viewer, data) => {
                             const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
-                            const table = window.WORKER.table(arrow);
+                            const table = await window.WORKER.table(arrow);
                             viewer.load(table);
                             // force _process to run - otherwise reading
                             // bytelength will return the un-transfered arrow.
@@ -100,7 +100,7 @@ utils.with_server({}, () => {
                     const arrow = arrows.int_float_str_arrow.slice();
                     const byte_length = await page.evaluate(
                         async (viewer, data, schema) => {
-                            const table = window.WORKER.table(schema);
+                            const table = await window.WORKER.table(schema);
                             viewer.load(table);
                             const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
                             table.update(arrow);
@@ -115,6 +115,22 @@ utils.with_server({}, () => {
                     );
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     expect(byte_length).toBe(0);
+                },
+                {wait_for_update: false}
+            );
+
+            test.capture(
+                "Should load a promise to a table.",
+                async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(async viewer => {
+                        await viewer.load(
+                            window.WORKER.table({
+                                a: [1, 2, 3, 4]
+                            })
+                        );
+                    }, viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                 },
                 {wait_for_update: false}
             );

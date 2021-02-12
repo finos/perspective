@@ -24,7 +24,7 @@ const getTable = async (): Promise<Table> => {
     const req = fetch("./superstore.arrow");
     const resp = await req;
     const buffer = await resp.arrayBuffer();
-    return worker.table(buffer as any);
+    return await worker.table(buffer as any);
 };
 
 const config: PerspectiveViewerOptions = {

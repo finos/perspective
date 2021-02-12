@@ -11,8 +11,8 @@ import {PerspectiveWorkspace} from "../../../src/js/workspace/workspace";
 import perspective from "@finos/perspective";
 
 describe("tables", () => {
-    test("setting a table calls load on a subscribed viewer", () => {
-        const table = perspective.table([{a: 1}]);
+    test("setting a table calls load on a subscribed viewer", async () => {
+        const table = await perspective.table([{a: 1}]);
         const viewers = {One: {table: "test", name: "One"}};
         const config = {
             viewers,
@@ -36,8 +36,8 @@ describe("tables", () => {
         expect(widget.viewer.load).toBeCalled();
     });
 
-    test("delete a table without subscribers works", () => {
-        const table = perspective.table([{a: 1}]);
+    test("delete a table without subscribers works", async () => {
+        const table = await perspective.table([{a: 1}]);
         const workspace = new PerspectiveWorkspace(document.body);
 
         workspace.tables.set("test", table);
@@ -47,8 +47,8 @@ describe("tables", () => {
         expect(workspace.tables.has("test")).toBeFalsy();
     });
 
-    test("delete a table with subscribers fails", () => {
-        const table = perspective.table([{a: 1}]);
+    test("delete a table with subscribers fails", async () => {
+        const table = await perspective.table([{a: 1}]);
         const viewers = {One: {table: "test", name: "One"}};
         const config = {
             viewers,
