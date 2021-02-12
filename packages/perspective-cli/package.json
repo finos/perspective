@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-cli",
-    "version": "0.6.1",
+    "version": "0.6.2",
     "description": "Perspective.js CLI",
     "main": "build/index.js",
     "publishConfig": {
@@ -27,10 +27,10 @@
         "perspective": "perspective"
     },
     "dependencies": {
-        "@finos/perspective": "^0.6.1",
-        "@finos/perspective-viewer": "^0.6.1",
-        "@finos/perspective-viewer-d3fc": "^0.6.1",
-        "@finos/perspective-viewer-datagrid": "^0.6.1",
+        "@finos/perspective": "^0.6.2",
+        "@finos/perspective-viewer": "^0.6.2",
+        "@finos/perspective-viewer-d3fc": "^0.6.2",
+        "@finos/perspective-viewer-datagrid": "^0.6.2",
         "commander": "^2.19.0",
         "core-js": "^3.6.4"
     }

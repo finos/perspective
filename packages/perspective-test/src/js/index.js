@@ -61,6 +61,8 @@ let browser,
 async function get_new_page() {
     page = await browser.newPage();
 
+    // https://github.com/puppeteer/puppeteer/issues/1718
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36");
     await page.setRequestInterception(true);
 
     // Webfonts cause tests to render inconcistently (or block) when run in a

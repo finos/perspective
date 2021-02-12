@@ -1,8 +1,16 @@
 # Changelog
 
-## [0.6.1](https://github.com/finos/perspective/tree/HEAD)
+## [0.6.2](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.6.0...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.1...HEAD)
+
+**Fixed bugs:**
+
+- Fix `@finos/perspective-jupyterlab` compat with webpack5 [\#1323](https://github.com/finos/perspective/pull/1323) ([texodus](https://github.com/texodus))
+
+## [v0.6.1](https://github.com/finos/perspective/tree/v0.6.1) (2021-02-11)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.0...v0.6.1)
 
 **Implemented enhancements:**
 
@@ -38,6 +46,7 @@
 
 **Merged pull requests:**
 
+- Export inline `@finos/perspective` by default, and simplify some package `dist` with rollup [\#1322](https://github.com/finos/perspective/pull/1322) ([texodus](https://github.com/texodus))
 - Update regular-table to 0.2.1 [\#1321](https://github.com/finos/perspective/pull/1321) ([texodus](https://github.com/texodus))
 - Docs site updates [\#1319](https://github.com/finos/perspective/pull/1319) ([texodus](https://github.com/texodus))
 - Add `jlab\_link` script to link local changes into development Jupyterlab [\#1309](https://github.com/finos/perspective/pull/1309) ([sc1f](https://github.com/sc1f))
