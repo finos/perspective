@@ -8,7 +8,6 @@
  */
 
 const DEFAULT_CONFIG = require("./settings.js").default;
-const get_config_file = require("./__node.js").default;
 
 module.exports.get_types = function() {
     return Object.keys(module.exports.get_config().types);
@@ -61,7 +60,7 @@ module.exports.override_config = function(config) {
 
 module.exports.get_config = function get_config() {
     if (!global.__PERSPECTIVE_CONFIG__) {
-        global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, typeof window === "undefined" ? get_config_file() : global.__TEMPLATE_CONFIG__ || {});
+        global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, global.__TEMPLATE_CONFIG__ || {});
     }
     return global.__PERSPECTIVE_CONFIG__;
 };
