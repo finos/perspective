@@ -1597,13 +1597,13 @@ module.exports = perspective => {
         });
 
         it("should partial update on unindexed table, column dataset", async function() {
-            let table = perspective.table(data);
+            let table = await perspective.table(data);
             table.update({
                 __INDEX__: [2],
                 y: ["new_string"]
             });
 
-            let view = table.view();
+            let view = await table.view();
             let result = await view.to_json();
 
             // does not unset any values
@@ -1618,7 +1618,7 @@ module.exports = perspective => {
         });
 
         it("should partial update and unset on unindexed table", async function() {
-            let table = perspective.table(data);
+            let table = await perspective.table(data);
             table.update([
                 {
                     __INDEX__: 2,
@@ -1627,7 +1627,7 @@ module.exports = perspective => {
                 }
             ]);
 
-            let view = table.view();
+            let view = await table.view();
             let result = await view.to_json();
 
             // does not unset any values
@@ -1642,14 +1642,14 @@ module.exports = perspective => {
         });
 
         it("should partial update and unset on unindexed table, column dataset", async function() {
-            let table = perspective.table(data);
+            let table = await perspective.table(data);
             table.update({
                 __INDEX__: [0, 2],
                 y: [undefined, "new_string"],
                 z: [null, undefined]
             });
 
-            let view = table.view();
+            let view = await table.view();
             let result = await view.to_json();
 
             // does not unset any values

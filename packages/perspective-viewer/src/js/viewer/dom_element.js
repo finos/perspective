@@ -127,7 +127,7 @@ export class DomElement extends PerspectiveElement {
                     })
                     .finally(() => {
                         // Clean up the View on the Emscripten heap.
-                        this._filter_view.delete();
+                        this._filter_view?.delete();
                         delete this._filter_view;
                     });
             }

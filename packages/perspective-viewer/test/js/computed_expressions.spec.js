@@ -687,6 +687,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Computed", "==", "2 Monday"]]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Order Date"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(() => document.activeElement.blur());
             });
 

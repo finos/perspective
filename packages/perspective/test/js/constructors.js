@@ -1035,14 +1035,14 @@ module.exports = perspective => {
             const data = {
                 x: ["1/1/2020, 12:30:45 PM", "03/15/2020, 11:30:45 AM", "06/30/2020, 01:30:45 AM", "12/31/2020, 11:59:59 PM"]
             };
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
             const schema = await table.schema();
 
             expect(schema).toEqual({
                 x: "datetime"
             });
 
-            const view = table.view();
+            const view = await table.view();
             const result = await view.to_columns();
 
             const expected = {
@@ -1058,14 +1058,14 @@ module.exports = perspective => {
             const data = {
                 x: ["1/1/2020, 05:30:45 AM", "03/15/2020, 11:30:45 AM", "06/30/2020, 01:30:45 AM", "12/31/2020, 11:59:59 PM"]
             };
-            const table = perspective.table(data);
+            const table = await perspective.table(data);
             const schema = await table.schema();
 
             expect(schema).toEqual({
                 x: "datetime"
             });
 
-            const view = table.view();
+            const view = await table.view();
             const result = await view.to_columns();
 
             const expected = {
