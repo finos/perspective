@@ -197,8 +197,8 @@ module.exports = perspective => {
             });
 
             it("x == 1, rolling updates", async function() {
-                var table = perspective.table(data);
-                var view = table.view({
+                var table = await perspective.table(data);
+                var view = await table.view({
                     columns: ["x"],
                     filter: [["x", "==", 1]]
                 });
@@ -301,11 +301,11 @@ module.exports = perspective => {
             });
 
             it("w == datetime as Date() object", async function() {
-                const table = perspective.table(datetime_data);
+                const table = await perspective.table(datetime_data);
                 expect(await table.schema()).toEqual({
                     x: "datetime"
                 });
-                const view = table.view({
+                const view = await table.view({
                     filter: [["x", "==", datetime_data[0]["x"]]]
                 });
                 expect(await view.num_rows()).toBe(1);
@@ -320,11 +320,11 @@ module.exports = perspective => {
             });
 
             it("w == datetime as US locale string", async function() {
-                const table = perspective.table(datetime_data);
+                const table = await perspective.table(datetime_data);
                 expect(await table.schema()).toEqual({
                     x: "datetime"
                 });
-                const view = table.view({
+                const view = await table.view({
                     filter: [["x", "==", datetime_data_local[0]["x"]]]
                 });
                 expect(await view.num_rows()).toBe(1);
