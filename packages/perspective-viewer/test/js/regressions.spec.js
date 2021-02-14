@@ -47,7 +47,7 @@ utils.with_server({}, () => {
                         schema
                     );
                     await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
 
                     await page.evaluate(
                         async (viewer, data, schema) => {

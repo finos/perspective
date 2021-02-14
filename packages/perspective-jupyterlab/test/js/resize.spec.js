@@ -17,7 +17,7 @@ utils.with_server({}, () => {
             test.capture(
                 "Basic widget functions",
                 async page => {
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.waitForSelector("perspective-viewer[settings]");
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 },
@@ -27,7 +27,7 @@ utils.with_server({}, () => {
             test.capture(
                 "Resize the container causes the widget to resize",
                 async page => {
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(async () => {
                         document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:300px;height:300px";
@@ -45,7 +45,7 @@ utils.with_server({}, () => {
             test.capture(
                 "row_pivots traitlet works",
                 async page => {
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(() => {
                         window.__WIDGET__.row_pivots = ["State"];
                     });

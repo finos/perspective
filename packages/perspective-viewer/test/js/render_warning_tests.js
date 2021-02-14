@@ -26,7 +26,7 @@ exports.default = function(plugin_name, columns) {
             plugin.max_cells = 1;
         }, plugin_name);
 
-        await page.shadow_click("perspective-viewer", "#config_button");
+        await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Profit"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
@@ -39,7 +39,7 @@ exports.default = function(plugin_name, columns) {
             plugin.max_cells = 1;
         }, plugin_name);
 
-        await page.shadow_click("perspective-viewer", "#config_button");
+        await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Profit"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
@@ -52,7 +52,7 @@ exports.default = function(plugin_name, columns) {
             plugin.max_columns = 1;
         }, plugin_name);
 
-        await page.shadow_click("perspective-viewer", "#config_button");
+        await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Profit"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
@@ -65,7 +65,7 @@ exports.default = function(plugin_name, columns) {
             plugin.max_columns = 1;
         }, plugin_name);
 
-        await page.shadow_click("perspective-viewer", "#config_button");
+        await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Row ID"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
@@ -80,7 +80,7 @@ exports.default = function(plugin_name, columns) {
             plugin.max_columns = 5;
         }, plugin_name);
 
-        await page.shadow_click("perspective-viewer", "#config_button");
+        await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Profit"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
@@ -95,7 +95,7 @@ exports.default = function(plugin_name, columns) {
             plugin.max_columns = 1;
         }, plugin_name);
 
-        await page.shadow_click("perspective-viewer", "#config_button");
+        await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
         await page.evaluate((element, view_columns) => element.setAttribute("columns", view_columns), viewer, view_columns);
         await page.evaluate(element => element.setAttribute("column-pivots", '["Row ID"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");

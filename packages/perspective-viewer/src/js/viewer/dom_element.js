@@ -510,9 +510,6 @@ export class DomElement extends PerspectiveElement {
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
         this._add_computed_expression_button = this.shadowRoot.querySelector("#add-computed-expression");
         this._computed_expression_widget = this.shadowRoot.querySelector("perspective-computed-expression-widget");
-        this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
-        this._drop_target = this.shadowRoot.querySelector("#drop_target");
-        this._config_button = this.shadowRoot.querySelector("#config_button");
         this._side_panel = this.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
@@ -520,9 +517,8 @@ export class DomElement extends PerspectiveElement {
         this._plugin_information = this.shadowRoot.querySelector(".plugin_information");
         this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
         this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
-        this._resize_bar = this.shadowRoot.querySelector("#resize_bar");
         this._columns_container = this.shadowRoot.querySelector("#columns_container");
-        this._status_bar = this.shadowRoot.querySelector("perspective-statusbar");
+        this._vieux = this.shadowRoot.querySelector("perspective-vieux");
     }
 
     // sets state, manipulates DOM

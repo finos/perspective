@@ -271,31 +271,6 @@ export class ActionElement extends DomElement {
         }
     }
 
-    _reset_sidepanel() {
-        this._side_panel.style.width = "";
-    }
-
-    _resize_sidepanel(event) {
-        const initial = document.body.style.cursor;
-        document.body.style.cursor = "col-resize";
-        const start = event.clientX;
-        const width = this._side_panel.offsetWidth;
-        const resize = event => {
-            const new_width = Math.max(0, Math.min(width + (event.clientX - start), this.offsetWidth - 10));
-            this._side_panel.style.width = `${new_width}px`;
-            if (this._plugin) {
-                this.notifyResize();
-            }
-        };
-        const stop = () => {
-            document.body.style.cursor = initial;
-            document.removeEventListener("mousemove", resize);
-            document.removeEventListener("mouseup", stop);
-        };
-        document.addEventListener("mousemove", resize);
-        document.addEventListener("mouseup", stop);
-    }
-
     _vis_selector_changed() {
         this._plugin_information.classList.add("hidden");
         this.setAttribute("plugin", this._vis_selector.value);
@@ -336,17 +311,20 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_widget.bind(this));
         this._computed_expression_widget.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-resize", this._reset_sidepanel.bind(this));
+
+        // TODO WIP
+        // this._computed_expression_widget.addEventListener(
+        //     "perspective-computed-expression-resize",
+        //     this._reset_sidepanel.bind(this)
+        // );
+
         this._computed_expression_widget.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
         this._computed_expression_widget.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
         this._computed_expression_widget.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
-        this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
-        this._drop_target.addEventListener("dragover", dragover.bind(this));
-        this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
-        this._resize_bar.addEventListener("dblclick", this._reset_sidepanel.bind(this));
-        this._status_bar.addEventListener("perspective-statusbar-reset", this.reset.bind(this));
         this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
+        this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());
+        this._vieux.addEventListener("perspective-vieux-resize", () => this._plugin.resize.call(this));
 
         this._plugin_information_action.addEventListener("click", () => {
             this._debounce_update({ignore_size_check: true, limit_points: false});

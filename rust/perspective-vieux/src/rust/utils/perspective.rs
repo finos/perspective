@@ -28,7 +28,11 @@ macro_rules! async_typed {
 #[rustfmt::skip]
 extern "C" {
 
+    #[derive(Clone)]
     pub type PerspectiveJsWorker;
+
+    #[wasm_bindgen(method, catch, js_name = delete)]
+    pub async fn _delete(this: &PerspectiveJsWorker) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = table)]
     pub async fn _table(
@@ -38,6 +42,9 @@ extern "C" {
 
     #[derive(Clone)]
     pub type PerspectiveJsTable;
+
+    #[wasm_bindgen(method, catch, js_name = delete)]
+    pub async fn _delete(this: &PerspectiveJsTable) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = size)]
     pub async fn _size(this: &PerspectiveJsTable) -> Result<JsValue, JsValue>;
@@ -82,10 +89,12 @@ extern "C" {
 }
 
 impl PerspectiveJsWorker {
+    async_typed!(_delete, delete() -> ());
     async_typed!(_table, table(data: js_sys::Object) -> PerspectiveJsTable);
 }
 
 impl PerspectiveJsTable {
+    async_typed!(_delete, delete() -> ());
     async_typed!(_view, view(config: js_sys::Object) -> PerspectiveJsView);
     async_typed!(_size, size() -> f64);
 }

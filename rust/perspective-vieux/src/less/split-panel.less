@@ -1,0 +1,45 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms
+ * of the Apache License 2.0.  The full license can be found in the LICENSE
+ * file.
+ *
+ */
+
+:host {
+
+    .split-panel {
+        display: flex;
+
+        & > * {
+            flex: 1 1 auto;
+        }
+
+        & > *:first-child {
+            flex: 0 0 auto;
+        }
+
+        // The thing you click to drag the panel size.
+        .split-panel-divider {
+            flex: 0 0 8px;
+            transition: background-color 0.2s ease-out;
+
+            &:hover {
+                background-color: rgba(0,0,0,0.05);
+                cursor: col-resize;
+            }
+        }
+
+        // Make the elements embedded in each child stretch to fill the
+        // container
+        .split-panel-child {
+            display: flex;
+
+            & > * {
+                flex: 1 1 auto;
+            }
+        }
+    }
+}

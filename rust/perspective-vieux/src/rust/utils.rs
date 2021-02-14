@@ -10,12 +10,13 @@
 
 pub mod perspective;
 
+use std::cell::RefCell;
 use std::future::Future;
-use typed_html::dom::{DOMTree, VNode};
+use std::ops::Deref;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
-use web_sys::{Document, Element};
+use yew::prelude::*;
 
 pub type JsResult<T> = Result<T, JsValue>;
 
@@ -32,144 +33,37 @@ extern "C" {
     pub fn log_str(s: &str);
 }
 
-/// Apply a style node to the target `elem`.
-pub fn apply_style_node(elem: &Element, css: &str) -> Result<(), JsValue> {
-    let document = &web_sys::window().unwrap().document().unwrap();
-    let style = document.create_element("style")?;
-    style.set_text_content(Some(css));
-    elem.append_child(&style)?;
-    Ok(())
-}
-
-pub fn apply_dom_tree(
-    elem: &Element,
-    tree: &mut DOMTree<String>,
-) -> Result<(), JsValue> {
-    let document = &web_sys::window().unwrap().document().unwrap();
-    match tree.vnode() {
-        VNode::Element(x) => {
-            for child in x.children {
-                apply_vnode(document, elem, &child)?;
-            }
-        }
-        _ => unimplemented!(),
-    }
-
-    Ok(())
-}
-
-fn apply_vnode(
-    document: &Document,
-    elem: &Element,
-    node: &VNode<'_, String>,
-) -> Result<(), JsValue> {
-    match node {
-        VNode::Text(text) | VNode::UnsafeText(text) => {
-            let node = document.create_text_node(&text);
-            elem.append_child(&node).map(|_| ())?;
-            Ok(())
-        }
-        VNode::Element(element) => {
-            let node = document.create_element(element.name)?;
-            for (key, value) in &element.attributes {
-                node.set_attribute(&key, &value)?;
-            }
-
-            for child in &element.children {
-                apply_vnode(document, &node, &child)?;
-            }
-
-            elem.append_child(&node)?;
-            Ok(())
-        }
-    }
-}
-
-pub trait PerspectiveComponent: Clone {
-    /// The root `HtmlElement` to which this component renders.
-    fn get_root(&self) -> &web_sys::HtmlElement;
-
-    /// Convenience function for injecting `self` into ` closure which returns a
-    /// `Future`, the Rust equivalent of an `AsyncFn`.  It handles both the lifetime of
-    /// `self` as well as wrapping the inner `Future` in a JavaScript `Promise` (or it
-    /// would not execute).
-    fn async_method_to_jsfunction<F, T>(
-        &self,
-        f: F,
-    ) -> Closure<dyn Fn() -> js_sys::Promise>
+pub trait ToClosure<T: Component> {
+    fn to_closure<F>(&self, f: F) -> Closure<dyn Fn(MouseEvent)>
     where
-        T: Future<Output = Result<JsValue, JsValue>> + 'static,
-        F: Fn(Self) -> T + 'static,
-        Self: 'static,
-    {
-        let this = self.clone();
-        let cb = move || future_to_promise(f(this.clone()));
-        let box_cb: Box<dyn Fn() -> js_sys::Promise> = Box::new(cb);
-        Closure::wrap(box_cb)
-    }
+        F: Fn(MouseEvent) -> T::Message + 'static;
+}
 
-    /// Convenience function for wrapping and injecting `self` into a `Future`.
-    fn async_method_to_jspromise<F, T>(&self, f: F) -> js_sys::Promise
+impl<T: Component> ToClosure<T> for ComponentLink<T> {
+    fn to_closure<F>(&self, f: F) -> Closure<dyn Fn(MouseEvent)>
     where
-        T: Future<Output = Result<JsValue, JsValue>> + 'static,
-        F: FnOnce(Self) -> T + 'static,
-        Self: 'static,
+        F: Fn(MouseEvent) -> T::Message + 'static,
     {
-        let this = self.clone();
-        future_to_promise(f(this.clone()))
-    }
-
-    /// Convenience function for wrapping and injecting `self` into a closure with an
-    /// argument (a common pattern for event handles in JavaScript).
-    fn method_to_jsfunction_arg1<F, T>(&self, f: F) -> js_sys::Function
-    where
-        T: wasm_bindgen::convert::FromWasmAbi + 'static,
-        F: Fn(&Self, T) -> Result<(), JsValue> + 'static,
-        Self: 'static,
-    {
-        let this = self.clone();
-        let box_cb: Box<dyn Fn(T) -> Result<(), JsValue>> =
-            Box::new(move |e| f(&this, e));
-        Closure::wrap(box_cb).into_js_value().unchecked_into()
+        let callback = self.callback(f);
+        Closure::wrap(Box::new(move |event: MouseEvent| {
+            callback.emit(event);
+        }) as Box<dyn Fn(MouseEvent)>)
     }
 }
 
-#[cfg(test)]
-mod perspective_component_tests {
-    use crate::utils::*;
-    use wasm_bindgen_test::*;
-
-    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
-
-    #[derive(Clone)]
-    struct Test {}
-
-    impl PerspectiveComponent for Test {
-        fn get_root(&self) -> &web_sys::HtmlElement {
-            unimplemented!()
-        }
-    }
-
-    #[wasm_bindgen_test]
-    fn test_async_method_to_jsfunction() {
-        async fn f(_: Test) -> Result<JsValue, JsValue> {
-            Ok(JsValue::UNDEFINED)
-        }
-
-        let _: &js_sys::Function = (Test {})
-            .async_method_to_jsfunction(f)
-            .as_ref()
-            .unchecked_ref();
-    }
-
-    #[wasm_bindgen_test]
-    fn test_async_method_to_jspromise() {
-        async fn f(_: Test) -> Result<JsValue, JsValue> {
-            Ok(JsValue::UNDEFINED)
-        }
-
-        let _: js_sys::Promise = (Test {}).async_method_to_jspromise(f);
-    }
+pub fn async_method_to_jsfunction<F, T, U>(
+    this: &U,
+    f: F,
+) -> Closure<dyn Fn() -> js_sys::Promise>
+where
+    T: Future<Output = Result<JsValue, JsValue>> + 'static,
+    F: Fn(U) -> T + 'static,
+    U: Clone + 'static,
+{
+    let this = this.clone();
+    let cb = move || future_to_promise(f(this.clone()));
+    let box_cb: Box<dyn Fn() -> js_sys::Promise> = Box::new(cb);
+    Closure::wrap(box_cb)
 }
 
 #[macro_export]
@@ -194,4 +88,118 @@ macro_rules! js_object {
         })*
         $o
     }};
+}
+
+#[macro_export]
+macro_rules! maybe {
+    ($($exp:stmt);* $(;)*) => {{
+        let x: Result<_, JsValue> = (|| {
+            $(
+                $exp
+            )*
+        })();
+        x.unwrap()
+    }};
+}
+
+pub struct WeakComponentLink<C: Component>(Rc<RefCell<Option<ComponentLink<C>>>>);
+
+impl<C: Component> Clone for WeakComponentLink<C> {
+    fn clone(&self) -> Self {
+        Self(Rc::clone(&self.0))
+    }
+}
+
+impl<C: Component> Default for WeakComponentLink<C> {
+    fn default() -> Self {
+        Self(Rc::default())
+    }
+}
+
+impl<C: Component> Deref for WeakComponentLink<C> {
+    type Target = Rc<RefCell<Option<ComponentLink<C>>>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<C: Component> PartialEq for WeakComponentLink<C> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+#[macro_export]
+macro_rules! enable_weak_link_test {
+    ($props:expr, $link:expr) => {
+        #[cfg(test)]
+        {
+            *$props.weak_link.borrow_mut() = Some($link.clone());
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! test_html {
+    ($($html:tt)*) => {{
+        use crate::components::perspective_vieux::CSS;
+        use wasm_bindgen::JsCast;
+        use yew::prelude::*;
+
+        struct TestElement {
+            html: Html
+        }
+
+        #[derive(Properties, Clone)]
+        struct TestElementProps {
+            html: Html
+        }
+
+        impl Component for TestElement {
+            type Message = ();
+            type Properties = TestElementProps;
+
+            fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+                TestElement {
+                    html: _props.html,
+                }
+            }
+
+            fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+                false
+            }
+
+            fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+                true
+            }
+
+            fn view(&self) -> Html {
+                html! {
+                    <>
+                        <style>
+                            { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
+                            { &CSS }
+                        </style>
+                        { self.html.clone() }
+                    </>
+                }
+            }
+        }
+
+        let window = web_sys::window().unwrap();
+        let document = window.document().unwrap();
+        let body = document.body().unwrap();
+        let div = document.create_element("div").unwrap();
+        body.append_child(&div).unwrap();
+
+        let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
+        let shadow_root = div
+            .attach_shadow(&init)
+            .unwrap()
+            .unchecked_into::<web_sys::Element>();
+
+        let app = App::<TestElement>::new();
+        app.mount_with_props(shadow_root, TestElementProps { html: html!{ $($html)* } })
+    }}
 }

@@ -25,7 +25,7 @@ utils.with_server({}, () => {
                 "with column position 1 set to null.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", null, "Quantity"]'), viewer);
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
@@ -38,7 +38,7 @@ utils.with_server({}, () => {
                 "tooltip columns works",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit", "State"]'), viewer);
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
@@ -65,7 +65,7 @@ utils.with_server({}, () => {
                 "treemap label shows formatted date",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date"]'), viewer);
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
@@ -75,7 +75,7 @@ utils.with_server({}, () => {
 
             test.skip("treemap parent button shows formatted date", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date", "Ship Mode"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");

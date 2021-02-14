@@ -15,14 +15,12 @@ path = "src/rust/lib.rs"
 default = ["wee_alloc", "console_error_panic_hook"]
 
 [dependencies]
-# serde = { version = "1.0", features = ["derive"] }
+futures = "0.3.12"
+js-intern = "0.3.1"
+num-format = "0.4.0"
 wasm-bindgen = { version = "0.2.63" } #, features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
-js-intern = "0.3.1"
-yew = "0.17.3"
-typed-html = { git = "https://github.com/bodil/typed-html", rev = "4c13ecca" }
-num-format = "0.4.0"
-futures = "0.3.12"
+yew = { git = "https://github.com/yewstack/yew", rev = "b074b4b" } # "0.17.4"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

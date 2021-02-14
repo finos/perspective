@@ -34,7 +34,8 @@ export default () => {
         {
             input: "src/js/viewer.js",
             external: id => {
-                // `@finos/perspective-vieux` is inlined for now.  So we need to bundle:
+                // `@finos/perspective-vieux` is inlined for now.  So we need to
+                // bundle:
                 // * Files in this package (starting with '.')
                 // * Anything else in the package root ..
                 //     * .. including the inlined `@finos/perspective-vieux` ..
