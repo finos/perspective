@@ -6,8 +6,12 @@ module.exports = common({}, config => {
         entry: {"perspective-viewer": "./dist/esm/viewer.js"},
         output: {
             filename: "[name].js",
+            webassemblyModuleFilename: "perspective-viewer.wasm",
             libraryTarget: "umd",
             path: path.resolve(__dirname, "../../dist/umd")
+        },
+        experiments: {
+            syncWebAssembly: true
         }
     });
 });

@@ -33,7 +33,8 @@ utils.with_server({}, () => {
                     element => {
                         let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".segment");
                         if (elem) {
-                            return elem.textContent.includes("11/12");
+                            // TODO Full label is clipped
+                            return elem.textContent.includes("11/");
                         }
                     },
                     {},

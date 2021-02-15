@@ -105,8 +105,17 @@ try {
         execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
         execute`yarn --silent clean --screenshots`;
+        if (!PACKAGE || minimatch("perspective-vieux", PACKAGE)) {
+            console.log("-- Running Rust tests");
+            execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
+        }
+
         execute`${docker("puppeteer")} node scripts/test_js.js --private-puppeteer ${getarg()}`;
     } else {
+        if (!IS_INSIDE_PUPPETEER && (!PACKAGE || minimatch("perspective-vieux", PACKAGE))) {
+            console.log("-- Running Rust tests");
+            execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
+        }
         if (IS_LOCAL_PUPPETEER) {
             execute`yarn --silent clean --screenshots`;
             execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;

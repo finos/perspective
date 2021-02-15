@@ -53,6 +53,9 @@ module.exports = {
             }
         ]
     },
+    experiments: {
+        syncWebAssembly: true
+    },
     output: {
         filename: "lumino.js",
         libraryTarget: "umd",

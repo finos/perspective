@@ -28,6 +28,9 @@ jobs:
     - bash: npm install -g yarn
       displayName: "Install Yarn"
 
+    - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      displayName: "Install wasm-pack"
+
     - task: Cache@2
       inputs:
         key: 'yarn | "$(Agent.OS)" | yarn.lock'

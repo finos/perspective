@@ -487,14 +487,19 @@ export class PerspectiveElement extends StateElement {
             computed_columns: computed_columns
         };
 
+        if (this._view) {
+            this._view.remove_update(this._view_updater);
+            this._status_bar.remove_on_update_callback();
+            this._view.delete();
+            this._view = undefined;
+        }
+
+        if (this._task) {
+            this._task.cancel();
+        }
+
         try {
             const _view = await this._table.view(config);
-            if (this._view) {
-                this._view.remove_update(this._view_updater);
-                this._view.delete();
-                this._view = undefined;
-            }
-
             this._view = _view;
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
@@ -503,11 +508,10 @@ export class PerspectiveElement extends StateElement {
             throw e;
         }
 
+        this._status_bar.set_view(this._view);
+
         const timer = this._render_time();
         this._render_count = (this._render_count || 0) + 1;
-        if (this._task) {
-            this._task.cancel();
-        }
 
         const task = (this._task = new CancelTask(() => this._render_count--, true));
 

@@ -123,9 +123,9 @@ async function focus_package() {
                     value: "perspective-viewer-d3fc"
                 },
                 {
-                    key: "o",
-                    name: "perspective-phosphor",
-                    value: "perspective-phosphor"
+                    key: "r",
+                    name: "perspective-vieux",
+                    value: "perspective-vieux"
                 },
                 {
                     key: "l",

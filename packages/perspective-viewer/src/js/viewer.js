@@ -8,9 +8,10 @@
  */
 
 import "@webcomponents/webcomponentsjs";
+import {wasm} from "../../dist/esm/@finos/perspective-vieux";
 import "./polyfill.js";
 
-import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard, invertPromise, throttlePromise} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute, invertPromise, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
 import "./autocomplete_widget.js";
@@ -571,12 +572,11 @@ class PerspectiveViewer extends ActionElement {
     async load(data) {
         let table;
         if (data instanceof Promise) {
+            this._status_bar.set_table(data);
             table = await data;
         } else {
-            try {
-                data = data.trim();
-            } catch (e) {}
             if (data.type === "table") {
+                this._status_bar.set_table(Promise.resolve(data));
                 table = data;
             } else {
                 throw new Error(`Unrecognized input type ${typeof data}.  Please use a \`perspective.Table()\``);
@@ -737,7 +737,6 @@ class PerspectiveViewer extends ActionElement {
         }
         this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
-        this._hide_context_menu();
     }
 
     /**
@@ -748,23 +747,12 @@ class PerspectiveViewer extends ActionElement {
      * @memberof PerspectiveViewer
      */
     async download(flat = false) {
-        const view = flat ? await this._table.view() : this._view;
-        const csv = await view.to_csv({formatted: true});
-        const element = document.createElement("a");
-        const binStr = csv;
-        const len = binStr.length;
-        const arr = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            arr[i] = binStr.charCodeAt(i);
+        const {download_flat, download} = await wasm;
+        if (flat) {
+            await download_flat(this._table);
+        } else {
+            await download(this._view);
         }
-        const blob = new Blob([arr]);
-        element.setAttribute("href", window.URL.createObjectURL(blob));
-        element.setAttribute("download", "perspective.csv");
-        element.style.display = "none";
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        this._hide_context_menu();
     }
 
     /**
@@ -773,45 +761,13 @@ class PerspectiveViewer extends ActionElement {
      * restrictions on clipboard access.  See
      * {@link https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard}.
      */
-    copy(flat = false) {
-        let data;
-
+    async copy(flat = false) {
+        const {copy_flat, copy} = await wasm;
         if (flat) {
-            let view = this._table.view();
-            view.then(view => view.to_csv({formatted: true}))
-                .then(csv => {
-                    data = csv;
-                })
-                .catch(err => {
-                    console.error(err);
-                    data = "";
-                });
-            view.delete();
+            await copy_flat(this._table);
         } else {
-            this._view
-                .to_csv({formatted: true})
-                .then(csv => {
-                    data = csv;
-                })
-                .catch(err => {
-                    console.error(err);
-                    data = "";
-                });
+            await copy(this._view);
         }
-
-        let count = 0;
-        let f = () => {
-            if (typeof data !== "undefined") {
-                copy_to_clipboard(data);
-            } else if (count < 200) {
-                count++;
-                setTimeout(f, 50);
-            } else {
-                console.warn("Timeout expired - copy to clipboard cancelled.");
-            }
-        };
-        f();
-        this._hide_context_menu();
     }
 
     /**

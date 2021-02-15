@@ -34,7 +34,14 @@ export default () => {
         {
             input: "src/js/viewer.js",
             external: id => {
-                let include = id.startsWith(".") || require.resolve(id).indexOf(PROJECT_PATH) === 0 || id.endsWith(".css");
+                // `@finos/perspective-vieux` is inlined for now.  So we need to bundle:
+                // * Files in this package (starting with '.')
+                // * Anything else in the package root ..
+                //     * .. including the inlined `@finos/perspective-vieux` ..
+                //         * .. but not its own `/pkg/`, because
+                //           `@finos/perspective-vieux` itself does not.
+                // * Vendor CSS that goes in the Shadow DOM
+                let include = id.startsWith(".") || (require.resolve(id).indexOf(PROJECT_PATH) === 0 && require.resolve(id).indexOf("@finos/perspective-vieux/pkg/") === -1) || id.endsWith(".css");
                 return !include;
             },
             output: {

@@ -9,6 +9,9 @@ module.exports = common({}, config =>
             library: "perspective-workspace",
             libraryTarget: "umd",
             path: path.resolve(__dirname, "../dist/umd")
+        },
+        experiments: {
+            syncWebAssembly: true
         }
     })
 );
