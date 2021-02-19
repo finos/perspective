@@ -21,7 +21,7 @@ from ..core.data import deconstruct_pandas
 from ..core.exception import PerspectiveError
 from ..libpsp import is_libpsp
 from ..viewer import PerspectiveViewer
-from ..core._version import major_minor_version
+from ..core._version import __version__
 
 
 def _type_to_string(t):
@@ -209,10 +209,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
     # Required by ipywidgets for proper registration of the backend
     _model_name = Unicode("PerspectiveModel").tag(sync=True)
     _model_module = Unicode("@finos/perspective-jupyterlab").tag(sync=True)
-    _model_module_version = Unicode("~{}".format(major_minor_version)).tag(sync=True)
+    _model_module_version = Unicode("~{}".format(__version__)).tag(sync=True)
     _view_name = Unicode("PerspectiveView").tag(sync=True)
     _view_module = Unicode("@finos/perspective-jupyterlab").tag(sync=True)
-    _view_module_version = Unicode("~{}".format(major_minor_version)).tag(sync=True)
+    _view_module_version = Unicode("~{}".format(__version__)).tag(sync=True)
 
     def __init__(
         self,
