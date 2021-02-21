@@ -17,7 +17,7 @@ utils.with_server({}, () => {
         function() {
             test.capture("replaces all rows.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 const json = await page.evaluate(async element => {
                     let json = await element.view.to_json();
                     return json.slice(10, 20);

@@ -7,14 +7,14 @@ import path from "path";
 export default () => {
     return [
         {
-            input: `src/less/container.less`,
+            input: `src/less/perspective-vieux.less`,
             output: {
                 dir: "dist/css"
             },
             plugins: [
                 postcss({
                     inject: false,
-                    extract: path.resolve(`dist/css/container.css`),
+                    extract: path.resolve(`dist/css/perspective-vieux.css`),
                     minimize: {preset: "lite"}
                 })
             ]

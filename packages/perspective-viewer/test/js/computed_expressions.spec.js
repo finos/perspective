@@ -40,14 +40,14 @@ utils.with_server({}, () => {
         "superstore.html",
         () => {
             test.capture("click on add column button opens the computed expression UI.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
             });
 
             test.capture("click on close button closes the computed expression UI.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_click("perspective-viewer", "perspective-computed-expression-widget", "#psp-computed-expression-widget-close");
@@ -56,7 +56,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing an expression in the textarea should work even when pushed down to page bottom.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -76,7 +76,7 @@ utils.with_server({}, () => {
 
             // Autocomplete
             test.capture("Typing a numeric function should show autocomplete for numeric columns", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("sqrt('", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -89,7 +89,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing a string function should show autocomplete for string columns", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("uppercase('", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -102,7 +102,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing a datetime function should show autocomplete for datetime columns", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("month_bucket('", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -115,7 +115,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing a partial column name should show autocomplete", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -128,7 +128,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing a long expression should dock the autocomplete", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -141,7 +141,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing a long expression should dock the autocomplete, and the details panel should show", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -155,7 +155,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("An expression that doesn't reach max-width should undock the autocomplete", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -175,21 +175,21 @@ utils.with_server({}, () => {
 
             // Prediction/search
             test.capture("Typing a partial expression should search by expression label and value", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("day", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
             });
 
             test.capture("Typing a column name followed by a partial function should not show autocomplete", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("'Sales' a", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
             });
 
             test.capture("Typing an alias should not show autocomplete", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -202,7 +202,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow down should select the next autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("con", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -212,7 +212,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow down on the last item should select the first autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("con", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -222,7 +222,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow up should select the previous autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("con", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -233,7 +233,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow up from the first item should select the last autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("con", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -241,7 +241,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow down on an undocked autocomplete should select the next autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -250,7 +250,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow down on the last item on an undocked autocomplete should select the first autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -259,7 +259,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow up on an undocked autocomplete should select the previous autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -268,7 +268,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing arrow up from the first item on an undocked autocomplete should select the last autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"S', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -277,7 +277,7 @@ utils.with_server({}, () => {
 
             // Replace items
             test.capture("Pressing enter should apply the autocomplete item", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("con", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -288,7 +288,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Pressing enter should apply the selected column", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type("'S", "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -297,7 +297,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Column replace should work for a fragment", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"Pro', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -306,7 +306,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("Column replace should work for a fragment with spaces", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type('"Product ', "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
@@ -317,7 +317,7 @@ utils.with_server({}, () => {
             // Functionality - make sure the UI will validate error cases so
             // the engine is not affected.
             test.capture("A type-invalid expression should show an error message", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -331,7 +331,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("An expression with invalid inputs should show an error message", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -345,7 +345,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("An expression that overwrites a real column should show an error message", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -359,7 +359,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("An expression that overwrites a computed column with a different type should show an error message", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -384,7 +384,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing enter should save a valid expression", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -400,7 +400,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Typing enter should not save an invalid expression", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -416,7 +416,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("Typing a large expression in the textarea should work even when pushed down to page bottom.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.shadow_type(
@@ -437,7 +437,7 @@ utils.with_server({}, () => {
             // Remove
             test.capture("Removing computed columns should reset active columns, pivots, sort, and filter.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'sqrt("Profit") as "first"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'sqrt("Sales") as "second"');
@@ -481,7 +481,7 @@ utils.with_server({}, () => {
             // reset
             test.capture("Resetting the viewer with computed columns should place columns in the inactive list.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'sqrt("Profit")');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'sqrt("Sales")');
@@ -494,7 +494,7 @@ utils.with_server({}, () => {
 
             test.capture("Resetting the viewer with computed columns in active columns should reset columns but not delete columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
@@ -509,7 +509,7 @@ utils.with_server({}, () => {
 
             test.capture("Resetting the viewer with computed columns set as pivots should reset pivots but not delete columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
@@ -525,7 +525,7 @@ utils.with_server({}, () => {
 
             test.capture("Resetting the viewer with computed columns set as filters should reset filters but not delete columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
@@ -550,7 +550,7 @@ utils.with_server({}, () => {
 
             test.capture("Resetting the viewer with computed columns set as sort should reset sort but not delete columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
@@ -576,7 +576,7 @@ utils.with_server({}, () => {
             // save
             test.capture("saving without an expression should fail as button is disabled.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
                 await page.evaluate(
                     element =>
@@ -590,27 +590,27 @@ utils.with_server({}, () => {
 
             test.capture("saving a single computed expression should add it to inactive columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'month_bucket("Ship Date")');
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
             });
 
             test.capture("saving a single computed expression with dependencies should add all columns to inactive columns.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, '"Sales" + (pow2("Sales")) as "new column"');
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
             });
 
             test.skip("saving a duplicate expression should fail with error message.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'month_bucket("Ship Date")');
                 await add_computed_expression(page, 'month_bucket("Ship Date")');
             });
 
             // Transforms
             test.capture("Computed expression columns should persist when new views are created.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'month_bucket("Ship Date")');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["State", "City"]'), viewer);
@@ -618,7 +618,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("Computed expression columns should persist when new computed columns are added.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'month_bucket("Ship Date")');
                 await add_computed_expression(page, '"Sales" % "Profit"');
                 const viewer = await page.$("perspective-viewer");
@@ -627,7 +627,7 @@ utils.with_server({}, () => {
 
             // usage
             test.capture("aggregates by computed expression column.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
@@ -640,7 +640,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("row pivots by computed expression column.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Computed"]'), viewer);
@@ -649,7 +649,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("column pivots by computed expression column.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Computed"]'), viewer);
@@ -659,7 +659,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("row and column pivots by computed expression column.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'concat_comma("State", "City") as "Computed"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_computed_expression(page, 'uppercase("City") as "Computed2"');
@@ -674,7 +674,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("sorts by computed expression column.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'pow2("Sales") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("sort", JSON.stringify([["Computed", "desc"]])), viewer);
@@ -682,7 +682,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("filters by computed expression column.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Computed", "==", "2 Monday"]]'), viewer);
@@ -692,7 +692,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("computed expression column aggregates should persist.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Quantity"]'), viewer);
@@ -704,7 +704,7 @@ utils.with_server({}, () => {
 
             // Attributes
             test.capture("adds computed expression via attribute", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const computed = ['"Sales" + "Profit" as "First"', 'sqrt((pow2("Row ID"))) as "Second"'];
@@ -715,7 +715,7 @@ utils.with_server({}, () => {
             });
 
             test.capture("adds computed expression via attribute in classic syntax", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const computed = [
@@ -741,7 +741,7 @@ utils.with_server({}, () => {
 
             // Save and restore
             test.capture("Computed expressions are saved without changes", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_computed_expression(page, 'day_of_week("Order Date") as "Computed"');
                 await add_computed_expression(page, 'month_of_year("Ship Date") as "Computed2"');
                 const viewer = await page.$("perspective-viewer");
@@ -759,7 +759,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("Computed expressions are restored without changes", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
@@ -773,7 +773,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("On restore, computed expressions in the active columns list are restored correctly.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
@@ -787,7 +787,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("On restore, computed expressions in pivots are restored correctly.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
@@ -803,7 +803,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("On restore, computed expressions in filter are restored correctly.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
@@ -818,7 +818,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("On restore, computed expressions in sort are restored correctly.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
@@ -833,7 +833,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("On restore, computed expressions in classic syntax are parsed correctly.", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
@@ -859,7 +859,7 @@ utils.with_server({}, () => {
             });
 
             test.skip("On restore, user defined aggregates are maintained on computed expression columns", async page => {
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async element => {
                     const config = {

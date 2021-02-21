@@ -12,39 +12,50 @@ export const wasm = import("./index.js");
 
 let _index = undefined;
 async function _await_index(f) {
+    await new Promise(setTimeout);
     if (!_index) {
         _index = await wasm;
     }
     return f();
 }
 
-function handle_view_errors(e) {
-    if (e.message !== "View is not initialized") {
-        throw e;
-    }
-}
+// function handle_view_errors(e) {
+//     if (e.message !== "View is not initialized") {
+//         throw e;
+//     }
+// }
 
-class PerspectiveStatusBarElement extends HTMLElement {
+class PerspectiveVieuxElement extends HTMLElement {
     constructor() {
         super();
         _await_index(() => {
-            this._instance = new _index.StatusBarElement(this);
+            this._instance = new _index.PerspectiveVieuxElement(this);
         });
     }
 
-    set_view(...args) {
-        return _await_index(() => this._instance.set_view(...args).catch(handle_view_errors));
+    connectedCallback() {
+        _await_index(() => {
+            this._instance.connected_callback();
+        });
     }
 
-    set_table(...args) {
-        return _await_index(() => this._instance.set_table(...args));
+    load(table) {
+        _await_index(() => this._instance.load(table));
     }
 
-    remove_on_update_callback(...args) {
-        return _await_index(() => this._instance.remove_on_update_callback(...args));
+    set_view(view) {
+        _await_index(() => this._instance.set_view(view));
+    }
+
+    delete_view() {
+        return _await_index(() => this._instance.delete_view());
+    }
+
+    toggle_config(force) {
+        return _await_index(() => this._instance.toggle_config(force));
     }
 }
 
-if (document.createElement("perspective-statusbar").constructor === HTMLElement) {
-    window.customElements.define("perspective-statusbar", PerspectiveStatusBarElement);
+if (document.createElement("perspective-vieux").constructor === HTMLElement) {
+    window.customElements.define("perspective-vieux", PerspectiveVieuxElement);
 }

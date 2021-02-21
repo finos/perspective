@@ -25,7 +25,7 @@ utils.with_server({}, () => {
                 "tooltips with no color and size.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit", null, null, "Quantity"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
@@ -51,7 +51,7 @@ utils.with_server({}, () => {
                 "tooltip columns works",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit", "Discount", "Quantity", "State"]'), viewer);
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
                     expect(columns).toEqual(["Sales", "Profit", "Discount", "Quantity", "State"]);
@@ -77,7 +77,7 @@ utils.with_server({}, () => {
                 "tooltip columns works when color column is null",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit", null, "Quantity", "State"]'), viewer);
                     const columns = JSON.parse(await page.evaluate(element => element.getAttribute("columns"), viewer));
                     expect(columns).toEqual(["Sales", "Profit", null, "Quantity", "State"]);

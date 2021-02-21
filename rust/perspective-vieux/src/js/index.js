@@ -8,7 +8,7 @@
  *
  */
 
-import {StatusBarElement, download, download_flat, copy, copy_flat, set_panic_hook} from "../../pkg/perspective_vieux_bg.js";
-export {StatusBarElement, download, download_flat, copy, copy_flat, set_panic_hook};
+import {PerspectiveVieuxElement, download, download_flat, copy, copy_flat, set_panic_hook} from "../../pkg/perspective_vieux_bg.js";
+export {PerspectiveVieuxElement, download, download_flat, copy, copy_flat, set_panic_hook};
 
 set_panic_hook();

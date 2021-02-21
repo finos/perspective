@@ -23,7 +23,7 @@ utils.with_server({}, () => {
 
             test.skip("sunburst label shows formatted date", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                 await page.evaluate(element => element.setAttribute("filters", '[["Product ID", "==", "FUR-BO-10001798"]]'), viewer);
@@ -45,7 +45,7 @@ utils.with_server({}, () => {
 
             test.skip("sunburst parent button shows formatted date", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Ship Date", "City"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                 await page.evaluate(element => element.setAttribute("filters", '[["Product ID", "==", "FUR-BO-10001798"]]'), viewer);

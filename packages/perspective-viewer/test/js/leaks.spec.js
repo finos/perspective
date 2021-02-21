@@ -31,7 +31,7 @@ utils.with_server({}, () => {
                         }, viewer);
                         await page.waitForSelector("perspective-viewer:not([updating])");
                     }
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(async () =>
                         document.getElementsByTagName("perspective-viewer")[0].load(
                             window.__WORKER__.table(
@@ -51,7 +51,7 @@ utils.with_server({}, () => {
                 "doesn't leak views when setting row pivots.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     for (var i = 0; i < 100; i++) {
                         await page.evaluate(element => {
                             let pivots = ["State", "City", "Segment", "Ship Mode", "Region", "Category"];
@@ -71,7 +71,7 @@ utils.with_server({}, () => {
                 "doesn't leak views when setting filters.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     for (var i = 0; i < 100; i++) {
                         await page.evaluate(element => {
                             element.setAttribute("filters", JSON.stringify([["Sales", ">", Math.random() * 100 + 100]]));

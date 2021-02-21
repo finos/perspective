@@ -20,7 +20,7 @@ utils.with_server({}, () => {
 
             test.capture("resets viewable area when the logical size expands.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["City"]'), viewer);
@@ -28,11 +28,11 @@ utils.with_server({}, () => {
 
             test.capture("resets viewable area when the physical size expands.", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Category"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", "[]"), viewer);
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
             });
 
             test.capture("perspective dispatches perspective-click event with correct details", async page => {
@@ -66,7 +66,7 @@ utils.with_server({}, () => {
 
             test.capture("perspective dispatches perspective-click event with correct details when filter is set", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("row-pivots", '["State", "Category"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 const detail = await click_details(page, 310, 320);

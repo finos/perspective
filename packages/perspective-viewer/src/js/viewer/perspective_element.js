@@ -489,7 +489,7 @@ export class PerspectiveElement extends StateElement {
 
         if (this._view) {
             this._view.remove_update(this._view_updater);
-            this._status_bar.remove_on_update_callback();
+            await this._vieux.delete_view();
             this._view.delete();
             this._view = undefined;
         }
@@ -508,7 +508,7 @@ export class PerspectiveElement extends StateElement {
             throw e;
         }
 
-        this._status_bar.set_view(this._view);
+        this._vieux.set_view(this._view);
 
         const timer = this._render_time();
         this._render_count = (this._render_count || 0) + 1;

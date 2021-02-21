@@ -70,9 +70,11 @@ function common({no_minify, inline} = {}) {
                     test: /perspective\.worker\.js$/,
                     type: "javascript/auto",
                     loader: "worker-loader",
-                    options: {
-                        inline: "no-fallback"
-                    }
+                    options: inline
+                        ? {
+                              inline: "no-fallback"
+                          }
+                        : undefined
                 }
             ]
         },

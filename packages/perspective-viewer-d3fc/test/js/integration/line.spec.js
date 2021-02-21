@@ -23,7 +23,7 @@ utils.with_server({}, () => {
 
             test.capture("Sets a category axis when pivoted by a computed datetime", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("computed-columns", JSON.stringify(["hour_bucket('Ship Date')"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["hour_bucket(Ship Date)"]'), viewer);

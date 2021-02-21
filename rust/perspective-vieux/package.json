@@ -17,7 +17,7 @@
         "src/**/*"
     ],
     "scripts": {
-        "build:wasm": "wasm-pack build",
+        "build:wasm": "wasm-pack build --debug",
         "build:rollup": "rollup --config rollup.config.js",
         "build": "npm-run-all build:rollup build:wasm && cpx 'src/less/*' dist/less",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
@@ -27,7 +27,7 @@
         "lint": "eslint src examples/*.md examples/*.html",
         "test:build": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
         "test:run": "echo 'No Jest tests'",
-        "test:clean": "rm perspective.csv",
+        "test:clean": "rm perspective.csv || true",
         "test": "yarn test:build && wasm-pack test --chrome --headless && yarn test:clean",
         "watch": "npm-run-all -p watch:*"
     },

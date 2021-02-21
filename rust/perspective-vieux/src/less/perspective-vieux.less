@@ -1,0 +1,73 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms
+ * of the Apache License 2.0.  The full license can be found in the LICENSE
+ * file.
+ *
+ */
+
+ @import "./split-panel.less";
+ @import "./status-bar.less";
+
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    #app_panel {
+        position: absolute;
+        bottom: 36px;
+        left: 0 ;
+        right: 0;
+        top: 0;
+    }
+
+    #status_bar {
+        position: absolute;
+        bottom: 0;
+        left:0 ;
+        right: 0;
+        height: 36px;
+    }
+
+    #main_column {
+        display: flex;
+        flex-direction: column;
+
+        #main_panel_container {
+            flex: 1 1 auto;
+            position: relative;
+            overflow: hidden;
+        }
+    }
+
+    #config_button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: var(--button--padding, 12px 14px 24px 8px);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+
+        background: none;
+        color: var(--inactive--color, #999);
+        font-family: var(--button--font-family, Arial);
+        font-size: var(--button--font-size, 16px);
+        font-weight: normal;
+        transition: opacity 0.3s;
+
+        &:hover {
+            color: var(--active--color, inherit);
+            cursor: pointer;
+        }
+        &:before {
+            font-feature-settings: "liga";
+            content: var(--settings-button--content, "\1f527");
+        }
+    }
+}

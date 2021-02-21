@@ -35,7 +35,6 @@ pub fn download(view: &PerspectiveJsView) -> Promise {
     let view = view.clone();
     future_to_promise(async move {
         download_async(&view).await?;
-        view.delete().await?;
         Ok(JsValue::NULL)
     })
 }

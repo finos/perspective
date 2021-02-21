@@ -13,7 +13,7 @@ exports.default = function() {
         "shows horizontal columns on small vertical viewports.",
         async page => {
             const viewer = await page.$("perspective-viewer");
-            await page.shadow_click("perspective-viewer", "#config_button");
+            await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
             await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales"]'), viewer);
         },
         {
@@ -29,7 +29,7 @@ exports.default = function() {
         "shows horizontal columns on small vertical and horizontal viewports.",
         async page => {
             const viewer = await page.$("perspective-viewer");
-            await page.shadow_click("perspective-viewer", "#config_button");
+            await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
             await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales"]'), viewer);
         },
         {
