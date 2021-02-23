@@ -90,13 +90,13 @@ T col<T>::operator()(t_parameter_list parameters) {
 }
 
 template <typename T>
-toupper<T>::toupper() {}
+upper<T>::upper() {}
 
 template <typename T>
-toupper<T>::~toupper() {}
+upper<T>::~upper() {}
 
 template <>
-t_tscalar toupper<t_tscalar>::operator()(t_parameter_list parameters) {
+t_tscalar upper<t_tscalar>::operator()(t_parameter_list parameters) {
      auto num_params = parameters.size();
 
     if (num_params == 0) {
@@ -108,10 +108,11 @@ t_tscalar toupper<t_tscalar>::operator()(t_parameter_list parameters) {
 
     t_string_view param = t_string_view(parameters[0]);
     std::string s(param.begin(), param.size());
+    std::cout << "upper " << s << std::endl;
     t_tscalar rval;
     boost::to_upper(s);
     rval.set(s.c_str());
-    std::cout << "toupper: " << rval.repr() << std::endl;
+    std::cout << "upper saved: " << rval.repr() << std::endl;
     return rval;
 }
 
@@ -987,7 +988,7 @@ void month_of_year<DTYPE_TIME>(
 
 // Explicitly instantiate all exprtk functions
 template struct col<t_tscalar>;
-template struct toupper<t_tscalar>;
+template struct upper<t_tscalar>;
 
 } // end namespace computed_function
 } // end namespace perspective

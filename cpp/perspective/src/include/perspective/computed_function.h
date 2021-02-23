@@ -66,14 +66,14 @@ struct col : public exprtk::igeneric_function<T> {
 };
 
 template <typename T>
-struct toupper : public exprtk::igeneric_function<T> {
+struct upper : public exprtk::igeneric_function<T> {
     typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
     typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
     typedef typename t_generic_type::string_view t_string_view;
 
-    toupper();
+    upper();
 
-    ~toupper();
+    ~upper();
 
     T operator()(t_parameter_list parameters);
 };

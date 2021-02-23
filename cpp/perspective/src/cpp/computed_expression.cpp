@@ -10,9 +10,10 @@
 #include <perspective/computed_expression.h>
 
 namespace perspective {
-std::shared_ptr<exprtk::parser<t_tscalar>> t_computed_expression_parser::EXPRESSION_PARSER = std::make_shared<exprtk::parser<t_tscalar>>();
-std::shared_ptr<exprtk::parser<t_tscalar>> t_computed_expression_parser::VALIDATION_PARSER = std::make_shared<exprtk::parser<t_tscalar>>();
-exprtk::symbol_table<t_tscalar> t_computed_expression_parser::CONSTANTS_SYMTABLE = exprtk::symbol_table<t_tscalar>();
+std::shared_ptr<exprtk::parser<t_tscalar>>
+t_computed_expression_parser::PARSER = std::make_shared<exprtk::parser<t_tscalar>>();
+exprtk::symbol_table<t_tscalar>
+t_computed_expression_parser::GLOBAL_SYMTABLE = exprtk::symbol_table<t_tscalar>();
 
 t_computed_expression::t_computed_expression(
         const std::string& expression_string,
@@ -50,15 +51,15 @@ t_computed_expression::compute(
         sym_table.add_variable(column_id, values[cidx].second);
     }
 
-    expr_definition.register_symbol_table(t_computed_expression_parser::CONSTANTS_SYMTABLE);
+    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
     expr_definition.register_symbol_table(sym_table);
 
-    if (!t_computed_expression_parser::EXPRESSION_PARSER->compile(m_parsed_expression_string, expr_definition)) {
+    if (!t_computed_expression_parser::PARSER->compile(m_parsed_expression_string, expr_definition)) {
         std::stringstream ss;
         ss << "[t_computed_expression::compute] Failed to parse expression: `"
             << m_parsed_expression_string
             << "`, failed with error: "
-            << t_computed_expression_parser::EXPRESSION_PARSER->error().c_str()
+            << t_computed_expression_parser::PARSER->error().c_str()
             << std::endl;
 
         PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -128,15 +129,15 @@ t_computed_expression::recompute(
         sym_table.add_variable(column_id, values[cidx].second);
     }
 
-    expr_definition.register_symbol_table(t_computed_expression_parser::CONSTANTS_SYMTABLE);
+    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
     expr_definition.register_symbol_table(sym_table);
 
-    if (!t_computed_expression_parser::EXPRESSION_PARSER->compile(m_parsed_expression_string, expr_definition)) {
+    if (!t_computed_expression_parser::PARSER->compile(m_parsed_expression_string, expr_definition)) {
         std::stringstream ss;
         ss << "[t_computed_expression::recompute] Failed to parse expression: `"
             << m_parsed_expression_string
             << "`, failed with error: "
-            << t_computed_expression_parser::EXPRESSION_PARSER->error().c_str()
+            << t_computed_expression_parser::PARSER->error().c_str()
             << std::endl;
 
         PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -241,8 +242,7 @@ t_computed_expression::get_dtype() const {
 
 void
 t_computed_expression_parser::init() {
-    VALIDATION_PARSER->enable_unknown_symbol_resolver();
-    CONSTANTS_SYMTABLE.add_constants();
+    t_computed_expression_parser::GLOBAL_SYMTABLE.add_constants();
 }
 
 t_computed_expression
@@ -254,18 +254,41 @@ t_computed_expression_parser::precompute(
 ) {
     auto start = std::chrono::high_resolution_clock::now(); 
     exprtk::symbol_table<t_tscalar> sym_table;
-    sym_table.add_constants();
-
     exprtk::expression<t_tscalar> expr_definition;
+
+    // We aren't accessing values over multiple iterations, so we don't need
+    // to track the column name.
+    std::vector<t_tscalar> values;
+
+    auto num_input_columns = column_ids.size();
+    values.resize(num_input_columns);
+
+    // Add a new scalar of the input column type to the symtable, which
+    // will use the scalar to validate the output type of the expression.
+    for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
+        const std::string& column_id = column_ids[cidx].first;
+        const std::string& column_name = column_ids[cidx].second;
+
+        t_tscalar rval;
+        rval.m_type = schema->get_dtype(column_name);
+
+        // Needs to be valid here, as invalid scalars will return DTYPE_NONE
+        // and all we care about is the dtype and not validity.
+        rval.m_status = STATUS_VALID;
+        values[cidx] = rval;
+
+        sym_table.add_variable(column_id, values[cidx]);
+    }
+
+    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
     expr_definition.register_symbol_table(sym_table);
 
-    // default unknown symbol resolution will allow for parse.
-    if (!t_computed_expression_parser::VALIDATION_PARSER->compile(parsed_expression_string, expr_definition)) {
+    if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
         std::stringstream ss;
-        ss << "[precompute] Failed to validate expression: `"
+        ss << "[t_computed_expression_parser::precompute] Failed to parse expression: `"
             << parsed_expression_string
             << "`, failed with error: "
-            << t_computed_expression_parser::VALIDATION_PARSER->error().c_str()
+            << t_computed_expression_parser::PARSER->error().c_str()
             << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
@@ -282,6 +305,77 @@ t_computed_expression_parser::precompute(
         parsed_expression_string,
         column_ids,
         v.get_dtype());
+}
+
+t_dtype
+t_computed_expression_parser::get_dtype(
+    const std::string& expression_string,
+    const std::string& parsed_expression_string,
+    const std::vector<std::pair<std::string, std::string>>& column_ids,
+    const t_schema& schema
+) {
+    auto start = std::chrono::high_resolution_clock::now(); 
+    exprtk::symbol_table<t_tscalar> sym_table;
+    exprtk::expression<t_tscalar> expr_definition;
+
+    // We aren't accessing values over multiple iterations, so we don't need
+    // to track the column name.
+    std::vector<t_tscalar> values;
+
+    auto num_input_columns = column_ids.size();
+    values.resize(num_input_columns);
+
+    bool has_invalid_column = false;
+
+    // Add a new scalar of the input column type to the symtable, which
+    // will use the scalar to validate the output type of the expression.
+    for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
+        const std::string& column_id = column_ids[cidx].first;
+        const std::string& column_name = column_ids[cidx].second;
+
+        if (!schema.has_column(column_name)) {
+            std::cerr << "[t_computed_expression_parser::get_dtype] Column `"
+                << column_name << "` does not exist in the schema!"
+                << std::endl;
+            has_invalid_column = false;
+            break;
+        }
+
+        t_tscalar rval;
+        rval.m_type = schema.get_dtype(column_name);
+
+        // Needs to be valid here, as invalid scalars will return DTYPE_NONE
+        // and all we care about is the dtype and not validity.
+        rval.m_status = STATUS_VALID;
+        values[cidx] = rval;
+
+        sym_table.add_variable(column_id, values[cidx]);
+    }
+
+    if (has_invalid_column) {
+        return DTYPE_NONE;
+    }
+
+    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
+    expr_definition.register_symbol_table(sym_table);
+
+    if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
+        std::cerr << "[t_computed_expression_parser::get_dtype] Failed to validate expression: `"
+            << parsed_expression_string
+            << "`, failed with error: "
+            << t_computed_expression_parser::PARSER->error().c_str()
+            << std::endl;
+        return DTYPE_NONE;
+    }
+
+    t_tscalar v = expr_definition.value();
+
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    std::cout << "[get_dtype] took: " << duration.count() << std::endl;
+
+    std::cout << "dtype: " << get_dtype_descr(v.get_dtype()) << std::endl;
+    return v.get_dtype();
 }
 
 } // end namespace perspective

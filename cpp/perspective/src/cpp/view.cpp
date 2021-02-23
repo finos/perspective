@@ -361,6 +361,23 @@ View<CTX_T>::computed_schema() const {
         }
     }
 
+    return new_schema;
+}
+
+template <typename CTX_T>
+std::map<std::string, std::string>
+View<CTX_T>::expression_schema() const {
+    auto schema = m_ctx->get_schema();
+    auto _types = schema.types();
+    auto names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
     for (const auto& expr : m_expressions) {
         std::string expression_string = expr.get_expression_string();
         new_schema[expression_string] = dtype_to_str(expr.get_dtype());
@@ -376,6 +393,12 @@ View<CTX_T>::computed_schema() const {
 template <>
 std::map<std::string, std::string>
 View<t_ctxunit>::computed_schema() const {
+    return {};
+}
+
+template <>
+std::map<std::string, std::string>
+View<t_ctxunit>::expression_schema() const {
     return {};
 }
 
@@ -397,7 +420,23 @@ View<t_ctx0>::computed_schema() const {
         new_schema[name] = dtype_to_str(types[name]);
     }
 
-    // TODO: remove the old computed API
+    return new_schema;
+}
+
+template <>
+std::map<std::string, std::string>
+View<t_ctx0>::expression_schema() const {
+    t_schema schema = m_ctx->get_schema();
+    std::vector<t_dtype> _types = schema.types();
+    std::vector<std::string> names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    std::map<std::string, std::string> new_schema;
+
     for (const auto& expr : m_expressions) {
         std::string expression_string = expr.get_expression_string();
         new_schema[expression_string] = dtype_to_str(expr.get_dtype());

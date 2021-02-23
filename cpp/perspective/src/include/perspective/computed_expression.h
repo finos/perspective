@@ -73,7 +73,8 @@ public:
 
     /**
      * @brief Given expression strings, validate the expression's dtype and
-     * return a new `t_computed_expression`.
+     * return a new `t_computed_expression`. This method will abort() if
+     * an input column is invalid or the expression cannot be parsed.
      * 
      * @param expression_string 
      * @param parsed_expression_string 
@@ -88,9 +89,31 @@ public:
         std::shared_ptr<t_schema> schema
     );
 
-    static std::shared_ptr<exprtk::parser<t_tscalar>> EXPRESSION_PARSER;
-    static std::shared_ptr<exprtk::parser<t_tscalar>> VALIDATION_PARSER;
-    static exprtk::symbol_table<t_tscalar> CONSTANTS_SYMTABLE;
+    /**
+     * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
+     * if the expression is invalid. Unlike `precompute`, this method
+     * implements additional checks for column validity and is guaranteed
+     * to return a value, even if the expression cannot be parsed.
+     * 
+     * @param expression_string 
+     * @param parsed_expression_string 
+     * @param column_ids 
+     * @param schema 
+     * @return t_dtype 
+     */
+    static t_dtype get_dtype(
+        const std::string& expression_string,
+        const std::string& parsed_expression_string,
+        const std::vector<std::pair<std::string, std::string>>& column_ids,
+        const t_schema& schema);
+
+    static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
+
+    // Symbol table for constants and functions that don't have any state.
+    static exprtk::symbol_table<t_tscalar> GLOBAL_SYMTABLE;
+
+    // Instances of Exprtk functions
+    static std::vector<exprtk::igeneric_function<t_tscalar>> FUNCTIONS;
 };
 
 } // end namespace perspective

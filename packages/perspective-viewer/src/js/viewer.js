@@ -23,7 +23,6 @@ import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
 import {ActionElement} from "./viewer/action_element.js";
-import {COMPUTED_EXPRESSION_PARSER} from "./computed_expressions/computed_expression_parser.js";
 
 /**
  * Module for the `<perspective-viewer>` custom element.
@@ -81,7 +80,6 @@ class PerspectiveViewer extends ActionElement {
         this._show_warnings = true;
         this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
-        // this._computed_expression_parser = COMPUTED_EXPRESSION_PARSER;
         this._edit_port = null;
         this._edit_port_lock = invertPromise();
         window.addEventListener("resize", this._resize_handler);
@@ -127,17 +125,17 @@ class PerspectiveViewer extends ActionElement {
         this._update_column_list(
             sort,
             inner,
-            (s, computed_names) => {
+            (s, expressions) => {
                 let dir = "asc";
                 if (Array.isArray(s)) {
                     dir = s[1];
                     s = s[0];
                 }
-                let computed = undefined;
-                if (computed_names.includes(s)) {
-                    computed = s;
+                let expression = undefined;
+                if (expressions.includes(s)) {
+                    expression = s;
                 }
-                return this._new_row(s, false, false, false, dir, computed);
+                return this._new_row(s, false, false, false, dir, expression);
             },
             (sort, node) => {
                 if (Array.isArray(sort)) {
@@ -180,126 +178,103 @@ class PerspectiveViewer extends ActionElement {
         this._debounce_update();
     }
 
-    /* eslint-disable max-len */
-
     /**
      * Sets new computed columns for the viewer.
      *
      * @kind member
      * @type {Array<Object>}
-     * @param {Array<Object>} computed-columns An Array of computed column objects,
-     * which have three properties: `column`, a column name for the new column,
-     * `computed_function_name`, a String representing the computed function to
-     * apply, and `inputs`, an Array of String column names to be used as
-     * inputs to the computation.
-     * @fires PerspectiveViewer#perspective-config-update
-     * @example <caption>via Javascript DOM</caption>
-     * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('computed-columns', JSON.stringify([{column: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
-     * @example <caption>via HTML</caption>
-     * <perspective-viewer computed-columns="[{column:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
+     * @param {Array<Object>} computed-columns DEPRECATED - use the
+     * "expressions" API instead.
+     * @deprecated
      */
     @array_attribute
-    "computed-columns"(computed_columns) {
-        const resolve = this._set_updating();
-
-        (async () => {
-            if (this._computed_expression_widget.style.display !== "none") {
-                this._computed_expression_widget._close_expression_widget();
-            }
-            if (computed_columns === null || computed_columns === undefined || computed_columns.length === 0) {
-                // Remove computed columns from the DOM, and reset the config
-                // to exclude all computed columns.
-                if (this.hasAttribute("computed-columns")) {
-                    this.removeAttribute("computed-columns");
-                    const parsed = this._get_view_parsed_computed_columns();
-                    this._reset_computed_column_view(parsed);
-                    this.removeAttribute("parsed-computed-columns");
-                    resolve();
-                    return;
-                }
-                computed_columns = [];
-            }
-
-            let parsed_computed_columns = [];
-
-            // for (const column of computed_columns) {
-            //     if (typeof column === "string") {
-            //         // Either validated through the UI or here. If a `table`
-            //         // has not been loaded when the parsing happens,
-            //         // the column will be skipped.
-            //         if (this._computed_expression_parser.is_initialized) {
-            //             parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(column));
-            //         }
-            //     } else {
-            //         parsed_computed_columns.push(column);
-            //     }
-            // }
-
-            // Attempt to validate the parsed computed columns against the Table
-            let computed_schema = {};
-
-            if (this._table) {
-                computed_schema = await this._table.computed_schema(parsed_computed_columns);
-                const validated = await this._validate_parsed_computed_columns(parsed_computed_columns, computed_schema);
-                if (validated.length !== parsed_computed_columns.length) {
-                    // Generate a diff error message with the invalid columns
-                    const diff = [];
-                    for (let i = 0; i < parsed_computed_columns.length; i++) {
-                        if (i > validated.length - 1) {
-                            diff.push(parsed_computed_columns[i]);
-                        } else {
-                            if (parsed_computed_columns[i].column !== validated[i].column) {
-                                diff.push(parsed_computed_columns[i]);
-                            }
-                        }
-                    }
-                    console.warn("Could not apply these computed columns:", JSON.stringify(diff));
-                }
-                parsed_computed_columns = validated;
-            }
-
-            // Need to refresh the UI so that previous computed columns used in
-            // pivots, columns, etc. get cleared
-            const old_columns = this._get_view_parsed_computed_columns();
-            const to_remove = this._diff_computed_column_view(old_columns, parsed_computed_columns);
-            this._reset_computed_column_view(to_remove);
-
-            // Always store a copy of the parsed computed columns for
-            // validation of column names, etc.
-            this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
-
-            this._update_computed_column_view(computed_schema);
-            this.dispatchEvent(new Event("perspective-config-update"));
-            await this._debounce_update();
-            resolve();
-        })();
+    "computed-columns"() {
+        console.error("[PerspectiveViewer] the `computed-columns` attribute is deprecated - use the `expressions` attribute instead.");
     }
 
     @array_attribute
-    "expressions"(expressions) {
+    expressions(expressions) {
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._computed_expression_widget.style.display !== "none") {
-                this._computed_expression_widget._close_expression_widget();
+            if (this._expression_widget.style.display !== "none") {
+                this._expression_widget._close_expression_widget();
             }
             if (expressions === null || expressions === undefined || expressions.length === 0) {
-                // Remove computed columns from the DOM, and reset the config
-                // to exclude all computed columns.
+                // Remove expression columns from the DOM, and reset the config
+                // to exclude all expression columns.
                 if (this.hasAttribute("expressions")) {
                     this.removeAttribute("expressions");
-                    // TODO: remove expression columns from all uses.
-                    resolve();
+                    this._reset_expressions_view();
                     return;
                 }
-                expressions = [];
+
+                resolve();
             }
 
-            // TODO: move this into `_new_view()` or create a new method that
-            // can access the state of the view itself without breaking the
-            // relative structure and organization of the module.
-            this._update_expressions_view(expressions);
+            let expression_schema = {};
+
+            if (this.table) {
+                expression_schema = await this.table.expression_schema(expressions);
+                const validated_expressions = [];
+
+                /**
+                 * Clear the expressions attribute if the validation fails at
+                 * any point. This validation gets triggered in two scenarios:
+                 *
+                 * 1. When a user types an expression and clicks save,
+                 *  where the expression has already been checked. In
+                 *  this case, there should be no failure of the
+                 *  validation as the expression has already been
+                 *  checked and validated.
+                 *
+                 * 2. When a user calls setAttribute() or restore()
+                 *  with a config that contains expressions, in which case
+                 *  the existing expressions are cleared already, and so
+                 *  there is no need to preserve the array.
+                 */
+                let clear_expressions = false;
+
+                for (const expression of expressions) {
+                    if (expression_schema[expression]) {
+                        validated_expressions.push(expression);
+                    } else {
+                        console.error(`Failed to set "expressions" attribute: expression "${expression}" is invalid.`);
+                        clear_expressions = true;
+                    }
+                }
+
+                if (clear_expressions) {
+                    // recurses one level down but will not make any calls
+                    // to Perspective.
+                    this.setAttribute("expressions", null);
+                }
+
+                // Need to remove old expressions from the viewer DOM and
+                // config so they don't mess up state. To do this, we need
+                // to get the expression columns that are currently in the DOM,
+                // as this callback runs after the attribute is already set
+                // with the new value.
+                const active_expressions = this._get_view_active_columns()
+                    .filter(x => x.classList.contains("expression"))
+                    .map(x => x.getAttribute("name"));
+                const inactive_expressions = this._get_view_all_columns()
+                    .filter(x => x.classList.contains("expression"))
+                    .map(x => x.getAttribute("name"));
+
+                const old_expressions = active_expressions.concat(inactive_expressions);
+                const to_remove = this._diff_expressions(old_expressions, expressions);
+
+                if (to_remove.length > 0) {
+                    this._reset_expressions_view(to_remove);
+                }
+
+                expressions = validated_expressions;
+            } else {
+                console.warn(`Applying unvalidated expressions: ${expressions} because the viewer does not have a Table attached!`);
+            }
+
+            this._update_expressions_view(expressions, expression_schema);
             this.dispatchEvent(new Event("perspective-config-update"));
             await this._debounce_update();
             resolve();
@@ -380,17 +355,17 @@ class PerspectiveViewer extends ActionElement {
             this._update_column_list(
                 filters,
                 inner,
-                (filter, computed_names) => {
+                (filter, expressions) => {
                     const fterms = JSON.stringify({
                         operator: filter[1],
                         operand: filter[2]
                     });
                     const name = filter[0];
-                    let computed = undefined;
-                    if (computed_names.includes(name)) {
-                        computed = name;
+                    let expression = undefined;
+                    if (expressions.includes(name)) {
+                        expression = name;
                     }
-                    return this._new_row(name, undefined, undefined, fterms, undefined, computed);
+                    return this._new_row(name, undefined, undefined, fterms, undefined, expression);
                 },
                 (filter, node) =>
                     node.getAttribute("name") === filter[0] &&
@@ -461,12 +436,12 @@ class PerspectiveViewer extends ActionElement {
         }
 
         const inner = this._column_pivots.querySelector("ul");
-        this._update_column_list(pivots, inner, (pivot, computed_names) => {
-            let computed = undefined;
-            if (computed_names.includes(pivot)) {
-                computed = pivot;
+        this._update_column_list(pivots, inner, (pivot, expressions) => {
+            let expression = undefined;
+            if (expressions.includes(pivot)) {
+                expression = pivot;
             }
-            return this._new_row(pivot, undefined, undefined, undefined, undefined, computed);
+            return this._new_row(pivot, undefined, undefined, undefined, undefined, expression);
         });
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
@@ -489,12 +464,12 @@ class PerspectiveViewer extends ActionElement {
         }
 
         const inner = this._row_pivots.querySelector("ul");
-        this._update_column_list(pivots, inner, (pivot, computed_names) => {
-            let computed = undefined;
-            if (computed_names.includes(pivot)) {
-                computed = pivot;
+        this._update_column_list(pivots, inner, (pivot, expressions) => {
+            let expression = undefined;
+            if (expressions.includes(pivot)) {
+                expression = pivot;
             }
-            return this._new_row(pivot, undefined, undefined, undefined, undefined, computed);
+            return this._new_row(pivot, undefined, undefined, undefined, undefined, expression);
         });
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();

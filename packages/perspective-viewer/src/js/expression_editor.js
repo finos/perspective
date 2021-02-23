@@ -217,7 +217,10 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 const parsed = JSON.parse(data);
                 if (Array.isArray(parsed) && parsed.length > 4) {
                     event.preventDefault();
-                    this._edit_area.textContent += `"${parsed[0]}"`;
+
+                    // Escape single quotes in the column name
+                    let column_name = parsed[0].replace(/'/g, "\\'");
+                    this._edit_area.textContent += `$'${column_name}'`;
                 }
             } catch (e) {
                 // regular text, don't do anything as browser will handle

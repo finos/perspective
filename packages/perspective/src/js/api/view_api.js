@@ -79,6 +79,8 @@ view.prototype.schema = async_queue("schema");
 
 view.prototype.computed_schema = async_queue("computed_schema");
 
+view.prototype.expression_schema = async_queue("expression_schema");
+
 view.prototype.column_paths = async_queue("column_paths");
 
 view.prototype.num_columns = async_queue("num_columns");

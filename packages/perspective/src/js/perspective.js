@@ -348,6 +348,43 @@ export default function(Module) {
         return schema;
     };
 
+    /**
+     * The expression schema of this {@link module:perspective~view},
+     * which contains only the expressions created on this view.
+     *
+     * A schema is an Object, the keys of which are the columns of this
+     * {@link module:perspective~view}, and the values are their string type
+     * names. If this {@link module:perspective~view} is aggregated, these will
+     * be the aggregated types; otherwise these types will be the same as the
+     * columns in the underlying {@link module:perspective~table}.
+     *
+     * @example
+     * // Create a view with expressions
+     * const view = table.view({
+     *      expressions: ["$'x' + $'y'"]
+     * });
+     *
+     * await view.expression_schema(); // {"$'x' + $'y'": "float"}
+     *
+     * @async
+     *
+     * @returns {Promise<Object>} A Promise of this
+     * {@link module:perspective~view}'s expression schema.
+     */
+    view.prototype.expression_schema = function(override = true) {
+        const schema = extract_map(this._View.expression_schema());
+        if (override) {
+            for (const key of Object.keys(schema)) {
+                let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
+                colname = colname[colname.length - 1];
+                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                    schema[key] = this.overridden_types[colname];
+                }
+            }
+        }
+        return schema;
+    };
+
     view.prototype._column_names = function(skip = false, depth = 0) {
         return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
@@ -1081,7 +1118,6 @@ export default function(Module) {
 
     view_config.prototype.get_expressions = function() {
         let vector = __MODULE__.make_2d_val_vector();
-        console.log("get_expressions", this.expressions);
         for (let expression of this.expressions) {
             let inner = __MODULE__.make_val_vector();
             console.log("get_expressions:inner:", expression);
@@ -1282,6 +1318,62 @@ export default function(Module) {
     };
 
     /**
+     * Transform an expression string into a vector that internally provides
+     * the engine with more metadata in order to efficiently compute the
+     * expression:
+     *
+     * v[0]: the expression string as typed by the user
+     * v[1]: the expression string with $'column' replaced with col0, col1,
+     *  etc., which allows for faster lookup of column values.
+     * v[2]: a map of column keys (col0, col1) to actual column names,
+     *  which will be used in the engine to look up column values.
+     *
+     * @private
+     * @param {Array<String>} expressions
+     */
+    function validate_expressions(expressions) {
+        let validated_expressions = [];
+
+        for (let expression_string of expressions) {
+            if (expression_string.includes("$''")) {
+                throw new Error("Expression cannot reference empty column $''!");
+            }
+
+            // Map of column names to column IDs, so that we generate
+            // column IDs correctly without collision.
+            let cname_map = {};
+
+            // Map of column IDs to column names, so the engine can look
+            // up the right column internally without more transforms.
+            let column_id_map = {};
+            let running_cidx = 0;
+
+            // TODO: probably validate columns here as well? although
+            // if the front-end validates through get_expression_schema
+            // then we probably can just take the input as is.
+            let parsed_expression_string = expression_string.replace(/\$'(.*?[^\\])'/g, (_, cname) => {
+                // If the column name contains escaped single quotes, remove
+                // them assuming they are escaping a single quote and not the
+                // literal string "\'", in which case...?
+                cname = cname.replace(/\\'/g, "'");
+
+                if (cname_map[cname] === undefined) {
+                    let column_id = `COLUMN${running_cidx}`;
+                    cname_map[cname] = column_id;
+                    column_id_map[column_id] = cname;
+                }
+
+                running_cidx++;
+                return cname_map[cname];
+            });
+
+            validated_expressions.push([expression_string, parsed_expression_string, column_id_map]);
+        }
+
+        return validated_expressions;
+    }
+
+    /**
      * Given an array of computed column definitions, perform type lookups to
      * create a schema for the computed column without calculating or
      * constructing any new columns.
@@ -1331,33 +1423,58 @@ export default function(Module) {
         return new_schema;
     };
 
+    /**
+     * Given an array of expressions, return a schema containing the column
+     * type for each expression. If the expression is invalid or returns
+     * the type "none" (indicating the expression could be parsed but resulted
+     * in an invalid output column), the expression will not be present in the
+     * returned schema.
+     *
+     * @param {Array<String>} expressions An array of string expressions to
+     * be validated.
+     *
+     * @returns {Promise<Object>} A Promise that resolves to an expression
+     * schema based on the expressions provided.
+     */
     table.prototype.expression_schema = function(expressions, override = true) {
-        const new_schema = {};
+        const expression_schema = {};
 
-        if (!expressions || expressions.length === 0) return new_schema;
+        if (!expressions || expressions.length === 0) return expression_schema;
+        expressions = validate_expressions(expressions);
 
-        let vector = __MODULE__.make_string_vector();
-        vector = fill_vector(vector, expressions);
+        console.log(expressions);
 
-        let expression_schema = __MODULE__.get_table_expression_schema(this._Table, vector);
-        let columns = expression_schema.columns();
-        let types = expression_schema.types();
+        // Transform Array into a C++ vector that can be passed through
+        // Emscripten.
+        let vector = __MODULE__.make_2d_val_vector();
+
+        for (let expression of expressions) {
+            let inner = __MODULE__.make_val_vector();
+            for (let val of expression) {
+                inner.push_back(val);
+            }
+            vector.push_back(inner);
+        }
+
+        const _schema = __MODULE__.get_table_expression_schema(this._Table, vector);
+        let columns = _schema.columns();
+        let types = _schema.types();
 
         for (let key = 0; key < columns.size(); key++) {
             const name = columns.get(key);
             const type = types.get(key);
             if (override && this.overridden_types[name]) {
-                new_schema[name] = this.overridden_types[name];
+                expression_schema[name] = this.overridden_types[name];
             } else {
-                new_schema[name] = get_column_type(type.value);
+                expression_schema[name] = get_column_type(type.value);
             }
         }
 
-        expression_schema.delete();
+        _schema.delete();
         columns.delete();
         types.delete();
 
-        return new_schema;
+        return expression_schema;
     };
 
     /**
@@ -1489,52 +1606,8 @@ export default function(Module) {
 
         const table_schema = this.schema();
 
-        /**
-         * Transform an expression string into a vector that internally provides
-         * the engine with more metadata in order to efficiently compute the
-         * expression:
-         *
-         * v[0]: the expression string as typed by the user
-         * v[1]: the expression string with $'column' replaced with col0, col1,
-         *  etc., which allows for faster lookup of column values.
-         * v[2]: a map of column keys (col0, col1) to actual column names,
-         *  which will be used in the engine to look up column values.
-         */
         if (config.expressions.length > 0) {
-            let validated_expressions = [];
-
-            for (let expression_string of config.expressions) {
-                if (expression_string.includes("$''")) {
-                    throw new Error("Expression cannot reference empty column $''!");
-                }
-
-                // Map of column names to column IDs, so that we generate
-                // column IDs correctly without collision.
-                let cname_map = {};
-
-                // Map of column IDs to column names, so the engine can look
-                // up the right column internally without more transforms.
-                let column_id_map = {};
-                let running_cidx = 0;
-
-                // TODO: probably validate columns here as well? although
-                // if the front-end validates through get_expression_schema
-                // then we probably can just take the input as is.
-                let parsed_expression_string = expression_string.replace(/\$'(.*?[^\\])'/g, (_, cname) => {
-                    if (cname_map[cname] === undefined) {
-                        let column_id = `COLUMN${running_cidx}`;
-                        cname_map[cname] = column_id;
-                        column_id_map[column_id] = cname;
-                    }
-
-                    running_cidx++;
-                    return cname_map[cname];
-                });
-
-                validated_expressions.push([expression_string, parsed_expression_string, column_id_map]);
-            }
-
-            config.expressions = validated_expressions;
+            config.expressions = validate_expressions(config.expressions);
         }
 
         if (config.columns === undefined) {
@@ -1544,6 +1617,12 @@ export default function(Module) {
             if (config.computed_columns.length > 0) {
                 for (let col of config.computed_columns) {
                     config.columns.push(col.column);
+                }
+            }
+
+            if (config.expressions.length > 0) {
+                for (const expr of config.expressions) {
+                    config.columns.push(expr[0]);
                 }
             }
         }

@@ -94,6 +94,7 @@ declare module "@finos/perspective" {
         on_update(callback: UpdateCallback, options?: {mode?: string}): void;
         schema(): Promise<Schema>;
         computed_schema(): Promise<Schema>;
+        expression_schema(): Promise<Schema>;
         to_arrow(options?: SerializeConfig & {data_slice: any}): Promise<ArrayBuffer>;
         to_columns(options?: SerializeConfig): Promise<Array<object>>;
         to_csv(options?: SerializeConfig & {config: object}): Promise<string>;
@@ -117,6 +118,7 @@ declare module "@finos/perspective" {
         aggregates?: {[column_name: string]: string};
         sort?: Array<Array<string>>;
         filter?: Array<Array<string>>;
+        expressions?: Array<string>;
         computed_columns?: Array<{
             column: string;
             computed_function_name: string;
@@ -130,6 +132,7 @@ declare module "@finos/perspective" {
         replace(data: TableData): Promise<void>;
         delete(): Promise<void>;
         on_delete(callback: Function): void;
+        expression_schema(expressions: Array<string>): Promise<Schema>;
         computed_schema(): Promise<Schema>;
         schema(): Promise<Schema>;
         size(): Promise<number>;

@@ -84,47 +84,31 @@ export class ActionElement extends DomElement {
      *
      * @param {*} event
      */
-    _open_computed_expression_widget(event) {
+    _open_expression_widget(event) {
         event.stopImmediatePropagation();
-        // FIXME: we need a better way to pass down types, metadata, etc.
-        // from the parent viewer to child web components.
-        this._computed_expression_widget._computed_expression_parser = this._computed_expression_parser;
 
         // Bind `get_type` so the expression editor can render the correct
         // types for each column.
-        this._computed_expression_widget._get_type = this._get_type.bind(this);
+        this._expression_widget._get_type = this._get_type.bind(this);
 
         // Pass down a way to get the column names from the viewer.
-        this._computed_expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
-        this._computed_expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
+        this._expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
+        this._expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
 
-        this._computed_expression_widget.style.display = "flex";
+        this._expression_widget.style.display = "flex";
         this._side_panel_actions.style.display = "none";
-        this._computed_expression_widget._observe_editor();
+        this._expression_widget._observe_editor();
     }
 
     /**
      * Given an expression (in the `detail` property of the
-     * `perspective-computed-expression-save` event), retrieve the viewer's
-     * `computed-columns` array and append the new expression to be parsed.
+     * `perspective-expression-editor-save` event), set the `expressions`
+     * attribute on the viewer.
      *
      * @param {*} event
      */
-    _save_computed_expression(event) {
+    _save_expression(event) {
         let expression = event.detail.expression;
-
-        // // `computed-columns` stores the raw expression typed by the user.
-        // let computed_columns = this._get_view_computed_columns();
-
-        // if (computed_columns.includes(expression)) {
-        //     console.warn(`"${expression}" was not applied because it already exists.`);
-        //     return;
-        // }
-
-        // computed_columns.push(expression);
-
-        // this.setAttribute("computed-columns", JSON.stringify(computed_columns));
-
         let expressions = this._get_view_expressions();
 
         if (expressions.includes(expression)) {
@@ -132,48 +116,21 @@ export class ActionElement extends DomElement {
             return;
         }
 
-        if (expression.includes("$''")) {
-            throw new Error("Expression cannot reference empty column $''!");
-        }
-
         expressions.push(expression);
 
-        console.log(expressions);
-
+        // Will be validated in the attribute callback
         this.setAttribute("expressions", JSON.stringify(expressions));
     }
 
-    async _type_check_computed_expression(event) {
-        // const parsed = event.detail.parsed_expression || [];
-        // if (parsed.length === 0) {
-        //     this._computed_expression_widget._type_check_expression({});
-        //     return;
-        // }
-        // const functions = {};
-        // for (const col of parsed) {
-        //     functions[col.column] = col.computed_function_name;
-        // }
-        // const schema = await this._table.computed_schema(parsed);
-        // // Look at the failing values, and get their expected types
-        // const expected_types = {};
-        // for (const key in functions) {
-        //     if (!schema[key]) {
-        //         expected_types[key] = await this._table.get_computation_input_types(functions[key]);
-        //     }
-        // }
+    async _type_check_expression(event) {
+        const expression = event.detail.expression;
 
-        // this._computed_expression_widget._type_check_expression(schema, expected_types);
-    }
+        if (!expression || expression.length === 0) {
+            this._expression_widget._type_check_expression({});
+            return;
+        }
 
-    /**
-     * Remove all computed expressions from the DOM.
-     */
-    _clear_all_computed_expressions() {
-        this.setAttribute("computed-columns", JSON.stringify([]));
-    }
-
-    _set_computed_expression(event) {
-        return event;
+        this._expression_widget._type_check_expression(await this._table.expression_schema([expression]));
     }
 
     _column_visibility_clicked(ev) {
@@ -326,18 +283,14 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_widget.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
-
+        this._add_expression_button.addEventListener("click", this._open_expression_widget.bind(this));
         // TODO WIP
-        // this._computed_expression_widget.addEventListener(
-        //     "perspective-computed-expression-resize",
-        //     this._reset_sidepanel.bind(this)
+        // this._expression_widget.addEventListener(
+        //      "perspective-expression-editor-resize",
+        //      this._reset_sidepanel.bind(this)
         // );
-
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
+        this._expression_widget.addEventListener("perspective-expression-editor-save", this._save_expression.bind(this));
+        this._expression_widget.addEventListener("perspective-expression-editor-type-check", this._type_check_expression.bind(this));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());

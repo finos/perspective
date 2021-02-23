@@ -1489,9 +1489,10 @@ namespace binding {
         std::vector<t_computed_expression> expressions;
         expressions.reserve(js_expressions.size());
 
-        for (const std::vector<t_val>& expr : js_expressions) {
-            // not a public API, so we are sure the correct elements
-            // are present in the vector.
+        // Will either abort() or succeed completely, and this isn't a public
+        // API so we can directly index for speed.
+        for (t_uindex idx = 0; idx < js_expressions.size(); ++idx) {
+            const auto& expr = js_expressions[idx];
             std::string expression_string = expr[0].as<std::string>();
             std::string parsed_expression_string = expr[1].as<std::string>();
             std::vector<std::pair<std::string, std::string>> column_ids;
@@ -1737,26 +1738,46 @@ namespace binding {
         return computed_schema;
     }
 
+    template <>
     t_schema
     get_table_expression_schema(
         std::shared_ptr<Table> table,
-        const std::vector<std::string>& j_expressions
-    ) {
-        t_schema expression_schema;
-        // std::shared_ptr<t_schema> table_schema = std::make_shared<t_schema>(table->get_schema());
+        const std::vector<std::vector<t_val>>& j_expressions) {
+        // Don't create a expression object - just pass the values as a
+        // tuple for validation.
+        std::vector<std::tuple<std::string, std::string, std::vector<std::pair<std::string, std::string>>>> expressions;
+        expressions.resize(j_expressions.size());
 
-        // for (const auto& expression : j_expressions) {
-        //     t_dtype dtype = t_computed_expression_parser::get_expression_dtype(expression, table_schema);
-        //     if (dtype == DTYPE_NONE) {
-        //         std::cout << "[get_table_expression_schema] " << expression << " resolves to a column of invalid type." << std::endl;
-        //         continue;
-        //     }
+        // Convert from vector of t_val into vector of tuples
+        for (t_uindex idx = 0; idx < j_expressions.size(); ++idx) {
+            const auto& expr = j_expressions[idx];
+            std::string expression_string = expr[0].as<std::string>();
+            std::string parsed_expression_string = expr[1].as<std::string>();
+            std::vector<std::pair<std::string, std::string>> column_ids;
 
-        //     expression_schema.add_column(expression, dtype);
-        // }
+            // Read the Javascript map of column IDs to column names, and
+            // convert them into string pairs. This guarantees iteration
+            // order at the cost of constant time access (which we don't use).
+            t_val j_column_id_keys = t_val::global("Object").call<t_val>("keys", expr[2]);
+            auto column_id_keys = vecFromArray<t_val, std::string>(j_column_id_keys);
+            column_ids.resize(column_id_keys.size());
 
+            for (t_uindex cidx = 0; cidx < column_id_keys.size(); ++cidx) {
+                const std::string& column_id = column_id_keys[cidx];
+                column_ids[cidx] = std::pair<std::string, std::string>(column_id, expr[2][column_id].as<std::string>());
+            }
+
+            auto tp = std::make_tuple(
+                expression_string,
+                parsed_expression_string,
+                column_ids);
+
+            expressions[idx] = tp;
+        }
+
+        t_schema expression_schema = table->get_expression_schema(expressions);
         return expression_schema;
-    }
+    };
 
     std::vector<t_dtype>
     get_computation_input_types(const std::string& computed_function_name) {
@@ -1887,6 +1908,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_expanded", &View<t_ctxunit>::get_row_expanded)
         .function("schema", &View<t_ctxunit>::schema)
         .function("computed_schema", &View<t_ctxunit>::computed_schema)
+        .function("expression_schema", &View<t_ctxunit>::expression_schema)
         .function("column_names", &View<t_ctxunit>::column_names)
         .function("column_paths", &View<t_ctxunit>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctxunit>::_get_deltas_enabled)
@@ -1915,6 +1937,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
         .function("schema", &View<t_ctx0>::schema)
         .function("computed_schema", &View<t_ctx0>::computed_schema)
+        .function("expression_schema", &View<t_ctx0>::expression_schema)
         .function("column_names", &View<t_ctx0>::column_names)
         .function("column_paths", &View<t_ctx0>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
@@ -1946,6 +1969,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("set_depth", &View<t_ctx1>::set_depth)
         .function("schema", &View<t_ctx1>::schema)
         .function("computed_schema", &View<t_ctx1>::computed_schema)
+        .function("expression_schema", &View<t_ctx1>::expression_schema)
         .function("column_names", &View<t_ctx1>::column_names)
         .function("column_paths", &View<t_ctx1>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
@@ -1977,6 +2001,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("set_depth", &View<t_ctx2>::set_depth)
         .function("schema", &View<t_ctx2>::schema)
         .function("computed_schema", &View<t_ctx2>::computed_schema)
+        .function("expression_schema", &View<t_ctx2>::expression_schema)
         .function("column_names", &View<t_ctx2>::column_names)
         .function("column_paths", &View<t_ctx2>::column_paths)
         .function("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
@@ -2296,7 +2321,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_to_val", &scalar_to_val);
     function("get_computed_functions", &get_computed_functions);
     function("get_table_computed_schema", &get_table_computed_schema<t_val>);
-    function("get_table_expression_schema", &get_table_expression_schema);
+    function("get_table_expression_schema", &get_table_expression_schema<t_val>);
     function("get_computation_input_types", &get_computation_input_types);
     function("is_valid_datetime", &is_valid_datetime);
 }
