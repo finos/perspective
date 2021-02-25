@@ -104,6 +104,16 @@ jobs:
           python_flag: '--python38'
           manylinux_flag: '--manylinux2014'
           artifact_name: 'cp38-cp38-manylinux2014_x86_64'
+        Python39ManyLinux2010:
+          python.version: '3.9'
+          python_flag: '--python39'
+          manylinux_flag: '--manylinux2010'
+          artifact_name: 'cp39-cp39-manylinux2010_x86_64'
+        Python39ManyLinux2014:
+          python.version: '3.9'
+          python_flag: '--python39'
+          manylinux_flag: '--manylinux2014'
+          artifact_name: 'cp39-cp39-manylinux2014_x86_64'
 
   steps:
     - task: UsePythonVersion@0
@@ -176,6 +186,9 @@ jobs:
         Python38:
           python.version: '3.8'
           python_flag: '--python38'
+        Python39:
+          python.version: '3.9'
+          python_flag: '--python39'
 
   steps:
     - task: UsePythonVersion@0
@@ -239,6 +252,10 @@ jobs:
         python.version: '3.7'
         python_flag: ''
         artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
+      Python39:
+        python.version: '3.9'
+        python_flag: ''
+        artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
 
       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
         Python36:
@@ -250,6 +267,11 @@ jobs:
           python.version: '3.8'
           python_flag: '--python38'
           artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
+
+        Python39:
+          python.version: '3.9'
+          python_flag: '--python39'
+          artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
 
   steps:
     - task: UsePythonVersion@0
