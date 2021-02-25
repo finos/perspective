@@ -12,7 +12,7 @@ const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
 const IS_PY2 = getarg("--python2");
-const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
+const PYTHON = IS_PY2 ? "python2" : getarg("--python39") ? "python3.9" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
 
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
@@ -64,7 +64,7 @@ try {
 
         // These are system deps that may only be in place from pep-517/518 so
         // lets reinstall them to be sure
-        cmd += `${PYTHON} -m pip install 'numpy>=1.13.1' && `;
+        cmd += `${PYTHON} -m pip install -U 'numpy>=1.13.1' wheel twine && `;
 
         // remove the build folder so we completely rebuild (and pick up the
         // libs we just installed above, since this build method won't use
