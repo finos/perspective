@@ -24,15 +24,10 @@ export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, 
     readonly table?: Table;
     readonly view?: View;
 }
-interface ComputedColumn {
-    column: string;
-    inputs: string[];
-    computed_function_name: string;
-}
 
 export type Filters = Array<[string, string, string]>;
 export type Sort = Array<[string, string] | string>;
-export type ComputedColumns = ComputedColumn[];
+export type Expressions = string[];
 export type Aggregates = {[column_name: string]: string};
 export type Pivots = string[];
 export type Columns = string[];
@@ -42,7 +37,7 @@ export interface PerspectiveViewerOptions {
     editable?: boolean;
     plugin?: string;
     columns?: Columns;
-    "computed-columns"?: ComputedColumns;
+    expressions?: Expressions;
     "row-pivots"?: Pivots;
     "column-pivots"?: Pivots;
     filters?: Filters;
@@ -52,7 +47,7 @@ export interface PerspectiveViewerOptions {
 
 interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions, "editable" | "plugin" | "selectable"> {
     aggregates?: string;
-    "computed-columns"?: string;
+    expressions?: string;
     "row-pivots"?: string;
     "column-pivots"?: string;
     filters?: string;

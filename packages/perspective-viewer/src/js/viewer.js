@@ -13,9 +13,7 @@ import "./polyfill.js";
 import {bindTemplate, json_attribute, array_attribute, invertPromise, throttlePromise} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
-import "./autocomplete_widget.js";
 import "./expression_editor.js";
-import "./computed_expressions/widget.js";
 
 import template from "../html/viewer.html";
 
@@ -40,7 +38,7 @@ import {ActionElement} from "./viewer/action_element.js";
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "computed-columns", "expressions", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
+const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "expressions", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
 
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to
@@ -179,7 +177,7 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * Sets new computed columns for the viewer.
+     * DEPRECATED: use the expressions API instead.
      *
      * @kind member
      * @type {Array<Object>}
@@ -192,13 +190,29 @@ class PerspectiveViewer extends ActionElement {
         console.error("[PerspectiveViewer] the `computed-columns` attribute is deprecated - use the `expressions` attribute instead.");
     }
 
+    /**
+     * Sets this `perspective.table.view`'s `expressions` property, which will
+     * output new columns from the given expressions.
+     *
+     * @kind member
+     * @type {Array<String>}
+     * @param {Array<String>} expressions An array of string expressions to
+     * be calculated by Perspective.
+     * @fires PerspectiveViewer#perspective-config-update
+     *
+     * @example <caption>via Javascript DOM</caption>
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('expressions', JSON.stringify(["$'x' + ($'y' + 20)"]));
+     * @example <caption>via HTML</caption>
+     * <perspective-viewer expressions='["$\'x\' + 10"]'></perspective-viewer>
+     */
     @array_attribute
     expressions(expressions) {
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._expression_widget.style.display !== "none") {
-                this._expression_widget._close_expression_widget();
+            if (this._expression_editor.style.display !== "none") {
+                this._expression_editor.close();
             }
             if (expressions === null || expressions === undefined || expressions.length === 0) {
                 // Remove expression columns from the DOM, and reset the config

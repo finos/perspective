@@ -80,24 +80,15 @@ export class ActionElement extends DomElement {
     }
 
     /**
-     * Display the computed expressions panel.
+     * Display the expressions editor.
      *
      * @param {*} event
      */
-    _open_expression_widget(event) {
+    _open_expression_editor(event) {
         event.stopImmediatePropagation();
-
-        // Bind `get_type` so the expression editor can render the correct
-        // types for each column.
-        this._expression_widget._get_type = this._get_type.bind(this);
-
-        // Pass down a way to get the column names from the viewer.
-        this._expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
-        this._expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
-
-        this._expression_widget.style.display = "flex";
+        this._expression_editor.style.display = "flex";
         this._side_panel_actions.style.display = "none";
-        this._expression_widget._observe_editor();
+        this._expression_editor.observe();
     }
 
     /**
@@ -126,11 +117,11 @@ export class ActionElement extends DomElement {
         const expression = event.detail.expression;
 
         if (!expression || expression.length === 0) {
-            this._expression_widget._type_check_expression({});
+            this._expression_editor.type_check_expression({});
             return;
         }
 
-        this._expression_widget._type_check_expression(await this._table.expression_schema([expression]));
+        this._expression_editor.type_check_expression(await this._table.expression_schema([expression]));
     }
 
     _column_visibility_clicked(ev) {

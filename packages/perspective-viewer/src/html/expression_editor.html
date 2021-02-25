@@ -8,5 +8,24 @@ the Apache License 2.0.  The full license can be found in the LICENSE file.
 -->
 
 <template id="perspective-expression-editor">
-    <div role="textbox" contenteditable="true" spellcheck="false" class="perspective-expression-editor__edit_area"></div>
+    <div class="psp-expression-editor__body psp-expression-editor__container">
+        <div class="psp-expression-editor__container">
+            <div class="psp-expression-editor__action">
+                <span class="psp-icon psp-icon__close" id="psp-expression-editor-close" aria-label="Close Expression Editor"></span>
+                <span id="psp-expression-editor-title">New Column</span>
+            </div>
+            <div class="psp-expression-editor__content psp-expression-editor__content--nomargin">
+                <div role="textbox"
+                    class="perspective-expression-editor__edit_area"
+                    contenteditable="true"
+                    spellcheck="false"
+                    aria-multiline="true"
+                    aria-label="Type an expression here"
+                    aria-placeholder="Type an expression"></div>
+            </div>
+        </div>
+        <div id="psp-expression-editor-actions">
+            <button id="psp-expression-editor-button-save" class="psp-expression-editor__button" disabled>Save</button>
+        </div>
+    </div>
 </template>

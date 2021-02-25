@@ -28,7 +28,6 @@ t_computed_expression::t_computed_expression(
 void
 t_computed_expression::compute(
     std::shared_ptr<t_data_table> data_table) const {
-    auto start = std::chrono::high_resolution_clock::now(); 
     exprtk::symbol_table<t_tscalar> sym_table;
 
     exprtk::expression<t_tscalar> expr_definition;
@@ -81,10 +80,6 @@ t_computed_expression::compute(
 
         output_column->set_scalar(ridx, value);
     }
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); 
-    std::cout << "[compute] total: " << duration.count() << std::endl;
 };
 
 void
@@ -92,7 +87,6 @@ t_computed_expression::recompute(
     std::shared_ptr<t_data_table> gstate_table,
     std::shared_ptr<t_data_table> flattened,
     const std::vector<t_rlookup>& changed_rows) const {
-    auto start = std::chrono::high_resolution_clock::now(); 
     exprtk::symbol_table<t_tscalar> sym_table;
 
     exprtk::expression<t_tscalar> expr_definition;
@@ -214,10 +208,6 @@ t_computed_expression::recompute(
         t_tscalar value = expr_definition.value();
         output_column->set_scalar(ridx, value);
     }
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); 
-    std::cout << "[recompute] took: " << duration.count() << std::endl;
 }
 
 std::string
@@ -252,7 +242,6 @@ t_computed_expression_parser::precompute(
     const std::vector<std::pair<std::string, std::string>>& column_ids,
     std::shared_ptr<t_schema> schema
 ) {
-    auto start = std::chrono::high_resolution_clock::now(); 
     exprtk::symbol_table<t_tscalar> sym_table;
     exprtk::expression<t_tscalar> expr_definition;
 
@@ -295,11 +284,6 @@ t_computed_expression_parser::precompute(
 
     t_tscalar v = expr_definition.value();
 
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << "[precompute] took: " << duration.count() << std::endl;
-
-    std::cout << "dtype: " << get_dtype_descr(v.get_dtype()) << std::endl;
     return t_computed_expression(
         expression_string,
         parsed_expression_string,
@@ -314,7 +298,6 @@ t_computed_expression_parser::get_dtype(
     const std::vector<std::pair<std::string, std::string>>& column_ids,
     const t_schema& schema
 ) {
-    auto start = std::chrono::high_resolution_clock::now(); 
     exprtk::symbol_table<t_tscalar> sym_table;
     exprtk::expression<t_tscalar> expr_definition;
 
@@ -360,21 +343,10 @@ t_computed_expression_parser::get_dtype(
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
-        std::cerr << "[t_computed_expression_parser::get_dtype] Failed to validate expression: `"
-            << parsed_expression_string
-            << "`, failed with error: "
-            << t_computed_expression_parser::PARSER->error().c_str()
-            << std::endl;
         return DTYPE_NONE;
     }
 
     t_tscalar v = expr_definition.value();
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-    std::cout << "[get_dtype] took: " << duration.count() << std::endl;
-
-    std::cout << "dtype: " << get_dtype_descr(v.get_dtype()) << std::endl;
     return v.get_dtype();
 }
 

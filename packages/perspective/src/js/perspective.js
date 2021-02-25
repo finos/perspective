@@ -1120,7 +1120,6 @@ export default function(Module) {
         let vector = __MODULE__.make_2d_val_vector();
         for (let expression of this.expressions) {
             let inner = __MODULE__.make_val_vector();
-            console.log("get_expressions:inner:", expression);
             for (let val of expression) {
                 inner.push_back(val);
             }
@@ -1441,8 +1440,6 @@ export default function(Module) {
 
         if (!expressions || expressions.length === 0) return expression_schema;
         expressions = validate_expressions(expressions);
-
-        console.log(expressions);
 
         // Transform Array into a C++ vector that can be passed through
         // Emscripten.

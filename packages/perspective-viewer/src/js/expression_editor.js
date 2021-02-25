@@ -10,7 +10,6 @@
 import {bindTemplate, throttlePromise} from "./utils.js";
 
 import template from "../html/expression_editor.html";
-
 import style from "../less/expression_editor.less";
 
 // Eslint complains here because we don't do anything, but actually we globally
@@ -26,44 +25,146 @@ class PerspectiveExpressionEditor extends HTMLElement {
     connectedCallback() {
         this._register_ids();
         this._register_callbacks();
-
-        // `renderer` is a function that takes a string of content and
-        // returns a string of valid HTML. The default renderer
-        // splits the string by space and returns `span` elements.
-        this.renderer = this._render_content;
+        this._editor_observer = new MutationObserver(this._resize_editor.bind(this));
+        this._disable_save_button();
     }
 
     /**
-     * Replace the render function of the editor instance with a custom
-     * renderer, which allows for full manipulation of the final rendered
-     * output of the editor.
-     *
-     * @param {Function} render_function a function that takes a string and
-     * returns a string of valid HTML.
+     * Observe the editor when it is opened.
      */
-    set_renderer(render_function) {
-        this.renderer = render_function;
+    observe() {
+        this._editor_observer.observe(this._edit_area, {
+            attributes: true,
+            attributeFilter: ["style"]
+        });
+
+        // Focus on the edit area immediately
+        this._focus();
+    }
+
+    /**
+     * Close the expressions editor.
+     */
+    close() {
+        this.style.display = "none";
+        this._side_panel_actions.style.display = "flex";
+        this._disable_save_button();
+        this._clear();
+        // Disconnect the observer.
+        this._editor_observer.disconnect();
+    }
+
+    /**
+     * Given an expression schema from the viewer, assert that the expression
+     * outputs a column with a valid type, and enable/disable the save button.
+     *
+     * @param {*} expression_schema
+     */
+    @throttlePromise
+    async type_check_expression(expression_schema) {
+        const expression = this._temp_expression;
+        expression_schema[expression] ? this._enable_save_button() : this._disable_save_button();
+    }
+
+    /**
+     * Validate the expression even when empty.
+     *
+     * @param {*} ev
+     */
+    @throttlePromise
+    async _validate_expression(expression) {
+        if (expression.length === 0) {
+            this._disable_save_button();
+            return;
+        }
+
+        // Store the expression temporarily so we can access it in
+        // `type_check_expression()`.
+        this._temp_expression = expression;
+
+        // Take the parsed expression and type check it on the viewer,
+        // which will call `type_check_expression()` with an expression schema.
+        const event = new CustomEvent("perspective-expression-editor-type-check", {
+            detail: {
+                expression: this._temp_expression
+            }
+        });
+
+        this.dispatchEvent(event);
+
+        return;
+    }
+
+    /**
+     * Given an expression string, render it into markup. Called only when the
+     * expression is not an empty string.
+     *
+     * @param {String} expression
+     */
+    _render_expression(expression) {
+        return `<span class="psp-expression__">${expression}</span>`;
+    }
+
+    /**
+     * When the Save button is clicked, pass the expression to the viewer.
+     *
+     * @private
+     */
+    _save_expression() {
+        if (this._save_button.getAttribute("disabled")) {
+            return;
+        }
+
+        const expression = this._get_text();
+        const parsed_expression = this._parsed_expression || [];
+
+        const event = new CustomEvent("perspective-expression-editor-save", {
+            detail: {
+                expression: expression,
+                parsed_expression: parsed_expression
+            }
+        });
+
+        this.dispatchEvent(event);
+    }
+
+    /**
+     * Dispatch an event on editor resize to notify the side panel, and
+     * disconnect the observer.
+     *
+     * @private
+     */
+    _resize_editor() {
+        const event = new CustomEvent("perspective-expression-editor-resize");
+        this.dispatchEvent(event);
+        this._editor_observer.disconnect();
+    }
+
+    _disable_save_button() {
+        this._save_button.setAttribute("disabled", true);
+    }
+
+    _enable_save_button() {
+        this._save_button.removeAttribute("disabled");
+    }
+
+    /**
+     * Clear the edit area.
+     */
+    _clear() {
+        this._edit_area.innerHTML = "";
     }
 
     /**
      * Analyze the content in the editor and redraw the selection caret every
      * time an `input` event is fired.
+     *
+     * @private
      */
     @throttlePromise
-    update_content() {
+    _update_content() {
         const selection = this.shadowRoot.getSelection();
-        const tokens = this.get_tokens(this._edit_area);
-
-        // Dispatch a `perspective-expression-editor-input` event,
-        // signifying that the input has reached the editor but has not
-        // been rendered into HTML yet
-        const input_event = new CustomEvent("perspective-expression-editor-input", {
-            detail: {
-                nodes: tokens.map(t => t.node),
-                text: this._edit_area.textContent
-            }
-        });
-        this.dispatchEvent(input_event);
+        const tokens = this._get_tokens(this._edit_area);
 
         let anchor_idx = null;
         let focus_idx = null;
@@ -85,46 +186,31 @@ class PerspectiveExpressionEditor extends HTMLElement {
 
         if (this._value.length === 0) {
             // Clear input from the editor
-            this.clear_content();
+            this._clear();
         } else {
-            // Calls the `renderer` to transform a text string to DOM tokens,
-            // but only when string.length > 0
-            const markup = this.renderer(this._value, tokens);
+            // Calls the `_render_expression` to transform a text string
+            // to DOM tokens, but only when string.length > 0
+            const markup = this._render_expression(this._value, tokens);
             this._edit_area.innerHTML = markup;
         }
 
         this.restore_selection(anchor_idx, focus_idx);
 
-        // Dispatch `perspective-expression-editor-rendered`, which signifies
-        // that the editor UI has updated to its final state.
-        const rendered_event = new CustomEvent("perspective-expression-editor-rendered", {
-            detail: {
-                nodes: tokens.map(t => t.node),
-                text: this._value
-            }
-        });
-
-        this.dispatchEvent(rendered_event);
-    }
-
-    clear_content() {
-        this._edit_area.innerHTML = "";
-    }
-
-    _render_content(content) {
-        return `<span class="psp-expression__fragment">${content}</span>`;
+        // After the render has completed, validate the expression.
+        this._validate_expression(this._get_text());
     }
 
     /**
      * After editor content has been rendered, "un-reset" the caret position
      * by returning it to where the user selected.
      *
+     * @private
      * @param {Number} absolute_anchor_idx
      * @param {Number} absolute_focus_idx
      */
     restore_selection(absolute_anchor_idx, absolute_focus_idx) {
         const selection = this.shadowRoot.getSelection();
-        const tokens = this.get_tokens(this._edit_area);
+        const tokens = this._get_tokens(this._edit_area);
         let anchor_node = this._edit_area;
         let anchor_idx = 0;
         let focus_node = this._edit_area;
@@ -151,11 +237,23 @@ class PerspectiveExpressionEditor extends HTMLElement {
         selection.setBaseAndExtent(anchor_node, anchor_idx, focus_node, focus_idx);
     }
 
-    get_text() {
+    /**
+     * Returns the editor's text content.
+     *
+     * @private
+     */
+    _get_text() {
         return this._edit_area.textContent;
     }
 
-    get_tokens(element) {
+    /**
+     * Return an array of the element's tokens in traversal order, flattening
+     * out any element trees.
+     *
+     * @private
+     * @param {*} element
+     */
+    _get_tokens(element) {
         const tokens = [];
         for (const node of element.childNodes) {
             if (this._ignored_nodes.includes(node.nodeName)) continue;
@@ -164,7 +262,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
                     tokens.push({text: node.nodeValue, node});
                     break;
                 case Node.ELEMENT_NODE:
-                    tokens.splice(tokens.length, 0, ...this.get_tokens(node));
+                    tokens.splice(tokens.length, 0, ...this._get_tokens(node));
                     break;
                 default:
                     continue;
@@ -173,17 +271,24 @@ class PerspectiveExpressionEditor extends HTMLElement {
         return tokens;
     }
 
-    focus() {
+    /**
+     * Set focus on the edit area.
+     *
+     * @private
+     */
+    _focus() {
         this._edit_area.focus();
     }
 
     /**
      * Dispatch a `perspective-expression-editor-keyup` event containing
-     * the original `keyup` event in `event.details`.
+     * the original `keyup` event in `event.details` so that other elements
+     * can act when the editor receives input.
      *
+     * @private
      * @param {*} ev a `keyup` event.
      */
-    keyup(ev) {
+    _keyup(ev) {
         const event = new CustomEvent("perspective-expression-editor-keyup", {
             detail: ev
         });
@@ -192,14 +297,37 @@ class PerspectiveExpressionEditor extends HTMLElement {
 
     /**
      * Dispatch a `perspective-expression-editor-keydown` event containing
-     * the original `keyup` event in `event.details`.
+     * the original `keydown` event in `event.details` so that other elements
+     * can act when the editor receives input.
      *
+     * @private
      * @param {*} ev a `keydown` event.
      */
-    keydown(ev) {
+    _keydown(ev) {
+        // Prevent reserved keys from triggering a re-render.
+        // TODO: enable multi-line expressions in the editor.
+        switch (ev.key) {
+            case "Enter":
+                {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    this._save_expression();
+                }
+                break;
+            case "Tab":
+            case "ArrowDown":
+            case "ArrowUp":
+                {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+                break;
+        }
+
         const event = new CustomEvent("perspective-expression-editor-keydown", {
             detail: ev
         });
+
         this.dispatchEvent(event);
     }
 
@@ -207,10 +335,11 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * When a column/text is dragged and dropped into the textbox, read it
      * properly and set selection state on the editor.
      *
+     * @private
      * @param {*} event
      */
     _capture_drop_data(event) {
-        this._edit_area.focus();
+        this._focus();
         const data = event.dataTransfer.getData("text");
         if (data !== "") {
             try {
@@ -230,7 +359,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 // at the end of the editor's text content as the default
                 // selection fires with the caret at the beginning.
                 this._reset_selection();
-                this.update_content();
+                this._update_content();
             }
         }
     }
@@ -245,6 +374,9 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _register_ids() {
         this._edit_area = this.shadowRoot.querySelector(".perspective-expression-editor__edit_area");
+        this._close_button = this.shadowRoot.querySelector("#psp-expression-editor-close");
+        this._save_button = this.shadowRoot.querySelector("#psp-expression-editor-button-save");
+        this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
     }
 
     /**
@@ -252,8 +384,10 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _register_callbacks() {
         this._edit_area.addEventListener("drop", this._capture_drop_data.bind(this));
-        this._edit_area.addEventListener("input", this.update_content.bind(this));
-        this._edit_area.addEventListener("keyup", this.keyup.bind(this));
-        this._edit_area.addEventListener("keydown", this.keydown.bind(this));
+        this._edit_area.addEventListener("input", this._update_content.bind(this));
+        this._edit_area.addEventListener("keyup", this._keyup.bind(this));
+        this._edit_area.addEventListener("keydown", this._keydown.bind(this));
+        this._save_button.addEventListener("click", this._save_expression.bind(this));
+        this._close_button.addEventListener("click", this.close.bind(this));
     }
 }

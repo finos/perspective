@@ -529,8 +529,8 @@ export class DomElement extends PerspectiveElement {
         this._active_columns = this.shadowRoot.querySelector("#active_columns");
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
-        this._add_computed_expression_button = this.shadowRoot.querySelector("#add-computed-expression");
-        this._computed_expression_widget = this.shadowRoot.querySelector("perspective-computed-expression-widget");
+        this._add_expression_button = this.shadowRoot.querySelector("#add-expression");
+        this._expression_editor = this.shadowRoot.querySelector("perspective-expression-editor");
         this._side_panel = this.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");

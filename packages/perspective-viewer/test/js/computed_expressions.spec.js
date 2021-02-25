@@ -22,13 +22,13 @@ const path = require("path");
 const add_computed_expression = async (page, expression) => {
     const viewer = await page.$("perspective-viewer");
     await page.waitForSelector("perspective-viewer:not([updating])");
-    await page.shadow_click("perspective-viewer", "#add-computed-expression");
-    await page.shadow_type(expression, "perspective-viewer", "perspective-computed-expression-widget", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+    await page.shadow_click("perspective-viewer", "#add-expression");
+    await page.shadow_type(expression, "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
     // a little hacky around waiting for the UI, etc. to render final state
     await page.waitFor(200);
     await page.evaluate(element => {
-        const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-        const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+        const editor = element.shadowRoot.querySelector("perspective-expression-editor");
+        const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
         button.removeAttribute("disabled");
         button.click();
     }, viewer);
@@ -51,7 +51,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
-                await page.shadow_click("perspective-viewer", "perspective-computed-expression-widget", "#psp-computed-expression-widget-close");
+                await page.shadow_click("perspective-viewer", "perspective-computed-expression-widget", "#psp-expression-editor-close");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
@@ -70,7 +70,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -84,7 +84,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -97,7 +97,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -110,7 +110,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -123,7 +123,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -170,7 +170,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -431,7 +431,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     const editor = element.shadowRoot.querySelector("perspective-computed-expression-widget");
-                    const button = editor.shadowRoot.querySelector("#psp-computed-expression-widget-button-save");
+                    const button = editor.shadowRoot.querySelector("#psp-expression-editor-button-save");
                     button.removeAttribute("disabled");
                 }, viewer);
             });
@@ -585,7 +585,7 @@ utils.with_server({}, () => {
                     element =>
                         element.shadowRoot
                             .querySelector("perspective-computed-expression-widget")
-                            .shadowRoot.querySelector("#psp-computed-expression-widget-button-save")
+                            .shadowRoot.querySelector("#psp-expression-editor-button-save")
                             .click(),
                     viewer
                 );

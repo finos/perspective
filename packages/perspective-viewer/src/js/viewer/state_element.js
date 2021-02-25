@@ -66,23 +66,6 @@ export class StateElement extends HTMLElement {
         return this._get_view_active_valid_column_names().length;
     }
 
-    /**
-     * Given a data type, return the names of all columns with the specified
-     * data type.
-     *
-     * @param {Array[String]} types an array of valid type names
-     */
-    _get_view_column_names_by_types(types) {
-        const names = [];
-        const viewer_columns = this._get_view_all_columns();
-        for (const column of viewer_columns) {
-            if (types.includes(column.getAttribute("type"))) {
-                names.push(column.getAttribute("name"));
-            }
-        }
-        return names;
-    }
-
     // deprecate
     _get_view_columns({active = true} = {}) {
         let selector;
@@ -140,14 +123,6 @@ export class StateElement extends HTMLElement {
             let order = col.getAttribute("sort-order") || "asc";
             return [col.getAttribute("name"), order];
         });
-    }
-
-    _get_view_computed_columns() {
-        return JSON.parse(this.getAttribute("computed-columns")) || [];
-    }
-
-    _get_view_parsed_computed_columns() {
-        return JSON.parse(this.getAttribute("parsed-computed-columns")) || [];
     }
 
     _get_view_expressions() {

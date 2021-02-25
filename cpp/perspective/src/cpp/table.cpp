@@ -223,7 +223,7 @@ Table::get_expression_schema(
 
     for (const auto& expr : expressions) {
         const std::string& expression = std::get<0>(expr);
-        std::cout << "expr: " << expression << std::endl;
+
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
             expression,
             std::get<1>(expr),
