@@ -254,7 +254,7 @@ jobs:
         artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
       Python39:
         python.version: '3.9'
-        python_flag: ''
+        python_flag: '--python39'
         artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
 
       ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
