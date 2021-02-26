@@ -101,7 +101,7 @@ export class DomElement extends PerspectiveElement {
                 const expressions = this._get_view_expressions();
 
                 // If `name` is in expressions, recreate the current
-                // viewer's computed columns.
+                // viewer's expressions.
                 this._table
                     .view({
                         row_pivots: [name],
@@ -204,6 +204,15 @@ export class DomElement extends PerspectiveElement {
         let reset_columns_attr = false;
 
         for (const expr of expressions) {
+            // Check for whether the expression is in the attribute but
+            // NOT in the DOM - occurs when restore is called and a race
+            // condition between `expressions` and `columns` occurs.
+            const should_reset = !columns.includes(expr) && attr.includes(expr);
+
+            if (should_reset) {
+                reset_columns_attr = true;
+            }
+
             // If the column already exists or is already in the active DOM,
             // don't add it to the inactive DOM
             const should_add = !columns.includes(expr) && !active.includes(expr);

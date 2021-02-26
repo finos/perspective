@@ -56,7 +56,6 @@
         "@finos/perspective": "^0.8.2",
         "@types/react": "^16.8.6",
         "awesomplete": "^1.1.2",
-        "chevrotain": "^6.5.0",
         "core-js": "^3.6.4",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",

@@ -12,6 +12,7 @@
 namespace perspective {
 std::shared_ptr<exprtk::parser<t_tscalar>>
 t_computed_expression_parser::PARSER = std::make_shared<exprtk::parser<t_tscalar>>();
+
 exprtk::symbol_table<t_tscalar>
 t_computed_expression_parser::GLOBAL_SYMTABLE = exprtk::symbol_table<t_tscalar>();
 
@@ -149,6 +150,10 @@ t_computed_expression::recompute(
 
     for (t_uindex idx = 0; idx < num_rows; ++idx) {
         bool row_already_exists = false;
+
+        // TODO: re-figure out the reason we need `idx` and `ridx` here -
+        // I think ridx is used to get the row from the gnode master table,
+        // whereas idx is the index into the flattened table.
         t_uindex ridx = idx;
 
         if (changed_rows.size() > 0) {
@@ -161,7 +166,7 @@ t_computed_expression::recompute(
         for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
             const std::string& column_id = m_column_ids[cidx].first;
 
-            t_tscalar arg = flattened_columns[column_id]->get_scalar(ridx);
+            t_tscalar arg = flattened_columns[column_id]->get_scalar(idx);
 
             if (!arg.is_valid()) {
                 /**
@@ -185,6 +190,8 @@ t_computed_expression::recompute(
                     (row_already_exists && flattened_columns[column_id]->is_cleared(idx)) ||
                     (!row_already_exists && !flattened_columns[column_id]->is_valid(idx));
 
+                // std::cout << "should_unset: " << should_unset << std::endl;
+
                 /**
                  * Use `unset` instead of `clear`, as
                  * `t_gstate::update_master_table` will reconcile `STATUS_CLEAR`
@@ -206,7 +213,7 @@ t_computed_expression::recompute(
         if (skip_row) continue;
 
         t_tscalar value = expr_definition.value();
-        output_column->set_scalar(ridx, value);
+        output_column->set_scalar(idx, value);
     }
 }
 

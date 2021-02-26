@@ -393,7 +393,6 @@ t_tscalar
 mktscalar(const T& v) {
     t_tscalar rval;
     rval.set(v);
-    std::cout << "made t_tscalar: " << rval.to_string() << std::endl; 
     return rval;
 }
 

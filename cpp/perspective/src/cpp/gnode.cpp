@@ -378,6 +378,11 @@ t_gnode::_process_table(t_uindex port_id) {
 
     // Reconcile column names - only attempt to process valid computed columns
     std::vector<std::string> column_names = get_output_schema().m_columns;
+
+    for (const auto& expr : m_expression_map) {
+        column_names.push_back(expr.first);
+    }
+
     std::vector<std::string> valid_computed_columns;
     valid_computed_columns.reserve(
         m_computed_column_map.m_computed_columns.size());
@@ -393,9 +398,6 @@ t_gnode::_process_table(t_uindex port_id) {
         valid_computed_columns.begin(),
         valid_computed_columns.end());
 
-    for (const auto& expr : m_expression_map) {
-        column_names.push_back(expr.first);
-    }
 
     t_uindex ncols = column_names.size();
 

@@ -1462,29 +1462,6 @@ namespace binding {
             }
         }
 
-        // construct filters with filter terms, and fill the vector of tuples
-        auto js_filter = config.call<std::vector<std::vector<t_val>>>("get_filter");
-        std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
-
-        for (auto f : js_filter) {
-            // parse filter details
-            std::string column_name = f.at(0).as<std::string>();
-            std::string filter_op_str = f.at(1).as<std::string>();
-            t_dtype column_type = schema->get_dtype(column_name);
-            t_filter_op filter_operator = str_to_filter_op(filter_op_str);
-
-            // validate the filter before it goes into the core engine
-            t_val filter_term = t_val::null();
-            if (f.size() > 2) {
-                // null/not null filters do not have a filter term
-                filter_term = f.at(2);
-            }
-
-            if (is_valid_filter(column_type, date_parser, filter_operator, filter_term)) {
-                filter.push_back(make_filter_term(column_type, date_parser, column_name, filter_op_str, filter_term));
-            }
-        }
-
         auto js_expressions = config.call<std::vector<std::vector<t_val>>>("get_expressions");
         std::vector<t_computed_expression> expressions;
         expressions.reserve(js_expressions.size());
@@ -1515,6 +1492,29 @@ namespace binding {
 
             expressions.push_back(expression);
             schema->add_column(expression_string, expression.get_dtype());
+        }
+
+        // construct filters with filter terms, and fill the vector of tuples
+        auto js_filter = config.call<std::vector<std::vector<t_val>>>("get_filter");
+        std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
+
+        for (auto f : js_filter) {
+            // parse filter details
+            std::string column_name = f.at(0).as<std::string>();
+            std::string filter_op_str = f.at(1).as<std::string>();
+            t_dtype column_type = schema->get_dtype(column_name);
+            t_filter_op filter_operator = str_to_filter_op(filter_op_str);
+
+            // validate the filter before it goes into the core engine
+            t_val filter_term = t_val::null();
+            if (f.size() > 2) {
+                // null/not null filters do not have a filter term
+                filter_term = f.at(2);
+            }
+
+            if (is_valid_filter(column_type, date_parser, filter_operator, filter_term)) {
+                filter.push_back(make_filter_term(column_type, date_parser, column_name, filter_op_str, filter_term));
+            }
         }
 
         // create the `t_view_config`
