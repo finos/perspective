@@ -72,7 +72,9 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * @param {*} ev
      */
     @throttlePromise
-    async _validate_expression(expression) {
+    async _validate_expression() {
+        const expression = this._edit_area.value;
+
         if (expression.length === 0) {
             this._disable_save_button();
             return;
@@ -115,7 +117,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
             return;
         }
 
-        const expression = this._get_text();
+        const expression = this._edit_area.value;
         const parsed_expression = this._parsed_expression || [];
 
         const event = new CustomEvent("perspective-expression-editor-save", {
@@ -152,123 +154,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * Clear the edit area.
      */
     _clear() {
-        this._edit_area.innerHTML = "";
-    }
-
-    /**
-     * Analyze the content in the editor and redraw the selection caret every
-     * time an `input` event is fired.
-     *
-     * @private
-     */
-    @throttlePromise
-    _update_content() {
-        const selection = this.shadowRoot.getSelection();
-        const tokens = this._get_tokens(this._edit_area);
-
-        let anchor_idx = null;
-        let focus_idx = null;
-        let current_idx = 0;
-
-        for (const token of tokens) {
-            if (token.node === selection.anchorNode) {
-                anchor_idx = current_idx + selection.anchorOffset;
-            }
-
-            if (token.node === selection.focusNode) {
-                focus_idx = current_idx + selection.focusOffset;
-            }
-
-            current_idx += token.text.length;
-        }
-
-        this._value = tokens.map(t => t.text).join("");
-
-        if (this._value.length === 0) {
-            // Clear input from the editor
-            this._clear();
-        } else {
-            // Calls the `_render_expression` to transform a text string
-            // to DOM tokens, but only when string.length > 0
-            const markup = this._render_expression(this._value, tokens);
-            this._edit_area.innerHTML = markup;
-        }
-
-        this.restore_selection(anchor_idx, focus_idx);
-
-        // After the render has completed, validate the expression.
-        this._validate_expression(this._get_text());
-    }
-
-    /**
-     * After editor content has been rendered, "un-reset" the caret position
-     * by returning it to where the user selected.
-     *
-     * @private
-     * @param {Number} absolute_anchor_idx
-     * @param {Number} absolute_focus_idx
-     */
-    restore_selection(absolute_anchor_idx, absolute_focus_idx) {
-        const selection = this.shadowRoot.getSelection();
-        const tokens = this._get_tokens(this._edit_area);
-        let anchor_node = this._edit_area;
-        let anchor_idx = 0;
-        let focus_node = this._edit_area;
-        let focus_idx = 0;
-        let current_idx = 0;
-
-        for (const token of tokens) {
-            const start_idx = current_idx;
-            const end_idx = start_idx + token.text.length;
-
-            if (start_idx <= absolute_anchor_idx && absolute_anchor_idx <= end_idx) {
-                anchor_node = token.node;
-                anchor_idx = absolute_anchor_idx - start_idx;
-            }
-
-            if (start_idx <= absolute_focus_idx && absolute_focus_idx <= end_idx) {
-                focus_node = token.node;
-                focus_idx = absolute_focus_idx - start_idx;
-            }
-
-            current_idx += token.text.length;
-        }
-
-        selection.setBaseAndExtent(anchor_node, anchor_idx, focus_node, focus_idx);
-    }
-
-    /**
-     * Returns the editor's text content.
-     *
-     * @private
-     */
-    _get_text() {
-        return this._edit_area.textContent;
-    }
-
-    /**
-     * Return an array of the element's tokens in traversal order, flattening
-     * out any element trees.
-     *
-     * @private
-     * @param {*} element
-     */
-    _get_tokens(element) {
-        const tokens = [];
-        for (const node of element.childNodes) {
-            if (this._ignored_nodes.includes(node.nodeName)) continue;
-            switch (node.nodeType) {
-                case Node.TEXT_NODE:
-                    tokens.push({text: node.nodeValue, node});
-                    break;
-                case Node.ELEMENT_NODE:
-                    tokens.splice(tokens.length, 0, ...this._get_tokens(node));
-                    break;
-                default:
-                    continue;
-            }
-        }
-        return tokens;
+        this._edit_area.value = "";
     }
 
     /**
@@ -281,54 +167,27 @@ class PerspectiveExpressionEditor extends HTMLElement {
     }
 
     /**
-     * Dispatch a `perspective-expression-editor-keyup` event containing
-     * the original `keyup` event in `event.details` so that other elements
-     * can act when the editor receives input.
-     *
-     * @private
-     * @param {*} ev a `keyup` event.
-     */
-    _keyup(ev) {
-        const event = new CustomEvent("perspective-expression-editor-keyup", {
-            detail: ev
-        });
-        this.dispatchEvent(event);
-    }
-
-    /**
-     * Dispatch a `perspective-expression-editor-keydown` event containing
-     * the original `keydown` event in `event.details` so that other elements
-     * can act when the editor receives input.
+     * Enable tab indentation support and shift-enter to save.
      *
      * @private
      * @param {*} ev a `keydown` event.
      */
     _keydown(ev) {
-        // Prevent reserved keys from triggering a re-render.
-        // TODO: enable multi-line expressions in the editor.
         switch (ev.key) {
             case "Enter":
                 {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    this._save_expression();
+                    if (ev.shiftKey) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        this._save_expression();
+                    }
                 }
                 break;
-            case "Tab":
-            case "ArrowDown":
-            case "ArrowUp":
-                {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                }
-                break;
+            case "Tab": {
+                ev.preventDefault();
+                this._edit_area.value += "    ";
+            }
         }
-
-        const event = new CustomEvent("perspective-expression-editor-keydown", {
-            detail: ev
-        });
-
-        this.dispatchEvent(event);
     }
 
     /**
@@ -354,12 +213,6 @@ class PerspectiveExpressionEditor extends HTMLElement {
             } catch (e) {
                 // regular text, don't do anything as browser will handle
                 // the `drop` event.
-            } finally {
-                // When text is dropped into the editor, set the caret
-                // at the end of the editor's text content as the default
-                // selection fires with the caret at the beginning.
-                this._reset_selection();
-                this._update_content();
             }
         }
     }
@@ -373,7 +226,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * Map DOM IDs to class properties.
      */
     _register_ids() {
-        this._edit_area = this.shadowRoot.querySelector(".perspective-expression-editor__edit_area");
+        this._edit_area = this.shadowRoot.querySelector("#psp-expression-editor__edit_area");
         this._close_button = this.shadowRoot.querySelector("#psp-expression-editor-close");
         this._save_button = this.shadowRoot.querySelector("#psp-expression-editor-button-save");
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
@@ -384,8 +237,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _register_callbacks() {
         this._edit_area.addEventListener("drop", this._capture_drop_data.bind(this));
-        this._edit_area.addEventListener("input", this._update_content.bind(this));
-        this._edit_area.addEventListener("keyup", this._keyup.bind(this));
+        this._edit_area.addEventListener("input", this._validate_expression.bind(this));
         this._edit_area.addEventListener("keydown", this._keydown.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
         this._close_button.addEventListener("click", this.close.bind(this));

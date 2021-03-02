@@ -443,11 +443,15 @@ export class PerspectiveElement extends StateElement {
         }
 
         try {
-            const _view = await this._table.view(config);
-            this._view = _view;
+            this._view = await this._table.view(config);
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
         } catch (e) {
+            // Delete the view handle only if it exists - if this._view is
+            // undefined, calling delete will throw its own "cannot read
+            // property of undefined" error and squash the original, more
+            // informative error message on why the view could not be created.
+            if (this._view) this._view.delete();
             throw e;
         }
 

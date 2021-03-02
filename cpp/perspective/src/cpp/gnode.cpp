@@ -106,6 +106,16 @@ t_gnode::init() {
         input_port->get_table()->flatten();
     }
 
+    // Initialize the vocab for expressions
+    t_lstore_recipe vlendata_args(
+        "", "__EXPRESSION_VOCAB_VLENDATA__", DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+
+    t_lstore_recipe extents_args(
+        "", "__EXPRESSION_VOCAB_EXTENTS__", DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+
+    m_expression_vocab.reset(new t_vocab(vlendata_args, extents_args));
+    m_expression_vocab->init(true);
+
     m_init = true;
 }
 
@@ -1084,11 +1094,12 @@ t_gnode::_recompute_expressions(
 }
 
 void
-t_gnode::_register_expressions(const std::vector<t_computed_expression>& expressions) {
-    for (const auto& expr : expressions) {
+t_gnode::_register_expressions(std::vector<t_computed_expression>& expressions) {
+    for (auto& expr : expressions) {
         const std::string& expression_string = expr.get_expression_string();
 
         if (m_expression_map.count(expression_string) == 0) {
+            expr.set_expression_vocab(m_expression_vocab);
             m_expression_map[expression_string] = expr;
         }
     }

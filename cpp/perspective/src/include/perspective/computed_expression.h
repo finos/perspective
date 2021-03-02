@@ -55,6 +55,8 @@ public:
         std::shared_ptr<t_data_table> flattened,
         const std::vector<t_rlookup>& changed_rows) const;
 
+    void set_expression_vocab(std::shared_ptr<t_vocab> vocab);
+
     std::string get_expression_string() const;
     std::string get_parsed_expression_string() const;
     std::vector<std::pair<std::string, std::string>> get_column_ids() const;
@@ -64,6 +66,7 @@ private:
     std::string m_expression_string;
     std::string m_parsed_expression_string;
     std::vector<std::pair<std::string, std::string>> m_column_ids;
+    std::shared_ptr<t_vocab> m_expression_vocab;
     t_dtype m_dtype;
 };
 
@@ -113,7 +116,11 @@ public:
     static exprtk::symbol_table<t_tscalar> GLOBAL_SYMTABLE;
 
     // Instances of Exprtk functions
-    static std::vector<exprtk::igeneric_function<t_tscalar>> FUNCTIONS;
+    static computed_function::date_bucket DATE_BUCKET_FN;
+    static computed_function::intern INTERN_VALIDATOR_FN;
+    static computed_function::concat CONCAT_VALIDATOR_FN;
+    static computed_function::upper UPPER_VALIDATOR_FN;
+    static computed_function::lower LOWER_VALIDATOR_FN;
 };
 
 } // end namespace perspective

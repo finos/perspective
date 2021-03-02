@@ -317,11 +317,12 @@ protected:
 
     /**
      * @brief Add each expression to `m_expression_map` if it does not
-     * already exist.
+     * already exist, and register the gnode's vocab pointer with each
+     * expression.
      * 
      * @param expressions 
      */
-    void _register_expressions(const std::vector<t_computed_expression>& expressions);
+    void _register_expressions(std::vector<t_computed_expression>& expressions);
 
     /**
      * @brief Remove expressions from the `m_expression_map`.
@@ -424,6 +425,10 @@ private:
 
     // track all expressions on this gnode
     tsl::ordered_map<std::string, t_computed_expression> m_expression_map;
+
+    // Expressions that create strings need to intern their strings so that
+    // memory leaks/errors do not happen later.
+    std::shared_ptr<t_vocab> m_expression_vocab;
 
     bool m_init;
     t_uindex m_id;

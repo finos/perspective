@@ -1366,6 +1366,10 @@ export default function(Module) {
                 return cname_map[cname];
             });
 
+            // Replace single quote string literals and wrap them in a call to
+            // intern() which makes sure they don't leak
+            parsed_expression_string = parsed_expression_string.replace(/'(.*?[^\\])'/g, match => `intern(${match})`);
+
             validated_expressions.push([expression_string, parsed_expression_string, column_id_map]);
         }
 

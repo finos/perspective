@@ -34,7 +34,12 @@ namespace perspective {
  * 
  */
 namespace computed_function {
-    
+
+typedef typename exprtk::igeneric_function<t_tscalar>::parameter_list_t t_parameter_list;
+typedef typename exprtk::igeneric_function<t_tscalar>::generic_type t_generic_type;
+typedef typename t_generic_type::scalar_view t_scalar_view;
+typedef typename t_generic_type::string_view t_string_view;
+
 /**
  * @brief A custom exprtk function that reaches into a column and returns the
  * value of the next row. Basically like an iterator but slow and bad, and this
@@ -44,39 +49,99 @@ namespace computed_function {
  * 
  * @tparam T 
  */
-template <typename T>
-struct col : public exprtk::igeneric_function<T> {
-    typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
-    typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
-    typedef typename t_generic_type::string_view t_string_view;
+// template <typename T>
+// struct col : public exprtk::igeneric_function<T> {
+//     typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
+//     typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
+//     typedef typename t_generic_type::string_view t_string_view;
 
-    col(std::shared_ptr<t_data_table> data_table, const tsl::hopscotch_set<std::string>& input_columns);
-    col(std::shared_ptr<t_schema> schema);
+//     col(std::shared_ptr<t_data_table> data_table, const tsl::hopscotch_set<std::string>& input_columns);
+//     col(std::shared_ptr<t_schema> schema);
 
-    ~col();
+//     ~col();
 
-    T next(const std::string& column_name);
+//     T next(const std::string& column_name);
 
-    T operator()(t_parameter_list parameters);
+//     T operator()(t_parameter_list parameters);
 
-    std::shared_ptr<t_schema> m_schema;
-    tsl::hopscotch_set<std::string> m_input_columns;
-    std::map<std::string, std::shared_ptr<t_column>> m_columns;
-    std::map<std::string, t_uindex> m_ridxs;
+//     std::shared_ptr<t_schema> m_schema;
+//     tsl::hopscotch_set<std::string> m_input_columns;
+//     std::map<std::string, std::shared_ptr<t_column>> m_columns;
+//     std::map<std::string, t_uindex> m_ridxs;
+// };
+
+#define STRING_FUNCTION_HEADER(NAME)                                    \
+    struct NAME : public exprtk::igeneric_function<t_tscalar> {        \
+        NAME(std::shared_ptr<t_vocab> expression_vocab);               \
+        ~NAME();                                                       \
+        t_tscalar operator()(t_parameter_list parameters);              \
+        std::shared_ptr<t_vocab> m_expression_vocab;                    \
+        t_tscalar m_sentinel;                                           \
+        t_tscalar m_rval;                                               \
+        t_tscalar m_none;                                               \
+    };                                                                  \
+
+// Place string literals into an intermediate vocab and return a scalar so
+// that they can be used in all scalar operations.
+STRING_FUNCTION_HEADER(intern)
+
+// Concat any number of columns and string literals together.
+STRING_FUNCTION_HEADER(concat)
+
+// Uppercase a string, storing intermediates in `expression_vocab`
+STRING_FUNCTION_HEADER(upper)
+
+// Lowercase a string
+STRING_FUNCTION_HEADER(lower)
+
+// template <typename T>
+// struct lower : public exprtk::igeneric_function<T> {
+//     typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
+//     typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
+//     typedef typename t_generic_type::scalar_view t_scalar_view;
+//     typedef typename t_generic_type::string_view t_string_view;
+
+//     lower(std::shared_ptr<t_vocab> expression_vocab);
+//     ~lower();
+
+//     T operator()(t_parameter_list parameters);
+
+//     std::shared_ptr<t_vocab> m_expression_vocab;
+//     t_tscalar m_sentinel;
+//     t_tscalar m_rval;
+//     t_tscalar m_none;
+// };
+
+enum t_date_bucket_unit {
+    SECONDS,
+    MINUTES,
+    HOURS,
+    DAYS,
+    WEEKS,
+    MONTHS,
+    YEARS
 };
 
-template <typename T>
-struct upper : public exprtk::igeneric_function<T> {
-    typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
-    typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
-    typedef typename t_generic_type::string_view t_string_view;
+struct date_bucket : public exprtk::igeneric_function<t_tscalar> {
+    date_bucket();
+    ~date_bucket();
 
-    upper();
+    t_tscalar operator()(t_parameter_list parameters);
 
-    ~upper();
-
-    T operator()(t_parameter_list parameters);
+    // faster unit lookups, since we are calling this lookup in a tight loop.
+    static tsl::hopscotch_map<std::string, t_date_bucket_unit> UNIT_MAP;
 };
+
+void _second_bucket(t_tscalar& val, t_tscalar& rval);
+void _minute_bucket(t_tscalar& val, t_tscalar& rval);
+void _hour_bucket(t_tscalar& val, t_tscalar& rval);
+void _day_bucket(t_tscalar& val, t_tscalar& rval);
+void _week_bucket(t_tscalar& val, t_tscalar& rval);
+void _month_bucket(t_tscalar& val, t_tscalar& rval);
+void _year_bucket(t_tscalar& val, t_tscalar& rval);
+
+t_tscalar now();
+t_tscalar today();
 
 /**
  * @brief Generate headers for numeric computations with one operand.

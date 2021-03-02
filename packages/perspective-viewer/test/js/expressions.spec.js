@@ -23,7 +23,7 @@ const add_expression = async (page, expression) => {
     const viewer = await page.$("perspective-viewer");
     await page.waitForSelector("perspective-viewer:not([updating])");
     await page.shadow_click("perspective-viewer", "#add-expression");
-    await page.shadow_type(expression, "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+    await page.shadow_type(expression, "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
     // a little hacky around waiting for the UI, etc. to render final state
     await page.waitFor(200);
     await page.evaluate(element => {
@@ -61,7 +61,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_type("abc", "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.shadow_type("abc", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
@@ -69,7 +69,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_type("$'Sales' + $'Category'", "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.shadow_type("$'Sales' + $'Category'", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
@@ -77,26 +77,48 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_type("$'aaaa' + $'Sales'", "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.shadow_type("$'aaaa' + $'Sales'", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("Typing enter should save a valid expression", async page => {
+            test.capture("Typing tab should enter an indent", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_type("$'Sales' + 10", "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.shadow_type("$'Sales' + 10", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.press("Tab");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Typing enter should enter a newline", async page => {
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-expression");
+                await page.shadow_type("$'Sales' + 10", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.press("Enter");
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("Typing enter should not save an invalid expression", async page => {
+            test.capture("Typing shift-enter should save a valid expression", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_type("definitely not valid", "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.shadow_type("$'Sales' + 10", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.down("Shift");
+                await page.keyboard.press("Enter");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("Typing shift-enter should not save an invalid expression", async page => {
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#add-expression");
+                await page.shadow_type("definitely not valid", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.down("Shift");
                 await page.keyboard.press("Enter");
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
@@ -105,7 +127,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_type("1 + 2 + 3 + 4 + 5 + 6 + 7".repeat(10), "perspective-viewer", "perspective-expression-editor", ".perspective-expression-editor__edit_area");
+                await page.shadow_type("1 + 2 + 3 + 4 + 5 + 6 + 7".repeat(10), "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
             });
 
             // Remove

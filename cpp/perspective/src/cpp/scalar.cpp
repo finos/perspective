@@ -62,7 +62,7 @@ namespace perspective {
     } \
 
 #define BINARY_OPERATOR_BODY(OP) \
-    if (!other.is_valid() || !is_valid() || !is_numeric()) return mknone(); \
+    if (!other.is_valid() || !is_valid() || !is_numeric() || !other.is_numeric()) return mknone(); \
     t_tscalar rval; \
     rval.clear(); \
     rval.m_type = m_type; \
