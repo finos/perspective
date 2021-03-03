@@ -6,21 +6,9 @@ python3 -m pip install -U perspective-python
 
 export NODE_OPTIONS=--max-old-space-size=32768
 
-EXTENSIONS="
-@jupyter-widgets/jupyterlab-manager@2.0.0
-@finos/perspective-jupyterlab
-@jupyter-voila/jupyterlab-preview@1.1.0
-"
+EXTENSIONS="@jupyter-widgets/jupyterlab-manager @finos/perspective-jupyterlab"
 
 
-until jupyter labextension install $EXTENSIONS --no-build
-do
-    echo "Extension failed to install"
-done
-
-until jupyter lab build --dev-build=False --minimize=False
-do
-    echo "Extension failed to install"
-done
-
+jupyter labextension install $EXTENSIONS --no-build
+jupyter lab build --dev-build=False --minimize=False
 jupyter serverextension enable --py jupyterlab
