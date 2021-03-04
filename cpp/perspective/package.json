@@ -10,7 +10,7 @@
         "dist/cjs/**/*"
     ],
     "scripts": {
-        "build": "yarn emsdk-run node ./build.js",
+        "build": "node ../../scripts/run_emsdk.js node ./build.js",
         "clean": "rimraf dist/cpp/build",
         "test": ":",
         "test:run": ":",

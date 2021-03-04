@@ -49,7 +49,6 @@
         "cssnano": "^4.1.10",
         "cssnano-preset-lite": "^1.0.1",
         "dotenv": "^8.1.0",
-        "emsdk-npm": "https://github.com/texodus/emsdk-npm.git#bash-sub-fix",
         "eslint": "^6.6.0",
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-markdown": "^1.0.2",
