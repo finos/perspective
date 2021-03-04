@@ -240,11 +240,13 @@
         }
 
         & .y-label-container .splitter-label::after {
-            content: "\1f847";
+            font-family: var(--d3fc-y1-label--font-family, inherit);
+            content: var(--d3fc-y1-label--content, "\1f847");
         }
 
         & .y2-label-container .splitter-label::after {
-            content: "\1f845";
+            font-family: var(--d3fc-y2-label--font-family, inherit);
+            content: var(--d3fc-y2-label--content, "\1f845");
         }
 
         &.d3_y_bar .y-axis path,
