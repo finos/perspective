@@ -11,6 +11,13 @@ pr:
     include:
     - '*'  # must quote since "*" is a YAML reserved character; we want a string
 
+schedules:
+- cron: "0 0 * * 6"
+  displayName: Daily midnight build
+  branches:
+    include:
+    - master
+  always: true
 
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
@@ -77,7 +84,7 @@ jobs:
         manylinux_flag: '--manylinux2010'
         artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
 
-      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
         Python36ManyLinux2010:
           python.version: '3.6'
           python_flag: '--python36'
@@ -169,7 +176,7 @@ jobs:
       Python37:
         python.version: '3.7'
         python_flag: ''
-      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
         Python36:
           python.version: '3.6'
           python_flag: '--python36'
@@ -240,7 +247,7 @@ jobs:
         python_flag: ''
         artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
 
-      ${{ if startsWith(variables['build.sourceBranch'], 'refs/tags/v') }}:
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
         Python36:
           python.version: '3.6'
           python_flag: '--python36'
