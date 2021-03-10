@@ -17,6 +17,7 @@ from .validate import (
     validate_sort,
     validate_filters,
     validate_computed_columns,
+    validate_expressions,
     validate_plugin_config,
 )
 from .viewer_traitlets import PerspectiveTraitlets
@@ -50,6 +51,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "aggregates",
         "columns",
         "computed_columns",
+        "expressions",
         "plugin",
         "editable",
     )
@@ -64,6 +66,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         sort=None,
         filters=None,
         computed_columns=None,
+        expressions=None,
         plugin_config=None,
         dark=None,
         editable=False,
@@ -131,6 +134,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.sort = validate_sort(sort) or []
         self.filters = validate_filters(filters) or []
         self.computed_columns = validate_computed_columns(computed_columns) or []
+        self.expressions = validate_expressions(expressions) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.dark = dark
         self.editable = editable
@@ -268,6 +272,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.filters = []
         self.sort = []
         self.computed_columns = []
+        self.expressions = []
         self.aggregates = {}
         self.columns = []
         self.plugin = "datagrid"

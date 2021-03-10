@@ -189,6 +189,7 @@ class _PerspectiveManagerInternal(object):
                 if msg["method"] in (
                     "schema",
                     "computed_schema",
+                    "expression_schema",
                     "get_computation_input_types",
                 ):
                     # make sure schema returns string types through the
@@ -231,6 +232,7 @@ class _PerspectiveManagerInternal(object):
                     result = getattr(table_or_view, msg["method"])(data, **options)
                 elif msg["cmd"] == "table_method" and msg["method"] in (
                     "computed_schema",
+                    "expression_schema",
                     "get_computation_input_types",
                 ):
                     # computed_schema on the table takes kwargs; computed

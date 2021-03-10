@@ -14,10 +14,11 @@ from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
 from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
-from ._utils import _dtype_to_pythontype, _dtype_to_str
+from ._utils import _dtype_to_pythontype, _dtype_to_str, _validate_expressions
 from .libbinding import (
     make_table,
     get_table_computed_schema,
+    get_table_expression_schema,
     get_computed_functions,
     get_computation_input_types,
     str_to_filter_op,
@@ -212,6 +213,47 @@ class Table(object):
                 schema[columns[i]] = _dtype_to_pythontype(types[i])
         return schema
 
+    def expression_schema(self, expressions, **kwargs):
+        """Returns a schema containing the column names and data types for
+        each valid expression in ``expressions``.
+
+        If an expression is invalid, i.e. by referencing invalid columns,
+        performing an invalid operation (adding a string to a number, for
+        instance), or has syntax errors, the expression will not be included
+        in the returned schema. Thus, this method can be used to type and
+        syntax check expressions before they are entered into the view
+        constructor, which will throw a :obj:`PerspectiveCppError` if
+        the expression is invalid.
+
+        Args:
+            expressions (:obj:`list`): A list of string expressions to validate
+                and create a schema from.
+
+        Keyword Args:
+            as_string (:obj:`bool`): If True, returns the data types as string
+                representations so they can be serialized.
+        """
+        schema = {}
+
+        if len(expressions) == 0:
+            return schema
+
+        expressions = _validate_expressions(expressions)
+
+        s = get_table_expression_schema(self._table, expressions)
+
+        columns = s.columns()
+        types = s.types()
+        as_string = kwargs.pop("as_string", False)
+
+        for i in range(0, len(columns)):
+            if as_string:
+                schema[columns[i]] = _dtype_to_str(types[i])
+            else:
+                schema[columns[i]] = _dtype_to_pythontype(types[i])
+
+        return schema
+
     def get_computation_input_types(self, computed_function_name=None, **kwargs):
         """Returns a list of accepted input types for the provided
         ``computed_function_name``.
@@ -236,12 +278,8 @@ class Table(object):
                 new_types.append(_dtype_to_pythontype(types[i]))
         return new_types
 
-    def columns(self, computed=False):
+    def columns(self):
         """Returns the column names of this :class:`~perspective.Table`.
-
-        Keyword Args:
-            computed (:obj:`bool`): Whether to include computed columns in this
-                array. Defaults to False.
 
         Returns:
             :obj:`list`: a list of string column names
@@ -409,6 +447,7 @@ class Table(object):
         sort=None,
         filter=None,
         computed_columns=None,
+        expressions=None,
     ):
         """Create a new :class:`~perspective.View` from this
         :class:`~perspective.Table` via the supplied keyword arguments.
@@ -448,14 +487,22 @@ class Table(object):
         self._state_manager.call_process(self._table.get_id())
 
         config = {}
+
+        if expressions is not None:
+            config["expressions"] = _validate_expressions(expressions)
+
         if columns is None:
             config["columns"] = self.columns()
             if computed_columns is not None:
                 # append all computed columns if columns are not specified
                 for col in computed_columns:
                     config["columns"].append(col["column"])
+            if config["expressions"] is not None:
+                for expression in config["expressions"]:
+                    config["columns"].append(expression[0])
         else:
             config["columns"] = columns
+
         if row_pivots is not None:
             config["row_pivots"] = row_pivots
         if column_pivots is not None:

@@ -22,6 +22,7 @@ def view(
     sort=None,
     filter=None,
     computed_columns=None,
+    expressions=None,
 ):
     """Create a new View by posting a message to the Perspective server
     implementation through `client`, returning a Future that will resolve to a
@@ -38,6 +39,7 @@ def view(
         "sort": sort,
         "filter": filter,
         "computed_columns": computed_columns,
+        "expressions": expressions,
     }
 
     msg = {
@@ -109,6 +111,11 @@ class PerspectiveViewProxy(object):
 
     def computed_schema(self, as_string=False):
         return self._async_queue("computed_schema", "view_method", as_string=as_string)
+
+    def expression_schema(self, as_string=False):
+        return self._async_queue(
+            "expression_schema", "view_method", as_string=as_string
+        )
 
     def on_update(self, callback, mode=None):
         return self._subscribe("on_update", "view_method", callback, mode=mode)

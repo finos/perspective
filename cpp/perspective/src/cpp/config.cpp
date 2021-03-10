@@ -12,6 +12,10 @@
 
 namespace perspective {
 
+// t_ctxunit
+t_config::t_config(const std::vector<std::string>& detail_columns)
+    : t_config(detail_columns, {}, FILTER_OP_AND, {}, {}) {}
+
 // t_ctx0
 t_config::t_config(
     const std::vector<std::string>& detail_columns,
@@ -151,9 +155,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
 
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
-
-t_config::t_config(const std::vector<std::string>& detail_columns)
-    : t_config(detail_columns, {}, FILTER_OP_AND, {}, {}) {}
 
 t_config::t_config() {}
 

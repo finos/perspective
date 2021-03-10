@@ -562,6 +562,7 @@ set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
 	${PSP_PYTHON_SRC}/src/computed.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
+	${PSP_PYTHON_SRC}/src/expressions.cpp
 	${PSP_PYTHON_SRC}/src/fill.cpp
 	${PSP_PYTHON_SRC}/src/numpy.cpp
 	${PSP_PYTHON_SRC}/src/python.cpp

@@ -149,6 +149,26 @@ def validate_filters(filters):
         )
 
 
+def validate_expressions(expressions):
+    if expressions is None:
+        return []
+
+    if isinstance(expressions, string_types):
+        # wrap in a list and return
+        return [expressions]
+
+    if isinstance(expressions, list):
+        for expr in expressions:
+            if not isinstance(expr, string_types):
+                raise PerspectiveError(
+                    "Cannot parse non-string expression: {}".format(str(type(expr)))
+                )
+    else:
+        raise PerspectiveError(
+            "Cannot parse expressions of type: {}".format(str(type(expressions)))
+        )
+
+
 def validate_computed_columns(computed_columns):
     if computed_columns is None:
         return []

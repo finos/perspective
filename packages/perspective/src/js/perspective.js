@@ -1340,7 +1340,7 @@ export default function(Module) {
 
             // Map of column names to column IDs, so that we generate
             // column IDs correctly without collision.
-            let cname_map = {};
+            let column_name_map = {};
 
             // Map of column IDs to column names, so the engine can look
             // up the right column internally without more transforms.
@@ -1356,14 +1356,14 @@ export default function(Module) {
                 // literal string "\'", in which case...?
                 cname = cname.replace(/\\'/g, "'");
 
-                if (cname_map[cname] === undefined) {
+                if (column_name_map[cname] === undefined) {
                     let column_id = `COLUMN${running_cidx}`;
-                    cname_map[cname] = column_id;
+                    column_name_map[cname] = column_id;
                     column_id_map[column_id] = cname;
                 }
 
                 running_cidx++;
-                return cname_map[cname];
+                return column_name_map[cname];
             });
 
             // Replace single quote string literals and wrap them in a call to
@@ -1632,6 +1632,8 @@ export default function(Module) {
         // as local time
         if (config.filter.length > 0) {
             for (let filter of config.filter) {
+                // TODO new Date() would not work for computed
+                // columns when creating a raw view.
                 const dtype = table_schema[filter[0]];
                 const is_compare = filter[1] !== perspective.FILTER_OPERATORS.isNull && filter[1] !== perspective.FILTER_OPERATORS.isNotNull;
                 if (is_compare && (dtype === "date" || dtype === "datetime")) {

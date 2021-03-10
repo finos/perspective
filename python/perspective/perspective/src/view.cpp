@@ -137,6 +137,37 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         column_only = true;
     }
 
+    auto p_expressions = config.attr("get_expressions")().cast<std::vector<std::vector<t_val>>>();
+    std::vector<t_computed_expression> expressions;
+    expressions.reserve(p_expressions.size());
+
+    // Will either abort() or succeed completely, and this isn't a public
+    // API so we can directly index for speed.
+    for (t_uindex idx = 0; idx < p_expressions.size(); ++idx) {
+        const auto& expr = p_expressions[idx];
+        std::string expression_string = expr[0].cast<std::string>();
+        std::string parsed_expression_string = expr[1].cast<std::string>();
+
+        auto p_column_ids = py::dict(expr[2]);
+        std::vector<std::pair<std::string, std::string>> column_ids;
+        column_ids.resize(p_column_ids.size());
+        t_uindex cidx = 0;
+        
+        for (const auto& item : p_column_ids) {
+            column_ids[cidx] = std::pair<std::string, std::string>(
+                item.first.cast<std::string>(),
+                item.second.cast<std::string>());
+            ++cidx;
+        }
+
+        // If the expression cannot be parsed, it will abort() here.
+        t_computed_expression expression = t_computed_expression_parser::precompute(
+            expression_string, parsed_expression_string, column_ids, schema);
+
+        expressions.push_back(expression);
+        schema->add_column(expression_string, expression.get_dtype());
+    }
+
     // this needs to be a py_dict
     auto p_computed_columns = config.attr("get_computed_columns")().cast<std::vector<t_val>>();
     std::vector<t_computed_column_definition> computed_columns;
@@ -237,6 +268,7 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         filter,
         sort,
         computed_columns,
+        expressions,
         filter_op,
         column_only);
 

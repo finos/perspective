@@ -16,6 +16,7 @@ from .validate import (
     validate_sort,
     validate_filters,
     validate_computed_columns,
+    validate_expressions,
     validate_plugin_config,
 )
 
@@ -43,6 +44,7 @@ class PerspectiveTraitlets(HasTraits):
     sort = List(default_value=[]).tag(sync=True)
     filters = List(default_value=[]).tag(sync=True)
     computed_columns = List(default_value=[]).tag(sync=True)
+    expressions = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
     dark = Bool(None, allow_none=True).tag(sync=True)
     editable = Bool(False).tag(sync=True)
@@ -77,9 +79,13 @@ class PerspectiveTraitlets(HasTraits):
     def _validate_filters(self, proposal):
         return validate_filters(proposal.value)
 
-    @validate("filters")
+    @validate("computed_columns")
     def _validate_computed_columns(self, proposal):
         return validate_computed_columns(proposal.value)
+
+    @validate("expressions")
+    def _validate_expressions(self, proposal):
+        return validate_expressions(proposal.value)
 
     @validate("plugin_config")
     def _validate_plugin_config(self, proposal):

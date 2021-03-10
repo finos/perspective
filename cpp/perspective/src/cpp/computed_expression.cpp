@@ -500,11 +500,11 @@ t_computed_expression_parser::get_dtype(
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
-        // std::cerr << "[t_computed_expression_parser::get_dtype] Failed to parse expression: `"
-        //     << parsed_expression_string
-        //     << "`, failed with error: "
-        //     << t_computed_expression_parser::PARSER->error().c_str()
-        //     << std::endl;
+        std::cerr << "[t_computed_expression_parser::get_dtype] Failed to parse expression: `"
+            << parsed_expression_string
+            << "`, failed with error: "
+            << t_computed_expression_parser::PARSER->error().c_str()
+            << std::endl;
         return DTYPE_NONE;
     }
 

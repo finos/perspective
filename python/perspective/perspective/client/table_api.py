@@ -89,6 +89,11 @@ class PerspectiveTableProxy(object):
             "computed_schema", "table_method", computed_columns, **kwargs
         )
 
+    def expression_schema(self, expressions, **kwargs):
+        return self._async_queue(
+            "expression_schema", "table_method", expressions, **kwargs
+        )
+
     def get_computation_input_types(self, computed_function_name=None, **kwargs):
         return self._async_queue(
             "get_computation_input_types",
@@ -97,8 +102,8 @@ class PerspectiveTableProxy(object):
             **kwargs
         )
 
-    def columns(self, computed=False):
-        return self._async_queue("columns", "table_method", computed=computed)
+    def columns(self):
+        return self._async_queue("columns", "table_method")
 
     def is_valid_filter(self, filter):
         return self._async_queue("is_valid_filter", "table_method", filter)
@@ -121,6 +126,7 @@ class PerspectiveTableProxy(object):
         sort=None,
         filter=None,
         computed_columns=None,
+        expressions=None,
     ):
         return make_view(
             self._client,
@@ -132,6 +138,7 @@ class PerspectiveTableProxy(object):
             sort,
             filter,
             computed_columns,
+            expressions,
         )
 
     def update(self, data, port_id=0):

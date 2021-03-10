@@ -31,6 +31,8 @@ class ViewConfig(object):
             filter (:obj:`list` of :obj:`list` of :obj:`str`):  A list of lists,
                 each list containing a column name, a filter comparator, and a
                 value to filter by.
+            expressions (:obj:`list` of :obj:`str`):  A list of string
+                expressions which will be calculated by the view.
         """
         self._config = config
         self._row_pivots = self._config.get("row_pivots", [])
@@ -40,6 +42,7 @@ class ViewConfig(object):
         self._sort = self._config.get("sort", [])
         self._filter = self._config.get("filter", [])
         self._computed_columns = self._config.get("computed_columns", [])
+        self._expressions = self._config.get("expressions", [])
         self._filter_op = self._config.get("filter_op", "and")
         self.row_pivot_depth = self._config.get("row_pivot_depth", None)
         self.column_pivot_depth = self._config.get("column_pivot_depth", None)
@@ -97,6 +100,10 @@ class ViewConfig(object):
 
     def get_computed_columns(self):
         return self._computed_columns
+
+    def get_expressions(self):
+        """A list of string expressions that should be calculated."""
+        return self._expressions
 
     def get_filter(self):
         """The columns that should be filtered.
