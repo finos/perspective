@@ -155,6 +155,7 @@ class _PerspectiveManagerInternal(object):
                 # Return the View's name to the front end so it can be
                 # resolved.
                 message = self._make_message(msg["id"], msg["view_name"])
+                print(message)
                 post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table_method" or cmd == "view_method":
                 # Call the method on the table/view instance
@@ -186,15 +187,10 @@ class _PerspectiveManagerInternal(object):
                 # Decide how to dispatch the method
                 arguments = {}
 
-                if msg["method"] in (
-                    "schema",
-                    "computed_schema",
-                    "expression_schema",
-                    "get_computation_input_types",
-                ):
+                if msg["method"] in ("schema", "expression_schema"):
                     # make sure schema returns string types through the
                     # wire API. `as_string` is respected by both the table
-                    # and view's `schema` and `computed_schema` methods.
+                    # and view's `schema` and `expression_schema` methods.
                     arguments["as_string"] = True
                 elif msg["method"].startswith("to_"):
                     # parse options in `to_format` calls
@@ -230,13 +226,12 @@ class _PerspectiveManagerInternal(object):
                     if len(arguments) > 1 and isinstance(arguments[1], dict):
                         options = arguments[1]
                     result = getattr(table_or_view, msg["method"])(data, **options)
-                elif msg["cmd"] == "table_method" and msg["method"] in (
-                    "computed_schema",
-                    "expression_schema",
-                    "get_computation_input_types",
+                elif (
+                    msg["cmd"] == "table_method"
+                    and msg["method"] == "expression_schema"
                 ):
-                    # computed_schema on the table takes kwargs; computed
-                    # schema on the view takes args.
+                    # expression_schema on the table takes `as_string` in
+                    # wargs,
                     result = getattr(table_or_view, msg["method"])(
                         *msg.get("args", []), **arguments
                     )

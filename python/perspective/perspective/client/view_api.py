@@ -21,7 +21,6 @@ def view(
     aggregates=None,
     sort=None,
     filter=None,
-    computed_columns=None,
     expressions=None,
 ):
     """Create a new View by posting a message to the Perspective server
@@ -38,7 +37,6 @@ def view(
         "aggregates": aggregates,
         "sort": sort,
         "filter": filter,
-        "computed_columns": computed_columns,
         "expressions": expressions,
     }
 
@@ -108,9 +106,6 @@ class PerspectiveViewProxy(object):
 
     def schema(self, as_string=False):
         return self._async_queue("schema", "view_method", as_string=as_string)
-
-    def computed_schema(self, as_string=False):
-        return self._async_queue("computed_schema", "view_method", as_string=as_string)
 
     def expression_schema(self, as_string=False):
         return self._async_queue(

@@ -202,9 +202,9 @@ class PerspectiveViewer extends ActionElement {
      *
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('expressions', JSON.stringify(["$'x' + ($'y' + 20)"]));
+     * elem.setAttribute('expressions', JSON.stringify(['"x" + ("y" + 20)']));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer expressions='["$\'x\' + 10"]'></perspective-viewer>
+     * <perspective-viewer expressions='[\'"x" + 10\']'></perspective-viewer>
      */
     @array_attribute
     expressions(expressions) {

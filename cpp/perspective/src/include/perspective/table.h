@@ -14,7 +14,6 @@
 #include <perspective/raw_types.h>
 #include <perspective/gnode.h>
 #include <perspective/pool.h>
-#include <perspective/computed.h>
 #include <perspective/data_table.h>
 
 namespace perspective {
@@ -68,8 +67,8 @@ public:
     /**
      * @brief The schema of the underlying `t_data_table`, which contains the
      * `psp_pkey`, `psp_op` and `psp_pkey` meta columns, and none of the
-     * computed columns that are created by views on this table. For a
-     * `t_schema` with all computed columns created by all views, use
+     * expression columns that are created by views on this table. For a
+     * `t_schema` with all expression columns created by all views, use
      * `m_gnode->get_table_sptr()->get_schema()`.
      *
      * The output schema is generally subject to further processing before
@@ -78,19 +77,6 @@ public:
      * @return t_schema
      */
     t_schema get_schema() const;
-
-    /**
-     * @brief Given a vector of computed column definitions, look up the
-     * computed function and its return types to create a computed schema
-     * without actually constructing/calculating the computed columns. Required
-     * so that computed column types/aggregates can be correctly identified
-     * without unnecessary recalculation.
-     * 
-     * @param computed_columns 
-     * @return t_schema 
-     */
-    t_schema get_computed_schema(
-        std::vector<t_computed_column_definition> computed_columns) const;
 
     /**
      * @brief Given a vector of expressions and its associated metadata 

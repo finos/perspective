@@ -449,7 +449,7 @@ else()
 	include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
-# Build exprtk for computed expression parsing
+# Build exprtk for expression parsing
 psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 #####################
 
@@ -483,8 +483,6 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/compat_impl_linux.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
-	${PSP_CPP_SRC}/src/cpp/computed.cpp
-	${PSP_CPP_SRC}/src/cpp/computed_column_map.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_expression.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_function.cpp
 	${PSP_CPP_SRC}/src/cpp/config.cpp
@@ -560,7 +558,6 @@ set(WASM_SOURCE_FILES ${SOURCE_FILES}
 
 set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
-	${PSP_PYTHON_SRC}/src/computed.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
 	${PSP_PYTHON_SRC}/src/expressions.cpp
 	${PSP_PYTHON_SRC}/src/fill.cpp

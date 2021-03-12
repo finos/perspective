@@ -66,17 +66,11 @@ class PerspectiveTableProxy(object):
     def get_limit(self):
         return self._async_queue("get_limit", "table_method")
 
-    def compute(self):
-        return self._async_queue("compute", "table_method")
-
     def clear(self):
         return self._async_queue("clear", "table_method")
 
     def replace(self, data):
         return self._async_queue("replace", "table_method", data)
-
-    def get_computed_functions(self):
-        return self._async_queue("get_computed_functions", "table_method")
 
     def size(self):
         return self._async_queue("size", "table_method")
@@ -84,22 +78,9 @@ class PerspectiveTableProxy(object):
     def schema(self, as_string=False):
         return self._async_queue("schema", "table_method", as_string=as_string)
 
-    def computed_schema(self, computed_columns=None, **kwargs):
-        return self._async_queue(
-            "computed_schema", "table_method", computed_columns, **kwargs
-        )
-
     def expression_schema(self, expressions, **kwargs):
         return self._async_queue(
             "expression_schema", "table_method", expressions, **kwargs
-        )
-
-    def get_computation_input_types(self, computed_function_name=None, **kwargs):
-        return self._async_queue(
-            "get_computation_input_types",
-            "table_method",
-            computed_function_name,
-            **kwargs
         )
 
     def columns(self):
@@ -125,7 +106,6 @@ class PerspectiveTableProxy(object):
         aggregates=None,
         sort=None,
         filter=None,
-        computed_columns=None,
         expressions=None,
     ):
         return make_view(
@@ -137,7 +117,6 @@ class PerspectiveTableProxy(object):
             aggregates,
             sort,
             filter,
-            computed_columns,
             expressions,
         )
 

@@ -135,11 +135,11 @@ async function get_new_page() {
                     triggerKeyEvent(char, "keydown");
                     triggerInputEvent(elem);
                     triggerKeyEvent(char, "keyUp");
-                    elem.innerText += char;
+                    elem.value += char;
                 }
 
-                if (elem.innerText !== content) {
-                    elem.innerText = content;
+                if (elem.value !== content) {
+                    elem.value = content;
                     triggerInputEvent(elem);
                 }
 

@@ -64,7 +64,6 @@ class View(object):
             and len(self._config.get_column_pivots()) == 0
             and len(self._config.get_filter()) == 0
             and len(self._config.get_sort()) == 0
-            and len(self._config.get_computed_columns()) == 0
             and len(self._config.get_expressions()) == 0
         )
 
@@ -248,15 +247,6 @@ class View(object):
 
         return {
             item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()
-        }
-
-    def computed_schema(self, as_string=False):
-        if as_string:
-            return {item[0]: item[1] for item in self._view.computed_schema().items()}
-
-        return {
-            item[0]: _str_to_pythontype(item[1])
-            for item in self._view.computed_schema().items()
         }
 
     def expression_schema(self, as_string=False):

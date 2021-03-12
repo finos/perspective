@@ -291,11 +291,9 @@ t_gnode::_process_table(t_uindex port_id) {
 
     // first update - master table is empty
     if (m_gstate->mapping_size() == 0) {
-        // Compute columns here on the flattened table, as the flattened table
-        // does not have any of the computed columns that are stored on the
+        // Compute expressions here on the flattened table, as the flattened table
+        // does not have any of the expressions that are stored on the
         // gnode, i.e. from all created contexts.
-        _compute_all_columns({flattened});
-
         if (m_expression_map.size() > 0) {
             _compute_expressions({flattened});
         }
@@ -335,22 +333,13 @@ t_gnode::_process_table(t_uindex port_id) {
     _process_state.m_current_data_table = m_oports[PSP_PORT_CURRENT]->get_table();
     _process_state.m_transitions_data_table = m_oports[PSP_PORT_TRANSITIONS]->get_table();
     _process_state.m_existed_data_table = m_oports[PSP_PORT_EXISTED]->get_table();
-    
-    // Add computed columns to transitions_data_table
-    _add_all_computed_columns(
-        _process_state.m_transitions_data_table,
-        DTYPE_UINT8);
 
+    // transitions table must have expression columns
     for (const auto& expr : m_expression_map) {
         _process_state.m_transitions_data_table->add_column_sptr(expr.first, DTYPE_UINT8, true);
     }
 
     // Recompute values for flattened and m_state->get_table
-    _recompute_all_columns(
-        get_table_sptr(),
-        _process_state.m_flattened_data_table,
-        _process_state.m_lookup);
-
     if (m_expression_map.size() > 0) {
         _recompute_expressions(
             get_table_sptr(),
@@ -362,13 +351,6 @@ t_gnode::_process_table(t_uindex port_id) {
     _process_state.clear_transitional_data_tables();
 
     // compute values on transitional tables before reserve
-    _compute_all_columns(
-        {
-            _process_state.m_delta_data_table,
-            _process_state.m_prev_data_table,
-            _process_state.m_current_data_table
-        });
-
     if (m_expression_map.size() > 0) {
         _compute_expressions({
             _process_state.m_delta_data_table,
@@ -386,27 +368,12 @@ t_gnode::_process_table(t_uindex port_id) {
     // mask_count = flattened_num_rows - number of rows that were removed
     _process_state.set_size_transitional_data_tables(mask_count);
 
-    // Reconcile column names - only attempt to process valid computed columns
+    // Reconcile column names with expressions
     std::vector<std::string> column_names = get_output_schema().m_columns;
 
     for (const auto& expr : m_expression_map) {
         column_names.push_back(expr.first);
     }
-
-    std::vector<std::string> valid_computed_columns;
-    valid_computed_columns.reserve(
-        m_computed_column_map.m_computed_columns.size());
-
-    for (const auto& computed : m_computed_column_map.m_computed_columns) {
-        valid_computed_columns.push_back(computed.first);
-    }
-    
-    // Process the `real` columns of the gnode state output schema + the
-    // computed columns registered by each context.
-    column_names.insert(
-        column_names.end(),
-        valid_computed_columns.begin(),
-        valid_computed_columns.end());
 
 
     t_uindex ncols = column_names.size();
@@ -481,13 +448,6 @@ t_gnode::_process_table(t_uindex port_id) {
     );
 #endif
     // After transitional tables are written, compute their values
-    _compute_all_columns(
-        {
-            _process_state.m_delta_data_table,
-            _process_state.m_prev_data_table,
-            _process_state.m_current_data_table
-        });
-
     if (m_expression_map.size() > 0) {
         _compute_expressions({
             _process_state.m_delta_data_table,
@@ -834,12 +794,11 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
     std::shared_ptr<t_data_table> pkeyed_table;
 
     if (should_update) {
-        // Will not have computed columns added in the context to be
-        // registered, but all previously computed columns.
+        // Will not have expressions added in the context to be
+        // registered, but all previous expressions on the gnode.
         pkeyed_table = m_gstate->get_pkeyed_table();
     }
 
-    std::vector<t_computed_column_definition> computed_columns;
     std::vector<t_computed_expression> expressions;
 
     switch (type) {
@@ -847,9 +806,6 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             set_ctx_state<t_ctx2>(ptr_);
             t_ctx2* ctx = static_cast<t_ctx2*>(ptr_);
             ctx->reset();
-
-            computed_columns = ctx->get_config().get_computed_columns();
-            m_computed_column_map.add_computed_columns(computed_columns);
 
             // Track expressions added by this context
             expressions = ctx->get_config().get_expressions();
@@ -860,7 +816,6 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
                 // were added as part of this context. Do so separately from
                 // update_context_from_state, so that registration-specific logic
                 // is centralized in one place.
-                _compute_all_columns({pkeyed_table});
                 if (m_expression_map.size() > 0) {
                     _compute_expressions({pkeyed_table});
                 }
@@ -872,14 +827,10 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             t_ctx1* ctx = static_cast<t_ctx1*>(ptr_);
             ctx->reset();
 
-            computed_columns = ctx->get_config().get_computed_columns();
-            m_computed_column_map.add_computed_columns(computed_columns);
-
             expressions = ctx->get_config().get_expressions();
             _register_expressions(expressions);
 
             if (should_update) {
-                _compute_all_columns({pkeyed_table});
                 if (m_expression_map.size() > 0) {
                     _compute_expressions({pkeyed_table});
                 }
@@ -890,14 +841,11 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             set_ctx_state<t_ctx0>(ptr_);
             t_ctx0* ctx = static_cast<t_ctx0*>(ptr_);
             ctx->reset();
-            computed_columns = ctx->get_config().get_computed_columns();
-            m_computed_column_map.add_computed_columns(computed_columns);
 
             expressions = ctx->get_config().get_expressions();
             _register_expressions(expressions);
 
             if (should_update) {
-                _compute_all_columns({pkeyed_table});
                 if (m_expression_map.size() > 0) {
                     _compute_expressions({pkeyed_table});
                 }
@@ -917,14 +865,11 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             set_ctx_state<t_ctx0>(ptr_);
             auto ctx = static_cast<t_ctx_grouped_pkey*>(ptr_);
             ctx->reset();
-            computed_columns = ctx->get_config().get_computed_columns();
-            m_computed_column_map.add_computed_columns(computed_columns);
 
             expressions = ctx->get_config().get_expressions();
             _register_expressions(expressions);
 
             if (should_update) {
-                _compute_all_columns({pkeyed_table});
                 if (m_expression_map.size() > 0) {
                     _compute_expressions({pkeyed_table});
                 }
@@ -934,13 +879,9 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
     }
 
-    // When a context is registered, compute its columns on the master table
+    // When a context is registered, add the expressions on the master table
     // so the columns will exist when updates, etc. are processed.
     std::shared_ptr<t_data_table> gstate_table = get_table_sptr();
-
-    for (const auto& computed : computed_columns) {
-        _add_computed_column(computed, gstate_table);
-    }
 
     for (const auto& expr : expressions) {
         gstate_table->add_column_sptr(
@@ -957,55 +898,26 @@ t_gnode::_unregister_context(const std::string& name) {
     auto it = m_contexts.find(name);
     if (it == m_contexts.end()) return;
 
-    // remove computed columns from gnode state
     t_ctx_handle ctxh = it->second;
     t_ctx_type type = ctxh.get_type();
 
-    std::vector<std::string> computed_column_names;
-
     switch (type) {
-        // No computed columns to remove
-        case UNIT_CONTEXT: break;
+        case UNIT_CONTEXT: break; // No computed columns to remove
         case TWO_SIDED_CONTEXT: {
             t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-            auto computed_columns = ctx->get_config().get_computed_columns();
-            computed_column_names.reserve(computed_columns.size());
-            for (const auto& c : computed_columns) {
-                computed_column_names.push_back(std::get<0>(c));
-            }
-            m_computed_column_map.remove_computed_columns(computed_column_names);
-
             // Remove expressions added by this context
             _unregister_expressions(ctx->get_config().get_expressions());
         } break;
         case ONE_SIDED_CONTEXT: {
             t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-            auto computed_columns = ctx->get_config().get_computed_columns();
-            computed_column_names.reserve(computed_columns.size());
-            for (const auto& c : computed_columns) {
-                computed_column_names.push_back(std::get<0>(c));
-            }
-            m_computed_column_map.remove_computed_columns(computed_column_names);
             _unregister_expressions(ctx->get_config().get_expressions());
         } break;
         case ZERO_SIDED_CONTEXT: {
             t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-            auto computed_columns = ctx->get_config().get_computed_columns();
-            computed_column_names.reserve(computed_columns.size());
-            for (const auto& c : computed_columns) {
-                computed_column_names.push_back(std::get<0>(c));
-            }
-            m_computed_column_map.remove_computed_columns(computed_column_names);
             _unregister_expressions(ctx->get_config().get_expressions());
         } break;
         case GROUPED_PKEY_CONTEXT: {
             auto ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-            auto computed_columns = ctx->get_config().get_computed_columns();
-            computed_column_names.reserve(computed_columns.size());
-            for (const auto& c : computed_columns) {
-                computed_column_names.push_back(std::get<0>(c));
-            }
-            m_computed_column_map.remove_computed_columns(computed_column_names);
             _unregister_expressions(ctx->get_config().get_expressions());
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
@@ -1069,7 +981,7 @@ t_gnode::notify_contexts(const t_data_table& flattened) {
 
 /******************************************************************************
  *
- * Computed Column Operations
+ * Expressions
  */
 
 void
@@ -1114,148 +1026,6 @@ t_gnode::_unregister_expressions(const std::vector<t_computed_expression>& expre
             m_expression_map.erase(expression_string);
         }
     }
-}
-
-void
-t_gnode::_recompute_all_columns(
-    std::shared_ptr<t_data_table> tbl,
-    std::shared_ptr<t_data_table> flattened,
-    const std::vector<t_rlookup>& changed_rows) {
-    const auto& computed_columns = m_computed_column_map.m_computed_columns;
-    for (const auto& computed : computed_columns) {
-        _recompute_column(computed.second, tbl, flattened, changed_rows);
-    }
-}
-
-void
-t_gnode::_compute_all_columns(
-    std::vector<std::shared_ptr<t_data_table>> tables) {
-    const auto& computed_columns = m_computed_column_map.m_computed_columns;
-    for (std::shared_ptr<t_data_table> table : tables) {
-        for (const auto& computed : computed_columns) {
-            _compute_column(computed.second, table);
-        }
-    }
-}
-
-void
-t_gnode::_add_all_computed_columns(
-    std::shared_ptr<t_data_table> table, t_dtype dtype) {
-    std::vector<std::string> computed_column_names;
-    computed_column_names.reserve(
-        m_computed_column_map.m_computed_columns.size());
-
-    for (const auto& computed : m_computed_column_map.m_computed_columns) {
-        computed_column_names.push_back(computed.first);
-    }
-
-    for (const std::string& name : computed_column_names) {
-       table->add_column(name, dtype, true);
-    }
-}
-
-void
-t_gnode::_add_computed_column(
-    const t_computed_column_definition& computed_column,
-    std::shared_ptr<t_data_table> tbl) {
-    std::string computed_column_name = std::get<0>(computed_column);
-    std::vector<std::string> input_column_names = std::get<2>(computed_column);
-    t_computation computation = std::get<3>(computed_column);
-
-    if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
-        std::cerr 
-            << "Cannot add computed column `"
-            << computed_column_name
-            << "` in gnode."
-            << std::endl;
-            return;
-    }
-
-    t_dtype output_column_type = computation.m_return_type;
-
-    tbl->add_column_sptr(
-        computed_column_name, output_column_type, true);
-}
-
-void
-t_gnode::_compute_column(
-    const t_computed_column_definition& computed_column,
-    std::shared_ptr<t_data_table> tbl) {
-    std::string computed_column_name = std::get<0>(computed_column);
-    std::vector<std::string> input_column_names = std::get<2>(computed_column);
-    t_computation computation = std::get<3>(computed_column);
-
-    std::vector<std::shared_ptr<t_column>> input_columns(input_column_names.size());
-
-    for (auto i = 0; i < input_column_names.size(); ++i) {
-        input_columns[i] = tbl->get_column(input_column_names[i]);
-    }
-
-    if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
-        std::cerr 
-            << "Cannot compute column `"
-            << computed_column_name
-            << "` in gnode."
-            << std::endl;
-            return;
-    }
-
-    t_dtype output_column_type = computation.m_return_type;
-
-    auto output_column = tbl->add_column_sptr(
-        computed_column_name, output_column_type, true);
-
-    output_column->reserve(input_columns[0]->size());
-
-    t_computed_column::apply_computation(
-        input_columns,
-        output_column,
-        computation);
-}
-
-void
-t_gnode::_recompute_column(
-    const t_computed_column_definition& computed_column,
-    std::shared_ptr<t_data_table> table,
-    std::shared_ptr<t_data_table> flattened,
-    const std::vector<t_rlookup>& changed_rows) {
-    std::vector<std::shared_ptr<t_column>> table_columns;
-    std::vector<std::shared_ptr<t_column>> flattened_columns;
-
-    std::string computed_column_name = std::get<0>(computed_column);
-    std::vector<std::string> input_column_names = std::get<2>(computed_column);
-    t_computation computation = std::get<3>(computed_column);
-
-    if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
-    std::cerr 
-        << "Cannot re-compute column `"
-        << computed_column_name
-        << "` in gnode."
-        << std::endl;
-        return;
-    }
-    
-    for (const auto& name : input_column_names) {
-        auto table_column = table->get_column(name);
-        auto flattened_column = flattened->get_column(name);
-        table_columns.push_back(table_column);
-        flattened_columns.push_back(flattened_column);
-    }
-
-    t_dtype output_column_type = computation.m_return_type;
-    
-    // FIXME: computed columns created with dependencies don't seem to work
-
-    auto output_column = flattened->add_column_sptr(
-        computed_column_name, output_column_type, true);
-    output_column->reserve(table_columns[0]->size());
-
-    t_computed_column::reapply_computation(
-        table_columns,
-        flattened_columns,
-        changed_rows,
-        output_column,
-        computation);
 }
 
 /******************************************************************************

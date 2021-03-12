@@ -12,7 +12,6 @@
 #include <perspective/base.h>
 #include <perspective/exports.h>
 #include <perspective/aggspec.h>
-#include <perspective/computed.h>
 #include <perspective/filter.h>
 #include <perspective/pivot.h>
 #include <perspective/schema.h>
@@ -46,7 +45,6 @@ public:
         const std::vector<std::string>& detail_columns,
         const std::vector<t_fterm>& fterms,
         t_filter_op combiner,
-        const std::vector<t_computed_column_definition>& computed_columns,
         const std::vector<t_computed_expression>& expressions);
 
     /**
@@ -62,7 +60,6 @@ public:
         const std::vector<t_aggspec>& aggregates,
         const std::vector<t_fterm>& fterms,
         t_filter_op combiner,
-        const std::vector<t_computed_column_definition>& computed_columns,
         const std::vector<t_computed_expression>& expressions);
 
     /**
@@ -84,7 +81,6 @@ public:
         const t_totals totals,
         const std::vector<t_fterm>& fterms,
         t_filter_op combiner,
-        const std::vector<t_computed_column_definition>& computed_columns,
         const std::vector<t_computed_expression>& expressions,
         bool column_only);
 
@@ -120,7 +116,7 @@ public:
 
     /**
      * @brief A t_config is trivial if it does not have any pivots, sorts,
-     * filter terms, or computed columns. This allows a context_zero to
+     * filter terms, or expressions. This allows a context_zero to
      * skip creating a traversal and simply read from its gnode state for
      * a performance boost.
      * 
@@ -165,10 +161,6 @@ public:
 
     const std::vector<t_fterm>& get_fterms() const;
 
-    // TOOD: const vec&?
-    std::vector<t_computed_column_definition>
-    get_computed_columns() const;
-
     std::vector<t_computed_expression>
     get_expressions() const;
 
@@ -204,13 +196,12 @@ private:
     std::vector<t_sortspec> m_sortspecs;
     std::vector<t_sortspec> m_col_sortspecs;
     std::vector<t_fterm> m_fterms;
-    std::vector<t_computed_column_definition> m_computed_columns;
     std::vector<t_computed_expression> m_expressions;
     t_filter_op m_combiner;
     bool m_column_only;
 
     // A trivial config exists if there are no pivots, sorts, filters, or
-    // computed columns.
+    // expression columns.
     bool m_is_trivial_config;
 
     // Internal

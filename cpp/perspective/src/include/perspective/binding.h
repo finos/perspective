@@ -165,22 +165,6 @@ namespace binding {
     void set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, T value);
 
     /**
-     * @brief Return a map of computed function metadata for use in the binding
-     * language. Keys are strings that map to maps containing strings of
-     * the following metadata:
-     * 
-     * - computed_function_name: the name of the computed function
-     * - input_type: the type of its input columns (all input columns are of
-     * the same type)
-     * - return_type: the return type of its output column
-     * - group: a category for the function
-     * 
-     * @return std::map<std::string, std::map<std::string, std::string>> 
-     */
-    std::map<std::string, std::map<std::string, std::string>>
-    get_computed_functions();
-
-    /**
      * @brief Utility function for accessing columns and adding data.
      * 
      * @tparam T 
@@ -334,38 +318,21 @@ namespace binding {
         std::shared_ptr<t_view_config> view_config,
         const std::string& name);
 
+    
     /**
-     * @brief Given a table and a vector of computed column definitions,
-     * get a `t_schema` containing the return types of computed columns
-     * without constructing/calculating the computed column.
+     * @brief Given a table and a list of expressions, validate the expressions
+     * and return a schema of only valid columns.
      * 
      * @tparam T 
      * @param table 
-     * @param j_computed_columns 
+     * @param j_expressions 
      * @return t_schema 
      */
-    template <typename T>
-    t_schema
-    get_table_computed_schema(
-        std::shared_ptr<Table> table,
-        std::vector<std::vector<T>> j_computed_columns);
-
-
     template <typename T>
     t_schema
     get_table_expression_schema(
         std::shared_ptr<Table> table,
         const std::vector<std::vector<T>>& j_expressions);
-
-    /**
-     * @brief Given a string that resolves to a valid computed function name,
-     * return a vector of its accepted input column types.
-     * 
-     * @param computed_function_name 
-     * @return std::vector<t_dtype> 
-     */
-    std::vector<t_dtype>
-    get_computation_input_types(const std::string& computed_function_name);
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.

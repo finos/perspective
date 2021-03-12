@@ -23,7 +23,6 @@ try:
     from .tornado_handler import *  # noqa: F401, F403
     from .viewer import *  # noqa: F401, F403
     from .table.libbinding import (
-        make_computations,
         init_expression_parser,
         _set_nthreads,
     )
@@ -35,7 +34,6 @@ try:
         """
         _set_nthreads(-1 if nthreads is None else nthreads)
 
-    make_computations()
     init_expression_parser()
 except ImportError:
     __is_libpsp__ = False

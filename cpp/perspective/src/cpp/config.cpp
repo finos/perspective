@@ -14,18 +14,16 @@ namespace perspective {
 
 // t_ctxunit
 t_config::t_config(const std::vector<std::string>& detail_columns)
-    : t_config(detail_columns, {}, FILTER_OP_AND, {}, {}) {}
+    : t_config(detail_columns, {}, FILTER_OP_AND, {}) {}
 
 // t_ctx0
 t_config::t_config(
     const std::vector<std::string>& detail_columns,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<t_computed_column_definition>& computed_columns,
     const std::vector<t_computed_expression>& expressions)
     : m_detail_columns(detail_columns)
     , m_fterms(fterms)
-    , m_computed_columns(computed_columns)
     , m_expressions(expressions)
     , m_combiner(combiner)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
@@ -37,7 +35,7 @@ t_config::t_config(
         m_col_sortspecs.empty() &&
         m_detail_columns.empty() &&
         m_fterms.empty() &&
-        m_computed_columns.empty()) {
+        m_expressions.empty()) {
         m_is_trivial_config = true;
     } else {
         m_is_trivial_config = false;
@@ -50,11 +48,9 @@ t_config::t_config(
     const std::vector<t_aggspec>& aggregates,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<t_computed_column_definition>& computed_columns,
     const std::vector<t_computed_expression>& expressions)
     : m_aggregates(aggregates)
     , m_fterms(fterms)
-    , m_computed_columns(computed_columns)
     , m_expressions(expressions)
     , m_combiner(combiner)
     , m_is_trivial_config(false)
@@ -74,12 +70,10 @@ t_config::t_config(
     const t_totals totals,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<t_computed_column_definition>& computed_columns,
     const std::vector<t_computed_expression>& expressions,
     bool column_only)
     : m_aggregates(aggregates)
     , m_fterms(fterms)
-    , m_computed_columns(computed_columns)
     , m_expressions(expressions)
     , m_combiner(combiner)
     , m_column_only(column_only)
@@ -384,11 +378,6 @@ t_config::has_filters() const {
 const std::vector<t_fterm>&
 t_config::get_fterms() const {
     return m_fterms;
-}
-
-std::vector<t_computed_column_definition>
-t_config::get_computed_columns() const {
-    return m_computed_columns;
 }
 
 std::vector<t_computed_expression>

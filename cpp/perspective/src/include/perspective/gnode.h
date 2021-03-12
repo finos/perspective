@@ -20,8 +20,6 @@
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
 #include <perspective/process_state.h>
-#include <perspective/computed.h>
-#include <perspective/computed_column_map.h>
 #include <perspective/computed_expression.h>
 #include <perspective/computed_function.h>
 #include <tsl/ordered_map.h>
@@ -134,7 +132,7 @@ public:
 
     /**
      * @brief Given a new context, register it with the gnode, compute and
-     * add its computed expression columns, and add its expressions to the
+     * add its expression columns, and add its expressions to the
      * `m_expression_map` managed by the gnode.
      * 
      * @param name 
@@ -305,7 +303,7 @@ protected:
     
     /******************************************************************************
      *
-     * Computed Column Operations
+     * Expression Column Operations
      */
     void _compute_expressions(
         std::vector<std::shared_ptr<t_data_table>> tables);
@@ -331,75 +329,6 @@ protected:
      */
     void _unregister_expressions(const std::vector<t_computed_expression>& expressions);
 
-    /**
-     * @brief For all valid computed columns registered with the gnode,
-     * the master `m_table` of `m_state`.
-     * 
-     * @param tbl 
-     * @param flattened 
-     * @param changed_rows 
-     */
-    void
-    _recompute_all_columns(
-        std::shared_ptr<t_data_table> tbl,
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& changed_rows);
-
-    /**
-     * @brief For each `t_data_table` in tables, apply computations for each
-     * computed column registered with the gnode.
-     * 
-     * @param table 
-     */
-    void _compute_all_columns(
-        std::vector<std::shared_ptr<t_data_table>> tables);
-
-    /**
-     * @brief Add all valid computed columns to `table` with the specified
-     * `dtype`. Used when a column needs to be present for future operations,
-     * but when a computation is not necessary/the dtype of the column != the
-     * dtype of the actual computed column.
-     * 
-     * @param table 
-     * @param dtype 
-     */
-    void _add_all_computed_columns(
-        std::shared_ptr<t_data_table> table,
-        t_dtype dtype);
-
-    /**
-     * @brief Add a computed column to `tbl` without computing it.
-     * 
-     * @param computed_column 
-     * @param tbl 
-     */
-    void _add_computed_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> tbl);
-
-    /**
-     * @brief Apply a computed column to `tbl`.
-     * 
-     * @param computed_column 
-     * @param tbl 
-     */
-    void _compute_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> tbl);
-
-    /**
-     * @brief Recompute the computed column on `flattened`,
-     * using information from both `flattened` and `tbl`.
-     * 
-     * @param ctx 
-     * @param tbl 
-     */
-    void _recompute_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> table,
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& changed_rows);
-
 private:
     /**
      * @brief Process the input data table by flattening it, calculating
@@ -420,8 +349,6 @@ private:
 
     // A vector of `t_schema`s for each transitional `t_data_table`.
     std::vector<t_schema> m_transitional_schemas;
-
-    t_computed_column_map m_computed_column_map;
 
     // track all expressions on this gnode
     tsl::ordered_map<std::string, t_computed_expression> m_expression_map;
@@ -465,7 +392,8 @@ template <typename CTX_T>
 void
 t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh) {
     CTX_T* ctx = ctxh.get<CTX_T>();
-    // These tables are guaranteed to have all computed columns.
+    // These tables are guaranteed to have all expression columns applied
+    // in `process_table`.
     const t_data_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
     const t_data_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
     const t_data_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());

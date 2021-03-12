@@ -25,9 +25,9 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 // just alias the column for now
-                await page.evaluate(element => element.setAttribute("expressions", JSON.stringify(["$'Ship Date'"])), viewer);
+                await page.evaluate(element => element.setAttribute("expressions", JSON.stringify(['"Ship Date"'])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["$'Ship Date'"])), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(['"Ship Date"'])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", '["State","Sales"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
