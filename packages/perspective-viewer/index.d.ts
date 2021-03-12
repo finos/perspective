@@ -58,6 +58,7 @@ interface PerspectiveViewerHTMLAttributes extends Pick<PerspectiveViewerOptions,
     filters?: string;
     sort?: string;
     columns?: string;
+    throttle?: string | number;
 }
 
 interface ReactPerspectiveViewerHTMLAttributes<T> extends PerspectiveViewerHTMLAttributes, React.HTMLAttributes<T> {}
