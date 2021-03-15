@@ -31,6 +31,7 @@ exports.int_float_subtract_data = [
 
 exports.cols = ["i8", "ui8", "i16", "ui16", "i32", "ui32", "i64", "ui64", "f32", "f64"];
 exports.arrow = arrows.numbers_arrow;
+exports.all_types_arrow = arrows.all_types_arrow;
 
 exports.days_of_week = ["1 Sunday", "2 Monday", "3 Tuesday", "4 Wednesday", "5 Thursday", "6 Friday", "7 Saturday"];
 exports.months_of_year = ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"];

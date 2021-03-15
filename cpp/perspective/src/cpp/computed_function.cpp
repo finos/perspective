@@ -99,7 +99,7 @@ intern::intern(std::shared_ptr<t_vocab> expression_vocab)
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_VALID;
+        sentinel.m_status = STATUS_INVALID;
         sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
 
@@ -170,10 +170,9 @@ concat::concat(std::shared_ptr<t_vocab> expression_vocab)
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_VALID;
+        sentinel.m_status = STATUS_INVALID;
         sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
-
 
         // The rval is the scalar that is returned out from each call to the
         // function. Because strings are interned in a vocabulary, the only
@@ -206,8 +205,12 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
             t_scalar_view temp(gt);
             t_tscalar temp_scalar = temp();
 
-            if (temp_scalar.get_dtype() != DTYPE_STR || !temp_scalar.is_valid() || temp_scalar.is_none()) {
-                return m_none;
+            if (temp_scalar.get_dtype() != DTYPE_STR) {
+                m_rval.m_status = STATUS_CLEAR;
+            }
+
+            if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
+                return m_rval;
             }
 
             if (m_expression_vocab != nullptr) {
@@ -234,7 +237,8 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
             result += temp_str;
         } else {
             // An invalid call.
-            return m_none;
+            m_rval.m_status = STATUS_CLEAR;
+            return m_rval;
         }
     }
 
@@ -252,6 +256,7 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
     // will look in the uint64 field for all DTYPE_STR scalars from
     // expression.value().
     m_rval.m_data.m_uint64 = interned;
+    m_rval.m_status = STATUS_VALID;
 
     return m_rval;
 }
@@ -265,7 +270,7 @@ upper::upper(std::shared_ptr<t_vocab> expression_vocab)
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_VALID;
+        sentinel.m_status = STATUS_INVALID;
         sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
 
@@ -302,8 +307,12 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
         t_scalar_view temp(gt);
         t_tscalar temp_scalar = temp();
 
-        if (temp_scalar.get_dtype() != DTYPE_STR || !temp_scalar.is_valid() || temp_scalar.is_none()) {
-            return m_none;
+        if (temp_scalar.get_dtype() != DTYPE_STR) {
+            m_rval.m_status = STATUS_CLEAR;
+        }
+
+        if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
+            return m_rval;
         }
 
         if (m_expression_vocab != nullptr) {
@@ -330,6 +339,7 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
         if (temp_str == "") return m_none;
     } else {
         // An invalid call.
+        m_rval.m_status = STATUS_CLEAR;
         return m_none;
     }
 
@@ -349,6 +359,7 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
     // will look in the uint64 field for all DTYPE_STR scalars from
     // expression.value().
     m_rval.m_data.m_uint64 = interned;
+    m_rval.m_status = STATUS_VALID;
 
     return m_rval;
 }
@@ -362,7 +373,7 @@ lower::lower(std::shared_ptr<t_vocab> expression_vocab)
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_VALID;
+        sentinel.m_status = STATUS_INVALID;
         sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
 
@@ -399,8 +410,12 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
         t_scalar_view temp(gt);
         t_tscalar temp_scalar = temp();
 
-        if (temp_scalar.get_dtype() != DTYPE_STR || !temp_scalar.is_valid() || temp_scalar.is_none()) {
-            return m_none;
+        if (temp_scalar.get_dtype() != DTYPE_STR) {
+            m_rval.m_status = STATUS_CLEAR;
+        }
+
+        if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
+            return m_rval;
         }
 
         if (m_expression_vocab != nullptr) {
@@ -427,6 +442,7 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
         if (temp_str == "") return m_none;
     } else {
         // An invalid call.
+        m_rval.m_status = STATUS_CLEAR;
         return m_none;
     }
 
@@ -446,6 +462,7 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
     // will look in the uint64 field for all DTYPE_STR scalars from
     // expression.value().
     m_rval.m_data.m_uint64 = interned;
+    m_rval.m_status = STATUS_VALID;
 
     return m_rval;
 }
@@ -472,6 +489,9 @@ t_tscalar date_bucket::operator()(t_parameter_list parameters) {
     t_tscalar val;
     t_date_bucket_unit unit;
 
+    t_tscalar rval;
+    rval.clear();
+
     for (auto i = 0; i < parameters.size(); ++i) {
         t_generic_type& gt = parameters[i];
 
@@ -496,8 +516,42 @@ t_tscalar date_bucket::operator()(t_parameter_list parameters) {
         }
     }
 
-    t_tscalar rval;
-    
+    t_dtype dtype = val.get_dtype();
+
+    // type-check
+    if (!(dtype == DTYPE_DATE || dtype == DTYPE_TIME)) {
+        rval.m_status = STATUS_CLEAR;
+    }
+
+    // Depending on unit, datetime columns can result in a date column or a 
+    // datetime column.
+    if (val.m_type == DTYPE_TIME) {
+        switch (unit) {
+            case t_date_bucket_unit::SECONDS:
+            case t_date_bucket_unit::MINUTES:
+            case t_date_bucket_unit::HOURS: {
+                rval.m_type = DTYPE_TIME;
+            } break;
+            case t_date_bucket_unit::DAYS:
+            case t_date_bucket_unit::WEEKS:
+            case t_date_bucket_unit::MONTHS:
+            case t_date_bucket_unit::YEARS: {
+                rval.m_type = DTYPE_DATE;
+            } break;
+            default: {
+                // shouldn't trigger this block - unit has already been validated
+                return mknone();
+            } break;
+        }
+    } else {
+        // but date columns will always output date columns
+        rval.m_type = DTYPE_DATE;
+    }
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
     switch (unit) {
         case t_date_bucket_unit::SECONDS: {
             _second_bucket(val, rval);
@@ -530,21 +584,20 @@ t_tscalar date_bucket::operator()(t_parameter_list parameters) {
 }
 
 void _second_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_TIME: {
             auto int_ts = val.to_int64();
             std::int64_t bucketed_ts = floor(static_cast<double>(int_ts) / 1000) * 1000;
             rval.set(t_time(bucketed_ts));
         } break;
-        default: break;
+        default: {
+            // echo the original value back into the column.
+            rval.set(val);
+        }
     }
 }
 
 void _minute_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_TIME: {
             // Convert the int64 to a milliseconds duration timestamp
@@ -557,13 +610,13 @@ void _minute_bucket(t_tscalar& val, t_tscalar& rval) {
             rval.set(
                 t_time(std::chrono::duration_cast<std::chrono::milliseconds>(m_timestamp).count()));
         } break;
-        default: break;
+        default: {
+            rval.set(val);
+        } break;
     }
 }
 
 void _hour_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_TIME: {
             // Convert the int64 to a millisecond duration timestamp
@@ -576,13 +629,13 @@ void _hour_bucket(t_tscalar& val, t_tscalar& rval) {
             rval.set(
                 t_time(std::chrono::duration_cast<std::chrono::milliseconds>(hr_timestamp).count()));
         } break;
-        default: break;
+        default: {
+            rval.set(val);
+        } break;
     }
 }
 
 void _day_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_TIME: {
             // Convert the int64 to a milliseconds duration timestamp
@@ -607,13 +660,14 @@ void _day_bucket(t_tscalar& val, t_tscalar& rval) {
 
             rval.set(t_date(year, month, day));
         } break;
-        default: break;
+        default: {
+            // echo the original value back into the column.
+            rval.set(val);
+        } break;
     }
 }
 
 void _week_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_DATE: {
             // Retrieve the `t_date` struct from the scalar
@@ -686,8 +740,6 @@ void _week_bucket(t_tscalar& val, t_tscalar& rval) {
 }
 
 void _month_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_DATE: {
             t_date date_val = val.get<t_date>();
@@ -714,8 +766,6 @@ void _month_bucket(t_tscalar& val, t_tscalar& rval) {
 }
 
 void _year_bucket(t_tscalar& val, t_tscalar& rval) {
-    if (val.is_none() || !val.is_valid()) rval.set(t_none());
-
     switch (val.get_dtype()) {
         case DTYPE_DATE: {
             t_date date_val = val.get<t_date>();

@@ -163,64 +163,31 @@ namespace details {
 namespace numeric {
 namespace details {
 
-#define UNARY_STD_FUNCTION_BODY(FUNC)                                                                                         \
-    if (!v.is_valid()) return mknone();                                                                                       \
-    switch (v.get_dtype()) {                                                                                                  \
-        case perspective::t_dtype::DTYPE_INT64: return mktscalar(static_cast<double>(std::FUNC(v.get<std::int64_t>())));      \
-        case perspective::t_dtype::DTYPE_INT32: return mktscalar(static_cast<double>(std::FUNC(v.get<std::int32_t>())));      \
-        case perspective::t_dtype::DTYPE_INT16: return mktscalar(static_cast<double>(std::FUNC(v.get<std::int16_t>())));      \
-        case perspective::t_dtype::DTYPE_INT8: return mktscalar(static_cast<double>(std::FUNC(v.get<std::int8_t>())));        \
-        case perspective::t_dtype::DTYPE_UINT64: return mktscalar(static_cast<double>(std::FUNC(v.get<std::uint64_t>())));    \
-        case perspective::t_dtype::DTYPE_UINT32: return mktscalar(static_cast<double>(std::FUNC(v.get<std::uint32_t>())));    \
-        case perspective::t_dtype::DTYPE_UINT16: return mktscalar(static_cast<double>(std::FUNC(v.get<std::uint16_t>())));    \
-        case perspective::t_dtype::DTYPE_UINT8: return mktscalar(static_cast<double>(std::FUNC(v.get<std::uint8_t>())));      \
-        case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(static_cast<double>(std::FUNC(v.get<double>())));          \
-        case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(static_cast<double>(std::FUNC(v.get<float>())));           \
-        default: return mknone();                                                                                             \
-    }                                                                                                                         \
+#define UNARY_STD_FUNCTION_BODY(FUNC)                                                                                               \
+    t_tscalar rval;                                                                                                                 \
+    rval.clear();                                                                                                                   \
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;                                                                              \
+    if (!v.is_numeric()) { rval.m_status = perspective::t_status::STATUS_CLEAR; }                                                   \
+    if (!v.is_valid()) return rval;                                                                                                 \
+    rval.set(static_cast<double>(std::FUNC(v.to_double())));                                                                        \
+    return rval;                                                                                                                    \
 
 /**
  * @brief a function that returns none for all types besides float.
  * 
  */
-#define UNARY_STD_INT_FUNCTION_BODY(FUNC)                                                                                     \
-    if (!v.is_valid()) return mknone();                                                                                       \
-    switch (v.get_dtype()) {                                                                                                  \
-        case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(static_cast<double>(std::FUNC(v.get<double>())));          \
-        case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(static_cast<double>(std::FUNC(v.get<float>())));           \
-        default: return mknone();                                                                                             \
-    }                                                                                                                         \
-
-#define BINARY_STD_FUNCTION_INNER(V0_TYPE, FUNC)                                                                                                  \
-    switch (v1.get_dtype()) {                                                                                                                     \
-        case perspective::t_dtype::DTYPE_INT64: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::int64_t>())));      \
-        case perspective::t_dtype::DTYPE_INT32: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::int32_t>())));      \
-        case perspective::t_dtype::DTYPE_INT16: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::int16_t>())));      \
-        case perspective::t_dtype::DTYPE_INT8: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::int8_t>())));        \
-        case perspective::t_dtype::DTYPE_UINT64: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::uint64_t>())));    \
-        case perspective::t_dtype::DTYPE_UINT32: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::uint32_t>())));    \
-        case perspective::t_dtype::DTYPE_UINT16: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::uint16_t>())));    \
-        case perspective::t_dtype::DTYPE_UINT8: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<std::uint8_t>())));      \
-        case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<double>())));          \
-        case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(static_cast<double>(std::FUNC(v0.get<V0_TYPE>(), v1.get<float>())));           \
-        default: return mknone();                                                                                                                 \
-    }                                                                                                                                             \
-
-#define BINARY_STD_FUNCTION_BODY(FUNC)                                                            \
-    if (!v0.is_valid() || !v1.is_valid()) return mknone();                                        \
-    switch (v0.get_dtype()) {                                                                     \
-        case perspective::t_dtype::DTYPE_INT64: BINARY_STD_FUNCTION_INNER(std::int64_t, FUNC)     \
-        case perspective::t_dtype::DTYPE_INT32: BINARY_STD_FUNCTION_INNER(std::int32_t, FUNC)     \
-        case perspective::t_dtype::DTYPE_INT16: BINARY_STD_FUNCTION_INNER(std::int16_t, FUNC)     \
-        case perspective::t_dtype::DTYPE_INT8: BINARY_STD_FUNCTION_INNER(std::int8_t, FUNC)       \
-        case perspective::t_dtype::DTYPE_UINT64: BINARY_STD_FUNCTION_INNER(std::int64_t, FUNC)    \
-        case perspective::t_dtype::DTYPE_UINT32: BINARY_STD_FUNCTION_INNER(std::int32_t, FUNC)    \
-        case perspective::t_dtype::DTYPE_UINT16: BINARY_STD_FUNCTION_INNER(std::int16_t, FUNC)    \
-        case perspective::t_dtype::DTYPE_UINT8: BINARY_STD_FUNCTION_INNER(std::int8_t, FUNC)      \
-        case perspective::t_dtype::DTYPE_FLOAT64: BINARY_STD_FUNCTION_INNER(double, FUNC)         \
-        case perspective::t_dtype::DTYPE_FLOAT32: BINARY_STD_FUNCTION_INNER(float, FUNC)          \
-        default: return mknone();                                                                 \
-    }                                                                                             \
+#define UNARY_STD_INT_FUNCTION_BODY(FUNC)                                                                                           \
+    t_tscalar rval;                                                                                                                 \
+    rval.clear();                                                                                                                   \
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;                                                                              \
+    if (!v.is_numeric()) { rval.m_status = perspective::t_status::STATUS_CLEAR; }                                                   \
+    if (!v.is_valid()) return rval;                                                                                                 \
+    switch (v.get_dtype()) {                                                                                                        \
+        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(static_cast<double>(std::FUNC(v.get<double>()))); } break;             \
+        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(static_cast<double>(std::FUNC(v.get<float>()))); } break;              \
+        default: return rval;                                                                                                       \
+    }                                                                                                                               \
+    return rval;                                                                                                                    \
 
 struct t_tscalar_type_tag {};
 
@@ -320,117 +287,205 @@ template <> inline t_tscalar neg_impl(const t_tscalar v, t_tscalar_type_tag) { r
 template <> inline t_tscalar pos_impl(const t_tscalar v, t_tscalar_type_tag) { return +v; }
 
 template <> inline t_tscalar sgn_impl(const t_tscalar v, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_INT32;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
     switch (v.get_dtype()) {
         case perspective::t_dtype::DTYPE_INT64: {
             std::int64_t val = v.get<std::int64_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_INT32: {
             std::int32_t val = v.get<std::int32_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(val);
+            } else {
+                rval.set((0 < val) - (val < 0));
+            }
         } break;
         case perspective::t_dtype::DTYPE_INT16: {
             std::int16_t val = v.get<std::int16_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_INT8: {
             std::int8_t val = v.get<std::int8_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT64: {
             std::uint64_t val = v.get<std::uint64_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT32: {
             std::uint32_t val = v.get<std::uint32_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT16: {
             std::uint16_t val = v.get<std::uint16_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT8: {
             std::uint8_t val = v.get<std::uint8_t>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_FLOAT64: {
             double val = v.get<double>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
         case perspective::t_dtype::DTYPE_FLOAT32: {
             float val = v.get<float>();
-            if (val == 0) return mktscalar(0);
-            return mktscalar((0 < val) - (val < 0));
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(val));
+            } else {
+                rval.set(static_cast<std::int32_t>((0 < val) - (val < 0)));
+            }
         } break;
-        default: return mknone();
+        default: return rval;
     }
+
+    return rval;
 }
 
 template <> inline t_tscalar sin_impl(const t_tscalar v, t_tscalar_type_tag) { UNARY_STD_INT_FUNCTION_BODY(sin) }
 
 template <> inline t_tscalar sinc_impl(const t_tscalar v, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_INT32;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
     switch (v.get_dtype()) {
         case perspective::t_dtype::DTYPE_INT64: {
             std::int64_t val = v.get<std::int64_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_INT32: {
             std::int32_t val = v.get<std::int32_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_INT16: {
             std::int16_t val = v.get<std::int16_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_INT8: {
             std::int8_t val = v.get<std::int8_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT64: {
             std::uint64_t val = v.get<std::uint64_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT32: {
             std::uint32_t val = v.get<std::uint32_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT16: {
             std::uint16_t val = v.get<std::uint16_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_UINT8: {
             std::uint8_t val = v.get<std::uint8_t>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_FLOAT64: {
             double val = v.get<double>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
         case perspective::t_dtype::DTYPE_FLOAT32: {
             float val = v.get<float>();
-            if (val == 0) return mktscalar(1);
-            return mktscalar(std::sin(val) / val);
+            if (val == 0) {
+                rval.set(static_cast<std::int32_t>(1));
+            } else {
+                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
+            }
         } break;
-        default: return mknone();
+        default: return rval;
     }
+
+    return rval;
 }
 template <> inline t_tscalar sinh_impl(const t_tscalar v, t_tscalar_type_tag) { UNARY_STD_INT_FUNCTION_BODY(sinh) }
 template <> inline t_tscalar sqrt_impl(const t_tscalar v, t_tscalar_type_tag) { UNARY_STD_FUNCTION_BODY(sqrt) }
@@ -438,20 +493,33 @@ template <> inline t_tscalar tan_impl(const t_tscalar v, t_tscalar_type_tag) { U
 template <> inline t_tscalar tanh_impl(const t_tscalar v, t_tscalar_type_tag) { UNARY_STD_INT_FUNCTION_BODY(tanh) }
 
 template <> inline t_tscalar cot_impl(const t_tscalar v, t_tscalar_type_tag) {
-    if (!v.is_valid()) return mknone();
-    switch (v.get_dtype()) {
-        case perspective::t_dtype::DTYPE_INT64: return mktscalar(1.00 / std::tan(v.get<std::int64_t>()));
-        case perspective::t_dtype::DTYPE_INT32: return mktscalar(1.00 / std::tan(v.get<std::int32_t>()));
-        case perspective::t_dtype::DTYPE_INT16: return mktscalar(1.00 / std::tan(v.get<std::int16_t>()));
-        case perspective::t_dtype::DTYPE_INT8: return mktscalar(1.00 / std::tan(v.get<std::int8_t>()));
-        case perspective::t_dtype::DTYPE_UINT64: return mktscalar(1.00 / std::tan(v.get<std::uint64_t>()));
-        case perspective::t_dtype::DTYPE_UINT32: return mktscalar(1.00 / std::tan(v.get<std::uint32_t>()));
-        case perspective::t_dtype::DTYPE_UINT16: return mktscalar(1.00 / std::tan(v.get<std::uint16_t>()));
-        case perspective::t_dtype::DTYPE_UINT8: return mktscalar(1.00 / std::tan(v.get<std::uint8_t>()));
-        case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(1.00 / std::tan(v.get<double>()));
-        case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(1.00 / std::tan(v.get<float>()));
-        default: return mknone();
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
     }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
+    switch (v.get_dtype()) {
+        case perspective::t_dtype::DTYPE_INT64: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int64_t>()))); } break;
+        case perspective::t_dtype::DTYPE_INT32: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int32_t>()))); } break;
+        case perspective::t_dtype::DTYPE_INT16: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int16_t>()))); } break;
+        case perspective::t_dtype::DTYPE_INT8: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int8_t>()))); } break;
+        case perspective::t_dtype::DTYPE_UINT64: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint64_t>()))); } break;
+        case perspective::t_dtype::DTYPE_UINT32: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint32_t>()))); } break;
+        case perspective::t_dtype::DTYPE_UINT16: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint16_t>()))); } break;
+        case perspective::t_dtype::DTYPE_UINT8: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint8_t>()))); } break;
+        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(static_cast<double>(1.00 / std::tan(v.get<double>()))); } break;
+        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(static_cast<double>(1.00 / std::tan(v.get<float>()))); } break;
+        default: return rval;
+    }
+
+    return rval;
 }
 
 template <> inline t_tscalar sec_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
@@ -463,8 +531,20 @@ template <> inline t_tscalar g2d_impl(const t_tscalar v, t_tscalar_type_tag) { r
 template <> inline t_tscalar notl_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
 
 template <> inline t_tscalar frac_impl(const t_tscalar v, t_tscalar_type_tag) {
-    if (!v.is_valid()) return mknone();
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
     double intpart;
+
     switch (v.get_dtype()) {
         case perspective::t_dtype::DTYPE_INT64:
         case perspective::t_dtype::DTYPE_INT32:
@@ -473,29 +553,45 @@ template <> inline t_tscalar frac_impl(const t_tscalar v, t_tscalar_type_tag) {
         case perspective::t_dtype::DTYPE_UINT64:
         case perspective::t_dtype::DTYPE_UINT32:
         case perspective::t_dtype::DTYPE_UINT16:
-        case perspective::t_dtype::DTYPE_UINT8: return mktscalar(0);
-        case perspective::t_dtype::DTYPE_FLOAT64: return std::modf(v.get<double>(), &intpart);
-        case perspective::t_dtype::DTYPE_FLOAT32: return std::modf(v.get<float>(), &intpart);
-        default: return mknone();
+        case perspective::t_dtype::DTYPE_UINT8: { rval.set(static_cast<double>(0)); }; break;
+        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(std::modf(v.get<double>(), &intpart)); } break;
+        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(std::modf(v.get<float>(), &intpart)); } break;
+        default: return rval;
     }
+
+    return rval;
 }
 
 template <> inline t_tscalar trunc_impl(const t_tscalar v, t_tscalar_type_tag) {
-    // TODO: this is used in vector literal construction and doesn't work for some reason.
-    switch (v.get_dtype()) {
-        case perspective::t_dtype::DTYPE_INT64: return mktscalar(v.get<std::int64_t>());
-        case perspective::t_dtype::DTYPE_INT32: return mktscalar(static_cast<std::int64_t>(v.get<std::int32_t>()));
-        case perspective::t_dtype::DTYPE_INT16: return mktscalar(static_cast<std::int64_t>(v.get<std::int16_t>()));
-        case perspective::t_dtype::DTYPE_INT8: return mktscalar(static_cast<std::int64_t>(v.get<std::int8_t>()));
-        case perspective::t_dtype::DTYPE_UINT64: return mktscalar(static_cast<std::int64_t>(v.get<std::uint64_t>()));
-        case perspective::t_dtype::DTYPE_UINT32: return mktscalar(static_cast<std::int64_t>(v.get<std::uint32_t>()));
-        case perspective::t_dtype::DTYPE_UINT16: return mktscalar(static_cast<std::int64_t>(v.get<std::uint16_t>()));
-        case perspective::t_dtype::DTYPE_UINT8: return mktscalar(static_cast<std::int64_t>(v.get<std::uint8_t>()));
-        case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(static_cast<std::int64_t>(v.get<double>()));
-        case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(static_cast<std::int64_t>(v.get<float>()));
-        default: return mknone();
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_INT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
     }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
+    switch (v.get_dtype()) {
+        case perspective::t_dtype::DTYPE_INT64: { rval.set(v.get<std::int64_t>()); } break;
+        case perspective::t_dtype::DTYPE_INT32: { rval.set(static_cast<std::int64_t>(v.get<std::int32_t>())); } break;
+        case perspective::t_dtype::DTYPE_INT16: { rval.set(static_cast<std::int64_t>(v.get<std::int16_t>())); } break;
+        case perspective::t_dtype::DTYPE_INT8: { rval.set(static_cast<std::int64_t>(v.get<std::int8_t>())); } break;
+        case perspective::t_dtype::DTYPE_UINT64: { rval.set(static_cast<std::int64_t>(v.get<std::uint64_t>())); } break;
+        case perspective::t_dtype::DTYPE_UINT32: { rval.set(static_cast<std::int64_t>(v.get<std::uint32_t>())); } break;
+        case perspective::t_dtype::DTYPE_UINT16: { rval.set(static_cast<std::int64_t>(v.get<std::uint16_t>())); } break;
+        case perspective::t_dtype::DTYPE_UINT8: { rval.set(static_cast<std::int64_t>(v.get<std::uint8_t>())); } break;
+        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(static_cast<std::int64_t>(v.get<double>())); } break;
+        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(static_cast<std::int64_t>(v.get<float>())); } break;
+        default: return rval;
+    }
+
+    return rval;
 }
+
 template <> inline t_tscalar erf_impl(const t_tscalar v, t_tscalar_type_tag) { UNARY_STD_INT_FUNCTION_BODY(erf) }
 template <> inline t_tscalar erfc_impl(const t_tscalar v, t_tscalar_type_tag) { UNARY_STD_INT_FUNCTION_BODY(erfc) }
 template <> inline t_tscalar ncdf_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
@@ -511,173 +607,51 @@ template <> inline t_tscalar equal_impl(const t_tscalar v0, const t_tscalar v1, 
     t_tscalar rval;
     // TODO: this doesn't work between scalars of different dtypes - how do
     // we handle equality, comparison etc. between different dtyped scalars?
-    rval.set(v0 == v1);
+    rval.set(static_cast<bool>(v0 == v1));
     return rval;    
 }
 template <> inline t_tscalar nequal_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(v0 != v1);
+    rval.set(static_cast<bool>(v0 != v1));
     return rval;
 }
 template <> inline t_tscalar modulus_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return v0 % v1; }
-template <> inline t_tscalar pow_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { BINARY_STD_FUNCTION_BODY(pow) }
+
+template <> inline t_tscalar pow_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v1.is_numeric() || !v1.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v0.is_valid() || !v1.is_valid()) {
+        return rval;
+    }
+
+    rval.set(std::pow(v0.to_double(), v1.to_double()));
+
+    return rval;
+}
 
 template <> inline t_tscalar logn_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
-    if (!v0.is_valid() || !v1.is_valid()) return mknone();
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_INT64;
 
-    switch (v0.get_dtype()) {
-        case perspective::t_dtype::DTYPE_INT64: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::int64_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_INT32: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::int32_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_INT16: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::int16_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_INT8: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::int8_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT64: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::uint64_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT32: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::uint32_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT16: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::uint16_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT8: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<std::uint8_t>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_FLOAT64: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<double>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_FLOAT32: {
-            switch (v1.get_dtype()) {
-                case perspective::t_dtype::DTYPE_INT64: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::int64_t>()));
-                case perspective::t_dtype::DTYPE_INT32: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::int32_t>()));
-                case perspective::t_dtype::DTYPE_INT16: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::int16_t>()));
-                case perspective::t_dtype::DTYPE_INT8: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::int8_t>()));
-                case perspective::t_dtype::DTYPE_UINT64: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::uint64_t>()));
-                case perspective::t_dtype::DTYPE_UINT32: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::uint32_t>()));
-                case perspective::t_dtype::DTYPE_UINT16: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::uint16_t>()));
-                case perspective::t_dtype::DTYPE_UINT8: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<std::uint8_t>()));
-                case perspective::t_dtype::DTYPE_FLOAT64: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<double>()));
-                case perspective::t_dtype::DTYPE_FLOAT32: return mktscalar(std::log(v0.get<float>()) / std::log(v1.get<float>()));
-                default: return mknone();
-            }
-        } break;
-        default: return mknone();
+    if (!v1.is_numeric() || !v1.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
     }
+
+    if (!v0.is_valid() || !v1.is_valid()) {
+        return rval;
+    }
+
+    double result = std::log(v0.to_double()) / std::log(v1.to_double());
+
+    rval.set(result);
+    return rval;
 }
 
 template <> inline t_tscalar root_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return mknone(); }

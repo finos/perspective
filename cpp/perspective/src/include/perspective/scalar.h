@@ -286,6 +286,11 @@ PERSPECTIVE_EXPORT bool t_tscalar::get() const;
 template <template <typename COMPARED_T> class COMPARER_T>
 bool
 t_tscalar::compare_common(const t_tscalar& rhs) const {
+    // TODO: compare_common only works for equal types. This is probably
+    // something we don't want to change on a whim, as it is probably
+    // widely used and not something that we can easily trace through
+    // text-search or profiling, and changing this behavior will result in
+    // a whole load of edge cases.
     if (m_type != rhs.m_type) {
         COMPARER_T<unsigned char> cmp;
         return cmp(m_type, rhs.m_type);
