@@ -64,7 +64,17 @@ const check_datetime = (output, expected) => {
 describe("Timezone Tests", () => {
     beforeAll(() => {
         expect(process.env.TZ).toBe("America/New_York");
-        expect(new Date().getTimezoneOffset()).toBe(300);
+        const now = new Date();
+
+        // offset is 240 during DST and 300 during non-DST, since we manually
+        // set the timezone here just assert the timezone string
+
+        if (now.toString().includes("GMT-0400") || now.toString().includes("Eastern Daylight Time")) {
+            expect(new Date().getTimezoneOffset()).toBe(240);
+        } else {
+            expect(new Date().getTimezoneOffset()).toBe(300);
+        }
+
         console.log("Timezone set to", process.env.TZ);
     });
 
