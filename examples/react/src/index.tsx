@@ -21,7 +21,8 @@ import {HTMLPerspectiveViewerElement, PerspectiveViewerOptions} from "@finos/per
 const worker = perspective.shared_worker();
 
 const getTable = async (): Promise<Table> => {
-    const req = fetch("./superstore.arrow");
+    const uri = "https://cdn.jsdelivr.net/npm/superstore-arrow/superstore.arrow";
+    const req = fetch(uri);
     const resp = await req;
     const buffer = await resp.arrayBuffer();
     return await worker.table(buffer as any);
