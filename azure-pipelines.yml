@@ -126,7 +126,7 @@ jobs:
       displayName: "Install Yarn"
 
     - bash: yarn
-      displayName: 'Install Deps'
+      displayName: 'Install JS Deps'
 
     - bash: python -m pip install -U "black==20.8b1" flake8-black pip
       condition: and(succeeded(), ne(variables['python.version'], '2.7'))
@@ -210,25 +210,13 @@ jobs:
       displayName: "Install Yarn"
 
     - script: yarn
-      displayName: 'Install Deps'
+      displayName: 'Install JS Deps'
 
-    - script: choco install flatc
-      displayName: "Install Flatbuffers"
+    - script: choco install boost flatc
+      displayName: "System deps"
 
     - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
-      env:
-        # Set `BOOST_ROOT` manually, as `BOOST_ROOT` is removed in the VM:
-        # https://github.com/actions/virtual-environments/issues/687
-        #
-        # 06/18/2020 - seems like boost got moved to `x86_64` inside
-        # the boost folder, which broke builds for a bit.
-        #
-        # 11/24/2020 - boost 1.69 was removed, so update to 1.72:
-        # https://github.com/actions/virtual-environments/issues/1847
-        BOOST_ROOT: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/"
-        BOOST_INCLUDEDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/include"
-        BOOST_LIBRARYDIR: "C:/hostedtoolcache/windows/Boost/1.72.0/x86_64/libs"
 
 - job: 'MacOS_Catalina'
   pool:
@@ -236,11 +224,6 @@ jobs:
 
   strategy:
     matrix:
-
-      # Python27:
-      #   python.version: '2.7'
-      #   python_flag: '--python2'
-      #   artifact_name: 'cp27-cp27m-macosx_10_15_x86_64'
 
       Python37:
         python.version: '3.7'
@@ -293,7 +276,7 @@ jobs:
       displayName: "Install Yarn"
 
     - script: yarn --network-timeout 600000
-      displayName: 'Install Deps'
+      displayName: 'Install JS Deps'
 
     - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
