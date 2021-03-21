@@ -263,15 +263,9 @@ jobs:
 
     - script: |
         python -m pip install -U delocate wheel numpy "pyarrow>=2" pip
-      displayName: "Python 3 deps"
+      displayName: "Python deps"
       condition: eq(variables['python_flag'], '')
     
-    # Last released PyArrow version on Python 2 is 0.16.0
-    - script: |
-        python -m pip install -U delocate wheel numpy "pyarrow==0.16.0" pip
-      displayName: "Python 2 deps"
-      condition: eq(variables['python_flag'], '--python2')
-
     - script: npm install -g yarn
       displayName: "Install Yarn"
 
