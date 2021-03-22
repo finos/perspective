@@ -42,6 +42,9 @@ const dict_update_arrow = load_arrow(path.join(__dirname, "..", "arrow", "dict_u
 const numbers_arrow = load_arrow(path.join(__dirname, "..", "arrow", "number_types.arrow"));
 const all_types_arrow = load_arrow(path.join(__dirname, "..", "arrow", "all_types_small.arrow"));
 
+// uint8-64 x2, int8-64 x2, date, datetime, bool, string
+const all_types_multi_arrow = load_arrow(path.join(__dirname, "..", "arrow", "all_types_small_multi.arrow"));
+
 module.exports = {
     chunked_arrow,
     test_null_arrow,
@@ -56,5 +59,6 @@ module.exports = {
     dict_arrow,
     dict_update_arrow,
     numbers_arrow,
-    all_types_arrow
+    all_types_arrow,
+    all_types_multi_arrow
 };

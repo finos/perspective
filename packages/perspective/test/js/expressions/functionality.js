@@ -61,12 +61,12 @@ module.exports = perspective => {
                 x: "integer",
                 y: "string",
                 z: "boolean",
-                "0 and 1": "boolean",
-                "0 or 1": "boolean"
+                "0 and 1": "float",
+                "0 or 1": "float"
             });
             const result = await view.to_columns();
-            expect(result["0 and 1"]).toEqual([false, false, false, false]);
-            expect(result["0 or 1"]).toEqual([true, true, true, true]);
+            expect(result["0 and 1"]).toEqual([0, 0, 0, 0]);
+            expect(result["0 or 1"]).toEqual([1, 1, 1, 1]);
             view.delete();
             table.delete();
         });
@@ -79,6 +79,26 @@ module.exports = perspective => {
             });
             const result = await view.to_columns();
             expect(result['("w" + "x") ^ 2']).toEqual([2.5, 4.5, 6.5, 8.5].map(x => Math.pow(x, 2)));
+            view.delete();
+            table.delete();
+        });
+
+        it("Should be able to create a boolean expression column with scalars and columns in `view()`", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['"x" and 1', '"x" or 1']
+            });
+            expect(await view.schema()).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                '"x" and 1': "float",
+                '"x" or 1': "float"
+            });
+            const result = await view.to_columns();
+            expect(result['"x" and 1']).toEqual([1, 1, 1, 1]);
+            expect(result['"x" or 1']).toEqual([1, 1, 1, 1]);
             view.delete();
             table.delete();
         });
@@ -929,8 +949,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "boolean",
-                    "0 or 1": "boolean",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "string",
                     "date_bucket(\"b\", 'M')": "date",
                     "date_bucket(\"b\", 's')": "datetime"
@@ -1030,8 +1050,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "boolean",
-                    "0 or 1": "boolean",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "string",
                     "date_bucket(\"b\", 'M')": "date",
                     "date_bucket(\"b\", 's')": "datetime"
@@ -1054,8 +1074,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "boolean",
-                    "0 or 1": "boolean",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "string",
                     "date_bucket(\"b\", 'M')": "date",
                     "date_bucket(\"b\", 's')": "datetime"
@@ -1079,8 +1099,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "boolean",
-                    "0 or 1": "boolean",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "string",
                     "date_bucket(\"b\", 'M')": "date",
                     "date_bucket(\"b\", 's')": "datetime"
@@ -1104,8 +1124,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "integer",
-                    "0 or 1": "integer",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "integer",
                     "date_bucket(\"b\", 'M')": "integer",
                     "date_bucket(\"b\", 's')": "integer"
@@ -1134,8 +1154,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "boolean",
-                    "0 or 1": "boolean",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "integer",
                     "date_bucket(\"b\", 'M')": "integer",
                     "date_bucket(\"b\", 's')": "datetime"
@@ -1160,8 +1180,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "integer",
-                    "0 or 1": "integer",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "integer",
                     "date_bucket(\"b\", 'M')": "integer",
                     "date_bucket(\"b\", 's')": "integer"
@@ -1191,8 +1211,8 @@ module.exports = perspective => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "boolean",
-                    "0 or 1": "boolean",
+                    "0 and 1": "float",
+                    "0 or 1": "float",
                     'upper("c")': "integer",
                     "date_bucket(\"b\", 'M')": "integer",
                     "date_bucket(\"b\", 's')": "datetime"

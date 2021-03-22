@@ -29,9 +29,17 @@ exports.int_float_subtract_data = [
     {u: 5.5, v: 5, w: 4.5, x: 4, y: "d", z: false}
 ];
 
+exports.comparison_data = [
+    {u: 0, v: 1.5, w: 1.5, x: 1, x2: 1, y: "a", z: true},
+    {u: 1, v: 2.55, w: 2.5, x: 2, x2: 10, y: "b", z: false},
+    {u: 0, v: 3.5, w: 3.5, x: 3, x2: 3, y: "c", z: true},
+    {u: 1, v: 4.55, w: 4.5, x: 4, x2: 10, y: "d", z: false}
+];
+
 exports.cols = ["i8", "ui8", "i16", "ui16", "i32", "ui32", "i64", "ui64", "f32", "f64"];
 exports.arrow = arrows.numbers_arrow;
 exports.all_types_arrow = arrows.all_types_arrow;
+exports.all_types_multi_arrow = arrows.all_types_multi_arrow;
 
 exports.days_of_week = ["1 Sunday", "2 Monday", "3 Tuesday", "4 Wednesday", "5 Thursday", "6 Friday", "7 Saturday"];
 exports.months_of_year = ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"];

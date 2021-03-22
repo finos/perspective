@@ -218,7 +218,7 @@ struct epsilon_type<t_tscalar> {
         rval.set(0.0000000001);
         return rval;
     }
-};    
+};
 
 inline bool is_nan_impl(const t_tscalar& v, t_tscalar_type_tag) {
     return v.is_nan();
@@ -391,7 +391,7 @@ template <> inline t_tscalar sin_impl(const t_tscalar v, t_tscalar_type_tag) { U
 template <> inline t_tscalar sinc_impl(const t_tscalar v, t_tscalar_type_tag) {
     t_tscalar rval;
     rval.clear();
-    rval.m_type = perspective::t_dtype::DTYPE_INT32;
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
 
     if (!v.is_numeric()) {
         rval.m_status = perspective::t_status::STATUS_CLEAR;
@@ -401,88 +401,12 @@ template <> inline t_tscalar sinc_impl(const t_tscalar v, t_tscalar_type_tag) {
         return rval;
     }
 
-    switch (v.get_dtype()) {
-        case perspective::t_dtype::DTYPE_INT64: {
-            std::int64_t val = v.get<std::int64_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_INT32: {
-            std::int32_t val = v.get<std::int32_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_INT16: {
-            std::int16_t val = v.get<std::int16_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_INT8: {
-            std::int8_t val = v.get<std::int8_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT64: {
-            std::uint64_t val = v.get<std::uint64_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT32: {
-            std::uint32_t val = v.get<std::uint32_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT16: {
-            std::uint16_t val = v.get<std::uint16_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_UINT8: {
-            std::uint8_t val = v.get<std::uint8_t>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_FLOAT64: {
-            double val = v.get<double>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        case perspective::t_dtype::DTYPE_FLOAT32: {
-            float val = v.get<float>();
-            if (val == 0) {
-                rval.set(static_cast<std::int32_t>(1));
-            } else {
-                rval.set(static_cast<std::int32_t>(std::sin(val) / val));
-            }
-        } break;
-        default: return rval;
+    double x = v.to_double();
+
+    if (x == 0) {
+        rval.set(static_cast<double>(1.0));
+    } else {
+        rval.set(std::sin(x) / x);
     }
 
     return rval;
@@ -505,29 +429,85 @@ template <> inline t_tscalar cot_impl(const t_tscalar v, t_tscalar_type_tag) {
         return rval;
     }
 
-    switch (v.get_dtype()) {
-        case perspective::t_dtype::DTYPE_INT64: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int64_t>()))); } break;
-        case perspective::t_dtype::DTYPE_INT32: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int32_t>()))); } break;
-        case perspective::t_dtype::DTYPE_INT16: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int16_t>()))); } break;
-        case perspective::t_dtype::DTYPE_INT8: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::int8_t>()))); } break;
-        case perspective::t_dtype::DTYPE_UINT64: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint64_t>()))); } break;
-        case perspective::t_dtype::DTYPE_UINT32: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint32_t>()))); } break;
-        case perspective::t_dtype::DTYPE_UINT16: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint16_t>()))); } break;
-        case perspective::t_dtype::DTYPE_UINT8: { rval.set(static_cast<double>(1.00 / std::tan(v.get<std::uint8_t>()))); } break;
-        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(static_cast<double>(1.00 / std::tan(v.get<double>()))); } break;
-        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(static_cast<double>(1.00 / std::tan(v.get<float>()))); } break;
-        default: return rval;
-    }
+    rval.set(static_cast<double>(1.00 / std::tan(v.to_double())));
 
     return rval;
 }
 
 template <> inline t_tscalar sec_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
 template <> inline t_tscalar csc_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
-template <> inline t_tscalar r2d_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
-template <> inline t_tscalar d2r_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
-template <> inline t_tscalar d2g_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
-template <> inline t_tscalar g2d_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
+
+template <> inline t_tscalar r2d_impl(const t_tscalar v, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
+    // radians to degrees
+    rval.set(v.to_double() * 57.29577951308232087679815481410517033240547246656443);
+    return rval;
+}
+
+template <> inline t_tscalar d2r_impl(const t_tscalar v, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
+    // degrees to radians
+    rval.set(v.to_double() * 0.01745329251994329576923690768488612713442871888542);
+    return rval;
+}
+
+template <> inline t_tscalar d2g_impl(const t_tscalar v, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
+    // degrees to gradians
+    rval.set(v.to_double() * (20.0/9.0));
+    return rval;
+ }
+
+template <> inline t_tscalar g2d_impl(const t_tscalar v, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v.is_valid()) {
+        return rval;
+    }
+
+    // gradians to degrees
+    rval.set(v.to_double() * (9.0/20.0));
+    return rval;
+}
 template <> inline t_tscalar notl_impl(const t_tscalar v, t_tscalar_type_tag) { return mknone(); }
 
 template <> inline t_tscalar frac_impl(const t_tscalar v, t_tscalar_type_tag) {
@@ -554,8 +534,8 @@ template <> inline t_tscalar frac_impl(const t_tscalar v, t_tscalar_type_tag) {
         case perspective::t_dtype::DTYPE_UINT32:
         case perspective::t_dtype::DTYPE_UINT16:
         case perspective::t_dtype::DTYPE_UINT8: { rval.set(static_cast<double>(0)); }; break;
-        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(std::modf(v.get<double>(), &intpart)); } break;
-        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(std::modf(v.get<float>(), &intpart)); } break;
+        case perspective::t_dtype::DTYPE_FLOAT64:
+        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(std::modf(v.to_double(), &intpart)); } break;
         default: return rval;
     }
 
@@ -575,19 +555,7 @@ template <> inline t_tscalar trunc_impl(const t_tscalar v, t_tscalar_type_tag) {
         return rval;
     }
 
-    switch (v.get_dtype()) {
-        case perspective::t_dtype::DTYPE_INT64: { rval.set(v.get<std::int64_t>()); } break;
-        case perspective::t_dtype::DTYPE_INT32: { rval.set(static_cast<std::int64_t>(v.get<std::int32_t>())); } break;
-        case perspective::t_dtype::DTYPE_INT16: { rval.set(static_cast<std::int64_t>(v.get<std::int16_t>())); } break;
-        case perspective::t_dtype::DTYPE_INT8: { rval.set(static_cast<std::int64_t>(v.get<std::int8_t>())); } break;
-        case perspective::t_dtype::DTYPE_UINT64: { rval.set(static_cast<std::int64_t>(v.get<std::uint64_t>())); } break;
-        case perspective::t_dtype::DTYPE_UINT32: { rval.set(static_cast<std::int64_t>(v.get<std::uint32_t>())); } break;
-        case perspective::t_dtype::DTYPE_UINT16: { rval.set(static_cast<std::int64_t>(v.get<std::uint16_t>())); } break;
-        case perspective::t_dtype::DTYPE_UINT8: { rval.set(static_cast<std::int64_t>(v.get<std::uint8_t>())); } break;
-        case perspective::t_dtype::DTYPE_FLOAT64: { rval.set(static_cast<std::int64_t>(v.get<double>())); } break;
-        case perspective::t_dtype::DTYPE_FLOAT32: { rval.set(static_cast<std::int64_t>(v.get<float>())); } break;
-        default: return rval;
-    }
+    rval.set(static_cast<std::int64_t>(v.to_double()));
 
     return rval;
 }
@@ -601,20 +569,63 @@ template <> inline t_tscalar ncdf_impl(const t_tscalar v, t_tscalar_type_tag) { 
  *
  * Binary functions
  */
-template <> inline t_tscalar min_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return (v1 < v0) ? v1 : v0; }
-template <> inline t_tscalar max_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return (v1 > v0) ? v1 : v0;  }
+template <> inline t_tscalar min_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v0.is_valid() || !v1.is_valid() || v0.is_none() || v1.is_none()) {
+        rval.m_status = perspective::t_status::STATUS_INVALID;
+        return rval;
+    }
+
+    double x = v0.to_double();
+    double y = v1.to_double();
+
+    rval.set(x < y ? x : y);
+    return rval;
+}
+
+template <> inline t_tscalar max_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v0.is_valid() || !v1.is_valid() || v0.is_none() || v1.is_none()) {
+        rval.m_status = perspective::t_status::STATUS_INVALID;
+        return rval;
+    }
+
+    double x = v0.to_double();
+    double y = v1.to_double();
+
+    rval.set(x > y ? x : y);
+    return rval;
+}
+
 template <> inline t_tscalar equal_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    // TODO: this doesn't work between scalars of different dtypes - how do
-    // we handle equality, comparison etc. between different dtyped scalars?
-    rval.set(static_cast<bool>(v0 == v1));
+    rval.m_type = perspective::t_dtype::DTYPE_BOOL;
+
+    if (!v0.is_valid() || !v1.is_valid() || v0.is_none() || v1.is_none()) {
+        rval.m_status = perspective::t_status::STATUS_INVALID;
+        return rval;
+    }
+
+    rval.set(v0 == v1);
     return rval;    
 }
 template <> inline t_tscalar nequal_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(static_cast<bool>(v0 != v1));
+    rval.m_type = perspective::t_dtype::DTYPE_BOOL;
+
+    if (!v0.is_valid() || !v1.is_valid() || v0.is_none() || v1.is_none()) {
+        rval.m_status = perspective::t_status::STATUS_INVALID;
+        return rval;
+    }
+    
+    rval.set(v0 != v1);
     return rval;
 }
+
 template <> inline t_tscalar modulus_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return v0 % v1; }
 
 template <> inline t_tscalar pow_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
@@ -638,7 +649,7 @@ template <> inline t_tscalar pow_impl(const t_tscalar v0, const t_tscalar v1, t_
 template <> inline t_tscalar logn_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
     rval.clear();
-    rval.m_type = perspective::t_dtype::DTYPE_INT64;
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
 
     if (!v1.is_numeric() || !v1.is_numeric()) {
         rval.m_status = perspective::t_status::STATUS_CLEAR;
@@ -651,10 +662,36 @@ template <> inline t_tscalar logn_impl(const t_tscalar v0, const t_tscalar v1, t
     double result = std::log(v0.to_double()) / std::log(v1.to_double());
 
     rval.set(result);
+    std::cout << "result: " << rval.repr() << std::endl;
     return rval;
 }
 
-template <> inline t_tscalar root_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return mknone(); }
+template <> inline t_tscalar root_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = perspective::t_dtype::DTYPE_FLOAT64;
+
+    if (!v1.is_numeric() || !v1.is_numeric()) {
+        rval.m_status = perspective::t_status::STATUS_CLEAR;
+    }
+
+    if (!v0.is_valid() || !v1.is_valid()) {
+        return rval;
+    }
+
+    double x = v0.to_double();
+    std::int64_t y = static_cast<std::int64_t>(v1.to_double());
+
+    if (y < 0 || (x < 0 && y % 2 == 0)) {
+        return mknone();
+    }
+
+    double result = std::pow(v0.to_double(), (1.0 / v1.to_double()));
+
+    rval.set(result);
+    return rval;
+}
+
 template <> inline t_tscalar roundn_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return mknone(); }
 template <> inline t_tscalar hypot_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return mknone(); }
 template <> inline t_tscalar atan2_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) { return mknone(); }
@@ -663,37 +700,40 @@ template <> inline t_tscalar shl_impl(const t_tscalar v0, const t_tscalar v1, t_
 
 template <> inline t_tscalar and_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(static_cast<bool>(v0) && static_cast<bool>(v1));
+
+    // booleans need to return numeric scalars, otherwise they will not work
+    // inside a conditional for some reason.
+    rval.set(static_cast<double>(static_cast<bool>(v0) && static_cast<bool>(v1)));
     return rval;
 }
 
 template <> inline t_tscalar or_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(static_cast<bool>(v0) || static_cast<bool>(v1));
+    rval.set(static_cast<double>(static_cast<bool>(v0) || static_cast<bool>(v1)));
     return rval;
 }
 
 template <> inline t_tscalar xor_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(!v0 != !v1);
+    rval.set(static_cast<double>(!v0 != !v1));
     return rval;
 }
 
 template <> inline t_tscalar nand_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(!(static_cast<bool>(v0) && static_cast<bool>(v1)));
+    rval.set(static_cast<double>(!(static_cast<bool>(v0) && static_cast<bool>(v1))));
     return rval;
 }
 
 template <> inline t_tscalar nor_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(!(static_cast<bool>(v0) || static_cast<bool>(v1)));
+    rval.set(static_cast<double>(!(static_cast<bool>(v0) || static_cast<bool>(v1))));
     return rval;
 }
 
 template <> inline t_tscalar xnor_impl(const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
     t_tscalar rval;
-    rval.set(static_cast<bool>(v0) == static_cast<bool>(v1));
+    rval.set(static_cast<double>(static_cast<bool>(v0) == static_cast<bool>(v1)));
     return rval;
 }
 
@@ -719,13 +759,14 @@ template <> inline bool is_integer_impl(const t_tscalar& v, t_tscalar_type_tag) 
 } // end namespace details
 } // end namespace numeric
 
-inline bool is_true (const t_tscalar& v) {
+inline bool is_true(const t_tscalar& v) {
     return static_cast<bool>(v);
 }
 
 inline bool is_false(const t_tscalar& v) {
     return !is_true(v);
 };
+
 /******************************************************************************
  *
  * String -> t_tscalar
