@@ -45,3 +45,14 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
 * [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
+
+
+## Community
+
+The following organizations support and/or use perspective.
+
+
+| | | | |
+|:--:|:--:|:--:|:--:|
+|<img width="150" src="./docs/static/img/jpmorgan.png" alt="J.P. Morgan"></img>|<img width="150" src="./docs/static/img/scottlogic.jpg" alt="Scott Logic"></img>|<img width="150" src="./docs/static/img/rbc.jpg" alt="RBC Capital Markets"></img>|<img width="150" src="./docs/static/img/iex.png" alt="IEX"></img>|
+| [J.P. Morgan](https://www.jpmorgan.com/) | [Scott Logic](https://www.scottlogic.com/) | [RBC Capital Markets](https://www.rbc.com/) | [IEX](https://iextrading.com/) |
