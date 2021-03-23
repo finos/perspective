@@ -94,26 +94,13 @@ intern::intern(std::shared_ptr<t_vocab> expression_vocab)
     : exprtk::igeneric_function<t_tscalar>("S")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
-        t_tscalar rval;
-
+        sentinel.clear();
+    
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_INVALID;
-        sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
-
-        // The rval is the scalar that is returned out from each call to the
-        // function. Because strings are interned in a vocabulary, the only
-        // thing that is returned is a uint64 value that contains the index
-        // into the expression vocab.
-        rval.m_type = DTYPE_STR;
-        rval.m_status = STATUS_VALID;
-        rval.m_data.m_uint64 = 0;
-        rval.m_data.m_charptr = nullptr;
-
         m_sentinel = sentinel;
-        m_rval = rval;
 
         // m_none is a scalar with DTYPE_NONE that indicates an invalid
         // call to the function.
@@ -150,41 +137,26 @@ t_tscalar intern::operator()(t_parameter_list parameters) {
         return m_sentinel;
     }
 
+    // Intern the string into the vocabulary, and return the index of the
+    // string inside the vocabulary.
     t_uindex interned = m_expression_vocab->get_interned(temp_str);
-    m_rval.set(m_expression_vocab->unintern_c(interned));
 
-    // Return the sentinel with the uint64 data field set to the
-    // index of the string in the vocab. The compute() and recompute() methods
-    // will look in the uint64 field for all DTYPE_STR scalars from
-    // expression.value().
-    // m_rval.m_data.m_uint64 = interned;
-    return m_rval;
+    t_tscalar rval;
+    rval.set(m_expression_vocab->unintern_c(interned));
+    return rval;
 }
 
 
 concat::concat(std::shared_ptr<t_vocab> expression_vocab)
     : m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
-        t_tscalar rval;
+        sentinel.clear();
 
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_INVALID;
-        sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
-
-        // The rval is the scalar that is returned out from each call to the
-        // function. Because strings are interned in a vocabulary, the only
-        // thing that is returned is a uint64 value that contains the index
-        // into the expression vocab.
-        rval.m_type = DTYPE_STR;
-        rval.m_status = STATUS_VALID;
-        rval.m_data.m_uint64 = 0;
-        rval.m_data.m_charptr = nullptr;
-
         m_sentinel = sentinel;
-        m_rval = rval;
 
         // m_none is a scalar with DTYPE_NONE that indicates an invalid
         // call to the function.
@@ -195,6 +167,9 @@ concat::~concat() {}
 
 t_tscalar concat::operator()(t_parameter_list parameters) {
     std::string result;
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_STR;
 
     if (parameters.size() == 0) return m_none;
     
@@ -205,40 +180,28 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
             t_scalar_view temp(gt);
             t_tscalar temp_scalar = temp();
 
-            if (temp_scalar.get_dtype() != DTYPE_STR) {
-                m_rval.m_status = STATUS_CLEAR;
+            // Invalid type
+            if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
             }
 
-            if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
-                return m_rval;
+            // current param is the right type and we are type checking,
+            // so move on to the next param
+            if (m_expression_vocab == nullptr) {
+                continue;
             }
 
-            if (m_expression_vocab != nullptr) {
-                if (temp_scalar.m_data.m_uint64 >= 0
-                    && temp_scalar.m_data.m_uint64 < m_expression_vocab->get_vlenidx()) {
-                    result += std::string(m_expression_vocab->unintern_c(temp_scalar.m_data.m_uint64));
-                } else if (temp_scalar.m_data.m_charptr != nullptr) {
-                    // If there are no values in the uint64/it is uninitialized, but
-                    // the scalar has a charptr value then read the string out from
-                    // the scalar itself.
-                    result += temp_scalar.to_string();
-                } else {
-                    PSP_COMPLAIN_AND_ABORT("[concat] Invalid scalar found: " + temp_scalar.repr());
-                }
+            // no longer in type-checking - return if the param is invalid.
+            if (!temp_scalar.is_valid()) {
+                return rval;
             }
-        } else if (t_generic_type::e_string == gt.type) {
-            // upper('abc') - with a scalar string
-            t_string_view temp_string(gt);
-            std::string temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
 
-            // Don't allow empty strings
-            if (temp_str == "") return m_none;
-
-            result += temp_str;
+            // Read the string out from the scalar
+            result += temp_scalar.to_string();
         } else {
             // An invalid call.
-            m_rval.m_status = STATUS_CLEAR;
-            return m_rval;
+            return m_none;
         }
     }
 
@@ -255,37 +218,22 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
     // index of the string in the vocab. The compute() and recompute() methods
     // will look in the uint64 field for all DTYPE_STR scalars from
     // expression.value().
-    m_rval.m_data.m_uint64 = interned;
-    m_rval.m_status = STATUS_VALID;
+    rval.set(m_expression_vocab->unintern_c(interned));
 
-    return m_rval;
+    return rval;
 }
 
 upper::upper(std::shared_ptr<t_vocab> expression_vocab)
     : exprtk::igeneric_function<t_tscalar>("?")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
-        t_tscalar rval;
+        sentinel.clear();
 
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_INVALID;
-        sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
-
-
-        // The rval is the scalar that is returned out from each call to the
-        // function. Because strings are interned in a vocabulary, the only
-        // thing that is returned is a uint64 value that contains the index
-        // into the expression vocab.
-        rval.m_type = DTYPE_STR;
-        rval.m_status = STATUS_VALID;
-        rval.m_data.m_uint64 = 0;
-        rval.m_data.m_charptr = nullptr;
-
         m_sentinel = sentinel;
-        m_rval = rval;
 
         // m_none is a scalar with DTYPE_NONE that indicates an invalid
         // call to the function.
@@ -295,6 +243,9 @@ upper::upper(std::shared_ptr<t_vocab> expression_vocab)
 upper::~upper() {}
 
 t_tscalar upper::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_STR;
     std::string temp_str;
 
     if (parameters.size() != 1) {
@@ -307,39 +258,18 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
         t_scalar_view temp(gt);
         t_tscalar temp_scalar = temp();
 
-        if (temp_scalar.get_dtype() != DTYPE_STR) {
-            m_rval.m_status = STATUS_CLEAR;
+        if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
         }
 
-        if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
-            return m_rval;
+        if (!temp_scalar.is_valid()) {
+            return rval;
         }
 
-        if (m_expression_vocab != nullptr) {
-            if (temp_scalar.m_data.m_uint64 >= 0
-                && temp_scalar.m_data.m_uint64 < m_expression_vocab->get_vlenidx()) {
-                temp_str = std::string(m_expression_vocab->unintern_c(temp_scalar.m_data.m_uint64));
-            } else if (temp_scalar.m_data.m_charptr != nullptr) {
-                // If there are no values in the uint64/it is uninitialized, but
-                // the scalar has a charptr value then read the string out from
-                // the scalar itself.
-                temp_str = temp_scalar.to_string();
-            } else {
-                PSP_COMPLAIN_AND_ABORT("[upper] Invalid scalar found: " + temp_scalar.repr());
-            }
-        } else {
-            return m_sentinel;
-        }
-    } else if (t_generic_type::e_string == gt.type) {
-        // upper('abc') - with a scalar string
-        t_string_view temp_string(gt);
-        temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
-
-        // Don't allow empty strings
-        if (temp_str == "") return m_none;
+        temp_str = temp_scalar.to_string();
     } else {
         // An invalid call.
-        m_rval.m_status = STATUS_CLEAR;
         return m_none;
     }
 
@@ -353,42 +283,21 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
     boost::to_upper(temp_str);
 
     t_uindex interned = m_expression_vocab->get_interned(temp_str);
-
-    // Return the sentinel with the uint64 data field set to the
-    // index of the string in the vocab. The compute() and recompute() methods
-    // will look in the uint64 field for all DTYPE_STR scalars from
-    // expression.value().
-    m_rval.m_data.m_uint64 = interned;
-    m_rval.m_status = STATUS_VALID;
-
-    return m_rval;
+    rval.set(m_expression_vocab->unintern_c(interned));
+    return rval;
 }
 
 lower::lower(std::shared_ptr<t_vocab> expression_vocab)
     : exprtk::igeneric_function<t_tscalar>("?")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
-        t_tscalar rval;
+        sentinel.clear();
 
         // The sentinel is a string scalar that is returned to indicate a
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_STR;
-        sentinel.m_status = STATUS_INVALID;
-        sentinel.m_data.m_uint64 = 0;
         sentinel.m_data.m_charptr = nullptr;
-
-
-        // The rval is the scalar that is returned out from each call to the
-        // function. Because strings are interned in a vocabulary, the only
-        // thing that is returned is a uint64 value that contains the index
-        // into the expression vocab.
-        rval.m_type = DTYPE_STR;
-        rval.m_status = STATUS_VALID;
-        rval.m_data.m_uint64 = 0;
-        rval.m_data.m_charptr = nullptr;
-
         m_sentinel = sentinel;
-        m_rval = rval;
 
         // m_none is a scalar with DTYPE_NONE that indicates an invalid
         // call to the function.
@@ -398,6 +307,9 @@ lower::lower(std::shared_ptr<t_vocab> expression_vocab)
 lower::~lower() {}
 
 t_tscalar lower::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_STR;
     std::string temp_str;
 
     if (parameters.size() != 1) {
@@ -410,39 +322,18 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
         t_scalar_view temp(gt);
         t_tscalar temp_scalar = temp();
 
-        if (temp_scalar.get_dtype() != DTYPE_STR) {
-            m_rval.m_status = STATUS_CLEAR;
+        if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
         }
 
         if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
-            return m_rval;
+            return rval;
         }
 
-        if (m_expression_vocab != nullptr) {
-            if (temp_scalar.m_data.m_uint64 >= 0
-                && temp_scalar.m_data.m_uint64 < m_expression_vocab->get_vlenidx()) {
-                temp_str = std::string(m_expression_vocab->unintern_c(temp_scalar.m_data.m_uint64));
-            } else if (temp_scalar.m_data.m_charptr != nullptr) {
-                // If there are no values in the uint64/it is uninitialized, but
-                // the scalar has a charptr value then read the string out from
-                // the scalar itself.
-                temp_str = temp_scalar.to_string();
-            } else {
-                PSP_COMPLAIN_AND_ABORT("[lower] Invalid scalar found: " + temp_scalar.repr());
-            }
-        } else {
-            return m_sentinel;
-        }
-    } else if (t_generic_type::e_string == gt.type) {
-        // upper('abc') - with a scalar string
-        t_string_view temp_string(gt);
-        temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
-
-        // Don't allow empty strings
-        if (temp_str == "") return m_none;
+        temp_str = temp_scalar.to_string();
     } else {
         // An invalid call.
-        m_rval.m_status = STATUS_CLEAR;
         return m_none;
     }
 
@@ -456,15 +347,8 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
     boost::to_lower(temp_str);
 
     t_uindex interned = m_expression_vocab->get_interned(temp_str);
-
-    // Return the sentinel with the uint64 data field set to the
-    // index of the string in the vocab. The compute() and recompute() methods
-    // will look in the uint64 field for all DTYPE_STR scalars from
-    // expression.value().
-    m_rval.m_data.m_uint64 = interned;
-    m_rval.m_status = STATUS_VALID;
-
-    return m_rval;
+    rval.set(m_expression_vocab->unintern_c(interned));
+    return rval;
 }
 
 
@@ -820,6 +704,171 @@ t_tscalar today() {
     std::uint32_t day = static_cast<std::uint32_t>(t->tm_mday);
 
     rval.set(t_date(year, month, day));
+    return rval;
+}
+
+min_fn::min_fn() {}
+
+min_fn::~min_fn() {}
+
+t_tscalar min_fn::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    std::vector<t_tscalar> inputs;
+    inputs.resize(parameters.size());
+
+    // type check through all parameters first before calculating
+    for (auto i = 0; i < parameters.size(); ++i) {
+        t_generic_type& gt = parameters[i];
+
+        if (t_generic_type::e_scalar == gt.type) {
+            t_scalar_view _temp(gt);
+            t_tscalar temp = _temp();
+
+            std::cout << temp.repr() << std::endl;
+
+            if (!temp.is_numeric()) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            } else {
+                // correct type - we will check for STATUS_VALID later
+                inputs[i] = temp;
+                continue;
+            }
+        } else {
+            std::cerr << "[min_fn] Invalid parameter in min_fn()" << std::endl;
+            return mknone();
+        }
+    }
+
+    // types are now valid - we can calculate the value
+    for (auto i = 0; i < inputs.size(); ++i) {
+        const t_tscalar& val = inputs[i];
+
+        // correct type input but invalid - return
+        if (!val.is_valid()) {
+            return rval;
+        }
+
+        if (i == 0 || (val.to_double() < rval.to_double())) {
+            rval.set(val.to_double());
+        }
+    }
+
+    return rval;
+}
+
+max_fn::max_fn() {}
+
+max_fn::~max_fn() {}
+
+t_tscalar max_fn::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    std::vector<t_tscalar> inputs;
+    inputs.resize(parameters.size());
+
+    // type check through all parameters first before calculating
+    for (auto i = 0; i < parameters.size(); ++i) {
+        t_generic_type& gt = parameters[i];
+
+        if (t_generic_type::e_scalar == gt.type) {
+            t_scalar_view _temp(gt);
+            t_tscalar temp = _temp();
+
+            if (!temp.is_numeric()) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            } else {
+                // correct type - we will check for STATUS_VALID later
+                inputs[i] = temp;
+                continue;
+            }
+        } else {
+            std::cerr << "[max_fn] Invalid parameter in max_fn()" << std::endl;
+            return mknone();
+        }
+    }
+
+    // types are now valid - we can calculate the value
+    for (auto i = 0; i < inputs.size(); ++i) {
+        const t_tscalar& val = inputs[i];
+
+        // correct type input but invalid - return
+        if (!val.is_valid()) {
+            return rval;
+        }
+
+        if (i == 0 || (val.to_double() > rval.to_double())) {
+            rval.set(val.to_double());
+        }
+    }
+
+    return rval;
+}
+
+is_null::is_null() : exprtk::igeneric_function<t_tscalar>("T") {}
+
+is_null::~is_null() {}
+
+t_tscalar is_null::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+
+    t_tscalar rval;
+    rval.clear();
+
+    // Return a float so we can use it in conditionals
+    rval.m_type = DTYPE_FLOAT64;
+
+    for (auto i = 0; i < parameters.size(); ++i) {
+        t_generic_type& gt = parameters[i];
+
+        if (t_generic_type::e_scalar == gt.type) {
+            t_scalar_view temp(gt);
+            val.set(temp());
+        } else {
+            std::cerr << "[is_null] Invalid parameter in is_null()" << std::endl;
+            return mknone();
+        }
+    }
+
+    // Return an int so we can use it in conditionals
+    rval.set(static_cast<double>(val.is_none() || !val.is_valid()));
+
+    return rval;
+}
+
+is_not_null::is_not_null() : exprtk::igeneric_function<t_tscalar>("T") {}
+
+is_not_null::~is_not_null() {}
+
+t_tscalar is_not_null::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+
+    t_tscalar rval;
+    rval.clear();
+
+    // Return a float so we can use it in conditionals
+    rval.m_type = DTYPE_FLOAT64;
+
+    for (auto i = 0; i < parameters.size(); ++i) {
+        t_generic_type& gt = parameters[i];
+
+        if (t_generic_type::e_scalar == gt.type) {
+            t_scalar_view temp(gt);
+            val.set(temp());
+        } else {
+            std::cerr << "[is_null] Invalid parameter in is_null()" << std::endl;
+            return mknone();
+        }
+    }
+
+    rval.set(static_cast<double>(!val.is_none() && val.is_valid()));
+
     return rval;
 }
 

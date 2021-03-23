@@ -121,6 +121,10 @@ public:
     static computed_function::concat CONCAT_VALIDATOR_FN;
     static computed_function::upper UPPER_VALIDATOR_FN;
     static computed_function::lower LOWER_VALIDATOR_FN;
+    static computed_function::min_fn MIN_FN;
+    static computed_function::max_fn MAX_FN;
+    static computed_function::is_null IS_NULL_FN;
+    static computed_function::is_not_null IS_NOT_NULL_FN;
 };
 
 } // end namespace perspective

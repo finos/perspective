@@ -185,7 +185,10 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 break;
             case "Tab": {
                 ev.preventDefault();
-                this._edit_area.value += "    ";
+                const start = this._edit_area.selectionStart;
+                const end = this._edit_area.selectionEnd;
+                this._edit_area.value = this._edit_area.value.substring(0, start) + "    " + this._edit_area.value.substring(end);
+                this._edit_area.setSelectionRange(start + 1, start + 1);
             }
         }
     }

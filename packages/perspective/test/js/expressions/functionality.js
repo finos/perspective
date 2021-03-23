@@ -15,6 +15,569 @@ const expressions_common = require("./common.js");
  * continue to be functional on expressions.
  */
 module.exports = perspective => {
+    describe("Expression structures", function() {
+        describe("if statements", function() {
+            it("if without else should be invalid", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const validate = await table.expression_schema(['if ("w" > 1) 5;', 'if ("w" > 1) 5']);
+                expect(validate['if ("w" > 1) 5;']).toBeUndefined();
+                expect(validate['if ("w" > 1) 5']).toBeUndefined();
+                table.delete();
+            });
+
+            it.skip("if else with multiple return types should be invalid", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ["if (\"w\" == 1.5) 5; else 'abc'"]
+                });
+                const results = await view.to_columns();
+
+                // TODO: we should prevent this polymorphic return from being
+                // allowed, but the machinery around how if/else returns is
+                // opaque to me at the moment.
+                expect(results["if (\"w\" == 1.5) 5; else 'abc'"]).toEqual(["", "abc", "abc", "abc"]);
+                view.delete();
+                table.delete();
+            });
+
+            it("functional if", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ['if ("w" > 2, 5, 10);', 'if ("w" == 1.5, 5, 10)']
+                });
+
+                const results = await view.to_columns();
+                expect(results['if ("w" > 2, 5, 10);']).toEqual([10, 5, 5, 5]);
+                expect(results['if ("w" == 1.5, 5, 10)']).toEqual([5, 10, 10, 10]);
+                view.delete();
+                table.delete();
+            });
+
+            it("functional if string", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ["if (\"y\" == 'a', 5, 10);", "if (\"y\" != 'a', 5, 10)"]
+                });
+
+                const results = await view.to_columns();
+                expect(results["if (\"y\" == 'a', 5, 10);"]).toEqual([5, 10, 10, 10]);
+                expect(results["if (\"y\" != 'a', 5, 10)"]).toEqual([10, 5, 5, 5]);
+                view.delete();
+                table.delete();
+            });
+
+            it.skip("functional if bool", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ['if ("z" == true, 5, 10);', 'if ("z" != true, 5, 10)']
+                });
+
+                const results = await view.to_columns();
+                expect(results['if ("z" == 1, 5, 10);']).toEqual([5, 10, 5, 10]);
+                expect(results['if ("z" != true, 5, 10)']).toEqual([10, 5, 10, 5]);
+                view.delete();
+                table.delete();
+            });
+
+            it("functional if date", async function() {
+                const table = await perspective.table({
+                    a: "date",
+                    b: "date"
+                });
+
+                const view = await table.view({
+                    expressions: ['if ("a" == "b", 5, 10);', 'if ("a" < "b", 5, 10)']
+                });
+
+                table.update({
+                    a: [new Date(2020, 3, 1), new Date(2012, 0, 30), new Date(2018, 9, 31), new Date(2020, 1, 29)],
+                    b: [new Date(2020, 3, 1), new Date(2012, 1, 30), new Date(2018, 10, 31), new Date(2020, 1, 29)]
+                });
+
+                const results = await view.to_columns();
+                expect(results['if ("a" == "b", 5, 10);']).toEqual([5, 10, 10, 5]);
+                expect(results['if ("a" < "b", 5, 10)']).toEqual([10, 5, 5, 10]);
+
+                view.delete();
+                table.delete();
+            });
+
+            it("functional if datetime", async function() {
+                const table = await perspective.table({
+                    a: "datetime",
+                    b: "datetime"
+                });
+
+                const view = await table.view({
+                    expressions: ['if ("a" >= "b", 5, 10);', 'if ("a" < "b", 5, 10)']
+                });
+
+                table.update({
+                    a: [new Date(2020, 3, 1, 12, 30, 45, 850), new Date(2012, 0, 30, 19, 25), new Date(2018, 9, 31, 3, 13), new Date(2020, 1, 29, 23, 59, 59)],
+                    b: [new Date(2020, 3, 1, 12, 30, 45, 850), new Date(2012, 1, 30), new Date(2018, 10, 31), new Date(2020, 1, 29)]
+                });
+
+                const results = await view.to_columns();
+                expect(results['if ("a" >= "b", 5, 10);']).toEqual([5, 10, 10, 5]);
+                expect(results['if ("a" < "b", 5, 10)']).toEqual([10, 5, 5, 10]);
+                view.delete();
+                table.delete();
+            });
+
+            it("ternary if", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ['"w" > 2 ? 5 : 10;', '"w" == 1.5 ? 5 : 10']
+                });
+
+                const results = await view.to_columns();
+                expect(results['"w" > 2 ? 5 : 10;']).toEqual([10, 5, 5, 5]);
+                expect(results['"w" == 1.5 ? 5 : 10']).toEqual([5, 10, 10, 10]);
+                view.delete();
+                table.delete();
+            });
+
+            it("ternary if string", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ["\"y\" == 'a' ? 5 : 10;", "\"y\" != 'a' ? 5 : 10"]
+                });
+
+                const results = await view.to_columns();
+                expect(results["\"y\" == 'a' ? 5 : 10;"]).toEqual([5, 10, 10, 10]);
+                expect(results["\"y\" != 'a' ? 5 : 10"]).toEqual([10, 5, 5, 5]);
+                view.delete();
+                table.delete();
+            });
+
+            it.skip("ternary if bool", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ['"z" == true ? 5 : 10;', '"z" != true ? 5 : 10']
+                });
+
+                const results = await view.to_columns();
+                expect(results['"z" == 1 ? 5 : 10;']).toEqual([5, 10, 5, 10]);
+                expect(results['"z" != true ? 5 : 10']).toEqual([10, 5, 10, 5]);
+                view.delete();
+                table.delete();
+            });
+
+            it("ternary if date", async function() {
+                const table = await perspective.table({
+                    a: "date",
+                    b: "date"
+                });
+
+                const view = await table.view({
+                    expressions: ['"a" == "b" ? 5 : 10;', '"a" < "b" ? 5 : 10']
+                });
+
+                table.update({
+                    a: [new Date(2020, 3, 1), new Date(2012, 0, 30), new Date(2018, 9, 31), new Date(2020, 1, 29)],
+                    b: [new Date(2020, 3, 1), new Date(2012, 1, 30), new Date(2018, 10, 31), new Date(2020, 1, 29)]
+                });
+
+                const results = await view.to_columns();
+                expect(results['"a" == "b" ? 5 : 10;']).toEqual([5, 10, 10, 5]);
+                expect(results['"a" < "b" ? 5 : 10']).toEqual([10, 5, 5, 10]);
+
+                view.delete();
+                table.delete();
+            });
+
+            it("ternary if datetime", async function() {
+                const table = await perspective.table({
+                    a: "datetime",
+                    b: "datetime"
+                });
+
+                const view = await table.view({
+                    expressions: ['"a" >= "b" ? 5 : 10;', '"a" < "b" ? 5 : 10']
+                });
+
+                table.update({
+                    a: [new Date(2020, 3, 1, 12, 30, 45, 850), new Date(2012, 0, 30, 19, 25), new Date(2018, 9, 31, 3, 13), new Date(2020, 1, 29, 23, 59, 59)],
+                    b: [new Date(2020, 3, 1, 12, 30, 45, 850), new Date(2012, 1, 30), new Date(2018, 10, 31), new Date(2020, 1, 29)]
+                });
+
+                const results = await view.to_columns();
+                expect(results['"a" >= "b" ? 5 : 10;']).toEqual([5, 10, 10, 5]);
+                expect(results['"a" < "b" ? 5 : 10']).toEqual([10, 5, 5, 10]);
+                view.delete();
+                table.delete();
+            });
+
+            it("if else", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: ['if ("w" > 2) 5; else 10', 'if ("w" > 2) 5; else 10;', 'if ("w" > 2) { \n5; } else { \n10;}']
+                });
+
+                const results = await view.to_columns();
+                expect(results['if ("w" > 2) 5; else 10']).toEqual([10, 5, 5, 5]);
+                expect(results['if ("w" > 2) 5; else 10;']).toEqual([10, 5, 5, 5]);
+                expect(results['if ("w" > 2) { \n5; } else { \n10;}']).toEqual([10, 5, 5, 5]);
+                view.delete();
+                table.delete();
+            });
+
+            it("if else if", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [
+                        'if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10',
+                        'if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10;',
+                        'if ("w" == 3.5) { \n15; } else if ("w" > 2) { \n5; } else { \n10;}'
+                    ]
+                });
+
+                const results = await view.to_columns();
+                expect(results['if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10']).toEqual([10, 5, 15, 5]);
+                expect(results['if ("w" == 3.5) 15; else if ("w" > 2) 5; else 10;']).toEqual([10, 5, 15, 5]);
+                expect(results['if ("w" == 3.5) { \n15; } else if ("w" > 2) { \n5; } else { \n10;}']).toEqual([10, 5, 15, 5]);
+                view.delete();
+                table.delete();
+            });
+        });
+
+        describe("Switch", function() {
+            it("Switch on multiple columns", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`switch { case "w" > 2: sqrt(144); case "y" == 'a': sqrt(121); default: 0; }`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`switch { case "w" > 2: sqrt(144); case "y" == 'a': sqrt(121); default: 0; }`]).toEqual([11, 12, 12, 12]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Switch on multiple columns with resulting expression", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`switch { case "w" > 2: (sqrt(144) * "w"); case "y" == 'a': (sqrt(121) * "w"); default: "x"; }`]).toEqual([16.5, 30, 42, 54]);
+
+                await view.delete();
+                await table.delete();
+            });
+        });
+
+        describe("While loop", function() {
+            it("Scalar while", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; } x`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; } x`]).toEqual([10240, 10240, 10240, 10240]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Column while", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; } x`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; } x`]).toEqual([30, 50, 70, 90]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it.skip("Column while with break", async function() {
+                // FIXME: this can be parsed but the call to expression.value()
+                // throws an error or aborts with an empty message.
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; } x`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; } x`]).toEqual([16.5, 30, 42, 54]);
+
+                await view.delete();
+                await table.delete();
+            });
+        });
+
+        describe("For loop", function() {
+            it("Scalar for", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`for (var x := 0; x < 10; x += 1) { var y := x + 1; y}`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`for (var x := 0; x < 10; x += 1) { var y := x + 1; y}`]).toEqual([10, 10, 10, 10]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Column for", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`for (var x := 0; x < 10; x += 1) { var y := "w" + 1; y}`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`for (var x := 0; x < 10; x += 1) { var y := "w" + 1; y}`]).toEqual([2.5, 3.5, 4.5, 5.5]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it.skip("for loop only valid on numbers", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                // `for (var x := today(); x < 10; x += 1) { var y := "w" + 1; y}`
+                const expressions = [`for (var x := 'abc'; x < 10; x += 1) { var y := "w" + 1; y}`];
+                const validate = await table.expression_schema(expressions);
+
+                for (const expr of expressions) {
+                    expect(validate[expr]).toBeUndefined();
+                }
+
+                await table.delete();
+            });
+        });
+
+        describe.skip("Repeat loop", function() {
+            it("Scalar repeat", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`var x := 1; var y := 1; repeat x := x + (y * 2) until (x > 10)`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`var x := 1; var y := 1; repeat x := x + (y * 2) until (x > 10)`]).toEqual([11, 11, 11, 11]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it("Column repeat", async function() {
+                const table = await perspective.table(expressions_common.int_float_data);
+                const view = await table.view({
+                    expressions: [`var x := 1; repeat x := x + ("x" * 2) until (x > 10)`]
+                });
+
+                const results = await view.to_columns();
+                expect(results[`var x := 1; repeat x := x + ("x" * 2) until (x > 10)`]).toEqual([16.5, 30, 42, 54]);
+
+                await view.delete();
+                await table.delete();
+            });
+        });
+    });
+
+    describe("Local variables", function() {
+        it("Declare numeric var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := 10; var y := -100.00005; var z := x + y; abs(z)`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := 10; var y := -100.00005; var z := x + y; abs(z)`]).toEqual([90.00005, 90.00005, 90.00005, 90.00005]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [
+                    `var x := 'long literal string here'; var y := 'long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`,
+                    `var x := 'hello'; var y := upper(x); lower(y);`
+                ]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := 'long literal string here'; var y := 'long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`]).toEqual([
+                "strings: long literal string here, long literal string here",
+                "strings: long literal string here, long literal string here",
+                "strings: long literal string here, long literal string here",
+                "strings: long literal string here, long literal string here"
+            ]);
+            expect(results[`var x := 'hello'; var y := upper(x); lower(y);`]).toEqual(["hello", "hello", "hello", "hello"]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare date var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := today(); var y := today(); x == y ? 1 : 0;`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := today(); var y := today(); x == y ? 1 : 0;`]).toEqual([1, 1, 1, 1]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare datetime var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := now(); var y := now(); x == y ? 1 : 0;`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := now(); var y := now(); x == y ? 1 : 0;`]).toEqual([1, 1, 1, 1]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare boolean var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := true; var y := false; x and y ? 1 : 0`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := true; var y := false; x and y ? 1 : 0`]).toEqual([0, 0, 0, 0]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare column as var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := "w"; var y := 1.5; x > 2.5 ? x : y`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := "w"; var y := 1.5; x > 2.5 ? x : y`]).toEqual([1.5, 1.5, 3.5, 4.5]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Assign one type to var of another", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := 'w'; var y := 1.5; x := y; x`, `var x := 'w'; var y := 1.5; y := x; y`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := 'w'; var y := 1.5; x := y; x`]).toEqual([1.5, 1.5, 1.5, 1.5]);
+            expect(results[`var x := 'w'; var y := 1.5; y := x; y`]).toEqual(["w", "w", "w", "w"]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Assign to declared numeric var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := 100; var y := 200.5; x := y; x`, `var x := 10; var y := pow(x, 3); y := x; y`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := 100; var y := 200.5; x := y; x`]).toEqual([200.5, 200.5, 200.5, 200.5]);
+            expect(results[`var x := 10; var y := pow(x, 3); y := x; y`]).toEqual([10, 10, 10, 10]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Assign to declared string var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: [`var x := 'long literal string here'; var y := lower('ANOTHER VERY LONG STRING HERE'); x := y`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := 'long literal string here'; var y := lower('ANOTHER VERY LONG STRING HERE'); x := y`]).toEqual([
+                "another very long string here",
+                "another very long string here",
+                "another very long string here",
+                "another very long string here"
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Assign to declared date var", async function() {
+            const table = await perspective.table({
+                a: "date"
+            });
+            const view = await table.view({
+                expressions: [`var x := today(); var y := today(); var z := "a"; (x > z) and (y > z) ? 1 : 0`]
+            });
+
+            const tomorrow = new Date();
+            tomorrow.setDate(new Date().getDate() + 1);
+
+            table.update({
+                a: [new Date(2020, 3, 1), new Date(2012, 0, 30), new Date(2018, 9, 31), tomorrow]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := today(); var y := today(); var z := "a"; (x > z) and (y > z) ? 1 : 0`]).toEqual([1, 1, 1, 0]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Assign to declared datetime var", async function() {
+            const table = await perspective.table({
+                a: "datetime"
+            });
+            const view = await table.view({
+                expressions: [`var x := now(); var y := now(); var z := "a"; (x > z) and (y > z) ? 1 : 0`]
+            });
+
+            const tomorrow = new Date();
+            tomorrow.setDate(new Date().getDate() + 1);
+
+            table.update({
+                a: [new Date(2020, 3, 1, 12, 30, 45, 850), new Date(2012, 0, 30, 19, 25), new Date(2018, 9, 31, 3, 13), tomorrow]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := now(); var y := now(); var z := "a"; (x > z) and (y > z) ? 1 : 0`]).toEqual([1, 1, 1, 0]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Assign to declared column as var", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+
+            // test type transitions as assignments happen - from str to int,
+            // from float to str, etc.
+            const view = await table.view({
+                expressions: [`var x := "w"; var y := x; x := "y"; x;`, `var x := "z"; var y := x; x := "w"; x;`]
+            });
+
+            const results = await view.to_columns();
+            expect(results[`var x := "w"; var y := x; x := "y"; x;`]).toEqual(["a", "b", "c", "d"]);
+            expect(results[`var x := "z"; var y := x; x := "w"; x;`]).toEqual([1.5, 2.5, 3.5, 4.5]);
+
+            await view.delete();
+            await table.delete();
+        });
+    });
+
     describe("Functionality", function() {
         it("Should be able to create an expression column in `view()`", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
@@ -41,7 +604,7 @@ module.exports = perspective => {
         it("Should be able to create a string expression column with scalars in `view()`", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
             const view = await table.view({
-                row_pivots: ["'abc'"], // check that the strings are interned
+                row_pivots: ["'abc'"], // checks that the strings are interned
                 expressions: ["'abc'"]
             });
             const result = await view.to_columns();
@@ -971,15 +1534,21 @@ module.exports = perspective => {
                     '"c"', // valid
                     "date_bucket(\"b\", 'M')", // valid
                     "date_bucket(\"b\", 'abcde')", // invalid
+                    'concat("c", "a")', // invalid
+                    "concat(\"c\", ' ', \"c\", 'abc')", // valid
                     'upper("c")', // valid
-                    'lower("a")' // invalid
+                    'lower("a")', // invalid,
+                    'min("a", "c")', // invalid,
+                    'max(100, "a")' // valid
                 ];
                 const schema = await table.expression_schema(expressions);
                 expect(schema).toEqual({
                     '"a" + "d"': "float",
                     '"c"': "string",
                     "date_bucket(\"b\", 'M')": "date",
-                    'upper("c")': "string"
+                    'upper("c")': "string",
+                    'max(100, "a")': "float",
+                    "concat(\"c\", ' ', \"c\", 'abc')": "string"
                 });
                 table.delete();
             });

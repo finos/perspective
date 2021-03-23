@@ -154,6 +154,13 @@ inline bool string_to_real(Iterator& itr_external, const Iterator end, t_tscalar
 
 // exprtk needs to be imported after the type tags have been declared.
 // #define exprtk_enable_debugging
+
+// for some reason, break/continue will break expression.value() when it is
+// called, but enabling this ifdef creates a litany of compiler warnings
+// about misleading indentation inside exprtk.hpp. Considering that the UI
+// will not allow while/continue to be used, this should be ok.
+
+// #define exprtk_disable_break_continue
 #define exprtk_disable_return_statement
 #define exprtk_disable_rtl_io_file
 #include <exprtk.hpp>
@@ -662,7 +669,6 @@ template <> inline t_tscalar logn_impl(const t_tscalar v0, const t_tscalar v1, t
     double result = std::log(v0.to_double()) / std::log(v1.to_double());
 
     rval.set(result);
-    std::cout << "result: " << rval.repr() << std::endl;
     return rval;
 }
 

@@ -116,6 +116,11 @@ t_gnode::init() {
     m_expression_vocab.reset(new t_vocab(vlendata_args, extents_args));
     m_expression_vocab->init(true);
 
+    // FIXME: without adding this value into the vocab, the first row of a
+    // complex string expression gets garbage data and is undefined behavior,
+    // see "Declare string variable" test in Javascript to see example.
+    m_expression_vocab->get_interned("__PSP_SENTINEL__");
+
     m_init = true;
 }
 

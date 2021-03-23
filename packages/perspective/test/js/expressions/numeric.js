@@ -470,11 +470,13 @@ module.exports = perspective => {
             it("min", async function() {
                 const table = await perspective.table({
                     a: "integer",
-                    a: "float"
+                    b: "float"
                 });
 
+                const expressions = ["min(1)", 'min("a")', 'min("a", -10, -10.001)', 'min("b")', 'min("b", 0.00000000001, -10, -100, -100.1)', 'min("a", "b")'];
+
                 const view = await table.view({
-                    expressions: ['min("a", 1)', 'min("b", 0.00000000001, -10, -100, -100.1)']
+                    expressions
                 });
 
                 table.update({
@@ -482,9 +484,18 @@ module.exports = perspective => {
                     b: [1.5, 2.5, 3.5, 4.5]
                 });
 
+                const schema = await view.expression_schema();
+                for (const expr of expressions) {
+                    expect(schema[expr]).toEqual("float");
+                }
+
                 const result = await view.to_columns();
-                expect(result['min("a", -10)']).toEqual([-10, -10, -10, -10]);
+                expect(result["min(1)"]).toEqual([1, 1, 1, 1]);
+                expect(result['min("a")']).toEqual([1, 2, 3, 4]);
+                expect(result['min("a", -10, -10.001)']).toEqual([-10.001, -10.001, -10.001, -10.001]);
+                expect(result['min("b")']).toEqual([1.5, 2.5, 3.5, 4.5]);
                 expect(result['min("b", 0.00000000001, -10, -100, -100.1)']).toEqual([-100.1, -100.1, -100.1, -100.1]);
+                expect(result['min("a", "b")']).toEqual([1, 2, 3, 4]);
                 await view.delete();
                 await table.delete();
             });
@@ -495,8 +506,19 @@ module.exports = perspective => {
                     b: "float"
                 });
 
+                const expressions = [
+                    "max(1)",
+                    "max(2000000000000.11, 2000000000000.1)",
+                    'max("a")',
+                    'max("a", -1.00001)',
+                    'max("a", "b")',
+                    'max("b")',
+                    'max("a", 10, 20, 0.1, 0.00000001)',
+                    'max("b", -1, -100, 100)'
+                ];
+
                 const view = await table.view({
-                    expressions: ['max("a", 10, 20, 0.1, 0.00000001)', 'max("b", -1, -100, 100)']
+                    expressions
                 });
 
                 table.update({
@@ -504,9 +526,20 @@ module.exports = perspective => {
                     b: [1.5, 2.5, 3.5, 4.5]
                 });
 
+                const schema = await view.expression_schema();
+                for (const expr of expressions) {
+                    expect(schema[expr]).toEqual("float");
+                }
+
                 const result = await view.to_columns();
+                expect(result["max(1)"]).toEqual([1, 1, 1, 1]);
+                expect(result["max(2000000000000.11, 2000000000000.1)"]).toEqual([2000000000000.11, 2000000000000.11, 2000000000000.11, 2000000000000.11]);
+                expect(result['max("a")']).toEqual([1, 2, 3, 4]);
+                expect(result['max("a", "b")']).toEqual([1.5, 2.5, 3.5, 4.5]);
+                expect(result['max("b")']).toEqual([1.5, 2.5, 3.5, 4.5]);
                 expect(result['max("a", 10, 20, 0.1, 0.00000001)']).toEqual([20, 20, 20, 20]);
                 expect(result['max("b", -1, -100, 100)']).toEqual([100, 100, 100, 100]);
+
                 await view.delete();
                 await table.delete();
             });
@@ -726,8 +759,56 @@ module.exports = perspective => {
                 });
 
                 const result = await view.to_columns();
-                expect(result['rad2deg("a")']).toEqual([1, 2, 3, 4].map(x => x * (Math.PI / 180)));
+                expect(result['rad2deg("a")']).toEqual([1, 2, 3, 4].map(x => x * (180 / Math.PI)));
                 expect(result['rad2deg("b")']).toEqual([25.5, 45.5, 88.721282, 91.12983]);
+                await view.delete();
+                await table.delete();
+            });
+
+            it("is_null", async function() {
+                const table = await perspective.table({
+                    a: "integer",
+                    b: "float"
+                });
+
+                const view = await table.view({
+                    expressions: ['is_null("a")', 'is_null("b")', 'if(is_null("a")) 100; else 0;', 'if(is_null("b")) 100; else 0;']
+                });
+
+                table.update({
+                    a: [1, null, null, 4],
+                    b: [null, 2.5, null, 4.5]
+                });
+
+                const result = await view.to_columns();
+                expect(result['is_null("a")']).toEqual([0, 1, 1, 0]);
+                expect(result['is_null("b")']).toEqual([1, 0, 1, 0]);
+                expect(result['if(is_null("a")) 100; else 0;']).toEqual([0, 100, 100, 0]);
+                expect(result['if(is_null("b")) 100; else 0;']).toEqual([100, 0, 100, 0]);
+                await view.delete();
+                await table.delete();
+            });
+
+            it("is_not_null", async function() {
+                const table = await perspective.table({
+                    a: "integer",
+                    b: "float"
+                });
+
+                const view = await table.view({
+                    expressions: ['is_not_null("a")', 'is_not_null("b")', 'if(is_not_null("a")) 100; else 0;', 'if(is_not_null("b")) 100; else 0;']
+                });
+
+                table.update({
+                    a: [1, null, null, 4],
+                    b: [null, 2.5, null, 4.5]
+                });
+
+                const result = await view.to_columns();
+                expect(result['is_not_null("a")']).toEqual([1, 0, 0, 1]);
+                expect(result['is_not_null("b")']).toEqual([0, 1, 0, 1]);
+                expect(result['if(is_not_null("a")) 100; else 0;']).toEqual([100, 0, 0, 100]);
+                expect(result['if(is_not_null("b")) 100; else 0;']).toEqual([0, 100, 0, 100]);
                 await view.delete();
                 await table.delete();
             });
@@ -737,7 +818,7 @@ module.exports = perspective => {
             it("AND", async function() {
                 const table = await perspective.table(common.comparison_data);
                 const view = await table.view({
-                    expressions: ['"u" and "u"', '"u" and "z"', '"z" and "z"', "0 and 0", "1 and 1", "1 and 100"]
+                    expressions: ['"u" and "u"', '"u" and "z"', '"z" and "z"', "0 and 0", "1 and 1", "1 and 100", "true and false"]
                 });
                 const result = await view.to_columns();
                 expect(result['"u" and "u"']).toEqual([false, true, false, true].map(x => (x ? 1 : 0)));
@@ -746,6 +827,7 @@ module.exports = perspective => {
                 expect(result["0 and 0"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 expect(result["1 and 1"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["1 and 100"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
+                expect(result["true and false"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
@@ -753,11 +835,12 @@ module.exports = perspective => {
             it("mand", async function() {
                 const table = await perspective.table(common.comparison_data);
                 const view = await table.view({
-                    expressions: ['mand("u" and "u", "u" and "z", "z" and "z")', "mand(1, 2, 3)"]
+                    expressions: ['mand("u" and "u", "u" and "z", "z" and "z")', "mand(1, 2, 3)", "mand(true, true, true, true)"]
                 });
                 const result = await view.to_columns();
                 expect(result['mand("u" and "u", "u" and "z", "z" and "z")']).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 expect(result["mand(1, 2, 3)"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
+                expect(result["mand(true, true, true, true)"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
@@ -772,13 +855,15 @@ module.exports = perspective => {
                     f: [true, true, true, true]
                 });
                 const view = await table.view({
-                    expressions: ['"a" or "b"', '"c" or "d"', '"e" or "f"', "0 or 1"]
+                    expressions: ['"a" or "b"', '"c" or "d"', '"e" or "f"', "0 or 1", "true or false", "false or false"]
                 });
                 const result = await view.to_columns();
                 expect(result['"a" or "b"']).toEqual([false, true, false, true].map(x => (x ? 1 : 0)));
                 expect(result['"c" or "d"']).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result['"e" or "f"']).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["0 or 1"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
+                expect(result["true or false"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
+                expect(result["false or false"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
@@ -786,11 +871,12 @@ module.exports = perspective => {
             it("mor", async function() {
                 const table = await perspective.table(common.comparison_data);
                 const view = await table.view({
-                    expressions: ['mor("u" and "u", "u" and "z", "z" and "z")', "mor(0, 0, 0)"]
+                    expressions: ['mor("u" and "u", "u" and "z", "z" and "z")', "mor(0, 0, 0)", "mor(false, true, false)"]
                 });
                 const result = await view.to_columns();
                 expect(result['mor("u" and "u", "u" and "z", "z" and "z")']).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["mor(0, 0, 0)"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
+                expect(result["mor(false, true, false)"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
@@ -798,7 +884,7 @@ module.exports = perspective => {
             it("NAND", async function() {
                 const table = await perspective.table(common.comparison_data);
                 const view = await table.view({
-                    expressions: ['"u" nand "u"', '"u" nand "z"', '"z" nand "z"', "0 nand 0", "1 nand 1", "1 nand 100"]
+                    expressions: ['"u" nand "u"', '"u" nand "z"', '"z" nand "z"', "0 nand 0", "1 nand 1", "1 nand 100", "true nand true"]
                 });
                 const result = await view.to_columns();
                 expect(result['"u" nand "u"']).toEqual([true, false, true, false].map(x => (x ? 1 : 0)));
@@ -807,6 +893,7 @@ module.exports = perspective => {
                 expect(result["0 nand 0"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["1 nand 1"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 expect(result["1 nand 100"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
+                expect(result["true nand true"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
@@ -821,13 +908,14 @@ module.exports = perspective => {
                     f: [true, true, true, true]
                 });
                 const view = await table.view({
-                    expressions: ['"a" nor "b"', '"c" nor "d"', '"e" nor "f"', "0 nor 1"]
+                    expressions: ['"a" nor "b"', '"c" nor "d"', '"e" nor "f"', "0 nor 1", "false nor false"]
                 });
                 const result = await view.to_columns();
                 expect(result['"a" nor "b"']).toEqual([true, false, true, false].map(x => (x ? 1 : 0)));
                 expect(result['"c" nor "d"']).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 expect(result['"e" nor "f"']).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 expect(result["0 nor 1"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
+                expect(result["false nor false"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
@@ -842,29 +930,17 @@ module.exports = perspective => {
                     f: [true, true, true, true]
                 });
                 const view = await table.view({
-                    expressions: ['"a" xor "b"', '"c" xor "d"', '"e" xor "f"', "0 xor 1"]
+                    expressions: ['"a" xor "b"', '"c" xor "d"', '"e" xor "f"', "0 xor 1", "false xor false"]
                 });
                 const result = await view.to_columns();
                 expect(result['"a" xor "b"']).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 expect(result['"c" xor "d"']).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result['"e" xor "f"']).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["0 xor 1"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
+                expect(result["false xor false"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
                 await view.delete();
                 await table.delete();
             });
         });
     });
-
-    describe("String operations", function() {
-        describe("Functions", function() {});
-        describe("Comparisons", function() {});
-    });
-
-    describe("Conditionals", function() {
-        it("if float == float", async function() {});
-
-        it("if float == int should always be false due to differing types", async function() {});
-    });
-
-    describe("Loops", function() {});
 };

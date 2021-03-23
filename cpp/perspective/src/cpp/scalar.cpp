@@ -523,6 +523,7 @@ t_tscalar::set(bool v) {
 void
 t_tscalar::set(const char* v) {
     m_type = DTYPE_STR;
+
     if (can_store_inplace(v)) {
         strncpy(reinterpret_cast<char*>(&m_data), v, SCALAR_INPLACE_LEN);
         m_inplace = true;

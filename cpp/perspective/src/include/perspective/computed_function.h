@@ -77,7 +77,6 @@ typedef typename t_generic_type::string_view t_string_view;
         t_tscalar operator()(t_parameter_list parameters);              \
         std::shared_ptr<t_vocab> m_expression_vocab;                    \
         t_tscalar m_sentinel;                                           \
-        t_tscalar m_rval;                                               \
         t_tscalar m_none;                                               \
     };                                                                  \
 
@@ -104,6 +103,10 @@ enum t_date_bucket_unit {
     YEARS
 };
 
+/**
+ * @brief Bucket a date/datetime by seconds, minutes, hours, days, weeks,
+ * months, and years.
+ */
 struct date_bucket : public exprtk::igeneric_function<t_tscalar> {
     date_bucket();
     ~date_bucket();
@@ -124,6 +127,40 @@ void _year_bucket(t_tscalar& val, t_tscalar& rval);
 
 t_tscalar now();
 t_tscalar today();
+
+/**
+ * @brief Get the minimum of all the inputs.
+ */
+struct min_fn : public exprtk::igeneric_function<t_tscalar> {
+    min_fn();
+    ~min_fn();
+
+    t_tscalar operator()(t_parameter_list parameters);
+};
+
+/**
+ * @brief Get the maximum of all the inputs.
+ */
+struct max_fn : public exprtk::igeneric_function<t_tscalar> {
+    max_fn();
+    ~max_fn();
+
+    t_tscalar operator()(t_parameter_list parameters);
+};
+
+struct is_null : public exprtk::igeneric_function<t_tscalar> {
+    is_null();
+    ~is_null();
+
+    t_tscalar operator()(t_parameter_list parameters);
+};
+
+struct is_not_null : public exprtk::igeneric_function<t_tscalar> {
+    is_not_null();
+    ~is_not_null();
+
+    t_tscalar operator()(t_parameter_list parameters);
+};
 
 } // end namespace computed_function
 } // end namespace perspective
