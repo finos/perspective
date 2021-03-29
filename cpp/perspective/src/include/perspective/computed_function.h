@@ -80,8 +80,8 @@ typedef typename t_generic_type::string_view t_string_view;
         t_tscalar m_none;                                               \
     };                                                                  \
 
-// Place string literals into an intermediate vocab and return a scalar so
-// that they can be used in all scalar operations.
+// Place string literals into `expression_vocab` so they do not go out
+// of scope and remain valid for the lifetime of the table.
 STRING_FUNCTION_HEADER(intern)
 
 // Concat any number of columns and string literals together.
@@ -92,6 +92,65 @@ STRING_FUNCTION_HEADER(upper)
 
 // Lowercase a string
 STRING_FUNCTION_HEADER(lower)
+
+// Length of the string
+STRING_FUNCTION_HEADER(length)
+
+/**
+ * @brief Given a string column and 1...n string parameters, generate a numeric
+ * column that will act as a custom sort order for the string column:
+ * 
+ * category = ['A', 'B', 'C', 'D']
+ * order("Category", 'B', 'C', 'A') => [2, 0, 1, 3]
+ * 
+ * This allows string sort order to be overridden from the default alphabetical
+ * sort, which is useful for categories or string timestamps. Strings in the
+ * column not provided to `order()` will by default appear at the end.
+ */
+struct order : public exprtk::igeneric_function<t_tscalar> {
+    order(std::shared_ptr<t_vocab> expression_vocab);
+    ~order();
+    t_tscalar operator()(t_parameter_list parameters);
+
+    tsl::hopscotch_map<std::string, double> m_order_map;
+    double m_order_idx;
+
+    std::shared_ptr<t_vocab> m_expression_vocab;
+    t_tscalar m_sentinel;
+    t_tscalar m_none;
+};
+
+/**
+ * @brief Given a string column and a non-regex string literal, check whether
+ * each row in the string column contains the string literal.
+ */
+STRING_FUNCTION_HEADER(contains)
+
+
+#define FUNCTION_HEADER(NAME)                                           \
+    struct NAME : public exprtk::igeneric_function<t_tscalar> {         \
+        NAME();                                                         \
+        ~NAME();                                                        \
+        t_tscalar operator()(t_parameter_list parameters);              \
+        t_tscalar m_none;                                               \
+    };                                                                  \
+
+/**
+ * @brief Return the hour of the day the date/datetime belongs to.
+ */
+FUNCTION_HEADER(hour_of_day)
+
+// Day of Week/Month of Year write strings directly, and use custom strings
+// so they are sorted by day/month and *not* alphabetically
+
+extern const std::string days_of_week[7];
+extern const std::string months_of_year[12];
+
+// Return the day of the week the date/datetime belongs to
+STRING_FUNCTION_HEADER(day_of_week)
+
+// Return the month of the year the date/datetime belongs to
+STRING_FUNCTION_HEADER(month_of_year)
 
 enum t_date_bucket_unit {
     SECONDS,
@@ -115,6 +174,7 @@ struct date_bucket : public exprtk::igeneric_function<t_tscalar> {
 
     // faster unit lookups, since we are calling this lookup in a tight loop.
     static tsl::hopscotch_map<std::string, t_date_bucket_unit> UNIT_MAP;
+    t_tscalar m_none;
 };
 
 void _second_bucket(t_tscalar& val, t_tscalar& rval);
@@ -125,42 +185,49 @@ void _week_bucket(t_tscalar& val, t_tscalar& rval);
 void _month_bucket(t_tscalar& val, t_tscalar& rval);
 void _year_bucket(t_tscalar& val, t_tscalar& rval);
 
+/**
+ * @brief Returns the current datetime. Will be recalculated on view creation
+ * and table update.
+ * 
+ * @return t_tscalar 
+ */
 t_tscalar now();
+
+/**
+ * @brief Returns the current date. Will be recalculated on view creation
+ * and table update.
+ * 
+ * @return t_tscalar 
+ */
 t_tscalar today();
 
 /**
  * @brief Get the minimum of all the inputs.
  */
-struct min_fn : public exprtk::igeneric_function<t_tscalar> {
-    min_fn();
-    ~min_fn();
-
-    t_tscalar operator()(t_parameter_list parameters);
-};
+FUNCTION_HEADER(min_fn)
 
 /**
  * @brief Get the maximum of all the inputs.
  */
-struct max_fn : public exprtk::igeneric_function<t_tscalar> {
-    max_fn();
-    ~max_fn();
+FUNCTION_HEADER(max_fn)
 
-    t_tscalar operator()(t_parameter_list parameters);
-};
+/**
+ * @brief Get a as percent of b.
+ * 
+ */
+FUNCTION_HEADER(percent_of)
 
-struct is_null : public exprtk::igeneric_function<t_tscalar> {
-    is_null();
-    ~is_null();
+/**
+ * @brief Whether the input is null.
+ * 
+ */
+FUNCTION_HEADER(is_null)
 
-    t_tscalar operator()(t_parameter_list parameters);
-};
-
-struct is_not_null : public exprtk::igeneric_function<t_tscalar> {
-    is_not_null();
-    ~is_not_null();
-
-    t_tscalar operator()(t_parameter_list parameters);
-};
+/**
+ * @brief Whether the input is not null.
+ * 
+ */
+FUNCTION_HEADER(is_not_null)
 
 } // end namespace computed_function
 } // end namespace perspective

@@ -35,14 +35,31 @@ module.exports = perspective => {
                 y: ["A", "B", "C", "D"]
             });
             const view = await table.view({
-                expressions: ["10 + 20"]
+                expressions: ["10 + 20", "lower('ABC')", "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"]
             });
             const before = await view.to_columns();
             expect(before["10 + 20"]).toEqual([30, 30, 30, 30]);
+            expect(before["lower('ABC')"]).toEqual(["abc", "abc", "abc", "abc"]);
+            expect(before["concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"]).toEqual([
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters"
+            ]);
             table.update({x: [5, 6, 7]});
 
             const after = await view.to_columns();
             expect(after["10 + 20"]).toEqual([30, 30, 30, 30, 30, 30, 30]);
+            expect(after["lower('ABC')"]).toEqual(["abc", "abc", "abc", "abc", "abc", "abc", "abc"]);
+            expect(after["concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"]).toEqual([
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters"
+            ]);
             view.delete();
             table.delete();
         });
@@ -55,15 +72,17 @@ module.exports = perspective => {
             const view = await table.view({
                 // conditional here must be float, as int-float comparisons
                 // don't work as of yet.
-                expressions: ['if ("x" > 4) 10; else 100']
+                expressions: ['if ("x" > 4) 10; else 100', `"y" == 'A' ? true : false`]
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([100, 100, 100, 10]);
+            expect(before[`"y" == 'A' ? true : false`]).toEqual([1, 0, 0, 0]);
 
-            table.update({x: [5, 6, 7]});
+            table.update({x: [5, 6, 7], y: ["A", "A", "B"]});
 
             const after = await view.to_columns();
             expect(after['if ("x" > 4) 10; else 100']).toEqual([100, 100, 100, 10, 10, 10, 10]);
+            expect(after[`"y" == 'A' ? true : false`]).toEqual([1, 0, 0, 0, 1, 1, 0]);
 
             view.delete();
             table.delete();
@@ -78,16 +97,30 @@ module.exports = perspective => {
                 {index: "y"}
             );
             const view = await table.view({
-                expressions: ["10 + 20"]
+                expressions: ["10 + 20", "lower('ABC')", "concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"]
             });
 
             const before = await view.to_columns();
             expect(before["10 + 20"]).toEqual([30, 30, 30, 30]);
+            expect(before["lower('ABC')"]).toEqual(["abc", "abc", "abc", "abc"]);
+            expect(before["concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"]).toEqual([
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters"
+            ]);
 
             table.update({x: [5, 6, 7], y: ["A", "B", "D"]});
 
             const after = await view.to_columns();
             expect(after["10 + 20"]).toEqual([30, 30, 30, 30]);
+            expect(after["lower('ABC')"]).toEqual(["abc", "abc", "abc", "abc"]);
+            expect(after["concat('hello', ' ', 'world', ', ', 'here is a long, long, long string with lots of characters')"]).toEqual([
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters",
+                "hello world, here is a long, long, long string with lots of characters"
+            ]);
 
             view.delete();
             table.delete();
@@ -97,19 +130,22 @@ module.exports = perspective => {
             const table = await perspective.table(
                 {
                     x: [1.5, 2.5, 3.5, 4.5],
-                    y: ["A", "B", "C", "D"]
+                    y: ["A", "B", "C", "D"],
+                    z: ["a", "b", "c", "d"]
                 },
                 {index: "y"}
             );
             const view = await table.view({
-                expressions: ['if ("x" > 4) 10; else 100']
+                expressions: ['if ("x" > 4) 10; else 100', `"z" == 'a' ? true : false`]
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([100, 100, 100, 10]);
-            table.update({x: [5, 6, 7], y: ["A", "C", "D"]});
+            expect(before[`"z" == 'a' ? true : false`]).toEqual([1, 0, 0, 0]);
+            table.update({x: [5, 6, 7], y: ["A", "C", "D"], z: ["a", "a", "a"]});
 
             const after = await view.to_columns();
             expect(after['if ("x" > 4) 10; else 100']).toEqual([10, 100, 10, 10]);
+            expect(after[`"z" == 'a' ? true : false`]).toEqual([1, 0, 1, 1]);
             view.delete();
             table.delete();
         });

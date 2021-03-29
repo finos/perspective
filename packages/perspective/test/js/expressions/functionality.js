@@ -383,6 +383,39 @@ module.exports = perspective => {
     });
 
     describe("Local variables", function() {
+        it("Declare numeric", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ["1", "100.0000001"]
+            });
+
+            const results = await view.to_columns();
+            expect(results["1"]).toEqual([1, 1, 1, 1]);
+            expect(results["100.0000001"]).toEqual([100.0000001, 100.0000001, 100.0000001, 100.0000001]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ["'hello'", "'very long string that is very long and has many characters'"]
+            });
+
+            const results = await view.to_columns();
+            expect(results["'hello'"]).toEqual(["hello", "hello", "hello", "hello"]);
+            expect(results["'very long string that is very long and has many characters'"]).toEqual([
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters"
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("Declare numeric var", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
             const view = await table.view({
@@ -433,12 +466,16 @@ module.exports = perspective => {
 
         it("Declare datetime var", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
+            const now = new Date().getTime();
             const view = await table.view({
-                expressions: [`var x := now(); var y := now(); x == y ? 1 : 0;`]
+                expressions: ["now()"]
             });
 
             const results = await view.to_columns();
-            expect(results[`var x := now(); var y := now(); x == y ? 1 : 0;`]).toEqual([1, 1, 1, 1]);
+
+            for (const x of results["now()"]) {
+                expect(now - 1000 < x < now + 1000).toBe(true);
+            }
 
             await view.delete();
             await table.delete();
@@ -586,6 +623,26 @@ module.exports = perspective => {
             });
             const result = await view.to_columns();
             expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should be able to alias a real column in `view()`", async function() {
+            const table = await perspective.table(expressions_common.all_types_arrow.slice());
+            const columns = await table.columns();
+            const view = await table.view({
+                expressions: columns.map(col => `"${col}"`)
+            });
+
+            const schema = await view.schema();
+            const expression_schema = await view.expression_schema();
+            const result = await view.to_columns();
+
+            for (const col of columns) {
+                expect(expression_schema[`"${col}"`]).toEqual(schema[col]);
+                expect(result[`"${col}"`]).toEqual(result[col]);
+            }
+
             view.delete();
             table.delete();
         });

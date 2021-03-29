@@ -21,11 +21,17 @@ t_computed_expression_parser::GLOBAL_SYMTABLE = exprtk::symbol_table<t_tscalar>(
 computed_function::date_bucket
 t_computed_expression_parser::DATE_BUCKET_FN = computed_function::date_bucket();
 
+computed_function::hour_of_day
+t_computed_expression_parser::HOUR_OF_DAY_FN = computed_function::hour_of_day();
+
 computed_function::min_fn
 t_computed_expression_parser::MIN_FN = computed_function::min_fn();
 
 computed_function::max_fn
 t_computed_expression_parser::MAX_FN = computed_function::max_fn();
+
+computed_function::percent_of
+t_computed_expression_parser::PERCENT_OF_FN = computed_function::percent_of();
 
 computed_function::is_null
 t_computed_expression_parser::IS_NULL_FN = computed_function::is_null();
@@ -35,11 +41,20 @@ t_computed_expression_parser::IS_NOT_NULL_FN = computed_function::is_not_null();
 
 // As well as functions used for validation that have state but don't
 // need it to validate input types.
+computed_function::day_of_week
+t_computed_expression_parser::DAY_OF_WEEK_VALIDATOR_FN = computed_function::day_of_week(nullptr);
+
+computed_function::month_of_year
+t_computed_expression_parser::MONTH_OF_YEAR_VALIDATOR_FN = computed_function::month_of_year(nullptr);
+
 computed_function::intern
 t_computed_expression_parser::INTERN_VALIDATOR_FN = computed_function::intern(nullptr);
 
 computed_function::concat
 t_computed_expression_parser::CONCAT_VALIDATOR_FN = computed_function::concat(nullptr);
+
+computed_function::order
+t_computed_expression_parser::ORDER_VALIDATOR_FN = computed_function::order(nullptr);
 
 computed_function::upper
 t_computed_expression_parser::UPPER_VALIDATOR_FN = computed_function::upper(nullptr);
@@ -47,22 +62,35 @@ t_computed_expression_parser::UPPER_VALIDATOR_FN = computed_function::upper(null
 computed_function::lower
 t_computed_expression_parser::LOWER_VALIDATOR_FN = computed_function::lower(nullptr);
 
+computed_function::length
+t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nullptr);
+
 // Register functions in a centralized macro instead of copy-pasting the same
 // lines between compute/recompute
 #define REGISTER_COMPUTE_FUNCTIONS()                                                        \
+    computed_function::day_of_week day_of_week_fn = computed_function::day_of_week(m_expression_vocab);         \
+    computed_function::month_of_year month_of_year_fn = computed_function::month_of_year(m_expression_vocab);   \
     computed_function::intern intern_fn = computed_function::intern(m_expression_vocab);    \
     computed_function::concat concat_fn = computed_function::concat(m_expression_vocab);    \
+    computed_function::order order_fn = computed_function::order(m_expression_vocab);       \
     computed_function::upper upper_fn = computed_function::upper(m_expression_vocab);       \
     computed_function::lower lower_fn = computed_function::lower(m_expression_vocab);       \
+    computed_function::length length_fn = computed_function::length(m_expression_vocab);    \
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
     sym_table.add_function("date_bucket", t_computed_expression_parser::DATE_BUCKET_FN);    \
+    sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);    \
+    sym_table.add_function("day_of_week", day_of_week_fn);                                  \
+    sym_table.add_function("month_of_year", month_of_year_fn);                              \
     sym_table.add_function("intern", intern_fn);                                            \
     sym_table.add_function("concat", concat_fn);                                            \
+    sym_table.add_function("order", order_fn);                                              \
     sym_table.add_function("upper", upper_fn);                                              \
     sym_table.add_function("lower", lower_fn);                                              \
+    sym_table.add_function("length", length_fn);                                            \
     sym_table.add_reserved_function("min", t_computed_expression_parser::MIN_FN);           \
     sym_table.add_reserved_function("max", t_computed_expression_parser::MAX_FN);           \
+    sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
 
@@ -70,12 +98,18 @@ t_computed_expression_parser::LOWER_VALIDATOR_FN = computed_function::lower(null
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
     sym_table.add_function("date_bucket", t_computed_expression_parser::DATE_BUCKET_FN);    \
+    sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);    \
+    sym_table.add_function("day_of_week", t_computed_expression_parser::DAY_OF_WEEK_VALIDATOR_FN);    \
+    sym_table.add_function("month_of_year", t_computed_expression_parser::MONTH_OF_YEAR_VALIDATOR_FN);    \
     sym_table.add_function("intern", t_computed_expression_parser::INTERN_VALIDATOR_FN);    \
     sym_table.add_function("concat", t_computed_expression_parser::CONCAT_VALIDATOR_FN);    \
+    sym_table.add_function("order", t_computed_expression_parser::ORDER_VALIDATOR_FN);      \
     sym_table.add_function("upper", t_computed_expression_parser::UPPER_VALIDATOR_FN);      \
     sym_table.add_function("lower", t_computed_expression_parser::LOWER_VALIDATOR_FN);      \
+    sym_table.add_function("length", t_computed_expression_parser::LENGTH_VALIDATOR_FN);    \
     sym_table.add_reserved_function("min", t_computed_expression_parser::MIN_FN);           \
     sym_table.add_reserved_function("max", t_computed_expression_parser::MAX_FN);           \
+    sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
 

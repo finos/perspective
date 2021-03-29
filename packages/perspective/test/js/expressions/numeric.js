@@ -463,6 +463,42 @@ module.exports = perspective => {
                     await view.delete();
                     await table.delete();
                 });
+
+                it("Should not divide by 0", async function() {
+                    const table = await perspective.table({
+                        a: [1, 2, 3, 4],
+                        b: [0, 0, 0, 0],
+                        c: [1.5, 2.123, 3.125, 4.123809]
+                    });
+
+                    const view = await table.view({
+                        expressions: ['"a" / "b"', '"c" / "b"']
+                    });
+
+                    const result = await view.to_columns();
+                    expect(result['"a" / "b"']).toEqual([null, null, null, null]);
+                    expect(result['"c" / "b"']).toEqual([null, null, null, null]);
+                    await view.delete();
+                    await table.delete();
+                });
+
+                it("Should not modulo by 0", async function() {
+                    const table = await perspective.table({
+                        a: [1, 2, 3, 4],
+                        b: [0, 0, 0, 0],
+                        c: [1.5, 2.123, 3.125, 4.123809]
+                    });
+
+                    const view = await table.view({
+                        expressions: ['"a" % "b"', '"c" % "b"']
+                    });
+
+                    const result = await view.to_columns();
+                    expect(result['"a" % "b"']).toEqual([null, null, null, null]);
+                    expect(result['"c" % "b"']).toEqual([null, null, null, null]);
+                    await view.delete();
+                    await table.delete();
+                });
             });
         });
 
@@ -809,6 +845,30 @@ module.exports = perspective => {
                 expect(result['is_not_null("b")']).toEqual([0, 1, 0, 1]);
                 expect(result['if(is_not_null("a")) 100; else 0;']).toEqual([100, 0, 0, 100]);
                 expect(result['if(is_not_null("b")) 100; else 0;']).toEqual([0, 100, 0, 100]);
+                await view.delete();
+                await table.delete();
+            });
+
+            it("percent_of", async function() {
+                const table = await perspective.table({
+                    a: "integer",
+                    b: "float"
+                });
+
+                const view = await table.view({
+                    expressions: ['percent_of("a", 500)', 'percent_of("a", "b")', "percent_of(1, 3)"]
+                });
+
+                table.update({
+                    a: [100, 200, 300, 400],
+                    b: [100.5, 200.5, 300.5, 400.5]
+                });
+
+                const result = await view.to_columns();
+                expect(result['percent_of("a", 500)']).toEqual([100, 200, 300, 400].map(x => (x / 500) * 100));
+                expect(result['percent_of("a", "b")']).toEqual([100, 200, 300, 400].map((x, idx) => (x / result["b"][idx]) * 100));
+                expect(result["percent_of(1, 3)"]).toEqual([33.33333333333333, 33.33333333333333, 33.33333333333333, 33.33333333333333]);
+
                 await view.delete();
                 await table.delete();
             });

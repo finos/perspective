@@ -223,7 +223,25 @@ t_tscalar::operator*(const t_tscalar& other) const {
 
 t_tscalar
 t_tscalar::operator/(const t_tscalar& other) const {
-    BINARY_OPERATOR_BODY(/)
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    if (!is_numeric() || !other.is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+    }
+
+    if (!is_valid() || !other.is_valid()) {
+        return rval;
+    }
+
+    if (other.to_double() == 0) {
+        return rval;
+    }
+
+    rval.set(to_double() / other.to_double());
+
+    return rval;
 }
 
 t_tscalar
@@ -237,6 +255,10 @@ t_tscalar::operator%(const t_tscalar& other) const {
     }
 
     if (!is_valid() || !other.is_valid()) {
+        return rval;
+    }
+
+    if (other.to_double() == 0) {
         return rval;
     }
 

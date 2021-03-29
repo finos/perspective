@@ -30,26 +30,15 @@ const generator = function(length = 100, has_zero = true) {
  */
 module.exports = perspective => {
     describe("Invariant testing", function() {
-        describe("Inverse computed column operations should be invariant", function() {
+        describe("Inverse expressions should be invariant", function() {
             jsc.property("(x - y) + x == y", generator(), async data => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "-",
-                            inputs: ["a", "b"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "+",
-                            inputs: ["computed", "b"]
-                        }
-                    ]
+                    expressions: ['("a" - "b") + "b"']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], data["a"]);
+                const expected = array_equals(result['("a" - "b") + "b"'], data["a"]);
                 view.delete();
                 table.delete();
                 return expected;
@@ -59,26 +48,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "+",
-                            inputs: ["a", "b"]
-                        },
-                        {
-                            column: "computed2",
-                            computed_function_name: "-",
-                            inputs: ["computed", "a"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "-",
-                            inputs: ["computed2", "b"]
-                        }
-                    ]
+                    expressions: ['("a" + "b") - "a" - "b"']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(0));
+                const expected = array_equals(result['("a" + "b") - "a" - "b"'], Array(data["a"].length).fill(0));
                 view.delete();
                 table.delete();
                 return expected;
@@ -88,21 +61,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "+",
-                            inputs: ["a", "b"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "-",
-                            inputs: ["computed", "computed"]
-                        }
-                    ]
+                    expressions: ['("a" + "b") - ("a" + "b")']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(0));
+                const expected = array_equals(result['("a" + "b") - ("a" + "b")'], Array(data["a"].length).fill(0));
                 view.delete();
                 table.delete();
                 return expected;
@@ -112,16 +74,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "-",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['"a" - "a"']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(0));
+                const expected = array_equals(result['"a" - "a"'], Array(data["a"].length).fill(0));
                 view.delete();
                 table.delete();
                 return expected;
@@ -131,16 +87,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "/",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['"a" / "a"']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(1));
+                const expected = array_equals(result['"a" / "a"'], Array(data["a"].length).fill(1));
                 view.delete();
                 table.delete();
                 return expected;
@@ -150,26 +100,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "+",
-                            inputs: ["a", "a"]
-                        },
-                        {
-                            column: "computed2",
-                            computed_function_name: "-",
-                            inputs: ["computed", "a"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "-",
-                            inputs: ["computed2", "a"]
-                        }
-                    ]
+                    expressions: ['("a" + "a") - "a" - "a"']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(0));
+                const expected = array_equals(result['("a" + "a") - "a" - "a"'], Array(data["a"].length).fill(0));
                 view.delete();
                 table.delete();
                 return expected;
@@ -179,21 +113,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "x^2",
-                            inputs: ["a"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "sqrt",
-                            inputs: ["computed"]
-                        }
-                    ]
+                    expressions: ['sqrt(pow("a", 2))']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], data["a"]);
+                const expected = array_equals(result['sqrt(pow("a", 2))'], data["a"]);
                 view.delete();
                 table.delete();
                 return expected;
@@ -203,24 +126,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "x^2",
-                            inputs: ["a"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "*",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['pow("a", 2)', '"a" * "a"']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(
-                    result["result"],
-                    data["a"].map(x => x * x)
-                );
+                const expected = array_equals(result['pow("a", 2)'], result['"a" * "a"']);
                 view.delete();
                 table.delete();
                 return expected;
@@ -230,16 +139,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "percent_of",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['percent_of("a", "a")']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(100));
+                const expected = array_equals(result['percent_of("a", "a")'], Array(data["a"].length).fill(100));
                 view.delete();
                 table.delete();
                 return expected;
@@ -249,16 +152,10 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "abs",
-                            inputs: ["a"]
-                        }
-                    ]
+                    expressions: ['abs("a")']
                 });
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], data["a"]);
+                const expected = array_equals(result['abs("a")'], data["a"]);
                 view.delete();
                 table.delete();
                 return expected;
@@ -270,17 +167,11 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "==",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['"a" == "a"']
                 });
 
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(true));
+                const expected = array_equals(result['"a" == "a"'], Array(data["a"].length).fill(1));
                 view.delete();
                 table.delete();
                 return expected;
@@ -290,17 +181,11 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: ">",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['"a" > "a"']
                 });
 
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(false));
+                const expected = array_equals(result['"a" > "a"'], Array(data["a"].length).fill(0));
                 view.delete();
                 table.delete();
                 return expected;
@@ -310,23 +195,17 @@ module.exports = perspective => {
                 const table = await perspective.table(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "<",
-                            inputs: ["a", "a"]
-                        }
-                    ]
+                    expressions: ['"a" < "a"']
                 });
 
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(false));
+                const expected = array_equals(result['"a" < "a"'], Array(data["a"].length).fill(0));
                 view.delete();
                 table.delete();
                 return expected;
             });
 
-            jsc.property("is should always be true with the same input column", generator(), async data => {
+            jsc.property("String == should always be true with the same input column", generator(), async data => {
                 const table = await perspective.table({
                     a: "float",
                     b: "float",
@@ -338,123 +217,59 @@ module.exports = perspective => {
                 table.update(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "result",
-                            computed_function_name: "is",
-                            inputs: ["c", "c"]
-                        }
-                    ]
+                    expressions: ['"c" == "c"']
                 });
 
                 const result = await view.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(true));
-                view.delete();
-                table.delete();
-                return expected;
-            });
-        });
-
-        describe("Inverse operations on multiple views inheriting computed columns should be idempotent.", function() {
-            jsc.property("(x + y) - x - y == 0", generator(), async data => {
-                const table = await perspective.table(data);
-
-                const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "+",
-                            inputs: ["a", "b"]
-                        }
-                    ]
-                });
-
-                const view2 = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "+",
-                            inputs: ["a", "b"]
-                        },
-                        {
-                            column: "computed2",
-                            computed_function_name: "-",
-                            inputs: ["computed", "a"]
-                        }
-                    ]
-                });
-
-                const view3 = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "+",
-                            inputs: ["a", "b"]
-                        },
-                        {
-                            column: "computed2",
-                            computed_function_name: "-",
-                            inputs: ["computed", "a"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "-",
-                            inputs: ["computed2", "b"]
-                        }
-                    ]
-                });
-                const result = await view3.to_columns();
-                const expected = array_equals(result["result"], Array(data["a"].length).fill(0));
-                view3.delete();
-                view2.delete();
+                const expected = array_equals(result['"c" == "c"'], Array(data["c"].length).fill(1));
                 view.delete();
                 table.delete();
                 return expected;
             });
 
-            jsc.property("(x - y) + y == x", generator(), async data => {
-                const table = await perspective.table(data);
+            jsc.property("Datetime == should always be true with the same input column", generator(), async data => {
+                const table = await perspective.table({
+                    a: "float",
+                    b: "float",
+                    c: "string",
+                    d: "datetime",
+                    e: "boolean"
+                });
+
+                table.update(data);
 
                 const view = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "-",
-                            inputs: ["a", "b"]
-                        }
-                    ]
+                    expressions: ['"d" == "d"']
                 });
 
-                const view2 = await table.view({
-                    computed_columns: [
-                        {
-                            column: "computed",
-                            computed_function_name: "-",
-                            inputs: ["a", "b"]
-                        },
-                        {
-                            column: "result",
-                            computed_function_name: "+",
-                            inputs: ["computed", "b"]
-                        }
-                    ]
+                const result = await view.to_columns();
+                const expected = array_equals(result['"d" == "d"'], Array(data["d"].length).fill(1));
+                view.delete();
+                table.delete();
+                return expected;
+            });
+
+            jsc.property("Date == should always be true with the same input column", generator(), async data => {
+                const table = await perspective.table({
+                    a: "float",
+                    b: "float",
+                    c: "string",
+                    d: "date",
+                    e: "boolean"
                 });
 
-                const result = await view2.to_columns();
-                const expected = array_equals(result["result"], data["a"]);
+                table.update(data);
 
-                view2.delete();
+                const view = await table.view({
+                    expressions: ['"d" == "d"']
+                });
+
+                const result = await view.to_columns();
+                const expected = array_equals(result['"d" == "d"'], Array(data["d"].length).fill(1));
                 view.delete();
                 table.delete();
                 return expected;
             });
         });
     });
-
-    // describe("", function() {});
-    // describe("Equivalent computations on different views are idempotent", function() {
-    //     it("", async function() {
-    //         perspective;
-    //     });
-    // });
 };
