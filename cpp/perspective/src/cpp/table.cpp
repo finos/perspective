@@ -71,21 +71,56 @@ Table::get_expression_schema(
     const std::vector<std::tuple<
             std::string,
             std::string,
+            std::string,
             std::vector<std::pair<std::string, std::string>>>>& expressions) const {
-    const t_schema& schema = get_schema();
     t_schema expression_schema;
 
+    // Expression columns live on the `t_gstate` master table, so this
+    // schema will always contain ALL expressions columns created by ALL views
+    // on this table instance.
+    auto master_table_schema = m_gnode->get_table_sptr()->get_schema();
+
+    // However, we need to keep track of the "real" columns at the time the
+    // table was instantiated, which exists on the output schema that will
+    // not be mutated at a later time.
+    auto gnode_schema = get_schema();
+
     for (const auto& expr : expressions) {
-        const std::string& expression = std::get<0>(expr);
+        const std::string& expression_alias = std::get<0>(expr);
+
+        // Cannot overwrite a "real" column with an expression column
+        if (gnode_schema.has_column(expression_alias)) {
+            std::cerr 
+                << "Skipping expression column `"
+                << expression_alias
+                << "` as expressions cannot overwrite table columns."
+                << std::endl;
+            continue;
+        }
 
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
-            expression,
+            expression_alias,
             std::get<1>(expr),
             std::get<2>(expr),
-            schema);
+            std::get<3>(expr),
+            gnode_schema);
 
         if (expression_dtype != DTYPE_NONE) {
-            expression_schema.add_column(expression, expression_dtype);
+            // Check if the expression tries to overwrite an existing
+            // expression with a different type - i.e. expression abc exists
+            // and is a float, but is being overwritten with a string. Because
+            // this causes issues with writing to columns, we should not
+            // allow this case.
+            if (master_table_schema.has_column(expression_alias) && master_table_schema.get_dtype(expression_alias) != expression_dtype) {
+                std::cerr 
+                    << "Cannot overwrite expression `"
+                    << expression_alias
+                    << "` with an expression of a different output type."
+                    << std::endl;
+                continue;
+            }
+
+            expression_schema.add_column(expression_alias, expression_dtype);
         }
     }
 

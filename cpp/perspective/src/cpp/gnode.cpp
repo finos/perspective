@@ -890,7 +890,7 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
 
     for (const auto& expr : expressions) {
         gstate_table->add_column_sptr(
-            expr.get_expression_string(),
+            expr.get_expression_alias(),
             expr.get_dtype(),
             true);
     }
@@ -1013,22 +1013,19 @@ t_gnode::_recompute_expressions(
 void
 t_gnode::_register_expressions(std::vector<t_computed_expression>& expressions) {
     for (auto& expr : expressions) {
-        const std::string& expression_string = expr.get_expression_string();
-
-        if (m_expression_map.count(expression_string) == 0) {
-            expr.set_expression_vocab(m_expression_vocab);
-            m_expression_map[expression_string] = expr;
-        }
+        const std::string& expression_alias = expr.get_expression_alias();
+        expr.set_expression_vocab(m_expression_vocab);
+        m_expression_map[expression_alias] = expr;
     }
 }
 
 void
 t_gnode::_unregister_expressions(const std::vector<t_computed_expression>& expressions) {
     for (const auto& expr : expressions) {
-        const std::string& expression_string = expr.get_expression_string();
+        const std::string& expression_alias = expr.get_expression_alias();
 
-        if (m_expression_map.count(expression_string) == 1) {
-            m_expression_map.erase(expression_string);
+        if (m_expression_map.count(expression_alias) == 1) {
+            m_expression_map.erase(expression_alias);
         }
     }
 }

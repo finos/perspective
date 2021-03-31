@@ -1271,6 +1271,10 @@ export default function(Module) {
     function validate_expressions(expressions) {
         let validated_expressions = [];
 
+        // Keep track of aliases that coincide, and make them unique when
+        // necessary by adding a number at the end.
+        let alias_map = {};
+
         for (let expression_string of expressions) {
             if (expression_string.includes('""')) {
                 console.error(`Skipping expression '${expression_string}', as it cannot reference an empty column!`);
@@ -1286,10 +1290,33 @@ export default function(Module) {
             let column_id_map = {};
             let running_cidx = 0;
 
-            // TODO: probably validate columns here as well? although
-            // if the front-end validates through get_expression_schema
-            // then we probably can just take the input as is.
-            let parsed_expression_string = expression_string.replace(/\"(.*?[^\\])\"/g, (_, cname) => {
+            // First, look for a column alias, which is a // style comment
+            // on the first line of the expression.
+            let expression_alias;
+            let skip_expression = false;
+
+            let parsed_expression_string = expression_string.replace(/\/\/(.+)\n/, (_, alias) => {
+                expression_alias = alias.trim();
+
+                // Expression alias cannot overlap.
+                if (alias_map[expression_alias]) {
+                    console.error(`Skipping expression '${expression_string}', as it reuses alias ${alias}!`);
+                    skip_expression = true;
+                }
+
+                return "";
+            });
+
+            if (skip_expression) {
+                continue;
+            }
+
+            // If an alias does not exist, the alias is the expression itself.
+            if (!expression_alias || expression_alias.length == 0) {
+                expression_alias = expression_string;
+            }
+
+            parsed_expression_string = parsed_expression_string.replace(/\"(.*?[^\\])\"/g, (_, cname) => {
                 // If the column name contains escaped double quotes, replace
                 // them and assume that they escape one double quote. If there
                 // are multiple double quotes being escaped, i.e. \""...well?
@@ -1316,7 +1343,7 @@ export default function(Module) {
                 return `${match.substr(0, match.indexOf(full))}'${value}')`;
             });
 
-            validated_expressions.push([expression_string, parsed_expression_string, column_id_map]);
+            validated_expressions.push([expression_alias, expression_string, parsed_expression_string, column_id_map]);
         }
 
         return validated_expressions;

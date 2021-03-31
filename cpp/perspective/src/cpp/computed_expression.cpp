@@ -119,11 +119,13 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
  */
 
 t_computed_expression::t_computed_expression(
+        const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
         t_dtype dtype)
-    : m_expression_string(expression_string)
+    : m_expression_alias(expression_alias)
+    , m_expression_string(expression_string)
     , m_parsed_expression_string(parsed_expression_string)
     , m_column_ids(std::move(column_ids))
     , m_expression_vocab(nullptr)
@@ -132,7 +134,6 @@ t_computed_expression::t_computed_expression(
 void
 t_computed_expression::compute(
     std::shared_ptr<t_data_table> data_table) const {
-    auto start = std::chrono::high_resolution_clock::now(); 
     exprtk::symbol_table<t_tscalar> sym_table;
 
     REGISTER_COMPUTE_FUNCTIONS()
@@ -171,9 +172,22 @@ t_computed_expression::compute(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
-    // create or get output column - m_expression_string is the string as
-    // the user typed it.
-    auto output_column = data_table->add_column_sptr(m_expression_string, m_dtype, true);
+    // create or get output column using m_expression_alias
+    auto output_column = data_table->add_column_sptr(m_expression_alias, m_dtype, true);
+
+    // Stop if the column has a different dtype from m_dtype - that means
+    // this expression already exists and is a different dtype, and setting to
+    // it results in undefined behavior.
+    if (output_column->get_dtype() != m_dtype) {
+        std::stringstream ss;
+        ss << "[t_computed_expression::compute] Cannot overwrite column: `"
+            << m_expression_alias
+            << "` with an expression of a different type!"
+            << std::endl;
+
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+
     auto num_rows = data_table->size();
     output_column->reserve(num_rows);
 
@@ -192,10 +206,6 @@ t_computed_expression::compute(
     
         output_column->set_scalar(ridx, value);
     }
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); 
-    std::cout << "[compute] total: " << duration.count() << std::endl;
 };
 
 void
@@ -255,7 +265,22 @@ t_computed_expression::recompute(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
-    auto output_column = flattened->add_column_sptr(m_expression_string, m_dtype, true);
+    // get or create the output column
+    auto output_column = flattened->add_column_sptr(m_expression_alias, m_dtype, true);
+
+    // Stop if the column has a different dtype from m_dtype - that means
+    // this expression already exists and is a different dtype, and setting to
+    // it results in undefined behavior.
+    if (output_column->get_dtype() != m_dtype) {
+        std::stringstream ss;
+        ss << "[t_computed_expression::recompute] Cannot overwrite column: `"
+            << m_expression_alias
+            << "` with an expression of a different type!"
+            << std::endl;
+
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+
     output_column->reserve(gstate_table->size());
 
     t_uindex num_rows = changed_rows.size();
@@ -346,6 +371,11 @@ t_computed_expression::set_expression_vocab(std::shared_ptr<t_vocab> expression_
 }
 
 std::string
+t_computed_expression::get_expression_alias() const {
+    return m_expression_alias;
+}
+
+std::string
 t_computed_expression::get_expression_string() const {
     return m_expression_string;
 }
@@ -381,6 +411,7 @@ t_computed_expression_parser::init() {
 
 t_computed_expression
 t_computed_expression_parser::precompute(
+    const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
@@ -426,6 +457,7 @@ t_computed_expression_parser::precompute(
     t_tscalar v = expr_definition.value();
 
     return t_computed_expression(
+        expression_alias,
         expression_string,
         parsed_expression_string,
         column_ids,
@@ -434,6 +466,7 @@ t_computed_expression_parser::precompute(
 
 t_dtype
 t_computed_expression_parser::get_dtype(
+    const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,

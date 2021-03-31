@@ -751,6 +751,167 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Should be able to create an expression column using an alias.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"']
+            });
+            const result = await view.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Alias should be trimmed.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"']
+            });
+
+            const result = await view.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+
+            const view2 = await table.view({
+                expressions: ['// new column\n"w" - "x"']
+            });
+
+            const result2 = await view2.to_columns();
+            expect(result2["new column"]).toEqual([0.5, 0.5, 0.5, 0.5]);
+
+            await view2.delete();
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should be able to create an expression column using a very long alias.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column with lots of different strings and names and lots of good characters\n"w" + "x"']
+            });
+            const result = await view.to_columns();
+            expect(result["new column with lots of different strings and names and lots of good characters"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Comments after the alias are not picked up.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// alias\nvar x := "w" + "x"\n// a comment\n# another comment\n/* another comment here */\n']
+            });
+            const result = await view.to_columns();
+            expect(result["alias"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Duplicate alias should be made unique.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"', '// new column\n"w" - "x"']
+            });
+            const result = await view.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            expect(result["new column 1"]).toEqual([0.5, 0.5, 0.5, 0.5]);
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Duplicate alias across new views will overwrite results in old view.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"']
+            });
+
+            let result = await view.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+
+            const view2 = await table.view({
+                expressions: ["// new column\n100 * 10"]
+            });
+
+            expect(await view.expression_schema()).toEqual(await view2.expression_schema());
+
+            result = await view.to_columns();
+            const result2 = await view2.to_columns();
+            expect(result["new column"]).toEqual([1000, 1000, 1000, 1000]);
+            expect(result2["new column"]).toEqual([1000, 1000, 1000, 1000]);
+
+            await view2.delete();
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should not be able to overwrite table column with an expression", async function(done) {
+            expect.assertions(1);
+            const table = await perspective.table(expressions_common.int_float_data);
+            table
+                .view({
+                    expressions: ["// w\nupper('abc')"]
+                })
+                .catch(e => {
+                    expect(e.message).toMatch(`Abort(): View creation failed: cannot create expression column 'w' that overwrites a column that already exists.\n`);
+                    table.delete();
+                    done();
+                });
+        });
+
+        it("Should not be able to overwrite expression in the same view", async function(done) {
+            expect.assertions(1);
+            const table = await perspective.table(expressions_common.int_float_data);
+            table
+                .view({
+                    expressions: ["// w\nupper('abc')", "// w\nlower('abc')"]
+                })
+                .catch(e => {
+                    expect(e.message).toMatch(`Abort(): View creation failed: cannot create expression column 'w' that overwrites a column that already exists.\n`);
+                    table.delete();
+                    done();
+                });
+        });
+
+        it("Should not be able to overwrite expression column with one that returns a different type", async function(done) {
+            expect.assertions(2);
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"']
+            });
+
+            let result = await view.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+
+            table
+                .view({
+                    expressions: ["// new column\n upper('abc')"]
+                })
+                .catch(e => {
+                    expect(e.message).toMatch("Abort(): [t_computed_expression::compute] Cannot overwrite column: `new column` with an expression of a different type!\n");
+                    view.delete();
+                    table.delete();
+                    done();
+                });
+        });
+
+        it("Duplicate alias across new views will overwrite results in old view if deleted.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"']
+            });
+            const result = await view.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            await view.delete();
+
+            const view2 = await table.view({
+                expressions: ['// new column\n"w" - "x"']
+            });
+            const result2 = await view2.to_columns();
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+            expect(result2["new column"]).toEqual([0.5, 0.5, 0.5, 0.5]);
+
+            await view2.delete();
+            await table.delete();
+        });
+
         it("A new view should not reference expression columns it did not create.", async function(done) {
             expect.assertions(2);
             const table = await perspective.table(expressions_common.int_float_data);
@@ -1574,6 +1735,78 @@ module.exports = perspective => {
                     'upper("c")': "string",
                     "date_bucket(\"b\", 'M')": "date",
                     "date_bucket(\"b\", 's')": "datetime"
+                });
+                table.delete();
+            });
+
+            it("Should skip expressions that try to overwrite table columns", async function() {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"],
+                    d: [1.5, 2.5, 3.5, 4.5]
+                });
+                const expressions = [
+                    "// abc\n 123 + 345", //valid
+                    "// a\n sqrt(144)", // invalid
+                    "// b\n upper('abc')", // invalid
+                    "// c\n concat('a', 'b')", // invalid
+                    "// d\n today()" // invalid
+                ];
+                const schema = await table.expression_schema(expressions);
+                expect(schema).toEqual({
+                    abc: "float"
+                });
+                table.delete();
+            });
+
+            it("Should skip expressions that try to overwrite expressions with different types", async function() {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"],
+                    d: [1.5, 2.5, 3.5, 4.5]
+                });
+
+                const view = await table.view({
+                    expressions: ["// abc\n 123 + 345"]
+                });
+
+                const schema = await table.expression_schema(["// abc\n upper('abc')"]);
+                expect(schema).toEqual({});
+
+                view.delete();
+                table.delete();
+            });
+
+            it("Should skip invalid columns due to type error, with alias", async function() {
+                const table = await perspective.table({
+                    a: [1, 2, 3, 4],
+                    b: [new Date(), new Date(), new Date(), new Date()],
+                    c: ["a", "b", "c", "d"],
+                    d: [1.5, 2.5, 3.5, 4.5]
+                });
+                const expressions = [
+                    '// abc \n"a" + "d"', // valid
+                    '// def\n"c" + "b"', // invalid
+                    '"c"', // valid
+                    "// new column \ndate_bucket(\"b\", 'M')", // valid
+                    "date_bucket(\"b\", 'abcde')", // invalid
+                    'concat("c", "a")', // invalid
+                    "// more columns\nconcat(\"c\", ' ', \"c\", 'abc')", // valid
+                    'upper("c")', // valid
+                    'lower("a")', // invalid,
+                    'min("a", "c")', // invalid,
+                    'max(100, "a")' // valid
+                ];
+                const schema = await table.expression_schema(expressions);
+                expect(schema).toEqual({
+                    abc: "float",
+                    '"c"': "string",
+                    "new column": "date",
+                    'upper("c")': "string",
+                    'max(100, "a")': "float",
+                    "more columns": "string"
                 });
                 table.delete();
             });

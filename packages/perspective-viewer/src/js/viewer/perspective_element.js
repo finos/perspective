@@ -16,6 +16,7 @@ import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
 
 import {StateElement} from "./state_element.js";
+import {findExpressionByAlias, getExpressionAlias} from "../utils.js";
 
 /******************************************************************************
  *
@@ -146,16 +147,25 @@ export class PerspectiveElement extends StateElement {
         // Grab expressions from the viewer and validate them so that
         // expressions do not crash the viewer/table.
         const expressions = this._get_view_expressions();
-        const expression_schema = await table.expression_schema();
+        const expression_schema = await table.expression_schema(expressions);
         const valid_expressions = [];
+        const valid_expression_alias = [];
 
         for (const expression of expressions) {
-            if (expression_schema[expression]) {
+            const alias = getExpressionAlias(expression);
+
+            if (alias === undefined) {
+                console.warn(`Not applying expression ${expression} as it does not have an alias set.`);
+                continue;
+            }
+
+            if (expression_schema[alias]) {
                 valid_expressions.push(expression);
+                valid_expression_alias.push(alias);
             }
         }
 
-        cols = cols.concat(valid_expressions);
+        cols = cols.concat(valid_expression_alias);
 
         if (!this.hasAttribute("columns")) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));
@@ -185,11 +195,11 @@ export class PerspectiveElement extends StateElement {
 
         for (const name of cols) {
             let aggregate = aggregates.find(a => a.column === name).op;
-            const expression = valid_expressions.includes(name) ? name : undefined;
             let type = schema[name];
             if (!type) {
                 type = expression_schema[name];
             }
+            const expression = findExpressionByAlias(name, valid_expressions);
             const row = this._new_row(name, type, aggregate, null, null, expression);
             this._inactive_columns.appendChild(row);
             if (shown.includes(name)) {
@@ -202,11 +212,11 @@ export class PerspectiveElement extends StateElement {
         }
 
         for (const x of shown) {
-            const expression = expressions.includes(x) ? x : undefined;
-            let type = schema[name];
+            let type = schema[x];
             if (!type) {
-                type = expression_schema[name];
+                type = expression_schema[x];
             }
+            const expression = findExpressionByAlias(x, valid_expressions);
             const active_row = this._new_row(x, type, undefined, undefined, undefined, expression);
             this._active_columns.appendChild(active_row);
         }
@@ -368,11 +378,9 @@ export class PerspectiveElement extends StateElement {
             const filter = [node.getAttribute("name"), operator, operand];
             if (await this._table.is_valid_filter(filter)) {
                 filters.push(filter);
-                node.title = "";
                 operandNode.style.borderColor = "";
                 exclamation.hidden = true;
             } else {
-                node.title = "Invalid Filter";
                 operandNode.style.borderColor = "red";
                 exclamation.hidden = false;
             }

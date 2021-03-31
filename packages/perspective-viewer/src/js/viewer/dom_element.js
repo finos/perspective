@@ -13,6 +13,7 @@ import {renderers} from "./renderers.js";
 
 import {PerspectiveElement} from "./perspective_element.js";
 import {html, render} from "lit-html";
+import {findExpressionByAlias, getExpressionAlias, getRawExpression} from "../utils.js";
 
 /**
  * Render `<option>` blocks
@@ -99,14 +100,16 @@ export class DomElement extends PerspectiveElement {
                 // must be valid column names, recreate expressions if the
                 // expression is in the filter.
                 const expressions = this._get_view_expressions();
+                // either the expression string or undefined
+                let expression = findExpressionByAlias(name, expressions);
 
-                // If `name` is in expressions, recreate the current
-                // viewer's expressions.
+                // If the filter is an expression, we need to recreate the
+                // expression column.
                 this._table
                     .view({
                         row_pivots: [name],
                         columns: [],
-                        expressions: expressions.includes(name) ? [name] : []
+                        expressions: expression ? [expression] : []
                     })
                     .then(async view => {
                         // set as a property so we can delete it after the
@@ -177,7 +180,11 @@ export class DomElement extends PerspectiveElement {
         });
 
         if (expression) {
-            row.setAttribute("expression", JSON.stringify(expression));
+            // expression without the newline alias
+            const raw_expr = getRawExpression(expression);
+            row.setAttribute("expression", raw_expr);
+            row.setAttribute("title", raw_expr);
+            row.setAttribute("expression-alias", getExpressionAlias(expression));
             row.classList.add("expression");
         }
 
@@ -204,10 +211,20 @@ export class DomElement extends PerspectiveElement {
         let reset_columns_attr = false;
 
         for (const expr of expressions) {
+            // All expressions are guaranteed to have alias at this point. If
+            // it does not, then skip the expression.
+            const alias = getExpressionAlias(expr);
+
+            if (alias === undefined) {
+                console.warn(`Not applying expression ${expr} as it does not have an alias set.`);
+                continue;
+            }
+
+            //
             // Check for whether the expression is in the attribute but
             // NOT in the DOM - occurs when restore is called and a race
             // condition between `expressions` and `columns` occurs.
-            const should_reset = !columns.includes(expr) && attr.includes(expr);
+            const should_reset = !columns.includes(alias) && attr.includes(alias);
 
             if (should_reset) {
                 reset_columns_attr = true;
@@ -215,15 +232,15 @@ export class DomElement extends PerspectiveElement {
 
             // If the column already exists or is already in the active DOM,
             // don't add it to the inactive DOM
-            const should_add = !columns.includes(expr) && !active.includes(expr);
+            const should_add = !columns.includes(alias) && !active.includes(alias);
 
             if (!should_add) {
                 continue;
             }
 
-            let type = expression_schema[expr];
+            let type = expression_schema[alias];
 
-            const row = this._new_row(expr, type, null, null, null, expr);
+            const row = this._new_row(alias, type, null, null, null, expr);
             this._inactive_columns.insertBefore(row, this._inactive_columns.childNodes[0] || null);
             added_count++;
         }
@@ -372,10 +389,8 @@ export class DomElement extends PerspectiveElement {
                     const ref = lis.find(x => x.getAttribute("name") === name);
                     if (ref) {
                         const name = ref.getAttribute("name");
-                        let expression = undefined;
-                        if (expressions.includes(name)) {
-                            expression = name;
-                        }
+                        // either the expression string or undefined
+                        let expression = findExpressionByAlias(name, expressions);
                         return this._new_row(name, ref.getAttribute("type"), undefined, undefined, undefined, expression);
                     }
                 }

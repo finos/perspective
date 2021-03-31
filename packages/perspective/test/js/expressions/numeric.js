@@ -915,7 +915,7 @@ module.exports = perspective => {
                     f: [true, true, true, true]
                 });
                 const view = await table.view({
-                    expressions: ['"a" or "b"', '"c" or "d"', '"e" or "f"', "0 or 1", "true or false", "false or false"]
+                    expressions: ['"a" or "b"', '"c" or "d"', '"e" or "f"', "0 or 1", "true or false", "false or false", '// filtered\n"a" > 0.5 or "d" < 0.5']
                 });
                 const result = await view.to_columns();
                 expect(result['"a" or "b"']).toEqual([false, true, false, true].map(x => (x ? 1 : 0)));
@@ -924,6 +924,7 @@ module.exports = perspective => {
                 expect(result["0 or 1"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["true or false"]).toEqual([true, true, true, true].map(x => (x ? 1 : 0)));
                 expect(result["false or false"]).toEqual([false, false, false, false].map(x => (x ? 1 : 0)));
+                expect(result["filtered"]).toEqual([1, 1, 1, 1]);
                 await view.delete();
                 await table.delete();
             });

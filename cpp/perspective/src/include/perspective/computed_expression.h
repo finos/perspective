@@ -26,6 +26,10 @@
 
 namespace perspective {
 
+/**
+ * @brief Contains the metadata for a single expression and the methods which
+ * will compute the expression's output.
+ */
 class PERSPECTIVE_EXPORT t_computed_expression {
 public:
     // allow this struct to be copy constructed since we store it in
@@ -33,6 +37,7 @@ public:
     t_computed_expression() = default;
 
     t_computed_expression(
+        const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
@@ -57,12 +62,14 @@ public:
 
     void set_expression_vocab(std::shared_ptr<t_vocab> vocab);
 
+    std::string get_expression_alias() const;
     std::string get_expression_string() const;
     std::string get_parsed_expression_string() const;
     std::vector<std::pair<std::string, std::string>> get_column_ids() const;
     t_dtype get_dtype() const;
 
 private:
+    std::string m_expression_alias;
     std::string m_expression_string;
     std::string m_parsed_expression_string;
     std::vector<std::pair<std::string, std::string>> m_column_ids;
@@ -79,13 +86,19 @@ public:
      * return a new `t_computed_expression`. This method will abort() if
      * an input column is invalid or the expression cannot be parsed.
      * 
-     * @param expression_string 
-     * @param parsed_expression_string 
-     * @param column_ids 
+     * @param expression_alias an alias for the expression, which will become
+     * the name of the new expression column on the table.
+     * @param expression_string the expression, as the user typed it.
+     * @param parsed_expression_string the expression after having been
+     * parsed through the Perspective engine to replace column names, add
+     * intern(), etc.
+     * @param column_ids A map of column IDs to column names, which is used to
+     * properly access column names from the symbol table.
      * @param schema 
      * @return t_computed_expression 
      */
     static t_computed_expression precompute(
+        const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
@@ -98,13 +111,19 @@ public:
      * implements additional checks for column validity and is guaranteed
      * to return a value, even if the expression cannot be parsed.
      * 
-     * @param expression_string 
-     * @param parsed_expression_string 
-     * @param column_ids 
+     * @param expression_alias an alias for the expression, which will become
+     * the name of the new expression column on the table.
+     * @param expression_string the expression, as the user typed it.
+     * @param parsed_expression_string the expression after having been
+     * parsed through the Perspective engine to replace column names, add
+     * intern(), etc.
+     * @param column_ids A map of column IDs to column names, which is used to
+     * properly access column names from the symbol table.
      * @param schema 
      * @return t_dtype 
      */
     static t_dtype get_dtype(
+        const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,

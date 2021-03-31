@@ -10,6 +10,7 @@
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
 
 import {DomElement} from "./dom_element.js";
+import {findExpressionByAlias} from "../utils.js";
 
 export class ActionElement extends DomElement {
     async _toggle_config(event) {
@@ -99,10 +100,11 @@ export class ActionElement extends DomElement {
      * @param {*} event
      */
     _save_expression(event) {
-        const expression = event.detail.expression;
+        const {expression, alias} = event.detail;
         const expressions = this._get_view_expressions();
+        const is_duplicate = findExpressionByAlias(alias, expressions);
 
-        if (expressions.includes(expression)) {
+        if (expressions.includes(expression) || is_duplicate) {
             console.warn(`"${expression}" was not applied because it already exists.`);
             return;
         }
@@ -114,11 +116,13 @@ export class ActionElement extends DomElement {
     }
 
     async _type_check_expression(event) {
-        const expression = event.detail.expression;
+        const {expression, alias} = event.detail;
         const expressions = this._get_view_expressions();
+        const is_duplicate = findExpressionByAlias(alias, expressions);
 
-        if (expressions.includes(expression)) {
+        if (expressions.includes(expression) || is_duplicate) {
             console.warn(`Cannot apply duplicate expression: "${expression}"`);
+            this._expression_editor.type_check_expression({});
             return;
         }
 
@@ -159,7 +163,7 @@ export class ActionElement extends DomElement {
                     this._active_columns.removeChild(child);
                 }
             }
-            let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"));
+            let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"), undefined, undefined, undefined, parent.getAttribute("expression"));
             const cols = this._get_view_active_columns();
             let i = cols.length - 1;
             if (!cols[i] || !cols[i]?.classList.contains("null-column")) {

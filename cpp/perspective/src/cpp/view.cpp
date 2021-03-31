@@ -352,11 +352,11 @@ View<CTX_T>::expression_schema() const {
     }
 
     for (const auto& expr : m_expressions) {
-        std::string expression_string = expr.get_expression_string();
-        new_schema[expression_string] = dtype_to_str(expr.get_dtype());
+        std::string expression_alias = expr.get_expression_alias();
+        new_schema[expression_alias] = dtype_to_str(expr.get_dtype());
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[expression_string] = _map_aggregate_types(expression_string, new_schema[expression_string]);
+            new_schema[expression_alias] = _map_aggregate_types(expression_alias, new_schema[expression_alias]);
         }
     }
 
@@ -385,8 +385,8 @@ View<t_ctx0>::expression_schema() const {
     std::map<std::string, std::string> new_schema;
 
     for (const auto& expr : m_expressions) {
-        std::string expression_string = expr.get_expression_string();
-        new_schema[expression_string] = dtype_to_str(expr.get_dtype());
+        std::string expression_alias = expr.get_expression_alias();
+        new_schema[expression_alias] = dtype_to_str(expr.get_dtype());
     }
 
     return new_schema;

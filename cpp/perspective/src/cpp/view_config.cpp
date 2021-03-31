@@ -46,15 +46,15 @@ t_view_config::init(std::shared_ptr<t_schema> schema) {
 
 void
 t_view_config::validate(std::shared_ptr<t_schema> schema) {
-    std::unordered_set<std::string> expression_strings;
-    expression_strings.reserve(m_expressions.size());
+    std::unordered_set<std::string> expression_aliases;
+    expression_aliases.reserve(m_expressions.size());
 
     for (const auto& expr : m_expressions) {
-        expression_strings.insert(expr.get_expression_string());
+        expression_aliases.insert(expr.get_expression_alias());
     }
 
     for (const std::string& col : m_columns) {
-        if (!schema->has_column(col) && expression_strings.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View columns." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -63,7 +63,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
 
     for (const auto& agg : m_aggregates) {
         const std::string& col = agg.first;
-        if (!schema->has_column(col) && expression_strings.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View aggregates." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -71,7 +71,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     }
 
     for (const std::string& col : m_row_pivots) {
-        if (!schema->has_column(col) && expression_strings.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View row_pivots." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -79,7 +79,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     }
 
     for (const std::string& col : m_column_pivots) {
-        if (!schema->has_column(col) && expression_strings.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View column_pivots." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -88,7 +88,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
 
     for (const auto& filter : m_filter) {
         const std::string& col = std::get<0>(filter);
-        if (!schema->has_column(col) && expression_strings.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View filters." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -97,7 +97,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
 
     for (const auto& sort : m_sort) {
         const std::string& col = sort[0];
-        if (!schema->has_column(col) && expression_strings.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View sorts." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());

@@ -7,7 +7,7 @@
  *
  */
 
-import {bindTemplate, throttlePromise} from "./utils.js";
+import {bindTemplate, throttlePromise, getExpressionAlias, addExpressionAlias} from "./utils.js";
 
 import template from "../html/expression_editor.html";
 import style from "../less/expression_editor.less";
@@ -62,7 +62,13 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     @throttlePromise
     async type_check_expression(expression_schema) {
-        const expression = this._temp_expression;
+        let expression = this._temp_expression;
+        const alias = this._temp_expression_alias;
+
+        if (alias !== undefined) {
+            expression = alias;
+        }
+
         expression_schema[expression] ? this._enable_save_button() : this._disable_save_button();
     }
 
@@ -73,22 +79,28 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     @throttlePromise
     async _validate_expression() {
-        const expression = this._edit_area.value;
+        let expression = this._edit_area.value;
 
         if (expression.length === 0) {
             this._disable_save_button();
             return;
         }
 
+        if (getExpressionAlias(expression) === undefined) {
+            expression = addExpressionAlias(expression);
+        }
+
         // Store the expression temporarily so we can access it in
         // `type_check_expression()`.
         this._temp_expression = expression;
+        this._temp_expression_alias = getExpressionAlias(expression);
 
         // Take the parsed expression and type check it on the viewer,
         // which will call `type_check_expression()` with an expression schema.
         const event = new CustomEvent("perspective-expression-editor-type-check", {
             detail: {
-                expression: this._temp_expression
+                expression: this._temp_expression,
+                alias: this._temp_expression_alias
             }
         });
 
@@ -117,13 +129,20 @@ class PerspectiveExpressionEditor extends HTMLElement {
             return;
         }
 
-        const expression = this._edit_area.value;
-        const parsed_expression = this._parsed_expression || [];
+        let expression = this._edit_area.value;
+
+        // if the expression doesn't have an alias, generate an alias and
+        // add it to the expression.
+        if (getExpressionAlias(expression) === undefined) {
+            expression = addExpressionAlias(expression);
+        }
+
+        let alias = getExpressionAlias(expression);
 
         const event = new CustomEvent("perspective-expression-editor-save", {
             detail: {
-                expression: expression,
-                parsed_expression: parsed_expression
+                expression,
+                alias
             }
         });
 
@@ -187,8 +206,8 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 ev.preventDefault();
                 const start = this._edit_area.selectionStart;
                 const end = this._edit_area.selectionEnd;
-                this._edit_area.value = this._edit_area.value.substring(0, start) + "    " + this._edit_area.value.substring(end);
-                this._edit_area.setSelectionRange(start + 1, start + 1);
+                this._edit_area.value = this._edit_area.value.substring(0, start) + "  " + this._edit_area.value.substring(end);
+                this._edit_area.setSelectionRange(end + 2, end + 2);
             }
         }
     }

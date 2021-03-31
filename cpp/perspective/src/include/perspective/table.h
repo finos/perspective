@@ -92,6 +92,7 @@ public:
             std::tuple<
                 std::string,
                 std::string,
+                std::string,
                 std::vector<std::pair<std::string, std::string>>
             >>& expressions) const;
 

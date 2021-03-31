@@ -1397,28 +1397,40 @@ namespace binding {
         // API so we can directly index for speed.
         for (t_uindex idx = 0; idx < js_expressions.size(); ++idx) {
             const auto& expr = js_expressions[idx];
-            std::string expression_string = expr[0].as<std::string>();
-            std::string parsed_expression_string = expr[1].as<std::string>();
+            std::string expression_alias = expr[0].as<std::string>();
+            std::string expression_string = expr[1].as<std::string>();
+            std::string parsed_expression_string = expr[2].as<std::string>();
             std::vector<std::pair<std::string, std::string>> column_ids;
+
+            // Don't allow overwriting of "real" table columns or multiple
+            // columns with the same alias.
+            if (schema->has_column(expression_alias)) {
+                std::stringstream ss;
+                ss << "View creation failed: cannot create expression column '"
+                << expression_alias
+                << "' that overwrites a column that already exists."
+                << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            }
 
             // Read the Javascript map of column IDs to column names, and
             // convert them into string pairs. This guarantees iteration
             // order at the cost of constant time access (which we don't use).
-            t_val j_column_id_keys = t_val::global("Object").call<t_val>("keys", expr[2]);
+            t_val j_column_id_keys = t_val::global("Object").call<t_val>("keys", expr[3]);
             auto column_id_keys = vecFromArray<t_val, std::string>(j_column_id_keys);
             column_ids.resize(column_id_keys.size());
 
             for (t_uindex cidx = 0; cidx < column_id_keys.size(); ++cidx) {
                 const std::string& column_id = column_id_keys[cidx];
-                column_ids[cidx] = std::pair<std::string, std::string>(column_id, expr[2][column_id].as<std::string>());
+                column_ids[cidx] = std::pair<std::string, std::string>(column_id, expr[3][column_id].as<std::string>());
             }
 
             // If the expression cannot be parsed, it will abort() here.
             t_computed_expression expression = t_computed_expression_parser::precompute(
-                expression_string, parsed_expression_string, column_ids, schema);
+                expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
+            schema->add_column(expression_alias, expression.get_dtype());
             expressions.push_back(expression);
-            schema->add_column(expression_string, expression.get_dtype());
         }
 
         // construct filters with filter terms, and fill the vector of tuples
@@ -1632,29 +1644,31 @@ namespace binding {
         const std::vector<std::vector<t_val>>& j_expressions) {
         // Don't create a expression object - just pass the values as a
         // tuple for validation.
-        std::vector<std::tuple<std::string, std::string, std::vector<std::pair<std::string, std::string>>>> expressions;
+        std::vector<std::tuple<std::string, std::string, std::string, std::vector<std::pair<std::string, std::string>>>> expressions;
         expressions.resize(j_expressions.size());
 
         // Convert from vector of t_val into vector of tuples
         for (t_uindex idx = 0; idx < j_expressions.size(); ++idx) {
             const auto& expr = j_expressions[idx];
-            std::string expression_string = expr[0].as<std::string>();
-            std::string parsed_expression_string = expr[1].as<std::string>();
+            std::string expression_alias = expr[0].as<std::string>();
+            std::string expression_string = expr[1].as<std::string>();
+            std::string parsed_expression_string = expr[2].as<std::string>();
             std::vector<std::pair<std::string, std::string>> column_ids;
 
             // Read the Javascript map of column IDs to column names, and
             // convert them into string pairs. This guarantees iteration
             // order at the cost of constant time access (which we don't use).
-            t_val j_column_id_keys = t_val::global("Object").call<t_val>("keys", expr[2]);
+            t_val j_column_id_keys = t_val::global("Object").call<t_val>("keys", expr[3]);
             auto column_id_keys = vecFromArray<t_val, std::string>(j_column_id_keys);
             column_ids.resize(column_id_keys.size());
 
             for (t_uindex cidx = 0; cidx < column_id_keys.size(); ++cidx) {
                 const std::string& column_id = column_id_keys[cidx];
-                column_ids[cidx] = std::pair<std::string, std::string>(column_id, expr[2][column_id].as<std::string>());
+                column_ids[cidx] = std::pair<std::string, std::string>(column_id, expr[3][column_id].as<std::string>());
             }
 
             auto tp = std::make_tuple(
+                expression_alias,
                 expression_string,
                 parsed_expression_string,
                 column_ids);
