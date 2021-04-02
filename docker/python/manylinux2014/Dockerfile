@@ -14,6 +14,8 @@ RUN wget https://cmake.org/files/v3.15/cmake-3.15.4-Linux-x86_64.sh -q
 RUN mkdir /opt/cmake
 RUN printf "y\nn\n" | sh cmake-3.15.4-Linux-x86_64.sh --prefix=/opt/cmake > /dev/null
 RUN rm -fr cmake*.sh /opt/cmake/doc
+RUN rm -fr /usr/local/bin/cmake
+RUN rm -fr /usr/local/bin/ctest
 RUN rm -fr /opt/cmake/bin/cmake-gui
 RUN rm -fr /opt/cmake/bin/ccmake
 RUN rm -fr /opt/cmake/bin/cpack
@@ -48,7 +50,7 @@ RUN python3.8 -m pip install --ignore-installed auditwheel
 RUN python3.9 -m pip install --ignore-installed auditwheel
 
 # install boost
-RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
+RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz --no-check-certificate >/dev/null 2>&1
 RUN tar xfz boost_1_71_0.tar.gz
 # https://github.com/boostorg/build/issues/468
 RUN cd boost_1_71_0 && ./bootstrap.sh
@@ -60,7 +62,7 @@ RUN python3.8 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=2.0.0'
 RUN python3.9 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=2.0.0'
 
 # install node
-RUN curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+RUN curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
 RUN yum install -y nodejs
 
 RUN npm install --global yarn

@@ -6,7 +6,8 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-FROM quay.io/pypa/manylinux2010_x86_64
+# https://github.com/pypa/manylinux/issues/428#issuecomment-774729597
+FROM quay.io/pypa/manylinux2010_x86_64:2021-02-06-3d322a5
 RUN yum -y install rapidjson-devel sudo wget
 
 # Build new cmake
@@ -14,6 +15,8 @@ RUN wget https://cmake.org/files/v3.15/cmake-3.15.4-Linux-x86_64.sh -q
 RUN mkdir /opt/cmake
 RUN printf "y\nn\n" | sh cmake-3.15.4-Linux-x86_64.sh --prefix=/opt/cmake > /dev/null
 RUN rm -fr cmake*.sh /opt/cmake/doc
+RUN rm -fr /usr/local/bin/cmake
+RUN rm -fr /usr/local/bin/ctest
 RUN rm -fr /opt/cmake/bin/cmake-gui
 RUN rm -fr /opt/cmake/bin/ccmake
 RUN rm -fr /opt/cmake/bin/cpack
@@ -51,7 +54,7 @@ RUN python3.8 -m pip install --ignore-installed auditwheel
 RUN python3.9 -m pip install --ignore-installed auditwheel
 
 # install boost
-RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1
+RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz --no-check-certificate >/dev/null 2>&1
 RUN tar xfz boost_1_71_0.tar.gz
 # https://github.com/boostorg/build/issues/468
 RUN cd boost_1_71_0 && ./bootstrap.sh
