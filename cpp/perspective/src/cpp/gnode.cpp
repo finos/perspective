@@ -817,7 +817,7 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             _register_expressions(expressions);
     
             if (should_update) {
-                // Compute all valid computed columns + new computed columns that
+                // Compute all valid expressions + new expressions that
                 // were added as part of this context. Do so separately from
                 // update_context_from_state, so that registration-specific logic
                 // is centralized in one place.
@@ -907,7 +907,7 @@ t_gnode::_unregister_context(const std::string& name) {
     t_ctx_type type = ctxh.get_type();
 
     switch (type) {
-        case UNIT_CONTEXT: break; // No computed columns to remove
+        case UNIT_CONTEXT: break; // no expressions
         case TWO_SIDED_CONTEXT: {
             t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
             // Remove expressions added by this context

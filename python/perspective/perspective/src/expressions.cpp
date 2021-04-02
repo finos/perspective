@@ -22,16 +22,17 @@ t_schema
 get_table_expression_schema_py(
     std::shared_ptr<Table> table,
     const std::vector<std::vector<t_val>>& p_expressions) {
-    std::vector<std::tuple<std::string, std::string, std::vector<std::pair<std::string, std::string>>>> expressions;
+    std::vector<std::tuple<std::string, std::string, std::string, std::vector<std::pair<std::string, std::string>>>> expressions;
     expressions.resize(p_expressions.size());
 
     // Convert from vector of t_val into vector of tuples
     for (t_uindex idx = 0; idx < p_expressions.size(); ++idx) {
         const auto& expr = p_expressions[idx];
-        std::string expression_string = expr[0].cast<std::string>();
-        std::string parsed_expression_string = expr[1].cast<std::string>();
+        std::string expression_alias = expr[0].cast<std::string>();
+        std::string expression_string = expr[1].cast<std::string>();
+        std::string parsed_expression_string = expr[2].cast<std::string>();
 
-        auto p_column_ids = py::dict(expr[2]);
+        auto p_column_ids = py::dict(expr[3]);
         std::vector<std::pair<std::string, std::string>> column_ids;
         column_ids.resize(p_column_ids.size());
         t_uindex cidx = 0;
@@ -44,6 +45,7 @@ get_table_expression_schema_py(
         }
 
         auto tp = std::make_tuple(
+            expression_alias,
             expression_string,
             parsed_expression_string,
             column_ids);

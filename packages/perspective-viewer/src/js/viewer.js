@@ -129,7 +129,7 @@ class PerspectiveViewer extends ActionElement {
                     dir = s[1];
                     s = s[0];
                 }
-                // either the expression string or undefined
+                // either the whole expression string or undefined
                 let expression = findExpressionByAlias(s, expressions);
                 return this._new_row(s, false, false, false, dir, expression);
             },
@@ -280,10 +280,10 @@ class PerspectiveViewer extends ActionElement {
                 // with the new value.
                 const active_expressions = this._get_view_active_columns()
                     .filter(x => x.classList.contains("expression"))
-                    .map(x => x.getAttribute("name"));
-                const inactive_expressions = this._get_view_all_columns()
+                    .map(x => x.getAttribute("expression"));
+                const inactive_expressions = this._get_view_inactive_columns()
                     .filter(x => x.classList.contains("expression"))
-                    .map(x => x.getAttribute("name"));
+                    .map(x => x.getAttribute("expression"));
 
                 const old_expressions = active_expressions.concat(inactive_expressions);
                 const to_remove = this._diff_expressions(old_expressions, expressions);
@@ -384,7 +384,7 @@ class PerspectiveViewer extends ActionElement {
                         operand: filter[2]
                     });
                     const name = filter[0];
-                    // either the expression string or undefined
+                    // either the whole expression string or undefined
                     let expression = findExpressionByAlias(name, expressions);
                     return this._new_row(name, undefined, undefined, fterms, undefined, expression);
                 },
@@ -458,7 +458,7 @@ class PerspectiveViewer extends ActionElement {
 
         const inner = this._column_pivots.querySelector("ul");
         this._update_column_list(pivots, inner, (pivot, expressions) => {
-            // either the expression string or undefined
+            // either the whole expression string or undefined
             let expression = findExpressionByAlias(pivot, expressions);
             return this._new_row(pivot, undefined, undefined, undefined, undefined, expression);
         });
@@ -484,7 +484,7 @@ class PerspectiveViewer extends ActionElement {
 
         const inner = this._row_pivots.querySelector("ul");
         this._update_column_list(pivots, inner, (pivot, expressions) => {
-            // either the expression string or undefined
+            // either the whole expression string or undefined
             let expression = findExpressionByAlias(pivot, expressions);
             return this._new_row(pivot, undefined, undefined, undefined, undefined, expression);
         });

@@ -145,10 +145,22 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
     // API so we can directly index for speed.
     for (t_uindex idx = 0; idx < p_expressions.size(); ++idx) {
         const auto& expr = p_expressions[idx];
-        std::string expression_string = expr[0].cast<std::string>();
-        std::string parsed_expression_string = expr[1].cast<std::string>();
+        std::string expression_alias = expr[0].cast<std::string>();
+        std::string expression_string = expr[1].cast<std::string>();
+        std::string parsed_expression_string = expr[2].cast<std::string>();
 
-        auto p_column_ids = py::dict(expr[2]);
+        // Don't allow overwriting of "real" table columns or multiple
+        // columns with the same alias.
+        if (schema->has_column(expression_alias)) {
+            std::stringstream ss;
+            ss << "View creation failed: cannot create expression column '"
+            << expression_alias
+            << "' that overwrites a column that already exists."
+            << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        auto p_column_ids = py::dict(expr[3]);
         std::vector<std::pair<std::string, std::string>> column_ids;
         column_ids.resize(p_column_ids.size());
         t_uindex cidx = 0;
@@ -162,10 +174,10 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
 
         // If the expression cannot be parsed, it will abort() here.
         t_computed_expression expression = t_computed_expression_parser::precompute(
-            expression_string, parsed_expression_string, column_ids, schema);
+            expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
         expressions.push_back(expression);
-        schema->add_column(expression_string, expression.get_dtype());
+        schema->add_column(expression_alias, expression.get_dtype());
     }
 
     // construct filters with filter terms, and fill the vector of tuples

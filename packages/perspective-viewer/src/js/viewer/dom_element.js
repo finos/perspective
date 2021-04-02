@@ -180,12 +180,15 @@ export class DomElement extends PerspectiveElement {
         });
 
         if (expression) {
-            // expression without the newline alias
-            const raw_expr = getRawExpression(expression);
-            row.setAttribute("expression", raw_expr);
-            row.setAttribute("title", raw_expr);
-            row.setAttribute("expression-alias", getExpressionAlias(expression));
             row.classList.add("expression");
+
+            // used by the viewer to diff expression columns
+            row.setAttribute("expression", expression);
+
+            // expression without the newline alias - allows us to hover
+            // and see the expression as typed by the user.
+            const raw_expr = getRawExpression(expression);
+            row.setAttribute("title", raw_expr);
         }
 
         return row;
@@ -282,6 +285,7 @@ export class DomElement extends PerspectiveElement {
      * @param {Array<String>} expressions
      */
     _reset_expressions_view(expressions) {
+        console.log("called", expressions);
         if (expressions) {
             // Only remove columns specified in `expressions`
             const columns = this._get_view_active_column_names().filter(x => !expressions.includes(x));
@@ -334,7 +338,7 @@ export class DomElement extends PerspectiveElement {
         }
 
         // Remove inactive expression columns from the DOM
-        const inactive_expressions = this._get_view_all_columns().filter(x => x.classList.contains("expression"));
+        const inactive_expressions = this._get_view_inactive_columns().filter(x => x.classList.contains("expression"));
 
         for (const expr of inactive_expressions) {
             this._inactive_columns.removeChild(expr);
@@ -470,7 +474,7 @@ export class DomElement extends PerspectiveElement {
     }
 
     _set_column_defaults() {
-        const cols = this._get_view_all_columns();
+        const cols = this._get_view_inactive_columns();
         const active_cols = this._get_view_active_valid_columns();
         const valid_active_cols = this._get_view_active_valid_column_names();
         if (cols.length > 0) {

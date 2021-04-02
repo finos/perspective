@@ -24,15 +24,6 @@
 
 namespace perspective {
 
-/**
- * @brief The `computed_function` namespace contains all functions that will be
- * used to generate values for a computed column.
- * 
- * Computed functions should receive one or more `t_tscalar`s and return a 
- * single `t_tscalar` value, or receive a shared pointer to a `t_column` along
- * with an input scalar, and return void.
- * 
- */
 namespace computed_function {
 
 typedef typename exprtk::igeneric_function<t_tscalar>::parameter_list_t t_parameter_list;

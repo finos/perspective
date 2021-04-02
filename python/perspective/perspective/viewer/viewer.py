@@ -16,7 +16,6 @@ from .validate import (
     validate_aggregates,
     validate_sort,
     validate_filters,
-    validate_computed_columns,
     validate_expressions,
     validate_plugin_config,
 )
@@ -50,7 +49,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "sort",
         "aggregates",
         "columns",
-        "computed_columns",
         "expressions",
         "plugin",
         "editable",
@@ -65,7 +63,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         aggregates=None,
         sort=None,
         filters=None,
-        computed_columns=None,
         expressions=None,
         plugin_config=None,
         dark=None,
@@ -92,10 +89,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             filter (:obj:`list` of :obj:`list` of :obj:`str`): A list of lists,
                 each list containing a column name, a filter comparator, and a
                 value to filter by.
-            computed_columns (:obj:`list` of :obj:`dict`): A list of dicts,
-                each dict containing ``column``, a new computed column name,
-                ``computed_function_name``, a string computed function name,
-                and ``inputs``, a list of input column names.
+            expressions (:obj:`list` of :obj:`str`): A list of string
+                expressions which are applied to the view.
             plugin (:obj:`str`/:obj:`perspective.Plugin`): Which plugin to
                 select by default.
             plugin_config (:obj:`dict`): Custom config for all plugins by name.
@@ -108,11 +103,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             ...     row_pivots=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
-            ...     computed_columns=[{
-            ...         "column": "(Sales * Profit)",
-            ...         "computed_function_name": "*",
-            ...         "inputs": ["Sales", "Profit"]
-            ...     }]
+            ...     expressions=["// new column \n \"Sales\" + \"Profit\""]
             ... )
         """
 
@@ -133,7 +124,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.aggregates = validate_aggregates(aggregates) or {}
         self.sort = validate_sort(sort) or []
         self.filters = validate_filters(filters) or []
-        self.computed_columns = validate_computed_columns(computed_columns) or []
         self.expressions = validate_expressions(expressions) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.dark = dark
@@ -271,7 +261,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.column_pivots = []
         self.filters = []
         self.sort = []
-        self.computed_columns = []
         self.expressions = []
         self.aggregates = {}
         self.columns = []

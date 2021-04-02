@@ -43,6 +43,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("click on close button closes the expression UI.", async page => {
@@ -62,7 +63,7 @@ utils.with_server({}, () => {
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
                 await page.shadow_type("abc", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("A type-invalid expression should disable the save button", async page => {
@@ -70,7 +71,7 @@ utils.with_server({}, () => {
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
                 await page.shadow_type('"Sales" + "Category"', "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("An expression with invalid input columns should disable the save button", async page => {
@@ -78,7 +79,7 @@ utils.with_server({}, () => {
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
                 await page.shadow_type('"aaaa" + "Sales"', "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("Typing tab should enter an indent", async page => {
@@ -88,7 +89,8 @@ utils.with_server({}, () => {
                 await page.shadow_type('"Sales" + 10', "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.press("Tab");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.type("tabbed");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("Typing enter should enter a newline", async page => {
@@ -98,7 +100,8 @@ utils.with_server({}, () => {
                 await page.shadow_type('"Sales" + 10', "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.press("Enter");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.type("newline");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("Typing shift-enter should save a valid expression", async page => {
@@ -120,7 +123,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.down("Shift");
                 await page.keyboard.press("Enter");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.skip("Typing a large expression in the textarea should work even when pushed down to page bottom.", async page => {
@@ -323,6 +326,7 @@ utils.with_server({}, () => {
                             .click(),
                     viewer
                 );
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("saving a single expression should add it to inactive columns.", async page => {
@@ -370,6 +374,27 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(['"Sales" / "Profit"', "new column with an alias"])), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("sets column with expression column.", async page => {
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await add_expression(page, "1 + 2");
+                await add_expression(page, "// abc \n 1 + 2");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.setAttribute("columns", '["abc", "1 + 2"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
+
+            test.capture("adding new column should not reset columns.", async page => {
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await add_expression(page, "1 + 2");
+                await add_expression(page, "100");
+                await add_expression(page, "// abc \n 1 + 2");
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.setAttribute("columns", '["abc", "1 + 2", "100"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await add_expression(page, "// def \n 1 + 2");
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 

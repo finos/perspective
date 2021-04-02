@@ -1271,9 +1271,8 @@ export default function(Module) {
     function validate_expressions(expressions) {
         let validated_expressions = [];
 
-        // Keep track of aliases that coincide, and make them unique when
-        // necessary by adding a number at the end.
-        let alias_map = {};
+        // Keep track of aliases that coincide and skip them.
+        let alias_set = new Set();
 
         for (let expression_string of expressions) {
             if (expression_string.includes('""')) {
@@ -1299,10 +1298,12 @@ export default function(Module) {
                 expression_alias = alias.trim();
 
                 // Expression alias cannot overlap.
-                if (alias_map[expression_alias]) {
+                if (alias_set.has(expression_alias)) {
                     console.error(`Skipping expression '${expression_string}', as it reuses alias ${alias}!`);
                     skip_expression = true;
                 }
+
+                alias_set.add(expression_alias);
 
                 return "";
             });

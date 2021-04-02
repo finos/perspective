@@ -155,7 +155,6 @@ class _PerspectiveManagerInternal(object):
                 # Return the View's name to the front end so it can be
                 # resolved.
                 message = self._make_message(msg["id"], msg["view_name"])
-                print(message)
                 post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table_method" or cmd == "view_method":
                 # Call the method on the table/view instance

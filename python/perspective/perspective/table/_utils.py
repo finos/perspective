@@ -6,11 +6,13 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import logging
 import re
 from datetime import date, datetime
 from functools import partial
 from .libbinding import t_dtype
 
+ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 DATE_BUCKET_LITERAL_REGEX = re.compile(
@@ -132,6 +134,7 @@ def _validate_expressions(expressions):
        names, which will be used by the engine.
     """
     validated_expressions = []
+    alias_set = set()
 
     for expression in expressions:
         if '""' in expression:
@@ -139,6 +142,28 @@ def _validate_expressions(expressions):
 
         column_id_map = {}
         column_name_map = {}
+
+        alias_match = re.match(ALIAS_REGEX, expression)
+
+        if alias_match:
+            alias = alias_match.group(1).strip()
+
+            # Don't allow for duplicate aliases
+            if alias in alias_set:
+                logging.warn(
+                    "Skipping expression `{}` as it reuses alias `{}`!".format(
+                        expression, alias
+                    )
+                )
+                continue
+
+            alias_set.add(alias)
+
+            # Remove the alias from the expression
+            expression = re.sub(ALIAS_REGEX, "", expression)
+        else:
+            # Expression itself is the alias
+            alias = expression
 
         # we need to be able to modify the running_cidx inside of every call to
         # replacer_fn - must pass by reference unfortunately
@@ -161,6 +186,6 @@ def _validate_expressions(expressions):
         # remove the `intern()` in date_bucket - TODO: this is messy
         parsed = re.sub(DATE_BUCKET_LITERAL_REGEX, _replace_date_bucket_unit, parsed)
 
-        validated_expressions.append([expression, parsed, column_id_map])
+        validated_expressions.append([alias, expression, parsed, column_id_map])
 
     return validated_expressions

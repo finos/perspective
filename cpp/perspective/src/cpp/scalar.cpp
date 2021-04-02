@@ -323,6 +323,21 @@ t_tscalar::operator/(T other) const {
     return this->operator/(other_scalar);
 }
 
+/**
+ * Win32 build complains if the std::uint64_t specialization is unset, and
+ * Linux complains if the std::uint64_t is set as it somehow conflicts with
+ * the unsigned long specialization below the ifdef.
+ */
+#ifdef WIN32
+template <>
+t_tscalar
+t_tscalar::operator/(std::uint64_t other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator/(other_scalar);
+}
+#endif
+
 template <>
 t_tscalar
 t_tscalar::operator/(unsigned long other) const {

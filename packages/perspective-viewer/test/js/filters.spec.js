@@ -19,6 +19,7 @@ utils.with_server({}, () => {
                 await await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("filters", '[["v", "==", ""]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("autocomplete on datetime column", async page => {
@@ -26,6 +27,7 @@ utils.with_server({}, () => {
                 await await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("filters", '[["w", "==", ""]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
             test.capture("equals on date column", async page => {

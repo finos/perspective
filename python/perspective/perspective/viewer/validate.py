@@ -163,51 +163,10 @@ def validate_expressions(expressions):
                 raise PerspectiveError(
                     "Cannot parse non-string expression: {}".format(str(type(expr)))
                 )
+        return expressions
     else:
         raise PerspectiveError(
             "Cannot parse expressions of type: {}".format(str(type(expressions)))
-        )
-
-
-def validate_computed_columns(computed_columns):
-    if computed_columns is None:
-        return []
-
-    elif (
-        isinstance(computed_columns, list)
-        and len(computed_columns) > 0
-        and (
-            not isinstance(computed_columns[0], dict)
-            and not isinstance(computed_columns[0], str)
-        )
-    ):
-        # wrap
-        computed_columns = [computed_columns]
-
-    if isinstance(computed_columns, list):
-        for c in computed_columns:
-            if not isinstance(c, dict) and not isinstance(c, string_types):
-                raise PerspectiveError(
-                    "`computed_columns` kwarg must be a list of dicts or strings!"
-                )
-            if isinstance(c, dict):
-                keys = c.keys()
-                valid = (
-                    ("column" in keys)
-                    and ("computed_function_name" in keys)
-                    and ("inputs" in keys)
-                )
-
-                if not valid:
-                    raise PerspectiveError(
-                        "`computed_columns` kwarg must contain `columns`, `computed_function_name`, and `inputs`!"
-                    )
-        return computed_columns
-    else:
-        raise PerspectiveError(
-            "Cannot parse computed columns of type: {}".format(
-                str(type(computed_columns))
-            )
         )
 
 

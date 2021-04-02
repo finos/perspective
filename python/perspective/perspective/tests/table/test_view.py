@@ -1552,41 +1552,29 @@ class TestView(object):
             tbl.view(row_pivots=["a"], column_pivots=["c"], filter=[["a", ">", 1]], aggregates={"a": "avg"}, sort=[["x", "desc"]])
         assert str(ex.value) == "Invalid column 'x' found in View sorts.\n"
 
-    def test_invalid_columns_not_in_computed_should_throw(self):
+    def test_invalid_columns_not_in_expression_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         with raises(PerspectiveCppError) as ex:
             tbl.view(
-                columns=["x"],
-                computed_columns=[
-                    {
-                        "column": "abc",
-                        "computed_function_name": "exp",
-                        "inputs": ["a"]
-                    }
-                ]
+                columns=["abc", "x"],
+                expressions=['// abc \n 1 + 2']
             )
         assert str(ex.value) == "Invalid column 'x' found in View columns.\n"
 
-    def test_should_not_throw_valid_computed_columns(self):
+    def test_should_not_throw_valid_expression(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         view = tbl.view(
             columns=["abc"],
-            computed_columns=[
-                {
-                    "column": "abc",
-                    "computed_function_name": "uppercase",
-                    "inputs": ["c"]
-                }
-            ]
+            expressions=["// abc \n 'hello!'"]
         )
 
         assert view.schema() == {
             "abc": str
         }
 
-    def test_should_not_throw_valid_computed_columns_config(self):
+    def test_should_not_throw_valid_expression_config(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         view = tbl.view(
@@ -1598,76 +1586,9 @@ class TestView(object):
             filter=[["abc", "==", "A"]],
             row_pivots=["abc"],
             column_pivots=["abc"],
-            computed_columns=[
-                {
-                    "column": "abc",
-                    "computed_function_name": "uppercase",
-                    "inputs": ["c"]
-                }
-            ]
+            expressions=["// abc \n 'hello!'"]
         )
 
         assert view.schema() == {
             "abc": str
         }
-
-    def test_should_not_throw_ancestor_computed(self):
-        cc = [
-            {
-                "column": "exp(Discount)",
-                "computed_function_name": "exp",
-                "inputs": ["Discount"],
-            },
-            {
-                "column": "(Profit * exp(Discount))",
-                "computed_function_name": "*",
-                "inputs": ["Profit", "exp(Discount)"],
-            },
-            {
-                "column": "(Sales + (Profit * exp(Discount)))",
-                "computed_function_name": "+",
-                "inputs": ["Sales", "(Profit * exp(Discount))"],
-            },
-            {
-                "column": "(Profit * Discount)",
-                "computed_function_name": "*",
-                "inputs": ["Profit", "Discount"],
-            },
-            {
-                "column": "sqrt(Row ID)",
-                "computed_function_name": "sqrt",
-                "inputs": ["Row ID"],
-            },
-            {
-                "column": "((Profit * Discount) * sqrt(Row ID))",
-                "computed_function_name": "*",
-                "inputs": ["(Profit * Discount)", "sqrt(Row ID)"],
-            },
-            {
-                "column": "((Sales + (Profit * exp(Discount))) - ((Profit * Discount) * sqrt(Row ID)))",
-                "computed_function_name": "-",
-                "inputs": [
-                    "(Sales + (Profit * exp(Discount)))",
-                    "((Profit * Discount) * sqrt(Row ID))",
-                ],
-            },
-        ]
-
-        table = Table({
-            "Discount": [random.random() for i in range(10)],
-            "Profit": [random.random() for i in range(10)],
-            "Row ID": [random.random() for i in range(10)],
-            "Sales": [random.random() for i in range(10)],
-        })
-
-        view = table.view(
-            columns=["sqrt(Row ID)"],
-            filter=[["((Profit * Discount) * sqrt(Row ID))", ">", 0]],
-            sort=[["exp(Discount)", "desc"]],
-            aggregates={"sqrt(Row ID)": "avg"},
-            computed_columns=cc,
-            row_pivots=["((Sales + (Profit * exp(Discount))) - ((Profit * Discount) * sqrt(Row ID)))"],
-            column_pivots=["((Sales + (Profit * exp(Discount))) - ((Profit * Discount) * sqrt(Row ID)))"]
-        )
-
-        assert view.num_columns() == 20

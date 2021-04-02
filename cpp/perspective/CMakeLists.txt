@@ -570,7 +570,7 @@ set (PYTHON_BINDING_SOURCE_FILES
 )
 
 if (WIN32)
-	set(CMAKE_CXX_FLAGS " /EHsc /MP")
+	set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
 else()
 	set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 endif()

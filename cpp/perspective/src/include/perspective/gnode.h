@@ -425,7 +425,7 @@ t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_
     auto ctx_config = ctx->get_config();
 
     ctx->step_begin();
-    // Flattened has the computed columns at this point, as it has
+    // Flattened has the expressions at this point, as it has
     // passed through the body of `process_table`.
     ctx->notify(flattened, delta, prev, current, transitions, existed);
     ctx->step_end();
