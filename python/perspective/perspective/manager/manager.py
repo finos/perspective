@@ -6,9 +6,9 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import six
 import random
 import string
-import types
 from functools import partial
 from ..core.exception import PerspectiveError
 from ..table import Table
@@ -104,15 +104,22 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         """Return a table under management by name."""
         return self._tables.get(name, None)
 
+    def get_table_names(self):
+        """Return the tables that are hosted with this manager by name."""
+        return list(six.iterkeys(self._tables))
+
     def new_session(self):
         return PerspectiveSession(self)
 
     def call_loop(self, f, *args, **kwargs):
         """Calls `f()` on this `PerspectiveManager`'s event loop if it has one,
-        or synchronously if it does not.
+        or raise a PerspectiveError if there is no loop callback set using
+        `set_loop_callback()`.
         """
         if self._loop_callback is None:
-            return f(*args, **kwargs)        
+            raise PerspectiveError(
+                "Event loop not set on this PerspectiveManager - use set_loop_callback() before calling call_loop()."
+            )
         return self._loop_callback(f, *args, **kwargs)
 
     def set_loop_callback(self, loop_callback):
@@ -123,13 +130,13 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         hosts must only be interacted with from the same thread.
 
         Args:
-            loop_callback: A Function which accepts a Function arguments
-                and schedules it to run on the same thread on which
-                `set_loop_callback()` was originally invoked.
+            loop_callback: A function which accepts a function reference and
+                its args/kwargs, and schedules it to run on the same thread
+                on which set_loop_callback()` was originally invoked.
         """
         if self._loop_callback is not None:
             raise PerspectiveError("PerspectiveManager already has a `loop_callback`")
-        if type(loop_callback) is not types.FunctionType:
+        if not callable(loop_callback):
             raise PerspectiveError("`loop_callback` must be a function")
         self._loop_callback = loop_callback
         for table in self._tables.values():

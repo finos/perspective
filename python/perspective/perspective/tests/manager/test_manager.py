@@ -46,6 +46,14 @@ class TestPerspectiveManager(object):
         with raises(PerspectiveError):
             manager.host({})
 
+    def test_manager_host(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host(table)
+        table.update({"a": [4, 5, 6], "b": ["d", "e", "f"]})
+        names = manager.get_table_names()
+        assert manager.get_table(names[0]).size() == 6
+
     def test_manager_host_table_transitive(self):
         manager = PerspectiveManager()
         table = Table(data)
