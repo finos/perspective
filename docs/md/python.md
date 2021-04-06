@@ -247,10 +247,10 @@ using a websocket API.
 By default, `perspective` will run with a synchronous interface.  Using the
 `PerspectiveManager.set_loop_callback()` method, `perspective` can be configured
 to defer the application of side-effectful calls like `update()` to an event
-loop, such as `asyncio`.  When running in Async mode, Perspective will release
-the GIL for some operations, enabling better parallelism and overall better
-server performance.  There are a few important differences when running
-`PerspectiveManager` in this mode:
+loop, such as `tornado.ioloop.IOLoop`.  When running in Async mode, Perspective
+will release the GIL for some operations, enabling better parallelism and
+overall better server performance.  There are a few important differences when
+running `PerspectiveManager` in this mode:
 
   * Calls to methods like `update()` will return immediately, and the reciprocal 
     `on_update()` callbacks will be invoked on an event later scheduled.  Calls
