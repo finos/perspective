@@ -12,6 +12,7 @@ import {ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin} from "@jupyterl
 import {IThemeManager, WidgetTracker, Dialog, showDialog} from "@jupyterlab/apputils";
 import {ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget} from "@jupyterlab/docregistry";
 import {PerspectiveWidget} from "./psp_widget";
+import {Table} from "@finos/perspective";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const perspective = require("@finos/perspective");
@@ -82,19 +83,21 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 // don't handle other mimetypes for now
                 throw "Not handled";
             }
-            perspective
-                .worker()
-                .table(data)
-                .then((table: any) => {
-                    this._table = table;
-                    if (this._psp.viewer.table === undefined) {
-                        // construct new table
-                        this._psp.viewer.load(this._table);
-                    } else {
-                        // replace existing table for whatever reason
-                        this._psp.replace(this._table);
-                    }
-                });
+
+            if (this._psp.viewer.table === undefined) {
+                // construct new table
+                this._psp.viewer.load(
+                    perspective
+                        .worker()
+                        .table(data)
+                        .then((table: Table) => {
+                            this._table = table;
+                        })
+                );
+            } else {
+                // replace existing table for whatever reason
+                this._psp.replace(data);
+            }
         } catch {
             baddialog();
         }
@@ -118,7 +121,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
     private _type: IPerspectiveDocumentType;
     private _context: DocumentRegistry.Context;
     private _psp: PerspectiveWidget;
-    private _table: any;
+    private _table: Table;
     private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null = null;
 }
 
