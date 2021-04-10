@@ -178,6 +178,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         if (this.mode === MODE.GLOBAL_FILTERS && master && master.widgets.length > 0) {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
+            if (this.masterPanel.isAttached) {
+                this.masterPanel.close();
+            }
+
             this.addWidget(this.detailPanel);
         }
 

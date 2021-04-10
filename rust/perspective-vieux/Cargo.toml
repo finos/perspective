@@ -43,6 +43,7 @@ features = [
     "Clipboard",
     "CssStyleDeclaration", 
     "CustomEvent",
+    "CustomEventInit",
     "Document",
     "Element",
     # "DomTokenList",
