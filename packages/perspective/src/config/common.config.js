@@ -56,12 +56,12 @@ function common({no_minify, inline} = {}) {
                 },
                 inline
                     ? {
-                          test: /perspective\.cpp\.wasm$/,
+                          test: /\.wasm$/,
                           type: "javascript/auto",
                           loader: "arraybuffer-loader"
                       }
                     : {
-                          test: /perspective\.cpp\.wasm$/,
+                          test: /\.wasm$/,
                           type: "javascript/auto",
                           loader: "file-loader",
                           options: {name: "[name].[ext]"}

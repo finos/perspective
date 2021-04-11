@@ -55,6 +55,6 @@
         "typescript": "^3.7.4"
     },
     "jupyterlab": {
-        "extension": "dist/index.js"
+        "extension": true
     }
 }

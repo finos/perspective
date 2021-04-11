@@ -8,7 +8,13 @@
  *
  */
 
-export const wasm = import("./index.js");
+import init, * as internal from "../../pkg/perspective_vieux.js";
+import wasm_internal from "../../pkg/perspective_vieux_bg.wasm";
+
+export const wasm = init(wasm_internal).then(() => {
+    internal.set_panic_hook();
+    return internal;
+});
 
 let _index = undefined;
 async function _await_index(f) {
