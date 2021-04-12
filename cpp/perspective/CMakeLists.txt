@@ -318,15 +318,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 	# TBB is a dependency that we can build as part of our build process, so it
 	# does not necessarily have to be present before Perspective is built.
-	find_package(TBB)
-
-	if(NOT TBB_FOUND)
-		psp_build_message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
-		psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
-	else()
-		psp_build_message("${Cyan}Found TBB: TBB_INCLUDE_DIRS - ${TBB_INCLUDE_DIRS}, TBB_LIBRARY_DIRS - ${TBB_LIBRARY_DIRS} ${ColorReset}")
-		include_directories( ${TBB_INCLUDE_DIRS} )
-	endif()
+	psp_build_message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
+	psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
 
 	if(WIN32)
 		foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
