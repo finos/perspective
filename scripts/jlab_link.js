@@ -6,12 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const path = require("path");
-const {existsSync} = require("fs");
-const {execute, execute_return} = require("./script_utils.js");
+const {execute} = require("./script_utils.js");
 
 // Packages listed as dependencies & dev dependencies inside Jupyterlab plugin
-const packages = ["perspective", "perspective-viewer", "perspective-viewer-datagrid", "perspective-viewer-d3fc", "perspective-test", "perspective-webpack-plugin"].map(pkg => `@finos/${pkg}`);
+const packages = ["perspective", "perspective-viewer", "perspective-viewer-datagrid", "perspective-viewer-d3fc"];
 
 /**
  * In order for Jupyterlab to pick up changes to @finos/perspective-* in the
@@ -32,37 +30,7 @@ const packages = ["perspective", "perspective-viewer", "perspective-viewer-datag
  */
 (async function() {
     try {
-        // check if @finos packages are already linked
-        const link_path = path.resolve(process.env.HOME, ".config/yarn/link", "@finos");
-
-        if (!existsSync(link_path)) {
-            throw Error(`No @finos links found in ${link_path} - run \`yarn link\` inside all Perspective packages first.`);
-        }
-
-        const paths = await execute_return("jupyter lab path");
-        const app_path = paths["stdout"]
-            .split("\n")[0]
-            .split(":")[1]
-            .trim();
-        const staging_path = path.resolve(app_path, "staging");
-
-        if (!existsSync(staging_path)) {
-            throw Error("Jupyterlab staging path does not exist - run `jupyter lab build` first.");
-        }
-
-        process.chdir(staging_path);
-
-        // Run yarn link inside jlab staging
-        for (const pkg of packages) {
-            execute(`yarn link ${pkg}`);
-        }
-
-        // Build from Perspective root
-        process.chdir(path.resolve(__dirname, ".."));
-        console.log("--------------------------");
-        execute("jupyter lab build");
-
-        console.log("--------------------------");
+        execute`jupyter labextension link ${packages.map(x => `./packages/${x}`).join(" ")}`;
         console.log("Jupyterlab should now have all changes from the current working directory. To pick up new changes, run `yarn build` and `jupyter lab build`.");
     } catch (e) {
         console.error(e);

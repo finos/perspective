@@ -50,6 +50,12 @@ module.exports = {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 loader: "ts-loader"
+            },
+            {
+                test: /\.wasm$/,
+                type: "javascript/auto",
+                include: path.dirname(require.resolve("@finos/perspective-viewer")),
+                loader: "arraybuffer-loader"
             }
         ]
     },

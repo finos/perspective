@@ -49,7 +49,7 @@ class PerspectiveWebpackPlugin {
 
         if (!(this.options.inline || this.options.inlineWasm)) {
             rules.push({
-                test: /perspective\.cpp\.wasm$/,
+                test: /\.wasm$/,
                 type: "javascript/auto",
                 include: this.options.wasmPath,
                 use: {
@@ -61,7 +61,7 @@ class PerspectiveWebpackPlugin {
             });
         } else {
             rules.push({
-                test: /perspective\.cpp\.wasm$/,
+                test: /\.wasm$/,
                 type: "javascript/auto",
                 include: this.options.wasmPath,
                 loader: "arraybuffer-loader"

@@ -17,7 +17,7 @@
         "src/**/*"
     ],
     "scripts": {
-        "build:wasm": "wasm-pack build --debug",
+        "build:wasm": "wasm-pack build --target web",
         "build:rollup": "rollup --config rollup.config.js",
         "build": "npm-run-all build:rollup build:wasm && cpx 'src/less/*' dist/less",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",

@@ -37,13 +37,12 @@ const baddialog = (): void => {
     });
 };
 
+const WORKER = perspective.worker();
 export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
     constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, type: IPerspectiveDocumentType = "csv") {
         super({content: new PerspectiveWidget("Perspective"), context: options.context, reveal: options.reveal});
 
         this._psp = this.content;
-        this._table = undefined;
-
         this._type = type;
         this._context = options.context;
 
@@ -82,19 +81,14 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 // don't handle other mimetypes for now
                 throw "Not handled";
             }
-            perspective
-                .worker()
-                .table(data)
-                .then((table: any) => {
-                    this._table = table;
-                    if (this._psp.viewer.table === undefined) {
-                        // construct new table
-                        this._psp.viewer.load(this._table);
-                    } else {
-                        // replace existing table for whatever reason
-                        this._psp.replace(this._table);
-                    }
-                });
+
+            if (this._psp.viewer.table === undefined) {
+                // construct new table
+                this._psp.viewer.load(WORKER.table(data));
+            } else {
+                // replace existing table for whatever reason
+                this._psp.replace(data);
+            }
         } catch {
             baddialog();
         }
@@ -118,7 +112,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
     private _type: IPerspectiveDocumentType;
     private _context: DocumentRegistry.Context;
     private _psp: PerspectiveWidget;
-    private _table: any;
     private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null = null;
 }
 
