@@ -37,6 +37,7 @@ const baddialog = (): void => {
     });
 };
 
+const WORKER = perspective.worker();
 export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
     constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, type: IPerspectiveDocumentType = "csv") {
         super({content: new PerspectiveWidget("Perspective"), context: options.context, reveal: options.reveal});
@@ -83,7 +84,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
             if (this._psp.viewer.table === undefined) {
                 // construct new table
-                this._psp.viewer.load(perspective.worker().table(data));
+                this._psp.viewer.load(WORKER.table(data));
             } else {
                 // replace existing table for whatever reason
                 this._psp.replace(data);

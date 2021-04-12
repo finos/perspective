@@ -58,8 +58,9 @@ module.exports = {
 
 Otherwise, you'll need to configure your `webpack.config.js` to handle these
 `perspective` assets correctly.  ~`@finos/perspective-webpack-plugin` itself
-uses a combination of `worker-loader` and `file-loader`, which can be easily
-modified as needed:
+uses a combination of `worker-loader` and `file-loader` (or `arraybuffer-loader`
+to inline the contents of this file as a base64-encoded string), which can be
+easily modified as needed:
 
 ```javascript
 module.exports = {
@@ -71,10 +72,16 @@ module.exports = {
             loader: "worker-loader"
         },
         {
-            test: /perspective\.cpp\.wasm$/,
+            test: /perspective\.wasm$/,
             type: "javascript/auto",
             include: path.dirname(require.resolve("@finos/perspective")),
-            loader: "file-loader"
+            loader: "file-loader" // or "arraybuffer-loader"
+        },
+        {
+            test: /perspective-viewer\.wasm$/,
+            type: "javascript/auto",
+            include: path.dirname(require.resolve("@finos/perspective-viewer")),
+            loader: "file-loader" // or "arraybuffer-loader"
         }
     ]
 };
