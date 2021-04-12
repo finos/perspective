@@ -481,6 +481,10 @@ PerspectiveWidget(table)
 PerspectiveWidget(None)
 ```
 
+## `PerspectiveRenderer`
+
+Perspective also exposes a JS-only `mimerender-extension`. This lets you view `csv`, `json`, and `arrow` files directly from the file browser. You can see this by right clicking one of these files and `Open With->CSVPerspective` (or `JSONPerspective` or `ArrowPerspective`). Perspetive will also install itself as the default handler for opening `.arrow` files.
+
 ## `PerspectiveTornadoHandler`
 
 Perspective ships with a pre-built Tornado handler that makes integration with

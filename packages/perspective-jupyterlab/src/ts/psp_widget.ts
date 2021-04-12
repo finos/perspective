@@ -31,6 +31,7 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     column_pivots?: Pivots;
     row_pivots?: Pivots;
     computed_columns?: ComputedColumns;
+    editable?: boolean;
 }
 
 /**
@@ -56,7 +57,7 @@ export class PerspectiveWidget extends Widget {
      *
      * @param options
      */
-    _set_attributes(options: PerspectiveWidgetOptions): void {
+    _set_attributes(options: PerspectiveViewerOptions & PerspectiveWidgetOptions): void {
         const plugin: string = options.plugin || "datagrid";
         const columns: Columns = options.columns || [];
         const row_pivots: Pivots = options.row_pivots || options["row-pivots"] || [];

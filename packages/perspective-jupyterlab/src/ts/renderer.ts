@@ -38,9 +38,10 @@ const baddialog = (): void => {
 };
 
 const WORKER = perspective.worker();
+
 export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
     constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, type: IPerspectiveDocumentType = "csv") {
-        super({content: new PerspectiveWidget("Perspective"), context: options.context, reveal: options.reveal});
+        super({content: new PerspectiveWidget("Perspective", {editable: true}), context: options.context, reveal: options.reveal});
 
         this._psp = this.content;
         this._type = type;
@@ -56,7 +57,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         });
     }
 
-    private _update(): void {
+    private async _update(): Promise<void> {
         try {
             let data;
             if (this._type === "csv") {
@@ -84,13 +85,39 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
             if (this._psp.viewer.table === undefined) {
                 // construct new table
-                this._psp.viewer.load(WORKER.table(data));
+                const table = await WORKER.table(data);
+
+                // load data
+                this._psp.viewer.load(table);
+
+                // create a flat view
+                const view = await table.view();
+                view.on_update(() => {
+                    if (this._type === "csv") {
+                        view.to_csv().then((result: string) => {
+                            this.context.model.fromString(result);
+                            this.context.save();
+                        });
+                    } else if (this._type === "arrow") {
+                        view.to_arrow().then((result: ArrayBuffer) => {
+                            const resultAsB64 = btoa(new Uint8Array(result).reduce((acc, i) => (acc += String.fromCharCode.apply(null, [i])), ""));
+                            this.context.model.fromString(resultAsB64);
+                            this.context.save();
+                        });
+                    } else if (this._type === "json") {
+                        view.to_json().then((result: any) => {
+                            this.context.model.fromJSON(result);
+                            this.context.save();
+                        });
+                    }
+                });
             } else {
                 // replace existing table for whatever reason
                 this._psp.replace(data);
             }
-        } catch {
+        } catch (e) {
             baddialog();
+            throw e;
         }
 
         // pickup theme from env
