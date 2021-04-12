@@ -316,9 +316,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
 
-	# TBB is a dependency that we can build as part of our build process, so it
-	# does not necessarily have to be present before Perspective is built.
-	psp_build_message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
+	# TBB is a dependency that we build as part of our build process.
 	psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
 
 	if(WIN32)
