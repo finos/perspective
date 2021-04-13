@@ -1,0 +1,10 @@
+{
+    "ServerApp": {
+        "token": "",
+        "password": "",
+        "answer_yes": true,
+        "allow_remote_access": true,
+        "disable_check_xsrf": true,
+        "allow_password_change": false
+    }
+}

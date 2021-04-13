@@ -294,6 +294,33 @@ jobs:
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
 
+- job: "Jupyterlab"
+  dependsOn: ["WebAssembly", "Linux"]
+  pool: 
+    vmImage: "ubuntu-16.04"
+
+  steps:
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.linuxInitSteps }}
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
+        artifactName: "perspective-viewer-d3fc-$(Build.BuildNumber)"
+
+    - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
+      displayName: "Install perspective-python from wheel"
+
+    - bash: python -m pip install jupyterlab
+      displayName: "Install Jupyterlab"
+
+    - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
+      displayName: "Install Labextensions"
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
+        artifactName: "perspective-workspace-$(Build.BuildNumber)"
 
 - job: 'Windows'
   pool:

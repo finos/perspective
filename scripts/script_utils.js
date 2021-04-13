@@ -17,6 +17,7 @@ const rimraf = require("rimraf");
 const {promisify} = require("util");
 
 const isWin = process.platform === "win32";
+const isMacOS = process.platform === "darwin";
 
 /*******************************************************************************
  *
@@ -249,11 +250,12 @@ const getarg = (exports.getarg = function(flag, ...args) {
  * A `bash` expression for running commands in Docker images
  *
  * @param {string} image The Docker image name.
+ * @param {bool} network_host whether to pass `--network=host` to Docker
  * @returns {string} A command for invoking this docker image.
  * @example
  * execute`${docker()} echo "Hello from Docker"`;
  */
-exports.docker = function docker(image = "puppeteer") {
+exports.docker = function docker(image = "puppeteer", network_host = false) {
     console.log(`-- Creating perspective/${image} docker image`);
     const IS_WRITE = getarg("--write") || process.env.WRITE_TESTS;
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
@@ -271,13 +273,21 @@ exports.docker = function docker(image = "puppeteer") {
         env_vars += bash` -ePSP_MANYLINUX=1 `;
     }
 
-    let ret = bash`docker run \
+    // network=host only works on Docker for Linux, not on MacOS or Windows
+    if (IS_CI && network_host && !isWin && !isMacOS) {
+        flags += bash` --network="host"`;
+    }
+
+    // Allow for host.docker.internal to be used, which allows Docker
+    // images to connect to servers hosted on localhost.
+    flags += bash` --add-host=host.docker.internal:host-gateway`;
+
+    return bash`docker run \
         ${flags} \
         ${env_vars} \
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
         --cpus="${CPUS}.0" ${IMAGE}`;
-    return ret;
 };
 
 /**

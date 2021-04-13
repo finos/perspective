@@ -1,0 +1,18 @@
+{
+    "NotebookApp": {
+        "token": "",
+        "password": "",
+        "default_url": "/lab?reset",
+        "allow_remote_access": true,
+        "disable_check_xsrf": true,
+        "enable_mathjax": false
+    },
+    "LabApp": {
+        "tornado_settings": {
+            "page_config_data": {
+                "buildCheck": false,
+                "buildAvailable": false
+            }
+        }
+    }
+}

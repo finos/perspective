@@ -6,6 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-module.exports = async function() {
-    await global.__BROWSER__.close();
-};
+const main_config = require("@finos/perspective-test/jest.config.js");
+
+module.exports = Object.assign(main_config, {
+    globalSetup: "<rootDir>/test/config/jupyter/globalSetup.js",
+    testMatch: ["<rootDir>/test/jupyter/*.spec.js"],
+    roots: ["test"]
+});
