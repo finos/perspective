@@ -82,8 +82,8 @@ function get_psp_type(metadata) {
     }
 }
 
-async function sortHandler(regularTable, event) {
-    const meta = regularTable.getMeta(event.target);
+async function sortHandler(regularTable, event, target) {
+    const meta = regularTable.getMeta(target);
     const column_name = meta.column_header[meta.column_header.length - 1];
     const sort_method = event.shiftKey ? append_sort : override_sort;
     const sort = sort_method.call(this, column_name);
@@ -149,11 +149,23 @@ async function expandCollapseHandler(regularTable, event) {
 }
 
 function mousedownListener(regularTable, event) {
-    if (event.target.classList.contains("psp-tree-label") && event.offsetX < 26) {
+    if (event.which !== 1) {
+        return;
+    }
+
+    let target = event.target;
+    while (target.tagName !== "TD" && target.tagName !== "TH") {
+        target = target.parentElement;
+        if (!regularTable.contains(target)) {
+            return;
+        }
+    }
+
+    if (target.classList.contains("psp-tree-label") && event.offsetX < 26) {
         expandCollapseHandler.call(this, regularTable, event);
         event.handled = true;
-    } else if (event.target.classList.contains("psp-header-leaf") && !event.target.classList.contains("psp-header-corner")) {
-        sortHandler.call(this, regularTable, event);
+    } else if (target.classList.contains("psp-header-leaf") && !target.classList.contains("psp-header-corner")) {
+        sortHandler.call(this, regularTable, event, target);
         event.handled = true;
     }
 }
@@ -257,5 +269,11 @@ export async function createModel(regular, table, view, extend = {}) {
 export async function configureRegularTable(regular, model) {
     regular.addStyleListener(styleListener.bind(model, regular));
     regular.addEventListener("mousedown", mousedownListener.bind(model, regular));
-    await regular.draw();
+    try {
+        await regular.draw();
+    } catch (e) {
+        if (e.message !== "View is not initialized") {
+            throw e;
+        }
+    }
 }
