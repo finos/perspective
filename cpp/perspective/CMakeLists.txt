@@ -591,7 +591,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         set(CMAKE_MACOSX_RPATH TRUE)
         set(CMAKE_SKIP_BUILD_RPATH FALSE)
 		set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
         set(CMAKE_INSTALL_NAME_DIR "@rpath/")
 
 		# module_origin_path is the location of the binary
@@ -649,15 +649,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# setup.py file, we designate this to be in the build/lib.<platform> directory. However,
 		# since we want to be able to test perspective in-source, we also copy the libraries into
 		# the source folder. These two commands do that.
+		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tbb> ${PSP_PYTHON_SRC}/table/)
 		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
 		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
-
-		if(WIN32)
-			if(NOT TBB_FOUND)
-				add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tbb> ${PSP_PYTHON_SRC}/table/)
-			endif()
-		endif()
-		########################
 	else()
 		add_library(psp SHARED ${WASM_SOURCE_FILES})
 		target_link_libraries(psp arrow)
