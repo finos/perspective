@@ -223,6 +223,43 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it.skip("x == 1 pivoted, rolling updates", async function() {
+                var table = await perspective.table(
+                    {
+                        a: [1, 2, 3, 4],
+                        b: ["a", "b", "c", "d"],
+                        c: ["A", "B", "C", "D"]
+                    },
+                    {
+                        index: "c"
+                    }
+                );
+                var view = await table.view({
+                    row_pivots: ["a"],
+                    columns: ["b", "c"]
+                });
+
+                let out = await view.to_columns();
+                expect(out["__ROW_PATH__"]).toEqual([[], [1], [2], [3], [4]]);
+
+                for (let i = 0; i < 5; i++) {
+                    table.update([{x: 1}]);
+                }
+
+                expect(await view.to_columns()).toEqual({
+                    x: [1, 1, 1, 1, 1, 1]
+                });
+
+                table.update([{x: 2}]);
+
+                expect(await view.to_columns()).toEqual({
+                    x: [1, 1, 1, 1, 1, 1]
+                });
+
+                view.delete();
+                table.delete();
+            });
+
             it("x == 5", async function() {
                 var table = await perspective.table(data);
                 var view = await table.view({

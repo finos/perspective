@@ -121,6 +121,7 @@
         "setup": "node scripts/setup.js",
         "docs": "node scripts/docs.js",
         "test": "node scripts/test.js",
+        "test:jupyter": "yarn workspace @finos/perspective-jupyterlab test:jupyter",
         "test_js": "node scripts/test_js.js",
         "test_python": "node scripts/test_python.js",
         "clean": "node scripts/clean.js",

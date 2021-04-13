@@ -7,16 +7,19 @@
  *
  */
 
-const {bash, execute, getarg, docker} = require("./script_utils.js");
+const {bash, execute, getarg, docker, execute_throw} = require("./script_utils.js");
 const minimatch = require("minimatch");
 const fs = require("fs");
 
+const PACKAGE = process.env.PACKAGE;
 const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
 const IS_INSIDE_PUPPETEER = !!getarg("--private-puppeteer");
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
-const PACKAGE = process.env.PACKAGE;
+// Unfortunately we have to handle parts of the Jupyter test case here,
+// as the Jupyter server needs to be run outside of the main Jest process.
+const IS_JUPYTER = getarg("--jupyter") && minimatch("perspective-jupyterlab", PACKAGE);
 
 if (IS_WRITE) {
     console.log("-- Running the test suite in Write mode");
@@ -58,21 +61,23 @@ function jest_all() {
 /**
  * Run tests for a single package.
  */
-function jest_single() {
+function jest_single(cmd) {
     console.log(`-- Running "${PACKAGE}" test suite`);
+    const RUN_IN_BAND = getarg("--interactive") || IS_JUPYTER ? "--runInBand" : "";
     return bash`
         PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE}
+        IS_LOCAL_PUPPETEER=${IS_LOCAL_PUPPETEER}
         TZ=UTC 
         node_modules/.bin/lerna exec 
         --concurrency 1 
         --no-bail
         --scope="@finos/${PACKAGE}" 
         -- 
-        yarn test:run
+        yarn ${cmd ? cmd : "test:run"}
         ${DEBUG_FLAG}
-        ${getarg("--interactive") && "--runInBand"}
+        ${RUN_IN_BAND}
         --testNamePattern="${get_regex()}"`;
 }
 
@@ -102,9 +107,14 @@ function get_regex() {
 
 try {
     if (!IS_INSIDE_PUPPETEER && !IS_LOCAL_PUPPETEER) {
+        if (IS_JUPYTER) {
+            throw new Error("Error: Jupyterlab tests must be run against local puppeteer!");
+        }
+
         execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
         execute`yarn --silent clean --screenshots`;
+
         if (!PACKAGE || minimatch("perspective-vieux", PACKAGE)) {
             console.log("-- Running Rust tests");
             execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
@@ -116,12 +126,19 @@ try {
             console.log("-- Running Rust tests");
             execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
         }
+
         if (IS_LOCAL_PUPPETEER) {
             execute`yarn --silent clean --screenshots`;
             execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-            execute`node_modules/.bin/lerna run test:build --stream
-                --scope="@finos/${PACKAGE}"`;
+
+            if (IS_JUPYTER) {
+                // Start the Jupyterlab server
+                execute`node_modules/.bin/lerna run test:jupyter:jlab_start --stream --scope="@finos/${PACKAGE}"`;
+            } else {
+                execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
+            }
         }
+
         if (getarg("--quiet")) {
             // Run all tests with suppressed output.
             console.log("-- Running jest in quiet mode");
@@ -129,9 +146,18 @@ try {
             execute(silent(jest_all()));
         } else if (process.env.PACKAGE) {
             // Run tests for a single package.
+            if (IS_JUPYTER) {
+                // Jupyterlab is guaranteed to have started at this point, so
+                // copy the test files over and run the tests.
+                execute`node_modules/.bin/lerna run test:jupyter:build --stream --scope="@finos/${PACKAGE}"`;
+                execute_throw(jest_single("test:jupyter:run"));
+                return;
+            }
+
             if (minimatch("perspective", PACKAGE)) {
                 execute(jest_timezone());
             }
+
             execute(jest_single());
         } else {
             // Run all tests with full output.
