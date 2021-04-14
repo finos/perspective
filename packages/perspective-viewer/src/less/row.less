@@ -65,17 +65,19 @@
 
 :host {
     #filter_operand {
+        font-family: inherit;
+        font-size: 12px;
         display: var(--filter_operand-display, none);
         margin: 0;
         padding: 0px;
         height: 19px;
         color: inherit;
         outline: none;
-        border-color: var(--inactive--color, #ccc);
+        border-color: var(--inactive--color, #C5C9D0);
     }
 
     #filter_operator {
-        margin: 0 0 0 15px;
+        margin: 0 0 0 8px;
         display: var(--filter_operator-display, none);
         height: 17px;
         &:hover {
@@ -150,18 +152,15 @@
     }
 
     #row_close {
-        color: #999;
-        font-family: Arial;
+        color: #1d1d1d;
         font-size: 10px;
         &:hover {
             color: var(--active--color, inherit);
         }
     }
-    #column_aggregate {
-        font-family: Arial;
-    }
 
     .row_draggable select {
+        font-family: inherit;
         border: none;
     }
 
@@ -186,9 +185,12 @@
         background-color: var(--select--background-color, white);
         color: inherit;
         border-radius: 5px;
-        height: 24px;
+        height: 21px;
+        margin-top: 3px;
         padding: var(--column_type--padding, 0px 0px 0px 5px);
         font-size: 12px;
+        font-weight: 300;
+        font-family: inherit;
     }
 
     .awesomplete > ul {
@@ -262,13 +264,13 @@
     .row_draggable {
         background-color: var(
             --active--background,
-            rgb(240, 240, 255)
+            #CBE7F9
         ) !important;
         animation: var(
             --drop-target--animation,
             var(--row_draggable--animation, expand3 0.5s ease-out)
         );
-        box-shadow: inset 0px 0px 0px 3px #1078d1 !important;
+        box-shadow: inset 0px 0px 0px 1px #90CCF2 !important;
     }
 }
 
@@ -354,7 +356,7 @@
 :host #column_aggregate {
     display: var(--column_aggregate-display, none);
     font-size: 10px;
-    font-family: @sans-serif-fonts;
+    font-family: inherit;
     width: 88%;
     height: 20px;
 }

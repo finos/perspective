@@ -10,6 +10,7 @@
 @import "./column_labels.less";
 @import "./variables.less";
 // @import "./status_bar.less";
+@import "./scrollbars.less";
 
 
 .button {
@@ -91,6 +92,7 @@
         margin-left: 24px;
         margin-top: 3px;
         font-size: 12px;
+        font-weight: 300;
     }
     .side_panel-action:hover {
         cursor: pointer;
@@ -297,6 +299,8 @@
     }
     #top_panel perspective-row::after {
         content: ",";
+        line-height: 26px;
+        padding-left: 4px;
     }
     #top_panel perspective-row:last-child::after {
         display: none;
@@ -357,9 +361,11 @@
         background-color: #fff;
         color: inherit;
         border-radius: 5px;
-        height: 24px;
+        height: 21px;
+        margin-top: 3px;
         padding: var(--select--padding, 0px 0px 0px 6px);
         font-size: 12px;
+        font-weight: 300;
         font-family: inherit;
     }
     input {
@@ -404,9 +410,10 @@
         min-width: 5px;
         max-width: 5px;
         flex-grow: 0;
-        color: #999;
+        color: #1d1d1d;
         font-family: Arial;
         font-size: 12px;
+        user-select: none;
         &:hover {
             color: var(--active--color, inherit);
         }
@@ -419,27 +426,5 @@
         bottom: 0;
         width: 8px;
         cursor: col-resize;
-    }
-
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    :hover::-webkit-scrollbar-thumb {
-        background-color: rgba(0,0,0,0.15);
-    }
-    
-    :hover::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(0,0,0,0.3);
-    }
-
-    ::-webkit-scrollbar-thumb {
-        border-radius: 4px;
-        background-color: rgba(0, 0, 0, 0);
-    }
-
-    ::-webkit-scrollbar-corner {
-        background-color: rgba(0, 0, 0, 0);
     }
 }

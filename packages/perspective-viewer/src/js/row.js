@@ -31,7 +31,7 @@ function get_text_width(text, max = 0) {
     // FIXME get these values form the stylesheet
     SPAN.innerHTML = text;
     document.body.appendChild(SPAN);
-    const width = `${Math.max(max, SPAN.offsetWidth) + 20}px`;
+    const width = `${Math.max(max, SPAN.offsetWidth) + 10}px`;
     document.body.removeChild(SPAN);
     return width;
 }
