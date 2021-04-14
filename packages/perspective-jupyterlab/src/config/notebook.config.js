@@ -19,3 +19,5 @@ baseConfig.externals = [/^([a-z0-9]|@(?!finos\/perspective-viewer)|@(?!jupyter-w
 // rewrite output
 baseConfig.output.path = path.resolve(__dirname, "../../../../python/perspective/perspective/nbextension");
 // TODO export as amd?
+
+module.exports = baseConfig;

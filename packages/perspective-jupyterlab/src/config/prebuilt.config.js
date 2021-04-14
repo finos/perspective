@@ -7,8 +7,11 @@
  *
  */
 
-const path = require("path");
 const baseConfig = require("./plugin.config");
 
 // rewrite output, blank for prebuilt as its specified in package.json
-baseConfig.output = null;
+delete baseConfig.output.filename;
+delete baseConfig.output.publicPath;
+delete baseConfig.output.path;
+
+module.exports = baseConfig;

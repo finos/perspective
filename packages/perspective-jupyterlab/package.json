@@ -27,7 +27,7 @@
         "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd && webpack --color --config src/config/webpack.config.js",
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
         "test": "npm-run-all test:build test:run",
-        "build": "npm-run-all -s build:webpack build:labextension",
+        "build": "npm-run-all -s build:webpack build:labextension build:nbextension",
         "build:webpack": "webpack --color --config src/config/plugin.config.js",
         "build:nbextension": "webpack --color --config src/config/notebook.config.js",
         "build:labextension": "rimraf ../../python/perspective/perspective/labextension && jupyter labextension build .",
