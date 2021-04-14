@@ -94,21 +94,18 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 const view = await table.view();
                 view.on_update(() => {
                     if (this._type === "csv") {
-                        view.to_csv().then((result: string) => {
-                            this.context.model.fromString(result);
-                            this.context.save();
-                        });
+                        const result: string = await view.to_csv();
+                        this.context.model.fromString(result);
+                        this.context.save();
                     } else if (this._type === "arrow") {
-                        view.to_arrow().then((result: ArrayBuffer) => {
-                            const resultAsB64 = btoa(new Uint8Array(result).reduce((acc, i) => (acc += String.fromCharCode.apply(null, [i])), ""));
-                            this.context.model.fromString(resultAsB64);
-                            this.context.save();
-                        });
+                        const result: ArrayBuffer = await view.to_arrow();
+                        const resultAsB64 = btoa(new Uint8Array(result).reduce((acc, i) => (acc += String.fromCharCode.apply(null, [i])), ""));
+                        this.context.model.fromString(resultAsB64);
+                        this.context.save();
                     } else if (this._type === "json") {
-                        view.to_json().then((result: any) => {
-                            this.context.model.fromJSON(result);
-                            this.context.save();
-                        });
+                        const result: any = await view.to_json();
+                        this.context.model.fromJSON(result);
+                        this.context.save();
                     }
                 });
             } else {
