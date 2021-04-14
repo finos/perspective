@@ -22,8 +22,5 @@ import "@finos/perspective-viewer-d3fc";
 import {perspectiveRenderers} from "./renderer";
 import {PerspectiveJupyterPlugin} from "./plugin";
 
-/**
- * Export the renderer as default.
- */
 const plugins = [PerspectiveJupyterPlugin, perspectiveRenderers];
 export default plugins;
