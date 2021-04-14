@@ -24,11 +24,11 @@
 }
 
 .perspective-scroll-panel::-webkit-scrollbar-track {
-    background-color: #eee;
+    background-color: #F2F4F6;
 }
 
 .perspective-scroll-panel::-webkit-scrollbar-corner {
-    background-color: #eee;
+    background-color: #F2F4F6;
 }
 
 .perspective-scroll-panel::-webkit-scrollbar-thumb {
@@ -36,7 +36,7 @@
     //outline: 1px solid #666;
     height: 0.8em;
     width: 0.8em;
-    border: 8px solid #eee;
+    border: 8px solid #F2F4F6;
     border-left-width: 0px;
     border-top-width: 0px;
 }
@@ -82,6 +82,13 @@
 
 .p-DockPanel-handle {
     background-color: none;
+}
+
+.p-SplitPanel-handle, .p-DockPanel-handle {
+    transition: background-color 0.3s ease-out;
+    &:hover {
+        background-color: #E0E4E9;
+    }
 }
 
 .p-DockPanel-overlay {

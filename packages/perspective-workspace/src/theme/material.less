@@ -1,6 +1,5 @@
 @import "~@finos/perspective-viewer/src/less/fonts.less";
 @import (reference) "~@finos/perspective-viewer/src/themes/material-dense.less";
-@import (reference) "~@finos/perspective-viewer/src/themes/material-dense.dark.less";
 
 perspective-workspace {
     .perspective-workspace-material-base();
@@ -8,10 +7,19 @@ perspective-workspace {
 
 perspective-viewer.workspace-detail-widget {
     .perspective-viewer-material-dense();
+    background-color: #F2F4F6;
 }
 
 perspective-viewer.workspace-master-widget {
-    .perspective-viewer-material-dense-dark();
+    .perspective-viewer-material-dense();
+    background-color: #F2F4F6;
+    --plugin--background: #F2F4F6;
+    regular-table {
+        --header-miter--box-shadow-color: #E0E4E9 !important;
+        td, th {
+            border-color: #E0E4E9 !important;
+        }
+    }
 }
 
 .perspective-workspace-material-base() {
