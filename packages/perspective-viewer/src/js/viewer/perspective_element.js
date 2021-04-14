@@ -487,15 +487,14 @@ export class PerspectiveElement extends StateElement {
             computed_columns: computed_columns
         };
 
-        if (this._view) {
-            this._view.remove_update(this._view_updater);
-            await this._vieux.delete_view();
-            this._view.delete();
-            this._view = undefined;
-        }
-
         if (this._task) {
             this._task.cancel();
+        }
+
+        if (this._view) {
+            this._view.remove_update(this._view_updater);
+            this._vieux.delete_view();
+            this._view.delete();
         }
 
         try {
@@ -504,7 +503,6 @@ export class PerspectiveElement extends StateElement {
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
         } catch (e) {
-            this._view.delete();
             throw e;
         }
 

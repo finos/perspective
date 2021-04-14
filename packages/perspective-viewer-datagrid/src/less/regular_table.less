@@ -124,11 +124,6 @@ regular-table thead tr:last-child th {
     color: @negative;
 }
 
-html,
-body {
-    overflow: hidden;
-}
-
 regular-table table {
     user-select: none;
     color: #161616;
@@ -146,8 +141,12 @@ regular-table table {
     }
 
     td, th.psp-tree-label, th.psp-tree-label, th.psp-tree-leaf, tbody tr:first-child th {
-        border: 0px solid rgb(234, 237, 239);
+        border: 0px solid #eaedef;
         border-top-width: 1px;
+    }
+
+    tbody th:empty {
+        background-position: 0px -10px;
     }
 }
 

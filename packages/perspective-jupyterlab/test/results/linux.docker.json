@@ -1,6 +1,6 @@
 {
-    "resize_Basic_widget_functions": "a14f4d324f4bd8a82b4c288d5718f83b",
-    "resize_Resize_the_container_causes_the_widget_to_resize": "a14f4d324f4bd8a82b4c288d5718f83b",
-    "resize_row_pivots_traitlet_works": "dd9ada8ff87ff15db7af2d28a29c5144",
-    "__GIT_COMMIT__": "53aed115cad04a850a54c1b210776c4e64fb5aad"
+    "resize_Basic_widget_functions": "6fbdaeeb91dc93f21703665e7ab4089d",
+    "resize_Resize_the_container_causes_the_widget_to_resize": "6fbdaeeb91dc93f21703665e7ab4089d",
+    "resize_row_pivots_traitlet_works": "a0d948e023565c21315ebbdbcd20004f",
+    "__GIT_COMMIT__": "705ba0fa2e7e5fdf8bfa36e028ae61851f6c6f91"
 }

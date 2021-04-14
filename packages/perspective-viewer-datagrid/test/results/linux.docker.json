@@ -1,10 +1,10 @@
 {
     "superstore_shows_a_grid_without_any_settings_applied_": "0a3182ea48222066684b82a6e11a2b95",
     "superstore_pivots_by_a_row_": "7c51feeccc90fae171743a5b0e76aa33",
-    "superstore_pivots_by_two_rows_": "914240095c6e6e9b4780dc82967e31a9",
+    "superstore_pivots_by_two_rows_": "e96b8101d5946722e67ca701046fc0c3",
     "superstore_pivots_by_a_column_": "803aa562054c3dd3ebeacdba35f014cf",
     "superstore_pivots_by_a_row_and_a_column_": "5b7ea1564132ecbaef94fcdf6dd9524c",
-    "superstore_pivots_by_two_rows_and_two_columns_": "cf1915f6f5f1d09d3cf71fd8f2599785",
+    "superstore_pivots_by_two_rows_and_two_columns_": "f94e2afee46dadd5633ee8e3c0ceb0d0",
     "superstore_sorts_by_a_hidden_column_": "a065e63a3b314c4d972daa1060f24cc8",
     "superstore_sorts_by_a_numeric_column_": "df5a68a909c2ace92b2b1110545a609b",
     "superstore_filters_by_a_numeric_column_": "bef31e80e2a7bda7023f1734db46ed07",
@@ -15,6 +15,6 @@
     "superstore_resets_viewable_area_when_the_logical_size_expands_": "7cf77005d89d0b1676a23c61102c2360",
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "0a3182ea48222066684b82a6e11a2b95",
     "superstore_perspective_dispatches_perspective-click_event_with_correct_details": "0a3182ea48222066684b82a6e11a2b95",
-    "superstore_perspective_dispatches_perspective-click_event_with_correct_details_when_filter_is_set": "10c83ca693abb63574ea013e81b0138f",
-    "__GIT_COMMIT__": "f8db0c8a05e616952f3fec3501b3c0cd17a7dd08"
+    "superstore_perspective_dispatches_perspective-click_event_with_correct_details_when_filter_is_set": "7ab0c09f40c63a01a9efdaf370e8be74",
+    "__GIT_COMMIT__": "705ba0fa2e7e5fdf8bfa36e028ae61851f6c6f91"
 }

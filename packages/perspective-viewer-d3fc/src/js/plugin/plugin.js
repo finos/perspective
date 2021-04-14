@@ -41,24 +41,30 @@ export function register(...plugins) {
 
 function drawChart(chart) {
     return async function(el, view, task, end_col, end_row) {
-        let jsonp;
+        let jsonp, metadata;
         const realValues = JSON.parse(this.getAttribute("columns"));
-
-        if (end_col && end_row) {
-            jsonp = view.to_json({end_row, end_col, leaves_only: true});
-        } else if (end_col) {
-            jsonp = view.to_json({end_col, leaves_only: true});
-        } else if (end_row) {
-            jsonp = view.to_json({end_row, leaves_only: true});
-        } else {
-            jsonp = view.to_json({leaves_only: true});
+        try {
+            if (end_col && end_row) {
+                jsonp = view.to_json({end_row, end_col, leaves_only: true});
+            } else if (end_col) {
+                jsonp = view.to_json({end_col, leaves_only: true});
+            } else if (end_row) {
+                jsonp = view.to_json({end_row, leaves_only: true});
+            } else {
+                jsonp = view.to_json({leaves_only: true});
+            }
+            metadata = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
+        } catch (e) {
+            if (e.message !== "View is not initialized") {
+                throw e;
+            }
         }
-
-        let [table_schema, computed_schema, view_schema, json, config] = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
 
         if (task.cancelled) {
             return;
         }
+
+        let [table_schema, computed_schema, view_schema, json, config] = metadata;
 
         /**
          * Retrieve a tree axis column from the table and computed schemas,
@@ -105,7 +111,7 @@ function getOrCreatePluginElement() {
 function createOrUpdateChart(div, chart, settings) {
     const perspective_d3fc_element = getOrCreatePluginElement.call(this);
 
-    if (!document.body.contains(perspective_d3fc_element)) {
+    if (!div.contains(perspective_d3fc_element)) {
         div.innerHTML = "";
         div.appendChild(perspective_d3fc_element);
     }
