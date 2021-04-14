@@ -173,6 +173,11 @@ jobs:
   pool:
     vmImage: 'ubuntu-16.04'
 
+  strategy:
+    matrix:
+      # Do we care to test elsewhere?
+      python.version: '3.9'
+
   steps:
     - ${{ parameters.initSteps }}
     - ${{ parameters.linuxInitSteps }}
