@@ -17,6 +17,7 @@ import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
+import {PLUGIN_SYMBOL} from "./plugin_menu.js";
 
 const VIEWER_MAP = new WeakMap();
 const INSTALLED = new WeakMap();
@@ -159,9 +160,19 @@ class DatagridPlugin {
         }
     }
 
-    static save() {}
+    static save() {
+        if (VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            if (datagrid[PLUGIN_SYMBOL]) {
+                return JSON.parse(JSON.stringify(datagrid[PLUGIN_SYMBOL]));
+            }
+        }
+    }
 
-    static restore() {}
+    static restore(token) {
+        const datagrid = get_or_create_datagrid(this, this._datavis);
+        datagrid[PLUGIN_SYMBOL] = token;
+    }
 }
 
 /**

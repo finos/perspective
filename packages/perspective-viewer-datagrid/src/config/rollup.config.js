@@ -28,7 +28,7 @@ export default () => {
                 filesize(),
                 postcss({
                     inject: false,
-                    sourceMap: true,
+                    sourceMap: false,
                     minimize: {preset: "lite"}
                 }),
                 sourcemaps()

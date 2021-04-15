@@ -15,15 +15,26 @@ perspective-viewer, .perspective-viewer-material {
     --active--color: @blue500;
 }
 
+perspective-viewer-datagrid-plugin-menu {
+    background-color: #FFFFFF;
+    color: #161616;
+    border: 1px solid #E0E4E9;
+    --input--border-color: #E0E4E9;
+}
+
 .perspective-viewer-material-base() {
     background-color: #F2F4F6;
     font-family: "Open Sans";
+
+    --rt-pos-cell--color: @blue300;
+    --rt-neg-cell--color: @red300;
 
     --interface--font-family: "Open Sans";
     --interface-monospace--font-family: "Roboto Mono";
     --inactive-column-selector--content: "\E835";
     --active-column-selector--content: "\E834";
-    --column--background: none;
+    --column--background: #F2F4F6;
+    --plugin--background: #FFFFFF;
     --column--height: 21px;
     --active-column--height: 51px;
     --inactive-column--height: 24px;

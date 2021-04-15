@@ -4,8 +4,7 @@ const fs = require("fs");
 const hashes = JSON.parse(fs.readFileSync("gists.json"));
 
 const replacements = {
-    "/node_modules/": "https://cdn.jsdelivr.net/npm/",
-    "perspective-workspace/dist/umd/perspective-workspace.js": "perspective-workspace",
+    "/node_modules/": "https://unpkg.com/",
     "perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js": "perspective-viewer-datagrid",
     "perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js": "perspective-viewer-d3fc"
 

@@ -22,8 +22,8 @@
         "test:build": "cpx \"test/html/*\" dist/umd",
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --color",
         "test": "npm-run-all test:build test:run",
-        "watch:babel": "babel src/js --source-maps --watch --out-dir dist/esm",
-        "watch:webpack": "webpack --watch --color --config src/config/umd.config.js",
+        "watch:rollup": "rollup --watch --config src/config/rollup.config.js",
+        "watch:webpack": "webpack --watch --color --config src/config/webpack.config.js",
         "watch": "npm-run-all -p watch:*",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""

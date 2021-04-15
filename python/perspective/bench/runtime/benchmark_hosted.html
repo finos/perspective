@@ -12,7 +12,8 @@
 
 <head>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
     <script src="http://localhost:8080/perspective-viewer"></script>
     <script src="http://localhost:8080/perspective-viewer-datagrid"></script>
@@ -22,21 +23,21 @@
     <link rel='stylesheet' href="http://localhost:8080/material.dark.css">
 
     <style>
-        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
+        perspective-viewer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
     </style>
 
 </head>
 
 <body>
 
-    <perspective-viewer 
-        id="viewer" 
-        editable
-        plugin="d3_y_bar"
-        columns='["__TIME__"]'
-        row-pivots='["group", "name"]'
-        column-pivots='["group", "name"]'
-        aggregates="{'__TIME__':'avg'}">
+    <perspective-viewer id="viewer" editable plugin="d3_y_bar" columns='["__TIME__"]' row-pivots='["group", "name"]'
+        column-pivots='["group", "name"]' aggregates="{'__TIME__':'avg'}">
     </perspective-viewer>
 
     <script>

@@ -730,6 +730,7 @@ class PerspectiveViewer extends ActionElement {
             this.removeAttribute("columns");
         }
         this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
+        this._plugin.restore?.call(this, {});
         this.dispatchEvent(new Event("perspective-config-update"));
     }
 
