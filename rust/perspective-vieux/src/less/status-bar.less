@@ -15,7 +15,7 @@
         align-items: center;
 
         .section {
-            box-shadow: 8px 0px 0px -7px #ccc;
+            box-shadow: 8px 0px 0px -7px var(--pv-divider--color, #ccc);
             display: flex;
             align-items: center;
         
@@ -112,7 +112,6 @@
         }
 
         span.button {
-            text-transform: uppercase;
             margin: 0px;
             padding: 0 5px 0px 10px;
             transition: background-color 0.2s;
@@ -120,6 +119,7 @@
                 pointer-events: none;
                 overflow: hidden;
                 display: none;
+                font-weight: 300;
             }
 
             &:before {
@@ -133,7 +133,7 @@
 
                 min-width: 75px;
                 cursor: pointer;
-                background-color: rgba(0,0,0,0.1);
+                background-color: rgba(0,0,0,0.05);
                 transition: none;
             }
         }

@@ -152,7 +152,7 @@ async function script(page) {
 
     // close filter
     await page.evaluate(viewer => viewer.toggleConfig(), viewer2);
-    await page.waitFor(200);
+    await page.waitFor(1000);
     await page.mouse.click(200, 200, {button: "right"});
     await page.waitFor(100);
     await page.mouse.click(220, 220);
@@ -180,10 +180,14 @@ async function script(page) {
     await poke("row-pivots", ["second_bucket(lastUpdate)"]);
     await page.waitFor(1000);
     await poke("column-pivots", ["client"]);
-    await page.waitFor(3000);
+    await page.waitFor(1000);
+    await poke("filters", [["client", "in", ["Marge", "Lisa"]]]);
+    await page.waitFor(1000);
 
     await poke("plugin", "heatmap");
-    await page.waitFor(3000);
+    await page.waitFor(200);
+    await poke("filters", []);
+    await page.waitFor(1000);
 
     await poke("filters", [["vol", ">", 107]]);
     await page.waitFor(200);
@@ -197,7 +201,7 @@ async function script(page) {
     await page.waitFor(200);
 
     await poke("columns", ["bid"]);
-    await page.waitFor(3000);
+    await page.waitFor(1000);
 
     //script(page);
 }

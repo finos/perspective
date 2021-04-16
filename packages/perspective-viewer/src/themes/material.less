@@ -12,7 +12,7 @@
 
 perspective-viewer, .perspective-viewer-material {
     .perspective-viewer-material-base();
-    --active--color: @blue800;
+    --active--color: @blue500;
 }
 
 .perspective-viewer-material-base() {
@@ -30,8 +30,8 @@ perspective-viewer, .perspective-viewer-material {
     --active-columns--justify-content: space-evenly;
     --inactive-column--opacity: 0.3;
 
-    --float--column-type--color: @blue800;
-    --string--column-type--color: rgb(255,136,136);
+    --float--column-type--color: @blue500;
+    --string--column-type--color: @red500;
 
     --settings-button--content: "more_vert";
     --button--font-family: "Material Icons";
@@ -94,6 +94,14 @@ perspective-viewer, .perspective-viewer-material {
 
     --d3fc-y2-label--font-family: "Material Icons";
     --d3fc-y2-label--content: "arrow_downward";
+    --d3fc-tooltip--background--color: rgba(155,155,155,0.8);
+    --d3fc-tooltip--color: @grey900;
+    --d3fc-tooltip--border-color: #fff;
+    --d3fc-tooltip--box-shadow: @elevation1;
+    --d3fc-gridline--color: #eaedef;
+    --d3fc-axis--ticks: #161616; //@grey500; //rgb(187, 187, 187);
+    --d3fc-axis--lines: @grey60; //@grey500; //rgb(85, 85, 85);
+    --d3fc-legend--background: rgba(255,255,255,0.8);
 
     regular-table::-webkit-scrollbar-thumb {
         background-color: #E0E4E9;

@@ -128,7 +128,6 @@
         right: 0;
         bottom: 0;
         border: var(--plugin--border, none);
-        overflow: hidden;
     }
     .config {
         display: flex;
@@ -193,8 +192,7 @@
         flex-direction: column;
         overflow-x: hidden;
         width: 100%;
-        flex: 0 1 auto;
-        min-height: 35px;
+        flex: 0 100 auto;
         &.collapse {
             flex: 0 1 auto;
             flex-shrink: 0;
@@ -208,7 +206,7 @@
         }
     }
     #app:not(.columns_horizontal) #columns_container:not(.collapse) #active_columns {
-        max-height: 60%;
+        max-height: ~"min(calc(100% - 95px), 60%)";
     }
     #columns_container.collapse #sub_columns {
         flex: 0 1 auto;
@@ -410,7 +408,7 @@
         min-width: 5px;
         max-width: 5px;
         flex-grow: 0;
-        color: #1d1d1d;
+        color: var(--inactive--color, inherit);
         font-family: Arial;
         font-size: 12px;
         user-select: none;

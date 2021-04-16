@@ -407,7 +407,9 @@ export class PerspectiveElement extends StateElement {
                     timer();
                     task.cancel();
                 } catch (err) {
-                    console.error("Error rendering plugin.", err);
+                    if (err.message !== "View is not initialized") {
+                        console.error("Error rendering plugin.", err);
+                    }
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }

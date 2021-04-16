@@ -12,7 +12,7 @@
 .p-TabBar-tabLabel {
     background-color: transparent;
     border: none;
-    color: #666;
+    color: var(--workspace-secondary--color, #666);
     cursor: pointer;
 }
 
@@ -22,7 +22,7 @@
 
 .p-TabBar-tabLabel:focus {
     outline: none;
-    color: #666 !important;
+    color:  var(--workspace-secondary--color, #666) !important;
     cursor: text;
 }
 
@@ -97,13 +97,12 @@
     left: 14px;
     bottom: 0;
     position: absolute;
-    // background: #ccc;
     right: 14px;
     display: none;
     transition: background-color 0.2s ease-out, width 0.2s ease-out;
 
     height: 1px;
-    background-color: #eaeaea;
+    background-color: var(--workspace-tabbar--border-color, #eaeaea);
     margin-bottom: 0px;
 }
 
@@ -174,7 +173,7 @@
 }
 
 .p-TabBar-content.inactive-blur > .p-TabBar-tab {
-    background-color: #EAEDEF;
+    background-color:var(--workspace-inactive-blur--background-color, rgba(0,0,0,0.05));
 }
 
 .condensed .p-TabBar-content {
@@ -249,7 +248,7 @@
 }
 
 .p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
-    color: #666;
+    color:  var(--workspace-secondary--color, #666);
 }
 
 .p-TabBar-content > .p-TabBar-tab:hover {
@@ -257,7 +256,7 @@
 }
 
 .p-TabBar-content > .p-TabBar-tab.p-mod-current {
-    color: #666;
+    color:  var(--workspace-secondary--color, #666);
 }
 
 .p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
@@ -296,9 +295,9 @@
 }
 
 .p-TabBar-content > .p-TabBar-tab.p-mod-current {
-    color: var(--detail-tabbar--color, #666) !important;
-    border: var(--detail-tabbar--border, @border-color);
-    background-color: var(--detail-tabbar--background-color, white);
+    color: var(--workspace-tabbar--color, #666) !important;
+    border: var(--workspace-tabbar--border, @border-color);
+    background-color: var(--workspace-tabbar--background-color, white);
     height: 26px !important;
     max-height: 26px !important;
 }

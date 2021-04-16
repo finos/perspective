@@ -29,7 +29,7 @@ styleElement.innerText = `
 .homeContainer perspective-viewer, perspective-viewer {
     box-shadow: none !important;
     overflow: visible !important;
-    --plugin--box-shadow: 0 5px 5px rgba(0,0,0,0.2);
+    --plugin--box-shadow:  0 2px 4px 0 rgb(0 0 0 / 10%);
 }
 
 .homeContainer perspective-viewer {
@@ -141,7 +141,7 @@ window.addEventListener("WebComponentsReady", async function() {
     var worker = window.perspective.worker();
     var tbl = await worker.table(data, {index: "id"});
     elem.load(tbl);
-    elem._toggle_config();
+    elem.toggleConfig();
 
     setTimeout(function() {
         update(tbl, 0);
