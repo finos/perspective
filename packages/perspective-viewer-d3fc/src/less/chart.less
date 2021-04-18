@@ -6,7 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-@sans-serif-fonts: Arial, sans-serif;
+ 
+ @import "~@finos/perspective-viewer/src/less/variables.less";
+ 
+ @sans-serif-fonts: Arial, sans-serif;
 
 :host {
     .chart {
@@ -193,6 +196,11 @@
             line-height: 1em !important;
         }
 
+        & .x-label, & .y-label {
+            color: var(--d3fc-label--color, inherit);
+            font-size: 14px;
+        }
+
         & d3fc-canvas.plot-area {
             display: none;
         }
@@ -339,8 +347,9 @@
         &[borderbox-on-hover="true"] {
             transition: box-shadow 1s;
             &:hover {
-                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-                transition: box-shadow 0.2s;
+                background-color: var(--d3fc-legend--background, #ffffff);
+                box-shadow: @elevation1;
+                transition: box-shadow 0.2s,  background-color 0.2s;
             }
         }
 
@@ -451,12 +460,13 @@
         position: absolute;
         text-align: left;
         font-size: 10pt;
+        font-weight: 300;
         white-space: nowrap;
         padding: 0.5em;
         background: var(--d3fc-tooltip--background, #ffffff);
         color: var(--d3fc-tooltip--color, black);
-        border: 1px solid #777777;
-        border-radius: 2px;
+        border: 1px solid var(--d3fc-tooltip--border-color, #777777);
+        box-shadow: var(--d3fc-tooltip--box-shadow, none);
         pointer-events: none;
     }
 

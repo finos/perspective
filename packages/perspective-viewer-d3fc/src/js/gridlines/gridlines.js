@@ -8,20 +8,17 @@
  */
 import * as fc from "d3fc";
 
-const mainGridSvg = settings => x =>
-    x
-        .style("opacity", "0.3")
-        .style("stroke-width", "1.0")
-        .style("stroke", settings ? settings.colorStyles.grid.gridLineColor : "#bbb");
+const mainGridSvg = settings => x => x.style("stroke-width", "1.0").style("stroke", settings ? settings.colorStyles.grid.gridLineColor : "#bbb");
 
-const mainGridCanvas = c => {
-    c.globalAlpha = 0.3;
-    c.lineWidth = 1.0;
+const mainGridCanvas = settings => c => {
+    c.strokeStyle = settings ? settings.colorStyles.grid.gridLineColor : "#bbb";
+    c.lineWidth = 1;
 };
 
 const crossGridSvg = x => x.style("display", "none");
-const crossGridCanvas = c => {
-    c.globalAlpha = 0;
+const crossGridCanvas = settings => c => {
+    c.lineWidth = 1;
+    c.strokeStyle = settings ? settings.colorStyles.grid.gridLineColor : "#bbb";
 };
 
 export default (series, settings) => {
@@ -40,8 +37,8 @@ export default (series, settings) => {
         if (canvas) {
             seriesMulti = fc.seriesCanvasMulti().context(context);
             annotationGridline = fc.annotationCanvasGridline();
-            mainGrid = mainGridCanvas;
-            crossGrid = crossGridCanvas;
+            mainGrid = mainGridCanvas(settings);
+            crossGrid = crossGridCanvas(settings);
         }
 
         const multi = seriesMulti.xScale(xScale).yScale(yScale);

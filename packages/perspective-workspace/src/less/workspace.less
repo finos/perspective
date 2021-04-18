@@ -13,7 +13,7 @@
     @import "./dockpanel.less";
     @import "./widget.less";
 
-    background-color: var(--workspace--background-color, #eee);
+    background-color: #F2F4F6;
 
     width: 100%;
     height: 100%;
@@ -22,17 +22,19 @@
         width: 100%;
         height: 100%;
     }
+
     .p-SplitPanel {
         height: 100%;
         width: 100%;
     }
 
     div.p-SplitPanel-handle {
-        background-color: var(--master-divider--background-color);
+        background-color: inherit; //var(--master-divider--background-color);
     }
 
     .master-panel {
-        background-color: rgb(47, 49, 54);
+        background-color: var(--workspace-master--background-color, inherit);
+        padding: 12px 0px 12px 12px;
     }
 
     .perspective-workspace.context-menu * .p-SplitPanel-handle {

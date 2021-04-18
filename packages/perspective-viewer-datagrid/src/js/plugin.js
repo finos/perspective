@@ -46,10 +46,10 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
     if (!is_installed) {
         model = await createModel(regular, table, view);
         configureRegularTable(regular, model);
-        await configureRowSelectable.call(model, regular, viewer);
-        await configureClick.call(model, regular, viewer);
-        await configureEditable.call(model, regular, viewer);
         await configureSortable.call(model, regular, viewer);
+        await configureRowSelectable.call(model, regular, viewer);
+        await configureEditable.call(model, regular, viewer);
+        await configureClick.call(model, regular, viewer);
         INSTALLED.set(regular, model);
     } else {
         model = INSTALLED.get(regular);

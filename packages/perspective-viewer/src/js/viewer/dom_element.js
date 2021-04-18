@@ -484,13 +484,15 @@ export class DomElement extends PerspectiveElement {
                     app.classList.remove("columns_horizontal");
                 });
                 return true;
-            } else if (this.clientWidth < 600) {
-                if (!app.classList.contains("narrow")) {
-                    app.classList.add("narrow");
-                }
-            } else if (app.classList.contains("narrow")) {
-                app.classList.remove("narrow");
             }
+
+            // else if (this.clientWidth < 600 && this.clientHeight < 500) {
+            // if (!app.classList.contains("responsive_collapse_2")) {
+            //     app.classList.add("responsive_collapse_2");
+            // }
+            // } else if (app.classList.contains("responsive_collapse_2")) {
+            // app.classList.remove("responsive_collapse_2");
+            // }
             return false;
         }
         return false;

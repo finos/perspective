@@ -36,20 +36,45 @@ function styleListener(regularTable) {
         td.classList.toggle("psp-negative", float_val < 0);
     }
 
-    for (const tr of group_headers) {
-        for (const td of tr.children) {
+    const m = [];
+    let marked = new Set();
+    const table = regularTable.children[0];
+    for (let y = 0; y < group_headers.length; y++) {
+        let row = table.rows[y];
+        const tops = new Set();
+        for (let x = 0; x < row.cells.length; x++) {
+            const td = row.cells[x];
             const metadata = regularTable.getMeta(td);
             let needs_border = metadata.row_header_x === header_depth || metadata.x >= 0;
             td.classList.toggle("psp-header-group", true);
             td.classList.toggle("psp-header-leaf", false);
             td.classList.toggle("psp-header-border", needs_border);
+            td.classList.toggle("psp-header-group-corner", typeof metadata.x === "undefined");
+
+            let cell = row.cells[x],
+                xx = x,
+                tx,
+                ty;
+
+            for (; m[y] && m[y][xx]; ++xx);
+            tops.add(xx);
+            for (tx = xx; tx < xx + cell.colSpan; ++tx) {
+                for (ty = y; ty < y + cell.rowSpan; ++ty) {
+                    if (!m[ty]) m[ty] = [];
+                    m[ty][tx] = true;
+                }
+            }
+
+            cell.classList.toggle("psp-is-top", y === 0 || !marked.has(tx));
         }
+        marked = tops;
     }
 
     for (const tr of regularTable.children[0].children[1].children) {
         for (const td of tr.children) {
             const metadata = regularTable.getMeta(td);
-            if (td.tagName === "TH") {
+            const is_th = td.tagName === "TH";
+            if (is_th) {
                 const is_not_empty = !!metadata.value && metadata.value.toString().trim().length > 0;
                 const is_leaf = metadata.row_header_x >= this._config.row_pivots.length;
                 const next = regularTable.getMeta({dx: 0, dy: metadata.y - metadata.y0 + 1});
@@ -63,8 +88,8 @@ function styleListener(regularTable) {
             let type = get_psp_type.call(this, metadata);
             const is_numeric = type === "integer" || type === "float";
             const float_val = is_numeric && parseFloat(metadata.value);
-            td.classList.toggle("psp-align-right", is_numeric);
-            td.classList.toggle("psp-align-left", !is_numeric);
+            td.classList.toggle("psp-align-right", !is_th && is_numeric);
+            td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle("psp-positive", float_val > 0);
             td.classList.toggle("psp-negative", float_val < 0);
         }
@@ -163,10 +188,30 @@ function mousedownListener(regularTable, event) {
 
     if (target.classList.contains("psp-tree-label") && event.offsetX < 26) {
         expandCollapseHandler.call(this, regularTable, event);
-        event.handled = true;
+        event.stopImmediatePropagation();
     } else if (target.classList.contains("psp-header-leaf") && !target.classList.contains("psp-header-corner")) {
         sortHandler.call(this, regularTable, event, target);
-        event.handled = true;
+        event.stopImmediatePropagation();
+    }
+}
+
+function clickListener(regularTable, event) {
+    if (event.which !== 1) {
+        return;
+    }
+
+    let target = event.target;
+    while (target.tagName !== "TD" && target.tagName !== "TH") {
+        target = target.parentElement;
+        if (!regularTable.contains(target)) {
+            return;
+        }
+    }
+
+    if (target.classList.contains("psp-tree-label") && event.offsetX < 26) {
+        event.stopImmediatePropagation();
+    } else if (target.classList.contains("psp-header-leaf") && !target.classList.contains("psp-header-corner")) {
+        event.stopImmediatePropagation();
     }
 }
 
@@ -269,6 +314,7 @@ export async function createModel(regular, table, view, extend = {}) {
 export async function configureRegularTable(regular, model) {
     regular.addStyleListener(styleListener.bind(model, regular));
     regular.addEventListener("mousedown", mousedownListener.bind(model, regular));
+    regular.addEventListener("click", clickListener.bind(model, regular));
     try {
         await regular.draw();
     } catch (e) {
