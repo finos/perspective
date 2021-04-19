@@ -122,8 +122,14 @@ class _PerspectiveManagerInternal(object):
 
         try:
             if cmd == "init":
-                # return empty response
-                message = self._make_message(msg["id"], None)
+                # The client should wait for the return message on table()
+                # and view() to confirm successful creation.
+                flags = ["wait_for_response"]
+
+                # Return a message to the client to confirm initialization with
+                # a list of feature flags that the client will use to enable
+                # or disable behavior depending on its version.
+                message = self._make_message(msg["id"], flags)
                 post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table":
                 try:
