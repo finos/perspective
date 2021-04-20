@@ -119,7 +119,7 @@ Or create a `<perspective-viewer>` in HTML:
 ```html
 <perspective-viewer columns="['Sales', 'Profit']">`
   <script>
-    document.addEventListener("WebComponentsReady", async function() {
+    document.addEventListener("DOMContentLoaded", async function() {
       const data = {
         Sales: [500, 1000, 1500],
         Profit: [100.25, 200.5, 300.75]
@@ -616,7 +616,7 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-  window.addEventListener("WebComponentsReady", async function () {
+  window.addEventListener("DOMContentLoaded", async function () {
     // Create a client that expects a Perspective server
     // to accept connections at the specified URL.
     const websocket = perspective.websocket("ws://localhost:8888/websocket");

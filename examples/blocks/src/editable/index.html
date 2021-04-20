@@ -50,7 +50,7 @@
             });
         }
 
-        window.addEventListener('WebComponentsReady', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/node_modules/superstore-arrow/superstore.arrow', true);
             xhr.responseType = "arraybuffer"

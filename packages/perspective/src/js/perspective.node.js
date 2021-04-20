@@ -105,7 +105,7 @@ function perspective_assets(assets, host_psp) {
                 if (typeof content !== "undefined") {
                     console.log(`200 ${url}`);
                     response.writeHead(200, {"Content-Type": contentType});
-                    response.end(content, extname === ".arrow" ? "user-defined" : "utf-8");
+                    response.end(content, extname === ".arrow" ? undefined : "utf-8");
                     return;
                 }
             }
@@ -119,7 +119,7 @@ function perspective_assets(assets, host_psp) {
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
                             response.writeHead(200, {"Content-Type": contentType});
-                            response.end(content, extname === ".arrow" ? "user-defined" : "utf-8");
+                            response.end(content, extname === ".arrow" ? undefined : "utf-8");
                             return;
                         }
                     } catch (e) {}

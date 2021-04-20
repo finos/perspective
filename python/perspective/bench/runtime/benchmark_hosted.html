@@ -41,7 +41,7 @@
 
     <script>
 
-        window.addEventListener('WebComponentsReady', async function() {
+        window.addEventListener('DOMContentLoaded', async function () {
             const websocket = perspective.websocket("ws://localhost:8888/websocket");
             const table = websocket.open_table('benchmark_results');
             document.getElementById('viewer').load(table);

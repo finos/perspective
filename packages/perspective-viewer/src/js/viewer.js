@@ -7,7 +7,6 @@
  *
  */
 
-import "@webcomponents/webcomponentsjs";
 import {wasm} from "../../dist/esm/@finos/perspective-vieux";
 import "./polyfill.js";
 

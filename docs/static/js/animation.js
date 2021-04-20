@@ -132,7 +132,7 @@ function get_arrow(callback) {
     xhr.send(null);
 }
 
-window.addEventListener("WebComponentsReady", async function() {
+window.addEventListener("DOMContentLoaded", async function() {
     var data = [];
     for (var x = 0; x < 100; x++) {
         data.push(newRow());
