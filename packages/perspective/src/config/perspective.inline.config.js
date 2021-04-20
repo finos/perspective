@@ -4,6 +4,7 @@ const common = require("./common.config.js");
 module.exports = common({inline: true}, config =>
     Object.assign(config, {
         entry: "./dist/esm/perspective.parallel.js",
+        devtool: undefined,
         output: {
             filename: "perspective.inline.js",
             library: "perspective",
