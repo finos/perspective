@@ -1,2 +1,2 @@
-__version__ = "0.6.2"
-major_minor_version = "0.6"
+__version__ = "0.7.0"
+major_minor_version = "0.7"

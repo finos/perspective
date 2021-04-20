@@ -1,8 +1,62 @@
 # Changelog
 
-## [0.6.2](https://github.com/finos/perspective/tree/HEAD)
+## [0.7.0](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.6.1...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.2...HEAD)
+
+**Breaking changes:**
+
+- Remove webcomponentsjs [\#1388](https://github.com/finos/perspective/pull/1388) ([texodus](https://github.com/texodus))
+- Async Table and View Constructor [\#1289](https://github.com/finos/perspective/pull/1289) ([sc1f](https://github.com/sc1f))
+
+**Implemented enhancements:**
+
+- Material Theme 2.0 [\#1380](https://github.com/finos/perspective/pull/1380) ([texodus](https://github.com/texodus))
+- Add `call\_loop` and `get\_table\_names` [\#1375](https://github.com/finos/perspective/pull/1375) ([sc1f](https://github.com/sc1f))
+- Deprecate py27 \(linux\), add py39 \(osx\) [\#1336](https://github.com/finos/perspective/pull/1336) ([timkpaine](https://github.com/timkpaine))
+- Status Bar Component [\#1314](https://github.com/finos/perspective/pull/1314) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Binder link in README is broken [\#1339](https://github.com/finos/perspective/issues/1339)
+- Python wheel builds failing on catalina for py36 and py38 [\#1334](https://github.com/finos/perspective/issues/1334)
+- `perspective-python` should not use tilde \(~\) in client version resolution [\#1324](https://github.com/finos/perspective/issues/1324)
+- Inconsistent property names for ViewConfig [\#1079](https://github.com/finos/perspective/issues/1079)
+- issue running tests on Windows 7 [\#1051](https://github.com/finos/perspective/issues/1051)
+- Segmentation fault due to TBB when \> 8 clients are connected to a Python table [\#1007](https://github.com/finos/perspective/issues/1007)
+
+**Closed issues:**
+
+- Jupyter notebook wont display widget [\#1385](https://github.com/finos/perspective/issues/1385)
+- How to best notify existing Perspective Github community of upcoming events? [\#1357](https://github.com/finos/perspective/issues/1357)
+- collapse row pivots on data grid by default [\#1356](https://github.com/finos/perspective/issues/1356)
+- How to catch abort errors in JavaScript? [\#1348](https://github.com/finos/perspective/issues/1348)
+- Upload of v0.6.2 to PyPI? [\#1333](https://github.com/finos/perspective/issues/1333)
+- What is the correct way to unmount / cleanup the components? [\#1329](https://github.com/finos/perspective/issues/1329)
+- Webpack plugin fails in a fresh Next.js app [\#1316](https://github.com/finos/perspective/issues/1316)
+- Crash on Async Mode / GIL release [\#1313](https://github.com/finos/perspective/issues/1313)
+- Add periodic testing to CI [\#1267](https://github.com/finos/perspective/issues/1267)
+- Referencing perspective-workspace from index.html complains about perspective-row being already used [\#1218](https://github.com/finos/perspective/issues/1218)
+
+**Merged pull requests:**
+
+- Fix cross-origin webpack defaults [\#1387](https://github.com/finos/perspective/pull/1387) ([texodus](https://github.com/texodus))
+- Backwards compatibility for table\(\) and view\(\) [\#1384](https://github.com/finos/perspective/pull/1384) ([sc1f](https://github.com/sc1f))
+- Adds `yarn repl` to launch a shell inside our docker images [\#1382](https://github.com/finos/perspective/pull/1382) ([sc1f](https://github.com/sc1f))
+- Update regular-table to 0.3.1 [\#1379](https://github.com/finos/perspective/pull/1379) ([texodus](https://github.com/texodus))
+- Fix `@finos/perspective-jupyterlab` to work with WebAssembly/Webpack5 [\#1377](https://github.com/finos/perspective/pull/1377) ([texodus](https://github.com/texodus))
+- install boost via choco [\#1351](https://github.com/finos/perspective/pull/1351) ([timkpaine](https://github.com/timkpaine))
+- Fix timezone tests to take DST into account [\#1349](https://github.com/finos/perspective/pull/1349) ([sc1f](https://github.com/sc1f))
+- Fix D3FC label font bug [\#1343](https://github.com/finos/perspective/pull/1343) ([texodus](https://github.com/texodus))
+- Replace `emsdk-npm` with simple script [\#1342](https://github.com/finos/perspective/pull/1342) ([texodus](https://github.com/texodus))
+- fix binder [\#1341](https://github.com/finos/perspective/pull/1341) ([timkpaine](https://github.com/timkpaine))
+- Add nightly complete builds [\#1338](https://github.com/finos/perspective/pull/1338) ([timkpaine](https://github.com/timkpaine))
+- Fix \#1324: use ~major.minor.patch in PerspectiveWidget versioning [\#1331](https://github.com/finos/perspective/pull/1331) ([sc1f](https://github.com/sc1f))
+- Add `SplitPanel` and port to Yew [\#1326](https://github.com/finos/perspective/pull/1326) ([texodus](https://github.com/texodus))
+
+## [v0.6.2](https://github.com/finos/perspective/tree/v0.6.2) (2021-02-12)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.1...v0.6.2)
 
 **Fixed bugs:**
 

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-datagrid",
-    "version": "0.6.2",
+    "version": "0.7.0",
     "description": "Perspective.js",
     "main": "dist/esm/perspective-viewer-datagrid.js",
     "module": "dist/esm/perspective-viewer-datagrid.js",
@@ -38,11 +38,11 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.6.2",
-        "@finos/perspective-viewer": "^0.6.2",
+        "@finos/perspective": "^0.7.0",
+        "@finos/perspective-viewer": "^0.7.0",
         "regular-table": "=0.3.3"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.6.2"
+        "@finos/perspective-test": "^0.7.0"
     }
 }
