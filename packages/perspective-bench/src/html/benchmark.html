@@ -38,7 +38,7 @@
     <perspective-viewer></perspective-viewer>
 
     <script>
-        window.addEventListener('WebComponentsReady', async () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             const el = document.getElementsByTagName('perspective-viewer')[0];
             el.addEventListener("perspective-config-update", () => localStorage.setItem("layout", JSON.stringify(el.save())));
             el.restore(JSON.parse(localStorage.getItem("layout")));

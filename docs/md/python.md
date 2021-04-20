@@ -378,7 +378,7 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-  window.addEventListener("WebComponentsReady", async function () {
+  window.addEventListener("DOMContentLoaded", async function () {
     // Create a client that expects a Perspective server
     // to accept connections at the specified URL.
     const websocket = perspective.websocket("ws://localhost:8888/websocket");

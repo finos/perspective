@@ -55,8 +55,6 @@
         "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^0.6.2",
         "@types/react": "^16.8.6",
-        "@webcomponents/shadycss": "^1.5.2",
-        "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
         "chevrotain": "^6.5.0",
         "core-js": "^3.6.4",
