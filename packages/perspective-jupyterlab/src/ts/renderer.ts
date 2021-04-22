@@ -92,7 +92,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
                 // create a flat view
                 const view = await table.view();
-                view.on_update(() => {
+                view.on_update(async () => {
                     if (this._type === "csv") {
                         const result: string = await view.to_csv();
                         this.context.model.fromString(result);
