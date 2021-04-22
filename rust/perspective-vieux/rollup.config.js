@@ -20,7 +20,20 @@ export default () => {
             ]
         },
         {
-            input: "src/js/bootstrap.js",
+            input: `src/less/column-style.less`,
+            output: {
+                dir: "dist/css"
+            },
+            plugins: [
+                postcss({
+                    inject: false,
+                    extract: path.resolve(`dist/css/column-style.css`),
+                    minimize: {preset: "lite"}
+                })
+            ]
+        },
+        {
+            input: "src/js/vieux.js",
             external: [/node_modules/, /pkg/],
             output: {
                 sourcemap: true,

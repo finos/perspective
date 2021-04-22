@@ -9,7 +9,9 @@
 
 import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
 import {activate_plugin_menu, PLUGIN_SYMBOL} from "./plugin_menu.js";
-import {rgbaToRgb, infer_foreground_from_background, hexToRgb} from "./color_utils.js";
+import {rgbaToRgb, infer_foreground_from_background} from "./color_utils.js";
+
+import chroma from "chroma-js";
 
 function styleListener(regularTable) {
     const header_depth = regularTable._view_cache.config.row_pivots.length - 1;
@@ -125,11 +127,11 @@ function styleListener(regularTable) {
                     td.style.color = foreground;
                     td.style.backgroundColor = hex;
                 } else if (plugin?.color_mode === "gradient") {
-                    const a = Math.max(0, Math.min(1, Math.abs(metadata.user / plugin.opacity)));
+                    const a = Math.max(0, Math.min(1, Math.abs(metadata.user / plugin.gradient)));
                     const source = this._plugin_background;
                     const foreground = infer_foreground_from_background(rgbaToRgb([r, g, b, a], source));
                     td.style.color = foreground;
-                    td.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
+                    td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
                 } else if (plugin?.color_mode === "foreground") {
                     td.style.backgroundColor = "";
                     td.style.color = hex;
@@ -377,6 +379,18 @@ async function dataListener(regularTable, x0, y0, x1, y1) {
     };
 }
 
+function get_rule(regular, tag, def) {
+    let color = window
+        .getComputedStyle(regular)
+        .getPropertyValue(tag)
+        .trim();
+    if (color.length > 0) {
+        return color;
+    } else {
+        return def;
+    }
+}
+
 export async function createModel(regular, table, view, extend = {}) {
     const config = await view.get_config();
     const [table_schema, table_computed_schema, num_rows, schema, computed_schema, column_paths] = await Promise.all([
@@ -388,19 +402,11 @@ export async function createModel(regular, table, view, extend = {}) {
         view.column_paths()
     ]);
 
-    const _plugin_background = hexToRgb(window.getComputedStyle(regular).getPropertyValue("--plugin--background"));
-    let _pos_color = window
-        .getComputedStyle(regular)
-        .getPropertyValue("--rt-pos-cell--color")
-        .trim();
-    _pos_color = [_pos_color, ...hexToRgb(_pos_color)];
-
-    let _neg_color = window
-        .getComputedStyle(regular)
-        .getPropertyValue("--rt-neg-cell--color")
-        .trim();
-    _neg_color = [_neg_color, ...hexToRgb(_neg_color)];
-
+    const _plugin_background = chroma(get_rule(regular, "--plugin--background", "#FFFFFF")).rgb();
+    let _pos_color = get_rule(regular, "--rt-pos-cell--color", "#0000ff");
+    _pos_color = [_pos_color, ...chroma(_pos_color).rgb()];
+    let _neg_color = get_rule(regular, "--rt-neg-cell--color", "#ff0000");
+    _neg_color = [_neg_color, ...chroma(_neg_color).rgb()];
     const model = Object.assign(extend, {
         _view: view,
         _table: table,

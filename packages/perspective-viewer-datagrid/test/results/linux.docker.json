@@ -15,6 +15,6 @@
     "superstore_resets_viewable_area_when_the_logical_size_expands_": "0928f26b07e8a212512c5d79c74b6a28",
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "0a3182ea48222066684b82a6e11a2b95",
     "superstore_perspective_dispatches_perspective-click_event_with_correct_details": "0a3182ea48222066684b82a6e11a2b95",
-    "superstore_perspective_dispatches_perspective-click_event_with_correct_details_when_filter_is_set": "0e3475c7d33a1fe5528a28ec2e73caa5",
+    "superstore_perspective_dispatches_perspective-click_event_with_correct_details_when_filter_is_set": "cd7f7112cf3b93c5956a5239a7579d90",
     "__GIT_COMMIT__": "30f3db9bd8d5abae42390201fee931aaa2de6e05"
 }

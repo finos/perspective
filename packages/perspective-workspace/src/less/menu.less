@@ -22,9 +22,12 @@
         rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
 }
 
+.p-Menu-item:not([data-type=separator]) {
+    display: flex !important;
+}
 
 .p-Menu-item.p-mod-active {
-    background: #e5e5e5;
+    background: rgba(0,0,0,0.2);
 }
 
 .p-Menu-item.p-mod-disabled {
@@ -33,7 +36,7 @@
 
 .p-Menu-itemIcon {
     width: 21px;
-    padding: 4px 2px;
+    padding: 5px 2px 3px 0px;
 }
 
 .p-Menu-itemLabel {
@@ -83,15 +86,15 @@
 }
 
 .p-MenuBar-item.p-mod-active {
-    background: #e5e5e5;
+    background: rgba(0,0,0,0.2);
 }
 
 
 .p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
     z-index: 10001;
-    background: white;
-    border-left: 1px solid #c0c0c0;
-    border-right: 1px solid #c0c0c0;
+    background: rgba(0,0,0,0.2);
+    // border-left: 1px solid #c0c0c0;
+    // border-right: 1px solid #c0c0c0;
 }
 
 .p-Menu-itemIcon:before {

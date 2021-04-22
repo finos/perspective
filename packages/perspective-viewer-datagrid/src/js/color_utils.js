@@ -9,14 +9,8 @@
 
 export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
 
-export function hexToRgb(hex) {
-    var bigint = parseInt(hex.trim().slice(1), 16);
-    var r = (bigint >> 16) & 255;
-    var g = (bigint >> 8) & 255;
-    var b = bigint & 255;
-    return [r, g, b];
-}
-
+// AFAICT `chroma-js` has no alpha-aware blending? So we need a function to get
+// the color of a heatmap cell over the background.
 export function rgbaToRgb([r, g, b, a], source = [255, 255, 255]) {
     function f(i, c) {
         return ((1 - a) * (source[i] / 255) + a * (c / 255)) * 255;
@@ -25,6 +19,8 @@ export function rgbaToRgb([r, g, b, a], source = [255, 255, 255]) {
     return [f(0, r), f(1, g), f(2, b)];
 }
 
+// Chroma does this but why bother?
 export function infer_foreground_from_background([r, g, b]) {
+    // TODO Implement dark/light themes.
     return Math.sqrt(r * r * 0.299 + g * g * 0.587 + b * b * 0.114) > 130 ? "#161616" : "#ffffff";
 }

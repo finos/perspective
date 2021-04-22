@@ -1,0 +1,63 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+ :host {
+    position: absolute;
+    z-index: 10000;
+    padding: 6px;
+    outline: none;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 300;
+    border: inherit;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
+    user-select: none;
+
+    input.parameter {
+        max-width: 65px;
+        background: none;
+        color: inherit;
+        border: 0px solid transparent;
+        border-bottom-width: 1px;
+        border-color: var(--input--border-color);
+        outline: none;
+    }
+
+    input[type=radio], input[type=checkbox], & > div > div > span:first-child {
+        width: 24px;
+        margin: 0;
+    }
+
+    & > div > div {
+        display: flex;
+        align-items: center;
+        height: 24px;
+    }
+
+    div.section {
+        margin-bottom: 8px;
+    }
+
+    input[type=color] {
+        width: 24px;
+    }
+
+    .operator {
+        font-family: "Roboto Mono", monospace;
+        white-space:pre;
+    }
+
+    input.parameter[disabled] {
+        opacity: 0.5;
+    }
+
+    .indent1 {
+        margin-left: 24px;
+    }
+}

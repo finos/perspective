@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+mod column_style;
 mod split_panel;
 mod status_bar;
 mod status_bar_counter;

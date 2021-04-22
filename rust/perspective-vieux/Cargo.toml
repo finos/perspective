@@ -9,7 +9,7 @@ license = "Apache-2.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-path = "src/rust/lib.rs"
+path = "src/rust/vieux.rs"
 
 [features]
 default = ["wee_alloc", "console_error_panic_hook"]
@@ -18,7 +18,8 @@ default = ["wee_alloc", "console_error_panic_hook"]
 futures = "0.3.12"
 js-intern = "0.3.1"
 num-format = "0.4.0"
-wasm-bindgen = { version = "0.2.63" } #, features = ["serde-serialize"] }
+serde = { version = "1.0", features = ["derive"] }
+wasm-bindgen = { version = "0.2.63" , features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
 yew = { git = "https://github.com/yewstack/yew", rev = "b074b4b" } # "0.17.4"
 
@@ -45,6 +46,7 @@ features = [
     "CustomEvent",
     "CustomEventInit",
     "Document",
+    "DomRect",
     "Element",
     # "DomTokenList",
     "Event",
