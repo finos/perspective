@@ -72,31 +72,31 @@ utils.with_server({}, () => {
                 const detail = await click_details(page, 310, 320);
                 expect(detail).toEqual({
                     row: {
-                        __ROW_PATH__: ["California", "Technology"],
-                        Category: 6,
-                        City: 6,
-                        Country: 6,
-                        "Customer ID": 6,
-                        Discount: 0.8,
-                        "Order Date": 6,
-                        "Order ID": 6,
-                        "Postal Code": 544262,
-                        "Product ID": 6,
-                        Profit: 201.2865,
-                        Quantity: 20,
-                        Region: 6,
-                        "Row ID": 221,
-                        Sales: 2210.19,
-                        Segment: 6,
-                        "Ship Date": 6,
-                        "Ship Mode": 6,
-                        State: 6,
-                        "Sub-Category": 6
+                        __ROW_PATH__: ["California", "Office Supplies"],
+                        Category: 15,
+                        City: 15,
+                        Country: 15,
+                        "Customer ID": 15,
+                        Discount: 1,
+                        "Order Date": 15,
+                        "Order ID": 15,
+                        "Postal Code": 1370894,
+                        "Product ID": 15,
+                        Profit: 183.47429999999997,
+                        Quantity: 46,
+                        Region: 15,
+                        "Row ID": 712,
+                        Sales: 562.848,
+                        Segment: 15,
+                        "Ship Date": 15,
+                        "Ship Mode": 15,
+                        State: 15,
+                        "Sub-Category": 15
                     },
                     config: {
                         filters: [
                             ["State", "==", "California"],
-                            ["Category", "==", "Technology"]
+                            ["Category", "==", "Office Supplies"]
                         ]
                     }
                 });

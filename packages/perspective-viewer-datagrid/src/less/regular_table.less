@@ -10,6 +10,7 @@
 @import (less) "regular-table/src/less/material.less";
 @import (less) "./mitered-headers.less";
 @import (less) "./row-hover.less";
+@import (less) "./column-plugin.less";
 
 @positive: #338DCD; // @blue300
 @negative: #FF5942; // @red300
@@ -118,10 +119,10 @@ regular-table thead tr:last-child th {
     text-align: left;
 }
 .psp-positive:not(:focus) {
-    color: @positive;
+    color: var(--rt-pos-cell--color, @positive);
 }
 .psp-negative:not(:focus) {
-    color: @negative;
+    color: var(--rt-neg-cell--color, @negative);
 }
 
 regular-table table {
@@ -149,6 +150,3 @@ regular-table table {
         background-position: 0px -10px;
     }
 }
-
-
-

@@ -20,7 +20,7 @@ import {html, render} from "lit-html";
  */
 const options = vals => {
     const opts = [];
-    for (name in vals) {
+    for (let name in vals) {
         opts.push(html`
             <option value="${name}">${vals[name].name || name}</option>
         `);

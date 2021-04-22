@@ -8,14 +8,21 @@
  */
 
 import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
+import {activate_plugin_menu, PLUGIN_SYMBOL} from "./plugin_menu.js";
+import {rgbaToRgb, infer_foreground_from_background} from "./color_utils.js";
+
+import chroma from "chroma-js";
 
 function styleListener(regularTable) {
     const header_depth = regularTable._view_cache.config.row_pivots.length - 1;
     let group_headers = Array.from(regularTable.children[0].children[0].children);
     let [col_headers] = group_headers.splice(group_headers.length - 1, 1);
+    const plugins = regularTable[PLUGIN_SYMBOL] || {};
+
     for (const td of col_headers?.children) {
         const metadata = regularTable.getMeta(td);
-        const sort = this._config.sort.find(x => x[0] === metadata.column_header[metadata.column_header.length - 1]);
+        const column_name = metadata.column_header?.[metadata.column_header?.length - 1];
+        const sort = this._config.sort.find(x => x[0] === column_name);
         let needs_border = metadata.row_header_x === header_depth;
         needs_border = needs_border || (metadata.x + 1) % this._config.columns.length === 0;
         td.classList.toggle("psp-header-border", needs_border);
@@ -29,11 +36,24 @@ function styleListener(regularTable) {
 
         let type = get_psp_type.call(this, metadata);
         const is_numeric = type === "integer" || type === "float";
-        const float_val = is_numeric && parseFloat(metadata.value);
+        const float_val = is_numeric && metadata.user;
         td.classList.toggle("psp-align-right", is_numeric);
         td.classList.toggle("psp-align-left", !is_numeric);
         td.classList.toggle("psp-positive", float_val > 0);
         td.classList.toggle("psp-negative", float_val < 0);
+        td.classList.toggle("psp-menu-open", this._open_column_styles_menu[0] === metadata._virtual_x);
+
+        // Color plugin
+        // const plugin = plugins[column_name];
+        // if (plugin?.pos_color !== undefined) {
+        //     const [, r, g, b] = plugin.pos_color;
+        //     const foreground = infer_foreground_from_background([r, g, b]);
+        //     td.style.backgroundColor = plugin.pos_color[0];
+        //     td.style.color = foreground;
+        // } else {
+        //     td.style.backgroundColor = "";
+        //     td.style.color = "";
+        // }
     }
 
     const m = [];
@@ -44,13 +64,13 @@ function styleListener(regularTable) {
         const tops = new Set();
         for (let x = 0; x < row.cells.length; x++) {
             const td = row.cells[x];
+            td.style.backgroundColor = "";
             const metadata = regularTable.getMeta(td);
             let needs_border = metadata.row_header_x === header_depth || metadata.x >= 0;
             td.classList.toggle("psp-header-group", true);
             td.classList.toggle("psp-header-leaf", false);
             td.classList.toggle("psp-header-border", needs_border);
             td.classList.toggle("psp-header-group-corner", typeof metadata.x === "undefined");
-
             let cell = row.cells[x],
                 xx = x,
                 tx,
@@ -70,9 +90,60 @@ function styleListener(regularTable) {
         marked = tops;
     }
 
+    // this._cached_range = this._cached_range || {};
     for (const tr of regularTable.children[0].children[1].children) {
         for (const td of tr.children) {
             const metadata = regularTable.getMeta(td);
+            const column_name = metadata.column_header?.[metadata.column_header?.length - 1];
+            const plugin = plugins[column_name];
+            if (this._calc_range_flag) {
+                const is_leaf = metadata.row_header.length === 0 || metadata.row_header[metadata.row_header.length - 1] !== undefined;
+                if (is_leaf) {
+                    let column_meta = this._cached_range[column_name];
+                    let max = Math.max(column_meta || -Infinity, Math.abs(metadata.user) || -Infinity);
+                    if (isFinite(max)) {
+                        this._cached_range[column_name] = max;
+                    }
+                }
+            }
+
+            let type = get_psp_type.call(this, metadata);
+            const is_numeric = type === "integer" || type === "float";
+
+            if (is_numeric) {
+                const is_positive = metadata.user > 0;
+                const is_negative = metadata.user < 0;
+                const [hex, r, g, b] = (() => {
+                    if (plugin?.pos_color !== undefined) {
+                        return is_positive ? plugin.pos_color : is_negative ? plugin.neg_color : ["", 0, 0, 0];
+                    } else {
+                        return is_positive ? this._pos_color : is_negative ? this._neg_color : ["", 0, 0, 0];
+                    }
+                })();
+
+                if (plugin?.color_mode === "background") {
+                    const source = this._plugin_background;
+                    const foreground = infer_foreground_from_background(rgbaToRgb([r, g, b, 1], source));
+                    td.style.color = foreground;
+                    td.style.backgroundColor = hex;
+                } else if (plugin?.color_mode === "gradient") {
+                    const a = Math.max(0, Math.min(1, Math.abs(metadata.user / plugin.gradient)));
+                    const source = this._plugin_background;
+                    const foreground = infer_foreground_from_background(rgbaToRgb([r, g, b, a], source));
+                    td.style.color = foreground;
+                    td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
+                } else if (plugin?.color_mode === "foreground") {
+                    td.style.backgroundColor = "";
+                    td.style.color = hex;
+                } else {
+                    td.style.backgroundColor = "";
+                    td.style.color = "";
+                }
+            } else {
+                td.style.backgroundColor = "";
+                td.style.color = "";
+            }
+
             const is_th = td.tagName === "TH";
             if (is_th) {
                 const is_not_empty = !!metadata.value && metadata.value.toString().trim().length > 0;
@@ -85,9 +156,7 @@ function styleListener(regularTable) {
                 td.classList.toggle("psp-tree-leaf", is_not_empty && is_leaf);
             }
 
-            let type = get_psp_type.call(this, metadata);
-            const is_numeric = type === "integer" || type === "float";
-            const float_val = is_numeric && parseFloat(metadata.value);
+            const float_val = is_numeric && metadata.user;
             td.classList.toggle("psp-align-right", !is_th && is_numeric);
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle("psp-positive", float_val > 0);
@@ -173,7 +242,7 @@ async function expandCollapseHandler(regularTable, event) {
     regularTable.draw();
 }
 
-function mousedownListener(regularTable, event) {
+async function mousedownListener(regularTable, event) {
     if (event.which !== 1) {
         return;
     }
@@ -190,7 +259,19 @@ function mousedownListener(regularTable, event) {
         expandCollapseHandler.call(this, regularTable, event);
         event.stopImmediatePropagation();
     } else if (target.classList.contains("psp-header-leaf") && !target.classList.contains("psp-header-corner")) {
-        sortHandler.call(this, regularTable, event, target);
+        const rect = target.getBoundingClientRect();
+        if (event.clientY - rect.top > 16) {
+            this._calc_range_flag = true;
+            const meta = regularTable.getMeta(target);
+            this._open_column_styles_menu.unshift(meta._virtual_x);
+            await regularTable.draw();
+            this._calc_range_flag = undefined;
+            const maxes = this._cached_range;
+            activate_plugin_menu.call(this, regularTable, target, maxes);
+            event.preventDefault();
+        } else {
+            sortHandler.call(this, regularTable, event, target);
+        }
         event.stopImmediatePropagation();
     }
 }
@@ -226,37 +307,46 @@ const FORMATTER_CONS = {
 
 export const formatters = FORMATTERS;
 
-function _format(parts, val, use_table_schema = false) {
+function _format(parts, val, plugins = {}, use_table_schema = false) {
     if (val === null) {
         return "-";
     }
+
     const title = parts[parts.length - 1];
+    const plugin = plugins[title];
     const type = (use_table_schema && this._table_schema[title]) || this._schema[title] || "string";
-    if (FORMATTERS[type] === undefined) {
+    const is_numeric = type === "integer" || type === "float";
+    const is_plugin_override = is_numeric && plugin && plugin.fixed !== undefined;
+    let formatter_key = is_plugin_override ? `${type}${plugin.fixed}` : type;
+    if (FORMATTERS[formatter_key] === undefined) {
         const type_config = get_type_config(type);
-        if (FORMATTER_CONS[type] && type_config.format) {
-            FORMATTERS[type] = new FORMATTER_CONS[type]("en-us", type_config.format);
+        if (is_plugin_override) {
+            const opts = {minimumFractionDigits: plugin.fixed, maximumFractionDigits: plugin.fixed};
+            FORMATTERS[formatter_key] = new FORMATTER_CONS[type]("en-us", opts);
+        } else if (FORMATTER_CONS[type] && type_config.format) {
+            FORMATTERS[formatter_key] = new FORMATTER_CONS[type]("en-us", type_config.format);
         } else {
-            FORMATTERS[type] = false;
+            FORMATTERS[formatter_key] = false;
         }
     }
 
-    return FORMATTERS[type] ? FORMATTERS[type].format(val) : val;
+    return FORMATTERS[formatter_key] ? FORMATTERS[formatter_key].format(val) : val;
 }
 
-function* _tree_header(paths = [], row_headers) {
+function* _tree_header(paths = [], row_headers, regularTable) {
+    const plugins = regularTable[PLUGIN_SYMBOL];
     for (let path of paths) {
         path = ["TOTAL", ...path];
         const last = path[path.length - 1];
         path = path.slice(0, path.length - 1).fill("");
-        const formatted = _format.call(this, [row_headers[path.length - 1]], last, true);
+        const formatted = _format.call(this, [row_headers[path.length - 1]], last, plugins, true);
         path = path.concat({toString: () => formatted});
         path.length = row_headers.length + 1;
         yield path;
     }
 }
 
-async function dataListener(x0, y0, x1, y1) {
+async function dataListener(regularTable, x0, y0, x1, y1) {
     let columns = {};
     if (x1 - x0 > 0 && y1 - y0 > 0) {
         columns = await this._view.to_columns({
@@ -268,21 +358,37 @@ async function dataListener(x0, y0, x1, y1) {
         });
         this._ids = columns.__ID__;
     }
-    const data = [];
+    const data = [],
+        metadata = [];
     const column_headers = [];
     for (const path of this._column_paths.slice(x0, x1)) {
         const path_parts = path.split("|");
         const column = columns[path] || new Array(y1 - y0).fill(null);
-        data.push(column.map(x => _format.call(this, path_parts, x)));
+        data.push(column.map(x => _format.call(this, path_parts, x, regularTable[PLUGIN_SYMBOL])));
+        metadata.push(column);
         column_headers.push(path_parts);
     }
+
     return {
         num_rows: this._num_rows,
         num_columns: this._column_paths.length,
-        row_headers: Array.from(_tree_header.call(this, columns.__ROW_PATH__, this._config.row_pivots)),
+        row_headers: Array.from(_tree_header.call(this, columns.__ROW_PATH__, this._config.row_pivots, regularTable)),
         column_headers,
-        data
+        data,
+        metadata
     };
+}
+
+function get_rule(regular, tag, def) {
+    let color = window
+        .getComputedStyle(regular)
+        .getPropertyValue(tag)
+        .trim();
+    if (color.length > 0) {
+        return color;
+    } else {
+        return def;
+    }
 }
 
 export async function createModel(regular, table, view, extend = {}) {
@@ -295,6 +401,12 @@ export async function createModel(regular, table, view, extend = {}) {
         view.computed_schema(),
         view.column_paths()
     ]);
+
+    const _plugin_background = chroma(get_rule(regular, "--plugin--background", "#FFFFFF")).rgb();
+    let _pos_color = get_rule(regular, "--rt-pos-cell--color", "#0000ff");
+    _pos_color = [_pos_color, ...chroma(_pos_color).rgb()];
+    let _neg_color = get_rule(regular, "--rt-neg-cell--color", "#ff0000");
+    _neg_color = [_neg_color, ...chroma(_neg_color).rgb()];
     const model = Object.assign(extend, {
         _view: view,
         _table: table,
@@ -303,11 +415,16 @@ export async function createModel(regular, table, view, extend = {}) {
         _num_rows: num_rows,
         _schema: {...schema, ...computed_schema},
         _ids: [],
+        _cached_range: {},
+        _open_column_styles_menu: [],
+        _plugin_background,
+        _pos_color,
+        _neg_color,
         _column_paths: column_paths.filter(path => {
             return path !== "__ROW_PATH__" && path !== "__ID__";
         })
     });
-    regular.setDataListener(dataListener.bind(model));
+    regular.setDataListener(dataListener.bind(model, regular));
     return model;
 }
 

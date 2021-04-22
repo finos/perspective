@@ -8,9 +8,9 @@
         "url": "https://github.com/finos/perspective"
     },
     "license": "Apache-2.0",
-    "main": "dist/esm/bootstrap.js",
-    "module": "dist/esm/bootstrap.js",
-    "browser": "dist/esm/bootstrap.js",
+    "main": "dist/esm/vieux.js",
+    "module": "dist/esm/vieux.js",
+    "browser": "dist/esm/vieux.js",
     "files": [
         "dist/**/*",
         "pkg/**/*",

@@ -240,3 +240,10 @@ pre code.hljs {
     background: #000000;
     color: #fff;
 }
+
+perspective-column-style {
+    background-color: #2a2c2f !important;
+    color: #c5c9d0 !important;
+    border: 1px solid #3b3f46 !important;
+    --input--border-color :#3b3f46 !important;
+}

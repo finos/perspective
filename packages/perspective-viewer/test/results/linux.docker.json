@@ -54,7 +54,7 @@
     "Computed_Expressions_On_restore,_computed_expressions_in_classic_syntax_are_parsed_correctly_": "563f8c45e0ec32bc4b07d30ed5f0086e",
     "superstore_adds_computed_column_via_attribute": "f2fa526d6f0c168a47ab272bb7ae5771",
     "superstore_user_defined_aggregates_maintained_on_computed_columns": "c7aa2902feb512ceb1e1487de80878ff",
-    "__GIT_COMMIT__": "6dd0f47040cb7b100a47b800b003f2cab423b37b",
+    "__GIT_COMMIT__": "30f3db9bd8d5abae42390201fee931aaa2de6e05",
     "blank_Handles_reloading_with_a_schema_": "2c52bbde1ae5d88d3e68ef1e03b7d7c2",
     "superstore_doesn_t_leak_tables_": "5bb762b2860eb5af067bb83afbca3264",
     "superstore_doesn_t_leak_elements_": "ce0e8423bcca0fd661038fa7f04accff",

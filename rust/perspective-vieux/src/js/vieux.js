@@ -65,3 +65,20 @@ class PerspectiveVieuxElement extends HTMLElement {
 if (document.createElement("perspective-vieux").constructor === HTMLElement) {
     window.customElements.define("perspective-vieux", PerspectiveVieuxElement);
 }
+
+class PerspectiveColumnStyleElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    open(target, config, default_config) {
+        _await_index(() => {
+            this._instance = new _index.PerspectiveColumnStyleElement(this, config, default_config);
+            this._instance.open(target);
+        });
+    }
+}
+
+if (document.createElement("perspective-column-style").constructor === HTMLElement) {
+    window.customElements.define("perspective-column-style", PerspectiveColumnStyleElement);
+}
