@@ -12,6 +12,12 @@
 :host {
     width: 100%;
 
+    // https://stackoverflow.com/questions/20435166/contenteditable-not-working-in-safari-but-works-in-chrome
+    [contenteditable] {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+
     .perspective-expression-editor__edit_area {
         @default-text-color: var(--color, #666666);
 
