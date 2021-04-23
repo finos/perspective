@@ -2,10 +2,10 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 
-module.exports = {
+module.exports = ["material", "material.dark"].map(x => ({
     mode: "production",
     entry: {
-        material: path.join(__dirname, "../src/theme/material.less")
+        [x]: path.join(__dirname, `../src/theme/${x}.less`)
     },
     plugins: [
         new MiniCssExtractPlugin({
@@ -35,4 +35,4 @@ module.exports = {
             }
         ]
     }
-};
+}));

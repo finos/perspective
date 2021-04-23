@@ -1,6 +1,6 @@
 {
-    "resize_Basic_widget_functions": "bdcfe53125893ad1833cbcee38654d66",
-    "resize_Resize_the_container_causes_the_widget_to_resize": "bdcfe53125893ad1833cbcee38654d66",
+    "resize_Basic_widget_functions": "30f89fb74a40a6abfe02887d62be8282",
+    "resize_Resize_the_container_causes_the_widget_to_resize": "30f89fb74a40a6abfe02887d62be8282",
     "resize_row_pivots_traitlet_works": "03e9bd6f294b959000490af0908536f2",
-    "__GIT_COMMIT__": "30f3db9bd8d5abae42390201fee931aaa2de6e05"
+    "__GIT_COMMIT__": "d6344be7a126e4b2bfa05dbb8c4d5f5feca2b8c5"
 }
