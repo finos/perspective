@@ -1,7 +1,7 @@
 {
     "candlestick_filter_by_a_single_instrument_": "bf792ebd903a28489cbc4d2e5d084a00",
     "candlestick_filter_to_date_range_": "dd1643b5941ae253f4104a301e7215ff",
-    "__GIT_COMMIT__": "6dd0f47040cb7b100a47b800b003f2cab423b37b",
+    "__GIT_COMMIT__": "d6344be7a126e4b2bfa05dbb8c4d5f5feca2b8c5",
     "ohlc_filter_by_a_single_instrument_": "aa295a7ff82b48f5d7cefb36d02d9daa",
     "ohlc_filter_to_date_range_": "e79e029d4ca91c782181e6c418755612",
     "scatter_shows_a_grid_without_any_settings_applied_": "dfa14120c515bd1eef7a53276040ff2b",
