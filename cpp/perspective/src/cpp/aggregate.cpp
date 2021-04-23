@@ -211,59 +211,6 @@ t_aggregate::init() {
                 default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
             }
         } break;
-        case AGGTYPE_LAST_VALUE: {
-            switch (m_icolumns[0]->get_dtype()) {
-                case DTYPE_TIME:
-                case DTYPE_INT64: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::int64_t, std::int64_t, std::int64_t>>();
-                } break;
-                case DTYPE_INT32: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::int32_t, std::int32_t, std::int32_t>>();
-                } break;
-                case DTYPE_INT16: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::int16_t, std::int16_t, std::int16_t>>();
-                } break;
-                case DTYPE_INT8: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::int8_t, std::int8_t, std::int8_t>>();
-                } break;
-                case DTYPE_UINT64: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::uint64_t, std::uint64_t, std::uint64_t>>();
-                } break;
-                case DTYPE_DATE:
-                case DTYPE_UINT32: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::uint32_t, std::uint32_t, std::uint32_t>>();
-                } break;
-                case DTYPE_UINT16: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::uint16_t, std::uint16_t, std::uint16_t>>();
-                } break;
-                case DTYPE_UINT8: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::uint8_t, std::uint8_t, std::uint8_t>>();
-                } break;
-                case DTYPE_FLOAT64: {
-                    build_aggregate<t_aggimpl_last_value<double, double, double>>();
-                } break;
-                case DTYPE_FLOAT32: {
-                    build_aggregate<t_aggimpl_last_value<float, float, float>>();
-                } break;
-                case DTYPE_BOOL: {
-                    build_aggregate<
-                        t_aggimpl_last_value<std::uint8_t, std::uint8_t, std::uint8_t>>();
-                } break;
-                case DTYPE_STR: {
-                    build_aggregate<
-                        t_aggimpl_last_value<const char*, const char*, const char*>>();
-                } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
-            }
-        } break;
         case AGGTYPE_HIGH_WATER_MARK: {
             switch (m_icolumns[0]->get_dtype()) {
                 case DTYPE_TIME:

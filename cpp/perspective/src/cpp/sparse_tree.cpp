@@ -1108,13 +1108,29 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_LAST_VALUE: {
-                t_tscalar src_scalar = src->get_scalar(src_ridx);
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
+                old_value.set(dst_scalar);                
+                t_uindex leaf;
+                if (is_leaf(nidx)) {
+                    leaf = nidx;
+                } else {
+                    auto iters = m_idxleaf->get<by_idx_lfidx>().equal_range(nidx);
+                    if (iters.first != iters.second) {
+                        leaf = (--iters.second)->m_lfidx;
+                    } else {
+                        dst->set_scalar(dst_ridx, mknone());
+                        break;
+                    }
+                }
 
-                old_value.set(dst_scalar);
-                new_value.set(src_scalar);
-
-                dst->set_scalar(dst_ridx, new_value);
+                auto iters = m_idxpkey->get<by_idx_pkey>().equal_range(leaf);
+                if (iters.first != iters.second) {
+                    t_tscalar pkey = (--iters.second)->m_pkey;
+                    std::vector<t_tscalar> values;
+                    dst->set_scalar(dst_ridx, gstate.read_by_pkey(spec.get_dependencies()[0].name(), pkey));
+                } else {
+                    dst->set_scalar(dst_ridx, mknone());
+                }
             } break;
             case AGGTYPE_HIGH_WATER_MARK: {
                 t_tscalar src_scalar = src->get_scalar(src_ridx);

@@ -371,6 +371,18 @@ t_gstate::get_table() const {
     return m_table;
 }
 
+t_tscalar
+t_gstate::read_by_pkey(const std::string& colname, t_tscalar& pkey) const {
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    const t_column* col_ = col.get();
+    t_mapping::const_iterator iter = m_mapping.find(pkey);
+    if (iter != m_mapping.end()) {
+        return col_->get_scalar(iter->second);
+    } else {
+        PSP_COMPLAIN_AND_ABORT("Called without pkey");
+    }
+}
+
 void
 t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
     std::vector<t_tscalar>& out_data) const {

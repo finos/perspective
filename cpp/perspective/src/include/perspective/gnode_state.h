@@ -92,6 +92,9 @@ public:
         const std::vector<t_uindex>& master_table_indexes,
         t_uindex num_rows);
 
+    t_tscalar read_by_pkey(
+        const std::string& colname, t_tscalar& pkey) const;
+
     /**
      * @brief Read the values with the specified `pkeys` from the column at 
      * `colname`, writing into `out_data`.
