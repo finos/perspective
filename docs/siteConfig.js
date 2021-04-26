@@ -78,15 +78,7 @@ const siteConfig = {
     highlight: {
         theme: "atom-one-light"
     },
-    scripts: [
-        "https://buttons.github.io/buttons.js",
-        "https://unpkg.com/@finos/perspective/dist/umd/perspective.js",
-        "https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js",
-        "https://unpkg.com/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js",
-        "https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js",
-        "js/animation.js",
-        "js/logo.js"
-    ],
+    scripts: ["https://buttons.github.io/buttons.js", "js/index.js"],
     stylesheets: [
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",

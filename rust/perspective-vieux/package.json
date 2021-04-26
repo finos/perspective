@@ -22,7 +22,6 @@
         "build": "npm-run-all build:rollup build:wasm && cpx 'src/less/*' dist/less",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
-        "docs": "jsdoc2md src/js/index.js --separators > api.md",
         "fix": "yarn lint --fix",
         "lint": "eslint src examples/*.md examples/*.html",
         "test:build": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",

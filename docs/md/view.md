@@ -3,7 +3,7 @@ id: view
 title: View
 ---
 
-<script src="../../../../js/concepts/index.js"></script>
+<script src="../../../../js/index.js"></script>
 <link rel="stylesheet" href="../../../../css/concepts/index.css">
 
 The View is Perspective's query and serialization interface. It represents a

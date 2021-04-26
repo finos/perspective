@@ -1,14 +1,18 @@
-const worker = perspective.worker();
+import perspective from "@finos/perspective";
+
+const worker = perspective.shared_worker();
 
 async function main() {
     const arrow = await fetch("../../arrow/superstore.arrow");
     const table = await worker.table(await arrow.arrayBuffer());
 
-    const viewers = document.getElementsByTagName("perspective-viewer");
-    for (viewer of viewers) {
+    const viewers = document.querySelectorAll("perspective-viewer:not(.nosuperstore)");
+    for (const viewer of viewers) {
+        console.log("test3");
         viewer.load(table);
         viewer.toggleConfig();
     }
+    console.log("test4");
 
     let state = localStorage.getItem("lang_pref") || "Python";
     let ICON = `<span style="font-family:'Material Icons';vertical-align:bottom">input</span>`;
@@ -21,7 +25,8 @@ async function main() {
         const name = code.classList.contains("language-javascript") ? "Javascript" : "Python";
         const next = name === "Javascript" ? "Python" : "Javascript";
 
-        pre.innerHTML = `<a class="toggle-language" href="#" title="Toggle to ${next}">${ICON} <span class="language">${name}</span> <span class="next">${ARROW_ICON} ${next}</span></a>` + pre.innerHTML;
+        pre.innerHTML =
+            `<a class="toggle-language" href="#" title="Toggle to ${next}">${ICON} <span class="language">${name}</span> <span class="next">${ARROW_ICON} ${next}</span></a>` + pre.innerHTML;
         if (name !== state) {
             pre.style.display = "none";
         } else {
@@ -49,5 +54,8 @@ async function main() {
         });
     }
 }
-
-main();
+console.log("test1");
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("test2");
+    main();
+});

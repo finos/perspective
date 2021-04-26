@@ -79,7 +79,7 @@ class HomeSplash extends React.Component {
             <SplashContainer>
                 <div className="inner">
                     <ProjectTitle />
-                    <perspective-viewer class="titleViewer" />
+                    <perspective-viewer class="titleViewer nosuperstore" />
 
                     <PromoSection>
                         <Button id="grid">Datagrid</Button>
@@ -107,13 +107,13 @@ const PerspectiveBlock = props => {
     if (block.imageAlign === "right") {
         afterImage = (
             <div className="blockImage">
-                <perspective-viewer />
+                <perspective-viewer class="nosuperstore" />
             </div>
         );
     } else {
         beforeImage = (
             <div className="blockImage">
-                <perspective-viewer />
+                <perspective-viewer class="nosuperstore" />
             </div>
         );
     }
@@ -338,7 +338,7 @@ const Javascript = props => (
 const GetStarted = props => (
     <Container padding={["bottom", "top"]} id={props.id} background="dark">
         <div id="get_started">
-            <perspective-viewer></perspective-viewer>
+            <perspective-viewer class="nosuperstore"></perspective-viewer>
         </div>
     </Container>
 );
