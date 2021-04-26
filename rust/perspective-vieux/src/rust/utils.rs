@@ -56,19 +56,21 @@ fn ignore_view_delete(f: JsValue) {
     match f.clone().dyn_into::<js_sys::Error>() {
         Ok(err) => {
             if err.message() != "View is not initialized" {
-                wasm_bindgen::throw_val(f)
+                web_sys::console::log_1(&JsValue::from("A"));
+                wasm_bindgen::throw_val(f);
             }
         }
-        _ => {
-            if !js_sys::Reflect::has(&f, js_intern!("message")).unwrap()
-                || js_sys::Reflect::get(&f, js_intern!("message"))
-                    .unwrap()
-                    .as_string()
-                    .unwrap_or("".to_owned())
-                    != "View is not initialized"
-            {
-                wasm_bindgen::throw_val(f)
-            }
+        _ =>  match f.as_string() {
+            Some(x) if x == "View is not initialized" => {},
+            Some(_) => wasm_bindgen::throw_val(f),
+            _ => match js_sys::Reflect::has(&f, js_intern!("message")) {
+                Ok(true) if js_sys::Reflect::get(&f, js_intern!("message"))
+                            .unwrap()
+                            .as_string()
+                            .unwrap_or("".to_owned())
+                            == "View is not initialized" => {}
+                _ => wasm_bindgen::throw_val(f)
+            }   
         }
     }
 }
