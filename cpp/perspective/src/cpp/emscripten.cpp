@@ -1739,6 +1739,16 @@ namespace binding {
         return scalar_to_val(d);
     }
 
+    template <typename CTX_T>
+    t_val
+    get_min_max(std::shared_ptr<View<CTX_T>> view, const std::string& colname) {
+        t_val arr = t_val::array();
+        std::pair<t_tscalar, t_tscalar> min_max = view->get_min_max(colname);
+        arr.set(0, scalar_to_val(min_max.first));
+        arr.set(1, scalar_to_val(min_max.second));
+        return arr;
+    }
+
 } // end namespace binding
 } // end namespace perspective
 
@@ -2214,6 +2224,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_from_data_slice_one", &get_from_data_slice<t_ctx1>, allow_raw_pointers());
     function("get_data_slice_two", &get_data_slice<t_ctx2>, allow_raw_pointers());
     function("get_from_data_slice_two", &get_from_data_slice<t_ctx2>, allow_raw_pointers());
+    function("get_min_max_unit", &get_min_max<t_ctxunit>);
+    function("get_min_max_zero", &get_min_max<t_ctx0>);
+    function("get_min_max_one", &get_min_max<t_ctx1>);
+    function("get_min_max_two", &get_min_max<t_ctx2>);
     function("to_arrow_unit", &to_arrow<t_ctxunit>);
     function("to_arrow_zero", &to_arrow<t_ctx0>);
     function("to_arrow_one", &to_arrow<t_ctx1>);

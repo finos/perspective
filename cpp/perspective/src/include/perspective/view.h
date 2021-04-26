@@ -119,6 +119,13 @@ public:
     std::vector<std::vector<t_tscalar>> column_paths() const;
 
     /**
+     * @brief
+     *
+     * @return std::pair<t_tscalar, t_tscalar>
+     */
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+
+    /**
      * @brief Returns shared pointer to a t_data_slice object, which contains the
      * underlying slice of data as well as the metadata required to interface
      * with it.

@@ -51,6 +51,8 @@ public:
 
     perspective::t_index get_column_count() const;
 
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+
     using t_ctxbase<t_ctxunit>::get_data;
 
     std::vector<t_tscalar> get_data(

@@ -65,6 +65,8 @@ proxy_view.prototype = view.prototype;
 
 view.prototype.get_config = async_queue("get_config");
 
+view.prototype.get_min_max = async_queue("get_min_max");
+
 view.prototype.to_json = async_queue("to_json");
 
 view.prototype.to_arrow = async_queue("to_arrow");

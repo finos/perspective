@@ -98,16 +98,6 @@ function styleListener(regularTable) {
             const metadata = regularTable.getMeta(td);
             const column_name = metadata.column_header?.[metadata.column_header?.length - 1];
             const plugin = plugins[column_name];
-            if (this._calc_range_flag) {
-                const is_leaf = metadata.row_header.length === 0 || metadata.row_header[metadata.row_header.length - 1] !== undefined;
-                if (is_leaf) {
-                    let column_meta = this._cached_range[column_name];
-                    let max = Math.max(column_meta || -Infinity, Math.abs(metadata.user) || -Infinity);
-                    if (isFinite(max)) {
-                        this._cached_range[column_name] = max;
-                    }
-                }
-            }
 
             let type = get_psp_type.call(this, metadata);
             const is_numeric = type === "integer" || type === "float";
@@ -263,13 +253,11 @@ async function mousedownListener(regularTable, event) {
     } else if (target.classList.contains("psp-menu-enabled")) {
         const rect = target.getBoundingClientRect();
         if (event.clientY - rect.top > 16) {
-            this._calc_range_flag = true;
             const meta = regularTable.getMeta(target);
+            const column_name = meta.column_header?.[meta.column_header?.length - 1];
+            const [, max] = await this._view.get_min_max(column_name);
             this._open_column_styles_menu.unshift(meta._virtual_x);
-            await regularTable.draw();
-            this._calc_range_flag = undefined;
-            const maxes = this._cached_range;
-            activate_plugin_menu.call(this, regularTable, target, maxes);
+            activate_plugin_menu.call(this, regularTable, target, max);
             event.preventDefault();
         } else {
             sortHandler.call(this, regularTable, event, target);
@@ -417,7 +405,6 @@ export async function createModel(regular, table, view, extend = {}) {
         _num_rows: num_rows,
         _schema: {...schema, ...computed_schema},
         _ids: [],
-        _cached_range: {},
         _open_column_styles_menu: [],
         _plugin_background,
         _pos_color,
