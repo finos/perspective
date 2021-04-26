@@ -11,11 +11,10 @@ import chroma from "chroma-js";
 
 export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
 
-export function activate_plugin_menu(regularTable, target, maxes) {
+export function activate_plugin_menu(regularTable, target, column_max) {
     const target_meta = regularTable.getMeta(target);
     const column_name = target_meta.column_header[target_meta.column_header.length - 1];
     const column_type = this._schema[column_name];
-    const column_max = maxes[column_name];
     const default_config = {
         gradient: column_max,
         pos_color: this._pos_color[0],

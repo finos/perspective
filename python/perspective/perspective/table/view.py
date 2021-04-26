@@ -30,6 +30,7 @@ from .libbinding import (
     get_row_delta_zero,
     get_row_delta_one,
     get_row_delta_two,
+    scalar_to_py
 )
 
 
@@ -137,6 +138,17 @@ class View(object):
                 return 1
         else:
             return 0
+
+    def get_min_max(self, colname):
+        """Calculates the [min, max] of the leaf nodes of a column `colname`.
+
+        Args:
+            colname (:obj:`str`): The name of the column to calcualte range for.
+
+        Returns:
+            :obj:`list` of 2 elements, the `min` and `max` of the
+        """
+        return list(map(lambda x: scalar_to_py(x, False, False), self._view.get_min_max(colname)));
 
     def num_rows(self):
         """The number of aggregated rows in the :class:`~perspective.View`.

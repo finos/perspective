@@ -42,6 +42,8 @@ public:
 
     t_depth get_trav_depth(t_index idx) const;
 
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+
     using t_ctxbase<t_ctx1>::get_data;
 
 private:
