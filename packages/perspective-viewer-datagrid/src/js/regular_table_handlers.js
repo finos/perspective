@@ -29,6 +29,7 @@ function styleListener(regularTable) {
         td.classList.toggle("psp-header-border", needs_border);
         td.classList.toggle("psp-header-group", false);
         td.classList.toggle("psp-header-leaf", true);
+        td.classList.toggle("psp-is-top", false);
         td.classList.toggle("psp-header-corner", is_corner);
         td.classList.toggle("psp-header-sort-asc", !!sort && sort[1] === "asc");
         td.classList.toggle("psp-header-sort-desc", !!sort && sort[1] === "desc");
@@ -69,6 +70,8 @@ function styleListener(regularTable) {
             td.style.backgroundColor = "";
             const metadata = regularTable.getMeta(td);
             let needs_border = metadata.row_header_x === header_depth || metadata.x >= 0;
+            td.classList.toggle("psp-align-right", false);
+            td.classList.toggle("psp-align-left", false);
             td.classList.toggle("psp-header-group", true);
             td.classList.toggle("psp-header-leaf", false);
             td.classList.toggle("psp-header-border", needs_border);
@@ -250,18 +253,21 @@ async function mousedownListener(regularTable, event) {
     if (target.classList.contains("psp-tree-label") && event.offsetX < 26) {
         expandCollapseHandler.call(this, regularTable, event);
         event.stopImmediatePropagation();
-    } else if (target.classList.contains("psp-menu-enabled")) {
-        const rect = target.getBoundingClientRect();
-        if (event.clientY - rect.top > 16) {
-            const meta = regularTable.getMeta(target);
-            const column_name = meta.column_header?.[meta.column_header?.length - 1];
-            const [, max] = await this._view.get_min_max(column_name);
-            this._open_column_styles_menu.unshift(meta._virtual_x);
-            activate_plugin_menu.call(this, regularTable, target, max);
-            event.preventDefault();
-        } else {
-            sortHandler.call(this, regularTable, event, target);
-        }
+        return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    if (target.classList.contains("psp-menu-enabled") && event.clientY - rect.top > 16) {
+        const meta = regularTable.getMeta(target);
+        const column_name = meta.column_header?.[meta.column_header?.length - 1];
+        const [, max] = await this._view.get_min_max(column_name);
+        this._open_column_styles_menu.unshift(meta._virtual_x);
+        regularTable.draw();
+        activate_plugin_menu.call(this, regularTable, target, max);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    } else if (target.classList.contains("psp-header-leaf") && !target.classList.contains("psp-header-corner")) {
+        sortHandler.call(this, regularTable, event, target);
         event.stopImmediatePropagation();
     }
 }
