@@ -13,7 +13,7 @@ browser, or in concert with Python and/or
 Use it to create reports, dashboards, notebooks and applications, with static
 data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
-<img src="http://localhost:3000/img/promo-8.gif">
+<img src="https://github.com/finos/perspective/blob/gh-pages/img/demo_large.gif?raw=true">
 
 
 ## Features
@@ -33,8 +33,8 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 |[![Editable](https://bl.ocks.org/texodus/raw/45b868833c9f456bd39a51e606412c5d/e590d237a5237790694946018680719c9fef56cb/thumbnail.png)](https://bl.ocks.org/texodus/45b868833c9f456bd39a51e606412c5d)|[![Maps Elevation](https://perspective.finos.org/img/elevation_thumbnail.png)](https://bl.ocks.org/DevAndyLee/0efd87f7c0b8725a1c6bef8eafe86103)|[![Streaming](https://bl.ocks.org/texodus/raw/9bec2f8041471bafc2c56db2272a9381/c69c2cfacb23015f3aaeab3555a0035702ffdb1c/thumbnail.png)](https://bl.ocks.org/texodus/9bec2f8041471bafc2c56db2272a9381)|
 |IEX Cloud|NYC Citibike|JupyterLab Plugin|
 |[![IEX Cloud](https://bl.ocks.org/texodus/raw/eb151fdd9f98bde987538cbc20e003f6/79d409006f50b24f1607758945144b392e4921a2/thumbnail.png)](https://bl.ocks.org/texodus/eb151fdd9f98bde987538cbc20e003f6)|[![NYC Citibike](https://bl.ocks.org/texodus/raw/bc8d7e6f72e09c9dbd7424b4332cacad/f704ce53a3f453f8fe66bd9ff4ead831786384ea/thumbnail.png)](https://bl.ocks.org/texodus/bc8d7e6f72e09c9dbd7424b4332cacad)|[![JupyterLab Plugin](https://perspective.finos.org/img/jupyterlab.png)](http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks)|
-|CSV|Magic||
-|[![CSV](https://bl.ocks.org/texodus/raw/02d8fd10aef21b19d6165cf92e43e668/5e78be024893aa651fcdfac816841d54777ccdec/thumbnail.png)](https://bl.ocks.org/texodus/02d8fd10aef21b19d6165cf92e43e668)|[![CSV](https://perspective.finos.org/img/mtg_thumbnail.png)](https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67)||
+|CSV|Magic|Maps Citibike|
+|[![CSV](https://bl.ocks.org/texodus/raw/02d8fd10aef21b19d6165cf92e43e668/5e78be024893aa651fcdfac816841d54777ccdec/thumbnail.png)](https://bl.ocks.org/texodus/02d8fd10aef21b19d6165cf92e43e668)|[![CSV](https://perspective.finos.org/img/mtg_thumbnail.png)](https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67)|[![Maps Citibike](https://perspective.finos.org/img/citibike_thumbnail.png)](http://bl.ocks.org/DevAndyLee/57720f373752cd405dbbceb6f22c7854)|
 
 
 
