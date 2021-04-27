@@ -11,5 +11,6 @@ from .core import *
 from .core._version import __version__
 from .widget import *
 
+
 def _jupyter_labextension_paths():
-     return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]
+    return [{"src": "labextension", "dest": "@finos/perspective-jupyterlab"}]

@@ -91,29 +91,34 @@ version = get_version(os.path.join(here, name, "core", "_version.py"))
 # Representative files that should exist after a successful build
 jstargets = [
     # os.path.join(here, name, 'nbextension', 'index.js'),
-    os.path.join(here, name, 'labextension', 'package.json'),
+    os.path.join(here, name, "labextension", "package.json"),
 ]
 
 
-package_data_spec = {
-    name: [
-        "nbextension/**js*",
-        "labextension/**"
-    ]
-}
+package_data_spec = {name: ["nbextension/**js*", "labextension/**"]}
 
 
 data_files_spec = [
-    ("share/jupyter/nbextensions/finos-perspective-jupyterlab", "{}/nbextension".format(name), "**"),
-    ("share/jupyter/labextensions/@finos/perspective-jupyterlab", "{}/labextension".format(name), "**"),
+    (
+        "share/jupyter/nbextensions/finos-perspective-jupyterlab",
+        "{}/nbextension".format(name),
+        "**",
+    ),
+    (
+        "share/jupyter/labextensions/@finos/perspective-jupyterlab",
+        "{}/labextension".format(name),
+        "**",
+    ),
     ("share/jupyter/labextensions/@finos/perspective-jupyterlab", ".", "install.json"),
     ("etc/jupyter/nbconfig/notebook.d", ".", "finos-perspective-jupyterlab.json"),
 ]
 
 
-cmdclass = create_cmdclass('jsdeps', package_data_spec=package_data_spec, data_files_spec=data_files_spec)
+cmdclass = create_cmdclass(
+    "jsdeps", package_data_spec=package_data_spec, data_files_spec=data_files_spec
+)
 
-cmdclass['jsdeps'] = combine_commands(
+cmdclass["jsdeps"] = combine_commands(
     # install_npm(here, build_cmd='build_python_labextension'),
     ensure_targets(jstargets),
 )
