@@ -175,8 +175,9 @@ jobs:
 
   strategy:
     matrix:
-      # Do we care to test elsewhere?
-      python.version: '3.9'
+      Base:
+        # Do we care to test elsewhere?
+        python.version: '3.9'
 
   steps:
     - ${{ parameters.initSteps }}
