@@ -397,6 +397,23 @@ export default function(Module) {
     };
 
     /**
+     * Calculates the [min, max] of the leaf nodes of a column `colname`.
+     *
+     * @param {String} colname A column name in this `View`.
+     * @returns {Array<Object>} A tuple of [min, max], whose types are column
+     * and aggregate dependent.
+     */
+    view.prototype.get_min_max = function(colname) {
+        if (this.is_unit_context) {
+            return __MODULE__.get_min_max_unit(this._View, colname);
+        } else {
+            const num_sides = this.sides();
+            const nidx = SIDES[num_sides];
+            return __MODULE__[`get_min_max_${nidx}`](this._View, colname);
+        }
+    };
+
+    /**
      * Generic base function from which `to_json`, `to_columns` etc. derives.
      *
      * @private

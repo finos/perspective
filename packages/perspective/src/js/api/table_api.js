@@ -67,6 +67,10 @@ export function table(worker, data, options) {
                 reject
             );
         }
+
+        if (this._worker._initialized === true && !this._worker._features?.wait_for_response) {
+            resolve(this);
+        }
     });
 }
 

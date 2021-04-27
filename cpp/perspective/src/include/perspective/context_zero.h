@@ -41,6 +41,8 @@ public:
     void sort_by();
     std::vector<t_sortspec> get_sort_by() const;
 
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+
     using t_ctxbase<t_ctx0>::get_data;
 
 protected:

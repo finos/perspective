@@ -7,7 +7,6 @@
  *
  */
 
-import "@webcomponents/webcomponentsjs";
 import {wasm} from "../../dist/esm/@finos/perspective-vieux";
 import "./polyfill.js";
 
@@ -85,7 +84,7 @@ class PerspectiveViewer extends ActionElement {
             register_debug_plugin();
         }
 
-        this.toggleAttribute("settings", true);
+        this.toggleAttribute("settings", false);
 
         this._register_ids();
         this._register_callbacks();
@@ -731,6 +730,7 @@ class PerspectiveViewer extends ActionElement {
             this.removeAttribute("columns");
         }
         this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
+        this._plugin.restore?.call(this, {});
         this.dispatchEvent(new Event("perspective-config-update"));
     }
 

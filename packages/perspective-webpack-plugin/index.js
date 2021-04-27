@@ -9,6 +9,7 @@
 
 const {get_config} = require("@finos/perspective/dist/esm/config");
 const path = require("path");
+const webpack = require("webpack");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -84,6 +85,9 @@ class PerspectiveWebpackPlugin {
                 ]
             });
         }
+
+        const plugin_replace = new webpack.NormalModuleReplacementPlugin(/@finos\/perspective$/, "@finos/perspective/dist/esm/perspective.parallel.js");
+        plugin_replace.apply(compiler);
 
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }

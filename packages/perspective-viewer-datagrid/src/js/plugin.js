@@ -17,6 +17,7 @@ import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
+import {PLUGIN_SYMBOL} from "./plugin_menu.js";
 
 const VIEWER_MAP = new WeakMap();
 const INSTALLED = new WeakMap();
@@ -46,10 +47,10 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
     if (!is_installed) {
         model = await createModel(regular, table, view);
         configureRegularTable(regular, model);
-        await configureRowSelectable.call(model, regular, viewer);
-        await configureClick.call(model, regular, viewer);
-        await configureEditable.call(model, regular, viewer);
         await configureSortable.call(model, regular, viewer);
+        await configureRowSelectable.call(model, regular, viewer);
+        await configureEditable.call(model, regular, viewer);
+        await configureClick.call(model, regular, viewer);
         INSTALLED.set(regular, model);
     } else {
         model = INSTALLED.get(regular);
@@ -159,9 +160,19 @@ class DatagridPlugin {
         }
     }
 
-    static save() {}
+    static save() {
+        if (VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            if (datagrid[PLUGIN_SYMBOL]) {
+                return JSON.parse(JSON.stringify(datagrid[PLUGIN_SYMBOL]));
+            }
+        }
+    }
 
-    static restore() {}
+    static restore(token) {
+        const datagrid = get_or_create_datagrid(this, this._datavis);
+        datagrid[PLUGIN_SYMBOL] = token;
+    }
 }
 
 /**

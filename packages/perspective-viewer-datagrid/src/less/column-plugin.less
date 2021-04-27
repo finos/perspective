@@ -1,0 +1,49 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+perspective-viewer[settings] regular-table {
+    .psp-header-leaf {
+        height: 36px;
+        vertical-align: top;
+        padding-top: 2px;
+    }
+
+    .psp-header-leaf:not(.psp-header-corner):before {
+        font-family: "Material Icons";
+        content: "menu";
+        position: absolute;
+        width: calc(100% - 8px);
+        left: 5px;
+        bottom: 0px;
+        color: var(--inactive--color, #B4B7BE);
+        transition: color 0.3s ease-out;
+    }
+
+    .psp-header-leaf.psp-menu-enabled:not(.psp-header-corner):before {
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .psp-header-leaf.psp-menu-open:not(.psp-header-corner) {
+        pointer-events: none;        
+        &:before {
+            content: "expand_less";
+        }
+    }
+
+    .psp-header-leaf.psp-menu-enabled:hover:before {
+        color: #338DCD;
+    }
+
+    // Pin the column resize handle to the top so it does not overlap the
+    // column toolbar
+    .psp-header-leaf .rt-column-resize {
+        height: 18px;
+    }
+}

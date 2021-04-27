@@ -40,6 +40,10 @@ export function view(worker, table_name, config) {
             },
             reject
         );
+
+        if (this._worker._initialized === true && !this._worker._features?.wait_for_response) {
+            resolve(this);
+        }
     });
 }
 
@@ -60,6 +64,8 @@ proxy_view.prototype = view.prototype;
 // the queue for processing.
 
 view.prototype.get_config = async_queue("get_config");
+
+view.prototype.get_min_max = async_queue("get_min_max");
 
 view.prototype.to_json = async_queue("to_json");
 

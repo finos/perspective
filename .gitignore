@@ -168,6 +168,10 @@ python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
 /__pycache__
+# testing assets
+packages/perspective-jupyterlab/*.csv
+packages/perspective-jupyterlab/*.json
+packages/perspective-jupyterlab/*.arrow
 
 docs/static/js/logo.js
 docs/static/js/logo.js.map
@@ -182,7 +186,5 @@ rust/perspective-vieux/target
 rust/perspective-vieux/target2
 .emsdk
 
-# testing assets
-packages/perspective-jupyterlab/*.csv
-packages/perspective-jupyterlab/*.json
-packages/perspective-jupyterlab/*.arrow
+docs/static/css/material.dark.css
+docs/i18n/en.json

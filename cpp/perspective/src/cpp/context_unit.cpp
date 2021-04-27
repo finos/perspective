@@ -119,6 +119,28 @@ t_ctxunit::notify(const t_data_table& flattened) {
     }
 }
 
+std::pair<t_tscalar, t_tscalar> 
+t_ctxunit::get_min_max(const std::string& colname) const {
+    auto col = m_gstate->get_table()->get_const_column(colname);
+    auto rval = std::make_pair(mknone(), mknone());
+    for (std::size_t i = 0; i < col->size(); i++) {
+        t_tscalar val = col->get_scalar(i);
+        if (!val.is_valid()) {
+            continue;
+        }
+
+        if (rval.first.is_none() || (!val.is_none() && val < rval.first)) {
+            rval.first = val;
+        }
+
+        if (val > rval.second) {
+            rval.second = val;
+        }
+    }
+
+    return rval;
+}
+
 /**
  * @brief Given a start/end row and column, return the data for the subset.
  *

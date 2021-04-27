@@ -1,19 +1,34 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 @import (less) "regular-table/src/less/material.less";
-@import (less) "regular-table/dist/examples/perspective.css";
+@import (less) "./mitered-headers.less";
+@import (less) "./row-hover.less";
+@import (less) "./column-plugin.less";
+
+@positive: #338DCD; // @blue300
+@negative: #FF5942; // @red300
 
 // Row Selection
 
 .psp-row-selected, :hover .psp-row-selected, :hover th.psp-tree-leaf.psp-row-selected, :hover th.psp-tree-label.psp-row-selected {
-    color: black !important;
-    background-color: #EA7319;
+    color: white !important;
+    background-color: #EA7319 !important;
+    border-color: #EA7319 !important;
 }
 
 .psp-row-selected.psp-tree-label:not(:hover):before {
-    color: black;
+    color: white;
 }
 
 .psp-row-subselected, :hover .psp-row-subselected, :hover th.psp-tree-leaf.psp-row-subselected, :hover th.psp-tree-label.psp-row-subselected  {
-    background: rgba(234, 115, 25, 0.2);
+    background: rgba(234, 115, 25, 0.2) !important;
 }
 
 .psp-error {
@@ -28,4 +43,110 @@ td:focus {
 
 perspective-viewer.dragging regular-table {
     pointer-events: none;
+}
+
+.psp-header-border:last-child {
+    border-right-width: 0px;
+}
+
+.psp-header-sort-desc:after {
+    font-family: "Material Icons";
+    font-size: 10px;
+    content: "arrow_downward"
+}
+.psp-header-sort-asc:after {
+    font-family: "Material Icons";
+    font-size: 10px;
+    content: "arrow_upward"
+}
+.psp-header-sort-col-desc:after {
+    font-family: "Material Icons";
+    font-size: 10px;
+    content: "arrow_back"
+}
+.psp-header-sort-col-asc:after {
+    font-family: "Material Icons";
+    font-size: 10px;
+    content: "arrow_forward"
+}
+
+tbody th:last-of-type {
+    border-right: 1px solid #eaedef;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+tbody th:empty {
+    background-image: linear-gradient(to right, transparent 9px, #eee 10px, transparent 11px);
+    background-repeat: no-repeat;
+    min-width: 20px;
+    max-width: 20px;
+    pointer-events: none;
+}
+.psp-tree-label {
+    max-width: 0px;
+    min-width: 0px;
+}
+.psp-tree-label:before {
+    color: #ccc;
+    font-family: "Material Icons";
+    padding-right: 11px;
+    vertical-align: -1px;
+}
+.psp-tree-label-expand:before {
+    content: "add"
+}
+.psp-tree-label-collapse:before {
+    content: "remove"
+}
+
+.psp-tree-label:hover:before {
+    color: @positive;
+    text-shadow: 0px 0px 5px @positive;
+}
+
+regular-table thead tr:last-child th {
+    border-bottom-width: 0px;
+}
+
+.psp-tree-leaf {
+    padding-left: 24px;
+}
+
+.psp-align-right {
+    text-align: right;
+}
+.psp-align-left {
+    text-align: left;
+}
+.psp-positive:not(:focus) {
+    color: var(--rt-pos-cell--color, @positive);
+}
+.psp-negative:not(:focus) {
+    color: var(--rt-neg-cell--color, @negative);
+}
+
+regular-table table {
+    user-select: none;
+    color: #161616;
+
+    th {
+        font-weight: 400;
+    }
+
+    td, th {
+        height: 23px;
+    }
+
+    .psp-header-leaf {
+        border-bottom-width: 0px;
+    }
+
+    td, th.psp-tree-label, th.psp-tree-label, th.psp-tree-leaf, tbody tr:first-child th {
+        border: 0px solid #eaedef;
+        border-top-width: 1px;
+    }
+
+    tbody th:empty {
+        background-position: 0px -10px;
+    }
 }

@@ -39,25 +39,25 @@ utils.with_server({}, () => {
                 const detail = await click_details(page);
                 expect(detail).toEqual({
                     row: {
-                        "Row ID": 15,
-                        "Order ID": "US-2012-118983",
-                        "Order Date": 1353542400000,
-                        "Ship Date": 1353888000000,
                         "Ship Mode": "Standard Class",
-                        "Customer ID": "HP-14815",
-                        Segment: "Home Office",
                         Country: "United States",
-                        City: "Fort Worth",
-                        State: "Texas",
-                        "Postal Code": 76106,
-                        Region: "Central",
-                        "Product ID": "OFF-AP-10002311",
-                        Category: "Office Supplies",
-                        "Sub-Category": "Appliances",
-                        Sales: 68.81,
-                        Quantity: 5,
-                        Discount: 0.8,
-                        Profit: -123.858
+                        "Customer ID": "BH-11710",
+                        Discount: 0.2,
+                        "Order Date": 1307577600000,
+                        "Order ID": "CA-2011-115812",
+                        "Postal Code": 90032,
+                        "Product ID": "TEC-PH-10002033",
+                        Profit: 68.3568,
+                        Quantity: 4,
+                        Region: "West",
+                        "Row ID": 12,
+                        Sales: 911.424,
+                        Segment: "Consumer",
+                        "Ship Date": 1308009600000,
+                        Category: "Technology",
+                        City: "Los Angeles",
+                        State: "California",
+                        "Sub-Category": "Phones"
                     },
                     column_names: ["Order Date"],
                     config: {filters: []}
@@ -72,31 +72,31 @@ utils.with_server({}, () => {
                 const detail = await click_details(page, 310, 320);
                 expect(detail).toEqual({
                     row: {
-                        __ROW_PATH__: ["Delaware", "Technology"],
-                        "Row ID": 97,
-                        "Order ID": 2,
-                        "Order Date": 2,
-                        "Ship Date": 2,
-                        "Ship Mode": 2,
-                        "Customer ID": 2,
-                        Segment: 2,
-                        Country: 2,
-                        City: 2,
-                        State: 2,
-                        "Postal Code": 39802,
-                        Region: 2,
-                        "Product ID": 2,
-                        Category: 2,
-                        "Sub-Category": 2,
-                        Sales: 66.8,
-                        Quantity: 5,
-                        Discount: 0,
-                        Profit: 11.054
+                        __ROW_PATH__: ["California", "Office Supplies"],
+                        Category: 15,
+                        City: 15,
+                        Country: 15,
+                        "Customer ID": 15,
+                        Discount: 1,
+                        "Order Date": 15,
+                        "Order ID": 15,
+                        "Postal Code": 1370894,
+                        "Product ID": 15,
+                        Profit: 183.47429999999997,
+                        Quantity: 46,
+                        Region: 15,
+                        "Row ID": 712,
+                        Sales: 562.848,
+                        Segment: 15,
+                        "Ship Date": 15,
+                        "Ship Mode": 15,
+                        State: 15,
+                        "Sub-Category": 15
                     },
                     config: {
                         filters: [
-                            ["State", "==", "Delaware"],
-                            ["Category", "==", "Technology"]
+                            ["State", "==", "California"],
+                            ["Category", "==", "Office Supplies"]
                         ]
                     }
                 });

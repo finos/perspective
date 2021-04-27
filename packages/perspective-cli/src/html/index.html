@@ -47,7 +47,7 @@
 <body>
     <perspective-viewer id="view1"></perspective-viewer>
     <script>
-        window.addEventListener('WebComponentsReady', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             var elem = document.getElementById('view1');
             var worker = perspective.websocket();
             elem.load(worker.open_table('data_source_one'));

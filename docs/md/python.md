@@ -378,7 +378,7 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-  window.addEventListener("WebComponentsReady", async function () {
+  window.addEventListener("DOMContentLoaded", async function () {
     // Create a client that expects a Perspective server
     // to accept connections at the specified URL.
     const websocket = perspective.websocket("ws://localhost:8888/websocket");
@@ -480,6 +480,10 @@ PerspectiveWidget(table)
 ```python
 PerspectiveWidget(None)
 ```
+
+## `PerspectiveRenderer`
+
+Perspective also exposes a JS-only `mimerender-extension`. This lets you view `csv`, `json`, and `arrow` files directly from the file browser. You can see this by right clicking one of these files and `Open With->CSVPerspective` (or `JSONPerspective` or `ArrowPerspective`). Perspective will also install itself as the default handler for opening `.arrow` files.
 
 ## `PerspectiveTornadoHandler`
 

@@ -390,6 +390,12 @@ View<t_ctx0>::computed_schema() const {
     return new_schema;
 }
 
+template <typename T>
+std::pair<t_tscalar, t_tscalar> 
+View<T>::get_min_max(const std::string& colname) const {
+    return m_ctx->get_min_max(colname);
+}
+
 template <>
 std::shared_ptr<t_data_slice<t_ctxunit>>
 View<t_ctxunit>::get_data(

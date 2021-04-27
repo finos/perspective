@@ -3550,16 +3550,6 @@
     "@webassemblyjs/ast" "1.11.0"
     "@xtuc/long" "4.2.2"
 
-"@webcomponents/shadycss@^1.5.2":
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/@webcomponents/shadycss/-/shadycss-1.10.2.tgz#40e03cab6dc5e12f199949ba2b79e02f183d1e7b"
-  integrity sha512-9Iseu8bRtecb0klvv+WXZOVZatsRkbaH7M97Z+f+Pt909R4lDfgUODAnra23DOZTpeMTAkVpf4m/FZztN7Ox1A==
-
-"@webcomponents/webcomponentsjs@~2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@webcomponents/webcomponentsjs/-/webcomponentsjs-2.0.4.tgz#fe18c288f99b7103e9ae7a766020f9702cedcc08"
-  integrity sha512-wzPSTmwjAd/0oKW36Yi+cB/BmDrHhcHqGlbqqMjrbPIFkt5Mw7wtvEZQouCrQyBNnRquUhRnSWIBrRijHNBBKg==
-
 "@webpack-cli/configtest@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@webpack-cli/configtest/-/configtest-1.0.2.tgz#2a20812bfb3a2ebb0b27ee26a52eeb3e3f000836"
@@ -15041,10 +15031,10 @@ regjsparser@^0.6.4:
   dependencies:
     jsesc "~0.5.0"
 
-regular-table@=0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.3.1.tgz#68bb61a8c70c735bd223d2dbac0a1000620068af"
-  integrity sha512-wsJF/Jyk5ltpyRiwzbXTomiVso2xIggbB1ZH4gUW4VWIL2zdg21yIp3B0TdKyzyFSYMyayL4lF5f6Sqsa/vn8w==
+regular-table@=0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.3.3.tgz#92e5d9c488eb948e1e8a97da291376ffc1ee3707"
+  integrity sha512-TB+zpWaCAYujqq+ujaBCZ0Sl+Bpm9QO/n7isffgbtBEUAEwCR+oUyy9Ocgn0K0hRNyyyBWHJoGu57H22JLT0Ew==
 
 relateurl@0.2.x, relateurl@^0.2.7:
   version "0.2.7"

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-workspace",
-    "version": "0.6.2",
+    "version": "0.7.0",
     "description": "Perspective Workspace",
     "main": "./dist/cjs/perspective-workspace.js",
     "module": "./dist/cjs/perspective-workspace.js",
@@ -38,7 +38,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective-viewer": "^0.6.2",
+        "@finos/perspective-viewer": "^0.7.0",
         "@lumino/algorithm": "^1.2.0",
         "@lumino/commands": "^1.7.2",
         "@lumino/domutils": "^1.1.4",
@@ -49,7 +49,7 @@
         "lodash": "^4.17.4"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.6.2",
+        "@finos/perspective-test": "^0.7.0",
         "babel-loader": "^8.0.6",
         "babel-runtime": "^6.26.0",
         "lodash.clonedeep": "^4.5.0"

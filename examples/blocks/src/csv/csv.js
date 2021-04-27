@@ -1,4 +1,4 @@
-window.addEventListener("WebComponentsReady", function() {
+window.addEventListener("DOMContentLoaded", function() {
     const worker = window.perspective.worker();
 
     // Get `dropArea` element from the DOM.
