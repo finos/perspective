@@ -1,8 +1,40 @@
 # Changelog
 
-## [0.7.0](https://github.com/finos/perspective/tree/HEAD)
+## [0.8.0](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.6.2...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.7.0...HEAD)
+
+**Breaking changes:**
+
+- Add `get\_min\_max\(\)` to Perspective API [\#1395](https://github.com/finos/perspective/pull/1395) ([texodus](https://github.com/texodus))
+
+**Implemented enhancements:**
+
+- Datagrid Styleable Column [\#1386](https://github.com/finos/perspective/pull/1386) ([texodus](https://github.com/texodus))
+- Enable editing to mime renderer in JupyterLab [\#1353](https://github.com/finos/perspective/pull/1353) ([timkpaine](https://github.com/timkpaine))
+
+**Fixed bugs:**
+
+- jupyter widget x-axis [\#1389](https://github.com/finos/perspective/issues/1389)
+- Exception in Widget console [\#984](https://github.com/finos/perspective/issues/984)
+- Fix `last` aggregate to preserve status [\#1390](https://github.com/finos/perspective/pull/1390) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Jupyter labextension install does not work on master [\#1330](https://github.com/finos/perspective/issues/1330)
+- API docs are returning 404 [\#1398](https://github.com/finos/perspective/issues/1398)
+- PerspectiveWidget gets in unrecoverable state [\#1397](https://github.com/finos/perspective/issues/1397)
+- Cant get PerspectiveWidget loaded in jupyter lab [\#1392](https://github.com/finos/perspective/issues/1392)
+- Olympics example still referring to hypergrid [\#1304](https://github.com/finos/perspective/issues/1304)
+- Custom styles example not showing anything [\#1303](https://github.com/finos/perspective/issues/1303)
+
+**Merged pull requests:**
+
+- Disable column style menu for non-numeric columns [\#1391](https://github.com/finos/perspective/pull/1391) ([texodus](https://github.com/texodus))
+
+## [v0.7.0](https://github.com/finos/perspective/tree/v0.7.0) (2021-04-20)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.2...v0.7.0)
 
 **Breaking changes:**
 
