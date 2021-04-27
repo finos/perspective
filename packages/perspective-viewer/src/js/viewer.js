@@ -43,6 +43,15 @@ import {COMPUTED_EXPRESSION_PARSER} from "./computed_expressions/computed_expres
 
 const PERSISTENT_ATTRIBUTES = ["selectable", "editable", "plugin", "computed-columns", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "columns"];
 
+// There is no way to provide a default rejection handler within a promise and
+// also not lock the await-er, so this module attaches a global handler to
+// filter out cancelled query messages.
+window.addEventListener("unhandledrejection", event => {
+    if (event.reason?.message === "View method cancelled") {
+        event.preventDefault();
+    }
+});
+
 /**
  * The HTMLElement class for `<perspective-viewer>` custom element.
  *

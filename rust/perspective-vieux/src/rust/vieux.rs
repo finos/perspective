@@ -24,6 +24,7 @@ use utils::WeakComponentLink;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
+use web_sys::HtmlElement;
 use yew::prelude::*;
 
 #[cfg(feature = "wee_alloc")]
@@ -102,6 +103,36 @@ pub struct PerspectiveColumnStyleElement {
     blurhandler: Rc<RefCell<Option<Closure<dyn Fn(FocusEvent)>>>>,
 }
 
+/// Calculate the absolute coordinates (top, left) relative to `<body>` of a
+/// `target` element.
+fn calc_page_position(target: HtmlElement) -> Result<(i32, i32), JsValue> {
+    let mut top = target.offset_height();
+    let mut left = 0;
+    let mut elem = target;
+    while !elem.is_undefined() {
+        let is_sticky = match web_sys::window().unwrap().get_computed_style(&elem)? {
+            Some(x) => x.get_property_value("position")? == "sticky",
+            _ => false
+        };
+
+        top += elem.offset_top();
+        left += elem.offset_left();
+        elem = match elem.offset_parent() {
+            Some(elem) => {
+                let elem = elem.unchecked_into::<HtmlElement>();
+                if is_sticky {
+                    top -= elem.scroll_top();
+                    left -= elem.scroll_left();
+                }
+                elem
+            },
+            None => JsValue::UNDEFINED.unchecked_into::<HtmlElement>()
+        };
+    }
+
+    Ok((top, left))
+}
+
 #[wasm_bindgen]
 impl PerspectiveColumnStyleElement {
     #[wasm_bindgen(constructor)]
@@ -140,10 +171,10 @@ impl PerspectiveColumnStyleElement {
     /// absolutely positioned relative to an alread-connected `target`
     /// element.
     pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
-        let rect = target.get_bounding_client_rect();
+        let (top, left) = calc_page_position(target)?;
         self.root.send_message(ColumnStyleMsg::SetPos(
-            rect.bottom().round() as u32,
-            rect.left().round() as u32,
+            top as u32,
+            left as u32,
         ));
 
         web_sys::window()

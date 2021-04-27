@@ -57,23 +57,17 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
         await createModel(regular, table, view, model);
     }
 
-    try {
-        const draw = regular.draw({invalid_columns: true});
-        if (!model._preserve_focus_state) {
-            regular.scrollTop = 0;
-            regular.scrollLeft = 0;
-            deselect(regular, viewer);
-            regular._resetAutoSize();
-        } else {
-            model._preserve_focus_state = false;
-        }
-
-        await draw;
-    } catch (e) {
-        if (e.message !== "View is not initialized") {
-            throw e;
-        }
+    const draw = regular.draw({invalid_columns: true});
+    if (!model._preserve_focus_state) {
+        regular.scrollTop = 0;
+        regular.scrollLeft = 0;
+        deselect(regular, viewer);
+        regular._resetAutoSize();
+    } else {
+        model._preserve_focus_state = false;
     }
+
+    await draw;
 });
 
 /**
@@ -117,38 +111,22 @@ class DatagridPlugin {
     static deselectMode = "pivots";
 
     static async update(div) {
-        try {
-            const datagrid = VIEWER_MAP.get(div);
-            const model = INSTALLED.get(datagrid);
-            model._num_rows = await model._view.num_rows();
-            await datagrid.draw();
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
-            }
-        }
+        const datagrid = VIEWER_MAP.get(div);
+        const model = INSTALLED.get(datagrid);
+        model._num_rows = await model._view.num_rows();
+        await datagrid.draw();
     }
 
     static async create(div, view) {
-        try {
-            const datagrid = get_or_create_datagrid(this, div);
-            await datagridPlugin(datagrid, this, view);
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
-            }
-        }
+        const datagrid = get_or_create_datagrid(this, div);
+        await datagridPlugin(datagrid, this, view);
     }
 
     static async resize() {
         if (this.view && VIEWER_MAP.has(this._datavis)) {
             const datagrid = VIEWER_MAP.get(this._datavis);
-            try {
+            if (INSTALLED.has(datagrid)) {
                 await datagrid.draw();
-            } catch (e) {
-                if (e.message !== "View is not initialized") {
-                    throw e;
-                }
             }
         }
     }

@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.dark.css">
+      
+        <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+        
+        <style>
+
+            body {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            perspective-viewer {
+                --d3fc-positive--gradient: linear-gradient(
+                    #94D0FF, 
+                    #8795E8, 
+                    #966bff, 
+                    #AD8CFF,
+                    #C774E8, 
+                    #c774a9, 
+                    #FF6AD5, 
+                    #ff6a8b, 
+                    #ff8b8b, 
+                    #ffa58b,
+                    #ffde8b, 
+                    #cdde8b, 
+                    #8bde8b, 
+                    #20de8b
+                ) !important;
+
+                --d3fc-negative--gradient: linear-gradient(
+                    #94D0FF, 
+                    #8795E8, 
+                    #966bff, 
+                    #AD8CFF,
+                    #C774E8, 
+                    #c774a9, 
+                    #FF6AD5, 
+                    #ff6a8b, 
+                    #ff8b8b, 
+                    #ffa58b,
+                    #ffde8b, 
+                    #cdde8b, 
+                    #8bde8b, 
+                    #20de8b
+                ) !important;
+
+                --d3fc-full--gradient: linear-gradient(
+                    #94D0FF, 
+                    #8795E8, 
+                    #966bff, 
+                    #AD8CFF,
+                    #C774E8, 
+                    #c774a9, 
+                    #FF6AD5, 
+                    #ff6a8b, 
+                    #ff8b8b, 
+                    #ffa58b,
+                    #ffde8b, 
+                    #cdde8b, 
+                    #8bde8b, 
+                    #20de8b
+                ) !important;
+            }
+
+        </style>
+
+    </head>
+    <body> 
+
+        <perspective-workspace id="workspace">
+            <perspective-viewer table="movies"></perspective-viewer>
+        </perspective-workspace>
+      
+        <script>
+
+        const SCHEMA = {
+            "Title": "string",
+            "US Gross": "float",
+            "Worldwide Gross": "float",
+            "US DVD Sales": "float",
+            "Production Budget": "float",
+            "Release Date": "date",
+            "MPAA Rating": "string",
+            "Running Time min": "integer",
+            "Distributor": "string",
+            "Source": "string",
+            "Major Genre": "string",
+            "Creative Type": "string",
+            "Director": "string",
+            "Rotten Tomatoes Rating": "integer",
+            "IMDB Rating": "float",
+            "IMDB Votes": "integer"
+        };
+
+        const URL = "https://vega.github.io/editor/data/movies.json";
+
+        const datasource = async () => {
+            const request = fetch(URL);
+            const worker = perspective.worker();
+            const response = await request;
+            const json = await response.json();
+            for (const row of json) {
+                row["Release Date"] = row["Release Date"] ? new Date(row["Release Date"]) || null : null;
+            }
+            const table = await worker.table(SCHEMA);
+            table.update(json);
+            return table;
+        };
+
+        window.addEventListener("load", async () => {
+            let req = await fetch("layout.json");
+            let layout = await req.json();
+
+            const plugin = window.getPlugin("d3_heatmap");
+            plugin.max_cells = 10000;
+            plugin.max_columns = 200;
+            window.workspace.tables.set("movies", datasource());
+
+
+            window.workspace.restore(layout);
+        });
+
+        </script>
+    </body>
+</html>

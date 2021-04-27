@@ -86,6 +86,9 @@ class PerspectiveViewProxy(object):
     def num_columns(self):
         return self._async_queue("num_columns", "view_method")
 
+    def get_min_max(self):
+        return self._async_queue("get_min_max", "view_method")
+
     def get_row_expanded(self, idx):
         return self._async_queue("get_row_expanded", "view_method", idx)
 
