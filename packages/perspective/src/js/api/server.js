@@ -290,7 +290,7 @@ export class Server {
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a
             // view
-            this.process_error(msg, {message: "View is not initialized"});
+            this.process_error(msg, {message: "View method cancelled"});
             return;
         }
 

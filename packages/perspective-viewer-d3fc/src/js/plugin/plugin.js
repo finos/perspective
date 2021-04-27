@@ -43,22 +43,16 @@ function drawChart(chart) {
     return async function(el, view, task, end_col, end_row) {
         let jsonp, metadata;
         const realValues = JSON.parse(this.getAttribute("columns"));
-        try {
-            if (end_col && end_row) {
-                jsonp = view.to_json({end_row, end_col, leaves_only: true});
-            } else if (end_col) {
-                jsonp = view.to_json({end_col, leaves_only: true});
-            } else if (end_row) {
-                jsonp = view.to_json({end_row, leaves_only: true});
-            } else {
-                jsonp = view.to_json({leaves_only: true});
-            }
-            metadata = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
-            }
+        if (end_col && end_row) {
+            jsonp = view.to_json({end_row, end_col, leaves_only: true});
+        } else if (end_col) {
+            jsonp = view.to_json({end_col, leaves_only: true});
+        } else if (end_row) {
+            jsonp = view.to_json({end_row, leaves_only: true});
+        } else {
+            jsonp = view.to_json({leaves_only: true});
         }
+        metadata = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
 
         if (task.cancelled) {
             return;

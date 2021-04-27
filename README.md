@@ -6,23 +6,21 @@
 [![FINOS - Active](https://cdn.jsdelivr.net/gh/finos/contrib-toolbox@master/images/badge-active.svg)](https://finosfoundation.atlassian.net/wiki/display/FINOS/Active)
 
 Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
-datasets. Originally developed for J.P. Morgan's trading business,  Perspective
-makes it simple to build user-configurable analytics entirely in the
-browser, or in concert with Python and/or
-[JupyterLab](https://jupyterlab.readthedocs.io/en/stable/).
+datasets. Originally developed at J.P. Morgan,  Perspective makes it simple to
+build user-configurable analytics entirely in the browser, or in concert with
+Python and/or [JupyterLab](https://jupyterlab.readthedocs.io/en/stable/).
 Use it to create reports, dashboards, notebooks and applications, with static
-data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
-
-<img src="https://github.com/finos/perspective/blob/gh-pages/img/demo_large.gif?raw=true">
-
-
-## Features
+data or streaming updates via [Apache Arrow](https://arrow.apache.org/).  As a
+library, Perspective provides both:
 
 - A fast, memory efficient streaming query engine, written in C++ and compiled for both [WebAssembly](https://webassembly.org/) and [Python](https://www.python.org/), with read/write/stream/virtual support for [Apache Arrow](https://arrow.apache.org/).
 
-- A framework-agnostic User Interface component and [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/) Widget, over WebWorker (WebAssembly) or WebSocket (Python/Node), and a suite of Datagrid and [D3FC](https://d3fc.io/) Chart plugins.
-`
+- A framework-agnostic User Interface [Custom Element](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements) and [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/) Widget, via WebWorker (WebAssembly) or virtually via WebSocket (Python/Node), and a suite of Datagrid and [D3FC](https://d3fc.io/) Chart plugins.
+
+<img src="https://github.com/finos/perspective/blob/gh-pages/img/demo_large.gif?raw=true">
+
 ## Examples
+
 ||||
 |:--|:--|:--|
 |Movies|Superstore|Maps Airports|

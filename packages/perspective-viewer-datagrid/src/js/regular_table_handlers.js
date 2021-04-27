@@ -427,11 +427,5 @@ export async function configureRegularTable(regular, model) {
     regular.addStyleListener(styleListener.bind(model, regular));
     regular.addEventListener("mousedown", mousedownListener.bind(model, regular));
     regular.addEventListener("click", clickListener.bind(model, regular));
-    try {
-        await regular.draw();
-    } catch (e) {
-        if (e.message !== "View is not initialized") {
-            throw e;
-        }
-    }
+    await regular.draw();
 }

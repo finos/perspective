@@ -226,7 +226,7 @@ const Features = props => (
 const DESCRIPTION_TEXT = `
 # What is Perspective?
 Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
-datasets. Originally developed for J.P. Morgan's trading business,  Perspective
+datasets. Originally developed at J.P. Morgan,  Perspective
 makes it simple to build real-time & user configurable analytics entirely in the
 browser, or in concert with Python and/or
 [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
