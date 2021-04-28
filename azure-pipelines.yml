@@ -62,10 +62,35 @@ jobs:
         PSP_DOCKER: 1
 
     - task: PublishTestResults@2
-      condition: succeededOrFailed()
+      condition: succeeded()
       inputs:
         testRunner: JUnit
         testResultsFiles: 'junit.xml'
+
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
+        artifactName: "perspective-viewer"
+
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
+        artifactName: "perspective-viewer-datagrid"
+
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
+        artifactName: "perspective-viewer-d3fc"
+
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
+        artifactName: "perspective-workspace"
+
 
 - job: 'Linux'
   pool:

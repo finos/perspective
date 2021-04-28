@@ -7,10 +7,10 @@
  *
  */
 
-import debounce from "lodash/debounce";
 import isEqual from "lodash/isEqual";
 import {html, render} from "lit-html";
 
+import {throttlePromise} from "../utils.js";
 import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
@@ -507,9 +507,7 @@ export class PerspectiveElement extends StateElement {
         this._vieux.set_view(this._view);
 
         const timer = this._render_time();
-        this._render_count = (this._render_count || 0) + 1;
-
-        const task = (this._task = new CancelTask(() => this._render_count--, true));
+        const task = (this._task = new CancelTask(() => {}, true));
 
         try {
             const {max_cols, max_rows} = await this.get_maxes();
@@ -531,12 +529,9 @@ export class PerspectiveElement extends StateElement {
                 this.__render_times = [];
                 this.dispatchEvent(new Event("perspective-view-update"));
             }
+
             timer();
             task.cancel();
-            if (this._render_count === 0) {
-                this.removeAttribute("updating");
-                this.dispatchEvent(new Event("perspective-update-complete"));
-            }
         }
     }
 
@@ -582,22 +577,24 @@ export class PerspectiveElement extends StateElement {
         this.toggleAttribute("updating", true);
         let resolve;
         this._updating_promise = new Promise(_resolve => {
-            resolve = _resolve;
+            resolve = () => {
+                _resolve();
+            };
         });
         return resolve;
     }
 
-    _register_debounce_instance() {
-        const _update = debounce((resolve, ignore_size_check, force_update, limit_points) => {
-            this._new_view({ignore_size_check, force_update, limit_points}).then(resolve);
-        }, 0);
+    @throttlePromise
+    async _update(ignore_size_check, force_update, limit_points) {
+        await new Promise(setTimeout);
+        await this._new_view({ignore_size_check, force_update, limit_points});
+    }
 
-        this._debounce_update = async ({force_update = false, ignore_size_check = false, limit_points = true} = {}) => {
-            if (this._table) {
-                let resolve = this._set_updating();
-                await new Promise(resolve => _update(resolve, ignore_size_check, force_update, limit_points));
-                resolve();
-            }
-        };
+    async _debounce_update({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
+        if (this._table) {
+            let resolve = this._set_updating();
+            await this._update(ignore_size_check, force_update, limit_points);
+            resolve();
+        }
     }
 }

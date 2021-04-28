@@ -99,8 +99,8 @@ function showTooltip(containerNode, node, tooltipDiv, centered) {
     tooltipDiv
         .style("left", `${left}px`)
         .style("top", `${top}px`)
-        .transition()
-        .duration(200)
+        // .transition()
+        // .duration(200)
         .style("opacity", 0.9);
 
     if (centered) [left, top] = centerTip(tooltipDiv, containerRect);
@@ -150,8 +150,8 @@ function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top, cente
 function hideTooltip(tooltipDiv) {
     if (tooltipDiv) {
         tooltipDiv
-            .transition()
-            .duration(500)
+            // .transition()
+            // .duration(500)
             .style("opacity", 0);
     }
 }

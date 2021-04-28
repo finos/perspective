@@ -77,7 +77,6 @@ window.addEventListener("unhandledrejection", event => {
 class PerspectiveViewer extends ActionElement {
     constructor() {
         super();
-        this._register_debounce_instance();
         this._show_config = true;
         this._show_warnings = true;
         this.__render_times = [];
@@ -717,10 +716,7 @@ class PerspectiveViewer extends ActionElement {
      * attribute state has been applied.
      */
     async flush() {
-        await new Promise(setTimeout);
-        while (this.hasAttribute("updating")) {
-            await this._updating_promise;
-        }
+        await Promise.all([this._updating_promise || Promise.resolve(), this.notifyResize.flush()]);
     }
 
     /**

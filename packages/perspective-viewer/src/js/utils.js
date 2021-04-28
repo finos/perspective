@@ -180,42 +180,96 @@ export async function setPromise(cb = async () => {}, timeout = 0) {
     return await cb();
 }
 
-/**
- * Returns a promise whose resolve method can be called from elsewhere.
- */
-export function invertPromise() {
-    let resolve;
-    let promise = new Promise(_resolve => {
-        resolve = _resolve;
+export const invertPromise = () => {
+    let _resolve;
+    const promise = new Promise(resolve => {
+        _resolve = resolve;
     });
-    promise.resolve = resolve;
+
+    promise.resolve = _resolve;
     return promise;
-}
+};
 
 export function throttlePromise(target, property, descriptor) {
+    // Each call to `throttlePromise` has a unique `lock`
     const lock = Symbol("private lock");
-    const f = descriptor.value;
+    const _super = descriptor.value;
+
+    // Wrap the underlying function
     descriptor.value = async function(...args) {
-        if (this[lock]) {
-            await this[lock];
-            if (this[lock]) {
-                await this[lock];
+        // Initialize the lock for this Object instance, if it has never been
+        // initialized.
+        this[lock] = this[lock] || {gen: 0};
+
+        // Assign this invocation a unique ID.
+        let id = ++this[lock].gen;
+
+        // If the `lock` property is defined, a previous invocation is still
+        // processing.
+        if (this[lock].lock) {
+            // `await` the previous call;  afterwards, the drawn state will be
+            // updated but we need to draw again to incorporate this
+            // invocation's state changes.
+            await this[lock].lock;
+
+            // However, we only want to execute the _last_ such invocation,
+            // since each call precludes the previous ones if they are
+            // still queue-ed.
+            if (id !== this[lock].gen) {
+                // This invocation got de-duped with a later one, but it will
+                // wake up first, so if there is not a lock acquired here, push
+                // it to the back of the event queue.
+                if (!this[lock].lock) {
+                    await new Promise(requestAnimationFrame);
+                }
+
+                // Now await the currently-processing invocation (which
+                // occurred after than this one) and return.
+                await this[lock].lock;
                 return;
             }
         }
-        this[lock] = invertPromise();
+
+        // This invocation has made it to the render process, so "acquire" the
+        // lock.
+        this[lock].lock = invertPromise();
+
+        // Call the decorated function itself
         let result;
         try {
-            result = await f.call(this, ...args);
-        } catch (e) {
-            console.error(e);
+            result = await _super.call(this, ...args);
         } finally {
-            const l = this[lock];
-            this[lock] = undefined;
+            // Errors can leave promises which depend on this behavior
+            // dangling.
+            const l = this[lock].lock;
+            delete this[lock]["lock"];
+
+            // If this invocation is still the latest, clear the attribute
+            // state.
+            // TODO this is likely not he behavior we want for this event ..
+            if (id === this[lock].gen) {
+                this.removeAttribute("updating");
+                this.dispatchEvent(new Event("perspective-update-complete"));
+            }
+
             l.resolve();
-            return result;
+        }
+
+        return result;
+    };
+
+    // A function which clears the lock just like the main wrapper, but then
+    // does nothing.
+    descriptor.value.flush = async function() {
+        if (this[lock]?.lock) {
+            await this[lock].lock;
+            await new Promise(requestAnimationFrame);
+            if (this[lock]?.lock) {
+                await this[lock].lock;
+            }
         }
     };
+
     return descriptor;
 }
 

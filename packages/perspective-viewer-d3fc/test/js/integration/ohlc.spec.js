@@ -22,7 +22,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("filters", '[["Name", "==", "BARC"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(() => document.activeElement.blur());
+                await page.shadow_blur();
             });
 
             test.capture("filter to date range.", async page => {
@@ -31,7 +31,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Name"]'), viewer);
                 await page.evaluate(element => element.setAttribute("filters", '[["Date", ">", "2019-01-01"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(() => document.activeElement.blur());
+                await page.shadow_blur();
             });
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
