@@ -88,6 +88,7 @@ function drawChart(chart) {
         };
 
         createOrUpdateChart.call(this, el, chart, settings);
+        await new Promise(setTimeout);
     };
 }
 

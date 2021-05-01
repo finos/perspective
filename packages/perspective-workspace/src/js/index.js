@@ -138,7 +138,19 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * workspace.tables.set("superstore", await worker.table(data));
      */
     restore(layout) {
-        return this.workspace.restore(layout);
+        this.workspace.restore(layout);
+        MessageLoop.flush();
+    }
+
+    /**
+     * An async function which resolves when all pending DOM changes at the
+     * time of invocation are resolved.
+     */
+    async flush() {
+        MessageLoop.flush();
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        await Promise.all(Array.from(this.children).map(x => x.flush()));
     }
 
     addTable(name, table) {
@@ -174,6 +186,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      */
     notifyResize() {
         this.workspace.update();
+        MessageLoop.flush();
     }
 
     _light_dom_changed() {
@@ -189,7 +202,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
 
     _register_light_dom_listener() {
         let observer = new MutationObserver(this._light_dom_changed.bind(this));
-        let config = {attributes: false, childList: true, subtree: true};
+        let config = {attributes: false, childList: true, subtree: false};
         observer.observe(this, config);
         this._light_dom_changed();
     }
@@ -210,10 +223,9 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
         container.insertBefore(this.workspace.node, null);
         MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
+        MessageLoop.flush();
 
-        window.onresize = () => {
-            this.workspace.update();
-        };
+        window.onresize = this.workspace.update.bind(this.workspace);
     }
 
     disconnectedCallback() {

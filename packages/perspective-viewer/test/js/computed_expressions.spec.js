@@ -43,6 +43,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-computed-expression");
+                await page.shadow_blur();
             });
 
             test.capture("click on close button closes the computed expression UI.", async page => {
@@ -152,6 +153,7 @@ utils.with_server({}, () => {
                     ".perspective-expression-editor__edit_area"
                 );
                 await page.keyboard.press("ArrowDown");
+                await page.shadow_blur();
             });
 
             test.capture("An expression that doesn't reach max-width should undock the autocomplete", async page => {
@@ -476,6 +478,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.removeAttribute("computed-columns"), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.shadow_blur();
             });
 
             // reset
@@ -688,7 +691,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("filters", '[["Computed", "==", "2 Monday"]]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Computed", "Order Date"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(() => document.activeElement.blur());
+                await page.shadow_blur();
             });
 
             test.capture("computed expression column aggregates should persist.", async page => {

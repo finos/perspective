@@ -142,10 +142,22 @@ async function get_new_page() {
                     elem.innerText = content;
                     triggerInputEvent(elem);
                 }
+
+                document.activeElement.blur();
             },
             content,
             path
         );
+    };
+
+    page.shadow_blur = async function() {
+        await this.evaluate(() => {
+            let elem = document.activeElement;
+            while (elem) {
+                elem.blur();
+                elem = elem.shadowRoot?.activeElement;
+            }
+        });
     };
 
     page.shadow_focus = async function(...path) {
@@ -387,7 +399,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     });
                 }
 
-                const screenshot = await page.screenshot();
+                const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
                 // await page.close();
                 const hash = crypto
                     .createHash("md5")
