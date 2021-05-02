@@ -56,7 +56,6 @@ fn ignore_view_delete(f: JsValue) {
     match f.clone().dyn_into::<js_sys::Error>() {
         Ok(err) => {
             if err.message() != "View is not initialized" {
-                web_sys::console::log_1(&JsValue::from("A"));
                 wasm_bindgen::throw_val(f);
             }
         }

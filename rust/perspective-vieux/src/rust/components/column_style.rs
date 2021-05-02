@@ -6,14 +6,92 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::radio_list::RadioList;
 use crate::utils::WeakComponentLink;
 
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::JsCast;
+use std::fmt::Display;
+use std::str::FromStr;
 use wasm_bindgen::*;
 use yew::prelude::*;
 
+#[cfg(test)]
+use wasm_bindgen_test::*;
+
 pub static CSS: &str = include_str!("../../../dist/css/column-style.css");
+
+#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
+pub enum ColorMode {
+    #[serde(rename = "foreground")]
+    Foreground,
+
+    #[serde(rename = "background")]
+    Background,
+
+    #[serde(rename = "gradient")]
+    Gradient,
+}
+
+impl Default for ColorMode {
+    fn default() -> Self {
+        ColorMode::Foreground
+    }
+}
+
+impl Display for ColorMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self {
+            ColorMode::Foreground => "foreground",
+            ColorMode::Background => "background",
+            ColorMode::Gradient => "gradient",
+        };
+
+        write!(f, "{}", text)
+    }
+}
+
+impl FromStr for ColorMode {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "foreground" => Ok(ColorMode::Foreground),
+            "background" => Ok(ColorMode::Background),
+            "gradient" => Ok(ColorMode::Gradient),
+            x => Err(format!("Unknown ColorMode '{}'", x)),
+        }
+    }
+}
+
+#[cfg_attr(test, derive(Debug))]
+#[derive(Serialize, Deserialize, Clone, Default)]
+pub struct ColumnStyleConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color_mode: Option<ColorMode>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fixed: Option<u32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pos_color: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub neg_color: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub gradient: Option<f64>,
+}
+
+/// Exactly like a `ColumnStyleConfig`, except without `Option<>` fields, as
+/// this struct represents the default values we should use in the GUI when they
+/// are `None` in the real config.  It is also used to decide when to omit a
+/// field when serialized a `ColumnStyleConfig` to JSON.
+#[derive(Serialize, Deserialize, Clone, Default)]
+pub struct ColumnStyleDefaultConfig {
+    pub gradient: f64,
+    pub fixed: u32,
+    pub pos_color: String,
+    pub neg_color: String,
+}
 
 pub enum ColumnStyleMsg {
     SetPos(u32, u32),
@@ -25,29 +103,46 @@ pub enum ColumnStyleMsg {
     GradientChanged(String),
 }
 
+/// A `ColumnStyle` component is mounted to the window anchored at the screen
+/// position of `elem`.  It needs two input configs, the current configuration
+/// object and a default version without `Option<>`
 #[derive(Properties, Clone)]
 pub struct ColumnStyleProps {
-    pub elem: web_sys::HtmlElement,
+    #[prop_or_default]
     pub config: ColumnStyleConfig,
+
+    #[prop_or_default]
     pub default_config: ColumnStyleDefaultConfig,
+
+    #[prop_or_default]
+    pub on_change: Callback<ColumnStyleConfig>,
 
     #[prop_or_default]
     pub weak_link: WeakComponentLink<ColumnStyle>,
 }
 
 impl ColumnStyleProps {
+    /// When this config has changed, we must signal the wrapper element to
     fn dispatch_config(&self) {
-        let mut event_init = web_sys::CustomEventInit::new();
-        event_init.detail(&JsValue::from_serde(&self.config).unwrap());
-        let event = web_sys::CustomEvent::new_with_event_init_dict(
-            "perspective-column-style-change",
-            &event_init,
-        );
+        self.on_change.emit(self.config.clone());
+    }
 
-        self.elem.dispatch_event(&event.unwrap()).unwrap();
+    /// Human readable precision hint, e.g. "Prec 0.001" for `{fixed: 3}`.
+    fn make_fixed_text(&self) -> String {
+        match self.config.fixed {
+            Some(x) if x > 0 => format!("0.{}1", "0".repeat(x as usize - 1)),
+            None if self.default_config.fixed > 0 => {
+                let n = self.default_config.fixed as usize - 1;
+                format!("0.{}1", "0".repeat(n))
+            }
+            Some(_) | None => "1".to_owned(),
+        }
     }
 }
 
+/// The `ColumnStyle` component stores its UI state privately in its own struct,
+/// rather than its props (which has two version of this data itself, the
+/// JSON serializable config record and the defaults record).
 pub struct ColumnStyle {
     props: ColumnStyleProps,
     top: u32,
@@ -56,58 +151,6 @@ pub struct ColumnStyle {
     pos_color: String,
     neg_color: String,
     gradient: f64,
-}
-
-#[derive(PartialEq, Serialize, Deserialize, Clone)]
-pub enum ColorMode {
-    #[serde(rename = "foreground")]
-    Foreground,
-    #[serde(rename = "background")]
-    Background,
-    #[serde(rename = "gradient")]
-    Gradient,
-}
-
-impl Default for ColorMode {
-    fn default() -> Self {
-        ColorMode::Foreground
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Default)]
-pub struct ColumnStyleConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_mode: Option<ColorMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fixed: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pos_color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub neg_color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub gradient: Option<f64>,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ColumnStyleDefaultConfig {
-    pub gradient: f64,
-    pub fixed: u32,
-    pub pos_color: String,
-    pub neg_color: String,
-}
-
-impl ColumnStyle {
-    /// Human readable precision hint, e.g. "Prec 0.001" for `{fixed: 3}`.
-    fn make_fixed_text(&self) -> String {
-        match self.props.config.fixed {
-            Some(x) if x > 0 => format!("0.{}1", "0".repeat(x as usize - 1)),
-            None if self.props.default_config.fixed > 0 => {
-                let n = self.props.default_config.fixed as usize - 1;
-                format!("0.{}1", "0".repeat(n))
-            }
-            Some(_) | None => "1".to_owned(),
-        }
-    }
 }
 
 impl Component for ColumnStyle {
@@ -231,47 +274,47 @@ impl Component for ColumnStyle {
 
     fn view(&self) -> Html {
         // Fixed precision control oninput callback
-        let fixed_oninput = self.props.weak_link.borrow().as_ref().unwrap().callback(
-            move |event: InputData| ColumnStyleMsg::FixedChanged(event.value),
-        );
+        let fixed_oninput = self
+            .props
+            .weak_link
+            .borrow()
+            .as_ref()
+            .unwrap()
+            .callback(|event: InputData| ColumnStyleMsg::FixedChanged(event.value));
 
         // Color enabled/disabled oninput callback
         let color_enabled_oninput =
             self.props.weak_link.borrow().as_ref().unwrap().callback(
                 move |event: InputData| {
-                    ColumnStyleMsg::ColorEnabledChanged(
-                        event
-                            .event
-                            .target()
-                            .unwrap()
-                            .unchecked_into::<web_sys::HtmlInputElement>()
-                            .checked(),
-                    )
+                    let input = event
+                        .event
+                        .target()
+                        .unwrap()
+                        .unchecked_into::<web_sys::HtmlInputElement>();
+                    ColumnStyleMsg::ColorEnabledChanged(input.checked())
                 },
             );
 
+        // Color controls callback
         let pos_color_oninput =
             self.props.weak_link.borrow().as_ref().unwrap().callback(
-                move |event: InputData| ColumnStyleMsg::PosColorChanged(event.value),
+                |event: InputData| ColumnStyleMsg::PosColorChanged(event.value),
             );
 
         let neg_color_oninput =
             self.props.weak_link.borrow().as_ref().unwrap().callback(
-                move |event: InputData| ColumnStyleMsg::NegColorChanged(event.value),
+                |event: InputData| ColumnStyleMsg::NegColorChanged(event.value),
             );
 
-        let color_mode_changed =
-            self.props.weak_link.borrow().as_ref().unwrap().callback(
-                move |event: InputData| {
-                    ColumnStyleMsg::ColorModeChanged(match &event.value[..] {
-                        "foreground" => ColorMode::Foreground,
-                        "background" => ColorMode::Background,
-                        "gradient" => ColorMode::Gradient,
-                        _ => unimplemented!(),
-                    })
-                },
-            );
+        // Color mode radio callback
+        let color_mode_changed = {
+            let link = self.props.weak_link.borrow();
+            link.as_ref()
+                .unwrap()
+                .callback(|val: ColorMode| ColumnStyleMsg::ColorModeChanged(val))
+        };
 
+        // Gradient input callback
         let gradient_changed =
             self.props.weak_link.borrow().as_ref().unwrap().callback(
                 move |event: InputData| ColumnStyleMsg::GradientChanged(event.value),
@@ -287,25 +330,24 @@ impl Component for ColumnStyle {
                     { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
                 <div>
-                    <div>
+                    <div class="row">
                         <input type="checkbox" checked=true disabled=true/>
                         <span id="fixed-examples">{
-                            format!("Prec {}", self.make_fixed_text())
+                            format!("Prec {}", self.props.make_fixed_text())
                         }</span>
                     </div>
-                    <div class="section">
-                        <span></span>
+                    <div class="row section">
                         <input
-                            class="parameter"
-                            disable=true
                             id="fixed-param"
-                            value={ match self.props.config.fixed { None => self.props.default_config.fixed, Some(x) => x } }
-                            oninput=fixed_oninput
+                            class="parameter indent"
                             type="number"
+                            disable=true
                             min="0"
-                            step="1" />
+                            step="1"
+                            value={ match self.props.config.fixed { None => self.props.default_config.fixed, Some(x) => x } }
+                            oninput=fixed_oninput />
                     </div>
-                    <div>
+                    <div class="row">
                         <input
                             id="color-selected"
                             type="checkbox"
@@ -313,62 +355,39 @@ impl Component for ColumnStyle {
                             checked={ self.props.config.color_mode.is_some() } />
                         <input
                             id="color-param"
+                            class="parameter"
+                            type="color"
                             value={ &self.pos_color }
                             disabled={ self.props.config.color_mode.is_none() }
-                            oninput=pos_color_oninput
-                            class="parameter"
-                            type="color" />
+                            oninput=pos_color_oninput />
                         <span class="operator">{ " + / - " }</span>
                         <input
                             id="neg-color-param"
+                            class="parameter"
+                            type="color"
                             value={ &self.neg_color }
                             disabled={ self.props.config.color_mode.is_none() }
-                            oninput=neg_color_oninput
-                            class="parameter"
-                            type="color" />
+                            oninput=neg_color_oninput />
                     </div>
-                    <div class="indent1">
-                        <input
-                            id="color-mode-1"
-                            name="color-mode"
-                            type="radio"
-                            value="foreground"
-                            class="parameter"
-                            oninput=color_mode_changed.clone()
-                            disabled=self.props.config.color_mode.is_none()
-                            checked={ self.color_mode == ColorMode::Foreground } />
+
+                    <RadioList<ColorMode>
+                        class="indent"
+                        disabled={ self.props.config.color_mode.is_none() }
+                        values={ vec!(ColorMode::Foreground, ColorMode::Background, ColorMode::Gradient) }
+                        selected={ self.color_mode.clone() }
+                        on_change={ color_mode_changed } >
+
                         <span>{ "Foreground" }</span>
-                    </div>
-                    <div class="indent1">
-                        <input
-                            id="color-mode-2"
-                            name="color-mode"
-                            type="radio"
-                            value="background"
-                            class="parameter"
-                            oninput=color_mode_changed.clone()
-                            disabled=self.props.config.color_mode.is_none()
-                            checked={ self.color_mode == ColorMode::Background } />
                         <span>{ "Background" }</span>
-                    </div>
-                    <div class="indent1">
-                        <input
-                            id="color-mode-3"
-                            name="color-mode"
-                            type="radio"
-                            value="gradient"
-                            class="parameter"
-                            oninput=color_mode_changed
-                            disabled={ self.props.config.color_mode.is_none() }
-                            checked={ self.color_mode == ColorMode::Gradient } />
                         <span>{ "Gradient" }</span>
-                    </div>
-                    <div class="indent1">
-                        <span></span>
+
+                    </RadioList<ColorMode>>
+
+                    <div class="row indent">
                         <input
                             id="gradient-param"
                             value={ self.gradient }
-                            class="parameter"
+                            class="parameter indent"
                             oninput={ gradient_changed }
                             disabled={ !gradient_enabled }
                             type="number"
@@ -377,5 +396,49 @@ impl Component for ColumnStyle {
                 </div>
             </>
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_props(
+        config: ColumnStyleConfig,
+        default_config: ColumnStyleDefaultConfig,
+    ) -> ColumnStyleProps {
+        ColumnStyleProps {
+            config,
+            default_config,
+            on_change: Default::default(),
+            weak_link: WeakComponentLink::default(),
+        }
+    }
+
+    #[wasm_bindgen_test]
+    pub fn text_fixed_text_default() {
+        let config = ColumnStyleConfig::default();
+        let mut default_config = ColumnStyleDefaultConfig::default();
+        default_config.fixed = 2;
+        let props = make_props(config, default_config);
+        assert!(props.make_fixed_text() == "0.01");
+    }
+
+    #[wasm_bindgen_test]
+    pub fn text_fixed_text_override() {
+        let mut config = ColumnStyleConfig::default();
+        config.fixed = Some(3);
+        let mut default_config = ColumnStyleDefaultConfig::default();
+        default_config.fixed = 2;
+        let props = make_props(config, default_config);
+        assert!(props.make_fixed_text() == "0.001");
+    }
+
+    #[wasm_bindgen_test]
+    pub fn text_fixed_text_zero() {
+        let config = ColumnStyleConfig::default();
+        let default_config = ColumnStyleDefaultConfig::default();
+        let props = make_props(config, default_config);
+        assert!(props.make_fixed_text() == "1");
     }
 }
