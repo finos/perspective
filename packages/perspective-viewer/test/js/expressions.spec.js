@@ -82,7 +82,7 @@ utils.with_server({}, () => {
                 await page.evaluate(() => document.activeElement.blur());
             });
 
-            test.capture("Typing tab should enter an indent", async page => {
+            test.skip("Typing tab should enter an indent", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
@@ -90,10 +90,10 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.press("Tab");
                 await page.keyboard.type("tabbed");
-                await page.evaluate(() => document.activeElement.blur());
+                await page.shadow_blur();
             });
 
-            test.capture("Typing enter should enter a newline", async page => {
+            test.skip("Typing enter should enter a newline", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
@@ -101,10 +101,10 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.press("Enter");
                 await page.keyboard.type("newline");
-                await page.evaluate(() => document.activeElement.blur());
+                await page.shadow_blur();
             });
 
-            test.capture("Typing shift-enter should save a valid expression", async page => {
+            test.skip("Typing shift-enter should save a valid expression", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
@@ -112,10 +112,11 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.down("Shift");
                 await page.keyboard.press("Enter");
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.keyboard.up("Shift");
+                await page.evaluate(() => document.activeElement.blur());
             });
 
-            test.capture("Typing shift-enter should not save an invalid expression", async page => {
+            test.skip("Typing shift-enter should not save an invalid expression", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
@@ -123,6 +124,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.keyboard.down("Shift");
                 await page.keyboard.press("Enter");
+                await page.keyboard.up("Shift");
                 await page.evaluate(() => document.activeElement.blur());
             });
 
@@ -228,6 +230,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.removeAttribute("expressions"), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.shadow_blur();
             });
 
             // reset
@@ -308,7 +311,17 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_expression(page, "1 + 2");
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("sort", JSON.stringify([['"Sales" + 10', "desc"][("Sales", "desc")]])), viewer);
+                await page.evaluate(
+                    element =>
+                        element.setAttribute(
+                            "sort",
+                            JSON.stringify([
+                                ['"Sales" + 10', "desc"],
+                                ["Sales", "desc"]
+                            ])
+                        ),
+                    viewer
+                );
                 await page.evaluate(element => element.reset(), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
@@ -377,7 +390,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("sets column with expression column.", async page => {
+            test.capture("sets column attribute with expression column.", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_expression(page, "1 + 2");
                 await add_expression(page, "// abc \n 1 + 2");
@@ -389,10 +402,10 @@ utils.with_server({}, () => {
             test.capture("adding new column should not reset columns.", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_expression(page, "1 + 2");
-                await add_expression(page, "100");
+                await add_expression(page, '"Sales" + "Profit"');
                 await add_expression(page, "// abc \n 1 + 2");
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("columns", '["abc", "1 + 2", "100"]'), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(['"Sales" + "Profit"', "1 + 2", "abc"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await add_expression(page, "// def \n 1 + 2");
                 await page.waitForSelector("perspective-viewer:not([updating])");
@@ -400,12 +413,12 @@ utils.with_server({}, () => {
 
             test.capture("row pivots by expression column.", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                await add_expression(page, "1 + 2");
+                await add_expression(page, '"Sales" + 10');
                 await add_expression(page, "// abc \n 1 + 2");
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("row-pivots", '["abc", "1 + 2"]'), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["abc", '"Sales" + 10'])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["1 + 2"])), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales"])), viewer);
             });
 
             test.capture("column pivots by expression column.", async page => {
@@ -475,6 +488,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(['"Sales" + "Profit"'])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.shadow_blur();
             });
 
             test.capture("expression column aggregates should persist.", async page => {
@@ -521,7 +535,7 @@ utils.with_server({}, () => {
                     element.setAttribute("expressions", JSON.stringify(['// abc \n "Sales" / "Profit"']));
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["abc"])), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["abc", "Sales", "Profit"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
@@ -548,7 +562,8 @@ utils.with_server({}, () => {
                 await add_expression(page, '// abc\n"Sales" + "Profit"');
                 const viewer = await page.$("perspective-viewer");
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => {
+
+                const alias = await page.evaluate(element => {
                     const make_alias = expression => {
                         let alias;
                         expression.length > 20 ? (alias = expression.substr(0, 20).trim() + "...") : (alias = expression);
@@ -557,12 +572,15 @@ utils.with_server({}, () => {
                     const config = element.save();
                     const result = JSON.stringify(config.expressions);
                     const expected = JSON.stringify([`${make_alias('if ("Sales" > 100) true; else false')}`, '// abc\n"Sales" + "Profit"']);
-                    if (result !== expected) {
-                        throw new Error(`Expected ${expected} but received ${result}`);
-                    }
+                    return [result, expected];
                 }, viewer);
+
+                if (alias[0] !== alias[1]) {
+                    throw new Error(`Expression not saved properly: expected ${alias[1]} but received ${alias[0]}!`);
+                }
+
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(['if ("Sales" > 100) true; else false', '"Sales" + "Profit"'])), viewer);
+                await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["abc"])), viewer);
             });
 
             test.skip("expressions are restored without changes", async page => {

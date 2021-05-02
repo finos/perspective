@@ -872,6 +872,29 @@ module.exports = perspective => {
                 await view.delete();
                 await table.delete();
             });
+
+            it("bucket", async function() {
+                const table = await perspective.table({
+                    a: "integer",
+                    b: "float"
+                });
+
+                const view = await table.view({
+                    expressions: ['bucket("a", 5)', 'bucket("b", 2.5)', `bucket("b", 10)`]
+                });
+
+                table.update({
+                    a: [15, 15, 35, 40, 1250, 1255],
+                    b: [2.25, 2, 3.5, 16.5, 28, 8]
+                });
+
+                const result = await view.to_columns();
+                expect(result['bucket("a", 5)']).toEqual([15, 15, 35, 40, 1250, 1255]);
+                expect(result['bucket("b", 2.5)']).toEqual([0, 0, 2.5, 15, 27.5, 7.5]);
+                expect(result['bucket("b", 10)']).toEqual([0, 0, 0, 10, 20, 0]);
+                await view.delete();
+                await table.delete();
+            });
         });
 
         describe("Booleans", function() {

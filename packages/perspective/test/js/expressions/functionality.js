@@ -1557,6 +1557,29 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Should be able to weighted mean aggregate a numeric expression column.", async function() {
+            const table = await perspective.table({
+                x: [2, 2, 4, 4],
+                y: [100, 200, 300, 400],
+                z: [1.5, 2.5, 3.5, 4.5]
+            });
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ['"x" + "z"'],
+                aggregates: {
+                    '"x" + "z"': ["weighted mean", "y"]
+                },
+                expressions: ['"x" + "z"']
+            });
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                __ROW_PATH__: [[], [100], [200], [300], [400]],
+                '"x" + "z"': [6.9, 3.5, 4.5, 7.5, 8.5]
+            });
+            view.delete();
+            table.delete();
+        });
+
         it("Should be able to aggregate a numeric expression column that aliases a real column.", async function() {
             const table = await perspective.table({
                 x: [1, 2, 3, 4],

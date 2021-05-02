@@ -176,6 +176,17 @@ void _week_bucket(t_tscalar& val, t_tscalar& rval);
 void _month_bucket(t_tscalar& val, t_tscalar& rval);
 void _year_bucket(t_tscalar& val, t_tscalar& rval);
 
+struct bucket : public exprtk::igeneric_function<t_tscalar> {
+    bucket();
+    ~bucket();
+
+    t_tscalar operator()(t_parameter_list parameters);
+
+    // faster unit lookups, since we are calling this lookup in a tight loop.
+    // static tsl::hopscotch_map<std::string, t_date_bucket_unit> UNIT_MAP;
+    t_tscalar m_none;
+};
+
 /**
  * @brief Returns the current datetime. Will be recalculated on view creation
  * and table update.

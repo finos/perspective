@@ -806,6 +806,45 @@ date_bucket::UNIT_MAP = {
     {"Y", t_date_bucket_unit::YEARS}
 };
 
+
+bucket::bucket()
+    : exprtk::igeneric_function<t_tscalar>("TT") {
+    m_none = mknone();
+}
+
+bucket::~bucket() {}
+
+t_tscalar bucket::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    // Parameters are already validated in the constructor by Exprtk
+    t_generic_type& gt_val = parameters[0];
+    t_generic_type& gt_unit = parameters[1];
+
+    t_scalar_view temp_val(gt_val);
+    t_scalar_view temp_unit(gt_unit);
+
+    t_tscalar val = temp_val();
+    t_tscalar unit = temp_unit();
+    bool valid_dtypes = val.is_numeric() && unit.is_numeric();
+
+    // type-check
+    if (!valid_dtypes || val.m_status == STATUS_CLEAR || unit.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
+    }
+
+    if (!val.is_valid() || !unit.is_valid()) {
+        return rval;
+    }
+
+    rval.set(floor(val.to_double() / unit.to_double()) * unit.to_double());
+
+    return rval;
+}
+
 date_bucket::date_bucket()
     : exprtk::igeneric_function<t_tscalar>("TS") {
     m_none = mknone();

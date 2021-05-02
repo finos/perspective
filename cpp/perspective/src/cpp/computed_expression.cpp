@@ -21,6 +21,9 @@ t_computed_expression_parser::GLOBAL_SYMTABLE = exprtk::symbol_table<t_tscalar>(
 computed_function::date_bucket
 t_computed_expression_parser::DATE_BUCKET_FN = computed_function::date_bucket();
 
+computed_function::bucket t_computed_expression_parser::BUCKET_FN
+    = computed_function::bucket();
+
 computed_function::hour_of_day
 t_computed_expression_parser::HOUR_OF_DAY_FN = computed_function::hour_of_day();
 
@@ -79,6 +82,7 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
     sym_table.add_function("date_bucket", t_computed_expression_parser::DATE_BUCKET_FN);    \
+    sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);              \
     sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);    \
     sym_table.add_function("day_of_week", day_of_week_fn);                                  \
     sym_table.add_function("month_of_year", month_of_year_fn);                              \
@@ -98,6 +102,7 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
     sym_table.add_function("date_bucket", t_computed_expression_parser::DATE_BUCKET_FN);    \
+    sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);              \
     sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);    \
     sym_table.add_function("day_of_week", t_computed_expression_parser::DAY_OF_WEEK_VALIDATOR_FN);    \
     sym_table.add_function("month_of_year", t_computed_expression_parser::MONTH_OF_YEAR_VALIDATOR_FN);    \
