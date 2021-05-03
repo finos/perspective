@@ -252,7 +252,9 @@ export default function(Module) {
     function col_path_vector_to_string(vector) {
         let extracted = [];
         for (let i = 0; i < vector.size(); i++) {
-            extracted.push(__MODULE__.scalar_to_val(vector.get(i), false, true));
+            let s = vector.get(i);
+            extracted.push(__MODULE__.scalar_to_val(s, false, true));
+            s.delete();
         }
         vector.delete();
         return extracted;
@@ -476,7 +478,9 @@ export default function(Module) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_to_val(row_path.get(i), false, false);
+                            const s = row_path.get(i);
+                            const value = __MODULE__.scalar_to_val(s, false, false);
+                            s.delete();
                             formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                             if (get_ids) {
                                 formatter.addColumnValue(data, row, "__ID__", value);
@@ -509,9 +513,12 @@ export default function(Module) {
                 for (let i = 0; i < keys.size(); i++) {
                     // TODO: if __INDEX__ and set index have the same value,
                     // don't we need to make sure that it only emits one?
-                    const value = __MODULE__.scalar_to_val(keys.get(i), false, false);
+                    const s = keys.get(i);
+                    const value = __MODULE__.scalar_to_val(s, false, false);
+                    s.delete();
                     formatter.addColumnValue(data, row, "__INDEX__", value);
                 }
+                keys.delete();
             }
 
             // we could add an api to just clone the index column if
@@ -519,9 +526,12 @@ export default function(Module) {
             if (get_ids && num_sides === 0) {
                 const keys = slice.get_pkeys(ridx, 0);
                 for (let i = 0; i < keys.size(); i++) {
-                    const value = __MODULE__.scalar_to_val(keys.get(i), false, false);
+                    const s = keys.get(i);
+                    const value = __MODULE__.scalar_to_val(s, false, false);
+                    s.delete();
                     formatter.addColumnValue(data, row, "__ID__", value);
                 }
+                keys.delete();
             }
 
             if (row_path) {
