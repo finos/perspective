@@ -85,6 +85,12 @@ export class Server {
             case "init_profile_thread":
                 this.perspective.initialize_profile_thread();
                 break;
+            case "memory_usage":
+                this.post({
+                    id: msg.id,
+                    data: this.perspective.memory_usage()
+                });
+                break;
             case "init":
                 this.init(msg);
                 break;

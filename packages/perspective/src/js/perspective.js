@@ -65,6 +65,12 @@ export default function(Module) {
         delete _POOL_DEBOUNCES[table_id];
     }
 
+    function memory_usage() {
+        const mem = performance.memory ? JSON.parse(JSON.stringify(performance.memory, ["totalJSHeapSize", "usedJSHeapSize", "jsHeapSizeLimit"])) : process.memoryUsage();
+        mem.wasmHeap = __MODULE__.HEAP8.length;
+        return mem;
+    }
+
     /**
      * Common logic for creating and registering a Table.
      *
@@ -1689,6 +1695,8 @@ export default function(Module) {
         },
 
         initialize_profile_thread,
+
+        memory_usage,
 
         /**
          * A factory method for constructing {@link module:perspective~table}s.
