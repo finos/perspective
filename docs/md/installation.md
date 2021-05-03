@@ -63,10 +63,10 @@ which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
 Add these scripts to your `.html`'s `<head>` section:
 
 ```html
-<script src="https://unpkg.com/@finos/perspective"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-datagrid"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
+<script src="https://unpkg.com/@finos/perspective/dist/umd/perspective.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
 ```
 
 Once added to your page, you can access the Javascript API through the

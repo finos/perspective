@@ -54,7 +54,7 @@ RUN python3.8 -m pip install --ignore-installed auditwheel
 RUN python3.9 -m pip install --ignore-installed auditwheel
 
 # install boost
-RUN wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz --no-check-certificate >/dev/null 2>&1
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz --no-check-certificate >/dev/null 2>&1
 RUN tar xfz boost_1_71_0.tar.gz
 # https://github.com/boostorg/build/issues/468
 RUN cd boost_1_71_0 && ./bootstrap.sh
