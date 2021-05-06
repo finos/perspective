@@ -25,7 +25,7 @@ try {
         console.log("LOCAL Puppeteer not found in node_modules, installing...");
         fs.copyFileSync("package.json", "package.json.bak");
         fs.copyFileSync("yarn.lock", "yarn.lock.bak");
-        execute("yarn add -W --dev puppeteer");
+        execute("yarn add -W --dev puppeteer@9.0.0");
         fs.renameSync("package.json.bak", "package.json");
         fs.renameSync("yarn.lock.bak", "yarn.lock");
     }

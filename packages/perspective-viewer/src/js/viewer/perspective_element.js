@@ -159,9 +159,8 @@ export class PerspectiveElement extends StateElement {
      * @param {*} table
      * @param {*} computed
      */
-    async _load_table(table) {
+    async _load_table(table, resolve) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
-        const resolve = this._set_updating();
 
         this._clear_state();
         this._table = table;
@@ -536,10 +535,12 @@ export class PerspectiveElement extends StateElement {
     }
 
     _check_loaded_table() {
-        if (this._table) {
+        if (this._table && this._table_resolver) {
             const table = this._table;
+            const resolve = this._table_resolver;
             delete this._table;
-            this._load_table(table);
+            delete this._table_resolver;
+            this._load_table(table, resolve);
         }
     }
 
@@ -584,7 +585,7 @@ export class PerspectiveElement extends StateElement {
         return resolve;
     }
 
-    @throttlePromise
+    @throttlePromise(true)
     async _update(ignore_size_check, force_update, limit_points) {
         await new Promise(setTimeout);
         await this._new_view({ignore_size_check, force_update, limit_points});

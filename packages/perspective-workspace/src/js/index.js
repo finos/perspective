@@ -139,18 +139,6 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      */
     restore(layout) {
         this.workspace.restore(layout);
-        MessageLoop.flush();
-    }
-
-    /**
-     * An async function which resolves when all pending DOM changes at the
-     * time of invocation are resolved.
-     */
-    async flush() {
-        MessageLoop.flush();
-        await new Promise(requestAnimationFrame);
-        await new Promise(requestAnimationFrame);
-        await Promise.all(Array.from(this.children).map(x => x.flush()));
     }
 
     addTable(name, table) {
@@ -186,7 +174,6 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      */
     notifyResize() {
         this.workspace.update();
-        MessageLoop.flush();
     }
 
     _light_dom_changed() {
@@ -223,7 +210,6 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
         container.insertBefore(this.workspace.node, null);
         MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
-        MessageLoop.flush();
 
         window.onresize = this.workspace.update.bind(this.workspace);
     }
