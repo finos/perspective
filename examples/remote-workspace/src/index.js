@@ -14,11 +14,11 @@ import "@finos/perspective-workspace";
 
 import "./index.less";
 
-window.addEventListener("load", async () => {
-    const websocket = perspective.websocket("ws://localhost:8080");
+window.addEventListener("DOMContentLoaded", async () => {
+    const websocket = perspective.websocket("ws://localhost:8081");
     const worker = perspective.shared_worker();
-    const view = websocket.open_view("securities");
-    const table = await worker.table(view, {limit: 10000});
+    const server_table = websocket.open_table("securities_table");
+    const table = await worker.table(await server_table.view(), {limit: 10000});
 
     const workspace = document.createElement("perspective-workspace");
     document.body.appendChild(workspace);

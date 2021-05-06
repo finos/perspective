@@ -687,7 +687,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 [[package]]
 name = "yew"
 version = "0.17.4"
-source = "git+https://github.com/yewstack/yew?rev=b074b4b#b074b4b87d62b65147547bba8407f1d74df8de4c"
+source = "git+https://github.com/yewstack/yew?rev=c51ab7f#c51ab7f09482d045e0b9bd309d27033c31f9b91f"
 dependencies = [
  "anyhow",
  "anymap",
@@ -711,7 +711,7 @@ dependencies = [
 [[package]]
 name = "yew-macro"
 version = "0.17.0"
-source = "git+https://github.com/yewstack/yew?rev=b074b4b#b074b4b87d62b65147547bba8407f1d74df8de4c"
+source = "git+https://github.com/yewstack/yew?rev=c51ab7f#c51ab7f09482d045e0b9bd309d27033c31f9b91f"
 dependencies = [
  "boolinator",
  "lazy_static",

@@ -4,7 +4,7 @@
     "version": "0.8.0",
     "description": "An example app built using `@finos/perspective-workspace`.",
     "scripts": {
-        "start:server": "webpack-dev-server --open",
+        "start:server": "webpack serve --open",
         "start:client": "node server.js",
         "start": "npm-run-all -p start:server start:client"
     },

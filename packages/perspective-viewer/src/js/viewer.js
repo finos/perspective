@@ -577,6 +577,8 @@ class PerspectiveViewer extends ActionElement {
      */
     async load(data) {
         let table;
+        const resolve = this._set_updating();
+
         if (data instanceof Promise) {
             this._vieux.load(data);
             table = await data;
@@ -585,13 +587,15 @@ class PerspectiveViewer extends ActionElement {
                 this._vieux.load(Promise.resolve(data));
                 table = data;
             } else {
+                resolve();
                 throw new Error(`Unrecognized input type ${typeof data}.  Please use a \`perspective.Table()\``);
             }
         }
         if (this.isConnected) {
-            await this._load_table(table);
+            await this._load_table(table, resolve);
         } else {
             this._table = table;
+            this._table_resolve = resolve;
         }
     }
 
@@ -615,7 +619,8 @@ class PerspectiveViewer extends ActionElement {
      * @param {any} widget A `<perspective-viewer>` instance to clone.
      */
     clone(widget) {
-        this._load_table(widget.table);
+        const resolve = this._set_updating();
+        this._load_table(widget.table, resolve);
         this.restore(widget.save());
     }
 
@@ -716,7 +721,7 @@ class PerspectiveViewer extends ActionElement {
      * attribute state has been applied.
      */
     async flush() {
-        await Promise.all([this._updating_promise || Promise.resolve(), this.notifyResize.flush()]);
+        await Promise.all([this._updating_promise || Promise.resolve(), this.notifyResize.flush(this)]);
     }
 
     /**

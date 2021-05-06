@@ -121,6 +121,19 @@ fn validate(props: &SplitPanelProps) -> bool {
 
 /// A panel with 2 sub panels and a mouse-draggable divider which allows apportioning
 /// the panel's width.
+///
+/// # Examples
+///
+/// ```
+/// html! {
+///     <SplitPanel id="app_panel">
+///         <div id="A">
+///         <div id="B">
+///             <a href=".."></a>
+///         </div>
+///     </SplitPanel>
+/// }
+/// ```
 pub struct SplitPanel {
     link: ComponentLink<Self>,
     props: SplitPanelProps,

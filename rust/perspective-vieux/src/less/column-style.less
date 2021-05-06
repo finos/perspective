@@ -7,7 +7,9 @@
  *
  */
 
- :host {
+ @import "./radio-list.less";
+
+:host {
     position: absolute;
     z-index: 10000;
     padding: 6px;
@@ -24,24 +26,73 @@
         background: none;
         color: inherit;
         border: 0px solid transparent;
-        border-bottom-width: 1px;
-        border-color: var(--input--border-color);
         outline: none;
     }
 
-    input[type=radio], input[type=checkbox], & > div > div > span:first-child {
+    input.parameter[type=number] {
+        border-bottom-width: 1px;
+        border-color: var(--input--border-color);
+    }
+
+    .indent {
+        margin-left: 24px;
+    }
+
+    input[type=checkbox], & > div > div > span:first-child {
         width: 24px;
         margin: 0;
     }
 
-    & > div > div {
-        display: flex;
-        align-items: center;
-        height: 24px;
+    input[type=checkbox] {
+        appearance: none;
+        font-family: "Material Icons";
+        font-size: 16px;
+        text-align: center;
+
+        &:checked:after {
+            content: "\E834";
+        }
+
+        &:not([disabled]):checked:after {
+            color: var(--active-color, red);
+        }
+
+        &:after {
+            content: "\E835";
+            color: var(--inactive-color, #999);
+        }
     }
+
+    
+
+    input[type=radio] {
+        appearance: none;
+        font-family: "Material Icons";
+        font-size: 16px;
+        font-feature-settings: "liga";
+        text-align: center;
+
+        &:checked:after {
+            content: "radio_button_checked";
+            color: var(--active-color, red);
+        }
+
+        &:after {
+            content: "radio_button_unchecked";
+            color: var(--inactive-color, #999);
+        }
+    }
+
+
 
     div.section {
         margin-bottom: 8px;
+    }
+
+    div.row {
+        display: flex;
+        align-items: center;
+        height: 24px;
     }
 
     input[type=color] {
@@ -55,9 +106,5 @@
 
     input.parameter[disabled] {
         opacity: 0.5;
-    }
-
-    .indent1 {
-        margin-left: 24px;
     }
 }

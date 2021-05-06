@@ -190,7 +190,13 @@ export const invertPromise = () => {
     return promise;
 };
 
-export function throttlePromise(target, property, descriptor) {
+export function throttlePromise(target, property, descriptor, clear = false) {
+    if (typeof target === "boolean") {
+        return function(target, property, descriptor) {
+            return throttlePromise(target, property, descriptor, true);
+        };
+    }
+
     // Each call to `throttlePromise` has a unique `lock`
     const lock = Symbol("private lock");
     const _super = descriptor.value;
@@ -247,7 +253,7 @@ export function throttlePromise(target, property, descriptor) {
             // If this invocation is still the latest, clear the attribute
             // state.
             // TODO this is likely not he behavior we want for this event ..
-            if (id === this[lock].gen) {
+            if (id === this[lock].gen && clear) {
                 this.removeAttribute("updating");
                 this.dispatchEvent(new Event("perspective-update-complete"));
             }
@@ -260,12 +266,12 @@ export function throttlePromise(target, property, descriptor) {
 
     // A function which clears the lock just like the main wrapper, but then
     // does nothing.
-    descriptor.value.flush = async function() {
-        if (this[lock]?.lock) {
-            await this[lock].lock;
+    descriptor.value.flush = async function(obj) {
+        if (obj[lock]?.lock) {
+            await obj[lock].lock;
             await new Promise(requestAnimationFrame);
-            if (this[lock]?.lock) {
-                await this[lock].lock;
+            if (obj[lock]?.lock) {
+                await obj[lock].lock;
             }
         }
     };

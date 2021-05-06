@@ -10,6 +10,7 @@ pub mod column_style;
 pub mod perspective_vieux;
 pub mod split_panel;
 pub mod status_bar;
+pub mod radio_list;
 
 mod status_bar_counter;
 

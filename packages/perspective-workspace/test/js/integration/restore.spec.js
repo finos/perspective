@@ -45,7 +45,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.evaluate(async () => await document.querySelector("perspective-workspace").flush());
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {timeout: 30000}
             );
@@ -68,7 +68,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.evaluate(async () => await document.querySelector("perspective-workspace").flush());
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {timeout: 30000}
             );
@@ -99,7 +99,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.evaluate(async () => await document.querySelector("perspective-workspace").flush());
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {timeout: 30000}
             );
@@ -126,7 +126,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.restore(config);
                     }, config);
 
-                    await page.evaluate(async () => await document.querySelector("perspective-workspace").flush());
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
 
                     await page.evaluate(() => {
                         const workspace = document.getElementById("workspace").workspace;
@@ -134,7 +134,7 @@ utils.with_server({paths: PATHS}, () => {
                         workspace.duplicate(widget);
                     });
 
-                    await page.evaluate(async () => await document.querySelector("perspective-workspace").flush());
+                    while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                 },
                 {timeout: 30000}
             );
