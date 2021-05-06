@@ -18,8 +18,8 @@ init_expression_parser() {
     t_computed_expression_parser::init();
 }
 
-t_schema
-get_table_expression_schema_py(
+t_validated_expression_map
+validate_expressions_py(
     std::shared_ptr<Table> table,
     const std::vector<std::vector<t_val>>& p_expressions) {
     std::vector<std::tuple<std::string, std::string, std::string, std::vector<std::pair<std::string, std::string>>>> expressions;
@@ -53,8 +53,7 @@ get_table_expression_schema_py(
         expressions[idx] = tp;
     }
 
-    t_schema expression_schema = table->get_expression_schema(expressions);
-    return expression_schema;   
+    return table->validate_expressions(expressions);
 }
 
 } // end namespace binding

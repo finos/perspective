@@ -147,25 +147,33 @@ export class PerspectiveElement extends StateElement {
         // Grab expressions from the viewer and validate them so that
         // expressions do not crash the viewer/table.
         const expressions = this._get_view_expressions();
-        const expression_schema = await table.expression_schema(expressions);
         const valid_expressions = [];
-        const valid_expression_alias = [];
 
-        for (const expression of expressions) {
-            const alias = getExpressionAlias(expression);
+        let expression_schema = {};
 
-            if (alias === undefined) {
-                console.warn(`Not applying expression ${expression} as it does not have an alias set.`);
-                continue;
+        if (expressions.length > 0) {
+            const valid_expression_alias = [];
+            const validate_results = await table.validate_expressions(expressions);
+            expression_schema = validate_results.expression_schema;
+
+            for (const expression of expressions) {
+                const alias = getExpressionAlias(expression);
+
+                if (alias === undefined) {
+                    console.warn(`Not applying expression ${expression} as it does not have an alias set.`);
+                    continue;
+                }
+
+                if (expression_schema[alias]) {
+                    valid_expressions.push(expression);
+                    valid_expression_alias.push(alias);
+                } else {
+                    console.error(`Could not validate expression "${alias}": ${validate_results.errors[alias]}`);
+                }
             }
 
-            if (expression_schema[alias]) {
-                valid_expressions.push(expression);
-                valid_expression_alias.push(alias);
-            }
+            cols = cols.concat(valid_expression_alias);
         }
-
-        cols = cols.concat(valid_expression_alias);
 
         if (!this.hasAttribute("columns")) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));

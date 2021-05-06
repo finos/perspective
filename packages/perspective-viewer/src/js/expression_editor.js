@@ -26,7 +26,8 @@ class PerspectiveExpressionEditor extends HTMLElement {
         this._register_ids();
         this._register_callbacks();
         this._editor_observer = new MutationObserver(this._resize_editor.bind(this));
-        this._disable_save_button();
+        this._clear();
+        this._disable_save();
     }
 
     /**
@@ -48,7 +49,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
     close() {
         this.style.display = "none";
         this._side_panel_actions.style.display = "flex";
-        this._disable_save_button();
+        this._disable_save();
         this._clear();
         // Disconnect the observer.
         this._editor_observer.disconnect();
@@ -61,7 +62,13 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * @param {*} expression_schema
      */
     @throttlePromise
-    async type_check_expression(expression_schema) {
+    async type_check_expression(validated_expressions) {
+        if (!validated_expressions.expression_schema || !validated_expressions.errors) {
+            this._disable_save();
+            this._hide_error();
+            return;
+        }
+
         let expression = this._temp_expression;
         const alias = this._temp_expression_alias;
 
@@ -69,7 +76,11 @@ class PerspectiveExpressionEditor extends HTMLElement {
             expression = alias;
         }
 
-        expression_schema[expression] ? this._enable_save_button() : this._disable_save_button();
+        if (validated_expressions.expression_schema[expression]) {
+            this._enable_save();
+        } else {
+            this._disable_save(validated_expressions.errors[expression]);
+        }
     }
 
     /**
@@ -82,7 +93,10 @@ class PerspectiveExpressionEditor extends HTMLElement {
         let expression = this._edit_area.value;
 
         if (expression.length === 0) {
-            this._disable_save_button();
+            this._temp_expression = undefined;
+            this._temp_expression_alias = undefined;
+            this._disable_save();
+            this._hide_error();
             return;
         }
 
@@ -161,19 +175,41 @@ class PerspectiveExpressionEditor extends HTMLElement {
         this._editor_observer.disconnect();
     }
 
-    _disable_save_button() {
+    /**
+     * On an error state, disable the save button and show the error message
+     * if there is one.
+     *
+     * @param {*} error_message
+     */
+    _disable_save(error_message) {
         this._save_button.setAttribute("disabled", true);
+
+        if (error_message) {
+            this._show_error(error_message);
+        }
     }
 
-    _enable_save_button() {
+    _enable_save() {
+        this._hide_error();
         this._save_button.removeAttribute("disabled");
     }
 
+    _show_error(error_message) {
+        this._error_message.innerText = error_message;
+        this._error_message.style.display = "block";
+    }
+
+    _hide_error() {
+        this._error_message.innerText = "";
+        this._error_message.style.display = "none";
+    }
+
     /**
-     * Clear the edit area.
+     * Clear the edit area and hide the error message.
      */
     _clear() {
         this._edit_area.value = "";
+        this._hide_error();
     }
 
     /**
@@ -250,6 +286,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _register_ids() {
         this._edit_area = this.shadowRoot.querySelector("#psp-expression-editor__edit_area");
+        this._error_message = this.shadowRoot.querySelector("#psp-expression-editor__error-message");
         this._close_button = this.shadowRoot.querySelector("#psp-expression-editor-close");
         this._save_button = this.shadowRoot.querySelector("#psp-expression-editor-button-save");
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");

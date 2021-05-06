@@ -364,8 +364,6 @@ export function findExpressionByAlias(alias, expressions) {
 /**
  * Given an expression, strips the alias and returns the expression.
  *
- * TODO: consolidate all this stuff down to a getOrCreateAlias fn
- *
  * @param {String} expression
  * @returns String
  */

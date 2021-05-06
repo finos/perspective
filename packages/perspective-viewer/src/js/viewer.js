@@ -227,7 +227,9 @@ class PerspectiveViewer extends ActionElement {
             let expression_schema = {};
 
             if (this.table) {
-                expression_schema = await this.table.expression_schema(expressions);
+                const validation_results = await this.table.validate_expressions(expressions);
+                expression_schema = validation_results.expression_schema;
+                const errors = validation_results.errors;
                 const validated_expressions = [];
 
                 /**
@@ -261,6 +263,8 @@ class PerspectiveViewer extends ActionElement {
                         if (alias === undefined) {
                             console.error(`Failed to set "expressions" attribute: "${expression}" does not have an alias, i.e: // Expression Alias \n "x" + "y"`);
                         } else {
+                            // alias is guaranteed to be in the errors map
+                            console.error(`Error in expression "${alias}": ${errors[alias]}`);
                             console.error(`Failed to set "expressions" attribute: expression "${expression}" is invalid.`);
                         }
                         clear_expressions = true;

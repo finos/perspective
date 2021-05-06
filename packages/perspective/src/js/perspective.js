@@ -1268,7 +1268,7 @@ export default function(Module) {
      * @private
      * @param {Array<String>} expressions
      */
-    function validate_expressions(expressions) {
+    function parse_expression_strings(expressions) {
         let validated_expressions = [];
 
         // Keep track of aliases that coincide and skip them.
@@ -1351,24 +1351,36 @@ export default function(Module) {
     }
 
     /**
-     * Given an array of expressions, return a schema containing the column
-     * type for each expression. If the expression is invalid or returns
-     * the type "none" (indicating the expression could be parsed but resulted
-     * in an invalid output column), the expression will not be present in the
-     * returned schema.
+     * Given an array of expressions, return an object containing `expressions`,
+     * which map expression aliases to data types, and `errors`, which
+     * maps expression aliases to error messages. If an expression that was
+     * passed in is not in `expressions`, it is guaranteed to be in `errors`.
      *
      * @async
      * @param {Array<String>} expressions An array of string expressions to
      * be validated.
      *
-     * @returns {Promise<Object>} A Promise that resolves to an expression
-     * schema based on the expressions provided.
+     * @returns {Promise<Object>}
+     *
+     * @example
+     * const results = await table.validate_expressions([
+     *  '"Sales" + "Profit"', "invalid", "1 + 'string'"
+     * ]);
+     *
+     * // {'"Sales" + "Profit"': "float"}
+     * console.log(results.expression_schema);
+     *
+     * // {"invalid": "unknown token!", "1 + 'string'": "TypeError"}
+     * console.log(results.errors);
      */
-    table.prototype.expression_schema = function(expressions, override = true) {
-        const expression_schema = {};
+    table.prototype.validate_expressions = function(expressions, override = true) {
+        const validated = {
+            expression_schema: {},
+            errors: {}
+        };
 
-        if (!expressions || expressions.length === 0) return expression_schema;
-        expressions = validate_expressions(expressions);
+        if (!expressions || expressions.length === 0) return validated;
+        expressions = parse_expression_strings(expressions);
 
         // Transform Array into a C++ vector that can be passed through
         // Emscripten.
@@ -1382,25 +1394,32 @@ export default function(Module) {
             vector.push_back(inner);
         }
 
-        const _schema = __MODULE__.get_table_expression_schema(this._Table, vector);
-        let columns = _schema.columns();
-        let types = _schema.types();
+        const validation_results = __MODULE__.validate_expressions(this._Table, vector);
+        const aliases = validation_results.get_expressions();
+        const results = validation_results.get_results();
 
-        for (let key = 0; key < columns.size(); key++) {
-            const name = columns.get(key);
-            const type = types.get(key);
-            if (override && this.overridden_types[name]) {
-                expression_schema[name] = this.overridden_types[name];
+        for (let i = 0; i < aliases.size(); i++) {
+            const alias = aliases.get(i);
+            let result = results.get(i);
+
+            if (defaults.DATA_TYPES[result]) {
+                // valid - returned a type
+                if (override && this.overridden_types[alias]) {
+                    result = this.overridden_types[alias];
+                }
+
+                validated.expression_schema[alias] = result;
             } else {
-                expression_schema[name] = get_column_type(type.value);
+                // Invalid - returned an error message
+                validated.errors[alias] = result;
             }
         }
 
-        _schema.delete();
-        columns.delete();
-        types.delete();
+        aliases.delete();
+        results.delete();
+        validation_results.delete();
 
-        return expression_schema;
+        return validated;
     };
 
     /**
@@ -1512,7 +1531,7 @@ export default function(Module) {
         const table_schema = this.schema();
 
         if (config.expressions.length > 0) {
-            config.expressions = validate_expressions(config.expressions);
+            config.expressions = parse_expression_strings(config.expressions);
         }
 
         if (config.columns === undefined) {

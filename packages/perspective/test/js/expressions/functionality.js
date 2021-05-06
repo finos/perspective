@@ -19,9 +19,9 @@ module.exports = perspective => {
         describe("if statements", function() {
             it("if without else should be invalid", async function() {
                 const table = await perspective.table(expressions_common.int_float_data);
-                const validate = await table.expression_schema(['if ("w" > 1) 5;', 'if ("w" > 1) 5']);
-                expect(validate['if ("w" > 1) 5;']).toBeUndefined();
-                expect(validate['if ("w" > 1) 5']).toBeUndefined();
+                const validate = await table.validate_expressions(['if ("w" > 1) 5;', 'if ("w" > 1) 5']);
+                expect(validate.expression_schema['if ("w" > 1) 5;']).toBeUndefined();
+                expect(validate.expression_schema['if ("w" > 1) 5']).toBeUndefined();
                 table.delete();
             });
 
@@ -343,10 +343,10 @@ module.exports = perspective => {
                 const table = await perspective.table(expressions_common.int_float_data);
                 // `for (var x := today(); x < 10; x += 1) { var y := "w" + 1; y}`
                 const expressions = [`for (var x := 'abc'; x < 10; x += 1) { var y := "w" + 1; y}`];
-                const validate = await table.expression_schema(expressions);
+                const validate = await table.validate_expressions(expressions);
 
                 for (const expr of expressions) {
-                    expect(validate[expr]).toBeUndefined();
+                    expect(validate.expression_schema[expr]).toBeUndefined();
                 }
 
                 await table.delete();
@@ -1735,7 +1735,7 @@ module.exports = perspective => {
                     c: ["a", "b", "c", "d"]
                 });
                 const expressions = ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`];
-                const schema = await table.expression_schema(expressions);
+                const schema = await table.validate_expressions(expressions).expression_schema;
                 expect(schema).toEqual({
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
@@ -1763,7 +1763,7 @@ module.exports = perspective => {
                     "// c\n concat('a', 'b')", // invalid
                     "// d\n today()" // invalid
                 ];
-                const schema = await table.expression_schema(expressions);
+                const schema = await table.validate_expressions(expressions).expression_schema;
                 expect(schema).toEqual({
                     abc: "float"
                 });
@@ -1782,7 +1782,8 @@ module.exports = perspective => {
                     expressions: ["// abc\n 123 + 345"]
                 });
 
-                const schema = await table.expression_schema(["// abc\n upper('abc')"]);
+                // TODO: validate the error messages once we decide on a format.
+                const schema = await table.validate_expressions(["// abc\n upper('abc')"]).expression_schema;
                 expect(schema).toEqual({});
 
                 view.delete();
@@ -1809,7 +1810,7 @@ module.exports = perspective => {
                     'min("a", "c")', // invalid,
                     'max(100, "a")' // valid
                 ];
-                const schema = await table.expression_schema(expressions);
+                const schema = await table.validate_expressions(expressions).expression_schema;
                 expect(schema).toEqual({
                     abc: "float",
                     '"c"': "string",
@@ -1841,7 +1842,7 @@ module.exports = perspective => {
                     'min("a", "c")', // invalid,
                     'max(100, "a")' // valid
                 ];
-                const schema = await table.expression_schema(expressions);
+                const schema = await table.validate_expressions(expressions).expression_schema;
                 expect(schema).toEqual({
                     '"a" + "d"': "float",
                     '"c"': "string",
@@ -1869,7 +1870,7 @@ module.exports = perspective => {
                     'upper("c")', // valid
                     'lower("sdfadsj")' // invalid
                 ];
-                const schema = await table.expression_schema(expressions);
+                const schema = await table.validate_expressions(expressions).expression_schema;
                 expect(schema).toEqual({
                     '"a" + "d"': "float",
                     '"c"': "string",
@@ -1892,7 +1893,7 @@ module.exports = perspective => {
                     "if (\"c\" == 'a') 123; else 0;", // valid
                     "if (" // invalid
                 ];
-                const schema = await table.expression_schema(expressions);
+                const schema = await table.validate_expressions(expressions).expression_schema;
                 expect(schema).toEqual({
                     '"a" + "d"': "float",
                     "if (\"c\" == 'a') 123; else 0;": "float"

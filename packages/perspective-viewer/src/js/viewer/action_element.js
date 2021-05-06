@@ -7,8 +7,8 @@
  *
  */
 
+import debounce from "lodash/debounce";
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
-
 import {DomElement} from "./dom_element.js";
 import {findExpressionByAlias} from "../utils.js";
 
@@ -122,7 +122,12 @@ export class ActionElement extends DomElement {
 
         if (expressions.includes(expression) || is_duplicate) {
             console.warn(`Cannot apply duplicate expression: "${expression}"`);
-            this._expression_editor.type_check_expression({});
+            this._expression_editor.type_check_expression({
+                expression_schema: {},
+                errors: {
+                    alias: "Cannot apply duplicate expression."
+                }
+            });
             return;
         }
 
@@ -131,7 +136,7 @@ export class ActionElement extends DomElement {
             return;
         }
 
-        this._expression_editor.type_check_expression(await this._table.expression_schema([expression]));
+        this._expression_editor.type_check_expression(await this._table.validate_expressions([expression]));
     }
 
     _column_visibility_clicked(ev) {
@@ -285,13 +290,13 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_expression_button.addEventListener("click", this._open_expression_editor.bind(this));
-        // TODO WIP
-        // this._expression_editor.addEventListener(
-        //      "perspective-expression-editor-resize",
-        //      this._reset_sidepanel.bind(this)
-        // );
         this._expression_editor.addEventListener("perspective-expression-editor-save", this._save_expression.bind(this));
-        this._expression_editor.addEventListener("perspective-expression-editor-type-check", this._type_check_expression.bind(this));
+        this._expression_editor.addEventListener(
+            "perspective-expression-editor-type-check",
+            debounce(async event => {
+                await this._type_check_expression.apply(this, [event]);
+            }, 300)
+        );
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());

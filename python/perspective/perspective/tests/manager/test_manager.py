@@ -325,11 +325,14 @@ class TestPerspectiveManager(object):
         manager._process(make_view_message, self.post)
         manager._process(message, post_callback)
 
-    def test_manager_table_expression_schema(self):
+    def test_manager_table_validate_expressions(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
             "data": {
-                "abc": "float"
+                "expression_schema": {
+                    "abc": "float"
+                },
+                "errors": {}
             }
         })
 
@@ -337,7 +340,7 @@ class TestPerspectiveManager(object):
             "id": 1,
             "name": "table1",
             "cmd": "table_method",
-            "method": "expression_schema",
+            "method": "validate_expressions",
             "args": [['// abc \n "a" + "a"']]
         }
         manager = PerspectiveManager()

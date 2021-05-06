@@ -186,7 +186,11 @@ class _PerspectiveManagerInternal(object):
                 # Decide how to dispatch the method
                 arguments = {}
 
-                if msg["method"] in ("schema", "expression_schema"):
+                if msg["method"] in (
+                    "schema",
+                    "expression_schema",
+                    "validate_expressions",
+                ):
                     # make sure schema returns string types through the
                     # wire API. `as_string` is respected by both the table
                     # and view's `schema` and `expression_schema` methods.
@@ -227,9 +231,9 @@ class _PerspectiveManagerInternal(object):
                     result = getattr(table_or_view, msg["method"])(data, **options)
                 elif (
                     msg["cmd"] == "table_method"
-                    and msg["method"] == "expression_schema"
+                    and msg["method"] == "validate_expressions"
                 ):
-                    # expression_schema on the table takes `as_string` in
+                    # validate_expressions on the table takes `as_string` in
                     # wargs,
                     result = getattr(table_or_view, msg["method"])(
                         *msg.get("args", []), **arguments

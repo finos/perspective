@@ -66,14 +66,14 @@ Table::get_schema() const {
     return m_gnode->get_output_schema();
 }
 
-t_schema
-Table::get_expression_schema(
+t_validated_expression_map
+Table::validate_expressions(
     const std::vector<std::tuple<
             std::string,
             std::string,
             std::string,
             std::vector<std::pair<std::string, std::string>>>>& expressions) const {
-    t_schema expression_schema;
+    t_validated_expression_map rval(expressions.size());
 
     // Expression columns live on the `t_gstate` master table, so this
     // schema will always contain ALL expressions columns created by ALL views
@@ -81,20 +81,20 @@ Table::get_expression_schema(
     auto master_table_schema = m_gnode->get_table_sptr()->get_schema();
 
     // However, we need to keep track of the "real" columns at the time the
-    // table was instantiated, which exists on the output schema that will
-    // not be mutated at a later time.
+    // table was instantiated, which exists on the output schema. This means
+    // that we cannot create an expression column that references another
+    // expression column - expressions can only reference "real" columns.
     auto gnode_schema = get_schema();
 
     for (const auto& expr : expressions) {
         const std::string& expression_alias = std::get<0>(expr);
+        std::string error_string;
 
         // Cannot overwrite a "real" column with an expression column
         if (gnode_schema.has_column(expression_alias)) {
-            std::cerr 
-                << "Skipping expression column `"
-                << expression_alias
-                << "` as expressions cannot overwrite table columns."
-                << std::endl;
+            error_string += expression_alias;
+            error_string += "cannot overwrite an existing column.";
+            rval.add(expression_alias, error_string);
             continue;
         }
 
@@ -103,28 +103,35 @@ Table::get_expression_schema(
             std::get<1>(expr),
             std::get<2>(expr),
             std::get<3>(expr),
-            gnode_schema);
+            gnode_schema,
+            error_string);
 
-        if (expression_dtype != DTYPE_NONE) {
+        if (expression_dtype == DTYPE_NONE) {
+            // extract the error from the stream and set it in the returned map
+            rval.add(expression_alias, error_string);
+        } else {
             // Check if the expression tries to overwrite an existing
             // expression with a different type - i.e. expression abc exists
             // and is a float, but is being overwritten with a string. Because
             // this causes issues with writing to columns, we should not
             // allow this case.
             if (master_table_schema.has_column(expression_alias) && master_table_schema.get_dtype(expression_alias) != expression_dtype) {
-                std::cerr 
-                    << "Cannot overwrite expression `"
-                    << expression_alias
-                    << "` with an expression of a different output type."
-                    << std::endl;
+                std::stringstream ss;
+                ss <<  "ValueError: cannot overwrite "
+                    << "expression \"" << expression_alias << "\" of type \""
+                    << dtype_to_str(master_table_schema.get_dtype(expression_alias))
+                    << "\" with an expression of type \""
+                    << dtype_to_str(expression_dtype)
+                    << "\"";
+                rval.add(expression_alias, ss.str());
                 continue;
             }
 
-            expression_schema.add_column(expression_alias, expression_dtype);
+            rval.add(expression_alias, dtype_to_str(expression_dtype));
         }
     }
 
-    return expression_schema;
+    return rval;
 }
 
 std::shared_ptr<t_gnode>

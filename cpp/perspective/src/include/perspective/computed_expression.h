@@ -62,10 +62,10 @@ public:
 
     void set_expression_vocab(std::shared_ptr<t_vocab> vocab);
 
-    std::string get_expression_alias() const;
-    std::string get_expression_string() const;
-    std::string get_parsed_expression_string() const;
-    std::vector<std::pair<std::string, std::string>> get_column_ids() const;
+    const std::string& get_expression_alias() const;
+    const std::string& get_expression_string() const;
+    const std::string& get_parsed_expression_string() const;
+    const std::vector<std::pair<std::string, std::string>>& get_column_ids() const;
     t_dtype get_dtype() const;
 
 private:
@@ -109,7 +109,9 @@ public:
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
      * if the expression is invalid. Unlike `precompute`, this method
      * implements additional checks for column validity and is guaranteed
-     * to return a value, even if the expression cannot be parsed.
+     * to return a value, even if the expression cannot be parsed. If the
+     * expression has an error in it, this function will return `DTYPE_NONE`
+     * and the `error_string` will have an error message set.
      * 
      * @param expression_alias an alias for the expression, which will become
      * the name of the new expression column on the table.
@@ -119,7 +121,8 @@ public:
      * intern(), etc.
      * @param column_ids A map of column IDs to column names, which is used to
      * properly access column names from the symbol table.
-     * @param schema 
+     * @param schema
+     * @param error_string
      * @return t_dtype 
      */
     static t_dtype get_dtype(
@@ -127,12 +130,10 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const t_schema& schema);
+        const t_schema& schema,
+        std::string& error_string);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
-
-    // Symbol table for constants and functions that don't have any state.
-    static exprtk::symbol_table<t_tscalar> GLOBAL_SYMTABLE;
 
     // Instances of Exprtk functions
     static computed_function::date_bucket DATE_BUCKET_FN;
@@ -151,6 +152,32 @@ public:
     static computed_function::max_fn MAX_FN;
     static computed_function::is_null IS_NULL_FN;
     static computed_function::is_not_null IS_NOT_NULL_FN;
+};
+
+/**
+ * @brief a `t_schema`-like container for validated expression results that
+ * offers fast lookups.
+ */
+struct PERSPECTIVE_EXPORT t_validated_expression_map {
+    t_validated_expression_map(t_uindex capacity);
+
+    /**
+     * @brief Add an expression and its result (a `t_dtype` as string or an
+     * error message) to the map. If the expression is already in the map,
+     * it is replaced with the new result.
+     * 
+     * @param expression 
+     * @param result 
+     */
+    void add(const std::string& expression_alias, const std::string& result);
+    
+    t_uindex size() const;
+    const std::vector<std::string>& get_expressions() const;
+    const std::vector<std::string>& get_results() const;
+
+    std::vector<std::string> m_expressions;
+    std::vector<std::string> m_results;
+    tsl::hopscotch_map<std::string, t_uindex> m_expression_map;
 };
 
 } // end namespace perspective

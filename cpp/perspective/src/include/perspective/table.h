@@ -81,13 +81,20 @@ public:
     /**
      * @brief Given a vector of expressions and its associated metadata 
      * (the parsed expression string and a vector of input column_ids and
-     * column names), return the expression schema. If an expression
-     * is invalid, it will not be included in the schema that is returned.
+     * column names), return a `t_validated_expression_map` struct that contains
+     * `expressions`, a vector of expression names, and `result`, a vector of
+     * string dtypes or error messages for each expression.
+     * 
+     * We use a custom struct here because this method gets called in a tight
+     * loop (on every keypress in the expression editor and in each view()
+     * constructor), and there isn't a clean way (yet) to pass a hopscotch
+     * or unordered map through Embind, only std::map which is slower.
      * 
      * @param expressions
-     * @return t_schema
+     * @return t_validated_expression_map
      */
-    t_schema get_expression_schema(
+    t_validated_expression_map
+    validate_expressions(
         const std::vector<
             std::tuple<
                 std::string,

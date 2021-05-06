@@ -107,7 +107,7 @@ table.prototype.remove_port = async_queue("remove_port", "table_method");
 
 table.prototype.schema = async_queue("schema", "table_method");
 
-table.prototype.expression_schema = async_queue("expression_schema", "table_method");
+table.prototype.validate_expressions = async_queue("validate_expressions", "table_method");
 
 table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
 

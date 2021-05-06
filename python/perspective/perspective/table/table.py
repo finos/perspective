@@ -14,10 +14,15 @@ from ._callback_cache import _PerspectiveCallBackCache
 from ..core.exception import PerspectiveError
 from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
-from ._utils import _dtype_to_pythontype, _dtype_to_str, _validate_expressions
+from ._utils import (
+    _dtype_to_pythontype,
+    _dtype_to_str,
+    _str_to_pythontype,
+    _parse_expression_strings,
+)
 from .libbinding import (
     make_table,
-    get_table_expression_schema,
+    validate_expressions,
     str_to_filter_op,
     t_filter_op,
     t_op,
@@ -154,17 +159,11 @@ class Table(object):
                     schema[columns[i]] = _dtype_to_pythontype(types[i])
         return schema
 
-    def expression_schema(self, expressions, **kwargs):
-        """Returns a schema containing the column names and data types for
-        each valid expression in ``expressions``.
-
-        If an expression is invalid, i.e. by referencing invalid columns,
-        performing an invalid operation (adding a string to a number, for
-        instance), or has syntax errors, the expression will not be included
-        in the returned schema. Thus, this method can be used to type and
-        syntax check expressions before they are entered into the view
-        constructor, which will throw a :obj:`PerspectiveCppError` if
-        the expression is invalid.
+    def validate_expressions(self, expressions, as_string=False):
+        """Returns an :obj:`dict` with two keys: "expression_schema", which is
+        a schema containing the column names and data types for each valid
+        expression in ``expressions``, and "errors", which is a dict of
+        expressions to error messages.
 
         Args:
             expressions (:obj:`list`): A list of string expressions to validate
@@ -174,26 +173,29 @@ class Table(object):
             as_string (:obj:`bool`): If True, returns the data types as string
                 representations so they can be serialized.
         """
-        schema = {}
+        validated = {"expression_schema": {}, "errors": {}}
 
         if len(expressions) == 0:
-            return schema
+            return validated
 
-        expressions = _validate_expressions(expressions)
+        expressions = _parse_expression_strings(expressions)
+        validation_results = validate_expressions(self._table, expressions)
+        expression_aliases = validation_results.get_expressions()
+        results = validation_results.get_results()
 
-        s = get_table_expression_schema(self._table, expressions)
-
-        columns = s.columns()
-        types = s.types()
-        as_string = kwargs.pop("as_string", False)
-
-        for i in range(0, len(columns)):
-            if as_string:
-                schema[columns[i]] = _dtype_to_str(types[i])
+        for i in range(0, len(expression_aliases)):
+            alias = expression_aliases[i]
+            dtype = _str_to_pythontype(results[i])
+            if dtype is not None:
+                # valid expression - returned a type
+                if as_string:
+                    dtype = results[i]
+                validated["expression_schema"][alias] = dtype
             else:
-                schema[columns[i]] = _dtype_to_pythontype(types[i])
+                # invalid - returned an error message
+                validated["errors"][alias] = results[i]
 
-        return schema
+        return validated
 
     def columns(self):
         """Returns the column names of this :class:`~perspective.Table`.
@@ -405,7 +407,7 @@ class Table(object):
         config = {}
 
         if expressions is not None:
-            config["expressions"] = _validate_expressions(expressions)
+            config["expressions"] = _parse_expression_strings(expressions)
 
         if columns is None:
             config["columns"] = self.columns()

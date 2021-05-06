@@ -7,6 +7,16 @@
  *
  */
 
+export const DATA_TYPES = {
+    integer: "integer",
+    float: "float",
+    string: "string",
+    boolean: "boolean",
+    date: "date",
+    datetime: "datetime",
+    object: "object"
+};
+
 export const CONFIG_ALIASES = {
     row_pivot: "row_pivots",
     "row-pivot": "row_pivots",

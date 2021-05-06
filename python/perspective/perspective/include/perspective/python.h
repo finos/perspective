@@ -299,6 +299,15 @@ PYBIND11_MODULE(libbinding, m)
 
     /******************************************************************************
      *
+     * t_validated_expression_map
+     */
+    py::class_<t_validated_expression_map>(m, "t_validated_expression_map")
+        .def(py::init<t_uindex>())
+        .def("get_expressions", &t_validated_expression_map::get_expressions)
+        .def("get_results", &t_validated_expression_map::get_results);
+
+    /******************************************************************************
+     *
      * t_tscalar
      */
     py::class_<t_tscalar>(m, "t_tscalar")
@@ -424,7 +433,7 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_row_delta_zero", &get_row_delta_zero);
     m.def("get_row_delta_one", &get_row_delta_one);
     m.def("get_row_delta_two", &get_row_delta_two);
-    m.def("get_table_expression_schema", &get_table_expression_schema_py);
+    m.def("validate_expressions", &validate_expressions_py);
     m.def("init_expression_parser", &init_expression_parser);
     m.def("scalar_to_py", &scalar_to_py);
     m.def("_set_nthreads", &_set_nthreads);

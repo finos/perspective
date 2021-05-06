@@ -321,7 +321,8 @@ namespace binding {
     
     /**
      * @brief Given a table and a list of expressions, validate the expressions
-     * and return a schema of only valid columns.
+     * and return a map of all expressions with a string dtype or a string
+     * error message if the expression is invalid in any way.
      * 
      * @tparam T 
      * @param table 
@@ -329,8 +330,8 @@ namespace binding {
      * @return t_schema 
      */
     template <typename T>
-    t_schema
-    get_table_expression_schema(
+    t_validated_expression_map
+    validate_expressions(
         std::shared_ptr<Table> table,
         const std::vector<std::vector<T>>& j_expressions);
 

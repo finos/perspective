@@ -12,9 +12,11 @@ from perspective import Table, PerspectiveCppError
 
 
 class TestViewExpression(object):
-    def test_table_expression_schema_empty(self):
+    def test_table_validate_expressions_empty(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        assert table.expression_schema([]) == {}
+        validate = table.validate_expressions([])
+        assert validate["expression_schema"] == {}
+        assert validate["errors"] == {}
 
     def test_view_expression_schema_empty(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})

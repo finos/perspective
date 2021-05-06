@@ -1638,8 +1638,8 @@ namespace binding {
      */
 
     template <>
-    t_schema
-    get_table_expression_schema(
+    t_validated_expression_map
+    validate_expressions(
         std::shared_ptr<Table> table,
         const std::vector<std::vector<t_val>>& j_expressions) {
         // Don't create a expression object - just pass the values as a
@@ -1676,8 +1676,7 @@ namespace binding {
             expressions[idx] = tp;
         }
 
-        t_schema expression_schema = table->get_expression_schema(expressions);
-        return expression_schema;
+        return table->validate_expressions(expressions);
     };
 
     /******************************************************************************
@@ -2030,6 +2029,15 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_validated_expression_map
+     */
+    class_<t_validated_expression_map>("t_validated_expression_map")
+        .constructor<t_uindex>()
+        .function("get_expressions", &t_validated_expression_map::get_expressions)
+        .function("get_results", &t_validated_expression_map::get_results);
+
+    /******************************************************************************
+     *
      * t_tscalar
      */
     class_<t_tscalar>("t_tscalar");
@@ -2060,6 +2068,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .field("rows_changed", &t_stepdelta::rows_changed)
         .field("columns_changed", &t_stepdelta::columns_changed)
         .field("cells", &t_stepdelta::cells);
+
 
     /******************************************************************************
      *
@@ -2164,6 +2173,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_row_delta_one", &get_row_delta<t_ctx1>);
     function("get_row_delta_two", &get_row_delta<t_ctx2>);
     function("scalar_to_val", &scalar_to_val);
-    function("get_table_expression_schema", &get_table_expression_schema<t_val>);
+    function("validate_expressions", &validate_expressions<t_val>);
     function("is_valid_datetime", &is_valid_datetime);
 }

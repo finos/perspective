@@ -14,9 +14,6 @@ namespace perspective {
 std::shared_ptr<exprtk::parser<t_tscalar>>
 t_computed_expression_parser::PARSER = std::make_shared<exprtk::parser<t_tscalar>>();
 
-exprtk::symbol_table<t_tscalar>
-t_computed_expression_parser::GLOBAL_SYMTABLE = exprtk::symbol_table<t_tscalar>();
-
 // Exprtk functions without any state can be initialized statically
 computed_function::date_bucket
 t_computed_expression_parser::DATE_BUCKET_FN = computed_function::date_bucket();
@@ -139,7 +136,9 @@ t_computed_expression::t_computed_expression(
 void
 t_computed_expression::compute(
     std::shared_ptr<t_data_table> data_table) const {
+    // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
+    sym_table.add_constants();
 
     REGISTER_COMPUTE_FUNCTIONS()
 
@@ -163,7 +162,6 @@ t_computed_expression::compute(
         sym_table.add_variable(column_id, values[cidx].second);
     }
 
-    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(m_parsed_expression_string, expr_definition)) {
@@ -219,6 +217,7 @@ t_computed_expression::recompute(
     std::shared_ptr<t_data_table> flattened,
     const std::vector<t_rlookup>& changed_rows) const {
     exprtk::symbol_table<t_tscalar> sym_table;
+    sym_table.add_constants();
 
     REGISTER_COMPUTE_FUNCTIONS()
 
@@ -256,7 +255,6 @@ t_computed_expression::recompute(
         sym_table.add_variable(column_id, values[cidx].second);
     }
 
-    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(m_parsed_expression_string, expr_definition)) {
@@ -375,22 +373,22 @@ t_computed_expression::set_expression_vocab(std::shared_ptr<t_vocab> expression_
     m_expression_vocab = expression_vocab;
 }
 
-std::string
+const std::string&
 t_computed_expression::get_expression_alias() const {
     return m_expression_alias;
 }
 
-std::string
+const std::string&
 t_computed_expression::get_expression_string() const {
     return m_expression_string;
 }
 
-std::string
+const std::string&
 t_computed_expression::get_parsed_expression_string() const {
     return m_parsed_expression_string;
 }
 
-std::vector<std::pair<std::string, std::string>>
+const std::vector<std::pair<std::string, std::string>>&
 t_computed_expression::get_column_ids() const {
     return m_column_ids;
 }
@@ -407,7 +405,6 @@ t_computed_expression::get_dtype() const {
 
 void
 t_computed_expression_parser::init() {
-    t_computed_expression_parser::GLOBAL_SYMTABLE.add_constants();
     t_computed_expression_parser::PARSER->settings()
         .disable_control_structure(exprtk::parser<t_tscalar>::settings_store::e_ctrl_repeat_loop)
         .disable_base_function(exprtk::parser<t_tscalar>::settings_store::e_bf_min)
@@ -423,7 +420,7 @@ t_computed_expression_parser::precompute(
     std::shared_ptr<t_schema> schema
 ) {
     exprtk::symbol_table<t_tscalar> sym_table;
-    exprtk::expression<t_tscalar> expr_definition;
+    sym_table.add_constants();
 
     REGISTER_VALIDATION_FUNCTIONS()
 
@@ -446,7 +443,7 @@ t_computed_expression_parser::precompute(
         sym_table.add_variable(column_id, values[cidx]);
     }
 
-    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
+    exprtk::expression<t_tscalar> expr_definition;
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
@@ -475,10 +472,11 @@ t_computed_expression_parser::get_dtype(
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    const t_schema& schema
+    const t_schema& schema,
+    std::string& error_string
 ) {
     exprtk::symbol_table<t_tscalar> sym_table;
-    exprtk::expression<t_tscalar> expr_definition;
+    sym_table.add_constants();
 
     std::vector<t_tscalar> values;
 
@@ -487,8 +485,6 @@ t_computed_expression_parser::get_dtype(
     auto num_input_columns = column_ids.size();
     values.resize(num_input_columns);
 
-    bool has_invalid_column = false;
-
     // Add a new scalar of the input column type to the symtable, which
     // will use the scalar to validate the output type of the expression.
     for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
@@ -496,11 +492,8 @@ t_computed_expression_parser::get_dtype(
         const std::string& column_name = column_ids[cidx].second;
 
         if (!schema.has_column(column_name)) {
-            std::cerr << "[t_computed_expression_parser::get_dtype] Column `"
-                << column_name << "` does not exist in the schema!"
-                << std::endl;
-            has_invalid_column = false;
-            break;
+            error_string += ("Input column \"" + column_name + "\" does not exist.");
+            return DTYPE_NONE;
         }
 
         t_tscalar rval;
@@ -511,29 +504,59 @@ t_computed_expression_parser::get_dtype(
         sym_table.add_variable(column_id, values[cidx]);
     }
 
-    if (has_invalid_column) {
-        return DTYPE_NONE;
-    }
-
-    expr_definition.register_symbol_table(t_computed_expression_parser::GLOBAL_SYMTABLE);
+    exprtk::expression<t_tscalar> expr_definition;
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
-        // std::cerr << "[t_computed_expression_parser::get_dtype] Failed to parse expression: `"
-        //     << parsed_expression_string
-        //     << "`, failed with error: "
-        //     << t_computed_expression_parser::PARSER->error().c_str()
-        //     << std::endl;
+        auto error = t_computed_expression_parser::PARSER->error();
+        error_string += "ParserError: ";
+        error_string += error.c_str();
         return DTYPE_NONE;
     }
 
     t_tscalar v = expr_definition.value();
 
     if (v.m_status == STATUS_CLEAR) {
+        error_string += "TypeError: inputs do not resolve to a valid expression.";
         return DTYPE_NONE;
     }
 
     return v.get_dtype();
 }
 
+t_validated_expression_map::t_validated_expression_map(t_uindex capacity) {
+    if (capacity > 0) {
+        m_expressions.reserve(capacity);
+        m_results.reserve(capacity);
+        m_expression_map.reserve(capacity);
+    }
+}
+
+void
+t_validated_expression_map::add(
+    const std::string& expression_alias, const std::string& result) {
+    if (m_expression_map.count(expression_alias)) {
+        t_uindex idx = m_expression_map[expression_alias];
+        m_results[idx] = result;
+    } else {
+        m_expressions.push_back(expression_alias);
+        m_results.push_back(result);
+        m_expression_map[expression_alias] = m_expressions.size() - 1;
+    }
+}
+
+t_uindex
+t_validated_expression_map::size() const {
+    return m_expression_map.size();
+}
+
+const std::vector<std::string>&
+t_validated_expression_map::get_expressions() const {
+    return m_expressions;
+}
+
+const std::vector<std::string>&
+t_validated_expression_map::get_results() const {
+    return m_results;
+}
 } // end namespace perspective

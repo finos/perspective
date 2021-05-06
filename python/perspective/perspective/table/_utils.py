@@ -24,7 +24,7 @@ def _extract_type(type, typemap):
     rval = typemap.get(type)
 
     if rval is None:
-        raise KeyError("unsupported type: {}".format(type))
+        return None
 
     return rval
 
@@ -90,6 +90,23 @@ def _str_to_pythontype(typestring):
     return _extract_type(typestring, mapping)
 
 
+def _pythontype_to_str(typestring):
+    """Returns the normalized string representation of a Perspective type from
+    a Python type object.
+    """
+    mapping = {
+        bool: "boolean",
+        float: "float",
+        int: "integer",
+        date: "date",
+        datetime: "datetime",
+        str: "string",
+        object: "object",
+    }
+
+    return _extract_type(typestring, mapping)
+
+
 def _replace_expression_column_name(
     column_name_map, column_id_map, running_cidx, match_obj
 ):
@@ -123,7 +140,7 @@ def _replace_date_bucket_unit(match_obj):
     return "{0}'{1}')".format(full[0 : full.index(interned)], unit)
 
 
-def _validate_expressions(expressions):
+def _parse_expression_strings(expressions):
     """Given a list of string expressions, parse out column names and string
     literals using regex and return a list of lists that contain three items
     in each inner list:

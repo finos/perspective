@@ -396,7 +396,7 @@ export async function createModel(regular, table, view, extend = {}) {
 
     const [table_schema, table_expression_schema, num_rows, schema, expression_schema, column_paths] = await Promise.all([
         table.schema(),
-        table.expression_schema(expressions),
+        table.validate_expressions(expressions).expression_schema,
         view.num_rows(),
         view.schema(),
         view.expression_schema(),

@@ -7,7 +7,9 @@ declare module "@finos/perspective" {
         FLOAT = "float",
         INTEGER = "integer",
         BOOLEAN = "boolean",
-        DATE = "date"
+        DATE = "date",
+        DATETIME = "datetime",
+        OBJECT = "object"
     }
 
     export type ValuesByType = {
@@ -105,6 +107,11 @@ declare module "@finos/perspective" {
 
     export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string} | ArrayBuffer;
 
+    export type ValidatedExpressions = {
+        expression_schema: Schema;
+        errors: {[key: string]: string};
+    };
+
     export type TableOptions = {
         index?: string;
         limit?: number;
@@ -126,7 +133,7 @@ declare module "@finos/perspective" {
         replace(data: TableData): Promise<void>;
         delete(): Promise<void>;
         on_delete(callback: Function): void;
-        expression_schema(expressions: Array<string>): Promise<Schema>;
+        validate_expressions(expressions: Array<string>): Promise<ValidatedExpressions>;
         schema(): Promise<Schema>;
         size(): Promise<number>;
         update(data: TableData, options?: {port_id?: number}): void;

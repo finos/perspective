@@ -24,7 +24,7 @@ namespace binding {
 void init_expression_parser();
 
 t_schema
-get_table_expression_schema_py(
+validate_expressions_py(
     std::shared_ptr<Table> table,
     const std::vector<std::vector<t_val>>& p_expressions);
 
