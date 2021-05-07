@@ -51,7 +51,7 @@ utils.with_server({}, () => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
-                await page.shadow_click("perspective-viewer", "perspective-expression-editor", "#psp-expression-editor-close");
+                await page.shadow_click("perspective-viewer", "perspective-expression-editor", "#psp-expression-editor-button-close");
                 await page.evaluate(element => element.setAttribute("columns", JSON.stringify(["Sales", "Profit"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });

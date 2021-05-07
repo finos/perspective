@@ -45,9 +45,9 @@
     }
 
     .psp-expression-editor__action {
-        margin-bottom: 10px;
+        margin-bottom: 5px;
 
-        span#psp-expression-editor-close {
+        span#psp-expression-editor-button-close {
             color: #999;
             display: flex;
             font-family: var(--column-close--font-family, inherit);
@@ -130,6 +130,7 @@
         border-left: 0;
         border-right: 0;
         border-top: 0;
+        font-family: var(--interface--font-family, @material-sans-serif-fonts);
         font-size: 12px;
         margin-left: 6px;
         padding: 2px 5px;
@@ -158,6 +159,22 @@
             }
         }
 
+        &#psp-expression-editor-button-help {
+            background: #808080;
+            border-bottom-color: #777;
+            color: #fff;
+
+            &:active  {
+                background: #555;
+                border-bottom-color: #333;
+            }
+
+            &:hover {
+                background: #555;
+                border-bottom-color: #333;
+            }
+        }
+
         &#psp-expression-editor-button-save {
             background: #0171d2;
             border-bottom-color: #0160b1;
@@ -165,6 +182,11 @@
             height: 22px;
 
             &:active {
+                background: #0160b1;
+                border-bottom-color: #014986;
+            }
+
+            &:hover {
                 background: #0160b1;
                 border-bottom-color: #014986;
             }
@@ -183,7 +205,7 @@
     }
 
     #psp-expression-editor__edit_area {
-        @default-text-color: var(--color, #666666);
+        @default-text-color: var(--color, @darkgray);
 
         background: var(--background-color, none);
         border: 1px solid var(--inactive--color, #ccc);
@@ -298,5 +320,69 @@
             text-decoration: underline dotted
                 var(--expression--error-color, rgb(250, 51, 51));
         }
+    }
+    
+    #psp-expression-editor-help-container {
+        display: none;
+        flex-direction: column;
+        margin-top: 5px;
+        min-height: 100px;
+        max-height: 150px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+
+        .psp_expression-editor__help-item {
+            color: var(--color, @darkgray);
+            font-family: var(--interface-monospace--font-family, monospace);
+            font-size: 12px;
+            margin-bottom: 5px;
+            margin-right: 10px;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        .psp_expression-editor__help--group {
+            border-bottom: 1px solid var(--inactive--color, @border-color);
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+
+            .psp_expression-editor__help--header {
+                color: var(--color, @darkgray);
+                font-size: 12px;
+                margin-bottom: 5px;
+                padding-top: 5px;
+            }
+
+
+            &#psp-expression-editor-help-group-numeric {
+                .psp_expression-editor__help--group-content {
+                    flex-direction: row !important;
+                }
+            }
+
+            &#psp-expression-editor-help-group-comparison {
+                .psp_expression-editor__help--group-content {
+                    flex-direction: row !important;
+                }
+            }
+
+            .psp_expression-editor__help--group-content {
+                display: flex;
+                flex-direction: column;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                padding-top: 5px;
+
+                .psp_expression-editor__help--divider {
+                    border: 0;
+                    margin: 0;
+                    padding-bottom: 5px;
+                    width: 100%;
+                }
+            }
+        }
+        
     }
 }

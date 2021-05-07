@@ -11,6 +11,7 @@ import {bindTemplate, throttlePromise, getExpressionAlias, addExpressionAlias} f
 
 import template from "../html/expression_editor.html";
 import style from "../less/expression_editor.less";
+import {EXPRESSION_HELP_ITEMS} from "./expression_help_items";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -25,7 +26,8 @@ class PerspectiveExpressionEditor extends HTMLElement {
     connectedCallback() {
         this._register_ids();
         this._register_callbacks();
-        this._editor_observer = new MutationObserver(this._resize_editor.bind(this));
+        this._fill_help_items();
+        this._editor_observer = new ResizeObserver(this._resize_editor.bind(this));
         this._clear();
         this._disable_save();
     }
@@ -34,11 +36,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      * Observe the editor when it is opened.
      */
     observe() {
-        this._editor_observer.observe(this._edit_area, {
-            attributes: true,
-            attributeFilter: ["style"]
-        });
-
+        this._editor_observer.observe(this._edit_area);
         // Focus on the edit area immediately
         this._focus();
     }
@@ -49,6 +47,8 @@ class PerspectiveExpressionEditor extends HTMLElement {
     close() {
         this.style.display = "none";
         this._side_panel_actions.style.display = "flex";
+        this._help_container.style.display = "none";
+        this._help_container.style.width = `100%`;
         this._disable_save();
         this._clear();
         // Disconnect the observer.
@@ -164,15 +164,14 @@ class PerspectiveExpressionEditor extends HTMLElement {
     }
 
     /**
-     * Dispatch an event on editor resize to notify the side panel, and
-     * disconnect the observer.
+     * Whenever the editor resizes, make sure the width of the error message
+     * and help panel correspond to the editor width.
      *
      * @private
      */
     _resize_editor() {
-        const event = new CustomEvent("perspective-expression-editor-resize");
-        this.dispatchEvent(event);
-        this._editor_observer.disconnect();
+        this._error_message.style.width = `${this._edit_area.offsetWidth}px`;
+        this._help_container.style.width = `${this._edit_area.offsetWidth}px`;
     }
 
     /**
@@ -195,11 +194,16 @@ class PerspectiveExpressionEditor extends HTMLElement {
     }
 
     _show_error(error_message) {
+        // make sure the error is never larger than the editor, otherwise it
+        // will start moving the side-panel.
+        this._error_message.style.width = `${this._edit_area.offsetWidth}px`;
         this._error_message.innerText = error_message;
         this._error_message.style.display = "block";
     }
 
     _hide_error() {
+        // Reset the width when the error hides.
+        this._error_message.style.width = "100%";
         this._error_message.innerText = "";
         this._error_message.style.display = "none";
     }
@@ -263,10 +267,17 @@ class PerspectiveExpressionEditor extends HTMLElement {
                 const parsed = JSON.parse(data);
                 if (Array.isArray(parsed) && parsed.length > 4) {
                     event.preventDefault();
+                    let expression;
 
-                    // Escape double quotes in the column name
-                    let column_name = parsed[0].replace(/"/g, '\\"');
-                    this._edit_area.textContent += `"${column_name}"`;
+                    // expression column - use the raw expression without alias
+                    if (parsed.length === 6) {
+                        expression = parsed[parsed.length - 1];
+                    } else {
+                        // column name - escape double quotes and wrap
+                        expression = `"${parsed[0].replace(/"/g, '\\"')}"`;
+                    }
+
+                    this._edit_area.value += expression;
                     this._validate_expression();
                 }
             } catch (e) {
@@ -276,9 +287,49 @@ class PerspectiveExpressionEditor extends HTMLElement {
         }
     }
 
-    _reset_selection() {
-        const selection = this.shadowRoot.getSelection();
-        selection.setBaseAndExtent(selection.anchorNode, this._edit_area.textContent.length, selection.focusNode, this._edit_area.textContent.length);
+    _toggle_help() {
+        if (this._help_container.offsetParent === null) {
+            this._help_container.style.width = `${this._edit_area.offsetWidth}px`;
+            this._help_container.style.display = "flex";
+        } else {
+            this._help_container.style.display = "none";
+            this._help_container.style.width = `100%`;
+        }
+    }
+
+    _apply_help_item(event) {
+        const template = event.target.getAttribute("template");
+        this._edit_area.value += template;
+        this._validate_expression();
+    }
+
+    _fill_help_items() {
+        const divider = document.createElement("hr");
+        divider.classList.add("psp_expression-editor__help--divider");
+
+        for (const category in EXPRESSION_HELP_ITEMS) {
+            const group = this[`_help_group_${category}`];
+            const content = group.querySelector(".psp_expression-editor__help--group-content");
+            const frag = document.createDocumentFragment();
+
+            for (const item of EXPRESSION_HELP_ITEMS[category]) {
+                if (item === "DIVIDER") {
+                    frag.appendChild(divider.cloneNode());
+                    continue;
+                }
+
+                const elem = document.createElement("span");
+                elem.classList.add("psp_expression-editor__help-item");
+                elem.setAttribute("title", item.description);
+                elem.setAttribute("template", item.template);
+                elem.innerText = item.name;
+                elem.addEventListener("click", this._apply_help_item.bind(this));
+
+                frag.appendChild(elem);
+            }
+
+            content.appendChild(frag);
+        }
     }
 
     /**
@@ -287,9 +338,18 @@ class PerspectiveExpressionEditor extends HTMLElement {
     _register_ids() {
         this._edit_area = this.shadowRoot.querySelector("#psp-expression-editor__edit_area");
         this._error_message = this.shadowRoot.querySelector("#psp-expression-editor__error-message");
-        this._close_button = this.shadowRoot.querySelector("#psp-expression-editor-close");
+        this._close_button = this.shadowRoot.querySelector("#psp-expression-editor-button-close");
         this._save_button = this.shadowRoot.querySelector("#psp-expression-editor-button-save");
         this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
+
+        // Help panel
+        this._help_button = this.shadowRoot.querySelector("#psp-expression-editor-button-help");
+        this._help_container = this.shadowRoot.querySelector("#psp-expression-editor-help-container");
+        this._help_group_numeric = this.shadowRoot.querySelector("#psp-expression-editor-help-group-numeric");
+        this._help_group_string = this.shadowRoot.querySelector("#psp-expression-editor-help-group-string");
+        this._help_group_datetime = this.shadowRoot.querySelector("#psp-expression-editor-help-group-datetime");
+        this._help_group_comparison = this.shadowRoot.querySelector("#psp-expression-editor-help-group-comparison");
+        this._help_group_control_flow = this.shadowRoot.querySelector("#psp-expression-editor-help-group-control-flow");
     }
 
     /**
@@ -301,5 +361,6 @@ class PerspectiveExpressionEditor extends HTMLElement {
         this._edit_area.addEventListener("keydown", this._keydown.bind(this));
         this._save_button.addEventListener("click", this._save_expression.bind(this));
         this._close_button.addEventListener("click", this.close.bind(this));
+        this._help_button.addEventListener("click", this._toggle_help.bind(this));
     }
 }

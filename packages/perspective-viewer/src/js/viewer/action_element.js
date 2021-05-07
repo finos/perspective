@@ -7,7 +7,6 @@
  *
  */
 
-import debounce from "lodash/debounce";
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
 import {DomElement} from "./dom_element.js";
 import {findExpressionByAlias} from "../utils.js";
@@ -122,12 +121,12 @@ export class ActionElement extends DomElement {
 
         if (expressions.includes(expression) || is_duplicate) {
             console.warn(`Cannot apply duplicate expression: "${expression}"`);
-            this._expression_editor.type_check_expression({
+            const result = {
                 expression_schema: {},
-                errors: {
-                    alias: "Cannot apply duplicate expression."
-                }
-            });
+                errors: {}
+            };
+            result.errors[alias] = "Value Error - Cannot apply duplicate expression.";
+            this._expression_editor.type_check_expression(result);
             return;
         }
 
@@ -291,12 +290,7 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_expression_button.addEventListener("click", this._open_expression_editor.bind(this));
         this._expression_editor.addEventListener("perspective-expression-editor-save", this._save_expression.bind(this));
-        this._expression_editor.addEventListener(
-            "perspective-expression-editor-type-check",
-            debounce(async event => {
-                await this._type_check_expression.apply(this, [event]);
-            }, 300)
-        );
+        this._expression_editor.addEventListener("perspective-expression-editor-type-check", this._type_check_expression.bind(this));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());

@@ -394,9 +394,9 @@ export async function createModel(regular, table, view, extend = {}) {
     // contains more metadata than we need.
     const expressions = config.expressions.map(expr => expr[0]);
 
-    const [table_schema, table_expression_schema, num_rows, schema, expression_schema, column_paths] = await Promise.all([
+    const [table_schema, validated_expressions, num_rows, schema, expression_schema, column_paths] = await Promise.all([
         table.schema(),
-        table.validate_expressions(expressions).expression_schema,
+        table.validate_expressions(expressions),
         view.num_rows(),
         view.schema(),
         view.expression_schema(),
@@ -411,7 +411,7 @@ export async function createModel(regular, table, view, extend = {}) {
     const model = Object.assign(extend, {
         _view: view,
         _table: table,
-        _table_schema: {...table_schema, ...table_expression_schema},
+        _table_schema: {...table_schema, ...validated_expressions.expression_schema},
         _config: config,
         _num_rows: num_rows,
         _schema: {...schema, ...expression_schema},

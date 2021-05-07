@@ -92,8 +92,7 @@ Table::validate_expressions(
 
         // Cannot overwrite a "real" column with an expression column
         if (gnode_schema.has_column(expression_alias)) {
-            error_string += expression_alias;
-            error_string += "cannot overwrite an existing column.";
+            error_string += "Value Error - expression \"" + expression_alias + "\" cannot overwrite an existing column.";
             rval.add(expression_alias, error_string);
             continue;
         }

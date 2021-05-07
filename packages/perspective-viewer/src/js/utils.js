@@ -339,7 +339,13 @@ export function getExpressionAlias(expression) {
  */
 export function addExpressionAlias(expression) {
     let alias;
-    expression.length > 20 ? (alias = expression.substr(0, 20).trim() + "...") : (alias = expression);
+    expression.length > 20
+        ? (alias =
+              expression
+                  .replace("\n", " ")
+                  .substr(0, 20)
+                  .trim() + "...")
+        : (alias = expression);
     return `//${alias}\n${expression}`;
 }
 

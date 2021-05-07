@@ -666,7 +666,13 @@ template <> inline t_tscalar logn_impl(const t_tscalar v0, const t_tscalar v1, t
         return rval;
     }
 
-    double result = std::log(v0.to_double()) / std::log(v1.to_double());
+    double base = v1.to_double();
+
+    if (base < 0) {
+        return rval;
+    }
+
+    double result = std::log(v0.to_double()) / std::log(base);
 
     rval.set(result);
     return rval;

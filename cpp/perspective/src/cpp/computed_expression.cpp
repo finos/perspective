@@ -169,7 +169,7 @@ t_computed_expression::compute(
         ss << "[t_computed_expression::compute] Failed to parse expression: `"
             << m_parsed_expression_string
             << "`, failed with error: "
-            << t_computed_expression_parser::PARSER->error().c_str()
+            << t_computed_expression_parser::PARSER->error()
             << std::endl;
 
         PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -262,7 +262,7 @@ t_computed_expression::recompute(
         ss << "[t_computed_expression::recompute] Failed to parse expression: `"
             << m_parsed_expression_string
             << "`, failed with error: "
-            << t_computed_expression_parser::PARSER->error().c_str()
+            << t_computed_expression_parser::PARSER->error()
             << std::endl;
 
         PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -451,7 +451,7 @@ t_computed_expression_parser::precompute(
         ss << "[t_computed_expression_parser::precompute] Failed to parse expression: `"
             << parsed_expression_string
             << "`, failed with error: "
-            << t_computed_expression_parser::PARSER->error().c_str()
+            << t_computed_expression_parser::PARSER->error()
             << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
@@ -492,7 +492,7 @@ t_computed_expression_parser::get_dtype(
         const std::string& column_name = column_ids[cidx].second;
 
         if (!schema.has_column(column_name)) {
-            error_string += ("Input column \"" + column_name + "\" does not exist.");
+            error_string += ("Value Error - Input column \"" + column_name + "\" does not exist.");
             return DTYPE_NONE;
         }
 
@@ -509,15 +509,15 @@ t_computed_expression_parser::get_dtype(
 
     if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
         auto error = t_computed_expression_parser::PARSER->error();
-        error_string += "ParserError: ";
-        error_string += error.c_str();
+        // strip the Exprtk error codes such as "ERR001 -"
+        error_string += "Parser Error " + error.substr(error.find("- "));
         return DTYPE_NONE;
     }
 
     t_tscalar v = expr_definition.value();
 
     if (v.m_status == STATUS_CLEAR) {
-        error_string += "TypeError: inputs do not resolve to a valid expression.";
+        error_string += "Type Error - inputs do not resolve to a valid expression.";
         return DTYPE_NONE;
     }
 

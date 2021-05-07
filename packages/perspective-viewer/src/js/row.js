@@ -188,15 +188,19 @@ class Row extends HTMLElement {
     }
 
     _set_data_transfer(event) {
+        let data;
         if (this.hasAttribute("filter")) {
             const {operator, operand} = JSON.parse(this.getAttribute("filter"));
-            event.dataTransfer.setData("text/plain", JSON.stringify([this.getAttribute("name"), operator, operand, this.getAttribute("type"), this.getAttribute("aggregate")]));
+            data = [this.getAttribute("name"), operator, operand, this.getAttribute("type"), this.getAttribute("aggregate")];
         } else {
-            event.dataTransfer.setData(
-                "text/plain",
-                JSON.stringify([this.getAttribute("name"), get_type_config(this.getAttribute("type")).filter_operator, undefined, this.getAttribute("type"), this.getAttribute("aggregate")])
-            );
+            data = [this.getAttribute("name"), get_type_config(this.getAttribute("type")).filter_operator, undefined, this.getAttribute("type"), this.getAttribute("aggregate")];
         }
+        if (this.hasAttribute("expression") && this.hasAttribute("title")) {
+            // Add the expression to drag-data so it automatically
+            // resolves inside the expression editor.
+            data.push(this.getAttribute("title"));
+        }
+        event.dataTransfer.setData("text/plain", JSON.stringify(data));
         this.dispatchEvent(new CustomEvent("row-drag"));
     }
 
