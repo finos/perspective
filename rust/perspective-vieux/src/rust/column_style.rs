@@ -28,10 +28,10 @@ pub struct PerspectiveColumnStyleElement {
 
 /// Calculate the absolute coordinates (top, left) relative to `<body>` of a
 /// `target` element.
-fn calc_page_position(target: HtmlElement) -> Result<(i32, i32), JsValue> {
-    let mut top = target.offset_height();
+fn calc_page_position(target: HtmlElement) -> Result<(u32, u32), JsValue> {
+    let mut top = 0;
     let mut left = 0;
-    let mut elem = target;
+    let mut elem = target.unchecked_into::<HtmlElement>();
     while !elem.is_undefined() {
         let is_sticky = match web_sys::window().unwrap().get_computed_style(&elem)? {
             Some(x) => x.get_property_value("position")? == "sticky",
@@ -42,18 +42,71 @@ fn calc_page_position(target: HtmlElement) -> Result<(i32, i32), JsValue> {
         left += elem.offset_left();
         elem = match elem.offset_parent() {
             Some(elem) => {
-                let elem = elem.unchecked_into::<HtmlElement>();
                 if is_sticky {
                     top -= elem.scroll_top();
                     left -= elem.scroll_left();
                 }
-                elem
+                elem.unchecked_into::<HtmlElement>()
             }
             None => JsValue::UNDEFINED.unchecked_into::<HtmlElement>(),
         };
     }
 
-    Ok((top, left))
+    Ok((top as u32, left as u32))
+}
+
+/// Given the bounds of the target element as previous computed, as well as the
+/// browser's viewport and the bounds of the already-connected
+/// `<perspectuve-style-menu>` element itself, determine a new (top, left)
+/// coordinates that keeps the element on-screen.
+fn calc_relative_position(
+    elem: &HtmlElement,
+    top: u32,
+    left: u32,
+    height: u32,
+    width: u32,
+) -> Option<(u32, u32)> {
+    let window = web_sys::window().unwrap();
+    let rect = elem.get_bounding_client_rect();
+    let inner_width = window.inner_width().unwrap().as_f64().unwrap() as u32;
+    let inner_height = window.inner_height().unwrap().as_f64().unwrap() as u32;
+    let rect_top = rect.top() as u32;
+    let rect_height = rect.height() as u32;
+    let rect_width = rect.width() as u32;
+    let rect_left = rect.left() as u32;
+
+    let elem_over_y = inner_height < rect_top + rect_height;
+    let elem_over_x = inner_width < rect_left + rect_width;
+    let target_over_x = inner_width < rect_left + width;
+    let target_over_y = inner_height < rect_top + height;
+
+    match (elem_over_y, elem_over_x, target_over_x, target_over_y) {
+        (true, _, true, true) => {
+            // bottom right/top left
+            Some((top - rect_height, left - rect_width))
+        }
+        (true, _, true, false) => {
+            // bottom right, bottom left
+            Some((top - rect_height + height, left - rect_width))
+        }
+        (true, true, false, _) => {
+            // bottom right/top right
+            Some((top - rect_height, left + width - rect_width))
+        }
+        (true, false, false, _) => {
+            // bottom left/top left
+            Some((top - rect_height, left))
+        }
+        (false, true, true, _) => {
+            // top right/top left
+            Some((top, left - rect_width))
+        }
+        (false, true, false, _) => {
+            // top right/bottom right
+            Some((top + height, left + width - rect_width))
+        }
+        _ => None,
+    }
 }
 
 fn on_change(elem: &web_sys::HtmlElement, config: &ColumnStyleConfig) {
@@ -110,17 +163,30 @@ impl PerspectiveColumnStyleElement {
     /// absolutely positioned relative to an alread-connected `target`
     /// element.
     pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
+        let height = target.offset_height() as u32;
+        let width = target.offset_width() as u32;
         let (top, left) = calc_page_position(target)?;
-        self.root
-            .send_message(ColumnStyleMsg::SetPos(top as u32, left as u32));
 
-        web_sys::window()
-            .unwrap()
+        // default, top left/bottom left
+        let msg = ColumnStyleMsg::SetPos((top + height) as u32, left as u32);
+        self.root.send_message(msg);
+
+        let window = web_sys::window().unwrap();
+        window
             .document()
             .unwrap()
             .body()
             .unwrap()
             .append_child(&self.elem)?;
+
+        // Check if the menu has been positioned off-screen and re-locate if necessary
+        match calc_relative_position(&self.elem, top, left, height, width) {
+            None => (),
+            Some((top, left)) => {
+                let msg = ColumnStyleMsg::SetPos(top as u32, left as u32);
+                self.root.send_message(msg);
+            }
+        };
 
         let this = self.clone();
         *self.blurhandler.borrow_mut() =
