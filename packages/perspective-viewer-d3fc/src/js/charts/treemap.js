@@ -37,7 +37,7 @@ function treemap(container, settings) {
     container.datum(data).call(treemapGrid);
     if (color) {
         const color_column = settings.realValues[1];
-        if (settings.mainValues.find(x => x.name === color_column).type === "string") {
+        if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
             const legend = colorLegend()
                 .settings(settings)
                 .scale(color);

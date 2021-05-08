@@ -17,7 +17,7 @@ export function treeColor(settings, data) {
         .filter(x => x.height > 0)
         .map(x => getColors(x))
         .reduce((a, b) => a.concat(b));
-    if (settings.mainValues.find(x => x.name === color_column).type === "string") {
+    if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
         return seriesColorsFromDistinct(settings, colors);
     } else {
         let min = Math.min(...colors);
