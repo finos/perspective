@@ -1634,16 +1634,16 @@ module.exports = perspective => {
                 x: [new Date(2019, 0, 15), new Date(2019, 0, 30), new Date(2019, 1, 15)]
             });
             const view = await table.view({
-                row_pivots: [`date_bucket("x", 'M')`],
+                row_pivots: [`bucket("x", 'M')`],
                 aggregates: {
-                    "date_bucket(\"x\", 'M')": "distinct count"
+                    "bucket(\"x\", 'M')": "distinct count"
                 },
-                expressions: [`date_bucket("x", 'M')`]
+                expressions: [`bucket("x", 'M')`]
             });
             const result = await view.to_columns();
             expect(result).toEqual({
                 __ROW_PATH__: [[], [1546300800000], [1548979200000]],
-                "date_bucket(\"x\", 'M')": [2, 1, 1],
+                "bucket(\"x\", 'M')": [2, 1, 1],
                 x: [3, 2, 1]
             });
             view.delete();
@@ -1734,17 +1734,17 @@ module.exports = perspective => {
                     b: [new Date(), new Date(), new Date(), new Date()],
                     c: ["a", "b", "c", "d"]
                 });
-                const expressions = ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`];
-                const schema = await table.validate_expressions(expressions).expression_schema;
-                expect(schema).toEqual({
+                const expressions = ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`];
+                const results = await table.validate_expressions(expressions);
+                expect(results.expression_schema).toEqual({
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "string",
-                    "date_bucket(\"b\", 'M')": "date",
-                    "date_bucket(\"b\", 's')": "datetime"
+                    "bucket(\"b\", 'M')": "date",
+                    "bucket(\"b\", 's')": "datetime"
                 });
                 table.delete();
             });
@@ -1763,8 +1763,8 @@ module.exports = perspective => {
                     "// c\n concat('a', 'b')", // invalid
                     "// d\n today()" // invalid
                 ];
-                const schema = await table.validate_expressions(expressions).expression_schema;
-                expect(schema).toEqual({
+                const results = await table.validate_expressions(expressions);
+                expect(results.expression_schema).toEqual({
                     abc: "float"
                 });
                 table.delete();
@@ -1782,9 +1782,8 @@ module.exports = perspective => {
                     expressions: ["// abc\n 123 + 345"]
                 });
 
-                // TODO: validate the error messages once we decide on a format.
-                const schema = await table.validate_expressions(["// abc\n upper('abc')"]).expression_schema;
-                expect(schema).toEqual({});
+                const results = await table.validate_expressions(["// abc\n upper('abc')"]);
+                expect(results.expression_schema).toEqual({});
 
                 view.delete();
                 table.delete();
@@ -1801,8 +1800,8 @@ module.exports = perspective => {
                     '// abc \n"a" + "d"', // valid
                     '// def\n"c" + "b"', // invalid
                     '"c"', // valid
-                    "// new column \ndate_bucket(\"b\", 'M')", // valid
-                    "date_bucket(\"b\", 'abcde')", // invalid
+                    "// new column \nbucket(\"b\", 'M')", // valid
+                    "bucket(\"b\", 'abcde')", // invalid
                     'concat("c", "a")', // invalid
                     "// more columns\nconcat(\"c\", ' ', \"c\", 'abc')", // valid
                     'upper("c")', // valid
@@ -1810,8 +1809,8 @@ module.exports = perspective => {
                     'min("a", "c")', // invalid,
                     'max(100, "a")' // valid
                 ];
-                const schema = await table.validate_expressions(expressions).expression_schema;
-                expect(schema).toEqual({
+                const results = await table.validate_expressions(expressions);
+                expect(results.expression_schema).toEqual({
                     abc: "float",
                     '"c"': "string",
                     "new column": "date",
@@ -1833,8 +1832,8 @@ module.exports = perspective => {
                     '"a" + "d"', // valid
                     '"c" + "b"', // invalid
                     '"c"', // valid
-                    "date_bucket(\"b\", 'M')", // valid
-                    "date_bucket(\"b\", 'abcde')", // invalid
+                    "bucket(\"b\", 'M')", // valid
+                    "bucket(\"b\", 'abcde')", // invalid
                     'concat("c", "a")', // invalid
                     "concat(\"c\", ' ', \"c\", 'abc')", // valid
                     'upper("c")', // valid
@@ -1842,11 +1841,11 @@ module.exports = perspective => {
                     'min("a", "c")', // invalid,
                     'max(100, "a")' // valid
                 ];
-                const schema = await table.validate_expressions(expressions).expression_schema;
-                expect(schema).toEqual({
+                const results = await table.validate_expressions(expressions);
+                expect(results.expression_schema).toEqual({
                     '"a" + "d"': "float",
                     '"c"': "string",
-                    "date_bucket(\"b\", 'M')": "date",
+                    "bucket(\"b\", 'M')": "date",
                     'upper("c")': "string",
                     'max(100, "a")': "float",
                     "concat(\"c\", ' ', \"c\", 'abc')": "string"
@@ -1865,16 +1864,16 @@ module.exports = perspective => {
                     '"a" + "d"', // valid
                     '"abxbasd" + "sdfadsf"', // invalid
                     '"c"', // valid
-                    "date_bucket(\"b\", 'M')", // valid
-                    "date_bucket(\"basdsa\", 'Y')", // invalid
+                    "bucket(\"b\", 'M')", // valid
+                    "bucket(\"basdsa\", 'Y')", // invalid
                     'upper("c")', // valid
                     'lower("sdfadsj")' // invalid
                 ];
-                const schema = await table.validate_expressions(expressions).expression_schema;
-                expect(schema).toEqual({
+                const results = await table.validate_expressions(expressions);
+                expect(results.expression_schema).toEqual({
                     '"a" + "d"': "float",
                     '"c"': "string",
-                    "date_bucket(\"b\", 'M')": "date",
+                    "bucket(\"b\", 'M')": "date",
                     'upper("c")': "string"
                 });
                 table.delete();
@@ -1893,8 +1892,8 @@ module.exports = perspective => {
                     "if (\"c\" == 'a') 123; else 0;", // valid
                     "if (" // invalid
                 ];
-                const schema = await table.validate_expressions(expressions).expression_schema;
-                expect(schema).toEqual({
+                const results = await table.validate_expressions(expressions);
+                expect(results.expression_schema).toEqual({
                     '"a" + "d"': "float",
                     "if (\"c\" == 'a') 123; else 0;": "float"
                 });
@@ -1910,7 +1909,7 @@ module.exports = perspective => {
                     c: ["a", "b", "c", "d"]
                 });
                 const view = await table.view({
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.schema();
                 expect(schema).toEqual({
@@ -1923,8 +1922,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "string",
-                    "date_bucket(\"b\", 'M')": "date",
-                    "date_bucket(\"b\", 's')": "datetime"
+                    "bucket(\"b\", 'M')": "date",
+                    "bucket(\"b\", 's')": "datetime"
                 });
                 view.delete();
                 table.delete();
@@ -1937,7 +1936,7 @@ module.exports = perspective => {
                     c: ["a", "b", "c", "d"]
                 });
                 const view = await table.view({
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -1947,8 +1946,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "string",
-                    "date_bucket(\"b\", 'M')": "date",
-                    "date_bucket(\"b\", 's')": "datetime"
+                    "bucket(\"b\", 'M')": "date",
+                    "bucket(\"b\", 's')": "datetime"
                 });
                 view.delete();
                 table.delete();
@@ -1962,7 +1961,7 @@ module.exports = perspective => {
                 });
                 const view = await table.view({
                     columns: ["a"],
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -1972,8 +1971,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "string",
-                    "date_bucket(\"b\", 'M')": "date",
-                    "date_bucket(\"b\", 's')": "datetime"
+                    "bucket(\"b\", 'M')": "date",
+                    "bucket(\"b\", 's')": "datetime"
                 });
                 view.delete();
                 table.delete();
@@ -1987,7 +1986,7 @@ module.exports = perspective => {
                 });
                 const view = await table.view({
                     row_pivots: ["c"],
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -1997,8 +1996,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "integer",
-                    "date_bucket(\"b\", 'M')": "integer",
-                    "date_bucket(\"b\", 's')": "integer"
+                    "bucket(\"b\", 'M')": "integer",
+                    "bucket(\"b\", 's')": "integer"
                 });
                 view.delete();
                 table.delete();
@@ -2015,9 +2014,9 @@ module.exports = perspective => {
                     aggregates: {
                         "0 and 1": "any",
                         "0 or 1": "any",
-                        "date_bucket(\"b\", 's')": "last"
+                        "bucket(\"b\", 's')": "last"
                     },
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -2027,8 +2026,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "integer",
-                    "date_bucket(\"b\", 'M')": "integer",
-                    "date_bucket(\"b\", 's')": "datetime"
+                    "bucket(\"b\", 'M')": "integer",
+                    "bucket(\"b\", 's')": "datetime"
                 });
                 view.delete();
                 table.delete();
@@ -2043,7 +2042,7 @@ module.exports = perspective => {
                 const view = await table.view({
                     row_pivots: ["c"],
                     column_pivots: ["a"],
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -2053,8 +2052,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "integer",
-                    "date_bucket(\"b\", 'M')": "integer",
-                    "date_bucket(\"b\", 's')": "integer"
+                    "bucket(\"b\", 'M')": "integer",
+                    "bucket(\"b\", 's')": "integer"
                 });
                 view.delete();
                 table.delete();
@@ -2072,9 +2071,9 @@ module.exports = perspective => {
                     aggregates: {
                         "0 and 1": "any",
                         "0 or 1": "any",
-                        "date_bucket(\"b\", 's')": "last"
+                        "bucket(\"b\", 's')": "last"
                     },
-                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `date_bucket("b", 'M')`, `date_bucket("b", 's')`]
+                    expressions: ['"a" ^ 2', "sqrt(144)", "0 and 1", "0 or 1", '-"a"', 'upper("c")', `bucket("b", 'M')`, `bucket("b", 's')`]
                 });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
@@ -2084,8 +2083,8 @@ module.exports = perspective => {
                     "0 and 1": "float",
                     "0 or 1": "float",
                     'upper("c")': "integer",
-                    "date_bucket(\"b\", 'M')": "integer",
-                    "date_bucket(\"b\", 's')": "datetime"
+                    "bucket(\"b\", 'M')": "integer",
+                    "bucket(\"b\", 's')": "datetime"
                 });
                 view.delete();
                 table.delete();

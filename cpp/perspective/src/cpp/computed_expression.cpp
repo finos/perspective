@@ -15,9 +15,6 @@ std::shared_ptr<exprtk::parser<t_tscalar>>
 t_computed_expression_parser::PARSER = std::make_shared<exprtk::parser<t_tscalar>>();
 
 // Exprtk functions without any state can be initialized statically
-computed_function::date_bucket
-t_computed_expression_parser::DATE_BUCKET_FN = computed_function::date_bucket();
-
 computed_function::bucket t_computed_expression_parser::BUCKET_FN
     = computed_function::bucket();
 
@@ -78,7 +75,6 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     computed_function::length length_fn = computed_function::length(m_expression_vocab);    \
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
-    sym_table.add_function("date_bucket", t_computed_expression_parser::DATE_BUCKET_FN);    \
     sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);              \
     sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);    \
     sym_table.add_function("day_of_week", day_of_week_fn);                                  \
@@ -98,7 +94,6 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
 #define REGISTER_VALIDATION_FUNCTIONS()                                                     \
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
-    sym_table.add_function("date_bucket", t_computed_expression_parser::DATE_BUCKET_FN);    \
     sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);              \
     sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);    \
     sym_table.add_function("day_of_week", t_computed_expression_parser::DAY_OF_WEEK_VALIDATOR_FN);    \

@@ -225,7 +225,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 's')"]
+                expressions: ["bucket(\"a\", 's')"]
             });
 
             table.update({
@@ -233,7 +233,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 's')"]).toEqual(result.a);
+            expect(result["bucket(\"a\", 's')"]).toEqual(result.a);
             view.delete();
             table.delete();
         });
@@ -243,7 +243,7 @@ module.exports = perspective => {
                 a: "date"
             });
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 's')"]
+                expressions: ["bucket(\"a\", 's')"]
             });
 
             table.update({
@@ -251,7 +251,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 's')"]).toEqual(result.a.map(x => (x ? x : null)));
+            expect(result["bucket(\"a\", 's')"]).toEqual(result.a.map(x => (x ? x : null)));
             view.delete();
             table.delete();
         });
@@ -262,7 +262,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'm')"]
+                expressions: ["bucket(\"a\", 'm')"]
             });
 
             table.update({
@@ -270,7 +270,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 'm')"]).toEqual(result.a);
+            expect(result["bucket(\"a\", 'm')"]).toEqual(result.a);
             view.delete();
             table.delete();
         });
@@ -281,7 +281,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'm')"]
+                expressions: ["bucket(\"a\", 'm')"]
             });
 
             table.update({
@@ -289,7 +289,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 'm')"]).toEqual(result.a.map(x => (x ? x : null)));
+            expect(result["bucket(\"a\", 'm')"]).toEqual(result.a.map(x => (x ? x : null)));
             view.delete();
             table.delete();
         });
@@ -300,7 +300,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'h')"]
+                expressions: ["bucket(\"a\", 'h')"]
             });
 
             table.update({
@@ -308,7 +308,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 'h')"]).toEqual(result.a);
+            expect(result["bucket(\"a\", 'h')"]).toEqual(result.a);
             view.delete();
             table.delete();
         });
@@ -319,7 +319,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'h')"]
+                expressions: ["bucket(\"a\", 'h')"]
             });
 
             table.update({
@@ -327,7 +327,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 'h')"]).toEqual(result.a.map(x => (x ? x : null)));
+            expect(result["bucket(\"a\", 'h')"]).toEqual(result.a.map(x => (x ? x : null)));
             view.delete();
             table.delete();
         });
@@ -338,7 +338,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'D')"]
+                expressions: ["bucket(\"a\", 'D')"]
             });
 
             table.update({
@@ -346,7 +346,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 'D')"]).toEqual(result.a);
+            expect(result["bucket(\"a\", 'D')"]).toEqual(result.a);
             view.delete();
             table.delete();
         });
@@ -357,7 +357,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'D')"]
+                expressions: ["bucket(\"a\", 'D')"]
             });
 
             table.update({
@@ -365,7 +365,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result["date_bucket(\"a\", 'D')"]).toEqual(result.a.map(x => (x ? x : null)));
+            expect(result["bucket(\"a\", 'D')"]).toEqual(result.a.map(x => (x ? x : null)));
             view.delete();
             table.delete();
         });
@@ -376,7 +376,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'W')"]
+                expressions: ["bucket(\"a\", 'W')"]
             });
 
             table.update({
@@ -385,7 +385,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'W')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.week_bucket(x)));
+            expect(result["bucket(\"a\", 'W')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.week_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -396,7 +396,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'W')"]
+                expressions: ["bucket(\"a\", 'W')"]
             });
 
             table.update({
@@ -405,7 +405,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'W')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.week_bucket(x) : null)));
+            expect(result["bucket(\"a\", 'W')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.week_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -416,7 +416,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'W')"]
+                expressions: ["bucket(\"a\", 'W')"]
             });
 
             table.update({
@@ -425,7 +425,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'W')"].map(x => new Date(x))).toEqual(result.a.map(x => common.week_bucket(x)));
+            expect(result["bucket(\"a\", 'W')"].map(x => new Date(x))).toEqual(result.a.map(x => common.week_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -436,7 +436,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'M')"]
+                expressions: ["bucket(\"a\", 'M')"]
             });
 
             table.update({
@@ -445,7 +445,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'M')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.month_bucket(x)));
+            expect(result["bucket(\"a\", 'M')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.month_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -456,7 +456,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'M')"]
+                expressions: ["bucket(\"a\", 'M')"]
             });
 
             table.update({
@@ -465,7 +465,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'M')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.month_bucket(x) : null)));
+            expect(result["bucket(\"a\", 'M')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.month_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -476,7 +476,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'Y')"]
+                expressions: ["bucket(\"a\", 'Y')"]
             });
 
             table.update({
@@ -485,7 +485,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'Y')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.year_bucket(x)));
+            expect(result["bucket(\"a\", 'Y')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.year_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -496,7 +496,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: ["date_bucket(\"a\", 'Y')"]
+                expressions: ["bucket(\"a\", 'Y')"]
             });
 
             table.update({
@@ -505,7 +505,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result["date_bucket(\"a\", 'Y')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.year_bucket(x) : null)));
+            expect(result["bucket(\"a\", 'Y')"].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.year_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -632,7 +632,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 's')`]
+                expressions: [`bucket("a", 's')`]
             });
 
             table.update({
@@ -640,7 +640,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 's')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.second_bucket(x)));
+            expect(result[`bucket("a", 's')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.second_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -651,7 +651,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 's')`]
+                expressions: [`bucket("a", 's')`]
             });
 
             table.update({
@@ -659,7 +659,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 's')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.second_bucket(x) : null)));
+            expect(result[`bucket("a", 's')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.second_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -670,7 +670,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'm')`]
+                expressions: [`bucket("a", 'm')`]
             });
 
             table.update({
@@ -678,7 +678,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'm')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.minute_bucket(x)));
+            expect(result[`bucket("a", 'm')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.minute_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -689,7 +689,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'm')`]
+                expressions: [`bucket("a", 'm')`]
             });
 
             table.update({
@@ -697,7 +697,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'm')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.minute_bucket(x) : null)));
+            expect(result[`bucket("a", 'm')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.minute_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -708,7 +708,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'h')`]
+                expressions: [`bucket("a", 'h')`]
             });
 
             table.update({
@@ -716,7 +716,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'h')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.hour_bucket(x)));
+            expect(result[`bucket("a", 'h')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.hour_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -727,7 +727,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'h')`]
+                expressions: [`bucket("a", 'h')`]
             });
 
             table.update({
@@ -735,7 +735,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'h')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.hour_bucket(x) : null)));
+            expect(result[`bucket("a", 'h')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.hour_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -746,7 +746,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'D')`]
+                expressions: [`bucket("a", 'D')`]
             });
 
             table.update({
@@ -754,7 +754,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'D')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.day_bucket(x)));
+            expect(result[`bucket("a", 'D')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.day_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -765,7 +765,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'D')`]
+                expressions: [`bucket("a", 'D')`]
             });
 
             table.update({
@@ -773,7 +773,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'D')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.day_bucket(x) : null)));
+            expect(result[`bucket("a", 'D')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.day_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -784,7 +784,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'D')`]
+                expressions: [`bucket("a", 'D')`]
             });
 
             table.update({
@@ -792,7 +792,7 @@ module.exports = perspective => {
             });
 
             let result = await view.to_columns();
-            expect(result[`date_bucket("a", 'D')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.day_bucket(x) : null)));
+            expect(result[`bucket("a", 'D')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.day_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -803,7 +803,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'W')`]
+                expressions: [`bucket("a", 'W')`]
             });
 
             table.update({
@@ -812,7 +812,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'W')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.week_bucket(x)));
+            expect(result[`bucket("a", 'W')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.week_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -823,7 +823,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'W')`]
+                expressions: [`bucket("a", 'W')`]
             });
 
             table.update({
@@ -832,7 +832,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'W')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.week_bucket(x) : null)));
+            expect(result[`bucket("a", 'W')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.week_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -843,7 +843,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'W')`]
+                expressions: [`bucket("a", 'W')`]
             });
 
             table.update({
@@ -852,7 +852,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'W')`].map(x => new Date(x))).toEqual(result.a.map(x => common.week_bucket(x)));
+            expect(result[`bucket("a", 'W')`].map(x => new Date(x))).toEqual(result.a.map(x => common.week_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -863,7 +863,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'M')`]
+                expressions: [`bucket("a", 'M')`]
             });
 
             table.update({
@@ -872,7 +872,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'M')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.month_bucket(x)));
+            expect(result[`bucket("a", 'M')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.month_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -883,7 +883,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'M')`]
+                expressions: [`bucket("a", 'M')`]
             });
 
             table.update({
@@ -892,7 +892,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'M')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.month_bucket(x) : null)));
+            expect(result[`bucket("a", 'M')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.month_bucket(x) : null)));
             view.delete();
             table.delete();
         });
@@ -903,7 +903,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'Y')`]
+                expressions: [`bucket("a", 'Y')`]
             });
 
             table.update({
@@ -912,7 +912,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'Y')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.year_bucket(x)));
+            expect(result[`bucket("a", 'Y')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => common.year_bucket(x)));
             view.delete();
             table.delete();
         });
@@ -923,7 +923,7 @@ module.exports = perspective => {
             });
 
             const view = await table.view({
-                expressions: [`date_bucket("a", 'Y')`]
+                expressions: [`bucket("a", 'Y')`]
             });
 
             table.update({
@@ -932,7 +932,7 @@ module.exports = perspective => {
 
             let result = await view.to_columns();
 
-            expect(result[`date_bucket("a", 'Y')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.year_bucket(x) : null)));
+            expect(result[`bucket("a", 'Y')`].map(x => (x ? new Date(x) : null))).toEqual(result.a.map(x => (x ? common.year_bucket(x) : null)));
             view.delete();
             table.delete();
         });

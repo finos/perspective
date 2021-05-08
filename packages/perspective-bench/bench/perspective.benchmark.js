@@ -84,12 +84,12 @@ const COMPLEX_EXPRESSIONS = {
         `concat("State", ' ', "City")`
     ],
     datetime: [
-        `date_bucket("Order Date", 'D')`,
-        `// computed2\n date_bucket("Order Date", 'S')`,
+        `bucket("Order Date", 'D')`,
+        `// computed2\n bucket("Order Date", 'S')`,
         `day_of_week("computed2")`,
         `month_of_year("Ship Date")`,
-        `date_bucket("computed2", 'Y')`,
-        `date_bucket("computed2", 'm')`
+        `bucket("computed2", 'Y')`,
+        `bucket("computed2", 'm')`
     ]
 };
 

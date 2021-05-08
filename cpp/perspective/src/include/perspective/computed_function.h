@@ -153,13 +153,20 @@ enum t_date_bucket_unit {
     YEARS
 };
 
+
 /**
- * @brief Bucket a date/datetime by seconds, minutes, hours, days, weeks,
- * months, and years.
+ * @brief Bucket the input by the unit:
+ * 
+ * - If the input is a date or a datetime, the unit is one of the following:
+ *   [s]econds, [m]inutes, [h]ours, [D]ays, [W]eeks, [M]onths, [Y]ears.
+ * 
+ * - If the input is a number, the unit is also a number.
+ * 
+ * Any other inputs are invalid.
  */
-struct date_bucket : public exprtk::igeneric_function<t_tscalar> {
-    date_bucket();
-    ~date_bucket();
+struct bucket : public exprtk::igeneric_function<t_tscalar> {
+    bucket();
+    ~bucket();
 
     t_tscalar operator()(t_parameter_list parameters);
 
@@ -168,6 +175,7 @@ struct date_bucket : public exprtk::igeneric_function<t_tscalar> {
     t_tscalar m_none;
 };
 
+
 void _second_bucket(t_tscalar& val, t_tscalar& rval);
 void _minute_bucket(t_tscalar& val, t_tscalar& rval);
 void _hour_bucket(t_tscalar& val, t_tscalar& rval);
@@ -175,17 +183,6 @@ void _day_bucket(t_tscalar& val, t_tscalar& rval);
 void _week_bucket(t_tscalar& val, t_tscalar& rval);
 void _month_bucket(t_tscalar& val, t_tscalar& rval);
 void _year_bucket(t_tscalar& val, t_tscalar& rval);
-
-struct bucket : public exprtk::igeneric_function<t_tscalar> {
-    bucket();
-    ~bucket();
-
-    t_tscalar operator()(t_parameter_list parameters);
-
-    // faster unit lookups, since we are calling this lookup in a tight loop.
-    // static tsl::hopscotch_map<std::string, t_date_bucket_unit> UNIT_MAP;
-    t_tscalar m_none;
-};
 
 /**
  * @brief Returns the current datetime. Will be recalculated on view creation

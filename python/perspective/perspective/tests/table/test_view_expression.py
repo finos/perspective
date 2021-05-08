@@ -641,7 +641,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'D')"]
+            expressions=["// bucket \n bucket(\"a\", 'D')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -671,7 +671,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'D')"]
+            expressions=["// bucket \n bucket(\"a\", 'D')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -701,7 +701,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'D')"]
+            expressions=["// bucket \n bucket(\"a\", 'D')"]
         )
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
@@ -731,7 +731,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'M')"]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -761,7 +761,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'M')"]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -791,7 +791,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'M')"]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
@@ -816,7 +816,7 @@ class TestViewExpression(object):
             }
         )
         view = table.view(
-            expressions=["// bucket \n date_bucket(\"a\", 'M')"]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {

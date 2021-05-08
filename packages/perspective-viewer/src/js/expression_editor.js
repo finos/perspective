@@ -182,10 +182,7 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _disable_save(error_message) {
         this._save_button.setAttribute("disabled", true);
-
-        if (error_message) {
-            this._show_error(error_message);
-        }
+        error_message ? this._show_error(error_message) : this._hide_error();
     }
 
     _enable_save() {

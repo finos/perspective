@@ -1336,9 +1336,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'D')"])
+            view = table.view(expressions=["bucket(\"a\", 'D')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'D')"] == [datetime(2020, 1, 31)]
+            assert result["bucket(\"a\", 'D')"] == [datetime(2020, 1, 31)]
 
         def test_table_day_bucket_edge_in_CST(self):
             os.environ["TZ"] = "US/Central"
@@ -1349,9 +1349,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'D')"])
+            view = table.view(expressions=["bucket(\"a\", 'D')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'D')"] == [datetime(2020, 1, 31)]
+            assert result["bucket(\"a\", 'D')"] == [datetime(2020, 1, 31)]
 
         def test_table_day_bucket_edge_in_PST(self):
             os.environ["TZ"] = "US/Pacific"
@@ -1362,9 +1362,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'D')"])
+            view = table.view(expressions=["bucket(\"a\", 'D')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'D')"] == [datetime(2020, 1, 31)]
+            assert result["bucket(\"a\", 'D')"] == [datetime(2020, 1, 31)]
 
         def test_table_week_bucket_edge_in_EST(self):
             """Make sure edge cases are fixed for week_bucket - if a local
@@ -1375,9 +1375,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'W')"])
+            view = table.view(expressions=["bucket(\"a\", 'W')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'W')"] == [datetime(2020, 1, 27)]
+            assert result["bucket(\"a\", 'W')"] == [datetime(2020, 1, 27)]
 
         def test_table_week_bucket_edge_in_CST(self):
             os.environ["TZ"] = "US/Central"
@@ -1388,9 +1388,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'W')"])
+            view = table.view(expressions=["bucket(\"a\", 'W')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'W')"] == [datetime(2020, 1, 27)]
+            assert result["bucket(\"a\", 'W')"] == [datetime(2020, 1, 27)]
 
         def test_table_week_bucket_edge_in_PST(self):
             os.environ["TZ"] = "US/Pacific"
@@ -1401,9 +1401,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'W')"])
+            view = table.view(expressions=["bucket(\"a\", 'W')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'W')"] == [datetime(2020, 1, 27)]
+            assert result["bucket(\"a\", 'W')"] == [datetime(2020, 1, 27)]
 
         def test_table_week_bucket_edge_flip_in_EST(self):
             """Week bucket should flip backwards to last month."""
@@ -1412,9 +1412,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'W')"])
+            view = table.view(expressions=["bucket(\"a\", 'W')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'W')"] == [datetime(2020, 2, 24)]
+            assert result["bucket(\"a\", 'W')"] == [datetime(2020, 2, 24)]
 
         def test_table_week_bucket_edge_flip_in_CST(self):
             os.environ["TZ"] = "US/Central"
@@ -1424,9 +1424,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'W')"])
+            view = table.view(expressions=["bucket(\"a\", 'W')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'W')"] == [datetime(2020, 2, 24)]
+            assert result["bucket(\"a\", 'W')"] == [datetime(2020, 2, 24)]
 
         def test_table_week_bucket_edge_flip_in_PST(self):
             os.environ["TZ"] = "US/Pacific"
@@ -1436,9 +1436,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'W')"])
+            view = table.view(expressions=["bucket(\"a\", 'W')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'W')"] == [datetime(2020, 2, 24)]
+            assert result["bucket(\"a\", 'W')"] == [datetime(2020, 2, 24)]
 
         def test_table_month_bucket_edge_in_EST(self):
             """Make sure edge cases are fixed for month_bucket - if a local
@@ -1449,9 +1449,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'M')"])
+            view = table.view(expressions=["bucket(\"a\", 'M')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'M')"] == [datetime(2020, 6, 1)]
+            assert result["bucket(\"a\", 'M')"] == [datetime(2020, 6, 1)]
 
 
 
@@ -1464,9 +1464,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'M')"])
+            view = table.view(expressions=["bucket(\"a\", 'M')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'M')"] == [datetime(2020, 6, 1)]
+            assert result["bucket(\"a\", 'M')"] == [datetime(2020, 6, 1)]
 
         def test_table_month_bucket_edge_in_PST(self):
             os.environ["TZ"] = "US/Pacific"
@@ -1477,9 +1477,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'M')"])
+            view = table.view(expressions=["bucket(\"a\", 'M')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'M')"] == [datetime(2020, 6, 1)]
+            assert result["bucket(\"a\", 'M')"] == [datetime(2020, 6, 1)]
 
         def test_table_year_bucket_edge_in_EST(self):
             """Make sure edge cases are fixed for year_bucket - if a local
@@ -1490,9 +1490,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'Y')"])
+            view = table.view(expressions=["bucket(\"a\", 'Y')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'Y')"] == [datetime(2019, 1, 1)]
+            assert result["bucket(\"a\", 'Y')"] == [datetime(2019, 1, 1)]
 
         def test_table_year_bucket_edge_in_CST(self):
             os.environ["TZ"] = "US/Central"
@@ -1502,9 +1502,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'Y')"])
+            view = table.view(expressions=["bucket(\"a\", 'Y')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'Y')"] == [datetime(2019, 1, 1)]
+            assert result["bucket(\"a\", 'Y')"] == [datetime(2019, 1, 1)]
 
         def test_table_year_bucket_edge_in_PST(self):
             os.environ["TZ"] = "US/Pacific"
@@ -1514,9 +1514,9 @@ if os.name != 'nt':
             }
 
             table = Table(data)
-            view = table.view(expressions=["date_bucket(\"a\", 'Y')"])
+            view = table.view(expressions=["bucket(\"a\", 'Y')"])
             result = view.to_dict()
-            assert result["date_bucket(\"a\", 'Y')"] == [datetime(2019, 1, 1)]
+            assert result["bucket(\"a\", 'Y')"] == [datetime(2019, 1, 1)]
 
 
 class TestTableDateTimePivots(object):

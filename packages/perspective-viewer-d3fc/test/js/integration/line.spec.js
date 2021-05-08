@@ -24,7 +24,7 @@ utils.with_server({}, () => {
             test.capture("Sets a category axis when pivoted by an expression datetime", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                await page.evaluate(element => element.setAttribute("expressions", JSON.stringify([`// abc \n date_bucket("Ship Date", 'M')`])), viewer);
+                await page.evaluate(element => element.setAttribute("expressions", JSON.stringify([`// abc \n bucket("Ship Date", 'M')`])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["abc"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");

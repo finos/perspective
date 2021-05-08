@@ -1337,10 +1337,10 @@ export default function(Module) {
             // intern() which makes sure they don't leak
             parsed_expression_string = parsed_expression_string.replace(/'(.*?[^\\])'/g, match => `intern(${match})`);
 
-            // Replace intern() for date_bucket, as it takes a string literal
+            // Replace intern() for bucket, as it takes a string literal
             // parameter and does not work if that param is interned. TODO:
             // this is clumsy and we should have a better way of handling it.
-            parsed_expression_string = parsed_expression_string.replace(/date_bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)/g, (match, full, value) => {
+            parsed_expression_string = parsed_expression_string.replace(/bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)/g, (match, full, value) => {
                 return `${match.substr(0, match.indexOf(full))}'${value}')`;
             });
 

@@ -50,7 +50,7 @@ public:
      * @param data_table 
      */
     void compute(std::shared_ptr<t_data_table> data_table) const;
-
+ 
     /**
      * @brief Compute this expression for the rows in `changed_rows`, and
      * add the output column to `flattened`.
@@ -136,7 +136,6 @@ public:
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
     // Instances of Exprtk functions
-    static computed_function::date_bucket DATE_BUCKET_FN;
     static computed_function::bucket BUCKET_FN;
     static computed_function::hour_of_day HOUR_OF_DAY_FN;
     static computed_function::day_of_week DAY_OF_WEEK_VALIDATOR_FN;

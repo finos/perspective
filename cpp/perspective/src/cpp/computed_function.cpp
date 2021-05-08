@@ -796,7 +796,7 @@ t_tscalar month_of_year::operator()(t_parameter_list parameters) {
 }
 
 tsl::hopscotch_map<std::string, t_date_bucket_unit>
-date_bucket::UNIT_MAP = {
+bucket::UNIT_MAP = {
     {"s", t_date_bucket_unit::SECONDS},
     {"m", t_date_bucket_unit::MINUTES},
     {"h", t_date_bucket_unit::HOURS},
@@ -808,92 +808,69 @@ date_bucket::UNIT_MAP = {
 
 
 bucket::bucket()
-    : exprtk::igeneric_function<t_tscalar>("TT") {
+    : exprtk::igeneric_function<t_tscalar>("T?") {
     m_none = mknone();
 }
 
 bucket::~bucket() {}
 
 t_tscalar bucket::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar unit;
     t_tscalar rval;
     rval.clear();
-    rval.m_type = DTYPE_FLOAT64;
 
     // Parameters are already validated in the constructor by Exprtk
-    t_generic_type& gt_val = parameters[0];
-    t_generic_type& gt_unit = parameters[1];
+    t_generic_type& gt_val = parameters[0]; // always a scalar
+    t_generic_type& gt_unit = parameters[1]; // scalar or string
 
+    // Convert value to scalar
     t_scalar_view temp_val(gt_val);
-    t_scalar_view temp_unit(gt_unit);
+    val.set(temp_val());
 
-    t_tscalar val = temp_val();
-    t_tscalar unit = temp_unit();
-    bool valid_dtypes = val.is_numeric() && unit.is_numeric();
+    if (val.is_numeric()) {
+        rval.m_type = DTYPE_FLOAT64;
 
-    // type-check
-    if (!valid_dtypes || val.m_status == STATUS_CLEAR || unit.m_status == STATUS_CLEAR) {
-        rval.m_status = STATUS_CLEAR;
-        return rval;
-    }
-
-    if (!val.is_valid() || !unit.is_valid()) {
-        return rval;
-    }
-
-    rval.set(floor(val.to_double() / unit.to_double()) * unit.to_double());
-
-    return rval;
-}
-
-date_bucket::date_bucket()
-    : exprtk::igeneric_function<t_tscalar>("TS") {
-    m_none = mknone();
-}
-
-date_bucket::~date_bucket() {}
-
-t_tscalar date_bucket::operator()(t_parameter_list parameters) {
-    t_tscalar val;
-    t_date_bucket_unit unit;
-
-    t_tscalar rval;
-    rval.clear();
-
-    for (auto i = 0; i < parameters.size(); ++i) {
-        t_generic_type& gt = parameters[i];
-
-        if (t_generic_type::e_scalar == gt.type) {
-            t_scalar_view temp(gt);
-
-            // copies value, type, validity
-            val.set(temp());
-        } else if (t_generic_type::e_string == gt.type) {
-            t_string_view temp_string(gt);
-            std::string unit_str = std::string(temp_string.begin(), temp_string.end());
-
-            if (date_bucket::UNIT_MAP.count(unit_str) == 0) {
-                std::cerr << "[date_bucket] unknown unit in date_bucket - the valid units are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'." << unit << std::endl;
-                return m_none;
-            }
-
-            unit = date_bucket::UNIT_MAP[unit_str];
-        } else {
-            std::cerr << "[date_bucket] Invalid parameter in date_bucket()" << std::endl;
-            return m_none;
+        // Bucket by numeric value
+        t_scalar_view temp_unit(gt_unit);
+        unit.set(temp_unit());
+        
+        // type-check
+        if (!unit.is_numeric() || val.m_status == STATUS_CLEAR || unit.m_status == STATUS_CLEAR) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
         }
+
+        if (!val.is_valid() || !unit.is_valid()) {
+            return rval;
+        }
+
+        rval.set(floor(val.to_double() / unit.to_double()) * unit.to_double());
+
+        return rval;
     }
 
-    t_dtype dtype = val.get_dtype();
+    // Must be a datetime - second parameter is a string
+    t_string_view temp_string(gt_unit);
+    std::string unit_str = std::string(temp_string.begin(), temp_string.end());
+
+    if (bucket::UNIT_MAP.count(unit_str) == 0) {
+        std::cerr << "[bucket] unknown unit in bucket - the valid units are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'." << unit << std::endl;
+        return m_none;
+    }
+
+    t_date_bucket_unit date_bucket_unit = bucket::UNIT_MAP[unit_str];
+    t_dtype val_dtype = val.get_dtype();
 
     // type-check
-    if (!(dtype == DTYPE_DATE || dtype == DTYPE_TIME)) {
+    if (!(val_dtype == DTYPE_DATE || val_dtype == DTYPE_TIME)) {
         rval.m_status = STATUS_CLEAR;
     }
 
     // Depending on unit, datetime columns can result in a date column or a 
     // datetime column.
-    if (val.m_type == DTYPE_TIME) {
-        switch (unit) {
+    if (val_dtype == DTYPE_TIME) {
+        switch (date_bucket_unit) {
             case t_date_bucket_unit::SECONDS:
             case t_date_bucket_unit::MINUTES:
             case t_date_bucket_unit::HOURS: {
@@ -919,7 +896,7 @@ t_tscalar date_bucket::operator()(t_parameter_list parameters) {
         return rval;
     }
 
-    switch (unit) {
+    switch (date_bucket_unit) {
         case t_date_bucket_unit::SECONDS: {
             _second_bucket(val, rval);
         } break;

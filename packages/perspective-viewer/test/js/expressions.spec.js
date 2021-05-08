@@ -82,6 +82,21 @@ utils.with_server({}, () => {
                 await page.evaluate(() => document.activeElement.blur());
             });
 
+            test.capture("Should show the help panel", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                await page.shadow_click("perspective-viewer", "#add-expression");
+                await page.evaluate(
+                    element =>
+                        element.shadowRoot
+                            .querySelector("perspective-expression-editor")
+                            .shadowRoot.querySelector("#psp-expression-editor-button-help")
+                            .click(),
+                    viewer
+                );
+                await page.evaluate(() => document.activeElement.blur());
+            });
+
             test.skip("Typing tab should enter an indent", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.$("perspective-viewer");
@@ -174,7 +189,7 @@ utils.with_server({}, () => {
 
             test.capture("Should not prevent saving a duplicate expression with a different alias", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                await add_expression(page, '// new column \n "Sales" / "Profit"');
+                await add_expression(page, "// new column \n 123 + 345");
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.shadow_click("perspective-viewer", "#add-expression");
                 await page.shadow_type("//new column 1 \n 123 + 345", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
@@ -379,7 +394,7 @@ utils.with_server({}, () => {
             test.capture("aggregates by expression column.", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_expression(page, '"Sales" / "Profit"');
-                await add_expression(page, `// new column with an alias \n date_bucket("Order Date", 'Y')`);
+                await add_expression(page, `// new column with an alias \n bucket("Order Date", 'Y')`);
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => {
                     element.setAttribute("aggregates", JSON.stringify({'"Sales" / "Profit"': "avg", "new column with an alias": "last"}));
