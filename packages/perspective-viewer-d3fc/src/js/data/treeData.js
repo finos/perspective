@@ -30,7 +30,7 @@ export function treeData(settings) {
                 }
                 if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
                     const colorValue = getDataValue(d, settings.mainValues[1], split);
-                    element.color = element.color ? element.color + colorValue : colorValue;
+                    element.color = colorValue;
                 }
                 if (settings.realValues.length > 2 && settings.realValues[2] !== null) {
                     element.tooltip = [];
