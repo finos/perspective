@@ -60,10 +60,13 @@
                     overflow: hidden;
                 }
 
+                .sunburst-container:not(:only-child) svg {
+                    transform: translate(0, -27px);
+                }
+
                 & svg {
                     width: 100%;
                     height: 100%;
-                    transform: translate(0, -27px);
                 }
 
                 & path {
@@ -412,6 +415,10 @@
 
     .d3_treemap .legend-container.legend-color {
         height: 200px;
+    }
+
+    .d3_treemap .legend-container:not(.legend-color) {
+        width: 100px;
     }
 
     .zoom-controls {

@@ -23,7 +23,8 @@ describe("tooltip generateHTML should", () => {
         settings = {
             crossValues: [],
             splitValues: [],
-            mainValues: [{name: "main-1", type: "integer"}]
+            mainValues: [{name: "main-1", type: "integer"}],
+            realValues: ["main-1"]
         };
     });
     afterEach(() => {
@@ -48,6 +49,7 @@ describe("tooltip generateHTML should", () => {
 
     test("show multiple mainValues", () => {
         settings.mainValues.push({name: "main-2", type: "float"});
+        settings.realValues.push("main-2");
         const data = {
             mainValues: [101, 202.22]
         };

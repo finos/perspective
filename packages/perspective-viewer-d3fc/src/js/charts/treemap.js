@@ -14,6 +14,7 @@ import {treemapSeries} from "../series/treemap/treemapSeries";
 import {tooltip} from "../tooltip/tooltip";
 import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
+import {colorLegend} from "../legend/legend";
 
 function treemap(container, settings) {
     if (settings.crossValues.length === 0) {
@@ -34,10 +35,17 @@ function treemap(container, settings) {
 
     const treemapGrid = gridLayoutMultiChart().elementsPrefix("treemap");
     container.datum(data).call(treemapGrid);
-
     if (color) {
-        const legend = colorRangeLegend().scale(color);
-        container.call(legend);
+        const color_column = settings.realValues[1];
+        if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
+            const legend = colorLegend()
+                .settings(settings)
+                .scale(color);
+            container.call(legend);
+        } else {
+            const legend = colorRangeLegend().scale(color);
+            container.call(legend);
+        }
     }
 
     const treemapEnter = treemapGrid.chartEnter();
