@@ -8,21 +8,21 @@
  */
 
 import {treeData} from "../../../../src/js/data/treeData";
-import {data, splitData, mainValues, crossValues, realValues} from "./testTreeData";
+import {data, splitData, mainValues, crossValues, realValues, agg_paths} from "./testTreeData";
 
 describe("treeData should", () => {
     test("create a structure with the right number of levels", () => {
-        const {data: result} = treeData({data, mainValues, crossValues, realValues})[0];
+        const {data: result} = treeData({data, agg_paths, mainValues, crossValues, realValues})[0];
         expect(result.height).toEqual(2);
     });
 
     test("calculate the correct color extents", () => {
-        const {extents} = treeData({data, mainValues, crossValues, realValues})[0];
+        const {extents} = treeData({data, agg_paths, mainValues, crossValues, realValues})[0];
         expect(extents).toEqual([1544, 4156]);
     });
 
     test("produce tree data for each split", () => {
-        const result = treeData({data: splitData, mainValues, crossValues, realValues});
+        const result = treeData({data: splitData, agg_paths, mainValues, crossValues, realValues});
         expect(result.length).toEqual(4);
     });
 });
