@@ -220,7 +220,7 @@
         overflow: var(--row_draggable-overflow, visible);
         border-color: var(--row_draggable-border-color, none);
         border-width: var(--row_draggable-border-width, 0);
-        padding: var(--row_draggable-padding, 0);
+        padding: var(--row_draggable--padding, 0);
         font-size: 12px;
         flex-grow: 1;
         color: inherit;
@@ -255,7 +255,9 @@
     }
     .row_draggable {
         background-color: var(--null--background, transparent) !important;
+        box-shadow: var(--null--box-shadow, none);
         border-width: 0 0 1px 0 !important;
+        border-color: transparent !important;
     }
 }
 
@@ -263,13 +265,11 @@
     .row_draggable {
         background-color: var(
             --active--background,
-            #CBE7F9
+            rgba(38, 112, 169, 0.3)
         ) !important;
-        animation: var(
-            --drop-target--animation,
-            var(--row_draggable--animation, expand3 0.5s ease-out)
-        );
-        box-shadow: inset 0px 0px 0px 1px #90CCF2 !important;
+        box-shadow: var(--null--box-shadow, none);
+        border-width: 0 0 1px 0 !important;
+        border-color: transparent !important;
     }
 }
 

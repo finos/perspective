@@ -38,7 +38,7 @@ export const restoreLabels = nodes => {
 
 export const preventTextCollisions = nodes => {
     const textCollisionFuzzFactorPx = -2;
-    const textAdjustPx = 19; // This should remain the same as the css value for .top => font-size in the chart.less
+    const textAdjustPx = 14; // This should remain the same as the css value for .top => font-size in the chart.less
     const rect = element => element.getBoundingClientRect();
 
     const topNodes = [];
