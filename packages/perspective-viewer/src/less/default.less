@@ -173,7 +173,7 @@
     #side_panel perspective-row {
         --name-before-display: inline-block;
         --is_visible-display: inline-block;
-        --row_draggable-padding: 0px 10px 0px 0px;
+        --row_draggable--padding: 0px 8px 0px 0px;
         --row_draggable--margin: 0px 8px 0px 0px;
         --row_close-display: none;
         --column_name-max-width: 180px;
@@ -218,23 +218,25 @@
                 pointer-events: none;
             }
        
+            // "Locked" columns are columns in the GUI that cannot be removed
+            // (but can sstill be replaced or switched via drag/drop).
             &.one_lock,
             &.two_lock {
                 perspective-row:first-child {
-                    --active--color: #ccc;
+                    --active--color: var(--inactive--color, #ccc);
                     --is_visible--cursor: normal;
                 }
             }
 
             &.two_lock {
                 perspective-row:nth-child(2) {
-                    --active--color: #ccc;
+                    --active--color: var(--inactive--color, #ccc);
                     --is_visible--cursor: normal;
                 }
             }
         
             perspective-row:only-child {
-                --active--color: #ccc;
+                --active--color: var(--inactive--color, #ccc);
                 --is_visible--cursor: normal;
             }
         }

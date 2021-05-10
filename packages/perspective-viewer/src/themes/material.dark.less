@@ -27,13 +27,14 @@ perspective-viewer, .perspective-viewer-material-dark {
 
     --background-color: @grey800;
     --column--background: @grey800;
+    --null--background: rgba(0,0,0,8%);
     --color: white;
     --plugin--background: @grey700;
     --select--background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==) no-repeat 95% 50%;
     --select--background-color: @grey800;
     --inactive--color: @grey500;
     --pv-divider--color: @grey500;
-    --active--background: #2770a9;
+    --active--background: rgba(39, 113, 170, 0.5);
     --active--color: #2770a9;
     --float--column-type--color: @blue50;
     --string--column-type--color: @red50;
@@ -53,10 +54,10 @@ perspective-viewer, .perspective-viewer-material-dark {
     regular-table {
         --rt-pos-cell--color: @blue50;
         --rt-neg-cell--color: @red50;
-        table {
+        table tbody tr {
             td, th {
                 --rt-hover--border-color: @grey200;
-                border-color: @grey500 !important;
+                border-top-color: @grey500;
             }
         }
     }
@@ -85,38 +86,33 @@ perspective-viewer, .perspective-viewer-material-dark {
     --d3fc-tooltip--border-color: @grey800;
     --d3fc-legend--background: rgba(42,44,47,0.8);
 
-    --d3fc-series: rgba(31, 119, 180, 0.8);
-    --d3fc-series-1: #0366d6;
-    --d3fc-series-2: #ff7f0e;
-    --d3fc-series-3: #2ca02c;
-    --d3fc-series-4: #d62728;
-    --d3fc-series-5: #9467bd;
-    --d3fc-series-6: #8c564b;
-    --d3fc-series-7: #e377c2;
-    --d3fc-series-8: #7f7f7f;
-    --d3fc-series-9: #bcbd22;
-    --d3fc-series-10: #17becf;
+    --d3fc-series: rgb(71, 120, 194) !important;
+    --d3fc-series-1: rgb(71, 120, 194) !important;
+    --d3fc-series-2: rgb(204, 120, 48) !important;
+    --d3fc-series-3: rgb(158, 84, 192) !important;
+    --d3fc-series-4: rgb(51, 150, 153) !important;
+    --d3fc-series-5: rgb(102, 114, 143) !important;
+    --d3fc-series-6: rgb(211, 103, 189) !important;
+    --d3fc-series-7: rgb(109, 124, 77) !important;
+    --d3fc-series-8: rgb(221, 99, 103) !important;
+    --d3fc-series-9: rgb(120, 104, 206) !important;
+    --d3fc-series-10: rgb(23, 166, 123) !important;
+  
     --d3fc-full--gradient: linear-gradient(
-        #feeb65 0%,
-        #e4521b 22.5%,
-        #4d342f 42.5%,
-        #222222 50%,
-        #1a237e 57.5%,
-        #42b3d5 67.5%,
-        #dcedc8 100%
-    );
+        rgb(221, 99, 103) 0%,
+        @grey800 50%,
+        rgb(50, 137, 200) 100%
+    ) !important;
+  
     --d3fc-positive--gradient: linear-gradient(
-        #222222 0%,
-        #1a237e 35%,
-        #42b3d5 70%,
-        #dcedc8 100%
-    );
+        @grey800 0%,
+        rgb(50, 137, 200) 100%
+    ) !important;
+  
     --d3fc-negative--gradient: linear-gradient(
-        #feeb65 0%,
-        #e4521b 35%,
-        #4d342f 70%,
-        #222222 100%
-    );
+        @grey800 100%,
+        rgb(221, 99, 103) 0%
+    ) !important;
 
     --warning--color: #333;
 
