@@ -1,8 +1,36 @@
 # Changelog
 
-## [0.8.0](https://github.com/finos/perspective/tree/HEAD)
+## [0.8.1](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.7.0...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.0...HEAD)
+
+**Implemented enhancements:**
+
+- More Material style updates [\#1416](https://github.com/finos/perspective/pull/1416) ([texodus](https://github.com/texodus))
+- Color-by-string for Treemap/Sunburst [\#1415](https://github.com/finos/perspective/pull/1415) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Memory leak on reads from view, both on\_update and to\_json [\#1037](https://github.com/finos/perspective/issues/1037)
+- Responsive column style menu [\#1414](https://github.com/finos/perspective/pull/1414) ([texodus](https://github.com/texodus))
+- Fix memory leak\(s\), leak tests, `memory\_usage\(\)` wasm heap API [\#1412](https://github.com/finos/perspective/pull/1412) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Cannot find perspective\_vieux\_bg.wasm [\#1409](https://github.com/finos/perspective/issues/1409)
+- React and webpack examples don't work [\#1403](https://github.com/finos/perspective/issues/1403)
+- Unable to build the project in ubuntu environment. Getting 'Module not found: Error: Can't resolve '@finos/perspective' error [\#1401](https://github.com/finos/perspective/issues/1401)
+
+**Merged pull requests:**
+
+- Getting pybind version number always fails [\#1413](https://github.com/finos/perspective/pull/1413) ([nickpholden](https://github.com/nickpholden))
+- Fix `react` and `remote-workspace` examples [\#1411](https://github.com/finos/perspective/pull/1411) ([texodus](https://github.com/texodus))
+- Install Boost from JFrog, fix outdated docs from \#1409 [\#1410](https://github.com/finos/perspective/pull/1410) ([sc1f](https://github.com/sc1f))
+- Upgrade `puppeteer` to `9.0.0` [\#1408](https://github.com/finos/perspective/pull/1408) ([texodus](https://github.com/texodus))
+
+## [v0.8.0](https://github.com/finos/perspective/tree/v0.8.0) (2021-04-27)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.7.0...v0.8.0)
 
 **Breaking changes:**
 
@@ -21,15 +49,16 @@
 
 **Closed issues:**
 
-- Jupyter labextension install does not work on master [\#1330](https://github.com/finos/perspective/issues/1330)
 - API docs are returning 404 [\#1398](https://github.com/finos/perspective/issues/1398)
 - PerspectiveWidget gets in unrecoverable state [\#1397](https://github.com/finos/perspective/issues/1397)
 - Cant get PerspectiveWidget loaded in jupyter lab [\#1392](https://github.com/finos/perspective/issues/1392)
+- Jupyter labextension install does not work on master [\#1330](https://github.com/finos/perspective/issues/1330)
 - Olympics example still referring to hypergrid [\#1304](https://github.com/finos/perspective/issues/1304)
 - Custom styles example not showing anything [\#1303](https://github.com/finos/perspective/issues/1303)
 
 **Merged pull requests:**
 
+- Updated `gh-pages` site and `README.md` [\#1399](https://github.com/finos/perspective/pull/1399) ([texodus](https://github.com/texodus))
 - Disable column style menu for non-numeric columns [\#1391](https://github.com/finos/perspective/pull/1391) ([texodus](https://github.com/texodus))
 
 ## [v0.7.0](https://github.com/finos/perspective/tree/v0.7.0) (2021-04-20)
@@ -1672,7 +1701,7 @@
 
 ## [v0.2.0](https://github.com/finos/perspective/tree/v0.2.0) (2018-10-01)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.3...v0.2.0)
+[Full Changelog](https://github.com/finos/perspective/compare/0.2.0-beta.3...v0.2.0)
 
 **Closed issues:**
 
@@ -1686,13 +1715,13 @@
 - Refactor examples [\#249](https://github.com/finos/perspective/pull/249) ([texodus](https://github.com/texodus))
 - 1D charts generated from columnar data [\#231](https://github.com/finos/perspective/pull/231) ([sc1f](https://github.com/sc1f))
 
-## [v0.2.0-beta.3](https://github.com/finos/perspective/tree/v0.2.0-beta.3) (2018-09-25)
-
-[Full Changelog](https://github.com/finos/perspective/compare/0.2.0-beta.3...v0.2.0-beta.3)
-
 ## [0.2.0-beta.3](https://github.com/finos/perspective/tree/0.2.0-beta.3) (2018-09-25)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.2...0.2.0-beta.3)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.3...0.2.0-beta.3)
+
+## [v0.2.0-beta.3](https://github.com/finos/perspective/tree/v0.2.0-beta.3) (2018-09-25)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.2...v0.2.0-beta.3)
 
 **Implemented enhancements:**
 

@@ -1,2 +1,2 @@
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 major_minor_version = "0.8"
