@@ -128,12 +128,14 @@ regular-table thead tr:last-child th {
 regular-table table {
     user-select: none;
     color: #161616;
+    border-collapse: separate;
 
     th {
         font-weight: 400;
     }
 
     td, th {
+        border-color: #eaedef;
         height: 23px;
     }
 
@@ -142,7 +144,8 @@ regular-table table {
     }
 
     td, th.psp-tree-label, th.psp-tree-label, th.psp-tree-leaf, tbody tr:first-child th {
-        border: 0px solid #eaedef;
+        border-style: solid;
+        border-width: 0px;
         border-top-width: 1px;
     }
 
