@@ -29,7 +29,7 @@ async function convert(filename, options) {
     try {
         file = JSON.parse(file);
     } catch {}
-    let tbl = table(file);
+    let tbl = await table(file);
     let view = await tbl.view();
     let out;
     options.format = options.format || "arrow";
@@ -73,7 +73,7 @@ async function host(filename, options) {
     const server = new WebSocketServer({assets: files, port: options.port});
     let file;
     if (filename) {
-        file = table(fs.readFileSync(filename).toString());
+        file = await table(fs.readFileSync(filename).toString());
     } else {
         file = await read_stdin();
     }
