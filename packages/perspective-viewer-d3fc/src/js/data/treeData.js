@@ -31,7 +31,7 @@ export function treeData(settings) {
                 if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
                     const is_leaf = i === groups.length - 1;
                     const colorValue = is_leaf ? getDataValue(d, settings.mainValues[1], split) : getDataValue(settings.agg_paths[j][i + 1] || d, settings.mainValues[1], split);
-                    if (colorValue) {
+                    if (colorValue !== undefined) {
                         element.color = colorValue;
                     }
                 }
