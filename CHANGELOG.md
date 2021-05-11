@@ -1,8 +1,19 @@
 # Changelog
 
-## [0.8.1](https://github.com/finos/perspective/tree/HEAD)
+## [v0.8.2](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.8.0...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.1...HEAD)
+
+**Fixed bugs:**
+
+- Perspective-cli hosting error: input.on\_delete is not a function [\#1405](https://github.com/finos/perspective/issues/1405)
+- Fix CLI `async` regression [\#1419](https://github.com/finos/perspective/pull/1419) ([texodus](https://github.com/texodus))
+- Fix color gradient charts containing 0 [\#1418](https://github.com/finos/perspective/pull/1418) ([texodus](https://github.com/texodus))
+- Fix styling bugs from CSS minification [\#1417](https://github.com/finos/perspective/pull/1417) ([texodus](https://github.com/texodus))
+
+## [v0.8.1](https://github.com/finos/perspective/tree/v0.8.1) (2021-05-10)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.0...v0.8.1)
 
 **Implemented enhancements:**
 
