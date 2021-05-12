@@ -1,8 +1,16 @@
 # Changelog
 
-## [v0.8.2](https://github.com/finos/perspective/tree/HEAD)
+## [v0.8.3](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.8.1...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.2...HEAD)
+
+**Merged pull requests:**
+
+- Double-render fix [\#1420](https://github.com/finos/perspective/pull/1420) ([texodus](https://github.com/texodus))
+
+## [v0.8.2](https://github.com/finos/perspective/tree/v0.8.2) (2021-05-11)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.1...v0.8.2)
 
 **Fixed bugs:**
 
