@@ -7,6 +7,16 @@
  *
  */
 
+export const DATA_TYPES = {
+    integer: "integer",
+    float: "float",
+    string: "string",
+    boolean: "boolean",
+    date: "date",
+    datetime: "datetime",
+    object: "object"
+};
+
 export const CONFIG_ALIASES = {
     row_pivot: "row_pivots",
     "row-pivot": "row_pivots",
@@ -20,7 +30,7 @@ export const CONFIG_ALIASES = {
     sorts: "sort"
 };
 
-export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "computed_columns", "row_pivot_depth", "filter_op"];
+export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "computed_columns", "expressions", "row_pivot_depth", "filter_op"];
 
 const NUMBER_AGGREGATES = [
     "any",

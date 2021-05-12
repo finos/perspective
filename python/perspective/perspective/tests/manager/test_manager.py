@@ -325,11 +325,14 @@ class TestPerspectiveManager(object):
         manager._process(make_view_message, self.post)
         manager._process(message, post_callback)
 
-    def test_manager_table_computed_schema(self):
+    def test_manager_table_validate_expressions(self):
         post_callback = partial(self.validate_post, expected={
             "id": 1,
             "data": {
-                "abc": "float"
+                "expression_schema": {
+                    "abc": "float"
+                },
+                "errors": {}
             }
         })
 
@@ -337,42 +340,15 @@ class TestPerspectiveManager(object):
             "id": 1,
             "name": "table1",
             "cmd": "table_method",
-            "method": "computed_schema",
-            "args": [
-                [
-                    {
-                        "column": "abc",
-                        "computed_function_name": "+",
-                        "inputs": ["a", "a"]
-                    }
-                ]
-            ]
-        }
-        manager = PerspectiveManager()
-        table = Table(data)
-        view = table.view()
-        manager.host_table("table1", table)
-        manager._process(message, post_callback)
-
-    def test_manager_table_get_computation_input_types(self):
-        post_callback = partial(self.validate_post, expected={
-            "id": 1,
-            "data": ["string"]
-        })
-
-        message = {
-            "id": 1,
-            "name": "table1",
-            "cmd": "table_method",
-            "method": "get_computation_input_types",
-            "args": ["concat_comma"]
+            "method": "validate_expressions",
+            "args": [['// abc \n "a" + "a"']]
         }
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
         manager._process(message, post_callback)
 
-    def test_manager_view_computed_schema(self):
+    def test_manager_view_expression_schema(self):
         post_callback = partial(self.validate_post, expected={
             "id": 2,
             "data": {
@@ -380,14 +356,8 @@ class TestPerspectiveManager(object):
             }
         })
 
-        make_view_message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"computed_columns": [
-            {
-                "column": "abc",
-                "computed_function_name": "+",
-                "inputs": ["a", "a"]
-            }
-        ]}}
-        message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "computed_schema", "args": [False]}
+        make_view_message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"expressions": ['// abc \n "a" + "a"']}}
+        message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "expression_schema", "args": [False]}
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)

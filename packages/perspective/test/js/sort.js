@@ -127,7 +127,7 @@ module.exports = perspective => {
         });
 
         describe("With aggregates", function() {
-            describe("aggregates, in a sorted column with nulls", async function() {
+            describe("aggregates, in a sorted column with nulls", function() {
                 it("sum", async function() {
                     var table = await perspective.table(data2);
                     var view = await table.view({

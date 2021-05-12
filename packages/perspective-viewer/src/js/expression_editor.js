@@ -7,11 +7,11 @@
  *
  */
 
-import {bindTemplate, throttlePromise} from "./utils.js";
+import {bindTemplate, throttlePromise, getExpressionAlias, addExpressionAlias} from "./utils.js";
 
 import template from "../html/expression_editor.html";
-
 import style from "../less/expression_editor.less";
+import {EXPRESSION_HELP_ITEMS} from "./expression_help_items";
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
@@ -26,222 +26,327 @@ class PerspectiveExpressionEditor extends HTMLElement {
     connectedCallback() {
         this._register_ids();
         this._register_callbacks();
-
-        // `renderer` is a function that takes a string of content and
-        // returns a string of valid HTML. The default renderer
-        // splits the string by space and returns `span` elements.
-        this.renderer = this._render_content;
+        this._fill_help_items();
+        this._editor_observer = new ResizeObserver(this._resize_editor.bind(this));
+        this._clear();
+        this._disable_save();
     }
 
     /**
-     * Replace the render function of the editor instance with a custom
-     * renderer, which allows for full manipulation of the final rendered
-     * output of the editor.
-     *
-     * @param {Function} render_function a function that takes a string and
-     * returns a string of valid HTML.
+     * Observe the editor when it is opened.
      */
-    set_renderer(render_function) {
-        this.renderer = render_function;
+    observe() {
+        this._editor_observer.observe(this._edit_area);
+        // Focus on the edit area immediately
+        this._focus();
     }
 
     /**
-     * Analyze the content in the editor and redraw the selection caret every
-     * time an `input` event is fired.
+     * Close the expressions editor.
+     */
+    close() {
+        this.style.display = "none";
+        this._side_panel_actions.style.display = "flex";
+        this._help_container.style.display = "none";
+        this._help_container.style.width = `100%`;
+        this._disable_save();
+        this._clear();
+        // Disconnect the observer.
+        this._editor_observer.disconnect();
+    }
+
+    /**
+     * Given an expression schema from the viewer, assert that the expression
+     * outputs a column with a valid type, and enable/disable the save button.
+     *
+     * @param {*} expression_schema
      */
     @throttlePromise
-    update_content() {
-        const selection = this.shadowRoot.getSelection();
-        const tokens = this.get_tokens(this._edit_area);
-
-        // Dispatch a `perspective-expression-editor-input` event,
-        // signifying that the input has reached the editor but has not
-        // been rendered into HTML yet
-        const input_event = new CustomEvent("perspective-expression-editor-input", {
-            detail: {
-                nodes: tokens.map(t => t.node),
-                text: this._edit_area.textContent
-            }
-        });
-        this.dispatchEvent(input_event);
-
-        let anchor_idx = null;
-        let focus_idx = null;
-        let current_idx = 0;
-
-        for (const token of tokens) {
-            if (token.node === selection.anchorNode) {
-                anchor_idx = current_idx + selection.anchorOffset;
-            }
-
-            if (token.node === selection.focusNode) {
-                focus_idx = current_idx + selection.focusOffset;
-            }
-
-            current_idx += token.text.length;
+    async type_check_expression(validated_expressions) {
+        if (!validated_expressions.expression_schema || !validated_expressions.errors) {
+            this._disable_save();
+            this._hide_error();
+            return;
         }
 
-        this._value = tokens.map(t => t.text).join("");
+        let expression = this._temp_expression;
+        const alias = this._temp_expression_alias;
 
-        if (this._value.length === 0) {
-            // Clear input from the editor
-            this.clear_content();
+        if (alias !== undefined) {
+            expression = alias;
+        }
+
+        if (validated_expressions.expression_schema[expression]) {
+            this._enable_save();
         } else {
-            // Calls the `renderer` to transform a text string to DOM tokens,
-            // but only when string.length > 0
-            const markup = this.renderer(this._value, tokens);
-            this._edit_area.innerHTML = markup;
+            this._disable_save(validated_expressions.errors[expression]);
         }
-
-        this.restore_selection(anchor_idx, focus_idx);
-
-        // Dispatch `perspective-expression-editor-rendered`, which signifies
-        // that the editor UI has updated to its final state.
-        const rendered_event = new CustomEvent("perspective-expression-editor-rendered", {
-            detail: {
-                nodes: tokens.map(t => t.node),
-                text: this._value
-            }
-        });
-
-        this.dispatchEvent(rendered_event);
-    }
-
-    clear_content() {
-        this._edit_area.innerHTML = "";
-    }
-
-    _render_content(content) {
-        return `<span class="psp-expression__fragment">${content}</span>`;
     }
 
     /**
-     * After editor content has been rendered, "un-reset" the caret position
-     * by returning it to where the user selected.
+     * Validate the expression even when empty.
      *
-     * @param {Number} absolute_anchor_idx
-     * @param {Number} absolute_focus_idx
+     * @param {*} ev
      */
-    restore_selection(absolute_anchor_idx, absolute_focus_idx) {
-        const selection = this.shadowRoot.getSelection();
-        const tokens = this.get_tokens(this._edit_area);
-        let anchor_node = this._edit_area;
-        let anchor_idx = 0;
-        let focus_node = this._edit_area;
-        let focus_idx = 0;
-        let current_idx = 0;
+    @throttlePromise
+    async _validate_expression() {
+        let expression = this._edit_area.value;
 
-        for (const token of tokens) {
-            const start_idx = current_idx;
-            const end_idx = start_idx + token.text.length;
-
-            if (start_idx <= absolute_anchor_idx && absolute_anchor_idx <= end_idx) {
-                anchor_node = token.node;
-                anchor_idx = absolute_anchor_idx - start_idx;
-            }
-
-            if (start_idx <= absolute_focus_idx && absolute_focus_idx <= end_idx) {
-                focus_node = token.node;
-                focus_idx = absolute_focus_idx - start_idx;
-            }
-
-            current_idx += token.text.length;
+        if (expression.length === 0) {
+            this._temp_expression = undefined;
+            this._temp_expression_alias = undefined;
+            this._disable_save();
+            this._hide_error();
+            return;
         }
 
-        selection.setBaseAndExtent(anchor_node, anchor_idx, focus_node, focus_idx);
-    }
-
-    get_text() {
-        return this._edit_area.textContent;
-    }
-
-    get_tokens(element) {
-        const tokens = [];
-        for (const node of element.childNodes) {
-            if (this._ignored_nodes.includes(node.nodeName)) continue;
-            switch (node.nodeType) {
-                case Node.TEXT_NODE:
-                    tokens.push({text: node.nodeValue, node});
-                    break;
-                case Node.ELEMENT_NODE:
-                    tokens.splice(tokens.length, 0, ...this.get_tokens(node));
-                    break;
-                default:
-                    continue;
-            }
+        if (getExpressionAlias(expression) === undefined) {
+            expression = addExpressionAlias(expression);
         }
-        return tokens;
+
+        // Store the expression temporarily so we can access it in
+        // `type_check_expression()`.
+        this._temp_expression = expression;
+        this._temp_expression_alias = getExpressionAlias(expression);
+
+        // Take the parsed expression and type check it on the viewer,
+        // which will call `type_check_expression()` with an expression schema.
+        const event = new CustomEvent("perspective-expression-editor-type-check", {
+            detail: {
+                expression: this._temp_expression,
+                alias: this._temp_expression_alias
+            }
+        });
+
+        this.dispatchEvent(event);
+
+        return;
     }
 
-    focus() {
+    /**
+     * Given an expression string, render it into markup. Called only when the
+     * expression is not an empty string.
+     *
+     * @param {String} expression
+     */
+    _render_expression(expression) {
+        return `<span class="psp-expression__">${expression}</span>`;
+    }
+
+    /**
+     * When the Save button is clicked, pass the expression to the viewer.
+     *
+     * @private
+     */
+    _save_expression() {
+        if (this._save_button.getAttribute("disabled")) {
+            return;
+        }
+
+        let expression = this._edit_area.value;
+
+        // if the expression doesn't have an alias, generate an alias and
+        // add it to the expression.
+        if (getExpressionAlias(expression) === undefined) {
+            expression = addExpressionAlias(expression);
+        }
+
+        let alias = getExpressionAlias(expression);
+
+        const event = new CustomEvent("perspective-expression-editor-save", {
+            detail: {
+                expression,
+                alias
+            }
+        });
+
+        this.dispatchEvent(event);
+    }
+
+    /**
+     * Whenever the editor resizes, make sure the width of the error message
+     * and help panel correspond to the editor width.
+     *
+     * @private
+     */
+    _resize_editor() {
+        this._error_message.style.width = `${this._edit_area.offsetWidth}px`;
+        this._help_container.style.width = `${this._edit_area.offsetWidth}px`;
+    }
+
+    /**
+     * On an error state, disable the save button and show the error message
+     * if there is one.
+     *
+     * @param {*} error_message
+     */
+    _disable_save(error_message) {
+        this._save_button.setAttribute("disabled", true);
+        error_message ? this._show_error(error_message) : this._hide_error();
+    }
+
+    _enable_save() {
+        this._hide_error();
+        this._save_button.removeAttribute("disabled");
+    }
+
+    _show_error(error_message) {
+        // make sure the error is never larger than the editor, otherwise it
+        // will start moving the side-panel.
+        this._error_message.style.width = `${this._edit_area.offsetWidth}px`;
+        this._error_message.innerText = error_message;
+        this._error_message.style.display = "block";
+    }
+
+    _hide_error() {
+        // Reset the width when the error hides.
+        this._error_message.style.width = "100%";
+        this._error_message.innerText = "";
+        this._error_message.style.display = "none";
+    }
+
+    /**
+     * Clear the edit area and hide the error message.
+     */
+    _clear() {
+        this._edit_area.value = "";
+        this._hide_error();
+    }
+
+    /**
+     * Set focus on the edit area.
+     *
+     * @private
+     */
+    _focus() {
         this._edit_area.focus();
     }
 
     /**
-     * Dispatch a `perspective-expression-editor-keyup` event containing
-     * the original `keyup` event in `event.details`.
+     * Enable tab indentation support and shift-enter to save.
      *
-     * @param {*} ev a `keyup` event.
-     */
-    keyup(ev) {
-        const event = new CustomEvent("perspective-expression-editor-keyup", {
-            detail: ev
-        });
-        this.dispatchEvent(event);
-    }
-
-    /**
-     * Dispatch a `perspective-expression-editor-keydown` event containing
-     * the original `keyup` event in `event.details`.
-     *
+     * @private
      * @param {*} ev a `keydown` event.
      */
-    keydown(ev) {
-        const event = new CustomEvent("perspective-expression-editor-keydown", {
-            detail: ev
-        });
-        this.dispatchEvent(event);
+    _keydown(ev) {
+        switch (ev.key) {
+            case "Enter":
+                {
+                    if (ev.shiftKey) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        this._save_expression();
+                    }
+                }
+                break;
+            case "Tab": {
+                ev.preventDefault();
+                const start = this._edit_area.selectionStart;
+                const end = this._edit_area.selectionEnd;
+                this._edit_area.value = this._edit_area.value.substring(0, start) + "  " + this._edit_area.value.substring(end);
+                this._edit_area.setSelectionRange(end + 2, end + 2);
+            }
+        }
     }
 
     /**
      * When a column/text is dragged and dropped into the textbox, read it
      * properly and set selection state on the editor.
      *
+     * @private
      * @param {*} event
      */
     _capture_drop_data(event) {
-        this._edit_area.focus();
+        this._focus();
         const data = event.dataTransfer.getData("text");
         if (data !== "") {
             try {
                 const parsed = JSON.parse(data);
                 if (Array.isArray(parsed) && parsed.length > 4) {
                     event.preventDefault();
-                    this._edit_area.textContent += `"${parsed[0]}"`;
+                    let expression;
+
+                    // expression column - use the raw expression without alias
+                    if (parsed.length === 6) {
+                        expression = parsed[parsed.length - 1];
+                    } else {
+                        // column name - escape double quotes and wrap
+                        expression = `"${parsed[0].replace(/"/g, '\\"')}"`;
+                    }
+
+                    this._edit_area.value += expression;
+                    this._validate_expression();
                 }
             } catch (e) {
                 // regular text, don't do anything as browser will handle
                 // the `drop` event.
-            } finally {
-                // When text is dropped into the editor, set the caret
-                // at the end of the editor's text content as the default
-                // selection fires with the caret at the beginning.
-                this._reset_selection();
-                this.update_content();
             }
         }
     }
 
-    _reset_selection() {
-        const selection = this.shadowRoot.getSelection();
-        selection.setBaseAndExtent(selection.anchorNode, this._edit_area.textContent.length, selection.focusNode, this._edit_area.textContent.length);
+    _toggle_help() {
+        if (this._help_container.offsetParent === null) {
+            this._help_container.style.width = `${this._edit_area.offsetWidth}px`;
+            this._help_container.style.display = "flex";
+        } else {
+            this._help_container.style.display = "none";
+            this._help_container.style.width = `100%`;
+        }
+    }
+
+    _apply_help_item(event) {
+        const template = event.target.getAttribute("template");
+        this._edit_area.value += template;
+        this._validate_expression();
+    }
+
+    _fill_help_items() {
+        const divider = document.createElement("hr");
+        divider.classList.add("psp_expression-editor__help--divider");
+
+        for (const category in EXPRESSION_HELP_ITEMS) {
+            const group = this[`_help_group_${category}`];
+            const content = group.querySelector(".psp_expression-editor__help--group-content");
+            const frag = document.createDocumentFragment();
+
+            for (const item of EXPRESSION_HELP_ITEMS[category]) {
+                if (item === "DIVIDER") {
+                    frag.appendChild(divider.cloneNode());
+                    continue;
+                }
+
+                const elem = document.createElement("span");
+                elem.classList.add("psp_expression-editor__help-item");
+                elem.setAttribute("title", item.description);
+                elem.setAttribute("template", item.template);
+                elem.innerText = item.name;
+                elem.addEventListener("click", this._apply_help_item.bind(this));
+
+                frag.appendChild(elem);
+            }
+
+            content.appendChild(frag);
+        }
     }
 
     /**
      * Map DOM IDs to class properties.
      */
     _register_ids() {
-        this._edit_area = this.shadowRoot.querySelector(".perspective-expression-editor__edit_area");
+        this._edit_area = this.shadowRoot.querySelector("#psp-expression-editor__edit_area");
+        this._error_message = this.shadowRoot.querySelector("#psp-expression-editor__error-message");
+        this._close_button = this.shadowRoot.querySelector("#psp-expression-editor-button-close");
+        this._save_button = this.shadowRoot.querySelector("#psp-expression-editor-button-save");
+        this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
+
+        // Help panel
+        this._help_button = this.shadowRoot.querySelector("#psp-expression-editor-button-help");
+        this._help_container = this.shadowRoot.querySelector("#psp-expression-editor-help-container");
+        this._help_group_numeric = this.shadowRoot.querySelector("#psp-expression-editor-help-group-numeric");
+        this._help_group_string = this.shadowRoot.querySelector("#psp-expression-editor-help-group-string");
+        this._help_group_datetime = this.shadowRoot.querySelector("#psp-expression-editor-help-group-datetime");
+        this._help_group_comparison = this.shadowRoot.querySelector("#psp-expression-editor-help-group-comparison");
+        this._help_group_control_flow = this.shadowRoot.querySelector("#psp-expression-editor-help-group-control-flow");
     }
 
     /**
@@ -249,8 +354,10 @@ class PerspectiveExpressionEditor extends HTMLElement {
      */
     _register_callbacks() {
         this._edit_area.addEventListener("drop", this._capture_drop_data.bind(this));
-        this._edit_area.addEventListener("input", this.update_content.bind(this));
-        this._edit_area.addEventListener("keyup", this.keyup.bind(this));
-        this._edit_area.addEventListener("keydown", this.keydown.bind(this));
+        this._edit_area.addEventListener("input", this._validate_expression.bind(this));
+        this._edit_area.addEventListener("keydown", this._keydown.bind(this));
+        this._save_button.addEventListener("click", this._save_expression.bind(this));
+        this._close_button.addEventListener("click", this.close.bind(this));
+        this._help_button.addEventListener("click", this._toggle_help.bind(this));
     }
 }

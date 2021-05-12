@@ -137,72 +137,47 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         column_only = true;
     }
 
-    // this needs to be a py_dict
-    auto p_computed_columns = config.attr("get_computed_columns")().cast<std::vector<t_val>>();
-    std::vector<t_computed_column_definition> computed_columns;
+    auto p_expressions = config.attr("get_expressions")().cast<std::vector<std::vector<t_val>>>();
+    std::vector<t_computed_expression> expressions;
+    expressions.reserve(p_expressions.size());
 
-    for (auto c : p_computed_columns) {
-        py::dict computed_column = c.cast<py::dict>();
-        std::string computed_column_name = c["column"].cast<std::string>();
-        t_computed_function_name computed_function_name = 
-            str_to_computed_function_name(c["computed_function_name"].cast<std::string>());
-        std::vector<std::string> input_columns = c["inputs"].cast<std::vector<std::string>>();
+    // Will either abort() or succeed completely, and this isn't a public
+    // API so we can directly index for speed.
+    for (t_uindex idx = 0; idx < p_expressions.size(); ++idx) {
+        const auto& expr = p_expressions[idx];
+        std::string expression_alias = expr[0].cast<std::string>();
+        std::string expression_string = expr[1].cast<std::string>();
+        std::string parsed_expression_string = expr[2].cast<std::string>();
 
-        /**
-         * Mutate the schema to add computed columns - the distinction 
-         * between `natural` and `computed` columns must be erased here
-         * as all lookups into `schema` must be valid for all computed
-         * columns on the View.
-         */
-        std::vector<t_dtype> input_types(input_columns.size());
-
-        // If the input columns are invalid, an error will be thrown here.
-        for (auto i = 0; i < input_columns.size(); ++i) {
-            input_types[i] = schema->get_dtype(input_columns[i]);
+        // Don't allow overwriting of "real" table columns or multiple
+        // columns with the same alias.
+        if (schema->has_column(expression_alias)) {
+            std::stringstream ss;
+            ss << "View creation failed: cannot create expression column '"
+            << expression_alias
+            << "' that overwrites a column that already exists."
+            << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
 
-        t_computation computation = t_computed_column::get_computation(
-            computed_function_name, input_types);
+        auto p_column_ids = py::dict(expr[3]);
+        std::vector<std::pair<std::string, std::string>> column_ids;
+        column_ids.resize(p_column_ids.size());
+        t_uindex cidx = 0;
         
-        // Throw an exception if the computation is invalid - the UI will
-        // prevent users from saving invalidly-typed computations.
-        if (computation.m_name == INVALID_COMPUTED_FUNCTION) {
-            // Get actual input types
-            auto valid_input_types = t_computed_column::get_computation_input_types(computed_function_name);
-            std::stringstream ss;
-            ss << "View creation failed: could not build computed column '"
-               << computed_column_name
-               << "' as the input column types are invalid."
-               << std::endl;
-            PSP_COMPLAIN_AND_ABORT(ss.str());
+        for (const auto& item : p_column_ids) {
+            column_ids[cidx] = std::pair<std::string, std::string>(
+                item.first.cast<std::string>(),
+                item.second.cast<std::string>());
+            ++cidx;
         }
 
-        t_dtype output_column_type = computation.m_return_type;
+        // If the expression cannot be parsed, it will abort() here.
+        t_computed_expression expression = t_computed_expression_parser::precompute(
+            expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
-        // If the computed column does not overwrite a "real" column, add it
-        // to the schema, otherwise throw an exception. The viewer UI will
-        // prevent users from overwriting "real" columns, so the only case
-        // here is when views are created programatically, where we should
-        // fail fast and report the error cleanly.
-        if (!schema->has_column(computed_column_name)) {
-            schema->add_column(computed_column_name, output_column_type);
-
-            // Add the computed column to the config.
-            auto tp = std::make_tuple(
-                computed_column_name,
-                computed_function_name,
-                input_columns,
-                computation);
-
-            computed_columns.push_back(tp);
-        } else {
-            std::stringstream ss;
-            ss << "View creation failed: cannot overwrite Table column '"
-               << computed_column_name
-               << "' with a computed column."
-               << std::endl;
-            PSP_COMPLAIN_AND_ABORT(ss.str());
-        }        
+        expressions.push_back(expression);
+        schema->add_column(expression_alias, expression.get_dtype());
     }
 
     // construct filters with filter terms, and fill the vector of tuples
@@ -236,7 +211,7 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         columns,
         filter,
         sort,
-        computed_columns,
+        expressions,
         filter_op,
         column_only);
 

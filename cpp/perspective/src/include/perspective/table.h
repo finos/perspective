@@ -14,7 +14,6 @@
 #include <perspective/raw_types.h>
 #include <perspective/gnode.h>
 #include <perspective/pool.h>
-#include <perspective/computed.h>
 #include <perspective/data_table.h>
 
 namespace perspective {
@@ -68,8 +67,8 @@ public:
     /**
      * @brief The schema of the underlying `t_data_table`, which contains the
      * `psp_pkey`, `psp_op` and `psp_pkey` meta columns, and none of the
-     * computed columns that are created by views on this table. For a
-     * `t_schema` with all computed columns created by all views, use
+     * expression columns that are created by views on this table. For a
+     * `t_schema` with all expression columns created by all views, use
      * `m_gnode->get_table_sptr()->get_schema()`.
      *
      * The output schema is generally subject to further processing before
@@ -80,17 +79,29 @@ public:
     t_schema get_schema() const;
 
     /**
-     * @brief Given a vector of computed column definitions, look up the
-     * computed function and its return types to create a computed schema
-     * without actually constructing/calculating the computed columns. Required
-     * so that computed column types/aggregates can be correctly identified
-     * without unnecessary recalculation.
+     * @brief Given a vector of expressions and its associated metadata 
+     * (the parsed expression string and a vector of input column_ids and
+     * column names), return a `t_validated_expression_map` struct that contains
+     * `expressions`, a vector of expression names, and `result`, a vector of
+     * string dtypes or error messages for each expression.
      * 
-     * @param computed_columns 
-     * @return t_schema 
+     * We use a custom struct here because this method gets called in a tight
+     * loop (on every keypress in the expression editor and in each view()
+     * constructor), and there isn't a clean way (yet) to pass a hopscotch
+     * or unordered map through Embind, only std::map which is slower.
+     * 
+     * @param expressions
+     * @return t_validated_expression_map
      */
-    t_schema get_computed_schema(
-        std::vector<t_computed_column_definition> computed_columns) const;
+    t_validated_expression_map
+    validate_expressions(
+        const std::vector<
+            std::tuple<
+                std::string,
+                std::string,
+                std::string,
+                std::vector<std::pair<std::string, std::string>>
+            >>& expressions) const;
 
     /**
      * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.

@@ -11,117 +11,66 @@ from datetime import date, datetime
 from perspective import Table, PerspectiveCppError
 
 
-class TestViewComputed(object):
-    def test_view_computed_schema_empty(self):
+class TestViewExpression(object):
+    def test_table_validate_expressions_empty(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validate = table.validate_expressions([])
+        assert validate["expression_schema"] == {}
+        assert validate["errors"] == {}
+
+    def test_view_expression_schema_empty(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view()
         assert view.to_columns() == {"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]}
-        assert view.computed_schema() == {}
+        assert view.expression_schema() == {}
 
-    def test_view_computed_create(self):
+    def test_view_expression_create(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ]
-        )
+        view = table.view(expressions=['// computed \n "a" + "b"'])
         assert view.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
             "computed": [6, 8, 10, 12],
         }
-        assert view.computed_schema() == {"computed": float}
+        assert view.expression_schema() == {"computed": float}
 
-    def test_view_computed_invalid_type_should_throw(self):
+    def test_view_expression_create_no_alias(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        view = table.view(expressions=['"a" + "b"'])
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            '"a" + "b"': [6, 8, 10, 12],
+        }
+        assert view.expression_schema() == {'"a" + "b"': float}
+
+    def test_view_expression_should_not_overwrite_real(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with raises(PerspectiveCppError) as ex:
-            table.view(
-                computed_columns=[
-                    {
-                        "column": "computed",
-                        "computed_function_name": "uppercase",
-                        "inputs": ["a"],
-                    }
-                ]
-            )
-        assert str(ex.value) == "View creation failed: could not build computed column 'computed' as the input column types are invalid.\n"
+            table.view(expressions=['// a \n upper("a")'])
+        assert (
+            str(ex.value)
+            == "View creation failed: cannot create expression column 'a' that overwrites a column that already exists.\n"
+        )
 
-    def test_view_computed_should_not_overwrite_real(self):
-        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with raises(PerspectiveCppError) as ex:
-            table.view(
-                computed_columns=[
-                    {
-                        "column": "a",  # invalid - col already exists
-                        "computed_function_name": "+",
-                        "inputs": ["a", "b"],
-                    }
-                ]
-            )
-        assert str(ex.value) == "View creation failed: cannot overwrite Table column 'a' with a computed column.\n"
-
-    def test_view_computed_should_not_overwrite_real_dependencies(self):
-        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with raises(PerspectiveCppError) as ex:
-            table.view(
-                computed_columns=[
-                    {
-                        "column": "computed",
-                        "computed_function_name": "+",
-                        "inputs": ["a", "b"],
-                    },
-                    {
-                        "column": "computed2",
-                        "computed_function_name": "sqrt",
-                        "inputs": ["computed"],
-                    },
-                    {
-                        "column": "a",  # invalid
-                        "computed_function_name": "+",
-                        "inputs": ["computed", "computed2"],
-                    },
-                    {
-                        "column": "computed3",  # will be skipped
-                        "computed_function_name": "+",
-                        "inputs": ["a", "computed2"],
-                    },
-                    {
-                        "column": "computed4",  # will not be skipped
-                        "computed_function_name": "+",
-                        "inputs": ["computed", "computed2"],
-                    }
-                ]
-            )
-        assert str(ex.value) == "View creation failed: cannot overwrite Table column 'a' with a computed column.\n"
-
-    def test_view_computed_dependencies(self):
+    def test_view_expression_should_skip_duplicate(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                },
-                {
-                    "column": "computed2",
-                    "computed_function_name": "sqrt",
-                    "inputs": ["computed"],
-                },
-                {
-                    "column": "computed3",
-                    "computed_function_name": "exp",
-                    "inputs": ["computed"],
-                },
-                {
-                    "column": "computed4",
-                    "computed_function_name": "pow2",
-                    "inputs": ["computed3"],
-                },
+            columns=["abc"],
+            expressions=['// abc \n "a" + "b"', '// abc \n "a" - "b"'],
+        )
+        assert view.to_columns() == {"abc": [6, 8, 10, 12]}
+
+    def test_view_expression_multiple_alias(
+        self,
+    ):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        view = table.view(
+            expressions=[
+                '// computed \n "a" + "b"',
+                '// computed2 \n "a" + "b"',
+                '// computed3 \n "a" + "b"',
+                '// computed4 \n "a" + "b"',
             ]
         )
         assert view.schema() == {
@@ -133,135 +82,45 @@ class TestViewComputed(object):
             "computed4": float,
         }
 
-        assert view.computed_schema() == {
+        assert view.expression_schema() == {
             "computed": float,
             "computed2": float,
             "computed3": float,
             "computed4": float,
         }
 
-    def test_view_computed_dependencies_do_not_cross_over_different_views(self):
-        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                },
-                {
-                    "column": "computed2",
-                    "computed_function_name": "sqrt",
-                    "inputs": ["computed"],
-                },
-                {
-                    "column": "computed3",
-                    "computed_function_name": "exp",
-                    "inputs": ["computed"],
-                },
-                {
-                    "column": "computed4",
-                    "computed_function_name": "pow2",
-                    "inputs": ["computed3"],
-                },
-            ]
-        )
-        assert view.schema() == {
-            "a": int,
-            "b": int,
-            "computed": float,
-            "computed2": float,
-            "computed3": float,
-            "computed4": float,
-        }
-
-        assert view.computed_schema() == {
-            "computed": float,
-            "computed2": float,
-            "computed3": float,
-            "computed4": float,
-        }
-
-        with raises(PerspectiveCppError) as ex:
-            table.view(
-                computed_columns=[
-                    {
-                        "column": "computed5",
-                        "computed_function_name": "pow2",
-                        "inputs": ["computed3"],
-                    },
-                ]
-            )
-
-        assert str(ex.value) == "Could not get dtype for column `computed3` as it does not exist in the schema.\n"
-
-    def test_view_computed_create_no_columns(self):
+    def test_view_expression_create_no_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             columns=[],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"'
+            ]
         )
         assert view.to_columns() == {}
         assert view.schema() == {}
 
         # computed column should still exist
-        assert view.computed_schema() == {"computed": float}
+        assert view.expression_schema() == {"computed": float}
 
-    def test_view_computed_create_columns(self):
+    def test_view_expression_create_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             columns=["computed"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"'
+            ]
         )
         assert view.to_columns() == {"computed": [6, 8, 10, 12]}
         assert view.schema() == {"computed": float}
         # computed column should still exist
-        assert view.computed_schema() == {"computed": float}
+        assert view.expression_schema() == {"computed": float}
 
-    def test_view_computed_multiple_dependents(self):
+    def test_view_expression_create_clear(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                },
-                {
-                    "column": "final",
-                    "computed_function_name": "pow2",
-                    "inputs": ["computed"],
-                },
-            ]
-        )
-        assert view.to_columns() == {
-            "a": [1, 2, 3, 4],
-            "b": [5, 6, 7, 8],
-            "computed": [6, 8, 10, 12],
-            "final": [36, 64, 100, 144],
-        }
-
-    def test_view_computed_create_clear(self):
-        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"'
             ]
         )
         assert view.to_columns() == {
@@ -273,46 +132,11 @@ class TestViewComputed(object):
         assert view.schema() == {"a": int, "b": int, "computed": float}
         assert view.to_columns() == {}
 
-    def test_view_computed_multiple_dependents_clear(self):
+    def test_view_expression_create_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                },
-                {
-                    "column": "final",
-                    "computed_function_name": "pow2",
-                    "inputs": ["computed"],
-                },
-            ]
-        )
-        assert view.to_columns() == {
-            "a": [1, 2, 3, 4],
-            "b": [5, 6, 7, 8],
-            "computed": [6, 8, 10, 12],
-            "final": [36, 64, 100, 144],
-        }
-        table.clear()
-        assert view.schema() == {
-            "a": int,
-            "b": int,
-            "computed": float,
-            "final": float,
-        }
-        assert view.to_columns() == {}
-
-    def test_view_computed_create_replace(self):
-        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"'
             ]
         )
         assert view.to_columns() == {
@@ -328,20 +152,12 @@ class TestViewComputed(object):
             "computed": [60, 80, 100, 120],
         }
 
-    def test_view_computed_multiple_dependents_replace(self):
+    def test_view_expression_multiple_dependents_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                },
-                {
-                    "column": "final",
-                    "computed_function_name": "pow2",
-                    "inputs": ["computed"],
-                },
+            expressions=[
+                '// computed \n "a" + "b"',
+                '// final \n ("a" + "b") ^ 2'
             ]
         )
         assert view.to_columns() == {
@@ -364,26 +180,18 @@ class TestViewComputed(object):
             "final": [3600, 6400, 10000, 14400],
         }
 
-    def test_view_computed_multiple_views_should_not_conflate(self):
+    def test_view_expression_multiple_views_should_not_conflate(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"',
             ]
         )
 
         view2 = table.view(
-            computed_columns=[
-                {
-                    "column": "computed2",
-                    "computed_function_name": "-",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed2 \n "a" - "b"'
             ]
         )
 
@@ -403,26 +211,18 @@ class TestViewComputed(object):
             "computed2": [-4, -4, -4, -4],
         }
 
-    def test_view_computed_multiple_views_should_all_clear(self):
+    def test_view_expression_multiple_views_should_all_clear(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"',
             ]
         )
 
         view2 = table.view(
-            computed_columns=[
-                {
-                    "column": "computed2",
-                    "computed_function_name": "-",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed2 \n "a" - "b"'
             ]
         )
 
@@ -452,26 +252,18 @@ class TestViewComputed(object):
 
         assert view2.to_columns() == {}
 
-    def test_view_computed_multiple_views_should_all_replace(self):
+    def test_view_expression_multiple_views_should_all_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"',
             ]
         )
 
         view2 = table.view(
-            computed_columns=[
-                {
-                    "column": "computed2",
-                    "computed_function_name": "-",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed2 \n "a" - "b"'
             ]
         )
 
@@ -505,19 +297,14 @@ class TestViewComputed(object):
             "computed2": [-40, -40, -40, -40],
         }
 
-    def test_view_computed_delete_and_create(self):
+    def test_view_expression_delete_and_create(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"',
             ]
         )
-
         assert view.schema() == {"a": int, "b": int, "computed": float}
 
         assert view.to_columns() == {
@@ -529,33 +316,25 @@ class TestViewComputed(object):
         view.delete()
 
         view2 = table.view(
-            computed_columns=[
-                {
-                    "column": "computed2",
-                    "computed_function_name": "-",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" - "b"'
             ]
         )
 
-        assert view2.schema() == {"a": int, "b": int, "computed2": float}
+        assert view2.schema() == {"a": int, "b": int, "computed": float}
 
         assert view2.to_columns() == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
-            "computed2": [-4, -4, -4, -4],
+            "computed": [-4, -4, -4, -4],
         }
 
-    def test_view_computed_delete_and_create_with_updates(self):
+    def test_view_expression_delete_and_create_with_updates(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed \n "a" + "b"',
             ]
         )
 
@@ -572,12 +351,8 @@ class TestViewComputed(object):
         view.delete()
 
         view2 = table.view(
-            computed_columns=[
-                {
-                    "column": "computed2",
-                    "computed_function_name": "-",
-                    "inputs": ["a", "b"],
-                }
+            expressions=[
+                '// computed2 \n "a" - "b"',
             ]
         )
 
@@ -601,13 +376,10 @@ class TestViewComputed(object):
             {"id": int, "msg": str, "val": float},
             index="id",
         )
+
         table.view(
-            computed_columns=[
-                {
-                    "column": "inverted",
-                    "computed_function_name": "invert",
-                    "inputs": ["val"],
-                }
+            expressions=[
+                '// inverted \n 1 / "val"',
             ],
             columns=["inverted"],
         )
@@ -621,34 +393,26 @@ class TestViewComputed(object):
             ]
         )
 
-    def test_view_computed_with_custom_columns(self):
+    def test_view_expression_with_custom_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             columns=["computed", "b"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
         )
         assert view.to_columns() == {
             "b": [5, 6, 7, 8],
             "computed": [6, 8, 10, 12],
         }
 
-    def test_view_computed_with_row_pivots(self):
+    def test_view_expression_with_row_pivots(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             row_pivots=["computed"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
         )
         assert view.to_columns() == {
             "__ROW_PATH__": [[], [6], [8], [10], [12]],
@@ -657,18 +421,14 @@ class TestViewComputed(object):
             "computed": [36.0, 6.0, 8.0, 10.0, 12.0],
         }
 
-    def test_view_computed_with_row_pivots_clear(self):
+    def test_view_expression_with_row_pivots_clear(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
             row_pivots=["computed"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
         )
 
         assert view.to_columns() == {
@@ -687,18 +447,14 @@ class TestViewComputed(object):
             "computed": [None],
         }
 
-    def test_view_computed_with_row_pivots_replace(self):
+    def test_view_expression_with_row_pivots_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
             row_pivots=["computed"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
         )
 
         assert view.to_columns() == {
@@ -717,17 +473,13 @@ class TestViewComputed(object):
             "computed": [360.0, 60.0, 80.0, 100.0, 120.0],
         }
 
-    def test_view_computed_with_column_pivots(self):
+    def test_view_expression_with_column_pivots(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             column_pivots=["computed"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
         )
         assert view.to_columns() == {
             "6|a": [1, None, None, None],
@@ -744,17 +496,13 @@ class TestViewComputed(object):
             "12|computed": [None, None, None, 12.0],
         }
 
-    def test_view_computed_with_row_column_pivots(self):
+    def test_view_expression_with_row_column_pivots(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             column_pivots=["computed"],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "+",
-                    "inputs": ["a", "b"],
-                }
-            ],
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
         )
         assert view.to_columns() == {
             "6|a": [1, None, None, None],
@@ -771,17 +519,11 @@ class TestViewComputed(object):
             "12|computed": [None, None, None, 12.0],
         }
 
-    def test_view_computed_with_sort(self):
+    def test_view_expression_with_sort(self):
         table = Table({"a": ["a", "ab", "abc", "abcd"]})
         view = table.view(
             sort=[["computed", "desc"]],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "length",
-                    "inputs": ["a"],
-                }
-            ],
+            expressions=['// computed \n length("a")']
         )
 
         assert view.to_columns() == {
@@ -789,17 +531,11 @@ class TestViewComputed(object):
             "computed": [4, 3, 2, 1],
         }
 
-    def test_view_computed_with_filter(self):
+    def test_view_expression_with_filter(self):
         table = Table({"a": ["a", "ab", "abc", "abcd"]})
         view = table.view(
             filter=[["computed", ">=", 3]],
-            computed_columns=[
-                {
-                    "column": "computed",
-                    "computed_function_name": "length",
-                    "inputs": ["a"],
-                }
-            ],
+            expressions=['// computed \n length("a")']
         )
 
         assert view.to_columns() == {"a": ["abc", "abcd"], "computed": [3, 4]}
@@ -807,13 +543,7 @@ class TestViewComputed(object):
     def test_view_day_of_week_date(self):
         table = Table({"a": [date(2020, 3, i) for i in range(9, 14)]})
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "day_of_week",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=['// bucket \n day_of_week("a")']
         )
         assert view.schema() == {"a": date, "bucket": str}
         assert view.to_columns() == {
@@ -832,13 +562,7 @@ class TestViewComputed(object):
             {"a": [datetime(2020, 3, i, 12, 30) for i in range(9, 14)]}
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "day_of_week",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=['// bucket \n day_of_week("a")']
         )
         assert view.schema() == {"a": datetime, "bucket": str}
         assert view.to_columns() == {
@@ -855,13 +579,7 @@ class TestViewComputed(object):
     def test_view_month_of_year_date(self):
         table = Table({"a": [date(2020, i, 15) for i in range(1, 13)]})
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "month_of_year",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=['// bucket \n month_of_year("a")']
         )
         assert view.schema() == {"a": date, "bucket": str}
         assert view.to_columns() == {
@@ -889,13 +607,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "month_of_year",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=['// bucket \n month_of_year("a")']
         )
         assert view.schema() == {"a": datetime, "bucket": str}
         assert view.to_columns() == {
@@ -929,13 +641,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "day_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'D')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -965,13 +671,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "day_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'D')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -1001,13 +701,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "day_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'D')"]
         )
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
@@ -1037,13 +731,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "month_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -1073,13 +761,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "month_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": date, "bucket": date}
         assert view.to_columns() == {
@@ -1109,13 +791,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "month_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {
@@ -1140,13 +816,7 @@ class TestViewComputed(object):
             }
         )
         view = table.view(
-            computed_columns=[
-                {
-                    "column": "bucket",
-                    "computed_function_name": "month_bucket",
-                    "inputs": ["a"],
-                }
-            ]
+            expressions=["// bucket \n bucket(\"a\", 'M')"]
         )
         assert view.schema() == {"a": datetime, "bucket": date}
         assert view.to_columns() == {

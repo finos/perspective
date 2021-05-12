@@ -105,15 +105,9 @@ table.prototype.make_port = async_queue("make_port", "table_method");
 
 table.prototype.remove_port = async_queue("remove_port", "table_method");
 
-table.prototype.compute = async_queue("compute", "table_method");
-
 table.prototype.schema = async_queue("schema", "table_method");
 
-table.prototype.computed_schema = async_queue("computed_schema", "table_method");
-
-table.prototype.get_computation_input_types = async_queue("get_computation_input_types", "table_method");
-
-table.prototype.get_computed_functions = async_queue("get_computed_functions", "table_method");
+table.prototype.validate_expressions = async_queue("validate_expressions", "table_method");
 
 table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
 

@@ -18,7 +18,7 @@ t_view_config::t_view_config(
         const std::vector<std::string>& columns,
         const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
-        const std::vector<t_computed_column_definition>& computed_columns,
+        const std::vector<t_computed_expression>& expressions,
         const std::string& filter_op,
         bool column_only)
     : m_init(false)
@@ -28,7 +28,7 @@ t_view_config::t_view_config(
     , m_columns(columns)
     , m_filter(filter)
     , m_sort(sort)
-    , m_computed_columns(computed_columns)
+    , m_expressions(expressions)
     , m_row_pivot_depth(-1)
     , m_column_pivot_depth(-1)
     , m_filter_op(filter_op)
@@ -46,15 +46,15 @@ t_view_config::init(std::shared_ptr<t_schema> schema) {
 
 void
 t_view_config::validate(std::shared_ptr<t_schema> schema) {
-    std::unordered_set<std::string> computed_column_names;
-    computed_column_names.reserve(m_computed_columns.size());
+    std::unordered_set<std::string> expression_aliases;
+    expression_aliases.reserve(m_expressions.size());
 
-    for (const auto& c : m_computed_columns) {
-        computed_column_names.insert(std::get<0>(c));
+    for (const auto& expr : m_expressions) {
+        expression_aliases.insert(expr.get_expression_alias());
     }
 
     for (const std::string& col : m_columns) {
-        if (!schema->has_column(col) && computed_column_names.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View columns." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -63,7 +63,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
 
     for (const auto& agg : m_aggregates) {
         const std::string& col = agg.first;
-        if (!schema->has_column(col) && computed_column_names.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View aggregates." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -71,7 +71,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     }
 
     for (const std::string& col : m_row_pivots) {
-        if (!schema->has_column(col) && computed_column_names.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View row_pivots." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -79,7 +79,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     }
 
     for (const std::string& col : m_column_pivots) {
-        if (!schema->has_column(col) && computed_column_names.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View column_pivots." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -88,7 +88,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
 
     for (const auto& filter : m_filter) {
         const std::string& col = std::get<0>(filter);
-        if (!schema->has_column(col) && computed_column_names.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View filters." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -97,7 +97,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
 
     for (const auto& sort : m_sort) {
         const std::string& col = sort[0];
-        if (!schema->has_column(col) && computed_column_names.count(col) == 0) {
+        if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
             ss << "Invalid column '" << col << "' found in View sorts." << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -166,11 +166,12 @@ t_view_config::get_col_sortspec() const {
     return m_col_sortspec;
 }
 
-std::vector<t_computed_column_definition>
-t_view_config::get_computed_columns() const {
+std::vector<t_computed_expression>
+t_view_config::get_expressions() const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_computed_columns;
+    return m_expressions;
 }
+
 
 t_filter_op
 t_view_config::get_filter_op() const {
@@ -201,7 +202,7 @@ void
 t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
     /*
      * Provide aggregates for columns that are shown but NOT specified in 
-     * `m_aggregates`, including computed columns that are in the `columns`
+     * `m_aggregates`, including expressions that are in the `columns`
      * array but not the `aggregates` map.
      */
     for (const std::string& column : m_columns) {

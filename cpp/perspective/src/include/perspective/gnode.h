@@ -20,8 +20,7 @@
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
 #include <perspective/process_state.h>
-#include <perspective/computed.h>
-#include <perspective/computed_column_map.h>
+#include <perspective/computed_expression.h>
 #include <perspective/computed_function.h>
 #include <tsl/ordered_map.h>
 #ifdef PSP_ENABLE_PYTHON
@@ -131,7 +130,23 @@ public:
      */
     void remove_input_port(t_uindex port_id);
 
+    /**
+     * @brief Given a new context, register it with the gnode, compute and
+     * add its expression columns, and add its expressions to the
+     * `m_expression_map` managed by the gnode.
+     * 
+     * @param name 
+     * @param type 
+     * @param ptr 
+     */
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
+
+    /**
+     * @brief Remove a context by name from the gnode, and remove its
+     * computed expression columns from `m_expression_map`.
+     * 
+     * @param name 
+     */
     void _unregister_context(const std::string& name);
 
     const t_data_table* get_table() const;
@@ -285,75 +300,34 @@ protected:
      */
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
-
-    /**
-     * @brief For all valid computed columns registered with the gnode,
-     * the master `m_table` of `m_state`.
-     * 
-     * @param tbl 
-     * @param flattened 
-     * @param changed_rows 
+    
+    /******************************************************************************
+     *
+     * Expression Column Operations
      */
-    void
-    _recompute_all_columns(
+    void _compute_expressions(
+        std::vector<std::shared_ptr<t_data_table>> tables);
+
+    void _recompute_expressions(
         std::shared_ptr<t_data_table> tbl,
         std::shared_ptr<t_data_table> flattened,
         const std::vector<t_rlookup>& changed_rows);
 
     /**
-     * @brief For each `t_data_table` in tables, apply computations for each
-     * computed column registered with the gnode.
+     * @brief Add each expression to `m_expression_map` if it does not
+     * already exist, and register the gnode's vocab pointer with each
+     * expression.
      * 
-     * @param table 
+     * @param expressions 
      */
-    void _compute_all_columns(
-        std::vector<std::shared_ptr<t_data_table>> tables);
+    void _register_expressions(std::vector<t_computed_expression>& expressions);
 
     /**
-     * @brief Add all valid computed columns to `table` with the specified
-     * `dtype`. Used when a column needs to be present for future operations,
-     * but when a computation is not necessary/the dtype of the column != the
-     * dtype of the actual computed column.
+     * @brief Remove expressions from the `m_expression_map`.
      * 
-     * @param table 
-     * @param dtype 
+     * @param expressions 
      */
-    void _add_all_computed_columns(
-        std::shared_ptr<t_data_table> table,
-        t_dtype dtype);
-
-    /**
-     * @brief Add a computed column to `tbl` without computing it.
-     * 
-     * @param computed_column 
-     * @param tbl 
-     */
-    void _add_computed_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> tbl);
-
-    /**
-     * @brief Apply a computed column to `tbl`.
-     * 
-     * @param computed_column 
-     * @param tbl 
-     */
-    void _compute_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> tbl);
-
-    /**
-     * @brief Recompute the computed column on `flattened`,
-     * using information from both `flattened` and `tbl`.
-     * 
-     * @param ctx 
-     * @param tbl 
-     */
-    void _recompute_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> table,
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& changed_rows);
+    void _unregister_expressions(const std::vector<t_computed_expression>& expressions);
 
 private:
     /**
@@ -376,7 +350,12 @@ private:
     // A vector of `t_schema`s for each transitional `t_data_table`.
     std::vector<t_schema> m_transitional_schemas;
 
-    t_computed_column_map m_computed_column_map;
+    // track all expressions on this gnode
+    tsl::ordered_map<std::string, t_computed_expression> m_expression_map;
+
+    // Expressions that create strings need to intern their strings so that
+    // memory leaks/errors do not happen later.
+    std::shared_ptr<t_vocab> m_expression_vocab;
 
     bool m_init;
     t_uindex m_id;
@@ -413,7 +392,8 @@ template <typename CTX_T>
 void
 t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh) {
     CTX_T* ctx = ctxh.get<CTX_T>();
-    // These tables are guaranteed to have all computed columns.
+    // These tables are guaranteed to have all expression columns applied
+    // in `process_table`.
     const t_data_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
     const t_data_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
     const t_data_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
@@ -443,10 +423,9 @@ t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_
     const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
     const t_data_table& existed) {
     auto ctx_config = ctx->get_config();
-    auto computed_columns = ctx_config.get_computed_columns();
 
     ctx->step_begin();
-    // Flattened has the computed columns at this point, as it has
+    // Flattened has the expressions at this point, as it has
     // passed through the body of `process_table`.
     ctx->notify(flattened, delta, prev, current, transitions, existed);
     ctx->step_end();

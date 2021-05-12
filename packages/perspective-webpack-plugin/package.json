@@ -11,7 +11,8 @@
         "index.js"
     ],
     "scripts": {
-        "build": "echo 'No build'"
+        "build": "echo 'No build'",
+        "clean": "echo 'No clean'"
     },
     "jest": {},
     "repository": {

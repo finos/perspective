@@ -7,13 +7,13 @@
  *
  */
 
-const functionality = require("./computed/functionality");
-const numeric = require("./computed/numeric");
-const string = require("./computed/string");
-const datetime = require("./computed/datetime");
-const updates = require("./computed/updates");
-const deltas = require("./computed/deltas");
-const invariant = require("./computed/invariant");
+const functionality = require("./expressions/functionality");
+const numeric = require("./expressions/numeric");
+const string = require("./expressions/string");
+const datetime = require("./expressions/datetime");
+const updates = require("./expressions/updates");
+const deltas = require("./expressions/deltas");
+const invariant = require("./expressions/invariant");
 
 module.exports = perspective => {
     functionality(perspective);

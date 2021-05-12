@@ -17,24 +17,16 @@ namespace perspective {
 namespace binding {
 
 /**
- * @brief Seed the computations metadata vector. Must be called at module
- * initialization time for computed columns to work.
- */
-void make_computations();
-
-/**
- * @brief Given a table and a vector of computed column definitions,
- * get a `t_schema` containing the return types of computed columns
- * without constructing/calculating the computed column.
+ * @brief Initialize the expressions parser. Must be called at module
+ * initialization before any interactions with the module. 
  * 
- * @param table 
- * @param p_computed_columns 
- * @return t_schema 
  */
-t_schema
-get_table_computed_schema_py(
+void init_expression_parser();
+
+t_validated_expression_map
+validate_expressions_py(
     std::shared_ptr<Table> table,
-    t_val p_computed_columns);
+    const std::vector<std::vector<t_val>>& p_expressions);
 
 } //namespace binding
 } //namespace perspective

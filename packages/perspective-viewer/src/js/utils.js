@@ -327,3 +327,67 @@ export const registerPlugin = (name, plugin) => {
         global.__perspective_plugins__.push([name, plugin]);
     }
 };
+
+/**
+ * Given an expression, return its alias or undefined if it does not have one.
+ *
+ * @param {*} expression
+ * @returns String
+ */
+export function getExpressionAlias(expression) {
+    const matches = expression.match(/\/\/(.+)\n/);
+    let alias;
+
+    // Has an alias - use that to type check.
+    if (matches && matches.length == 2) {
+        alias = matches[1].trim();
+    }
+
+    return alias;
+}
+
+/**
+ * Adds an alias to the given expression and returns it.
+ *
+ * @param {*} expression
+ * @returns String
+ */
+export function addExpressionAlias(expression) {
+    let alias;
+    expression.length > 20
+        ? (alias =
+              expression
+                  .replace("\n", " ")
+                  .substr(0, 20)
+                  .trim() + "...")
+        : (alias = expression);
+    return `//${alias}\n${expression}`;
+}
+
+/**
+ * Given an alias and an array of string expressions, find the alias inside
+ * the expressions array. This is important so we can map aliases back to
+ * expressions inside _new_row.
+ *
+ * @param {String} alias
+ * @param {Array<String>} expressions
+ * @returns String
+ */
+export function findExpressionByAlias(alias, expressions) {
+    for (const expr of expressions) {
+        const expr_alias = getExpressionAlias(expr);
+        if (alias === expr_alias) {
+            return expr;
+        }
+    }
+}
+
+/**
+ * Given an expression, strips the alias and returns the expression.
+ *
+ * @param {String} expression
+ * @returns String
+ */
+export function getRawExpression(expression) {
+    return expression.replace(/\/\/(.+)\n/, "");
+}

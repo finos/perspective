@@ -25,6 +25,31 @@ SUPPRESS_WARNINGS_VC(4800)
 
 namespace perspective {
 
+#define BINARY_OPERATOR_BODY(OP) \
+    t_tscalar rval;                                 \
+    rval.clear();                                   \
+    rval.m_type = DTYPE_FLOAT64;                    \
+    if (!is_numeric() || !other.is_numeric()) {     \
+        rval.m_status = STATUS_CLEAR;               \
+    }                                               \
+    if (!other.is_valid() || !is_valid()) {         \
+        return rval;                                \
+    }                                               \
+    rval.set(to_double() OP other.to_double());     \
+    return rval; \
+
+/**
+ * @brief A function-style cast used by exprtk. Because we want the numeric
+ * type that can accomodate the most values without retyping, the scalar
+ * here is set as DTYPE_FLOAT64.
+ * 
+ * @param value
+ */
+t_tscalar::t_tscalar(int v) {
+    // set<double>() returns a scalar with DTYPE_FLOAT64.
+    this->set(static_cast<double>(v));
+}
+
 bool
 t_tscalar::is_none() const {
     return m_type == DTYPE_NONE;
@@ -77,6 +102,299 @@ t_tscalar::operator>=(const t_tscalar& rhs) const {
 bool
 t_tscalar::operator<=(const t_tscalar& rhs) const {
     return compare_common<std::less_equal>(rhs);
+}
+
+t_tscalar
+t_tscalar::operator+() const {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = m_type;
+
+    if (!is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+    }
+
+    if (!is_valid()) {
+        return rval;
+    }
+
+    switch (m_type) { 
+        case DTYPE_INT64: {
+            rval.set(+(m_data.m_int64));
+        } break;
+        case DTYPE_INT32: {
+            rval.set(+(m_data.m_int32));
+        } break;
+        case DTYPE_INT16: {
+            rval.set(+(m_data.m_int16));
+        } break;
+        case DTYPE_INT8: {
+            rval.set(+(m_data.m_int8));
+        } break;
+        case DTYPE_UINT64: {
+            rval.set(+(m_data.m_uint64));
+        } break;
+        case DTYPE_UINT32: {
+            rval.set(+(m_data.m_uint32));
+        } break;
+        case DTYPE_UINT16: {
+            rval.set(+(m_data.m_uint16));
+        } break;
+        case DTYPE_UINT8: {
+            rval.set(+(m_data.m_uint8));
+        } break;
+        case DTYPE_FLOAT64: {
+            rval.set(+(m_data.m_float64));
+        } break;
+        case DTYPE_FLOAT32: {
+            rval.set(+(m_data.m_float32));
+        } break;
+        default: return mknone();
+    }
+
+    return rval;
+}
+
+t_tscalar
+t_tscalar::operator-() const {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = m_type;
+
+    if (!is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+    }
+
+    if (!is_valid()) {
+        return rval;
+    }
+
+    switch (m_type) { 
+        case DTYPE_INT64: {
+            rval.set(-m_data.m_int64);
+        } break;
+        case DTYPE_INT32: {
+            rval.set(-m_data.m_int32);
+        } break;
+        case DTYPE_INT16: {
+            rval.set(-m_data.m_int16);
+        } break;
+        case DTYPE_INT8: {
+            rval.set(-m_data.m_int8);
+        } break;
+        case DTYPE_UINT64: {
+            rval.set(-m_data.m_uint64);
+        } break;
+        case DTYPE_UINT32: {
+            rval.set(-m_data.m_uint32);
+        } break;
+        case DTYPE_UINT16: {
+            rval.set(-m_data.m_uint16);
+        } break;
+        case DTYPE_UINT8: {
+            rval.set(-m_data.m_uint8);
+        } break;
+        case DTYPE_FLOAT64: {
+            rval.set(-m_data.m_float64);
+        } break;
+        case DTYPE_FLOAT32: {
+            rval.set(-m_data.m_float32);
+        } break;
+        default: return mknone();
+    }
+
+    return rval;
+}
+
+t_tscalar
+t_tscalar::operator+(const t_tscalar& other) const {
+    BINARY_OPERATOR_BODY(+)
+}
+
+t_tscalar
+t_tscalar::operator-(const t_tscalar& other) const {
+    BINARY_OPERATOR_BODY(-)
+}
+
+t_tscalar
+t_tscalar::operator*(const t_tscalar& other) const {
+    BINARY_OPERATOR_BODY(*)
+}
+
+t_tscalar
+t_tscalar::operator/(const t_tscalar& other) const {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    if (!is_numeric() || !other.is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+    }
+
+    if (!is_valid() || !other.is_valid()) {
+        return rval;
+    }
+
+    if (other.to_double() == 0) {
+        return rval;
+    }
+
+    rval.set(to_double() / other.to_double());
+
+    return rval;
+}
+
+t_tscalar
+t_tscalar::operator%(const t_tscalar& other) const {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    if (!is_numeric() || !other.is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+    }
+
+    if (!is_valid() || !other.is_valid()) {
+        return rval;
+    }
+
+    if (other.to_double() == 0) {
+        return rval;
+    }
+
+    rval.set(fmod(to_double(), other.to_double()));
+
+    return rval;
+}
+
+template <typename T>
+t_tscalar
+t_tscalar::operator+(T other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator+(other_scalar);
+}
+
+template <>
+t_tscalar
+t_tscalar::operator+(unsigned int other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator+(other_scalar);
+}
+
+template <typename T>
+t_tscalar
+t_tscalar::operator-(T other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator-(other_scalar);
+}
+
+template <typename T>
+t_tscalar
+t_tscalar::operator*(T other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator*(other_scalar);
+}
+
+template <>
+t_tscalar
+t_tscalar::operator*(int other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator*(other_scalar);
+}
+
+template <>
+t_tscalar
+t_tscalar::operator*(double other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator*(other_scalar);
+}
+
+template <typename T>
+t_tscalar
+t_tscalar::operator/(T other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator/(other_scalar);
+}
+
+/**
+ * Win32 build complains if the std::uint64_t specialization is unset, and
+ * Linux complains if the std::uint64_t is set as it somehow conflicts with
+ * the unsigned long specialization below the ifdef.
+ */
+#ifdef WIN32
+template <>
+t_tscalar
+t_tscalar::operator/(std::uint64_t other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator/(other_scalar);
+}
+#endif
+
+template <>
+t_tscalar
+t_tscalar::operator/(unsigned long other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(static_cast<std::uint32_t>(other));
+    return this->operator/(other_scalar);
+}
+
+template <>
+t_tscalar
+t_tscalar::operator/(double other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator/(other_scalar);
+}
+
+template <typename T>
+t_tscalar
+t_tscalar::operator%(T other) const {
+    t_tscalar other_scalar;
+    other_scalar.set(other);
+    return this->operator%(other_scalar);
+}
+
+t_tscalar&
+t_tscalar::operator+=(const t_tscalar& rhs) {
+    t_tscalar tmp = this->operator+(rhs);
+    this->set(tmp);
+    return *this;
+}
+
+t_tscalar&
+t_tscalar::operator-=(const t_tscalar& rhs) {
+    t_tscalar tmp = this->operator-(rhs);
+    this->set(tmp);
+    return *this;
+}
+
+t_tscalar&
+t_tscalar::operator*=(const t_tscalar& rhs) {
+    t_tscalar tmp = this->operator*(rhs);
+    this->set(tmp);
+    return *this;
+}
+
+t_tscalar&
+t_tscalar::operator/=(const t_tscalar& rhs) {
+    t_tscalar tmp = this->operator/(rhs);
+    this->set(tmp);
+    return *this;
+}
+
+t_tscalar&
+t_tscalar::operator%=(const t_tscalar& rhs) {
+    t_tscalar tmp = this->operator%(rhs);
+    this->set(tmp);
+    return *this;
 }
 
 bool
@@ -242,6 +560,7 @@ t_tscalar::set(bool v) {
 void
 t_tscalar::set(const char* v) {
     m_type = DTYPE_STR;
+
     if (can_store_inplace(v)) {
         strncpy(reinterpret_cast<char*>(&m_data), v, SCALAR_INPLACE_LEN);
         m_inplace = true;

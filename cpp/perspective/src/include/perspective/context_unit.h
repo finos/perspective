@@ -32,7 +32,7 @@ namespace perspective {
  * the order in which the table is meant to be read.
  * 
  * Additionally, to create a unit context, the context must have no pivots,
- * sorts, filters, or computed columns applied. It can have any number of
+ * sorts, filters, or expressions applied. It can have any number of
  * columns in any order. See implementations in the binding language to see
  * how a unit context is created.
  * 

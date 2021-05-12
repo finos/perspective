@@ -64,7 +64,7 @@ class View(object):
             and len(self._config.get_column_pivots()) == 0
             and len(self._config.get_filter()) == 0
             and len(self._config.get_sort()) == 0
-            and len(self._config.get_computed_columns()) == 0
+            and len(self._config.get_expressions()) == 0
         )
 
         if self._is_unit_context:
@@ -249,13 +249,28 @@ class View(object):
             item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()
         }
 
-    def computed_schema(self, as_string=False):
+    def expression_schema(self, as_string=False):
+        """Returns the expression schema of this :class:`~perspective.View`,
+        which is a key-value map that contains the expressions and their
+        Python data types.
+
+        If the columns are aggregated, their aggregated types will be returned
+        instead.
+
+        Keyword Args:
+            as_string (:obj:`bool`): returns data types as string
+                representations, if ``True``.
+
+        Returns:
+            :obj:`dict`: A map of :obj:`str` column name to :obj:`str` or
+                :obj:`type`, depending on the value of ``as_string`` kwarg.
+        """
         if as_string:
-            return {item[0]: item[1] for item in self._view.computed_schema().items()}
+            return {item[0]: item[1] for item in self._view.expression_schema().items()}
 
         return {
             item[0]: _str_to_pythontype(item[1])
-            for item in self._view.computed_schema().items()
+            for item in self._view.expression_schema().items()
         }
 
     def on_update(self, callback, mode=None):

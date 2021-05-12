@@ -389,12 +389,17 @@ function get_rule(regular, tag, def) {
 
 export async function createModel(regular, table, view, extend = {}) {
     const config = await view.get_config();
-    const [table_schema, table_computed_schema, num_rows, schema, computed_schema, column_paths] = await Promise.all([
+
+    // Extract just the expression strings from the expressions array, which
+    // contains more metadata than we need.
+    const expressions = config.expressions.map(expr => expr[0]);
+
+    const [table_schema, validated_expressions, num_rows, schema, expression_schema, column_paths] = await Promise.all([
         table.schema(),
-        table.computed_schema(config.computed_columns),
+        table.validate_expressions(expressions),
         view.num_rows(),
         view.schema(),
-        view.computed_schema(),
+        view.expression_schema(),
         view.column_paths()
     ]);
 
@@ -406,10 +411,10 @@ export async function createModel(regular, table, view, extend = {}) {
     const model = Object.assign(extend, {
         _view: view,
         _table: table,
-        _table_schema: {...table_schema, ...table_computed_schema},
+        _table_schema: {...table_schema, ...validated_expressions.expression_schema},
         _config: config,
         _num_rows: num_rows,
-        _schema: {...schema, ...computed_schema},
+        _schema: {...schema, ...expression_schema},
         _ids: [],
         _open_column_styles_menu: [],
         _plugin_background,

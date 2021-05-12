@@ -29,6 +29,7 @@ utils.with_server({}, () => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Name"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("filters", '[["Date", ">", "2019-01-01"]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.shadow_blur();

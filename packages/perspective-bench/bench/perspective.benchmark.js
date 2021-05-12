@@ -71,6 +71,28 @@ const COMPLEX_COMPUTED_CONFIGS = {
     ]
 };
 
+const SIMPLE_EXPRESSION = ['// computed \n "Sales" + "Profit"'];
+
+const COMPLEX_EXPRESSIONS = {
+    numeric: ['sqrt("Sales" * "Profit") + "Sales"', 'abs("Profit" * "Quantity")', 'abs("Profit" * "Quantity") - (sqrt("Sales" * "Profit") + "Sales")'],
+    string: [
+        'upper("City")',
+        'lower("Customer ID")',
+        'lower("Order ID")',
+        'upper("City") == lower("Customer ID")',
+        `concat(lower("Customer ID"), ', ', lower("Order ID"))`,
+        `concat("State", ' ', "City")`
+    ],
+    datetime: [
+        `bucket("Order Date", 'D')`,
+        `// computed2\n bucket("Order Date", 'S')`,
+        `day_of_week("computed2")`,
+        `month_of_year("Ship Date")`,
+        `bucket("computed2", 'Y')`,
+        `bucket("computed2", 'm')`
+    ]
+};
+
 /******************************************************************************
  *
  * Perspective.js Benchmarks
@@ -479,7 +501,7 @@ describe("View", async () => {
     }
 });
 
-describe("Computed Column", async () => {
+describe("Expression/Computed Column", async () => {
     for (const name of Object.keys(COMPUTED_FUNCS)) {
         describe("mixed", async () => {
             // Use a single source table for computed
@@ -529,6 +551,7 @@ describe("Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
                 let add_computed_method;
+
                 if (table.add_computed) {
                     add_computed_method = table.add_computed;
                 }
@@ -540,9 +563,16 @@ describe("Computed Column", async () => {
 
                         table = table.add_computed([COMPUTED_CONFIG]);
                     } else {
-                        view = await table.view({
-                            computed_columns: [COMPUTED_CONFIG]
-                        });
+                        let config = {};
+                        if (view.expression_schema) {
+                            // New expressions API
+                            config.expressions = SIMPLE_EXPRESSION;
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns = [COMPUTED_CONFIG];
+                        }
+
+                        view = await table.view(config);
                     }
 
                     // must process update
@@ -551,10 +581,19 @@ describe("Computed Column", async () => {
 
                 if (!add_computed_method) {
                     benchmark(`sort computed: \`${name}\``, async () => {
-                        view = await table.view({
-                            sort: [["computed", "desc"]],
-                            computed_columns: [COMPUTED_CONFIG]
-                        });
+                        let config = {
+                            sort: [["computed", "desc"]]
+                        };
+
+                        if (view.expression_schema) {
+                            // New expressions API
+                            config.expressions = SIMPLE_EXPRESSION;
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns = [COMPUTED_CONFIG];
+                        }
+
+                        view = await table.view(config);
 
                         await table.size();
                     });
@@ -578,10 +617,19 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`row pivot computed: \`${name}\``, async () => {
-                    view = await table.view({
-                        row_pivots: ["computed"],
-                        computed_columns: [COMPUTED_CONFIG]
-                    });
+                    let config = {
+                        row_pivots: ["computed"]
+                    };
+
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
 
                     await table.size();
                 });
@@ -604,11 +652,20 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`row and column pivot computed: \`${name}\``, async () => {
-                    view = await table.view({
+                    let config = {
                         row_pivots: ["computed"],
-                        column_pivots: ["computed"],
-                        computed_columns: [COMPUTED_CONFIG]
-                    });
+                        column_pivots: ["computed"]
+                    };
+
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
 
                     await table.size();
                 });
@@ -631,10 +688,19 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`column pivot computed: \`${name}\``, async () => {
-                    view = await table.view({
-                        column_pivots: ["computed"],
-                        computed_columns: [COMPUTED_CONFIG]
-                    });
+                    let config = {
+                        column_pivots: ["computed"]
+                    };
+
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
 
                     await table.size();
                 });
@@ -644,8 +710,6 @@ describe("Computed Column", async () => {
 
     // multi-dependency computed columns
     for (const name in COMPLEX_COMPUTED_CONFIGS) {
-        const CONFIG = COMPLEX_COMPUTED_CONFIGS[name];
-
         describe("mixed", async () => {
             // Use a single source table for computed
             let table;
@@ -671,19 +735,35 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`computed complex: \`${name}\``, async () => {
-                    view = await table.view({
-                        computed_columns: CONFIG
-                    });
+                    let config = {};
 
-                    // must process update
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[name];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                    }
+
+                    view = await table.view(config);
+
                     await table.size();
                 });
 
                 benchmark(`sort computed complex: \`${name}\``, async () => {
-                    view = await table.view({
-                        sort: [["computed", "desc"]],
-                        computed_columns: [COMPUTED_CONFIG]
-                    });
+                    let config = {};
+
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[name];
+                        config.sort = [[COMPLEX_EXPRESSIONS[name][0], "desc"]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.sort = [["computed", "desc"]];
+                    }
+
+                    view = await table.view(config);
 
                     await table.size();
                 });
@@ -706,11 +786,19 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`row pivot computed complex: \`${name}\``, async () => {
-                    view = await table.view({
-                        row_pivots: ["computed"],
-                        computed_columns: CONFIG
-                    });
+                    let config = {};
 
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[name];
+                        config.row_pivots = [COMPLEX_EXPRESSIONS[name][0]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.row_pivots = ["computed"];
+                    }
+
+                    view = await table.view(config);
                     await table.size();
                 });
             });
@@ -732,12 +820,21 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`row and column pivot computed complex: \`${name}\``, async () => {
-                    view = await table.view({
-                        row_pivots: ["computed"],
-                        column_pivots: ["computed"],
-                        computed_columns: [COMPUTED_CONFIG]
-                    });
+                    let config = {};
 
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[name];
+                        config.row_pivots = [COMPLEX_EXPRESSIONS[name][0]];
+                        config.column_pivots = [COMPLEX_EXPRESSIONS[name][1]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.row_pivots = ["computed"];
+                        config.column_pivots = ["computed2"];
+                    }
+
+                    view = await table.view(config);
                     await table.size();
                 });
             });
@@ -759,11 +856,19 @@ describe("Computed Column", async () => {
                 }
 
                 benchmark(`column pivot computed complex: \`${name}\``, async () => {
-                    view = await table.view({
-                        column_pivots: ["computed"],
-                        computed_columns: CONFIG
-                    });
+                    let config = {};
 
+                    if (view.expression_schema) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[name];
+                        config.column_pivots = [COMPLEX_EXPRESSIONS[name][0]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.column_pivots = ["computed"];
+                    }
+
+                    view = await table.view(config);
                     await table.size();
                 });
             });

@@ -261,11 +261,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             ...     row_pivots=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
-            ...     computed_columns=[{
-            ...         "column": "sqrt(a)",
-            ...         "computed_function_name": "sqrt",
-            ...         "inputs": ["a"]
-            ...     }])
+            ...     expressions=["// new column \n \"Sales\" + \"Profit\""])
         """
         self._displayed = False
         self.on_displayed(self._on_display)

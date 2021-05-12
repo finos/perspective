@@ -77,9 +77,7 @@ export default function(Module) {
      * @param {DataAccessor|Object[]} accessor - the data we provide to the
      * Table
      * @param {Object} _Table - `undefined` if a new table will be created, or
-     * an `std::shared_ptr<Table>` if updating
-     * @param {Object[]} computed - An array of computed columns to be applied
-     * to the table.
+     * an `std::shared_ptr<Table>` if updating.
      * @param {String} index - A column name to be used as a primary key.
      * @param {Number} limit - an upper bound on the number of rows in the
      * table. If set, new rows that exceed the limit start overwriting old ones
@@ -160,7 +158,7 @@ export default function(Module) {
             this.view_config.column_pivots.length === 0 &&
             this.view_config.filter.length === 0 &&
             this.view_config.sort.length === 0 &&
-            this.view_config.computed_columns.length === 0;
+            this.view_config.expressions.length === 0;
 
         if (this.is_unit_context) {
             this._View = __MODULE__.make_view_unit(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
@@ -308,8 +306,8 @@ export default function(Module) {
     };
 
     /**
-     * The computed column schema of this {@link module:perspective~view},
-     * containing only user-created computed columns.
+     * The expression schema of this {@link module:perspective~view},
+     * which contains only the expressions created on this view.
      *
      * A schema is an Object, the keys of which are the columns of this
      * {@link module:perspective~view}, and the values are their string type
@@ -318,23 +316,20 @@ export default function(Module) {
      * columns in the underlying {@link module:perspective~table}.
      *
      * @example
-     * // Create a view with computed columns
-     * const view = await table.view({
-     *      computed_columns: [{
-     *          column: "x + y",
-     *          computed_function_name: "+",
-     *          inputs: ["x", "y"]
-     *      }]
+     * // Create a view with expressions
+     * const view = table.view({
+     *      expressions: ['"x" + "y" - 100']
      * });
-     * const computed_schema = await view.computed_schema(); // {x: "float"}
+     *
+     * await view.expression_schema(); // {'"x" + "y" - 100': "float"}
      *
      * @async
      *
      * @returns {Promise<Object>} A Promise of this
-     * {@link module:perspective~view}'s computed column schema.
+     * {@link module:perspective~view}'s expression schema.
      */
-    view.prototype.computed_schema = function(override = true) {
-        const schema = extract_map(this._View.computed_schema());
+    view.prototype.expression_schema = function(override = true) {
+        const schema = extract_map(this._View.expression_schema());
         if (override) {
             for (const key of Object.keys(schema)) {
                 let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
@@ -1016,7 +1011,7 @@ export default function(Module) {
         this.columns = config.columns;
         this.filter = config.filter || [];
         this.sort = config.sort || [];
-        this.computed_columns = config.computed_columns || [];
+        this.expressions = config.expressions || [];
         this.filter_op = config.filter_op || "and";
         this.row_pivot_depth = config.row_pivot_depth;
         this.column_pivot_depth = config.column_pivot_depth;
@@ -1064,15 +1059,14 @@ export default function(Module) {
         return vector;
     };
 
-    view_config.prototype.get_computed_columns = function() {
+    view_config.prototype.get_expressions = function() {
         let vector = __MODULE__.make_2d_val_vector();
-        for (let computed of this.computed_columns) {
-            let computed_vector = __MODULE__.make_val_vector();
-            computed_vector.push_back(computed.column);
-            computed_vector.push_back(computed.computed_function_name);
-            // make this input_columns
-            computed_vector.push_back(computed.inputs);
-            vector.push_back(computed_vector);
+        for (let expression of this.expressions) {
+            let inner = __MODULE__.make_val_vector();
+            for (let val of expression) {
+                inner.push_back(val);
+            }
+            vector.push_back(inner);
         }
         return vector;
     };
@@ -1096,7 +1090,7 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function table(_Table, index, computed, limit, overridden_types) {
+    function table(_Table, index, limit, overridden_types) {
         this._Table = _Table;
         this.gnode_id = this._Table.get_gnode().get_id();
         this._Table.get_pool().set_update_delegate(this);
@@ -1104,17 +1098,12 @@ export default function(Module) {
         this.initialized = false;
         this.index = index;
         this.limit = limit;
-        this.computed = computed || [];
         this.update_callbacks = [];
         this._delete_callbacks = [];
         this.views = [];
         this.overridden_types = overridden_types;
         bindall(this);
     }
-
-    table.prototype.compute = function() {
-        return true;
-    };
 
     table.prototype.get_id = function() {
         return this._Table.get_id();
@@ -1266,80 +1255,178 @@ export default function(Module) {
     };
 
     /**
-     * Given an array of computed column definitions, perform type lookups to
-     * create a schema for the computed column without calculating or
-     * constructing any new columns.
+     * Transform an expression string into a vector that internally provides
+     * the engine with more metadata in order to efficiently compute the
+     * expression:
      *
-     * @async
-     * @param {Array<Object>} computed_columns an array of computed column
-     * definitions.
+     * v[0]: the expression string as typed by the user
+     * v[1]: the expression string with "column" replaced with col0, col1,
+     *  etc., which allows for faster lookup of column values.
+     * v[2]: a map of column keys (col0, col1) to actual column names,
+     *  which will be used in the engine to look up column values.
      *
-     * @returns {Promise<Object>} A Promise that resolves to a computed schema
-     * based on the computed column definitions provided.
+     * @private
+     * @param {Array<String>} expressions
      */
-    table.prototype.computed_schema = function(computed_columns, override = true) {
-        const new_schema = {};
+    function parse_expression_strings(expressions) {
+        let validated_expressions = [];
 
-        if (!computed_columns || computed_columns.length === 0) return new_schema;
+        // Keep track of aliases that coincide and skip them.
+        let alias_set = new Set();
 
-        // Before passing into C++, transform array of objects into vector of
-        // Tuples expected by the Emscripten binding function.
-        let vector = __MODULE__.make_2d_val_vector();
+        for (let expression_string of expressions) {
+            if (expression_string.includes('""')) {
+                console.error(`Skipping expression '${expression_string}', as it cannot reference an empty column!`);
+                continue;
+            }
 
-        for (let computed of computed_columns) {
-            let computed_vector = __MODULE__.make_val_vector();
-            computed_vector.push_back(computed.column);
-            computed_vector.push_back(computed.computed_function_name);
-            computed_vector.push_back(computed.inputs);
-            vector.push_back(computed_vector);
+            // Map of column names to column IDs, so that we generate
+            // column IDs correctly without collision.
+            let column_name_map = {};
+
+            // Map of column IDs to column names, so the engine can look
+            // up the right column internally without more transforms.
+            let column_id_map = {};
+            let running_cidx = 0;
+
+            // First, look for a column alias, which is a // style comment
+            // on the first line of the expression.
+            let expression_alias;
+            let skip_expression = false;
+
+            let parsed_expression_string = expression_string.replace(/\/\/(.+)\n/, (_, alias) => {
+                expression_alias = alias.trim();
+
+                // Expression alias cannot overlap.
+                if (alias_set.has(expression_alias)) {
+                    console.error(`Skipping expression '${expression_string}', as it reuses alias ${alias}!`);
+                    skip_expression = true;
+                }
+
+                alias_set.add(expression_alias);
+
+                return "";
+            });
+
+            if (skip_expression) {
+                continue;
+            }
+
+            // If an alias does not exist, the alias is the expression itself.
+            if (!expression_alias || expression_alias.length == 0) {
+                expression_alias = expression_string;
+            }
+
+            parsed_expression_string = parsed_expression_string.replace(/\"(.*?[^\\])\"/g, (_, cname) => {
+                // If the column name contains escaped double quotes, replace
+                // them and assume that they escape one double quote. If there
+                // are multiple double quotes being escaped, i.e. \""...well?
+                cname = cname.replace(/\\"/g, '"');
+
+                if (column_name_map[cname] === undefined) {
+                    let column_id = `COLUMN${running_cidx}`;
+                    column_name_map[cname] = column_id;
+                    column_id_map[column_id] = cname;
+                }
+
+                running_cidx++;
+                return column_name_map[cname];
+            });
+
+            // Replace single quote string literals and wrap them in a call to
+            // intern() which makes sure they don't leak
+            parsed_expression_string = parsed_expression_string.replace(/'(.*?[^\\])'/g, match => `intern(${match})`);
+
+            // Replace intern() for bucket, as it takes a string literal
+            // parameter and does not work if that param is interned. TODO:
+            // this is clumsy and we should have a better way of handling it.
+            parsed_expression_string = parsed_expression_string.replace(/bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)/g, (match, full, value) => {
+                return `${match.substr(0, match.indexOf(full))}'${value}')`;
+            });
+
+            validated_expressions.push([expression_alias, expression_string, parsed_expression_string, column_id_map]);
         }
 
-        let computed_schema = __MODULE__.get_table_computed_schema(this._Table, vector);
-        let columns = computed_schema.columns();
-        let types = computed_schema.types();
+        return validated_expressions;
+    }
 
-        for (let key = 0; key < columns.size(); key++) {
-            const name = columns.get(key);
-            const type = types.get(key);
-            if (override && this.overridden_types[name]) {
-                new_schema[name] = this.overridden_types[name];
+    /**
+     * Given an array of expressions, return an object containing `expressions`,
+     * which map expression aliases to data types, and `errors`, which
+     * maps expression aliases to error messages. If an expression that was
+     * passed in is not in `expressions`, it is guaranteed to be in `errors`.
+     *
+     * @async
+     * @param {Array<String>} expressions An array of string expressions to
+     * be validated.
+     *
+     * @returns {Promise<Object>}
+     *
+     * @example
+     * const results = await table.validate_expressions([
+     *  '"Sales" + "Profit"', "invalid", "1 + 'string'"
+     * ]);
+     *
+     * // {'"Sales" + "Profit"': "float"}
+     * console.log(results.expression_schema);
+     *
+     * // {"invalid": "unknown token!", "1 + 'string'": "TypeError"}
+     * console.log(results.errors);
+     */
+    table.prototype.validate_expressions = function(expressions, override = true) {
+        const validated = {
+            expression_schema: {},
+            errors: {}
+        };
+
+        if (!expressions || expressions.length === 0) return validated;
+        expressions = parse_expression_strings(expressions);
+
+        // Transform Array into a C++ vector that can be passed through
+        // Emscripten.
+        let vector = __MODULE__.make_2d_val_vector();
+
+        for (let expression of expressions) {
+            let inner = __MODULE__.make_val_vector();
+            for (let val of expression) {
+                inner.push_back(val);
+            }
+            vector.push_back(inner);
+        }
+
+        const validation_results = __MODULE__.validate_expressions(this._Table, vector);
+        const aliases = validation_results.get_expressions();
+        const results = validation_results.get_results();
+
+        for (let i = 0; i < aliases.size(); i++) {
+            const alias = aliases.get(i);
+            let result = results.get(i);
+
+            if (defaults.DATA_TYPES[result]) {
+                // valid - returned a type
+                if (override && this.overridden_types[alias]) {
+                    result = this.overridden_types[alias];
+                }
+
+                validated.expression_schema[alias] = result;
             } else {
-                new_schema[name] = get_column_type(type.value);
+                // Invalid - returned an error message
+                validated.errors[alias] = result;
             }
         }
 
-        computed_schema.delete();
-        columns.delete();
-        types.delete();
+        aliases.delete();
+        results.delete();
+        validation_results.delete();
 
-        return new_schema;
-    };
-
-    /**
-     * Given a computed function name, return an array of strings containing
-     * the expected input column types for the computed function.
-     *
-     * @private
-     * @async
-     * @param {String} computed_function_name
-     * @returns {Promise<Array<String>>}
-     */
-    table.prototype.get_computation_input_types = function(computed_function_name) {
-        const types = __MODULE__.get_computation_input_types(computed_function_name);
-        const new_types = [];
-
-        for (let i = 0; i < types.size(); i++) {
-            const type = types.get(i);
-            new_types.push(get_column_type(type.value));
-        }
-
-        return new_types;
+        return validated;
     };
 
     /**
      * Validates a filter configuration, i.e. that the value to filter by is not
      * null or undefined.
      *
+     * @async
      * @param {Array<string>} [filter] a filter configuration to test.
      */
     table.prototype.is_valid_filter = function(filter) {
@@ -1439,14 +1526,21 @@ export default function(Module) {
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
-        config.computed_columns = config.computed_columns || [];
+        config.expressions = config.expressions || [];
+
+        const table_schema = this.schema();
+
+        if (config.expressions.length > 0) {
+            config.expressions = parse_expression_strings(config.expressions);
+        }
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
             config.columns = this.columns();
-            if (config.computed_columns.length > 0) {
-                for (let col of config.computed_columns) {
-                    config.columns.push(col.column);
+
+            if (config.expressions.length > 0) {
+                for (const expr of config.expressions) {
+                    config.columns.push(expr[0]);
                 }
             }
         }
@@ -1454,8 +1548,8 @@ export default function(Module) {
         // convert date/datetime filters to Date() objects, so they are parsed
         // as local time
         if (config.filter.length > 0) {
-            const table_schema = this.schema();
             for (let filter of config.filter) {
+                // TODO: this does not work for expressions
                 const dtype = table_schema[filter[0]];
                 const is_compare = filter[1] !== perspective.FILTER_OPERATORS.isNull && filter[1] !== perspective.FILTER_OPERATORS.isNotNull;
                 if (is_compare && (dtype === "date" || dtype === "datetime")) {
@@ -1634,39 +1728,9 @@ export default function(Module) {
     };
 
     /**
-     * Return an Object containing computed function metadata. Keys are strings,
-     * and each value is an Object containing the following metadata:
-     *
-     * - name
-     * - label
-     * - pattern
-     * - computed_function_name: the name of the computed function
-     * - input_type: the type of its input columns (all input columns are of
-     * the same type)
-     * - return_type: the return type of its output column
-     * - group: a category for the function
-     * - num_params: the number of input parameters
-     * - format_function: an anonymous function used for naming new columns
-     * - help: a help string that can be displayed in the UI.
-     */
-    table.prototype.get_computed_functions = function() {
-        let functions = extract_map(__MODULE__.get_computed_functions());
-        for (const f in functions) {
-            if (functions.hasOwnProperty(f)) {
-                // Extract inner map
-                functions[f] = extract_map(functions[f]);
-                functions[f]["num_params"] = parseInt(functions[f]["num_params"]);
-            }
-        }
-        return functions;
-    };
-
-    /**
      * The column names of this table.
      *
      * @async
-     * @param {boolean} computed Should computed columns be included? (default
-     * false)
      * @returns {Promise<Array<string>>} An array of column names for this
      * table.
      */
@@ -1788,7 +1852,7 @@ export default function(Module) {
 
                 // Pass through user-provided values or `null` to the
                 // Javascript Table constructor.
-                return new table(_Table, options.index, undefined, options.limit, overridden_types);
+                return new table(_Table, options.index, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {
                     _Table.delete();

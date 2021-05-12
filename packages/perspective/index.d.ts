@@ -7,7 +7,9 @@ declare module "@finos/perspective" {
         FLOAT = "float",
         INTEGER = "integer",
         BOOLEAN = "boolean",
-        DATE = "date"
+        DATE = "date",
+        DATETIME = "datetime",
+        OBJECT = "object"
     }
 
     export type ValuesByType = {
@@ -93,7 +95,7 @@ declare module "@finos/perspective" {
         on_delete(callback: Function): void;
         on_update(callback: UpdateCallback, options?: {mode?: string}): void;
         schema(): Promise<Schema>;
-        computed_schema(): Promise<Schema>;
+        expression_schema(): Promise<Schema>;
         to_arrow(options?: SerializeConfig & {data_slice: any}): Promise<ArrayBuffer>;
         to_columns(options?: SerializeConfig): Promise<Array<object>>;
         to_csv(options?: SerializeConfig & {config: object}): Promise<string>;
@@ -104,6 +106,11 @@ declare module "@finos/perspective" {
     export type UpdateCallback = (updated: {port_id: number; delta: Array<object> | ArrayBuffer}) => void;
 
     export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string} | ArrayBuffer;
+
+    export type ValidatedExpressions = {
+        expression_schema: Schema;
+        errors: {[key: string]: string};
+    };
 
     export type TableOptions = {
         index?: string;
@@ -117,11 +124,7 @@ declare module "@finos/perspective" {
         aggregates?: {[column_name: string]: string};
         sort?: Array<Array<string>>;
         filter?: Array<Array<string>>;
-        computed_columns?: Array<{
-            column: string;
-            computed_function_name: string;
-            inputs: Array<string>;
-        }>;
+        expressions?: Array<string>;
     };
 
     export type Table = {
@@ -130,7 +133,7 @@ declare module "@finos/perspective" {
         replace(data: TableData): Promise<void>;
         delete(): Promise<void>;
         on_delete(callback: Function): void;
-        computed_schema(): Promise<Schema>;
+        validate_expressions(expressions: Array<string>): Promise<ValidatedExpressions>;
         schema(): Promise<Schema>;
         size(): Promise<number>;
         update(data: TableData, options?: {port_id?: number}): void;
