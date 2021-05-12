@@ -87,43 +87,7 @@ public:
     // An empty config, used for the unit context.
     t_config();
 
-    // Constructors used for C++ tests, not exposed to other parts of the engine
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
-
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
-
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
-
-    t_config(
-        const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
-
-    t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
-    
-    /**
-     * @brief For each column in the config's `detail_columns` (i.e. visible
-     * columns), add it to the internal map tracking column indices.
-     * 
-     * @param detail_columns 
-     */
-    void setup(const std::vector<std::string>& detail_columns);
-
-    void setup(const std::vector<std::string>& detail_columns,
-        const std::vector<std::string>& sort_pivot,
-        const std::vector<std::string>& sort_pivot_by);
-
-    /**
-     * @brief A t_config is trivial if it does not have any pivots, sorts,
-     * filter terms, or expressions. This allows a context_zero to
-     * skip creating a traversal and simply read from its gnode state for
-     * a performance boost.
-     * 
-     * @return true 
-     * @return false 
-     */
-    bool is_trivial_config();
+    void init();
 
     t_index get_colidx(const std::string& colname) const;
 
@@ -161,8 +125,11 @@ public:
 
     const std::vector<t_fterm>& get_fterms() const;
 
-    std::vector<t_computed_expression>
+    const std::vector<t_computed_expression>&
     get_expressions() const;
+
+    const tsl::hopscotch_map<std::string, std::string>&
+    get_expression_alias_map() const;
 
     t_totals get_totals() const;
 
@@ -200,9 +167,10 @@ private:
     t_filter_op m_combiner;
     bool m_column_only;
 
-    // A trivial config exists if there are no pivots, sorts, filters, or
-    // expression columns.
-    bool m_is_trivial_config;
+    // A map of expression aliases to expression strings as typed by the
+    // user. This allows for multiple views to simultaneously exist with
+    // the same expression alias that resolve to different columns.
+    tsl::hopscotch_map<std::string, std::string> m_expression_alias_map;
 
     // Internal
     t_totals m_totals;
