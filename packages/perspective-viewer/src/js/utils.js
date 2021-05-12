@@ -201,6 +201,22 @@ export function throttlePromise(target, property, descriptor, clear = false) {
     const lock = Symbol("private lock");
     const _super = descriptor.value;
 
+    async function throttleOnce(id) {
+        if (id !== this[lock].gen) {
+            // This invocation got de-duped with a later one, but it will
+            // wake up first, so if there is not a lock acquired here, push
+            // it to the back of the event queue.
+            if (!this[lock].lock) {
+                await new Promise(requestAnimationFrame);
+            }
+
+            // Now await the currently-processing invocation (which
+            // occurred after than this one) and return.
+            await this[lock].lock;
+            return true;
+        }
+    }
+
     // Wrap the underlying function
     descriptor.value = async function(...args) {
         // Initialize the lock for this Object instance, if it has never been
@@ -210,6 +226,10 @@ export function throttlePromise(target, property, descriptor, clear = false) {
         // Assign this invocation a unique ID.
         let id = ++this[lock].gen;
 
+        if (clear) {
+            await new Promise(requestAnimationFrame);
+        }
+
         // If the `lock` property is defined, a previous invocation is still
         // processing.
         if (this[lock].lock) {
@@ -218,20 +238,15 @@ export function throttlePromise(target, property, descriptor, clear = false) {
             // invocation's state changes.
             await this[lock].lock;
 
-            // However, we only want to execute the _last_ such invocation,
-            // since each call precludes the previous ones if they are
-            // still queue-ed.
-            if (id !== this[lock].gen) {
-                // This invocation got de-duped with a later one, but it will
-                // wake up first, so if there is not a lock acquired here, push
-                // it to the back of the event queue.
-                if (!this[lock].lock) {
-                    await new Promise(requestAnimationFrame);
-                }
-
-                // Now await the currently-processing invocation (which
-                // occurred after than this one) and return.
-                await this[lock].lock;
+            // We only want to execute the _last_ invocation, since each call
+            // precludes the previous ones if they are still queue-ed.
+            if (await throttleOnce.call(this, id)) {
+                return;
+            }
+        } else if (clear) {
+            // Even if the lock is clear, we need to debounce the queue-ed.
+            const debounced = await throttleOnce.call(this, id);
+            if (debounced) {
                 return;
             }
         }
