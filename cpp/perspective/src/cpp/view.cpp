@@ -15,25 +15,6 @@
 
 namespace perspective {
 
-std::string
-join_column_names(
-    const std::vector<t_tscalar>& names, const std::string& separator) {
-    if (names.size() == 0) {
-        return "";
-    } else if (names.size() == 1) {
-        return names.at(0).to_string();
-    } else {
-        std::ostringstream ss;
-        for (auto i = 0; i < names.size() - 1; ++i) {
-            std::string str = names.at(i).to_string();
-            ss << str;
-            ss << separator;
-        }
-        ss << names.at(names.size() - 1).to_string();
-        return ss.str();
-    }
-}
-
 template <typename CTX_T>
 View<CTX_T>::View(
         std::shared_ptr<Table> table,
@@ -53,6 +34,8 @@ View<CTX_T>::View(
     m_filter = m_view_config->get_fterm();
     m_sort = m_view_config->get_sortspec();
     m_expressions = m_view_config->get_expressions();
+    m_expression_alias_map = m_view_config->get_expression_alias_map();
+    m_expression_alias_reverse_map = m_view_config->get_expression_alias_reverse_map();
 
     // Add hidden columns used in sorts to the `m_hidden_sort` vector.
     if (m_sort.size() > 0) {
@@ -77,8 +60,6 @@ template <typename CTX_T>
 View<CTX_T>::~View() {
     auto pool = m_table->get_pool();
     auto gnode = m_table->get_gnode();
-    // TODO: need to invalidate memory used by previous computed columns
-    // without affecting views that depend on those computed columns.
     pool->unregister_context(gnode->get_id(), m_name);
 }
 
@@ -159,13 +140,20 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
     const std::vector<t_aggspec> aggs = m_ctx->get_aggregates();
     std::vector<std::string> aggregate_names(aggs.size());
+    names.reserve(m_ctx->unity_get_column_count());
 
     for (auto i = 0; i < aggs.size(); ++i) {
-        aggregate_names[i] = aggs[i].name();
+        const std::string& agg_name = aggs[i].name();
+
+        if (m_expression_alias_reverse_map.count(agg_name)) {
+            aggregate_names[i] = m_expression_alias_reverse_map.at(agg_name);
+        } else {
+            aggregate_names[i] = agg_name;
+        }
     }
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
-        std::string name = aggregate_names[key % aggregate_names.size()];
+        const std::string& name = aggregate_names[key % aggregate_names.size()];
 
         if (name == "psp_okey") {
             continue;
@@ -177,10 +165,32 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
         }
 
         std::vector<t_tscalar> new_path;
-        for (auto path = col_path.rbegin(); path != col_path.rend(); ++path) {
-            new_path.push_back(*path);
+
+        for (auto iter = col_path.rbegin(); iter != col_path.rend(); ++iter) {
+            const t_tscalar& path = *iter;
+            const std::string& colname = path.to_string();
+
+            if (m_expression_alias_reverse_map.count(colname)) {
+                t_tscalar new_col_path;
+                new_col_path.set(m_expression_alias_reverse_map.at(colname).c_str());
+                new_path.push_back(new_col_path);
+            } else {
+                new_path.push_back(path);
+            }
+
         }
-        new_path.push_back(m_ctx->get_aggregate_name(key % aggregate_names.size()));
+
+        const t_tscalar& agg_name = m_ctx->get_aggregate_name(key % aggregate_names.size());
+        const std::string& agg_name_str = agg_name.to_string();
+
+        if (m_expression_alias_reverse_map.count(agg_name_str)) {
+            t_tscalar new_agg_name;
+            new_agg_name.set(m_expression_alias_reverse_map.at(agg_name_str).c_str());
+            new_path.push_back(new_agg_name);
+        } else {
+            new_path.push_back(agg_name);
+        }
+
         names.push_back(new_path);
     }
 
@@ -191,14 +201,21 @@ template <>
 std::vector<std::vector<t_tscalar>>
 View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
+    names.reserve(m_ctx->unity_get_column_count());
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
-        if (name.to_string() == "psp_okey") {
+        std::string colname = name.to_string();
+
+        if (colname == "psp_okey") {
             continue;
         };
-        std::vector<t_tscalar> col_path;
-        col_path.push_back(name);
+
+        if (m_expression_alias_reverse_map.count(colname)) {
+            name.set(m_expression_alias_reverse_map.at(colname).c_str());
+        }
+
+        std::vector<t_tscalar> col_path{name};
         names.push_back(col_path);
     }
 
@@ -209,12 +226,20 @@ template <>
 std::vector<std::vector<t_tscalar>>
 View<t_ctxunit>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
+    names.reserve(m_ctx->unity_get_column_count());
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
-        if (name.to_string() == "psp_okey") {
+        std::string colname = name.to_string();
+
+        if (colname == "psp_okey") {
             continue;
         };
+
+        if (m_expression_alias_reverse_map.count(colname)) {
+            name.set(m_expression_alias_reverse_map.at(colname).c_str());
+        }
+
         std::vector<t_tscalar> col_path;
         col_path.push_back(name);
         names.push_back(col_path);
@@ -267,7 +292,11 @@ View<CTX_T>::schema() const {
     std::map<std::string, std::string> new_schema;
 
     for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
+        std::string name = names[i];
+        if (m_expression_alias_reverse_map.count(name)) {
+            name = m_expression_alias_reverse_map.at(name);
+        }
+        types[name] = _types[i];
     }
 
     auto col_names = column_names(false);
@@ -293,8 +322,13 @@ View<t_ctxunit>::schema() const {
     std::vector<std::string> names = schema.columns();
 
     std::map<std::string, t_dtype> types;
+
     for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
+        std::string name = names[i];
+        if (m_expression_alias_reverse_map.count(name)) {
+            name = m_expression_alias_reverse_map.at(name);
+        }
+        types[name] = _types[i];
     }
 
     std::vector<std::vector<t_tscalar>> cols = column_names(false);
@@ -319,8 +353,13 @@ View<t_ctx0>::schema() const {
     std::vector<std::string> names = schema.columns();
 
     std::map<std::string, t_dtype> types;
+
     for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
+        std::string name = names[i];
+        if (m_expression_alias_reverse_map.count(name)) {
+            name = m_expression_alias_reverse_map.at(name);
+        }
+        types[name] = _types[i];
     }
 
     std::vector<std::vector<t_tscalar>> cols = column_names(false);
@@ -340,48 +379,24 @@ View<t_ctx0>::schema() const {
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::expression_schema() const {
-    auto schema = m_ctx->get_schema();
-    auto _types = schema.types();
-    auto names = schema.columns();
-
     std::map<std::string, t_dtype> types;
     std::map<std::string, std::string> new_schema;
-
-    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
-    }
 
     for (const auto& expr : m_expressions) {
         std::string expression_alias = expr.get_expression_alias();
         new_schema[expression_alias] = dtype_to_str(expr.get_dtype());
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[expression_alias] = _map_aggregate_types(expression_alias, new_schema[expression_alias]);
+            new_schema[expression_alias] = _map_aggregate_types(expr.get_expression_string(), new_schema[expression_alias]);
         }
     }
 
     return new_schema;
 }
 
-
-template <>
-std::map<std::string, std::string>
-View<t_ctxunit>::expression_schema() const {
-    return {};
-}
-
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::expression_schema() const {
-    t_schema schema = m_ctx->get_schema();
-    std::vector<t_dtype> _types = schema.types();
-    std::vector<std::string> names = schema.columns();
-
-    std::map<std::string, t_dtype> types;
-    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
-    }
-
     std::map<std::string, std::string> new_schema;
 
     for (const auto& expr : m_expressions) {
@@ -390,6 +405,12 @@ View<t_ctx0>::expression_schema() const {
     }
 
     return new_schema;
+}
+
+template <>
+std::map<std::string, std::string>
+View<t_ctxunit>::expression_schema() const {
+    return {};
 }
 
 template <typename T>
@@ -557,9 +578,13 @@ View<CTX_T>::data_slice_to_arrow(
         std::string name;
 
         if (sides() > 1) {
-            name = join_column_names(col_path, m_separator);
+            name = _join_column_names(col_path, m_separator);
         } else {
             name = col_path.at(col_path.size() - 1).to_string();
+
+            if (m_expression_alias_reverse_map.count(name)) {
+                name = m_expression_alias_reverse_map.at(name);
+            }
         }
 
         std::shared_ptr<arrow::Array> arr;
@@ -938,6 +963,37 @@ View<CTX_T>::_find_hidden_sort(const std::vector<t_sortspec>& sort) {
             // Store the actual column, not the composite column path
             m_hidden_sort.push_back(s.m_colname);
         }
+    }
+}
+
+template <typename CTX_T>
+std::string
+View<CTX_T>::_join_column_names(
+    const std::vector<t_tscalar>& names, const std::string& separator) const {
+    if (names.size() == 0) {
+        return "";
+    } else if (names.size() == 1) {
+        std::string str = names.at(0).to_string();
+
+        if (m_expression_alias_reverse_map.count(str)) {
+            str = m_expression_alias_reverse_map.at(str);
+        }
+
+        return str;
+    } else {
+        std::ostringstream ss;
+        for (auto i = 0; i < names.size() - 1; ++i) {
+            std::string str = names.at(i).to_string();
+
+            if (m_expression_alias_reverse_map.count(str)) {
+                str = m_expression_alias_reverse_map.at(str);
+            }
+
+            ss << str;
+            ss << separator;
+        }
+        ss << names.at(names.size() - 1).to_string();
+        return ss.str();
     }
 }
 

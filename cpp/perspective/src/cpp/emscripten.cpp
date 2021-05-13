@@ -1363,35 +1363,13 @@ namespace binding {
         auto sort = config.call<std::vector<std::vector<std::string>>>("get_sort");
         auto filter_op = config["filter_op"].as<std::string>();
 
-        // aggregates require manual parsing - std::maps read from JS are empty
-        t_val j_aggregate_keys
-            = t_val::global("Object").call<t_val>("keys", config["aggregates"]);
-        auto aggregate_names = vecFromArray<t_val, std::string>(j_aggregate_keys);
-
-        tsl::ordered_map<std::string, std::vector<std::string>> aggregates;
-        for (const auto& name : aggregate_names) {
-            t_val val = config["aggregates"][name];
-            bool is_array = t_val::global("Array").call<bool>("isArray", val);
-            if (is_array) {
-                auto agg = vecFromArray<t_val, std::string>(val);
-                aggregates[name] = agg;
-            } else {
-                std::vector<std::string> agg {val.as<std::string>()};
-                aggregates[name] = agg;
-            }
-        };
-
-        bool column_only = false;
-
-        // make sure that primary keys are created for column-only views
-        if (row_pivots.size() == 0 && column_pivots.size() > 0) {
-            row_pivots.push_back("psp_okey");
-            column_only = true;
-        }
-
+        // Do expressions first, since we want to change all items that
+        // reference an alias to reference the whole expression string.
         auto js_expressions = config.call<std::vector<std::vector<t_val>>>("get_expressions");
         std::vector<t_computed_expression> expressions;
+        tsl::hopscotch_map<std::string, std::string> expression_alias_map;
         expressions.reserve(js_expressions.size());
+        expression_alias_map.reserve(js_expressions.size());
 
         // Will either abort() or succeed completely, and this isn't a public
         // API so we can directly index for speed.
@@ -1402,8 +1380,7 @@ namespace binding {
             std::string parsed_expression_string = expr[2].as<std::string>();
             std::vector<std::pair<std::string, std::string>> column_ids;
 
-            // Don't allow overwriting of "real" table columns or multiple
-            // columns with the same alias.
+            // Don't allow overwriting of "real" table columns.
             if (schema->has_column(expression_alias)) {
                 std::stringstream ss;
                 ss << "View creation failed: cannot create expression column '"
@@ -1429,23 +1406,101 @@ namespace binding {
             t_computed_expression expression = t_computed_expression_parser::precompute(
                 expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
-            schema->add_column(expression_alias, expression.get_dtype());
+            expression_alias_map[expression_alias] = expression_string;
+
+            // At this point, we start to erase the alias so that it is
+            // no longer internally referenced by pivots, aggregates, etc, and
+            // only lives in the `expression_alias_map`.
+            schema->add_column(expression_string, expression.get_dtype());
             expressions.push_back(expression);
+        }
+
+        for (auto i = 0; i < columns.size(); ++i) {
+            const std::string& column_name = columns[i];
+            if (expression_alias_map.count(column_name) != 0) {
+                columns[i] = expression_alias_map[column_name];
+            }
+        }
+        
+        for (auto i = 0; i < row_pivots.size(); ++i) {
+            const std::string& rp = row_pivots[i];
+            if (expression_alias_map.count(rp) != 0) {
+                row_pivots[i] = expression_alias_map[rp];
+            }
+        }
+
+        for (auto i = 0; i < column_pivots.size(); ++i) {
+            const std::string& cp = column_pivots[i];
+            if (expression_alias_map.count(cp) != 0) {
+                column_pivots[i] = expression_alias_map[cp];
+            }
+        }
+
+        // aggregates require manual parsing - std::maps read from JS are empty
+        t_val j_aggregate_keys
+            = t_val::global("Object").call<t_val>("keys", config["aggregates"]);
+        std::vector<std::string> aggregate_names = vecFromArray<t_val, std::string>(j_aggregate_keys);
+
+        tsl::ordered_map<std::string, std::vector<std::string>> aggregates;
+        for (std::string& aggregate_name : aggregate_names) {
+            t_val val = config["aggregates"][aggregate_name];
+            bool is_array = t_val::global("Array").call<bool>("isArray", val);
+
+            // Check if the aggregate references an expression alias
+            if (expression_alias_map.count(aggregate_name) != 0) {
+                aggregate_name = expression_alias_map[aggregate_name];
+            }
+            
+            if (is_array) {
+                std::vector<std::string> agg = vecFromArray<t_val, std::string>(val);
+                if (agg.size() != 2) {
+                    std::stringstream ss;
+                    ss << "Cannot aggregate column \""
+                       << aggregate_name << "\" by weighted mean as weight is not specified."
+                       << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
+                }
+
+                std::string& weighted_name = agg[1];
+
+                if (expression_alias_map.count(weighted_name) != 0) {
+                    agg[1] = expression_alias_map[weighted_name];
+                }
+
+                aggregates[aggregate_name] = agg;
+            } else {
+                std::vector<std::string> agg {val.as<std::string>()};
+                aggregates[aggregate_name] = agg;
+            }
+        };
+
+        bool column_only = false;
+
+        // make sure that primary keys are created for column-only views
+        if (row_pivots.size() == 0 && column_pivots.size() > 0) {
+            row_pivots.push_back("psp_okey");
+            column_only = true;
         }
 
         // construct filters with filter terms, and fill the vector of tuples
         auto js_filter = config.call<std::vector<std::vector<t_val>>>("get_filter");
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
 
-        for (auto f : js_filter) {
+        for (const auto& f : js_filter) {
             // parse filter details
             std::string column_name = f.at(0).as<std::string>();
             std::string filter_op_str = f.at(1).as<std::string>();
+
+            if (expression_alias_map.count(column_name) != 0) {
+                column_name = expression_alias_map[column_name];
+            }
+
             t_dtype column_type = schema->get_dtype(column_name);
             t_filter_op filter_operator = str_to_filter_op(filter_op_str);
 
             // validate the filter before it goes into the core engine
             t_val filter_term = t_val::null();
+
             if (f.size() > 2) {
                 // null/not null filters do not have a filter term
                 filter_term = f.at(2);
@@ -1453,6 +1508,14 @@ namespace binding {
 
             if (is_valid_filter(column_type, date_parser, filter_operator, filter_term)) {
                 filter.push_back(make_filter_term(column_type, date_parser, column_name, filter_op_str, filter_term));
+            }
+        }
+
+        for (std::vector<std::string>& s : sort) {
+            const std::string& column_name = s[0];
+
+            if (expression_alias_map.count(column_name) != 0) {
+                s[0] = expression_alias_map[column_name];
             }
         }
 
@@ -1465,6 +1528,7 @@ namespace binding {
             filter,
             sort,
             expressions,
+            expression_alias_map,
             filter_op,
             column_only);
 
@@ -1917,6 +1981,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
             const std::vector<t_computed_expression>&,
+            const tsl::hopscotch_map<std::string, std::string>&,
             const std::string,
             bool>()
         .smart_ptr<std::shared_ptr<t_view_config>>("shared_ptr<t_view_config>")

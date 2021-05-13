@@ -212,6 +212,10 @@ export class DomElement extends PerspectiveElement {
 
         const attr = JSON.parse(this.getAttribute("columns")) || [];
         let reset_columns_attr = false;
+        console.log(expression_schema);
+
+        // TODO: find all expression columns on the dom and if it already
+        // exists, re-render if the types are different.
 
         for (const expr of expressions) {
             // All expressions are guaranteed to have alias at this point. If
@@ -223,7 +227,6 @@ export class DomElement extends PerspectiveElement {
                 continue;
             }
 
-            //
             // Check for whether the expression is in the attribute but
             // NOT in the DOM - occurs when restore is called and a race
             // condition between `expressions` and `columns` occurs.

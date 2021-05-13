@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import logging
 import re
 from datetime import date, datetime
 from functools import partial
@@ -162,16 +161,6 @@ def _parse_expression_strings(expressions):
 
         if alias_match:
             alias = alias_match.group(1).strip()
-
-            # Don't allow for duplicate aliases
-            if alias in alias_set:
-                logging.warn(
-                    "Skipping expression `{}` as it reuses alias `{}`!".format(
-                        expression, alias
-                    )
-                )
-                continue
-
             alias_set.add(alias)
 
             # Remove the alias from the expression

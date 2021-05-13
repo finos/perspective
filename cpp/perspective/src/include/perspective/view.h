@@ -260,6 +260,10 @@ private:
 
     void _find_hidden_sort(const std::vector<t_sortspec>& sort);
 
+    std::string
+    _join_column_names(
+        const std::vector<t_tscalar>& names, const std::string& separator) const;
+
     std::shared_ptr<Table> m_table;
     std::shared_ptr<CTX_T> m_ctx;
     std::string m_name;
@@ -273,6 +277,8 @@ private:
     std::vector<t_sortspec> m_sort;
     std::vector<std::string> m_hidden_sort;
     std::vector<t_computed_expression> m_expressions;
+    tsl::hopscotch_map<std::string, std::string> m_expression_alias_map;
+    tsl::hopscotch_map<std::string, std::string> m_expression_alias_reverse_map;
     bool m_column_only;
     t_uindex m_row_offset;
     t_uindex m_col_offset;

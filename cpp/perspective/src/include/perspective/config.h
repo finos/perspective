@@ -128,9 +128,6 @@ public:
     const std::vector<t_computed_expression>&
     get_expressions() const;
 
-    const tsl::hopscotch_map<std::string, std::string>&
-    get_expression_alias_map() const;
-
     t_totals get_totals() const;
 
     t_filter_op get_combiner() const;
@@ -166,11 +163,6 @@ private:
     std::vector<t_computed_expression> m_expressions;
     t_filter_op m_combiner;
     bool m_column_only;
-
-    // A map of expression aliases to expression strings as typed by the
-    // user. This allows for multiple views to simultaneously exist with
-    // the same expression alias that resolve to different columns.
-    tsl::hopscotch_map<std::string, std::string> m_expression_alias_map;
 
     // Internal
     t_totals m_totals;

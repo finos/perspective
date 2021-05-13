@@ -805,20 +805,49 @@ module.exports = perspective => {
             await table.delete();
         });
 
-        it("Duplicate alias should be made unique.", async function() {
+        it("Duplicate alias within the same view should resolve to the last expression.", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
+
             const view = await table.view({
-                expressions: ['// new column\n"w" + "x"', '// new column\n"w" - "x"']
+                expressions: ['// new column\n"w" + "x"', '// new column 1\n"w" - "x"', "// new column\n100 * 10", '// new column 1\n"w" + "x"', '// new column\n"w" - "x"']
             });
+
+            expect(await view.expression_schema()).toEqual({
+                "new column": "float",
+                "new column 1": "float"
+            });
+
             const result = await view.to_columns();
-            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
-            // alias skipped here
-            expect(result["new column 1"]).toEqual(undefined);
+
+            expect(result["new column"]).toEqual([0.5, 0.5, 0.5, 0.5]);
+            expect(result["new column 1"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+
             await view.delete();
             await table.delete();
         });
 
-        it("Duplicate alias across new views will overwrite results in old view.", async function() {
+        it("Duplicate alias within the same view should resolve to the last expression, different types.", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+
+            const view = await table.view({
+                expressions: ['// new column\n"w" + "x"', '// new column 1\n"w" - "x"', "// new column\n100", "// new column\nupper('abc')", '// new column 1\n"w" + "x"']
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                "new column": "string",
+                "new column 1": "float"
+            });
+
+            const result = await view.to_columns();
+
+            expect(result["new column"]).toEqual(Array(4).fill("ABC"));
+            expect(result["new column 1"]).toEqual([2.5, 4.5, 6.5, 8.5]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Duplicate alias across new views will not overwrite results in old view.", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
             const view = await table.view({
                 expressions: ['// new column\n"w" + "x"']
@@ -835,9 +864,18 @@ module.exports = perspective => {
 
             result = await view.to_columns();
             const result2 = await view2.to_columns();
-            expect(result["new column"]).toEqual([1000, 1000, 1000, 1000]);
+            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
             expect(result2["new column"]).toEqual([1000, 1000, 1000, 1000]);
 
+            const view3 = await table.view({
+                expressions: ["// new column\n100 * 100"],
+                row_pivots: ["y"]
+            });
+
+            const result3 = await view3.to_columns();
+            expect(result3["new column"]).toEqual([40000, 10000, 10000, 10000, 10000]);
+
+            await view3.delete();
             await view2.delete();
             await view.delete();
             await table.delete();
@@ -857,8 +895,7 @@ module.exports = perspective => {
                 });
         });
 
-        it("Should not be able to overwrite expression column with one that returns a different type", async function(done) {
-            expect.assertions(2);
+        it("Should be able to overwrite expression column with one that returns a different type", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
             const view = await table.view({
                 expressions: ['// new column\n"w" + "x"']
@@ -867,36 +904,16 @@ module.exports = perspective => {
             let result = await view.to_columns();
             expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
 
-            table
-                .view({
-                    expressions: ["// new column\n upper('abc')"]
-                })
-                .catch(e => {
-                    expect(e.message).toMatch("Abort(): [t_computed_expression::compute] Cannot overwrite column: `new column` with an expression of a different type!\n");
-                    view.delete();
-                    table.delete();
-                    done();
-                });
-        });
-
-        it("Duplicate alias across new views will overwrite results in old view if deleted.", async function() {
-            const table = await perspective.table(expressions_common.int_float_data);
-            const view = await table.view({
-                expressions: ['// new column\n"w" + "x"']
-            });
-            const result = await view.to_columns();
-            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
-            await view.delete();
-
             const view2 = await table.view({
-                expressions: ['// new column\n"w" - "x"']
+                expressions: ["// new column\n upper('abc')"]
             });
-            const result2 = await view2.to_columns();
-            expect(result["new column"]).toEqual([2.5, 4.5, 6.5, 8.5]);
-            expect(result2["new column"]).toEqual([0.5, 0.5, 0.5, 0.5]);
 
-            await view2.delete();
-            await table.delete();
+            const result2 = await view2.to_columns();
+            expect(result2["new column"]).toEqual(Array(4).fill("ABC"));
+
+            view2.delete();
+            view.delete();
+            table.delete();
         });
 
         it("A new view should not reference expression columns it did not create.", async function(done) {
@@ -1770,7 +1787,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Should skip expressions that try to overwrite expressions with different types", async function() {
+            it("Should not skip expressions that try to overwrite expressions with different types", async function() {
                 const table = await perspective.table({
                     a: [1, 2, 3, 4],
                     b: [new Date(), new Date(), new Date(), new Date()],
@@ -1779,11 +1796,14 @@ module.exports = perspective => {
                 });
 
                 const view = await table.view({
-                    expressions: ["// abc\n 123 + 345"]
+                    expressions: ["// abc\n 123 + 345", "//def \n lower('ABC')"]
                 });
 
-                const results = await table.validate_expressions(["// abc\n upper('abc')"]);
-                expect(results.expression_schema).toEqual({});
+                const results = await table.validate_expressions(["// abc\n upper('abc')", "// def\n 1 + 2"]);
+                expect(results.expression_schema).toEqual({
+                    abc: "string",
+                    def: "float"
+                });
 
                 view.delete();
                 table.delete();

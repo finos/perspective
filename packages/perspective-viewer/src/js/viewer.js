@@ -277,6 +277,8 @@ class PerspectiveViewer extends ActionElement {
                     this.setAttribute("expressions", null);
                 }
 
+                expressions = validated_expressions;
+
                 // Need to remove old expressions from the viewer DOM and
                 // config so they don't mess up state. To do this, we need
                 // to get the expression columns that are currently in the DOM,
@@ -290,13 +292,12 @@ class PerspectiveViewer extends ActionElement {
                     .map(x => x.getAttribute("expression"));
 
                 const old_expressions = active_expressions.concat(inactive_expressions);
+                console.log(active_expressions, inactive_expressions, old_expressions, expressions);
                 const to_remove = this._diff_expressions(old_expressions, expressions);
 
                 if (to_remove.length > 0) {
                     this._reset_expressions_view(to_remove);
                 }
-
-                expressions = validated_expressions;
             } else {
                 console.warn(`Applying unvalidated expressions: ${expressions} because the viewer does not have a Table attached!`);
             }

@@ -82,18 +82,7 @@ t_config::t_config() {}
 
 void
 t_config::init() {
-    const auto& expressions = get_expressions();
-
-    for (const auto& expression : expressions) {
-        m_expression_alias_map[expression.get_expression_alias()] = expression.get_expression_string();
-    }
-
     for (auto i = 0; i < m_detail_columns.size(); ++i) {
-        // const std::string& column = detail_columns[i];
-        // if (m_expression_alias_map.count(column) != 0) {
-        //     detail_columns[i] = m_expression_alias_map.at(column);
-        // }
-
         m_detail_colmap[m_detail_columns[i]] = i;
     }
 
@@ -299,11 +288,6 @@ t_config::get_fterms() const {
 const std::vector<t_computed_expression>&
 t_config::get_expressions() const {
     return m_expressions;
-}
-
-const tsl::hopscotch_map<std::string, std::string>&
-t_config::get_expression_alias_map() const {
-    return m_expression_alias_map;
 }
 
 t_filter_op

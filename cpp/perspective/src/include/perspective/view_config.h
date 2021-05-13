@@ -46,6 +46,7 @@ public:
         const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
         const std::vector<t_computed_expression>& expressions,
+        const tsl::hopscotch_map<std::string, std::string>& expression_alias_map,
         const std::string& filter_op,
         bool column_only);
 
@@ -81,21 +82,27 @@ public:
     void set_row_pivot_depth(std::int32_t depth);
     void set_column_pivot_depth(std::int32_t depth);
 
-    std::vector<std::string> get_row_pivots() const;
+    const std::vector<std::string>& get_row_pivots() const;
 
-    std::vector<std::string> get_column_pivots() const;
+    const std::vector<std::string>& get_column_pivots() const;
 
-    std::vector<t_aggspec> get_aggspecs() const;
+    const std::vector<t_aggspec>& get_aggspecs() const;
 
-    std::vector<std::string> get_columns() const;
+    const std::vector<std::string>& get_columns() const;
 
-    std::vector<t_fterm> get_fterm() const;
+    const std::vector<t_fterm>& get_fterm() const;
 
-    std::vector<t_sortspec> get_sortspec() const;
+    const std::vector<t_sortspec>& get_sortspec() const;
 
-    std::vector<t_sortspec> get_col_sortspec() const;
+    const std::vector<t_sortspec>& get_col_sortspec() const;
 
-    std::vector<t_computed_expression> get_expressions() const;
+    const std::vector<t_computed_expression>& get_expressions() const;
+
+    const tsl::hopscotch_map<std::string, std::string>&
+    get_expression_alias_map() const;
+
+    const tsl::hopscotch_map<std::string, std::string>&
+    get_expression_alias_reverse_map() const;
 
     t_filter_op get_filter_op() const;
 
@@ -162,6 +169,15 @@ private:
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> m_filter;
     std::vector<std::vector<std::string>> m_sort;
     std::vector<t_computed_expression> m_expressions;
+
+    // A map of expression aliases to expression strings as typed by the
+    // user. This allows for multiple views to simultaneously exist with
+    // the same expression alias that resolve to different columns.
+    tsl::hopscotch_map<std::string, std::string> m_expression_alias_map;
+
+    // A map of expression strings to expression aliases - when the view
+    // or view config is queried, use this to define the output to the user.
+    tsl::hopscotch_map<std::string, std::string> m_expression_alias_reverse_map;
 
     /**
      * @brief The ordered list of aggregate columns:

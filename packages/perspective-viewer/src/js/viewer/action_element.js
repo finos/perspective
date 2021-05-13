@@ -9,7 +9,6 @@
 
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
 import {DomElement} from "./dom_element.js";
-import {findExpressionByAlias} from "../utils.js";
 
 export class ActionElement extends DomElement {
     async _toggle_config(event) {
@@ -99,15 +98,8 @@ export class ActionElement extends DomElement {
      * @param {*} event
      */
     _save_expression(event) {
-        const {expression, alias} = event.detail;
+        const {expression} = event.detail;
         const expressions = this._get_view_expressions();
-        const is_duplicate = findExpressionByAlias(alias, expressions);
-
-        if (expressions.includes(expression) || is_duplicate) {
-            console.warn(`"${expression}" was not applied because it already exists.`);
-            return;
-        }
-
         expressions.push(expression);
 
         // Will be validated in the attribute callback
@@ -115,20 +107,7 @@ export class ActionElement extends DomElement {
     }
 
     async _type_check_expression(event) {
-        const {expression, alias} = event.detail;
-        const expressions = this._get_view_expressions();
-        const is_duplicate = findExpressionByAlias(alias, expressions);
-
-        if (expressions.includes(expression) || is_duplicate) {
-            console.warn(`Cannot apply duplicate expression: "${expression}"`);
-            const result = {
-                expression_schema: {},
-                errors: {}
-            };
-            result.errors[alias] = "Value Error - Cannot apply duplicate expression.";
-            this._expression_editor.type_check_expression(result);
-            return;
-        }
+        const {expression} = event.detail;
 
         if (!expression || expression.length === 0) {
             this._expression_editor.type_check_expression({});

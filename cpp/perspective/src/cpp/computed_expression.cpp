@@ -170,23 +170,10 @@ t_computed_expression::compute(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
-    // create or get output column using m_expression_alias
-    auto output_column = data_table->add_column_sptr(m_expression_alias, m_dtype, true);
-
-    // Stop if the column has a different dtype from m_dtype - that means
-    // this expression already exists and is a different dtype, and setting to
-    // it results in undefined behavior.
-    if (output_column->get_dtype() != m_dtype) {
-        std::stringstream ss;
-        ss << "[t_computed_expression::compute] Cannot overwrite column: `"
-            << m_expression_alias
-            << "` with an expression of a different type!"
-            << std::endl;
-
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
+    // Store the expression column under the entire string as typed by the user
+    auto output_column = data_table->add_column_sptr(m_expression_string, m_dtype, true);
     auto num_rows = data_table->size();
+
     output_column->reserve(num_rows);
 
     for (t_uindex ridx = 0; ridx < num_rows; ++ridx) {
@@ -264,21 +251,7 @@ t_computed_expression::recompute(
     }
 
     // get or create the output column
-    auto output_column = flattened->add_column_sptr(m_expression_alias, m_dtype, true);
-
-    // Stop if the column has a different dtype from m_dtype - that means
-    // this expression already exists and is a different dtype, and setting to
-    // it results in undefined behavior.
-    if (output_column->get_dtype() != m_dtype) {
-        std::stringstream ss;
-        ss << "[t_computed_expression::recompute] Cannot overwrite column: `"
-            << m_expression_alias
-            << "` with an expression of a different type!"
-            << std::endl;
-
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
+    auto output_column = flattened->add_column_sptr(m_expression_string, m_dtype, true);
     output_column->reserve(gstate_table->size());
 
     t_uindex num_rows = changed_rows.size();
