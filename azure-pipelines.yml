@@ -22,44 +22,167 @@ schedules:
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
 
+parameters:
+  - name: initSteps
+    type: stepList
+    default:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '12.x'
+    
+      - bash: npm install -g yarn
+        displayName: 'Install Yarn'
+
+      - task: Cache@2
+        inputs:
+          key: 'yarn | "$(Agent.OS)" | yarn.lock'
+          restoreKeys: |
+            yarn | "$(Agent.OS)"
+            yarn
+          path: $(YARN_CACHE_FOLDER)
+        displayName: Cache Yarn packages
+  
+      - bash: yarn --frozen-lockfile
+        displayName: "Install Deps"
+  
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: 'x64'
+        displayName: 'Use Python $(python.version)'
+  
+      - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=2" "black==20.8b1" flake8-black
+        displayName: 'Install Python base dependencies'
+        condition: and(succeeded(), ne(variables['python.version'], '2.7'))
+  
+      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        displayName: "Install wasm-pack"
+
+  - name: linuxInitSteps
+    type: stepList
+    default:
+      - bash: sudo node scripts/install_tools.js
+        displayName: "Linux System deps"
+
+  - name: macInitSteps
+    type: stepList
+    default:
+      - bash: brew install boost flatbuffers
+        displayName: "Mac System deps"
+
+  - name: windowsInitSteps
+    type: stepList
+    default:
+      - script: |
+          which python > python.txt
+          set /p PYTHON=<python.txt
+          ln -s %PYTHON% %PYTHON%$(python.version)
+          python --version
+          which python$(python.version)
+        displayName: "Which python"
+
+      - script: choco install boost-msvc-14.1 flatc
+        displayName: "System deps"
+
+  - name: webassemblySteps
+    type: stepList
+    default:
+      - bash: yarn build_js --ci
+        displayName: "Build"
+
+      - bash: yarn test_js --quiet --ci
+        displayName: "Test"
+        env:
+          PSP_DOCKER: 1
+
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testRunner: JUnit
+          testResultsFiles: 'junit.xml'
+
+  - name: pythonBuildSteps
+    type: stepList
+    default:
+      - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+        displayName: 'build'
+
+  - name: pythonBuildDockerSteps
+    type: stepList
+    default:
+      - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+        displayName: 'build'
+        env:
+          PSP_DOCKER: 1
+
+  - name: pythonCoverageSteps
+    type: stepList
+    default:
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: 'python/perspective/python_junit.xml'
+          testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
+
+      - task: PublishCodeCoverageResults@1
+        inputs: 
+          codeCoverageTool: Cobertura
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+
+  - name: pythonMacWheelSteps
+    type: stepList
+    default:
+      # Build a python wheel for Mac 10.14
+      - bash: yarn _wheel_python --ci $(python_flag) --macos
+        displayName: 'Build wheel'
+
+      # Test the wheel
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
+        displayName: 'Test Mac Wheel'
+
+      # Save the artifact to Azure storage
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
+          artifactName: '$(artifact_name)'
+
+  - name: pythonLinuxWheelSteps
+    type: stepList
+    default:
+      # Build a python wheel for Manylinux
+      - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
+        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+        displayName: 'Build Manylinux Wheel'
+        env:
+          PSP_DOCKER: 1
+
+      # Test the wheel
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
+        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+        displayName: 'Test Manylinux Wheel'
+
+      # Save the artifact to Azure storage
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
+          artifactName: '$(artifact_name)'
+
 jobs:
 - job: 'WebAssembly'
   pool:
     vmImage: 'ubuntu-16.04'
 
+  strategy:
+    matrix:
+      Base:
+        # Do we care to test elsewhere?
+        python.version: '3.9'
+
   steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
-
-    - bash: npm install -g yarn
-      displayName: "Install Yarn"
-
-    - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      displayName: "Install wasm-pack"
-
-    - task: Cache@2
-      inputs:
-        key: 'yarn | "$(Agent.OS)" | yarn.lock'
-        restoreKeys: |
-          yarn | "$(Agent.OS)"
-          yarn
-        path: $(YARN_CACHE_FOLDER)
-      displayName: Cache Yarn packages
-
-    - bash: yarn --frozen-lockfile
-      displayName: "Install Deps"
-
-    - bash: sudo node scripts/install_tools.js
-      displayName: "Install Tools"
-
-    - bash: yarn build_js --ci
-      displayName: "Build"
-
-    - bash: yarn test_js --quiet --ci
-      displayName: "Test"
-      env:
-        PSP_DOCKER: 1
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.linuxInitSteps }}
+    - ${{ parameters.webassemblySteps }}
 
     - task: PublishTestResults@2
       condition: succeeded()
@@ -148,59 +271,11 @@ jobs:
           artifact_name: 'cp39-cp39-manylinux2014_x86_64'
 
   steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.pythonBuildDockerSteps }}
+    - ${{ parameters.pythonCoverageSteps }}
+    - ${{ parameters.pythonLinuxWheelSteps }}
 
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
-
-    - bash: npm install -g yarn
-      displayName: "Install Yarn"
-
-    - bash: yarn
-      displayName: 'Install JS Deps'
-
-    - bash: python -m pip install -U "black==20.8b1" flake8-black pip
-      condition: and(succeeded(), ne(variables['python.version'], '2.7'))
-      displayName: 'Install Python deps'
-
-    - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-      displayName: 'build'
-      env:
-        PSP_DOCKER: 1
-
-    - task: PublishTestResults@2
-      condition: succeededOrFailed()
-      inputs:
-        testResultsFiles: 'python/perspective/python_junit.xml'
-        testRunTitle: 'Publish test results for Python $(python.version) $(manylinux_flag)'
-
-    - task: PublishCodeCoverageResults@1
-      inputs: 
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-
-    # Build a python wheel for Manylinux
-    - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      displayName: 'Build Manylinux Wheel'
-      env:
-        PSP_DOCKER: 1
-
-    # Test the wheel
-    - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      displayName: 'Test Manylinux Wheel'
-
-    # Save the artifact to Azure storage
-    - task: PublishPipelineArtifact@1
-      condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
-        artifactName: '$(artifact_name)'
 
 - job: 'Windows'
   pool:
@@ -223,35 +298,9 @@ jobs:
           python_flag: '--python39'
 
   steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
-
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
-
-    - script: |
-        which python > python.txt
-        set /p PYTHON=<python.txt
-        ln -s %PYTHON% %PYTHON%$(python.version)
-        python --version
-        which python$(python.version)
-      displayName: "Which python"
-
-    - script: |
-        python -m pip install -U numpy "pyarrow>=2" pip
-      displayName: "Python deps"
-
-    - script: npm install -g yarn
-      displayName: "Install Yarn"
-
-    - script: yarn
-      displayName: 'Install JS Deps'
-
-    - script: choco install boost-msvc-14.1 flatc
-      displayName: "System deps"
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.windowsInitSteps }}
+    - ${{ parameters.pythonBuildSteps }}
 
     - script: yarn build_python --ci $(python_flag)
       displayName: 'build'
@@ -284,60 +333,8 @@ jobs:
           artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
 
   steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-        architecture: 'x64'
-
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '12.x'
-
-    - script: |
-        brew install boost flatbuffers
-      displayName: "System deps"
-
-    - script: |
-        which python
-        python --version
-        which python$(python.version)
-      displayName: "Which python"
-
-    - script: |
-        python -m pip install -U delocate wheel numpy "pyarrow>=2" pip
-      displayName: "Python deps"
-      condition: eq(variables['python_flag'], '')
-    
-    - script: npm install -g yarn
-      displayName: "Install Yarn"
-
-    - script: yarn --network-timeout 600000
-      displayName: 'Install JS Deps'
-
-    - script: yarn build_python --ci $(python_flag)
-      displayName: 'build'
-
-    - task: PublishTestResults@2
-      condition: succeededOrFailed()
-      inputs:
-        testResultsFiles: 'python/perspective/python_junit.xml'
-        testRunTitle: 'Publish test results for Python $(python.version)'
-
-    - task: PublishCodeCoverageResults@1
-      inputs: 
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-
-    # Build a python wheel for Mac 10.14
-    - bash: yarn _wheel_python --ci $(python_flag) --macos
-      displayName: 'Build wheel'
-
-    # Test the wheel
-    - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
-      displayName: 'Test Mac Wheel'
-
-    # Save the artifact to Azure storage
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
-        artifactName: '$(artifact_name)'
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.macInitSteps }}
+    - ${{ parameters.pythonBuildSteps }}
+    - ${{ parameters.pythonCoverageSteps }}
+    - ${{ parameters.pythonMacWheelSteps }}
