@@ -112,34 +112,11 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
     auto sort = config.attr("get_sort")().cast<std::vector<std::vector<std::string>>>();
     auto filter_op = config.attr("get_filter_op")().cast<std::string>();
 
-    // to preserve order, do not cast to std::map - use keys and python 3.7's guarantee that dicts respect insertion order
-    auto p_aggregates = py::dict(config.attr("get_aggregates")());
-    tsl::ordered_map<std::string, std::vector<std::string>> aggregates;
-
-    for (auto& column : columns) {
-        py::str py_column_name = py::str(column);
-        if (p_aggregates.contains(py_column_name)) {
-            if (py::isinstance<py::str>(p_aggregates[py_column_name])) {
-                std::vector<std::string> agg{
-                    p_aggregates[py_column_name].cast<std::string>()};
-                aggregates[column] = agg;
-            } else {
-                aggregates[column] = p_aggregates[py_column_name].cast<std::vector<std::string>>();
-            }
-        }
-    };
-
-    bool column_only = false;
-
-    // make sure that primary keys are created for column-only views
-    if (row_pivots.size() == 0 && column_pivots.size() > 0) {
-        row_pivots.push_back("psp_okey");
-        column_only = true;
-    }
-
     auto p_expressions = config.attr("get_expressions")().cast<std::vector<std::vector<t_val>>>();
     std::vector<t_computed_expression> expressions;
+    tsl::hopscotch_map<std::string, std::string> expression_alias_map;
     expressions.reserve(p_expressions.size());
+    expression_alias_map.reserve(p_expressions.size());
 
     // Will either abort() or succeed completely, and this isn't a public
     // API so we can directly index for speed.
@@ -151,7 +128,7 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
 
         // Don't allow overwriting of "real" table columns or multiple
         // columns with the same alias.
-        if (schema->has_column(expression_alias)) {
+        if (schema->has_column(expression_alias) || schema->has_column(expression_string)) {
             std::stringstream ss;
             ss << "View creation failed: cannot create expression column '"
             << expression_alias
@@ -176,8 +153,67 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         t_computed_expression expression = t_computed_expression_parser::precompute(
             expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
+
+        expression_alias_map[expression_alias] = expression_string;
+
+        // At this point, we start to erase the alias so that it is
+        // no longer internally referenced by pivots, aggregates, etc, and
+        // only lives in the `expression_alias_map`.
+        schema->add_column(expression_string, expression.get_dtype());
         expressions.push_back(expression);
-        schema->add_column(expression_alias, expression.get_dtype());
+    }
+    
+    for (auto i = 0; i < row_pivots.size(); ++i) {
+        const std::string& rp = row_pivots[i];
+        if (expression_alias_map.count(rp) != 0) {
+            row_pivots[i] = expression_alias_map[rp];
+        }
+    }
+
+    for (auto i = 0; i < column_pivots.size(); ++i) {
+        const std::string& cp = column_pivots[i];
+        if (expression_alias_map.count(cp) != 0) {
+            column_pivots[i] = expression_alias_map[cp];
+        }
+    }
+
+    // to preserve order, do not cast to std::map - use keys and python 3.7's guarantee that dicts respect insertion order
+    auto p_aggregates = py::dict(config.attr("get_aggregates")());
+    tsl::ordered_map<std::string, std::vector<std::string>> aggregates;
+
+    for (std::string column : columns) {
+        py::str py_column_name = py::str(column);
+        if (p_aggregates.contains(py_column_name)) {
+            // Check if the aggregate references an expression alias
+            if (expression_alias_map.count(column) != 0) {
+                column = expression_alias_map[column];
+            }
+
+            if (py::isinstance<py::str>(p_aggregates[py_column_name])) {
+                std::vector<std::string> agg{
+                    p_aggregates[py_column_name].cast<std::string>()};
+                // Access the aggregate from the python dictionary using alias
+                // and store it using the full expression string.
+                aggregates[column] = agg;
+            } else {
+                aggregates[column] = p_aggregates[py_column_name].cast<std::vector<std::string>>();
+            }
+        }
+    };
+
+    for (auto i = 0; i < columns.size(); ++i) {
+        const std::string& column_name = columns[i];
+        if (expression_alias_map.count(column_name) != 0) {
+            columns[i] = expression_alias_map[column_name];
+        }
+    }
+
+    bool column_only = false;
+
+    // make sure that primary keys are created for column-only views
+    if (row_pivots.size() == 0 && column_pivots.size() > 0) {
+        row_pivots.push_back("psp_okey");
+        column_only = true;
     }
 
     // construct filters with filter terms, and fill the vector of tuples
@@ -188,6 +224,11 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         // parse filter details
         std::string column_name = f[0].cast<std::string>();
         std::string filter_op_str = f[1].cast<std::string>();
+
+        if (expression_alias_map.count(column_name) != 0) {
+            column_name = expression_alias_map[column_name];
+        }
+
         t_dtype column_type = schema->get_dtype(column_name);
         t_filter_op filter_operator = str_to_filter_op(filter_op_str);
 
@@ -203,6 +244,14 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         }
     }
 
+    for (std::vector<std::string>& s : sort) {
+        const std::string& column_name = s[0];
+
+        if (expression_alias_map.count(column_name) != 0) {
+            s[0] = expression_alias_map[column_name];
+        }
+    }
+
     // create the `t_view_config`
     auto view_config = std::make_shared<t_view_config>(
         row_pivots,
@@ -212,6 +261,7 @@ make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val conf
         filter,
         sort,
         expressions,
+        expression_alias_map,
         filter_op,
         column_only);
 

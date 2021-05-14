@@ -1381,7 +1381,7 @@ namespace binding {
             std::vector<std::pair<std::string, std::string>> column_ids;
 
             // Don't allow overwriting of "real" table columns.
-            if (schema->has_column(expression_alias)) {
+            if (schema->has_column(expression_alias) || schema->has_column(expression_string)) {
                 std::stringstream ss;
                 ss << "View creation failed: cannot create expression column '"
                 << expression_alias

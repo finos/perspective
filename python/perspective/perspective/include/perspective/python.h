@@ -203,6 +203,7 @@ PYBIND11_MODULE(libbinding, m)
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
             const std::vector<t_computed_expression>&,
+            const tsl::hopscotch_map<std::string, std::string>&,
             const std::string,
             bool>())
         .def("add_filter_term", &t_view_config::add_filter_term);

@@ -40,7 +40,6 @@ void
 t_view_config::init(std::shared_ptr<t_schema> schema) {
     // Build the reverse expression-to-alias mapping
     for (const auto& items : m_expression_alias_map) {
-        std::cout << "alias: " << items.first << ", expr: " << items.second << std::endl;
         m_expression_alias_reverse_map[items.second] = items.first;
     }
 
