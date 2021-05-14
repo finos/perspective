@@ -14,7 +14,7 @@ const datasource = async () => {
     return await worker.table(buffer);
 };
 
-window.addEventListener("WebComponentsReady", async function() {
+window.addEventListener("DOMContentLoaded", async function() {
     const workspace = document.getElementsByTagName("perspective-workspace")[0];
     workspace.addTable("superstore", await datasource());
 

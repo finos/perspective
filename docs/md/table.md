@@ -3,7 +3,7 @@ id: table
 title: Table
 ---
 
-<script src="../../../../js/concepts/index.js"></script>
+<script src="../../../../js/index.js"></script>
 <link rel="stylesheet" href="../../../../css/concepts/index.css">
 
 The `Table` is Perspective's columnar data frame, analogous to a

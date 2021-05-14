@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-webpack-plugin",
-    "version": "0.6.2",
+    "version": "0.8.3",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {
@@ -11,7 +11,8 @@
         "index.js"
     ],
     "scripts": {
-        "build": "echo 'No build'"
+        "build": "echo 'No build'",
+        "clean": "echo 'No clean'"
     },
     "jest": {},
     "repository": {

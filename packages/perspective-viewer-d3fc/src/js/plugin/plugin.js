@@ -41,42 +41,59 @@ export function register(...plugins) {
 
 function drawChart(chart) {
     return async function(el, view, task, end_col, end_row) {
-        let jsonp;
+        let jsonp, metadata;
         const realValues = JSON.parse(this.getAttribute("columns"));
-
+        const leaves_only = chart.plugin.type !== "d3_sunburst";
         if (end_col && end_row) {
-            jsonp = view.to_json({end_row, end_col, leaves_only: true});
+            jsonp = view.to_json({end_row, end_col, leaves_only});
         } else if (end_col) {
-            jsonp = view.to_json({end_col, leaves_only: true});
+            jsonp = view.to_json({end_col, leaves_only});
         } else if (end_row) {
-            jsonp = view.to_json({end_row, leaves_only: true});
+            jsonp = view.to_json({end_row, leaves_only});
         } else {
-            jsonp = view.to_json({leaves_only: true});
+            jsonp = view.to_json({leaves_only});
         }
-
-        let [table_schema, computed_schema, view_schema, json, config] = await Promise.all([this._table.schema(false), view.computed_schema(false), view.schema(false), jsonp, view.get_config()]);
+        metadata = await Promise.all([this._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
 
         if (task.cancelled) {
             return;
         }
 
+        let [table_schema, expression_schema, view_schema, json, config] = metadata;
+
         /**
-         * Retrieve a tree axis column from the table and computed schemas,
+         * Retrieve a tree axis column from the table and expression schemas,
          * returning a String type or `undefined`.
          * @param {String} column a column name
          */
         const get_pivot_column_type = function(column) {
             let type = table_schema[column];
             if (!type) {
-                type = computed_schema[column];
+                type = expression_schema[column];
             }
             return type;
         };
 
         const {columns, row_pivots, column_pivots, filter} = config;
-        const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
+        const filtered =
+            row_pivots.length > 0
+                ? json.reduce(
+                      (acc, col) => {
+                          if (col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) {
+                              acc.agg_paths.push(acc.aggs.slice());
+                              acc.rows.push(col);
+                          } else {
+                              const len = col.__ROW_PATH__.filter(x => x !== undefined).length;
+                              acc.aggs[len] = col;
+                              acc.aggs = acc.aggs.slice(0, len + 1);
+                          }
+                          return acc;
+                      },
+                      {rows: [], aggs: [], agg_paths: []}
+                  )
+                : {rows: json};
         const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
-        const mapped = filtered.map(dataMap);
+        const mapped = filtered.rows.map(dataMap);
 
         let settings = {
             realValues,
@@ -84,10 +101,12 @@ function drawChart(chart) {
             mainValues: columns.map(a => ({name: a, type: view_schema[a]})),
             splitValues: column_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
             filter,
-            data: mapped
+            data: mapped,
+            agg_paths: filtered.agg_paths
         };
 
         createOrUpdateChart.call(this, el, chart, settings);
+        await new Promise(setTimeout);
     };
 }
 
@@ -105,7 +124,7 @@ function getOrCreatePluginElement() {
 function createOrUpdateChart(div, chart, settings) {
     const perspective_d3fc_element = getOrCreatePluginElement.call(this);
 
-    if (!document.body.contains(perspective_d3fc_element)) {
+    if (!div.contains(perspective_d3fc_element)) {
         div.innerHTML = "";
         div.appendChild(perspective_d3fc_element);
     }

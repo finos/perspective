@@ -9,6 +9,86 @@
 
 module.exports = perspective => {
     describe("Pivotting with nulls", function() {
+        describe("last aggregate", function() {
+            it("preserves null when it is the last element in a leaf", async function() {
+                const DATA = {a: ["a", "a", "a", "b", "b", "b", "c", "c", "c"], b: [1, 2, null, 3, 4, 5, null, null, null]};
+                var table = await perspective.table(DATA);
+                var view = await table.view({
+                    row_pivots: ["a"],
+                    columns: ["b"],
+                    aggregates: {b: "last"}
+                });
+                var answer = [
+                    {__ROW_PATH__: [], b: null},
+                    {__ROW_PATH__: ["a"], b: null},
+                    {__ROW_PATH__: ["b"], b: 5},
+                    {__ROW_PATH__: ["c"], b: null}
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
+            it("preserves null when it is the last element in a leaf under 2 levels", async function() {
+                const DATA = {
+                    a: ["a", "a", "a", "b", "b", "b", "c", "c", "c", "a", "a", "a", "b", "b", "b", "c", "c", "c"],
+                    b: [1, 2, null, 3, 4, 5, null, null, null, 1, 2, null, null, null, null, 3, 4, 5],
+                    c: ["x", "x", "x", "x", "x", "x", "x", "x", "x", "y", "y", "y", "y", "y", "y", "y", "y", "y"]
+                };
+                var table = await perspective.table(DATA);
+                var view = await table.view({
+                    row_pivots: ["c", "a"],
+                    columns: ["b"],
+                    aggregates: {b: "last"}
+                });
+                var answer = [
+                    {__ROW_PATH__: [], b: 5},
+                    {__ROW_PATH__: ["x"], b: null},
+                    {__ROW_PATH__: ["x", "a"], b: null},
+                    {__ROW_PATH__: ["x", "b"], b: 5},
+                    {__ROW_PATH__: ["x", "c"], b: null},
+                    {__ROW_PATH__: ["y"], b: 5},
+                    {__ROW_PATH__: ["y", "a"], b: null},
+                    {__ROW_PATH__: ["y", "b"], b: null},
+                    {__ROW_PATH__: ["y", "c"], b: 5}
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
+            it("preserves null when it is the last element in a leaf under 2 levels when grand total is null", async function() {
+                const DATA = {
+                    a: ["a", "a", "a", "b", "b", "b", "c", "c", "c", "a", "a", "a", "b", "b", "b", "c", "c", "c"],
+                    b: [1, 2, null, null, null, null, 3, 4, 5, 1, 2, null, 3, 4, 5, null, null, null],
+                    c: ["x", "x", "x", "x", "x", "x", "x", "x", "x", "y", "y", "y", "y", "y", "y", "y", "y", "y"]
+                };
+                var table = await perspective.table(DATA);
+                var view = await table.view({
+                    row_pivots: ["c", "a"],
+                    columns: ["b"],
+                    aggregates: {b: "last"}
+                });
+                var answer = [
+                    {__ROW_PATH__: [], b: null},
+                    {__ROW_PATH__: ["x"], b: 5},
+                    {__ROW_PATH__: ["x", "a"], b: null},
+                    {__ROW_PATH__: ["x", "b"], b: null},
+                    {__ROW_PATH__: ["x", "c"], b: 5},
+                    {__ROW_PATH__: ["y"], b: null},
+                    {__ROW_PATH__: ["y", "a"], b: null},
+                    {__ROW_PATH__: ["y", "b"], b: 5},
+                    {__ROW_PATH__: ["y", "c"], b: null}
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+        });
+
         it("shows one pivot for the nulls on initial load", async function() {
             const dataWithNulls = [
                 {name: "Homer", value: 1},

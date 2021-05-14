@@ -52,7 +52,7 @@ View<CTX_T>::View(
     m_columns = m_view_config->get_columns();
     m_filter = m_view_config->get_fterm();
     m_sort = m_view_config->get_sortspec();
-    m_computed_columns = m_view_config->get_computed_columns();
+    m_expressions = m_view_config->get_expressions();
 
     // Add hidden columns used in sorts to the `m_hidden_sort` vector.
     if (m_sort.size() > 0) {
@@ -339,7 +339,7 @@ View<t_ctx0>::schema() const {
 
 template <typename CTX_T>
 std::map<std::string, std::string>
-View<CTX_T>::computed_schema() const {
+View<CTX_T>::expression_schema() const {
     auto schema = m_ctx->get_schema();
     auto _types = schema.types();
     auto names = schema.columns();
@@ -351,27 +351,28 @@ View<CTX_T>::computed_schema() const {
         types[names[i]] = _types[i];
     }
 
-    for (const auto& c : m_computed_columns) {
-        std::string name = std::get<0>(c);
-        new_schema[name] = dtype_to_str(types[name]);
+    for (const auto& expr : m_expressions) {
+        std::string expression_alias = expr.get_expression_alias();
+        new_schema[expression_alias] = dtype_to_str(expr.get_dtype());
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[name] = _map_aggregate_types(name, new_schema[name]);
+            new_schema[expression_alias] = _map_aggregate_types(expression_alias, new_schema[expression_alias]);
         }
     }
 
     return new_schema;
 }
 
+
 template <>
 std::map<std::string, std::string>
-View<t_ctxunit>::computed_schema() const {
+View<t_ctxunit>::expression_schema() const {
     return {};
 }
 
 template <>
 std::map<std::string, std::string>
-View<t_ctx0>::computed_schema() const {
+View<t_ctx0>::expression_schema() const {
     t_schema schema = m_ctx->get_schema();
     std::vector<t_dtype> _types = schema.types();
     std::vector<std::string> names = schema.columns();
@@ -382,12 +383,19 @@ View<t_ctx0>::computed_schema() const {
     }
 
     std::map<std::string, std::string> new_schema;
-    for (const auto& c : m_computed_columns) {
-        std::string name = std::get<0>(c);
-        new_schema[name] = dtype_to_str(types[name]);
+
+    for (const auto& expr : m_expressions) {
+        std::string expression_alias = expr.get_expression_alias();
+        new_schema[expression_alias] = dtype_to_str(expr.get_dtype());
     }
 
     return new_schema;
+}
+
+template <typename T>
+std::pair<t_tscalar, t_tscalar> 
+View<T>::get_min_max(const std::string& colname) const {
+    return m_ctx->get_min_max(colname);
 }
 
 template <>
@@ -810,9 +818,9 @@ View<CTX_T>::get_sort() const {
 }
 
 template <typename CTX_T>
-std::vector<t_computed_column_definition>
-View<CTX_T>::get_computed_columns() const {
-    return m_computed_columns;
+std::vector<t_computed_expression>
+View<CTX_T>::get_expressions() const {
+    return m_expressions;
 }
 
 template <>

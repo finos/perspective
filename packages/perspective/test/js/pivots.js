@@ -969,10 +969,10 @@ module.exports = perspective => {
             });
             let result2 = await view.to_columns();
             expect(result2).toEqual({
-                "2019-4-11 23:40:35|x": [null, null, 3, 4],
-                "2019-4-11 23:40:35|y": [null, null, "c", "d"],
-                "2019-4-13 03:27:15|x": [1, 2, null, null],
-                "2019-4-13 03:27:15|y": ["a", "b", null, null]
+                "4/11/2019, 11:40:35 PM|x": [null, null, 3, 4],
+                "4/11/2019, 11:40:35 PM|y": [null, null, "c", "d"],
+                "4/13/2019, 3:27:15 AM|x": [1, 2, null, null],
+                "4/13/2019, 3:27:15 AM|y": ["a", "b", null, null]
             });
             view.delete();
             table.delete();

@@ -40,6 +40,7 @@ export class Server {
     }
 
     /**
+     * Return an initialization message to the client for confirmation.
      * `Server` must be extended and the `post` method implemented before the
      * server can successfully be initialized.
      */
@@ -47,6 +48,16 @@ export class Server {
         if (msg.config) {
             override_config(msg.config);
         }
+
+        // The client will wait for a response message on table() and
+        // view(). If this flag is not set, the table() and view()
+        // constructors will resolve automatically and errors from the
+        // server will not be caught in those constructors. This allows
+        // for backwards compatibility between newer frontends (those
+        // with async table/view constructors) and older servers (which
+        // do not send the response message to the client).
+        msg.data = ["wait_for_response"];
+
         this.post(msg);
     }
 
@@ -73,6 +84,12 @@ export class Server {
         switch (msg.cmd) {
             case "init_profile_thread":
                 this.perspective.initialize_profile_thread();
+                break;
+            case "memory_usage":
+                this.post({
+                    id: msg.id,
+                    data: this.perspective.memory_usage()
+                });
                 break;
             case "init":
                 this.init(msg);
@@ -279,7 +296,7 @@ export class Server {
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a
             // view
-            this.process_error(msg, {message: "View is not initialized"});
+            this.process_error(msg, {message: "View method cancelled"});
             return;
         }
 

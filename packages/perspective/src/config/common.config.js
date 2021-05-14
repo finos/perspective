@@ -70,11 +70,9 @@ function common({no_minify, inline} = {}) {
                     test: /perspective\.worker\.js$/,
                     type: "javascript/auto",
                     loader: "worker-loader",
-                    options: inline
-                        ? {
-                              inline: "no-fallback"
-                          }
-                        : undefined
+                    options: {
+                        inline: "no-fallback"
+                    }
                 }
             ]
         },
@@ -82,9 +80,6 @@ function common({no_minify, inline} = {}) {
             fallback: {
                 crypto: false
             }
-        },
-        experiments: {
-            syncWebAssembly: true
         },
         devtool: "source-map",
         performance: {

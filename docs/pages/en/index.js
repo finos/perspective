@@ -79,7 +79,7 @@ class HomeSplash extends React.Component {
             <SplashContainer>
                 <div className="inner">
                     <ProjectTitle />
-                    <perspective-viewer class="titleViewer" />
+                    <perspective-viewer class="titleViewer nosuperstore" />
 
                     <PromoSection>
                         <Button id="grid">Datagrid</Button>
@@ -107,13 +107,13 @@ const PerspectiveBlock = props => {
     if (block.imageAlign === "right") {
         afterImage = (
             <div className="blockImage">
-                <perspective-viewer />
+                <perspective-viewer class="nosuperstore" />
             </div>
         );
     } else {
         beforeImage = (
             <div className="blockImage">
-                <perspective-viewer />
+                <perspective-viewer class="nosuperstore" />
             </div>
         );
     }
@@ -226,7 +226,7 @@ const Features = props => (
 const DESCRIPTION_TEXT = `
 # What is Perspective?
 Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
-datasets. Originally developed for J.P. Morgan's trading business,  Perspective
+datasets. Originally developed at J.P. Morgan,  Perspective
 makes it simple to build real-time & user configurable analytics entirely in the
 browser, or in concert with Python and/or
 [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
@@ -338,7 +338,7 @@ const Javascript = props => (
 const GetStarted = props => (
     <Container padding={["bottom", "top"]} id={props.id} background="dark">
         <div id="get_started">
-            <perspective-viewer></perspective-viewer>
+            <perspective-viewer class="nosuperstore"></perspective-viewer>
         </div>
     </Container>
 );

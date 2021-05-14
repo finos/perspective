@@ -1,8 +1,142 @@
 # Changelog
 
-## [0.6.2](https://github.com/finos/perspective/tree/HEAD)
+## [v0.8.3](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.6.1...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.2...HEAD)
+
+**Merged pull requests:**
+
+- Double-render fix [\#1420](https://github.com/finos/perspective/pull/1420) ([texodus](https://github.com/texodus))
+
+## [v0.8.2](https://github.com/finos/perspective/tree/v0.8.2) (2021-05-11)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.1...v0.8.2)
+
+**Fixed bugs:**
+
+- Perspective-cli hosting error: input.on\_delete is not a function [\#1405](https://github.com/finos/perspective/issues/1405)
+- Fix CLI `async` regression [\#1419](https://github.com/finos/perspective/pull/1419) ([texodus](https://github.com/texodus))
+- Fix color gradient charts containing 0 [\#1418](https://github.com/finos/perspective/pull/1418) ([texodus](https://github.com/texodus))
+- Fix styling bugs from CSS minification [\#1417](https://github.com/finos/perspective/pull/1417) ([texodus](https://github.com/texodus))
+
+## [v0.8.1](https://github.com/finos/perspective/tree/v0.8.1) (2021-05-10)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.8.0...v0.8.1)
+
+**Implemented enhancements:**
+
+- More Material style updates [\#1416](https://github.com/finos/perspective/pull/1416) ([texodus](https://github.com/texodus))
+- Color-by-string for Treemap/Sunburst [\#1415](https://github.com/finos/perspective/pull/1415) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Memory leak on reads from view, both on\_update and to\_json [\#1037](https://github.com/finos/perspective/issues/1037)
+- Responsive column style menu [\#1414](https://github.com/finos/perspective/pull/1414) ([texodus](https://github.com/texodus))
+- Fix memory leak\(s\), leak tests, `memory\_usage\(\)` wasm heap API [\#1412](https://github.com/finos/perspective/pull/1412) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Cannot find perspective\_vieux\_bg.wasm [\#1409](https://github.com/finos/perspective/issues/1409)
+- React and webpack examples don't work [\#1403](https://github.com/finos/perspective/issues/1403)
+- Unable to build the project in ubuntu environment. Getting 'Module not found: Error: Can't resolve '@finos/perspective' error [\#1401](https://github.com/finos/perspective/issues/1401)
+
+**Merged pull requests:**
+
+- Getting pybind version number always fails [\#1413](https://github.com/finos/perspective/pull/1413) ([nickpholden](https://github.com/nickpholden))
+- Fix `react` and `remote-workspace` examples [\#1411](https://github.com/finos/perspective/pull/1411) ([texodus](https://github.com/texodus))
+- Install Boost from JFrog, fix outdated docs from \#1409 [\#1410](https://github.com/finos/perspective/pull/1410) ([sc1f](https://github.com/sc1f))
+- Upgrade `puppeteer` to `9.0.0` [\#1408](https://github.com/finos/perspective/pull/1408) ([texodus](https://github.com/texodus))
+
+## [v0.8.0](https://github.com/finos/perspective/tree/v0.8.0) (2021-04-27)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.7.0...v0.8.0)
+
+**Breaking changes:**
+
+- Add `get\_min\_max\(\)` to Perspective API [\#1395](https://github.com/finos/perspective/pull/1395) ([texodus](https://github.com/texodus))
+
+**Implemented enhancements:**
+
+- Datagrid Styleable Column [\#1386](https://github.com/finos/perspective/pull/1386) ([texodus](https://github.com/texodus))
+- Enable editing to mime renderer in JupyterLab [\#1353](https://github.com/finos/perspective/pull/1353) ([timkpaine](https://github.com/timkpaine))
+
+**Fixed bugs:**
+
+- jupyter widget x-axis [\#1389](https://github.com/finos/perspective/issues/1389)
+- Exception in Widget console [\#984](https://github.com/finos/perspective/issues/984)
+- Fix `last` aggregate to preserve status [\#1390](https://github.com/finos/perspective/pull/1390) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- API docs are returning 404 [\#1398](https://github.com/finos/perspective/issues/1398)
+- PerspectiveWidget gets in unrecoverable state [\#1397](https://github.com/finos/perspective/issues/1397)
+- Cant get PerspectiveWidget loaded in jupyter lab [\#1392](https://github.com/finos/perspective/issues/1392)
+- Jupyter labextension install does not work on master [\#1330](https://github.com/finos/perspective/issues/1330)
+- Olympics example still referring to hypergrid [\#1304](https://github.com/finos/perspective/issues/1304)
+- Custom styles example not showing anything [\#1303](https://github.com/finos/perspective/issues/1303)
+
+**Merged pull requests:**
+
+- Updated `gh-pages` site and `README.md` [\#1399](https://github.com/finos/perspective/pull/1399) ([texodus](https://github.com/texodus))
+- Disable column style menu for non-numeric columns [\#1391](https://github.com/finos/perspective/pull/1391) ([texodus](https://github.com/texodus))
+
+## [v0.7.0](https://github.com/finos/perspective/tree/v0.7.0) (2021-04-20)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.2...v0.7.0)
+
+**Breaking changes:**
+
+- Remove webcomponentsjs [\#1388](https://github.com/finos/perspective/pull/1388) ([texodus](https://github.com/texodus))
+- Async Table and View Constructor [\#1289](https://github.com/finos/perspective/pull/1289) ([sc1f](https://github.com/sc1f))
+
+**Implemented enhancements:**
+
+- Material Theme 2.0 [\#1380](https://github.com/finos/perspective/pull/1380) ([texodus](https://github.com/texodus))
+- Add `call\_loop` and `get\_table\_names` [\#1375](https://github.com/finos/perspective/pull/1375) ([sc1f](https://github.com/sc1f))
+- Deprecate py27 \(linux\), add py39 \(osx\) [\#1336](https://github.com/finos/perspective/pull/1336) ([timkpaine](https://github.com/timkpaine))
+- Status Bar Component [\#1314](https://github.com/finos/perspective/pull/1314) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Binder link in README is broken [\#1339](https://github.com/finos/perspective/issues/1339)
+- Python wheel builds failing on catalina for py36 and py38 [\#1334](https://github.com/finos/perspective/issues/1334)
+- `perspective-python` should not use tilde \(~\) in client version resolution [\#1324](https://github.com/finos/perspective/issues/1324)
+- Inconsistent property names for ViewConfig [\#1079](https://github.com/finos/perspective/issues/1079)
+- issue running tests on Windows 7 [\#1051](https://github.com/finos/perspective/issues/1051)
+- Segmentation fault due to TBB when \> 8 clients are connected to a Python table [\#1007](https://github.com/finos/perspective/issues/1007)
+
+**Closed issues:**
+
+- Jupyter notebook wont display widget [\#1385](https://github.com/finos/perspective/issues/1385)
+- How to best notify existing Perspective Github community of upcoming events? [\#1357](https://github.com/finos/perspective/issues/1357)
+- collapse row pivots on data grid by default [\#1356](https://github.com/finos/perspective/issues/1356)
+- How to catch abort errors in JavaScript? [\#1348](https://github.com/finos/perspective/issues/1348)
+- Upload of v0.6.2 to PyPI? [\#1333](https://github.com/finos/perspective/issues/1333)
+- What is the correct way to unmount / cleanup the components? [\#1329](https://github.com/finos/perspective/issues/1329)
+- Webpack plugin fails in a fresh Next.js app [\#1316](https://github.com/finos/perspective/issues/1316)
+- Crash on Async Mode / GIL release [\#1313](https://github.com/finos/perspective/issues/1313)
+- Add periodic testing to CI [\#1267](https://github.com/finos/perspective/issues/1267)
+- Referencing perspective-workspace from index.html complains about perspective-row being already used [\#1218](https://github.com/finos/perspective/issues/1218)
+
+**Merged pull requests:**
+
+- Fix cross-origin webpack defaults [\#1387](https://github.com/finos/perspective/pull/1387) ([texodus](https://github.com/texodus))
+- Backwards compatibility for table\(\) and view\(\) [\#1384](https://github.com/finos/perspective/pull/1384) ([sc1f](https://github.com/sc1f))
+- Adds `yarn repl` to launch a shell inside our docker images [\#1382](https://github.com/finos/perspective/pull/1382) ([sc1f](https://github.com/sc1f))
+- Update regular-table to 0.3.1 [\#1379](https://github.com/finos/perspective/pull/1379) ([texodus](https://github.com/texodus))
+- Fix `@finos/perspective-jupyterlab` to work with WebAssembly/Webpack5 [\#1377](https://github.com/finos/perspective/pull/1377) ([texodus](https://github.com/texodus))
+- install boost via choco [\#1351](https://github.com/finos/perspective/pull/1351) ([timkpaine](https://github.com/timkpaine))
+- Fix timezone tests to take DST into account [\#1349](https://github.com/finos/perspective/pull/1349) ([sc1f](https://github.com/sc1f))
+- Fix D3FC label font bug [\#1343](https://github.com/finos/perspective/pull/1343) ([texodus](https://github.com/texodus))
+- Replace `emsdk-npm` with simple script [\#1342](https://github.com/finos/perspective/pull/1342) ([texodus](https://github.com/texodus))
+- fix binder [\#1341](https://github.com/finos/perspective/pull/1341) ([timkpaine](https://github.com/timkpaine))
+- Add nightly complete builds [\#1338](https://github.com/finos/perspective/pull/1338) ([timkpaine](https://github.com/timkpaine))
+- Fix \#1324: use ~major.minor.patch in PerspectiveWidget versioning [\#1331](https://github.com/finos/perspective/pull/1331) ([sc1f](https://github.com/sc1f))
+- Add `SplitPanel` and port to Yew [\#1326](https://github.com/finos/perspective/pull/1326) ([texodus](https://github.com/texodus))
+
+## [v0.6.2](https://github.com/finos/perspective/tree/v0.6.2) (2021-02-12)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.6.1...v0.6.2)
 
 **Fixed bugs:**
 
@@ -1586,7 +1720,7 @@
 
 ## [v0.2.0](https://github.com/finos/perspective/tree/v0.2.0) (2018-10-01)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.3...v0.2.0)
+[Full Changelog](https://github.com/finos/perspective/compare/0.2.0-beta.3...v0.2.0)
 
 **Closed issues:**
 
@@ -1600,13 +1734,13 @@
 - Refactor examples [\#249](https://github.com/finos/perspective/pull/249) ([texodus](https://github.com/texodus))
 - 1D charts generated from columnar data [\#231](https://github.com/finos/perspective/pull/231) ([sc1f](https://github.com/sc1f))
 
-## [v0.2.0-beta.3](https://github.com/finos/perspective/tree/v0.2.0-beta.3) (2018-09-25)
-
-[Full Changelog](https://github.com/finos/perspective/compare/0.2.0-beta.3...v0.2.0-beta.3)
-
 ## [0.2.0-beta.3](https://github.com/finos/perspective/tree/0.2.0-beta.3) (2018-09-25)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.2...0.2.0-beta.3)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.3...0.2.0-beta.3)
+
+## [v0.2.0-beta.3](https://github.com/finos/perspective/tree/v0.2.0-beta.3) (2018-09-25)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.2.0-beta.2...v0.2.0-beta.3)
 
 **Implemented enhancements:**
 

@@ -142,6 +142,7 @@
         "fix": "npm-run-all --silent fix:*",
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js",
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
-        "jlab_link": "node scripts/jlab_link.js"
+        "jlab_link": "node scripts/jlab_link.js",
+        "repl": "node scripts/repl.js"
     }
 }

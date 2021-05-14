@@ -65,6 +65,17 @@ union t_scalar_u {
 // t_scalar should remain a POD type.
 struct PERSPECTIVE_EXPORT t_tscalar {
 
+    t_tscalar() = default;
+
+    /**
+     * @brief A functional-style cast from int to `t_tscalar` used widely
+     * by Exprtk. The scalar returned is of DTYPE_FLOAT64, so we don't have
+     * to promote from int to float later on.
+     * 
+     * @param v 
+     */
+    t_tscalar(int v);
+
     template <typename T>
     T get() const;
 
@@ -103,6 +114,27 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     bool operator>(const t_tscalar& rhs) const;
     bool operator>=(const t_tscalar& rhs) const;
     bool operator<=(const t_tscalar& rhs) const;
+
+    t_tscalar operator+() const;
+    t_tscalar operator-() const;
+
+    t_tscalar operator+(const t_tscalar& other) const;
+    t_tscalar operator-(const t_tscalar& other) const;
+    t_tscalar operator*(const t_tscalar& other) const;
+    t_tscalar operator/(const t_tscalar& other) const;
+    t_tscalar operator%(const t_tscalar& other) const;
+
+    template <typename T> t_tscalar operator+(T other) const;
+    template <typename T> t_tscalar operator-(T other) const;
+    template <typename T> t_tscalar operator*(T other) const;
+    template <typename T> t_tscalar operator/(T other) const;
+    template <typename T> t_tscalar operator%(T other) const;
+    
+    t_tscalar& operator+=(const t_tscalar& rhs);
+    t_tscalar& operator-=(const t_tscalar& rhs);
+    t_tscalar& operator*=(const t_tscalar& rhs);
+    t_tscalar& operator/=(const t_tscalar& rhs);
+    t_tscalar& operator%=(const t_tscalar& rhs);
 
     bool is_numeric() const;
 
@@ -254,6 +286,11 @@ PERSPECTIVE_EXPORT bool t_tscalar::get() const;
 template <template <typename COMPARED_T> class COMPARER_T>
 bool
 t_tscalar::compare_common(const t_tscalar& rhs) const {
+    // TODO: compare_common only works for equal types. This is probably
+    // something we don't want to change on a whim, as it is probably
+    // widely used and not something that we can easily trace through
+    // text-search or profiling, and changing this behavior will result in
+    // a whole load of edge cases.
     if (m_type != rhs.m_type) {
         COMPARER_T<unsigned char> cmp;
         return cmp(m_type, rhs.m_type);
@@ -382,4 +419,23 @@ struct hash<perspective::t_tscalar> {
 PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_tscalar& t);
 PERSPECTIVE_EXPORT std::ostream& operator<<(
     std::ostream& os, const std::vector<perspective::t_tscalar>& t);
+
+/**
+ * exprtk uses std::numeric_limits<T>::quiet_NaN() and min_exponent10.
+ */
+template<>
+class numeric_limits<perspective::t_tscalar> {
+    public:
+        static perspective::t_tscalar quiet_NaN() {
+            // TODO: could stop allocating all those nans and fallback to
+            // a static nan value?
+            return perspective::mknone();
+        }
+
+        static perspective::t_tscalar infinity() {
+            perspective::t_tscalar rval;
+            rval.set(std::numeric_limits<double>::infinity());
+            return rval;
+        }
+};
 } // namespace std

@@ -226,6 +226,39 @@ t_ctx0::notify(const t_data_table& flattened) {
 }
 
 /**
+ * @brief Gives the min and max value (by t_tscalar comparison) of the leaf
+ * nodes of a given column.
+ *
+ * @param colname
+ * @return std::pair<t_tscalar, t_tscalar>
+ */
+std::pair<t_tscalar, t_tscalar> 
+t_ctx0::get_min_max(const std::string& colname) const {
+    std::pair<t_tscalar, t_tscalar> rval(mknone(), mknone());
+    t_uindex ctx_nrows = get_row_count();
+    std::vector<t_tscalar> values(ctx_nrows);
+    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(0, ctx_nrows);
+    std::vector<t_tscalar> out_data(pkeys.size());
+    m_gstate->read_column(colname, pkeys, out_data);
+    for (t_index ridx = 0; ridx < m_traversal->size(); ++ridx) {
+        auto val = out_data[ridx];
+        if (!val.is_valid()) {
+            continue;
+        }
+
+        if (rval.first.is_none() || (!val.is_none() && val < rval.first)) {
+            rval.first = val;
+        }
+
+        if (val > rval.second) {
+            rval.second = val;
+        }
+    }
+
+    return rval;
+}
+
+/**
  * @brief Given a start/end row and column index, return the underlying data
  * for the requested subset.
  *

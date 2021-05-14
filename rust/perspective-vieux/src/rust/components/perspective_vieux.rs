@@ -232,6 +232,7 @@ async fn toggle_config_task(
 ) -> Result<JsValue, JsValue> {
     let element = find_custom_element(&props, &callback).ok_or(JsValue::UNDEFINED)?;
     if open {
+        dispatch_settings_event(element.clone(), open)?;
         callback.emit(());
         plugin_resize(element).await;
     } else {
@@ -246,13 +247,32 @@ async fn toggle_config_task(
         let new_height = format!("{}px", element.client_height());
         main_panel.style().set_property("width", &new_width)?;
         main_panel.style().set_property("height", &new_height)?;
-        plugin_resize(element).await;
+        plugin_resize(element.clone()).await;
         main_panel.style().set_property("width", "")?;
         main_panel.style().set_property("height", "")?;
+        dispatch_settings_event(element, open)?;
         callback.emit(());
     }
 
     Ok(JsValue::UNDEFINED)
+}
+
+/// Dispatch the "perspective-toggle-settings" event to notify external
+/// listeners.
+fn dispatch_settings_event(
+    element: web_sys::Element,
+    open: bool,
+) -> Result<(), JsValue> {
+    let mut event_init = web_sys::CustomEventInit::new();
+    event_init.detail(&JsValue::from(open));
+    let event = web_sys::CustomEvent::new_with_event_init_dict(
+        "perspective-toggle-settings",
+        &event_init,
+    );
+
+    element.toggle_attribute_with_force("settings", open)?;
+    element.dispatch_event(&event.unwrap()).unwrap();
+    Ok(())
 }
 
 /// Find the root `<perspective-viewer>` Custom Element from the embedded

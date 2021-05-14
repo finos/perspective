@@ -26,11 +26,8 @@ std::shared_ptr<t_ctxunit>
 make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
     std::shared_ptr<t_view_config> view_config, const std::string& name) {
     auto columns = view_config->get_columns();
-    auto filter_op = view_config->get_filter_op();
-    auto fterm = view_config->get_fterm();
-    auto computed_columns = view_config->get_computed_columns();
 
-    auto cfg = t_config(columns, fterm, filter_op, computed_columns);
+    auto cfg = t_config(columns);
     auto ctx_unit = std::make_shared<t_ctxunit>(*(schema.get()), cfg);
     ctx_unit->init();
 
@@ -55,9 +52,9 @@ make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
     auto filter_op = view_config->get_filter_op();
     auto fterm = view_config->get_fterm();
     auto sortspec = view_config->get_sortspec();
-    auto computed_columns = view_config->get_computed_columns();
+    auto expressions = view_config->get_expressions();
 
-    auto cfg = t_config(columns, fterm, filter_op, computed_columns);
+    auto cfg = t_config(columns, fterm, filter_op, expressions);
     auto ctx0 = std::make_shared<t_ctx0>(*(schema.get()), cfg);
     ctx0->init();
     ctx0->sort_by(sortspec);
@@ -80,9 +77,9 @@ make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
     auto fterm = view_config->get_fterm();
     auto sortspec = view_config->get_sortspec();
     auto row_pivot_depth = view_config->get_row_pivot_depth();
-    auto computed_columns = view_config->get_computed_columns();
+    auto expressions = view_config->get_expressions();
 
-    auto cfg = t_config(row_pivots, aggspecs, fterm, filter_op, computed_columns);
+    auto cfg = t_config(row_pivots, aggspecs, fterm, filter_op, expressions);
     auto ctx1 = std::make_shared<t_ctx1>(*(schema.get()), cfg);
 
     ctx1->init();
@@ -116,12 +113,12 @@ make_context(std::shared_ptr<Table> table, std::shared_ptr<t_schema> schema,
     auto col_sortspec = view_config->get_col_sortspec();
     auto row_pivot_depth = view_config->get_row_pivot_depth();
     auto column_pivot_depth = view_config->get_column_pivot_depth();
-    auto computed_columns = view_config->get_computed_columns();
+    auto expressions = view_config->get_expressions();
 
     t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
     auto cfg = t_config(
-        row_pivots, column_pivots, aggspecs, total, fterm, filter_op, computed_columns, column_only);
+        row_pivots, column_pivots, aggspecs, total, fterm, filter_op, expressions, column_only);
     auto ctx2 = std::make_shared<t_ctx2>(*(schema.get()), cfg);
 
     ctx2->init();

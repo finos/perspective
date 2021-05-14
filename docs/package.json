@@ -1,22 +1,25 @@
 {
     "name": "@finos/docs",
     "private": true,
-    "version": "0.6.2",
+    "version": "0.8.3",
     "scripts": {
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
         "start": "npm run build:arrow && npm run theme && docusaurus-start",
         "build": "echo 'No build'",
-        "build:logo": "webpack --config logo.config.js --color",
         "build:arrow": "cpx ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
-        "docs": "npm run build:arrow && npm run build:logo && npm run theme && docusaurus-build",
+        "build:webpack": "webpack --config webpack.config.js --color",
+        "docs": "npm run build:webpack && npm run theme && docusaurus-build",
         "publish-gh-pages": "npm run theme && docusaurus-publish",
         "write-translations": "docusaurus-write-translations"
     },
     "devDependencies": {
         "@babel/plugin-proposal-class-properties": "^7.8.3",
-        "@finos/perspective": "^0.6.2",
-        "@finos/perspective-viewer": "^0.6.2",
+        "@finos/perspective": "^0.8.3",
+        "@finos/perspective-viewer": "^0.8.3",
+        "@finos/perspective-viewer-d3fc": "^0.8.3",
+        "@finos/perspective-viewer-datagrid": "^0.8.3",
+        "@finos/perspective-workspace": "^0.8.3",
         "docusaurus": "^1.8.0",
         "less": "^3.9.0"
     },

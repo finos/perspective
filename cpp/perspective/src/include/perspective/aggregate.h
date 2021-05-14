@@ -126,28 +126,6 @@ public:
     }
 };
 
-template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_last_value
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T> {
-public:
-    RESULT_T
-    value(ROLLING_T rs) { return RESULT_T(rs); }
-
-    ROLLING_T
-    reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter) {
-        if (biter >= eiter)
-            return ROLLING_T();
-        return ROLLING_T(*(eiter - 1));
-    }
-
-    ROLLING_T
-    roll_up(const ROLLING_T* biter, const ROLLING_T* eiter) {
-        if (biter >= eiter)
-            return ROLLING_T();
-
-        return ROLLING_T(*(eiter - 1));
-    }
-};
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
 class PERSPECTIVE_EXPORT t_aggimpl_hwm : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T> {

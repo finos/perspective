@@ -110,7 +110,7 @@ class D3FCChartElement extends HTMLElement {
 
             const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues, oldSettings.realValues];
             const newValues = [newSettings.crossValues, newSettings.mainValues, newSettings.splitValues, newSettings.realValues];
-            if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data, colorStyles: null};
+            if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data, agg_paths: newSettings.agg_paths, colorStyles: null};
         }
         this.remove();
         return newSettings;

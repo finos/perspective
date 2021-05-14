@@ -1,6 +1,5 @@
 @import "~@finos/perspective-viewer/src/less/fonts.less";
 @import (reference) "~@finos/perspective-viewer/src/themes/material-dense.less";
-@import (reference) "~@finos/perspective-viewer/src/themes/material-dense.dark.less";
 
 perspective-workspace {
     .perspective-workspace-material-base();
@@ -8,10 +7,27 @@ perspective-workspace {
 
 perspective-viewer.workspace-detail-widget {
     .perspective-viewer-material-dense();
+    background-color: #F2F4F6;
 }
 
 perspective-viewer.workspace-master-widget {
-    .perspective-viewer-material-dense-dark();
+    .perspective-viewer-material-dense();
+    background-color: #F2F4F6;
+    --plugin--background: #F2F4F6;
+    regular-table {
+        --pv-divider--color: #E0E4E9 !important;
+        td, th {
+            border-color: #E0E4E9;
+        }
+    }
+}
+
+perspective-column-style {
+    background-color: #FFFFFF;
+    color: #161616;
+    border: 1px solid #E0E4E9;
+    --input--border-color: #E0E4E9;
+    --active-color: @blue500;
 }
 
 .perspective-workspace-material-base() {
@@ -32,4 +48,11 @@ perspective-viewer.workspace-master-widget {
     --menu-reset--content: "autorenew";
     --menu-link--content: "link";
     --menu-unlink--content: "link_off";
+}
+
+
+.p-Menu {
+    font-family: "Open Sans", Arial;
+    font-weight: 300;
+    color: #161616;
 }

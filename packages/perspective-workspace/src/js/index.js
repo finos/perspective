@@ -138,7 +138,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * workspace.tables.set("superstore", await worker.table(data));
      */
     restore(layout) {
-        return this.workspace.restore(layout);
+        this.workspace.restore(layout);
     }
 
     addTable(name, table) {
@@ -189,7 +189,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
 
     _register_light_dom_listener() {
         let observer = new MutationObserver(this._light_dom_changed.bind(this));
-        let config = {attributes: false, childList: true, subtree: true};
+        let config = {attributes: false, childList: true, subtree: false};
         observer.observe(this, config);
         this._light_dom_changed();
     }
@@ -211,9 +211,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         container.insertBefore(this.workspace.node, null);
         MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
 
-        window.onresize = () => {
-            this.workspace.update();
-        };
+        window.onresize = this.workspace.update.bind(this.workspace);
     }
 
     disconnectedCallback() {

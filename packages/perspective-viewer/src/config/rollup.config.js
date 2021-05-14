@@ -21,7 +21,7 @@ export default () => {
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/umd/${key}.css`),
-                    sourceMap: true,
+                    sourceMap: false,
                     minimize: {preset: "lite"}
                 }),
                 sourcemaps()

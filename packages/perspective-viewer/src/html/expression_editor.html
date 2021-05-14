@@ -8,5 +8,48 @@ the Apache License 2.0.  The full license can be found in the LICENSE file.
 -->
 
 <template id="perspective-expression-editor">
-    <div role="textbox" contenteditable="true" spellcheck="false" class="perspective-expression-editor__edit_area"></div>
+    <div class="psp-expression-editor__body psp-expression-editor__container">
+        <div class="psp-expression-editor__container">
+            <div class="psp-expression-editor__action">
+                <span class="psp-icon psp-icon__close" id="psp-expression-editor-button-close" aria-label="Close Expression Editor"></span>
+                <span id="psp-expression-editor-title">New Column</span>
+            </div>
+            <div class="psp-expression-editor__content psp-expression-editor__content--nomargin">
+                <textarea
+                    name=""
+                    id="psp-expression-editor__edit_area"
+                    autocomplete="false"
+                    spellcheck="false"
+                    aria-multiline="true"
+                    aria-label="Type an expression here"></textarea>
+            </div>
+            <span id="psp-expression-editor__error-message"></span>
+            <div class="psp-expression-editor__help--container" id="psp-expression-editor-help-container">
+                <div class="psp_expression-editor__help--group" id="psp-expression-editor-help-group-numeric">
+                    <span class="psp_expression-editor__help--header" aria-label="Show/Hide Numeric Group">Numeric</span>
+                    <div class="psp_expression-editor__help--group-content"></div>
+                </div>
+                <div class="psp_expression-editor__help--group" id="psp-expression-editor-help-group-string">
+                    <span class="psp_expression-editor__help--header" aria-label="Show/Hide String Group">String</span>
+                    <div class="psp_expression-editor__help--group-content"></div>
+                </div>
+                <div class="psp_expression-editor__help--group" id="psp-expression-editor-help-group-datetime">
+                    <span class="psp_expression-editor__help--header" aria-label="Show/Hide Datetime Group">Datetime</span>
+                    <div class="psp_expression-editor__help--group-content"></div>
+                </div>
+                <div class="psp_expression-editor__help--group" id="psp-expression-editor-help-group-comparison">
+                    <span class="psp_expression-editor__help--header" aria-label="Show/Hide Comparison Group">Comparison</span>
+                    <div class="psp_expression-editor__help--group-content"></div>
+                </div>
+                <div class="psp_expression-editor__help--group" id="psp-expression-editor-help-group-control-flow">
+                    <span class="psp_expression-editor__help--header" aria-label="Show/Hide Control Flow Group">Control Flow</span>
+                    <div class="psp_expression-editor__help--group-content"></div>
+                </div>
+            </div>
+        </div>
+        <div id="psp-expression-editor-actions">
+            <button id="psp-expression-editor-button-help" class="psp-expression-editor__button">Help</button>
+            <button id="psp-expression-editor-button-save" class="psp-expression-editor__button" disabled>Save</button>
+        </div>
+    </div>
 </template>

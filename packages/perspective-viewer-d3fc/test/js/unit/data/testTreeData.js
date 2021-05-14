@@ -21,6 +21,20 @@ export const data = [
     }
 ];
 
+const item = {
+    __ROW_PATH__: ["East"],
+    Quantity: 4156
+};
+
+export const agg_paths = [
+    [item, item, item],
+    [item, item, item],
+    [item, item, item],
+    [item, item, item],
+    [item, item, item],
+    [item, item, item]
+];
+
 export const splitData = [
     {
         __ROW_PATH__: ["Central", "Furniture"],
@@ -101,16 +115,7 @@ export const mainValues = [
     }
 ];
 
-export const realValues = [
-    {
-        name: "Sales",
-        type: "float"
-    },
-    {
-        name: "Quantity",
-        type: "integer"
-    }
-];
+export const realValues = ["Sales", "Quantity"];
 
 export const crossValues = [
     {

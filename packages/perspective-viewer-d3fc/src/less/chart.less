@@ -6,7 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-@sans-serif-fonts: Arial, sans-serif;
+ 
+ @import "~@finos/perspective-viewer/src/less/variables.less";
+ 
+ @sans-serif-fonts: Arial, sans-serif;
 
 :host {
     .chart {
@@ -43,6 +46,7 @@
 
         &.d3_sunburst {
             padding: 0;
+            font-size: 14px;
 
             & .inner-container {
                 width: 100%;
@@ -57,10 +61,13 @@
                     overflow: hidden;
                 }
 
+                .sunburst-container:not(:only-child) svg {
+                    transform: translate(0, -27px);
+                }
+
                 & svg {
                     width: 100%;
                     height: 100%;
-                    transform: translate(0, -27px);
                 }
 
                 & path {
@@ -148,20 +155,17 @@
                 }
 
                 & .top {
-                    font-size: 19px;
-                    font-weight: bold;
+                    font-size: 14px;
                     z-index: 5;
                     pointer-events: none;
                 }
                 & .mid {
-                    font-size: 10px;
-                    font-weight: bold;
+                    font-size: 8px;
                     opacity: 0.7;
                     z-index: 4;
                 }
                 & .lower {
                     font-size: 0px;
-                    font-weight: bold;
                     opacity: 0;
                     z-index: 4;
                 }
@@ -191,6 +195,11 @@
         & .x-label {
             height: 1.2em !important;
             line-height: 1em !important;
+        }
+
+        & .x-label, & .y-label {
+            color: var(--d3fc-label--color, inherit);
+            font-size: 14px;
         }
 
         & d3fc-canvas.plot-area {
@@ -339,8 +348,9 @@
         &[borderbox-on-hover="true"] {
             transition: box-shadow 1s;
             &:hover {
-                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-                transition: box-shadow 0.2s;
+                background-color: var(--d3fc-legend--background, #ffffff);
+                box-shadow: @elevation1;
+                transition: box-shadow 0.2s,  background-color 0.2s;
             }
         }
 
@@ -405,6 +415,10 @@
         height: 200px;
     }
 
+    .d3_treemap .legend-container:not(.legend-color) {
+        width: 100px;
+    }
+
     .zoom-controls {
         position: absolute;
         top: 10px;
@@ -450,13 +464,14 @@
     div.tooltip {
         position: absolute;
         text-align: left;
-        font-size: 10pt;
+        font-size: 12px;
+        font-weight: 300;
         white-space: nowrap;
         padding: 0.5em;
         background: var(--d3fc-tooltip--background, #ffffff);
         color: var(--d3fc-tooltip--color, black);
-        border: 1px solid #777777;
-        border-radius: 2px;
+        border: 1px solid var(--d3fc-tooltip--border-color, #777777);
+        box-shadow: var(--d3fc-tooltip--box-shadow, none);
         pointer-events: none;
     }
 

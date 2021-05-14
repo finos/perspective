@@ -23,7 +23,7 @@ if (Python_EXECUTABLE)
 
   execute_process(
     COMMAND "${Python_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import pybind11; print('.'.join(int(x) for x in pybind11.version_info), end='')\nexcept:pass"
+            "from __future__ import print_function\ntry: import pybind11; print('.'.join(str(int(x)) for x in pybind11.version_info), end='')\nexcept:pass"
             OUTPUT_VARIABLE __pybind_version)
 elseif(__pybind_out)
   message(STATUS "Python executable not found.")

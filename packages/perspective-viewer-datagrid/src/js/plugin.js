@@ -17,6 +17,7 @@ import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
+import {PLUGIN_SYMBOL} from "./plugin_menu.js";
 
 const VIEWER_MAP = new WeakMap();
 const INSTALLED = new WeakMap();
@@ -46,33 +47,27 @@ const datagridPlugin = lock(async function(regular, viewer, view) {
     if (!is_installed) {
         model = await createModel(regular, table, view);
         configureRegularTable(regular, model);
-        await configureRowSelectable.call(model, regular, viewer);
-        await configureClick.call(model, regular, viewer);
-        await configureEditable.call(model, regular, viewer);
         await configureSortable.call(model, regular, viewer);
+        await configureRowSelectable.call(model, regular, viewer);
+        await configureEditable.call(model, regular, viewer);
+        await configureClick.call(model, regular, viewer);
         INSTALLED.set(regular, model);
     } else {
         model = INSTALLED.get(regular);
         await createModel(regular, table, view, model);
     }
 
-    try {
-        const draw = regular.draw({invalid_columns: true});
-        if (!model._preserve_focus_state) {
-            regular.scrollTop = 0;
-            regular.scrollLeft = 0;
-            deselect(regular, viewer);
-            regular._resetAutoSize();
-        } else {
-            model._preserve_focus_state = false;
-        }
-
-        await draw;
-    } catch (e) {
-        if (e.message !== "View is not initialized") {
-            throw e;
-        }
+    const draw = regular.draw({invalid_columns: true});
+    if (!model._preserve_focus_state) {
+        regular.scrollTop = 0;
+        regular.scrollLeft = 0;
+        deselect(regular, viewer);
+        regular._resetAutoSize();
+    } else {
+        model._preserve_focus_state = false;
     }
+
+    await draw;
 });
 
 /**
@@ -116,38 +111,22 @@ class DatagridPlugin {
     static deselectMode = "pivots";
 
     static async update(div) {
-        try {
-            const datagrid = VIEWER_MAP.get(div);
-            const model = INSTALLED.get(datagrid);
-            model._num_rows = await model._view.num_rows();
-            await datagrid.draw();
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
-            }
-        }
+        const datagrid = VIEWER_MAP.get(div);
+        const model = INSTALLED.get(datagrid);
+        model._num_rows = await model._view.num_rows();
+        await datagrid.draw();
     }
 
     static async create(div, view) {
-        try {
-            const datagrid = get_or_create_datagrid(this, div);
-            await datagridPlugin(datagrid, this, view);
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
-            }
-        }
+        const datagrid = get_or_create_datagrid(this, div);
+        await datagridPlugin(datagrid, this, view);
     }
 
     static async resize() {
         if (this.view && VIEWER_MAP.has(this._datavis)) {
             const datagrid = VIEWER_MAP.get(this._datavis);
-            try {
+            if (INSTALLED.has(datagrid)) {
                 await datagrid.draw();
-            } catch (e) {
-                if (e.message !== "View is not initialized") {
-                    throw e;
-                }
             }
         }
     }
@@ -159,9 +138,19 @@ class DatagridPlugin {
         }
     }
 
-    static save() {}
+    static save() {
+        if (VIEWER_MAP.has(this._datavis)) {
+            const datagrid = VIEWER_MAP.get(this._datavis);
+            if (datagrid[PLUGIN_SYMBOL]) {
+                return JSON.parse(JSON.stringify(datagrid[PLUGIN_SYMBOL]));
+            }
+        }
+    }
 
-    static restore() {}
+    static restore(token) {
+        const datagrid = get_or_create_datagrid(this, this._datavis);
+        datagrid[PLUGIN_SYMBOL] = token;
+    }
 }
 
 /**

@@ -7,15 +7,16 @@
  *
  */
 
-import debounce from "lodash/debounce";
 import isEqual from "lodash/isEqual";
 import {html, render} from "lit-html";
 
+import {throttlePromise} from "../utils.js";
 import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
 
 import {StateElement} from "./state_element.js";
+import {findExpressionByAlias, getExpressionAlias} from "../utils.js";
 
 /******************************************************************************
  *
@@ -41,25 +42,25 @@ const column_sorter = schema => (a, b) => {
     return r;
 };
 
-function get_aggregate_defaults(columns, schema, computed_schema) {
+function get_aggregate_defaults(columns, schema, expression_schema) {
     const aggregates = {};
     for (const col of columns) {
         let type = schema[col];
         if (!type) {
-            type = computed_schema[col];
+            type = expression_schema[col];
         }
         aggregates[col] = get_type_config(type).aggregate;
     }
     return aggregates;
 }
 
-function get_aggregates_with_defaults(aggregate_attribute, columns, schema, computed_schema) {
+function get_aggregates_with_defaults(aggregate_attribute, columns, schema, expression_schema) {
     const found = new Set();
     const aggregates = [];
     for (const col of aggregate_attribute) {
         let type = schema[col.column];
         if (!type) {
-            type = computed_schema[col.column];
+            type = expression_schema[col.column];
         }
         const type_config = get_type_config(type);
         found.add(col.column);
@@ -78,7 +79,7 @@ function get_aggregates_with_defaults(aggregate_attribute, columns, schema, comp
         if (!found.has(col)) {
             let type = schema[col];
             if (!type) {
-                type = computed_schema[col.column];
+                type = expression_schema[col.column];
             }
             aggregates.push({
                 column: col,
@@ -124,89 +125,55 @@ const _warning = (strings, ...args) => strings.flatMap((str, idx) => [_nowrap_te
 
 export class PerspectiveElement extends StateElement {
     /**
-     * Given an array of computed column definitions, check the table's
-     * computed schema and make sure all types and column names are valid.
-     * If any column names are invalid, they are removed from the output
-     * array of computed column definitions.
-     *
-     * @param {Array{Object}} computed_columns an Array of computed column
-     * definitions
-     * @param {Object{String}} computed_schema a computed column schema
-     * generated from the table
-     *
-     * @returns {Array{Object}} a validated Array of computed column definitions
-     */
-    _validate_parsed_computed_columns(computed_columns, computed_schema) {
-        if (!computed_columns || computed_columns.length === 0) return [];
-        const validated = [];
-
-        for (const computed of computed_columns) {
-            if (computed_schema[computed.column]) {
-                validated.push(computed);
-            }
-        }
-
-        return validated;
-    }
-
-    /**
      * Given a {@link module:perspective~table}, load it into the
      * {@link module:perspective_viewer~PerspectiveViewer} and set the viewer's
-     * state. If the `computed-columns` attribute is set on the viewer, this
-     * method attempts to validate the computed columns with the `Table` and
+     * state. If the `expressions` attribute is set on the viewer, this
+     * method attempts to validate the expressions with the `Table` and
      * reconcile state.
      *
      * @param {*} table
-     * @param {*} computed
      */
-    async _load_table(table) {
+    async _load_table(table, resolve) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
-        const resolve = this._set_updating();
 
         this._clear_state();
         this._table = table;
 
-        if (!this._computed_expression_parser.is_initialized) {
-            // Use metadata from the `Table` to construct the expression parser
-            const computed_functions = await table.get_computed_functions();
-            this._computed_expression_parser.init(computed_functions);
-        }
-
         let [cols, schema] = await Promise.all([table.columns(), table.schema(true)]);
 
-        // Initial col order never contains computed columns
+        // Initial col order never contains expressions
         this._initial_col_order = cols.slice();
 
-        // Already validated through the attribute API
-        let parsed_computed_columns = this._get_view_parsed_computed_columns();
+        // Grab expressions from the viewer and validate them so that
+        // expressions do not crash the viewer/table.
+        const expressions = this._get_view_expressions();
+        const valid_expressions = [];
 
-        if (parsed_computed_columns.length === 0) {
-            // Fallback for race condition on workspace - need to parse
-            // computed expressions and then set `parsed-computed-columns`
-            // so that future views can get the computed column.
-            const computed_expressions = this._get_view_computed_columns();
+        let expression_schema = {};
 
-            for (const expression of computed_expressions) {
-                if (typeof expression === "string") {
-                    parsed_computed_columns = parsed_computed_columns.concat(this._computed_expression_parser.parse(expression));
+        if (expressions.length > 0) {
+            const valid_expression_alias = [];
+            const validate_results = await table.validate_expressions(expressions);
+            expression_schema = validate_results.expression_schema;
+
+            for (const expression of expressions) {
+                const alias = getExpressionAlias(expression);
+
+                if (alias === undefined) {
+                    console.warn(`Not applying expression ${expression} as it does not have an alias set.`);
+                    continue;
+                }
+
+                if (expression_schema[alias]) {
+                    valid_expressions.push(expression);
+                    valid_expression_alias.push(alias);
                 } else {
-                    parsed_computed_columns.push(expression);
+                    console.error(`Could not validate expression "${alias}": ${validate_results.errors[alias]}`);
                 }
             }
+
+            cols = cols.concat(valid_expression_alias);
         }
-
-        const computed_schema = await table.computed_schema(parsed_computed_columns);
-
-        // Validate the computed columns and make sure no invalid columns
-        // are present, as invalid columns can cause segfaults later on.
-        const validated = await this._validate_parsed_computed_columns(parsed_computed_columns, computed_schema);
-        parsed_computed_columns = validated;
-
-        // Update the viewer with the parsed computed columns
-        this.setAttribute("parsed-computed-columns", JSON.stringify(parsed_computed_columns));
-
-        const computed_column_names = parsed_computed_columns.map(x => x.column);
-        cols = cols.concat(computed_column_names);
 
         if (!this.hasAttribute("columns")) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));
@@ -216,12 +183,12 @@ export class PerspectiveElement extends StateElement {
 
         // Update aggregates
         const aggregate_attribute = this.get_aggregate_attribute();
-        const aggregates = get_aggregates_with_defaults(aggregate_attribute, cols, schema, computed_schema);
+        const aggregates = get_aggregates_with_defaults(aggregate_attribute, cols, schema, expression_schema);
 
         let shown = JSON.parse(this.getAttribute("columns")); //.filter(x => all_cols.indexOf(x) > -1);
 
         // At this point, cols contains both the table columns and the
-        // validated computed columns, so this should only filter on columns
+        // validated expressions, so this should only filter on columns
         // that don't exist in either.
         const shown_is_invalid = shown.filter(x => cols.indexOf(x) > -1).length === 0;
 
@@ -229,19 +196,19 @@ export class PerspectiveElement extends StateElement {
             shown = this._initial_col_order;
         }
 
-        this._aggregate_defaults = get_aggregate_defaults(cols, schema, computed_schema);
+        this._aggregate_defaults = get_aggregate_defaults(cols, schema, expression_schema);
 
         // Clear the columns in the DOM before adding new ones
         this._clear_columns();
 
         for (const name of cols) {
             let aggregate = aggregates.find(a => a.column === name).op;
-            const computed = computed_column_names.includes(name) ? name : undefined;
             let type = schema[name];
             if (!type) {
-                type = computed_schema[name];
+                type = expression_schema[name];
             }
-            const row = this._new_row(name, type, aggregate, null, null, computed);
+            const expression = findExpressionByAlias(name, valid_expressions);
+            const row = this._new_row(name, type, aggregate, null, null, expression);
             this._inactive_columns.appendChild(row);
             if (shown.includes(name)) {
                 row.classList.add("active");
@@ -253,12 +220,12 @@ export class PerspectiveElement extends StateElement {
         }
 
         for (const x of shown) {
-            const computed = computed_column_names.includes(x) ? x : undefined;
-            let type = schema[name];
+            let type = schema[x];
             if (!type) {
-                type = computed_schema[name];
+                type = expression_schema[x];
             }
-            const active_row = this._new_row(x, type, undefined, undefined, undefined, computed);
+            const expression = findExpressionByAlias(x, valid_expressions);
+            const active_row = this._new_row(x, type, undefined, undefined, undefined, expression);
             this._active_columns.appendChild(active_row);
         }
 
@@ -269,10 +236,7 @@ export class PerspectiveElement extends StateElement {
         }
 
         this._show_column_container();
-
-        if ((await this._table.compute()) === true) {
-            this._show_side_panel_actions();
-        }
+        this._show_side_panel_actions();
 
         // Filters need type information to populate e.g. the operator dropdown,
         // so reset them.
@@ -406,8 +370,6 @@ export class PerspectiveElement extends StateElement {
                     }
                     timer();
                     task.cancel();
-                } catch (err) {
-                    console.error("Error rendering plugin.", err);
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }
@@ -424,11 +386,9 @@ export class PerspectiveElement extends StateElement {
             const filter = [node.getAttribute("name"), operator, operand];
             if (await this._table.is_valid_filter(filter)) {
                 filters.push(filter);
-                node.title = "";
                 operandNode.style.borderColor = "";
                 exclamation.hidden = true;
             } else {
-                node.title = "Invalid Filter";
                 operandNode.style.borderColor = "red";
                 exclamation.hidden = false;
             }
@@ -473,9 +433,7 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        // Computed Columns will have been parsed by this point in the
-        // setAttribute callback.
-        const computed_columns = this._get_view_parsed_computed_columns();
+        const expressions = this._get_view_expressions();
 
         const config = {
             filter: filters,
@@ -484,36 +442,36 @@ export class PerspectiveElement extends StateElement {
             aggregates: aggregates,
             columns: columns,
             sort: sort,
-            computed_columns: computed_columns
+            expressions: expressions
         };
-
-        if (this._view) {
-            this._view.remove_update(this._view_updater);
-            await this._vieux.delete_view();
-            this._view.delete();
-            this._view = undefined;
-        }
 
         if (this._task) {
             this._task.cancel();
         }
 
+        if (this._view) {
+            this._view.remove_update(this._view_updater);
+            this._vieux.delete_view();
+            this._view.delete();
+        }
+
         try {
-            const _view = await this._table.view(config);
-            this._view = _view;
+            this._view = await this._table.view(config);
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
         } catch (e) {
-            this._view.delete();
+            // Delete the view handle only if it exists - if this._view is
+            // undefined, calling delete will throw its own "cannot read
+            // property of undefined" error and squash the original, more
+            // informative error message on why the view could not be created.
+            if (this._view) this._view.delete();
             throw e;
         }
 
         this._vieux.set_view(this._view);
 
         const timer = this._render_time();
-        this._render_count = (this._render_count || 0) + 1;
-
-        const task = (this._task = new CancelTask(() => this._render_count--, true));
+        const task = (this._task = new CancelTask(() => {}, true));
 
         try {
             const {max_cols, max_rows} = await this.get_maxes();
@@ -535,20 +493,19 @@ export class PerspectiveElement extends StateElement {
                 this.__render_times = [];
                 this.dispatchEvent(new Event("perspective-view-update"));
             }
+
             timer();
             task.cancel();
-            if (this._render_count === 0) {
-                this.removeAttribute("updating");
-                this.dispatchEvent(new Event("perspective-update-complete"));
-            }
         }
     }
 
     _check_loaded_table() {
-        if (this._table) {
+        if (this._table && this._table_resolver) {
             const table = this._table;
+            const resolve = this._table_resolver;
             delete this._table;
-            this._load_table(table);
+            delete this._table_resolver;
+            this._load_table(table, resolve);
         }
     }
 
@@ -586,22 +543,24 @@ export class PerspectiveElement extends StateElement {
         this.toggleAttribute("updating", true);
         let resolve;
         this._updating_promise = new Promise(_resolve => {
-            resolve = _resolve;
+            resolve = () => {
+                _resolve();
+            };
         });
         return resolve;
     }
 
-    _register_debounce_instance() {
-        const _update = debounce((resolve, ignore_size_check, force_update, limit_points) => {
-            this._new_view({ignore_size_check, force_update, limit_points}).then(resolve);
-        }, 0);
+    @throttlePromise(true)
+    async _update(ignore_size_check, force_update, limit_points) {
+        await new Promise(setTimeout);
+        await this._new_view({ignore_size_check, force_update, limit_points});
+    }
 
-        this._debounce_update = async ({force_update = false, ignore_size_check = false, limit_points = true} = {}) => {
-            if (this._table) {
-                let resolve = this._set_updating();
-                await new Promise(resolve => _update(resolve, ignore_size_check, force_update, limit_points));
-                resolve();
-            }
-        };
+    async _debounce_update({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
+        if (this._table) {
+            let resolve = this._set_updating();
+            await this._update(ignore_size_check, force_update, limit_points);
+            resolve();
+        }
     }
 }

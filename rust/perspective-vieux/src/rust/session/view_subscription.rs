@@ -11,7 +11,6 @@ use crate::utils::*;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -29,10 +28,6 @@ pub struct ViewSubscription {
     closure: Closure<dyn Fn() -> js_sys::Promise>,
 }
 
-thread_local! {
-    static NULL_C: Closure<dyn FnMut(JsValue)> = Closure::wrap(Box::new(|_| ()));
-}
-
 impl ViewSubscription {
     pub fn new(
         table: PerspectiveJsTable,
@@ -41,11 +36,8 @@ impl ViewSubscription {
     ) -> ViewSubscription {
         let data = (table, view.clone(), callback);
         let closure = async_method_to_jsfunction(&data, Self::update_view_stats);
-
         view.on_update(closure.as_ref().unchecked_ref());
-        let _ = NULL_C.with(|x| {
-            future_to_promise(Self::update_view_stats(data.clone())).catch(x)
-        });
+        let _ = promisify_ignore_view_delete(Self::update_view_stats(data.clone()));
         ViewSubscription { data, closure }
     }
 

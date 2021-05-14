@@ -73,6 +73,9 @@ function (psp_build_dep name cmake_file)
 			EXCLUDE_FROM_ALL)
 
 		include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/)
+	elseif(${name} STREQUAL exprtk)
+		# no cmakelists - just include the header
+		include_directories(${CMAKE_BINARY_DIR}/${name}-src)
 	else()
 		add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
 			${CMAKE_BINARY_DIR}/${name}-build
@@ -252,9 +255,10 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
-			-flto \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
+
+		# TODO: -flto
 	endif()
 
 	set(ASYNC_MODE_FLAGS "")
@@ -445,6 +449,8 @@ else()
 	include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
+# Build exprtk for expression parsing
+psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 #####################
 
 set(CMAKE_C_FLAGS " \
@@ -477,8 +483,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/compat_impl_linux.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
 	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
-	${PSP_CPP_SRC}/src/cpp/computed.cpp
-	${PSP_CPP_SRC}/src/cpp/computed_column_map.cpp
+	${PSP_CPP_SRC}/src/cpp/computed_expression.cpp
 	${PSP_CPP_SRC}/src/cpp/computed_function.cpp
 	${PSP_CPP_SRC}/src/cpp/config.cpp
 	${PSP_CPP_SRC}/src/cpp/context_base.cpp
@@ -553,8 +558,8 @@ set(WASM_SOURCE_FILES ${SOURCE_FILES}
 
 set (PYTHON_BINDING_SOURCE_FILES
 	${PSP_PYTHON_SRC}/src/accessor.cpp
-	${PSP_PYTHON_SRC}/src/computed.cpp
 	${PSP_PYTHON_SRC}/src/context.cpp
+	${PSP_PYTHON_SRC}/src/expressions.cpp
 	${PSP_PYTHON_SRC}/src/fill.cpp
 	${PSP_PYTHON_SRC}/src/numpy.cpp
 	${PSP_PYTHON_SRC}/src/python.cpp
@@ -565,7 +570,7 @@ set (PYTHON_BINDING_SOURCE_FILES
 )
 
 if (WIN32)
-	set(CMAKE_CXX_FLAGS " /EHsc /MP")
+	set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
 else()
 	set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 endif()

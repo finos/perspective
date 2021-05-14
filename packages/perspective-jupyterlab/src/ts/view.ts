@@ -47,7 +47,7 @@ export class PerspectiveView extends DOMWidgetView {
             aggregates: this.model.get("aggregates"),
             sort: this.model.get("sort"),
             filters: this.model.get("filters"),
-            computed_columns: this.model.get("computed_columns"),
+            expressions: this.model.get("expressions"),
             plugin_config: this.model.get("plugin_config"),
             server: this.model.get("server"),
             client: this.model.get("client"),
@@ -116,7 +116,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:aggregates", this.aggregates_changed, this);
         this.model.on("change:sort", this.sort_changed, this);
         this.model.on("change:filters", this.filters_changed, this);
-        this.model.on("change:computed_columns", this.computed_columns_changed, this);
+        this.model.on("change:expressions", this.expressions_changed, this);
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:dark", this.dark_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
@@ -126,7 +126,7 @@ export class PerspectiveView extends DOMWidgetView {
         const observer = new MutationObserver(this._synchronize_state.bind(this));
         observer.observe(this.pWidget.viewer, {
             attributes: true,
-            attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters", "computed-columns"],
+            attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters", "expressions"],
             subtree: false
         });
 
@@ -374,8 +374,8 @@ export class PerspectiveView extends DOMWidgetView {
         this.pWidget.filters = this.model.get("filters");
     }
 
-    computed_columns_changed(): void {
-        this.pWidget.computed_columns = this.model.get("computed_columns");
+    expressions_changed(): void {
+        this.pWidget.expressions = this.model.get("expressions");
     }
 
     plugin_config_changed(): void {

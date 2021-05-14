@@ -66,17 +66,11 @@ class PerspectiveTableProxy(object):
     def get_limit(self):
         return self._async_queue("get_limit", "table_method")
 
-    def compute(self):
-        return self._async_queue("compute", "table_method")
-
     def clear(self):
         return self._async_queue("clear", "table_method")
 
     def replace(self, data):
         return self._async_queue("replace", "table_method", data)
-
-    def get_computed_functions(self):
-        return self._async_queue("get_computed_functions", "table_method")
 
     def size(self):
         return self._async_queue("size", "table_method")
@@ -84,21 +78,13 @@ class PerspectiveTableProxy(object):
     def schema(self, as_string=False):
         return self._async_queue("schema", "table_method", as_string=as_string)
 
-    def computed_schema(self, computed_columns=None, **kwargs):
+    def expression_schema(self, expressions, **kwargs):
         return self._async_queue(
-            "computed_schema", "table_method", computed_columns, **kwargs
+            "expression_schema", "table_method", expressions, **kwargs
         )
 
-    def get_computation_input_types(self, computed_function_name=None, **kwargs):
-        return self._async_queue(
-            "get_computation_input_types",
-            "table_method",
-            computed_function_name,
-            **kwargs
-        )
-
-    def columns(self, computed=False):
-        return self._async_queue("columns", "table_method", computed=computed)
+    def columns(self):
+        return self._async_queue("columns", "table_method")
 
     def is_valid_filter(self, filter):
         return self._async_queue("is_valid_filter", "table_method", filter)
@@ -120,7 +106,7 @@ class PerspectiveTableProxy(object):
         aggregates=None,
         sort=None,
         filter=None,
-        computed_columns=None,
+        expressions=None,
     ):
         return make_view(
             self._client,
@@ -131,7 +117,7 @@ class PerspectiveTableProxy(object):
             aggregates,
             sort,
             filter,
-            computed_columns,
+            expressions,
         )
 
     def update(self, data, port_id=0):

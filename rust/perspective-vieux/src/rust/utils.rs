@@ -10,17 +10,18 @@
 
 pub mod perspective;
 
+use js_intern::*;
 use std::cell::RefCell;
 use std::future::Future;
 use std::ops::Deref;
 use std::rc::Rc;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 pub type JsResult<T> = Result<T, JsValue>;
 
-/// Console FFI
+/// Console FFI TODO remove
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console, js_name = log)]
@@ -51,6 +52,39 @@ impl<T: Component> ToClosure<T> for ComponentLink<T> {
     }
 }
 
+fn ignore_view_delete(f: JsValue) {
+    match f.clone().dyn_into::<js_sys::Error>() {
+        Ok(err) => {
+            if err.message() != "View is not initialized" {
+                wasm_bindgen::throw_val(f);
+            }
+        }
+        _ =>  match f.as_string() {
+            Some(x) if x == "View is not initialized" => {},
+            Some(_) => wasm_bindgen::throw_val(f),
+            _ => match js_sys::Reflect::has(&f, js_intern!("message")) {
+                Ok(true) if js_sys::Reflect::get(&f, js_intern!("message"))
+                            .unwrap()
+                            .as_string()
+                            .unwrap_or("".to_owned())
+                            == "View is not initialized" => {}
+                _ => wasm_bindgen::throw_val(f)
+            }   
+        }
+    }
+}
+
+thread_local! {
+    static NULL_C: Closure<dyn FnMut(JsValue)> = Closure::wrap(Box::new(ignore_view_delete));
+}
+
+pub fn promisify_ignore_view_delete<F>(f: F) -> js_sys::Promise
+where
+    F: Future<Output = Result<JsValue, JsValue>> + 'static,
+{
+    NULL_C.with(|ignore| future_to_promise(f).catch(ignore))
+}
+
 pub fn async_method_to_jsfunction<F, T, U>(
     this: &U,
     f: F,
@@ -61,7 +95,7 @@ where
     U: Clone + 'static,
 {
     let this = this.clone();
-    let cb = move || future_to_promise(f(this.clone()));
+    let cb = move || promisify_ignore_view_delete(f(this.clone()));
     let box_cb: Box<dyn Fn() -> js_sys::Promise> = Box::new(cb);
     Closure::wrap(box_cb)
 }

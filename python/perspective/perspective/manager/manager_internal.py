@@ -122,8 +122,14 @@ class _PerspectiveManagerInternal(object):
 
         try:
             if cmd == "init":
-                # return empty response
-                message = self._make_message(msg["id"], None)
+                # The client should wait for the return message on table()
+                # and view() to confirm successful creation.
+                flags = ["wait_for_response"]
+
+                # Return a message to the client to confirm initialization with
+                # a list of feature flags that the client will use to enable
+                # or disable behavior depending on its version.
+                message = self._make_message(msg["id"], flags)
                 post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table":
                 try:
@@ -182,12 +188,12 @@ class _PerspectiveManagerInternal(object):
 
                 if msg["method"] in (
                     "schema",
-                    "computed_schema",
-                    "get_computation_input_types",
+                    "expression_schema",
+                    "validate_expressions",
                 ):
                     # make sure schema returns string types through the
                     # wire API. `as_string` is respected by both the table
-                    # and view's `schema` and `computed_schema` methods.
+                    # and view's `schema` and `expression_schema` methods.
                     arguments["as_string"] = True
                 elif msg["method"].startswith("to_"):
                     # parse options in `to_format` calls
@@ -223,12 +229,12 @@ class _PerspectiveManagerInternal(object):
                     if len(arguments) > 1 and isinstance(arguments[1], dict):
                         options = arguments[1]
                     result = getattr(table_or_view, msg["method"])(data, **options)
-                elif msg["cmd"] == "table_method" and msg["method"] in (
-                    "computed_schema",
-                    "get_computation_input_types",
+                elif (
+                    msg["cmd"] == "table_method"
+                    and msg["method"] == "validate_expressions"
                 ):
-                    # computed_schema on the table takes kwargs; computed
-                    # schema on the view takes args.
+                    # validate_expressions on the table takes `as_string` in
+                    # wargs,
                     result = getattr(table_or_view, msg["method"])(
                         *msg.get("args", []), **arguments
                     )

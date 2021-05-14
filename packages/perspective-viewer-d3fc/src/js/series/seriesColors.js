@@ -17,6 +17,14 @@ export function seriesColors(settings) {
         .domain(domain)();
 }
 
+export function seriesColorsFromDistinct(settings, data) {
+    // const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    let domain = Array.from(new Set(data));
+    return colorScale()
+        .settings(settings)
+        .domain(domain)();
+}
+
 export function seriesColorsFromGroups(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = [];

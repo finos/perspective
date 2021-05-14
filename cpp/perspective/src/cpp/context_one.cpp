@@ -97,6 +97,49 @@ t_ctx1::close(t_index idx) {
     return retval;
 }
 
+std::pair<t_tscalar, t_tscalar> 
+t_ctx1::get_min_max(const std::string& colname) const {
+    auto rval = std::make_pair(mknone(), mknone());
+    auto aggtable = m_tree->get_aggtable();
+    t_schema aggschema = aggtable->get_schema();
+    auto col = aggtable->get_const_column(colname).get();
+    auto colidx = aggschema.get_colidx(colname);
+    auto depth = m_config.get_num_rpivots();
+    const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
+    bool is_finished = false;
+    while (!is_finished && depth > 0) {
+        for (std::size_t i = 0; i < m_traversal->size(); i++) {
+            t_index nidx = m_traversal->get_tree_index(i);
+            t_index pnidx = m_tree->get_parent_idx(nidx);
+            if (m_tree->get_depth(nidx) != depth) {
+                continue;
+            }
+
+            t_uindex agg_ridx = m_tree->get_aggidx(nidx);
+            t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+            t_tscalar val
+                = extract_aggregate(aggspecs[colidx], col, agg_ridx, agg_pridx);
+
+            if (!val.is_valid()) {
+                continue;
+            }
+
+            is_finished = true;
+            if (rval.first.is_none() || (!val.is_none() && val < rval.first)) {
+                rval.first = val;
+            }
+
+            if (val > rval.second) {
+                rval.second = val;
+            }
+        }
+
+        depth--;
+    }
+
+    return rval;
+}
+
 std::vector<t_tscalar>
 t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
     PSP_TRACE_SENTINEL();

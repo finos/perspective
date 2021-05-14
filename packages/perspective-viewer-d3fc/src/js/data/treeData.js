@@ -13,7 +13,7 @@ import {toValue} from "../tooltip/selectionData";
 export function treeData(settings) {
     const sets = {};
     const real_aggs = settings.realValues.map(x => (x === null ? null : settings.mainValues.find(y => y.name === x)));
-    settings.data.forEach(d => {
+    settings.data.forEach((d, j) => {
         const groups = d.__ROW_PATH__;
         const splits = getSplitNames(d);
         splits.forEach(split => {
@@ -29,8 +29,11 @@ export function treeData(settings) {
                     currentLevel.push(element);
                 }
                 if (settings.realValues.length > 1 && settings.realValues[1] !== null) {
-                    const colorValue = getDataValue(d, settings.mainValues[1], split);
-                    element.color = element.color ? element.color + colorValue : colorValue;
+                    const is_leaf = i === groups.length - 1;
+                    const colorValue = is_leaf ? getDataValue(d, settings.mainValues[1], split) : getDataValue(settings.agg_paths[j][i + 1] || d, settings.mainValues[1], split);
+                    if (colorValue !== undefined) {
+                        element.color = colorValue;
+                    }
                 }
                 if (settings.realValues.length > 2 && settings.realValues[2] !== null) {
                     element.tooltip = [];
@@ -59,7 +62,7 @@ export function treeData(settings) {
             d.mainValues =
                 settings.realValues.length === 1 || (settings.realValues[1] === null && settings.realValues[2] === null)
                     ? d.value
-                    : [d.value, d.data.color].concat(d.data.tooltip || []).filter(x => x !== null);
+                    : [d.value, d.data.color].concat(d.data.tooltip || []).filter(x => x !== undefined);
             d.crossValue = d
                 .ancestors()
                 .slice(0, -1)
