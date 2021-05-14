@@ -44,6 +44,43 @@ describe("get_min_max", function() {
             view.delete();
             table.delete();
         });
+
+        it("float expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                expressions: ['// column\n"w" * 10']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([-95, 85]);
+            view.delete();
+            table.delete();
+        });
+
+        it("int expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                expressions: ["// column\n100 * 20", '//column2\n"x" + 5']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([2000, 2000]);
+            const range2 = await view.get_min_max("column2");
+            expect(range2).toEqual([6, 9]);
+            view.delete();
+            table.delete();
+        });
+
+        it("string expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                expressions: ["'abcd'", 'upper("y")']
+            });
+            const range = await view.get_min_max("'abcd'");
+            expect(range).toEqual(["abcd", "abcd"]);
+            const range2 = await view.get_min_max('upper("y")');
+            expect(range2).toEqual(["A", "D"]);
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("1 sided", function() {
@@ -76,6 +113,42 @@ describe("get_min_max", function() {
             });
             const cols = await view.get_min_max("y");
             expect(cols).toEqual([4, 4]);
+            view.delete();
+            table.delete();
+        });
+
+        it("float expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["y"],
+                expressions: ['// column\n"w" * 10']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([-40, 10]);
+            view.delete();
+            table.delete();
+        });
+
+        it("int expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["y"],
+                expressions: ['//column\n"x" + 5']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([28, 32]);
+            view.delete();
+            table.delete();
+        });
+
+        it("string expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["y"],
+                expressions: ["'abcdefghijk'"]
+            });
+            const range = await view.get_min_max("'abcdefghijk'");
+            expect(range).toEqual([4, 4]);
             view.delete();
             table.delete();
         });
@@ -117,6 +190,45 @@ describe("get_min_max", function() {
             view.delete();
             table.delete();
         });
+
+        it("float expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["y"],
+                column_pivots: ["z"],
+                expressions: ['// column\n"w" * 10']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([-95, 95]);
+            view.delete();
+            table.delete();
+        });
+
+        it("int expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["y"],
+                column_pivots: ["z"],
+                expressions: ['//column2\n"x" + 5']
+            });
+            const range = await view.get_min_max("column2");
+            expect(range).toEqual([6, 23]);
+            view.delete();
+            table.delete();
+        });
+
+        it("string expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["y"],
+                column_pivots: ["z"],
+                expressions: ['upper("y")']
+            });
+            const range = await view.get_min_max('upper("y")');
+            expect(range).toEqual([1, 3]);
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("column only", function() {
@@ -149,6 +261,42 @@ describe("get_min_max", function() {
             });
             const cols = await view.get_min_max("y");
             expect(cols).toEqual(["a", "d"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("float expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                column_pivots: ["z"],
+                expressions: ['// column\n"w" * 10']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([-95, 85]);
+            view.delete();
+            table.delete();
+        });
+
+        it("int expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                column_pivots: ["z"],
+                expressions: ['//column\n"x" + 5']
+            });
+            const range = await view.get_min_max("column");
+            expect(range).toEqual([6, 9]);
+            view.delete();
+            table.delete();
+        });
+
+        it("string expression column", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                column_pivots: ["z"],
+                expressions: ['upper("y")']
+            });
+            const range = await view.get_min_max('upper("y")');
+            expect(range).toEqual(["A", "D"]);
             view.delete();
             table.delete();
         });

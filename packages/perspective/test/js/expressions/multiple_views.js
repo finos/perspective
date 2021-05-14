@@ -126,6 +126,60 @@ module.exports = perspective => {
             await table.delete();
         });
 
+        it("Multiple views with the same expression alias should not conflict, sort", async () => {
+            const table = await perspective.table({
+                x: [1, 2, 3, 4],
+                y: [4, 3, 2, 1]
+            });
+
+            const v1 = await table.view({
+                expressions: [`// column \n"x" * -10`],
+                sort: [["column", "desc"]]
+            });
+            const v2 = await table.view({
+                expressions: [`// column \n "y" * 10`],
+                sort: [["column", "asc"]]
+            });
+
+            const result = await v1.to_columns();
+            const result2 = await v2.to_columns();
+
+            expect(result["column"]).toEqual([-10, -20, -30, -40]);
+            expect(result2["column"]).toEqual([10, 20, 30, 40]);
+
+            await v2.delete();
+            await v1.delete();
+            await table.delete();
+        });
+
+        it("Multiple views with the same expression alias should not conflict, hidden sort", async () => {
+            const table = await perspective.table({
+                x: [1, 2, 3, 4],
+                y: [4, 3, 2, 1]
+            });
+
+            const v1 = await table.view({
+                columns: ["x"],
+                expressions: [`// column \n"x" * -10`],
+                sort: [["column", "asc"]]
+            });
+            const v2 = await table.view({
+                columns: ["y"],
+                expressions: [`// column \n "y" * 10`],
+                sort: [["column", "asc"]]
+            });
+
+            const result = await v1.to_columns();
+            const result2 = await v2.to_columns();
+
+            expect(result["x"]).toEqual([4, 3, 2, 1]);
+            expect(result2["y"]).toEqual([1, 2, 3, 4]);
+
+            await v2.delete();
+            await v1.delete();
+            await table.delete();
+        });
+
         it("Multiple pivoted views with the same expression alias should not conflict", async () => {
             const table = await perspective.table(expressions_common.data);
 
@@ -142,6 +196,45 @@ module.exports = perspective => {
                     column: "last"
                 }
             });
+
+            expect(await v1.column_paths()).toEqual([
+                "__ROW_PATH__",
+                "1|x",
+                "1|y",
+                "1|z",
+                "1|column",
+                "2|x",
+                "2|y",
+                "2|z",
+                "2|column",
+                "3|x",
+                "3|y",
+                "3|z",
+                "3|column",
+                "4|x",
+                "4|y",
+                "4|z",
+                "4|column"
+            ]);
+            expect(await v2.column_paths()).toEqual([
+                "__ROW_PATH__",
+                "a|x",
+                "a|y",
+                "a|z",
+                "a|column",
+                "b|x",
+                "b|y",
+                "b|z",
+                "b|column",
+                "c|x",
+                "c|y",
+                "c|z",
+                "c|column",
+                "d|x",
+                "d|y",
+                "d|z",
+                "d|column"
+            ]);
 
             const result = await v1.to_columns();
             const result2 = await v2.to_columns();
@@ -191,6 +284,8 @@ module.exports = perspective => {
                     column: ["weighted mean", "z"]
                 }
             });
+
+            expect(await v1.column_paths()).toEqual(["__ROW_PATH__", "x", "y", "z", "column"]);
 
             const result = await v1.to_columns();
             const result2 = await v2.to_columns();

@@ -9,6 +9,7 @@
 
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
 import {DomElement} from "./dom_element.js";
+import {getExpressionAlias} from "../utils.js";
 
 export class ActionElement extends DomElement {
     async _toggle_config(event) {
@@ -100,10 +101,43 @@ export class ActionElement extends DomElement {
     _save_expression(event) {
         const {expression} = event.detail;
         const expressions = this._get_view_expressions();
-        expressions.push(expression);
+        const new_expressions = [];
+
+        // Don't allow two identical expressions
+        if (expressions.includes(expression)) {
+            console.warn(`Cannot apply duplicate expression: "${expression}"`);
+            const result = {
+                expression_schema: {},
+                errors: {}
+            };
+            result.errors[alias] = "Value Error - Cannot apply duplicate expression.";
+            this._expression_editor.type_check_expression(result);
+            return;
+        }
+
+        // If we are replacing an existing alias, go through and replace it in
+        // the expressions array so that the attribute accurately reflects
+        // the expressions present, instead of letting an "edit log" of sorts
+        // stack up on the attribute.
+        const alias = getExpressionAlias(expression);
+
+        for (const expr of expressions) {
+            const expr_alias = getExpressionAlias(expr);
+
+            // If an expression in the array has the current alias that we are
+            // trying to add, it needs to be removed and replaced with the
+            // expression that was just saved.
+            if (expr_alias === alias) {
+                continue;
+            }
+
+            new_expressions.push(expr);
+        }
+
+        new_expressions.push(expression);
 
         // Will be validated in the attribute callback
-        this.setAttribute("expressions", JSON.stringify(expressions));
+        this.setAttribute("expressions", JSON.stringify(new_expressions));
     }
 
     async _type_check_expression(event) {

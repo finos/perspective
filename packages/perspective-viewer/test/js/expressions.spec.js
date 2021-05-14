@@ -179,7 +179,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture("Should prevent saving a duplicate expression alias", async page => {
+            test.skip("Should prevent saving a duplicate expression alias", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_expression(page, '// new column \n "Sales" / "Profit"');
                 await page.waitForSelector("perspective-viewer:not([updating])");
@@ -195,7 +195,7 @@ utils.with_server({}, () => {
                 await page.shadow_type("//new column 1 \n 123 + 345", "perspective-viewer", "perspective-expression-editor", "#psp-expression-editor__edit_area");
             });
 
-            test.capture("Should prevent saving a duplicate expression", async page => {
+            test.skip("Should prevent saving a duplicate expression", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                 await add_expression(page, '"Sales" / "Profit"');
                 await page.waitForSelector("perspective-viewer:not([updating])");

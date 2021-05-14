@@ -279,23 +279,38 @@ class PerspectiveViewer extends ActionElement {
 
                 expressions = validated_expressions;
 
-                // Need to remove old expressions from the viewer DOM and
-                // config so they don't mess up state. To do this, we need
-                // to get the expression columns that are currently in the DOM,
-                // as this callback runs after the attribute is already set
-                // with the new value.
-                const active_expressions = this._get_view_active_columns()
-                    .filter(x => x.classList.contains("expression"))
-                    .map(x => x.getAttribute("expression"));
-                const inactive_expressions = this._get_view_inactive_columns()
-                    .filter(x => x.classList.contains("expression"))
-                    .map(x => x.getAttribute("expression"));
+                // We need to get the expressions from the DOM and remove
+                // outdated expressions - i.e. expressions in the DOM that
+                // do not exist in the attribute (can happen when restore is
+                // called).
+                //
+                // This is important because an expression that changes type
+                // needs to have its aggregates, etc. changed as well to
+                // prevent errors that can affect the Perspective table.
+                const active = {};
+                const inactive = {};
 
-                const old_expressions = active_expressions.concat(inactive_expressions);
-                console.log(active_expressions, inactive_expressions, old_expressions, expressions);
-                const to_remove = this._diff_expressions(old_expressions, expressions);
+                this._get_view_active_columns()
+                    .filter(x => x.classList.contains("expression"))
+                    .map(x => {
+                        active[x.getAttribute("name")] = x.getAttribute("expression");
+                    });
 
-                if (to_remove.length > 0) {
+                const inactive_expressions = this._get_view_inactive_columns().filter(x => x.classList.contains("expression"));
+
+                inactive_expressions.map(x => {
+                    inactive[x.getAttribute("name")] = x.getAttribute("expression");
+                });
+
+                const to_remove = this._diff_expressions(active, inactive, expressions);
+
+                // Remove inactives so we don't keep applying the same columns
+                // over and over again.
+                for (const expr of inactive_expressions) {
+                    this._inactive_columns.removeChild(expr);
+                }
+
+                if (Object.keys(to_remove).length > 0) {
                     this._reset_expressions_view(to_remove);
                 }
             } else {

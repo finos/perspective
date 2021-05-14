@@ -283,7 +283,6 @@ View<CTX_T>::column_paths() const {
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
-    // TODO: should revert to m_table
     auto schema = m_ctx->get_schema();
     auto _types = schema.types();
     auto names = schema.columns();
@@ -293,13 +292,19 @@ View<CTX_T>::schema() const {
 
     for (std::size_t i = 0, max = names.size(); i != max; ++i) {
         std::string name = names[i];
+
+        // Store the expression on the schema using the alias
         if (m_expression_alias_reverse_map.count(name)) {
             name = m_expression_alias_reverse_map.at(name);
         }
+
         types[name] = _types[i];
     }
 
+    // Returns real column names and the expression alias, not the whole
+    // expression string.
     auto col_names = column_names(false);
+
     for (const std::vector<t_tscalar>& name : col_names) {
         // Pull out the main aggregate column
         std::string agg_name = name.back().to_string();
@@ -416,7 +421,13 @@ View<t_ctxunit>::expression_schema() const {
 template <typename T>
 std::pair<t_tscalar, t_tscalar> 
 View<T>::get_min_max(const std::string& colname) const {
-    return m_ctx->get_min_max(colname);
+    // check if colname is an expression alias
+    if (m_expression_alias_map.count(colname)) {
+        const std::string& expression_string = m_expression_alias_map.at(colname);
+        return m_ctx->get_min_max(expression_string);
+    } else {
+        return m_ctx->get_min_max(colname);
+    }
 }
 
 template <>

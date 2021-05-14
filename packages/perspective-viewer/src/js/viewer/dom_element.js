@@ -201,25 +201,25 @@ export class DomElement extends PerspectiveElement {
      * @param {*} expression_schema
      */
     _update_expressions_view(expressions, expression_schema) {
-        const columns = this._get_view_all_column_names();
         const active = this._get_view_active_column_names();
+        const inactive = this._get_view_inactive_column_names();
 
         if (expressions.length === 0) {
             return;
         }
 
-        let added_count = 0;
+        let inactive_added_count = 0;
 
-        const attr = JSON.parse(this.getAttribute("columns")) || [];
-        let reset_columns_attr = false;
-        console.log(expression_schema);
-
-        // TODO: find all expression columns on the dom and if it already
-        // exists, re-render if the types are different.
+        // When restore is called, if the expression is in `columns` but
+        // `columns` is set before `expressions`, it will cause an error
+        // so we need to reset the columns view and re-render the active
+        // and inactive panel if that happens.
+        const columns_attr = JSON.parse(this.getAttribute("columns")) || [];
+        let reset_columns_view = false;
 
         for (const expr of expressions) {
-            // All expressions are guaranteed to have alias at this point. If
-            // it does not, then skip the expression.
+            // All expressions are guaranteed to have an alias at this point,
+            // so we can skip the expression if it somehow does not.
             const alias = getExpressionAlias(expr);
 
             if (alias === undefined) {
@@ -227,55 +227,101 @@ export class DomElement extends PerspectiveElement {
                 continue;
             }
 
-            // Check for whether the expression is in the attribute but
-            // NOT in the DOM - occurs when restore is called and a race
-            // condition between `expressions` and `columns` occurs.
-            const should_reset = !columns.includes(alias) && attr.includes(alias);
+            // Check for whether an expression column is used in the columns
+            // attribute but hasn't been created yet - if we don't reset
+            // the columns view, it can cause an `abort()` error that can't
+            // be recovered from.
+            const should_reset = columns_attr.includes(alias) && !inactive.includes(alias);
 
             if (should_reset) {
-                reset_columns_attr = true;
+                reset_columns_view = true;
             }
 
-            // If the column already exists or is already in the active DOM,
-            // don't add it to the inactive DOM
-            const should_add = !columns.includes(alias) && !active.includes(alias);
+            let row;
+            const expression_type = expression_schema[alias];
 
-            if (!should_add) {
-                continue;
+            // If the column is in the active DOM, re-render the column
+            // with the new expression type and expression string.
+            if (active.includes(alias) && !inactive.includes(alias)) {
+                console.log(this._get_view_active_columns());
+                const expression_row = this._get_view_active_columns().filter(x => x.getAttribute("name") == alias);
+                console.log(expression_row);
+                if (expression_row.length > 0 && expression_row[0]) {
+                    // Reset the expression on hover, the data type, and
+                    // the aggregate attribute.
+                    const aggregate = get_type_config(expression_type).aggregate;
+                    expression_row[0].setAttribute("aggregate", aggregate);
+                    expression_row[0].setAttribute("expression", expr);
+                    expression_row[0].setAttribute("type", expression_type);
+
+                    const weights = this._get_view_inactive_columns()
+                        .filter(x => x.getAttribute("type") === "integer" || x.getAttribute("type") === "float")
+                        .map(x => x.getAttribute("name"));
+                    expression_row[0].set_weights(weights);
+                }
+
+                // Needs a DOM reset of the columns attribute.
+                // reset_columns_view = true;
+            } else {
+                // A new expression column which will be added to the top of
+                // the inactive columns list.
+                row = this._new_row(alias, expression_type, null, null, null, expr);
+                this._inactive_columns.insertBefore(row, this._inactive_columns.childNodes[0] || null);
+                inactive_added_count++;
             }
-
-            let type = expression_schema[alias];
-
-            const row = this._new_row(alias, type, null, null, null, expr);
-            this._inactive_columns.insertBefore(row, this._inactive_columns.childNodes[0] || null);
-            added_count++;
         }
 
-        if (reset_columns_attr) {
-            this._update_column_view(attr, true);
+        if (reset_columns_view) {
+            this._update_column_view(columns_attr, true);
         } else {
             // Remove collapse so that new inactive columns show up
-            if (added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
+            if (inactive_added_count > 0 && this._inactive_columns.parentElement.classList.contains("collapse")) {
                 this._inactive_columns.parentElement.classList.remove("collapse");
             }
         }
     }
 
     /**
-     * Given two arrays of expressions, return an array of expressions that
-     * are in the old set but not the new set, i.e. they should be removed
-     * because they do not need to be included or re-calculated.
+     * Given a dictionary of active expression alias to expression strings from
+     * the DOM, inactive alias to expression strings from the DOM, and the
+     * new expressions attribute to apply, return a list of expressions that
+     * need to be removed from the DOM and from attributes. The expressions that
+     * should be removed are expressions that are in the DOM but not in the
+     * attributes, and expressions that have been replaced in the attribute
+     * by a new expression with the same alias.
      *
-     * @param {Array<String>} old_expressions
-     * @param {Array<String>} old_expressions
+     * @param {Object} old_active
+     * @param {Object} old_inactive
+     * @param {Array<String>} new_expressions
+     * @returns Object
      */
-    _diff_expressions(old_expressions, new_expressions) {
-        const to_remove = [];
-        for (const expr of old_expressions) {
-            if (!new_expressions.includes(expr)) {
-                to_remove.push(expr);
+    _diff_expressions(old_active, old_inactive, new_expressions) {
+        const to_remove = {};
+        const alias_map = {};
+
+        for (const expr of new_expressions) {
+            const alias = getExpressionAlias(expr);
+            alias_map[alias] = expr;
+        }
+
+        console.log(alias_map, old_active, old_inactive, new_expressions);
+
+        for (const alias in old_active) {
+            // If the new expression uses the same alias but replaces the
+            // expression, or if the old alias does not exist in the
+            // new expressions, remove it.
+            if (alias_map[alias] === undefined || old_active[alias] !== alias_map[alias]) {
+                to_remove[alias] = old_active[alias];
             }
         }
+
+        for (const alias in old_inactive) {
+            if (alias_map[alias] === undefined || old_inactive[alias] !== alias_map[alias]) {
+                to_remove[alias] = old_inactive[alias];
+            }
+        }
+
+        console.log(to_remove);
         return to_remove;
     }
 
@@ -285,18 +331,17 @@ export class DomElement extends PerspectiveElement {
      * viewer. If `expressions` is undefined, all expressions are removed,
      * otherwise the specified expressions will be removed.
      *
-     * @param {Array<String>} expressions
+     * @param {Object} expressions
      */
-    _reset_expressions_view(expressions) {
-        console.log("called", expressions);
-        if (expressions) {
+    _reset_expressions_view(expressions_map) {
+        if (expressions_map) {
             // Only remove columns specified in `expressions`
-            const columns = this._get_view_active_column_names().filter(x => !expressions.includes(x));
-            const aggregates = this._get_view_aggregates().filter(x => !expressions.includes(x.column));
-            const rp = this._get_view_row_pivots().filter(x => !expressions.includes(x));
-            const cp = this._get_view_column_pivots().filter(x => !expressions.includes(x));
-            const sort = this._get_view_sorts().filter(x => !expressions.includes(x[0]));
-            const filters = this._get_view_filters().filter(x => !expressions.includes(x[0]));
+            const columns = this._get_view_active_column_names().filter(x => expressions_map[x] === undefined);
+            const aggregates = this._get_view_aggregates().filter(x => expressions_map[x.column] === undefined);
+            const rp = this._get_view_row_pivots().filter(x => expressions_map[x] === undefined);
+            const cp = this._get_view_column_pivots().filter(x => expressions_map[x] === undefined);
+            const sort = this._get_view_sorts().filter(x => expressions_map[x[0]] === undefined);
+            const filters = this._get_view_filters().filter(x => !expressions_map[x[0]] === undefined);
 
             // Aggregates as an array is from the attribute API
             this.set_aggregate_attribute(aggregates);
@@ -340,7 +385,7 @@ export class DomElement extends PerspectiveElement {
             }
         }
 
-        // Remove inactive expression columns from the DOM
+        // Remove all inactive expression columns from the DOM
         const inactive_expressions = this._get_view_inactive_columns().filter(x => x.classList.contains("expression"));
 
         for (const expr of inactive_expressions) {

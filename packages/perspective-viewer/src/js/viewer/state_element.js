@@ -42,16 +42,12 @@ export class StateElement extends HTMLElement {
         return Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#inactive_columns perspective-row"));
     }
 
-    _get_view_all_column_names() {
+    _get_view_inactive_column_names() {
         return this._get_view_inactive_columns().map(x => x.getAttribute("name"));
     }
 
     _get_view_active_column_names() {
         return this._get_view_active_columns().map(x => x.getAttribute("name"));
-    }
-
-    _get_view_all_valid_column_names() {
-        return this._get_view_all_column_names().filter(x => x);
     }
 
     _get_view_active_valid_column_names() {
