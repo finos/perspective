@@ -33,6 +33,28 @@ void
 t_ctx0::init() {
     m_traversal = std::make_shared<t_ftrav>();
     m_deltas = std::make_shared<t_zcdeltas>();
+
+    // Initialize the vocab for expressions
+    t_lstore_recipe vlendata_args(
+        "", "__EXPRESSION_VOCAB_VLENDATA__", DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+
+    t_lstore_recipe extents_args(
+        "", "__EXPRESSION_VOCAB_EXTENTS__", DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+
+    m_expression_vocab.reset(new t_vocab(vlendata_args, extents_args));
+    m_expression_vocab->init(true);
+
+    // FIXME: without adding this value into the vocab, the first row of a
+    // complex string expression gets garbage data and is undefined behavior,
+    // see "Declare string variable" test in Javascript to see example.
+    m_expression_vocab->get_interned("__PSP_SENTINEL__");
+
+    // Each context stores its own expression columns in separate
+    // `t_data_table`s so that each context's expressions are isolated
+    // and do not affect other contexts when they are calculated.
+    const auto& expressions = m_config.get_expressions();
+    m_expression_tables = std::make_unique<t_expression_tables>(expressions);
+
     m_init = true;
 }
 
@@ -110,13 +132,15 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
 
                     if (filter_prev) {
                         if (filter_curr) {
-                            m_traversal->update_row(m_gstate, m_config, pkey);
+                            m_traversal->update_row(
+                                *m_gstate, *(m_expression_tables->m_master), m_config, pkey);
                         } else {
                             m_traversal->delete_row(pkey);
                         }
                     } else {
                         if (filter_curr) {
-                            m_traversal->add_row(m_gstate, m_config, pkey);
+                            m_traversal->add_row(
+                                *m_gstate, *(m_expression_tables->m_master), m_config, pkey);
                         }
                     }
                 } break;
@@ -145,9 +169,11 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
         switch (op) {
             case OP_INSERT: {
                 if (existed) {
-                    m_traversal->update_row(m_gstate, m_config, pkey);
+                    m_traversal->update_row(
+                        *m_gstate, *(m_expression_tables->m_master), m_config, pkey);
                 } else {
-                    m_traversal->add_row(m_gstate, m_config, pkey);
+                    m_traversal->add_row(
+                        *m_gstate, *(m_expression_tables->m_master), m_config, pkey);
                 }
             } break;
             case OP_DELETE: {
@@ -195,7 +221,8 @@ t_ctx0::notify(const t_data_table& flattened) {
             switch (op) {
                 case OP_INSERT: {
                     if (msk.get(idx)) {
-                        m_traversal->add_row(m_gstate, m_config, pkey);
+                        m_traversal->add_row(
+                            *m_gstate, *(m_expression_tables->m_master), m_config, pkey);
                     }
                 } break;
                 default: break;
@@ -215,7 +242,8 @@ t_ctx0::notify(const t_data_table& flattened) {
 
         switch (op) {
             case OP_INSERT: {
-                m_traversal->add_row(m_gstate, m_config, pkey);
+                m_traversal->add_row(
+                    *m_gstate, *(m_expression_tables->m_master), m_config, pkey);
             } break;
             default: break; 
         }
@@ -239,7 +267,9 @@ t_ctx0::get_min_max(const std::string& colname) const {
     std::vector<t_tscalar> values(ctx_nrows);
     std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(0, ctx_nrows);
     std::vector<t_tscalar> out_data(pkeys.size());
-    m_gstate->read_column(colname, pkeys, out_data);
+
+    read_column_from_gstate(colname, pkeys, out_data);
+
     for (t_index ridx = 0; ridx < m_traversal->size(); ++ridx) {
         auto val = out_data[ridx];
         if (!val.is_valid()) {
@@ -284,7 +314,8 @@ t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
 
     for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
         std::vector<t_tscalar> out_data(pkeys.size());
-        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
+        const std::string& colname = m_config.col_at(cidx);
+        read_column_from_gstate(colname, pkeys, out_data);
 
         for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
             auto v = out_data[ridx - ext.m_srow];
@@ -316,8 +347,9 @@ t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
     auto none = mknone();
     for (t_uindex cidx = 0; cidx < stride; ++cidx) {
         std::vector<t_tscalar> out_data(rows.size());
-        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
-
+        const std::string& colname = m_config.col_at(cidx);
+        read_column_from_gstate(colname, pkeys, out_data);
+    
         for (t_uindex ridx = 0; ridx < rows.size(); ++ridx) {
             auto v = out_data[ridx];
 
@@ -340,12 +372,12 @@ void
 t_ctx0::sort_by(const std::vector<t_sortspec>& sortby) {
     if (sortby.empty())
         return;
-    m_traversal->sort_by(m_gstate, m_config, sortby);
+    m_traversal->sort_by(*m_gstate, *(m_expression_tables->m_master), m_config, sortby);
 }
 
 void
 t_ctx0::reset_sortby() {
-    m_traversal->sort_by(m_gstate, m_config, std::vector<t_sortspec>());
+    m_traversal->sort_by(*m_gstate, *(m_expression_tables->m_master), m_config, std::vector<t_sortspec>());
 }
 
 t_tscalar
@@ -374,35 +406,6 @@ t_ctx0::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
         return rval;
     }
     return m_traversal->get_all_pkeys(cells);
-}
-
-std::vector<t_tscalar>
-t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    if (!m_traversal->validate_cells(cells)) {
-        std::vector<t_tscalar> rval;
-        return rval;
-    }
-
-    t_uindex ncols = get_column_count();
-
-    for (const auto& c : cells) {
-        if (c.second >= ncols) {
-            std::vector<t_tscalar> rval;
-            return rval;
-        }
-    }
-
-    // Order aligned with cells
-    std::vector<t_tscalar> pkeys = get_all_pkeys(cells);
-    std::vector<t_tscalar> out_data;
-    out_data.reserve(cells.size());
-
-    for (t_index idx = 0, loop_end = pkeys.size(); idx < loop_end; ++idx) {
-        std::string colname = m_config.col_at(cells[idx].second);
-        out_data.push_back(m_gstate->get(pkeys[idx], colname));
-    }
-
-    return out_data;
 }
 
 /**
@@ -438,10 +441,12 @@ t_ctx0::get_sort_by() const {
 }
 
 void
-t_ctx0::reset() {
+t_ctx0::reset(bool reset_expressions) {
     m_traversal->reset();
     m_deltas = std::make_shared<t_zcdeltas>();
     m_has_delta = false;
+
+    if (reset_expressions) m_expression_tables->reset();
 }
 
 t_index
@@ -600,6 +605,107 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     m_deltas->clear();
     clear_deltas();
     return rval;
+}
+
+void
+t_ctx0::compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
+    // Clear the transitional expression tables on the context so they are
+    // ready for the next update.
+    m_expression_tables->clear_transitional_tables();
+
+    t_data_table* master_expression_table = m_expression_tables->m_master.get();
+
+    // Set the master table to the right size.
+    master_expression_table->set_capacity(flattened_masked->get_capacity());
+    master_expression_table->set_size(flattened_masked->size());
+
+    const auto& expressions = m_config.get_expressions();
+    for (const t_computed_expression& expr : expressions) {
+        // Compute the expressions on the master table.
+        expr.compute(flattened_masked.get(), master_expression_table, m_expression_vocab);
+    }
+}
+
+void
+t_ctx0::compute_expressions(
+    std::shared_ptr<t_data_table> master,
+    std::shared_ptr<t_data_table> flattened,
+    std::shared_ptr<t_data_table> delta,
+    std::shared_ptr<t_data_table> prev,
+    std::shared_ptr<t_data_table> current,
+    std::shared_ptr<t_data_table> transitions,
+    std::shared_ptr<t_data_table> existed) {
+    // Clear the tables so they are ready for this round of updates
+    m_expression_tables->clear_transitional_tables();
+
+    // All tables are the same size
+    m_expression_tables->set_transitional_table_capacity(flattened->size());
+    m_expression_tables->set_transitional_table_size(flattened->size());
+
+    // Update the master expression table's capacity and size
+    m_expression_tables->m_master->set_capacity(master->get_capacity());
+    m_expression_tables->m_master->set_size(master->size());
+
+    const auto& expressions = m_config.get_expressions();
+    for (const auto& expr : expressions) {
+        // master: compute based on latest state of the gnode state table
+        expr.compute(master.get(), (m_expression_tables->m_master).get(), m_expression_vocab);
+
+        // flattened: compute based on the latest update dataset
+        expr.compute(flattened.get(), (m_expression_tables->m_flattened).get(), m_expression_vocab);
+
+        // delta: for each numerical column, the numerical delta between the
+        // previous value and the current value in the row.
+        expr.compute(delta.get(), (m_expression_tables->m_delta).get(), m_expression_vocab);
+
+        // prev: the values of the updated rows before this update was applied
+        expr.compute(prev.get(), (m_expression_tables->m_prev).get(), m_expression_vocab);
+
+        // current: the current values of the updated rows
+        expr.compute(current.get(), (m_expression_tables->m_current).get(), m_expression_vocab);
+    }
+
+    // Calculate the transitions now that the intermediate tables are computed
+    m_expression_tables->calculate_transitions(existed.get());
+}
+
+bool
+t_ctx0::is_expression_column(const std::string& colname) const {
+    const t_schema& schema = m_expression_tables->m_master->get_schema();
+    return schema.has_column(colname);
+}
+
+t_uindex
+t_ctx0::num_expressions() const {
+    const auto& expressions = m_config.get_expressions();
+    return expressions.size();
+}
+
+const t_expression_tables*
+t_ctx0::get_expression_tables() const {
+    return m_expression_tables.get();
+}
+
+void
+t_ctx0::read_column_from_gstate(
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    std::vector<t_tscalar>& out_data) const {
+    std::shared_ptr<t_data_table> master_table = m_gstate->get_table();
+
+    if (is_expression_column(colname)) {
+        m_gstate->read_column(
+            *(m_expression_tables->m_master),
+            colname,
+            pkeys,
+            out_data);
+    } else {
+        m_gstate->read_column(
+            *master_table,
+            colname,
+            pkeys,
+            out_data);
+    }
 }
 
 t_index

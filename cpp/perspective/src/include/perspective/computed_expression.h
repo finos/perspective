@@ -43,24 +43,10 @@ public:
         const std::vector<std::pair<std::string, std::string>>& column_ids,
         t_dtype dtype);
 
-    /**
-     * @brief Compute this expression and add the output column to
-     * `data_table.`
-     * 
-     * @param data_table 
-     */
-    void compute(std::shared_ptr<t_data_table> data_table) const;
- 
-    /**
-     * @brief Compute this expression for the rows in `changed_rows`, and
-     * add the output column to `flattened`.
-     */
-    void recompute(
-        std::shared_ptr<t_data_table> gstate_table,
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& changed_rows) const;
-
-    void set_expression_vocab(std::shared_ptr<t_vocab> vocab);
+    void compute(
+        t_data_table* source_table,
+        t_data_table* destination_table,
+        std::shared_ptr<t_vocab> vocab) const;
 
     const std::string& get_expression_alias() const;
     const std::string& get_expression_string() const;

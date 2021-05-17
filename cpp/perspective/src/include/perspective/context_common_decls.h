@@ -34,7 +34,7 @@ std::string repr() const;
 
 void init();
 
-void reset();
+void reset(bool reset_expressions = true);
 
 t_index sidedness() const;
 
@@ -47,9 +47,6 @@ void set_deltas_enabled(bool enabled_state);
 void set_feature_state(t_ctx_feature feature, bool state);
 
 std::vector<t_tscalar> get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
-
-std::vector<t_tscalar> get_cell_data(
-    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
 t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 
@@ -76,6 +73,34 @@ void pprint() const;
 t_dtype get_column_dtype(t_uindex idx) const;
 
 std::shared_ptr<t_data_table> get_table() const;
+
+/**
+ * @brief Given a column name return whether it is an expression column.
+ * Because expression columns cannot overwrite real columns, a column cannot
+ * be both an expression and a "real" column.
+ * 
+ * @param colname 
+ * @return true 
+ * @return false 
+ */
+bool is_expression_column(const std::string& colname) const;
+
+t_uindex num_expressions() const;
+
+const t_expression_tables* get_expression_tables() const;
+
+// Given shared pointers to data tables from the gnode, use them to
+// compute the results of expression columns.
+void compute_expressions(std::shared_ptr<t_data_table> flattened_masked);
+
+void compute_expressions(
+    std::shared_ptr<t_data_table> master,
+    std::shared_ptr<t_data_table> flattened,
+    std::shared_ptr<t_data_table> delta,
+    std::shared_ptr<t_data_table> prev,
+    std::shared_ptr<t_data_table> current,
+    std::shared_ptr<t_data_table> transitions,
+    std::shared_ptr<t_data_table> existed);
 
 // Unity api
 std::vector<t_tscalar> unity_get_row_data(t_uindex idx) const;

@@ -17,6 +17,7 @@
 #include <perspective/traversal_nodes.h>
 #include <perspective/traversal.h>
 #include <perspective/data_table.h>
+#include <perspective/expression_tables.h>
 
 namespace perspective {
 
@@ -84,6 +85,8 @@ private:
     bool m_row_depth_set;
     t_depth m_column_depth;
     bool m_column_depth_set;
+    std::shared_ptr<t_vocab> m_expression_vocab;
+    std::unique_ptr<t_expression_tables> m_expression_tables;
 };
 
 } // end namespace perspective

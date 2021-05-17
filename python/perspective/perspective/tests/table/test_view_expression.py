@@ -9,6 +9,7 @@
 from pytest import raises
 from datetime import date, datetime
 from perspective import Table, PerspectiveCppError
+from .test_view import compare_delta
 
 
 class TestViewExpression(object):
@@ -53,13 +54,13 @@ class TestViewExpression(object):
             == "View creation failed: cannot create expression column 'a' that overwrites a column that already exists.\n"
         )
 
-    def test_view_expression_should_skip_duplicate(self):
+    def test_view_expression_should_resolve_to_last_alias(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
             columns=["abc"],
             expressions=['// abc \n "a" + "b"', '// abc \n "a" - "b"'],
         )
-        assert view.to_columns() == {"abc": [6, 8, 10, 12]}
+        assert view.to_columns() == {"abc": [-4, -4, -4, -4]}
 
     def test_view_expression_multiple_alias(
         self,
@@ -88,6 +89,132 @@ class TestViewExpression(object):
             "computed3": float,
             "computed4": float,
         }
+
+    def test_view_expression_multiple_views_with_the_same_alias_should_not_overwrite(
+        self,
+    ):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+
+        view = table.view(
+            expressions=['// computed \n "a" + "b"']
+        )
+
+        view2 = table.view(
+            expressions=['// computed \n "a" * "b"']
+        )
+
+        assert view.expression_schema() == {
+            "computed": float
+        }
+
+        assert view2.expression_schema() == {
+            "computed": float,
+        }
+
+        assert view.to_dict()["computed"] == [6, 8, 10, 12]
+        assert view2.to_dict()["computed"] == [5, 12, 21, 32]
+
+    def test_view_expression_multiple_views_with_the_same_alias_pivoted(
+        self,
+    ):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+
+        view = table.view(
+            row_pivots=["computed"],
+            aggregates={
+                "computed": ["weighted mean", "b"]
+            },
+            expressions=['// computed \n "a" + "b"']
+        )
+
+        view2 = table.view(
+            row_pivots=["computed"],
+            aggregates={
+                "computed": "last"
+            },
+            expressions=['// computed \nconcat(\'abc\', \' \', \'def\')']
+        )
+
+        assert view.expression_schema() == {
+            "computed": float
+        }
+
+        assert view2.expression_schema() == {
+            "computed": str,
+        }
+
+        result = view.to_dict()
+        result2 = view2.to_dict()
+
+        assert result["__ROW_PATH__"] == [[], [6], [8], [10], [12]]
+        assert result2["__ROW_PATH__"] == [[], ["abc def"]]
+
+        assert result["computed"] == [9.384615384615385, 6, 8, 10, 12]
+        assert result2["computed"] == ["abc def", "abc def"]
+
+
+    def test_view_expression_multiple_views_with_the_same_alias_all_types(
+        self,
+    ):
+        now = datetime.now()
+        today = date.today()
+
+        month_bucketed = datetime(today.year, today.month, 1)
+        minute_bucketed = datetime(now.year, now.month, now.day, now.hour, now.minute, 0, 0)
+
+        table = Table({
+            "a": [1, 2, 3, 4],
+            "b": [5.5, 6.5, 7.5, 8.5],
+            "c": [datetime.now() for _ in range(4)],
+            "d": [date.today() for _ in range(4)],
+            "e": [True, False, True, False],
+            "f": ["a", "b", "c", "d"]
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed \n "a" + "b"',
+                '// computed2 \n bucket("c", \'M\')',
+                '// computed3 \n concat(\'a\', \'b\', \'c\')',
+                '// computed4 \n \'new string\'',
+            ]
+        )
+
+        view2 = table.view(
+            expressions=[
+                '// computed \n upper("f")',
+                '// computed2 \n 20 + ("b" * "a")',
+                '// computed4 \n bucket("c", \'m\')',
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "computed": float,
+            "computed2": date,
+            "computed3": str,
+            "computed4": str,
+        }
+
+        assert view2.expression_schema() == {
+            "computed": str,
+            "computed2": float,
+            "computed4": datetime,
+        }
+
+        result = view.to_dict()
+        result2 = view2.to_dict()
+
+        assert result["computed"] == [6.5, 8.5, 10.5, 12.5]
+        assert result2["computed"] == ["A", "B", "C", "D"]
+        
+        assert result["computed2"] == [month_bucketed for _ in range(4)]
+        assert result2["computed2"] == [25.5, 33, 42.5, 54]
+
+        assert result["computed3"] == ["abc", "abc", "abc", "abc"]
+        assert "computed3" not in result2
+
+        assert result["computed4"] == ["new string" for _ in range(4)]
+        assert result2["computed4"] == [minute_bucketed for _ in range(4)]
 
     def test_view_expression_create_no_columns(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
@@ -335,10 +462,11 @@ class TestViewExpression(object):
         view = table.view(
             expressions=[
                 '// computed \n "a" + "b"',
+                "upper(concat('abc', 'def'))"
             ]
         )
 
-        assert view.schema() == {"a": int, "b": int, "computed": float}
+        assert view.schema() == {"a": int, "b": int, "computed": float, "upper(concat('abc', 'def'))": str}
 
         table.update({"a": [5, 6], "b": [9, 10]})
 
@@ -346,6 +474,7 @@ class TestViewExpression(object):
             "a": [1, 2, 3, 4, 5, 6],
             "b": [5, 6, 7, 8, 9, 10],
             "computed": [6, 8, 10, 12, 14, 16],
+            "upper(concat('abc', 'def'))": ["ABCDEF" for _ in range(6)]
         }
 
         view.delete()
@@ -368,6 +497,58 @@ class TestViewExpression(object):
             "computed2": [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4],
         }
 
+    def test_view_expression_append(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+
+        view = table.view(
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
+        )
+
+        assert view.schema() == {"a": int, "b": int, "computed": float}
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12],
+        }
+
+        table.update({"a": [5, 6], "b": [9, 10]})
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [5, 6, 7, 8, 9, 10],
+            "computed": [6, 8, 10, 12, 14, 16],
+        }
+
+    def test_view_expression_delta_zero(self, util):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+
+        view = table.view(
+            expressions=[
+                '// computed \n "a" + "b"',
+            ]
+        )
+
+        assert view.schema() == {"a": int, "b": int, "computed": float}
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [6, 8, 10, 12],
+        }
+
+        def updater(port, delta):
+            compare_delta(delta, {"a": [5, 6], "b": [9, 10]})
+
+
+        table.update({"a": [5, 6], "b": [9, 10]})
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [5, 6, 7, 8, 9, 10],
+            "computed": [6, 8, 10, 12, 14, 16],
+        }
     def test_view_delete_with_scope(self):
         """Tests that `View`'s `__del__` method, when called by the Python
         reference counter, leaves an empty `Table` in a clean state.

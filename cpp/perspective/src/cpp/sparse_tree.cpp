@@ -720,7 +720,10 @@ t_stree::mark_zero_desc() {
 }
 
 void
-t_stree::update_aggs_from_static(const t_dtree_ctx& ctx, const t_gstate& gstate) {
+t_stree::update_aggs_from_static(
+    const t_dtree_ctx& ctx,
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table) {
     const t_data_table& src_aggtable = ctx.get_aggtable();
 
     t_agg_update_info agg_update_info;
@@ -786,7 +789,13 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx, const t_gstate& gstate)
         }
 
         update_agg_table(
-            r.m_sptidx, agg_update_info, r.m_daggidx, r.m_saggidx, r.m_nstrands, gstate);
+            r.m_sptidx,
+            agg_update_info,
+            r.m_daggidx,
+            r.m_saggidx,
+            r.m_nstrands,
+            gstate,
+            expression_master_table);
     }
 }
 
@@ -851,8 +860,15 @@ t_stree::gen_aggidx() {
 }
 
 void
-t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_ridx,
-    t_uindex dst_ridx, t_index nstrands, const t_gstate& gstate) {
+t_stree::update_agg_table(
+    t_uindex nidx,
+    t_agg_update_info& info,
+    t_uindex src_ridx,
+    t_uindex dst_ridx,
+    t_index nstrands,
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table) {
+
     for (t_uindex idx : info.m_dst_topo_sorted) {
         const t_column* src = info.m_src[idx];
         t_column* dst = info.m_dst[idx];
@@ -874,7 +890,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                     // entire sum in case it is now finite
                     auto pkeys = get_pkeys(nidx);
                     std::vector<double> values;
-                    gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
+                    read_column_from_gstate(
+                        gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, values, true);
                     new_value.set(std::accumulate(values.begin(), values.end(), double(0)));
                 }
                 dst->set_scalar(dst_ridx, new_value);
@@ -892,7 +909,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
                 std::vector<double> values;
 
-                gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values, false);
+                read_column_from_gstate(
+                    gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, values, false);
 
                 auto nr = std::accumulate(values.begin(), values.end(), double(0));
                 double dr = values.size();
@@ -917,8 +935,11 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 std::vector<t_tscalar> values;
                 std::vector<t_tscalar> weights;
 
-                gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
-                gstate.read_column(spec.get_dependencies()[1].name(), pkeys, weights);
+                read_column_from_gstate(
+                    gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, values);
+    
+                read_column_from_gstate(
+                    gstate, expression_master_table, spec.get_dependencies()[1].name(), pkeys, weights);
 
                 auto weights_it = weights.begin();
                 auto values_it = values.begin();
@@ -947,8 +968,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
                 old_value.set(dst->get_scalar(dst_ridx));
 
-                bool is_unique
-                    = gstate.is_unique(pkeys, spec.get_dependencies()[0].name(), new_value);
+                bool is_unique = is_unique_from_gstate(
+                    gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, new_value);
 
                 if (new_value.m_type == DTYPE_STR) {
                     if (is_unique) {
@@ -970,14 +991,21 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
             case AGGTYPE_ANY: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
-                gstate.apply(pkeys, spec.get_dependencies()[0].name(), new_value,
+
+                apply_from_gstate(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[0].name(),
+                    pkeys,
+                    new_value,
                     [](const t_tscalar& row_value, t_tscalar& output) {
                         if (row_value) {
                             output.set(row_value);
                             return true;
                         }
                         return false;
-                    });
+                    }
+                );
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -986,8 +1014,12 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
 
                 new_value.set(
-                    gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             if (values.size() == 0) {
                                 return t_tscalar();
                             } else if (values.size() == 1) {
@@ -1000,7 +1032,9 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
 
                                 return *middle;
                             }
-                        }));
+                        }
+                    )
+                );
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -1008,8 +1042,12 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
-                    pkeys, spec.get_dependencies()[0].name(),
+                new_value.set(
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[0].name(),
+                    pkeys,
                     [this](std::vector<t_tscalar>& values) {
                         std::set<t_tscalar> vset;
                         for (const auto& v : values) {
@@ -1022,7 +1060,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                             ss << *iter << ", ";
                         }
                         return m_symtable.get_interned_tscalar(ss.str().c_str());
-                    }));
+                    })
+                );
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -1075,16 +1114,24 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
-                    pkeys, spec.get_dependencies()[0].name(),
-                    [](std::vector<t_tscalar>& values) { return get_dominant(values); }));
+                new_value.set(
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[0].name(),
+                    pkeys,
+                    [](std::vector<t_tscalar>& values) {
+                        return get_dominant(values);
+                    })
+                );
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_FIRST:
             case AGGTYPE_LAST_BY_INDEX: {
                 old_value.set(dst->get_scalar(dst_ridx));
-                new_value.set(first_last_helper(nidx, spec, gstate));
+                new_value.set(first_last_helper(
+                    nidx, spec, gstate, expression_master_table));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_AND: {
@@ -1092,8 +1139,12 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
 
                 new_value.set(
-                    gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             t_tscalar rval;
                             rval.set(true);
 
@@ -1104,7 +1155,9 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                                 }
                             }
                             return rval;
-                        }));
+                        }
+                    )
+                );
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_LAST_VALUE: {
@@ -1126,8 +1179,16 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto iters = m_idxpkey->get<by_idx_pkey>().equal_range(leaf);
                 if (iters.first != iters.second) {
                     t_tscalar pkey = (--iters.second)->m_pkey;
-                    std::vector<t_tscalar> values;
-                    dst->set_scalar(dst_ridx, gstate.read_by_pkey(spec.get_dependencies()[0].name(), pkey));
+
+                    dst->set_scalar(
+                        dst_ridx,
+                        read_by_pkey_from_gstate(
+                            gstate,
+                            expression_master_table,
+                            spec.get_dependencies()[0].name(),
+                            pkey
+                        )
+                    );
                 } else {
                     dst->set_scalar(dst_ridx, mknone());
                 }
@@ -1166,8 +1227,12 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
 
                 new_value.set(
-                    gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             if (values.empty()) {
                                 return mknone();
                             }
@@ -1183,7 +1248,9 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                             }
 
                             return rval;
-                        }));
+                        }
+                    )
+                );
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_SUM_ABS: {
@@ -1191,8 +1258,12 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
 
                 new_value.set(
-                    gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             if (values.empty()) {
                                 return mknone();
                             }
@@ -1204,15 +1275,22 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                                 rval = rval.add(v.abs());
                             }
                             return rval;
-                        }));
+                        }
+                    )
+                );
+
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_ABS_SUM: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
                 new_value.set(
-                    gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             if (values.empty()) {
                                 return mknone();
                             }
@@ -1223,15 +1301,21 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                                 rval = rval.add(v);
                             }
                             return rval.abs();
-                        }));                
+                        }
+                    )
+                );                
                 dst->set_scalar(dst_ridx, new_value);
              } break;
             case AGGTYPE_MUL: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
                 new_value.set(
-                    gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             if (values.size() == 0) {
                                 return t_tscalar();
                             } else if (values.size() == 1) {
@@ -1244,7 +1328,9 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                                 }
                                 return v;
                             }
-                        }));
+                        }
+                    )
+                );
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -1253,15 +1339,21 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
 
                 new_value.set(
-                    gstate.reduce<std::function<std::uint32_t(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
+                    reduce_from_gstate<std::function<std::uint32_t(std::vector<t_tscalar>&)>>(
+                        gstate,
+                        expression_master_table,
+                        spec.get_dependencies()[0].name(),
+                        pkeys,
+                        [](std::vector<t_tscalar>& values) {
                             tsl::hopscotch_set<t_tscalar> vset;
                             for (const auto& v : values) {
                                 vset.insert(v);
                             }
                             std::uint32_t rv = vset.size();
                             return rv;
-                        }));
+                        }
+                    )
+                );
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -1269,8 +1361,12 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto pkeys = get_pkeys(nidx);
                 old_value.set(dst->get_scalar(dst_ridx));
                 bool skip = false;
-                bool is_unique
-                    = gstate.is_unique(pkeys, spec.get_dependencies()[0].name(), new_value);
+                bool is_unique = is_unique_from_gstate(
+                    gstate,
+                    expression_master_table,
+                    spec.get_dependencies()[0].name(),
+                    pkeys,
+                    new_value);
 
                 if (is_leaf(nidx) && is_unique) {
                     if (new_value.m_type == DTYPE_STR) {
@@ -1785,7 +1881,11 @@ t_stree::get_deltas() const {
 }
 
 t_tscalar
-t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec, const t_gstate& gstate) const {
+t_stree::first_last_helper(
+    t_uindex nidx,
+    const t_aggspec& spec,
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table) const {
     auto pkeys = get_pkeys(nidx);
 
     if (pkeys.empty())
@@ -1794,8 +1894,11 @@ t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec, const t_gstate&
     std::vector<t_tscalar> values;
     std::vector<t_tscalar> sort_values;
 
-    gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
-    gstate.read_column(spec.get_dependencies()[1].name(), pkeys, sort_values);
+    read_column_from_gstate(
+        gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, values);
+
+    read_column_from_gstate(
+        gstate, expression_master_table, spec.get_dependencies()[1].name(), pkeys, sort_values);
 
     auto minmax_idx = get_minmax_idx(sort_values, spec.get_sort_type());
 
@@ -1899,6 +2002,126 @@ t_stree::pprint() const {
             std::cout << get_aggregate(idx, aidx) << ", ";
         }
         std::cout << std::endl;
+    }
+}
+
+void
+t_stree::read_column_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    std::vector<t_tscalar>& out_data) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+    
+    if (expression_schema.has_column(colname)) {
+        gstate.read_column(expression_master_table, colname, pkeys, out_data);
+    } else {
+        std::shared_ptr<t_data_table> gstate_master_table = gstate.get_table();
+        gstate.read_column(*gstate_master_table, colname, pkeys, out_data);
+    }
+}
+
+void
+t_stree::read_column_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    std::vector<double>& out_data,
+    bool include_none) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+
+    if (expression_schema.has_column(colname)) {
+        gstate.read_column(
+            expression_master_table,
+            colname,
+            pkeys,
+            out_data,
+            include_none);
+    } else {
+        std::shared_ptr<t_data_table> gstate_master_table = gstate.get_table();
+        gstate.read_column(
+            *gstate_master_table,
+            colname,
+            pkeys,
+            out_data,
+            include_none);
+    }
+}
+
+t_tscalar
+t_stree::read_by_pkey_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    t_tscalar& pkey) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+
+    if (expression_schema.has_column(colname)) {
+        return gstate.read_by_pkey(expression_master_table, colname, pkey);
+    } else {
+        std::shared_ptr<t_data_table> gstate_master_table = gstate.get_table();
+        return gstate.read_by_pkey(*gstate_master_table, colname, pkey);
+    }
+}
+
+bool
+t_stree::is_unique_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    t_tscalar& value) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+
+    if (expression_schema.has_column(colname)) {
+        return gstate.is_unique(
+            expression_master_table, colname, pkeys, value);
+    } else {
+        std::shared_ptr<t_data_table> gstate_master_table = gstate.get_table();
+        return gstate.is_unique(
+            *gstate_master_table, colname, pkeys, value);
+    }
+}
+
+bool
+t_stree::apply_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    t_tscalar& value,
+    std::function<bool(const t_tscalar&, t_tscalar&)> fn) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+
+    if (expression_schema.has_column(colname)) {
+        return gstate.apply(
+            expression_master_table, colname, pkeys, value, fn);
+    } else {
+        std::shared_ptr<t_data_table> gstate_master_table = gstate.get_table();
+        return gstate.apply(
+            *gstate_master_table, colname, pkeys, value, fn);
+    }
+}
+
+template <typename FN_T>
+typename FN_T::result_type
+t_stree::reduce_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    FN_T fn) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+
+    if (expression_schema.has_column(colname)) {
+        return gstate.reduce(
+            expression_master_table, colname, pkeys, fn);
+    } else {
+        std::shared_ptr<t_data_table> gstate_master_table = gstate.get_table();
+        return gstate.reduce(
+            *gstate_master_table, colname, pkeys, fn);
     }
 }
 

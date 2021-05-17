@@ -169,6 +169,32 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Multiple appends should notify expression column", async function() {
+            const table = await perspective.table({
+                x: [1, 2, 3, 4],
+                y: ["A", "B", "C", "D"]
+            });
+            const view = await table.view({
+                expressions: ['lower("y")']
+            });
+
+            const before = await view.to_columns();
+            expect(before['lower("y")']).toEqual(["a", "b", "c", "d"]);
+            table.update({y: ["HELLO", "WORLD"]});
+
+            const result = await view.to_columns();
+            expect(result['lower("y")']).toEqual(["a", "b", "c", "d", "hello", "world"]);
+
+            table.update({x: [12, 34], y: ["XYZ", "ABCdEFg"]});
+
+            const result2 = await view.to_columns();
+            expect(result2["x"]).toEqual([1, 2, 3, 4, null, null, 12, 34]);
+            expect(result2['lower("y")']).toEqual(["a", "b", "c", "d", "hello", "world", "xyz", "abcdefg"]);
+
+            view.delete();
+            table.delete();
+        });
+
         it("Appends should notify expression column with multiple columns", async function() {
             const table = await perspective.table({
                 x: [1, 2, 3, 4],
@@ -998,6 +1024,39 @@ module.exports = perspective => {
                 int: [1, 2, 3, 4],
                 float: [2.25, 3.5, 4.75, 5.25]
             });
+
+            view.delete();
+            table.delete();
+        });
+    });
+
+    describe("Removing expression columns", () => {
+        it("Removes should remove rows in expression columns", async () => {
+            const table = await perspective.table(
+                {
+                    x: [1, 2, 3, 4],
+                    y: ["A", "B", "C", "D"]
+                },
+                {index: "x"}
+            );
+
+            const view = await table.view({
+                expressions: ['lower("y")']
+            });
+
+            const before = await view.to_columns();
+            expect(before['lower("y")']).toEqual(["a", "b", "c", "d"]);
+            table.update({y: ["HELLO", "WORLD"]});
+
+            const result = await view.to_columns();
+            expect(result["x"]).toEqual([null, 1, 2, 3, 4]);
+            expect(result['lower("y")']).toEqual(["world", "a", "b", "c", "d"]);
+
+            table.remove([4, null, 1]);
+
+            const result2 = await view.to_columns();
+            expect(result2["x"]).toEqual([2, 3]);
+            expect(result2['lower("y")']).toEqual(["b", "c"]);
 
             view.delete();
             table.delete();

@@ -1270,9 +1270,7 @@ export default function(Module) {
      */
     function parse_expression_strings(expressions) {
         let validated_expressions = [];
-
-        // Keep track of aliases that coincide and skip them.
-        let alias_set = new Set();
+        const expression_idx_map = {};
 
         for (let expression_string of expressions) {
             if (expression_string.includes('""')) {
@@ -1292,25 +1290,11 @@ export default function(Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
-            let skip_expression = false;
 
             let parsed_expression_string = expression_string.replace(/\/\/(.+)\n/, (_, alias) => {
                 expression_alias = alias.trim();
-
-                // Expression alias cannot overlap.
-                if (alias_set.has(expression_alias)) {
-                    console.error(`Skipping expression '${expression_string}', as it reuses alias ${alias}!`);
-                    skip_expression = true;
-                }
-
-                alias_set.add(expression_alias);
-
                 return "";
             });
-
-            if (skip_expression) {
-                continue;
-            }
 
             // If an alias does not exist, the alias is the expression itself.
             if (!expression_alias || expression_alias.length == 0) {
@@ -1344,7 +1328,18 @@ export default function(Module) {
                 return `${match.substr(0, match.indexOf(full))}'${value}')`;
             });
 
-            validated_expressions.push([expression_alias, expression_string, parsed_expression_string, column_id_map]);
+            const validated = [expression_alias, expression_string, parsed_expression_string, column_id_map];
+
+            // Check if this expression is already in the array, if so then
+            // we need to replace the expression so the last expression tagged
+            // with the alias is the one that is applied to the engine.
+            if (expression_idx_map[expression_alias] !== undefined) {
+                const idx = expression_idx_map[expression_alias];
+                validated_expressions[idx] = validated;
+            } else {
+                validated_expressions.push(validated);
+                expression_idx_map[expression_alias] = validated_expressions.length - 1;
+            }
         }
 
         return validated_expressions;
