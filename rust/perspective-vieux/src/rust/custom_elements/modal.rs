@@ -6,32 +6,46 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::column_style::*;
-use crate::utils::WeakComponentLink;
-
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use web_sys::HtmlElement;
+use web_sys::*;
 use yew::prelude::*;
 
-type Handler<T> = Rc<RefCell<Option<Closure<dyn Fn(T)>>>>;
+/// A `ModalElement` wraps the parameterized yew `Component` in a Custom Element.
+/// Via the `open()` and `close()` methods, a `ModalElement` can be positioned next
+/// to any existing on-page elements, accounting for viewport, scroll position, etc.
+pub struct ModalElement<T: Component> {
+    root: ComponentLink<T>,
+    elem: HtmlElement,
+    target: Rc<RefCell<Option<HtmlElement>>>,
+    blurhandler: Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>,
+}
 
-/// A `customElements` external API.
-#[wasm_bindgen]
-#[derive(Clone)]
-pub struct PerspectiveColumnStyleElement {
-    root: ComponentLink<ColumnStyle>,
-    elem: web_sys::HtmlElement,
-    blurhandler: Handler<FocusEvent>,
+// `#[derive(Clone)]` generates the trait bound `T: Clone`, which is not required
+// because `ComponentLink<T>` implements Clone without this bound;  thus `Clone`
+// must be implemented by hand.
+impl<T> Clone for ModalElement<T>
+where
+    T: Component,
+{
+    fn clone(&self) -> Self {
+        ModalElement {
+            root: self.root.clone(),
+            elem: self.elem.clone(),
+            target: self.target.clone(),
+            blurhandler: self.blurhandler.clone(),
+        }
+    }
 }
 
 /// Calculate the absolute coordinates (top, left) relative to `<body>` of a
 /// `target` element.
-fn calc_page_position(target: HtmlElement) -> Result<(u32, u32), JsValue> {
+fn calc_page_position(target: &HtmlElement) -> Result<(u32, u32), JsValue> {
     let mut top = 0;
     let mut left = 0;
-    let mut elem = target.unchecked_into::<HtmlElement>();
+    let mut elem = target.clone().unchecked_into::<HtmlElement>();
     while !elem.is_undefined() {
         let is_sticky = match web_sys::window().unwrap().get_computed_style(&elem)? {
             Some(x) => x.get_property_value("position")? == "sticky",
@@ -48,7 +62,10 @@ fn calc_page_position(target: HtmlElement) -> Result<(u32, u32), JsValue> {
                 }
                 elem.unchecked_into::<HtmlElement>()
             }
-            None => JsValue::UNDEFINED.unchecked_into::<HtmlElement>(),
+            None => match elem.dyn_into::<ShadowRoot>() {
+                Ok(root) => root.host().unchecked_into::<HtmlElement>(),
+                Err(_) => JsValue::UNDEFINED.unchecked_into::<HtmlElement>(),
+            },
         };
     }
 
@@ -109,27 +126,16 @@ fn calc_relative_position(
     }
 }
 
-fn on_change(elem: &web_sys::HtmlElement, config: &ColumnStyleConfig) {
-    let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&JsValue::from_serde(config).unwrap());
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "perspective-column-style-change",
-        &event_init,
-    );
-
-    elem.dispatch_event(&event.unwrap()).unwrap();
+pub trait ResizableMessage {
+    fn resize(y: u32, x: u32) -> Self;
 }
 
-#[wasm_bindgen]
-impl PerspectiveColumnStyleElement {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        elem: web_sys::HtmlElement,
-        js_config: JsValue,
-        js_def_config: JsValue,
-    ) -> PerspectiveColumnStyleElement {
-        let config = js_config.into_serde().unwrap();
-        let default_config = js_def_config.into_serde().unwrap();
+impl<T> ModalElement<T>
+where
+    T: Component,
+    <T as Component>::Message: ResizableMessage,
+{
+    pub fn new(elem: web_sys::HtmlElement, props: T::Properties) -> ModalElement<T> {
         elem.set_attribute("tabindex", "0").unwrap();
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
         let shadow_root = elem
@@ -137,38 +143,25 @@ impl PerspectiveColumnStyleElement {
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        let on_change = {
-            let _elem = elem.clone();
-            Callback::from(move |x: ColumnStyleConfig| on_change(&_elem, &x.clone()))
-        };
-
-        let props = ColumnStyleProps {
-            weak_link: WeakComponentLink::default(),
-            config,
-            on_change,
-            default_config,
-        };
-
-        let app = App::<ColumnStyle>::new();
+        let app = App::<T>::new();
         let root = app.mount_with_props(shadow_root, props);
         let blurhandler = Rc::new(RefCell::new(None));
-        PerspectiveColumnStyleElement {
+        ModalElement {
             root,
             elem,
+            target: Rc::new(RefCell::new(None)),
             blurhandler,
         }
     }
 
-    /// Open this menu by attaching directly to `document.body` with position
-    /// absolutely positioned relative to an alread-connected `target`
-    /// element.
-    pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
+    fn open_within_viewport(&mut self, target: HtmlElement) -> Result<(), JsValue> {
         let height = target.offset_height() as u32;
         let width = target.offset_width() as u32;
-        let (top, left) = calc_page_position(target)?;
+        let (top, left) = calc_page_position(&target)?;
+        *self.target.borrow_mut() = Some(target);
 
-        // default, top left/bottom left
-        let msg = ColumnStyleMsg::SetPos((top + height) as u32, left as u32);
+        // Default, top left/bottom left
+        let msg = T::Message::resize((top + height) as u32, left as u32);
         self.root.send_message(msg);
 
         let window = web_sys::window().unwrap();
@@ -179,20 +172,20 @@ impl PerspectiveColumnStyleElement {
             .unwrap()
             .append_child(&self.elem)?;
 
-        // Check if the menu has been positioned off-screen and re-locate if necessary
+        // Check if the modal has been positioned off-screen and re-locate if necessary
         match calc_relative_position(&self.elem, top, left, height, width) {
             None => (),
             Some((top, left)) => {
-                let msg = ColumnStyleMsg::SetPos(top as u32, left as u32);
+                let msg = T::Message::resize(top as u32, left as u32);
                 self.root.send_message(msg);
             }
         };
 
-        let this = self.clone();
+        let mut this = self.clone();
         *self.blurhandler.borrow_mut() =
             Some(Closure::wrap(Box::new(move |_event: FocusEvent| {
                 this.close().unwrap();
-            }) as Box<dyn Fn(FocusEvent)>));
+            }) as Box<dyn FnMut(FocusEvent)>));
 
         self.elem.add_event_listener_with_callback(
             "blur",
@@ -207,8 +200,25 @@ impl PerspectiveColumnStyleElement {
         self.elem.focus()
     }
 
+    /// Open this modal by attaching directly to `document.body` with position
+    /// absolutely positioned relative to an alread-connected `target`
+    /// element.
+    ///
+    /// Because the Custom Element has a `blur` handler, we must invoke this before
+    /// attempting to re-parent the element.
+    pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
+        self.elem.blur().unwrap();
+        let window = web_sys::window().unwrap();
+        let mut this = self.clone();
+        window.request_animation_frame(
+            Closure::once_into_js(move || this.open_within_viewport(target))
+                .unchecked_ref(),
+        )?;
+        Ok(())
+    }
+
     /// Remove from document and cleanup.
-    pub fn close(&self) -> Result<(), JsValue> {
+    pub fn close(&mut self) -> Result<(), JsValue> {
         self.elem.remove_event_listener_with_callback(
             "blur",
             self.blurhandler
@@ -219,7 +229,6 @@ impl PerspectiveColumnStyleElement {
                 .unchecked_ref(),
         )?;
 
-        // TODO this would happen automatically if we drop() from JS
         *self.blurhandler.borrow_mut() = None;
         web_sys::window()
             .unwrap()
@@ -229,8 +238,10 @@ impl PerspectiveColumnStyleElement {
             .unwrap()
             .remove_child(&self.elem)?;
 
+    
+        let target = self.target.borrow_mut().take().unwrap();
+        let event = web_sys::CustomEvent::new("-perspective-close-expression")?;        
+        target.dispatch_event(&event)?;
         Ok(())
     }
-
-    pub fn connected_callback(&self) {}
 }

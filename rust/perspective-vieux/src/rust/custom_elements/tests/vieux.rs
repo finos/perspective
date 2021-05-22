@@ -6,12 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-extern crate perspective_vieux;
-
 use crate::utils::perspective::*;
-use perspective_vieux::components::perspective_vieux::*;
-use perspective_vieux::utils::*;
-use perspective_vieux::*;
+use crate::{components::vieux::*, session::Session};
+use crate::utils::*;
+use crate::*;
 use wasm_bindgen_futures::JsFuture;
 
 use futures::channel::oneshot::*;
@@ -44,11 +42,13 @@ fn set_up_html() -> (WeakComponentLink<PerspectiveVieux>, web_sys::ShadowRoot) {
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let div1: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let div2: HtmlElement = document.create_element("div").unwrap().unchecked_into();
+    let session = Session::new();
     test_html! {
         <PerspectiveVieux
             weak_link=link.clone()
             ref=root.clone()
             elem=elem
+            session=session
             panels= (div1, div2)>
         </PerspectiveVieux>
     };

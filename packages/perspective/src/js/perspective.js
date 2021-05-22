@@ -1294,7 +1294,7 @@ export default function(Module) {
             let expression_alias;
             let skip_expression = false;
 
-            let parsed_expression_string = expression_string.replace(/\/\/(.+)\n/, (_, alias) => {
+            let parsed_expression_string = expression_string.replace(/\/\/(.+?)$/m, (_, alias) => {
                 expression_alias = alias.trim();
 
                 // Expression alias cannot overlap.

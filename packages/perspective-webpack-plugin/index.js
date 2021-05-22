@@ -10,6 +10,7 @@
 const {get_config} = require("@finos/perspective/dist/esm/config");
 const path = require("path");
 const webpack = require("webpack");
+const cssnano = require("cssnano");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -44,7 +45,20 @@ class PerspectiveWebpackPlugin {
             }
         });
 
+        rules.push({
+            test: /editor\.worker\.js$/,
+            type: "javascript/auto",
+            include: /monaco\-editor/,
+            use: {
+                loader: "worker-loader",
+                options: {
+                    filename: "editor.worker.js"
+                }
+            }
+        });
+
         if (this.options.inline || this.options.inlineWorker) {
+            rules[rules.length - 2].use.options.inline = "no-fallback";
             rules[rules.length - 1].use.options.inline = "no-fallback";
         }
 
@@ -68,6 +82,36 @@ class PerspectiveWebpackPlugin {
                 loader: "arraybuffer-loader"
             });
         }
+
+        rules.push({
+            test: /\.css$/,
+            include: /monaco\-editor/,
+            use: [
+                {loader: "css-loader", options: {sourceMap: false}},
+                {
+                    loader: "postcss-loader",
+                    options: {
+                        sourceMap: false,
+                        postcssOptions: {
+                            map: {annotation: false},
+                            minimize: true,
+                            plugins: [
+                                cssnano({
+                                    preset: "lite",
+                                    discardComments: {removeAll: true}
+                                })
+                            ]
+                        }
+                    }
+                }
+            ]
+        });
+
+        rules.push({
+            test: /\.ttf$/,
+            include: /monaco\-editor/,
+            use: ["file-loader"]
+        });
 
         const perspective_config = get_config();
         if (perspective_config) {

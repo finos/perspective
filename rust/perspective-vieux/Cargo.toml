@@ -19,6 +19,7 @@ futures = "0.3.12"
 js-intern = "0.3.1"
 num-format = "0.4.0"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.59"
 wasm-bindgen = { version = "0.2.63" , features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
 yew = { git = "https://github.com/yewstack/yew", rev = "c51ab7f" } # "0.17.4"

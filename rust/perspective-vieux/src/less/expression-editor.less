@@ -1,0 +1,82 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "./monaco.less";
+
+:host {
+    position: absolute;
+    z-index: 10000;
+    outline: none;
+    padding-top: 6px;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 300;
+    border: inherit;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
+    user-select: none;
+    background-color: white;
+
+    .monaco-editor .cursors-layer .cursor {
+        visibility: var(--monaco-cursor--visibility, inherit) !important;
+    }
+
+    #psp-expression-editor-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-left: 20px;
+        margin-top: 12px;
+    }
+
+    .psp-expression-editor__button {
+        font-family: inherit;
+        font-size: 14px;
+        border: none;        
+        margin-left: 6px;
+        padding: 2px 5px;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &[disabled] {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        &#psp-expression-editor-button-save {
+            color: inherit;
+            font-family: inherit;
+            font-weight: 300;
+            font-size: 12px;
+            height: 36px;
+            opacity: 0.1;
+            background-color: var(--plugin--background, #fff);
+            transition: background-color 0.2s;
+            padding-right: 0 6px;
+
+            &:not([disabled]) {
+                opacity: 1;
+            }
+
+            &:before {
+                margin-right: 6px;
+                font-size: 14px;
+                font-family: "Material Icons";
+                content: "save";
+            }
+           
+            &:hover {
+                background-color: rgba(0,0,0,0.05);
+                transition: none;
+            }
+        }
+    }
+}

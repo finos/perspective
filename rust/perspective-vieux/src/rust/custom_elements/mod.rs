@@ -9,11 +9,7 @@
 pub mod column_style;
 pub mod expression_editor;
 pub mod vieux;
-pub mod split_panel;
-pub mod status_bar;
-pub mod radio_list;
-
-mod status_bar_counter;
+pub mod modal;
 
 #[cfg(test)]
 mod tests;

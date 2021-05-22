@@ -33,8 +33,21 @@ export default () => {
             ]
         },
         {
+            input: `src/less/expression-editor.less`,
+            output: {
+                dir: "dist/css"
+            },
+            plugins: [
+                postcss({
+                    inject: false,
+                    extract: path.resolve(`dist/css/expression-editor.css`),
+                    minimize: {preset: "lite"}
+                })
+            ]
+        },
+        {
             input: "src/js/vieux.js",
-            external: [/node_modules/, /pkg/],
+            external: [/node_modules/, /pkg/, /monaco\-editor/],
             output: {
                 sourcemap: true,
                 dir: "dist/esm/"

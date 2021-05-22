@@ -37,7 +37,6 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                exclude: /node_modules/,
                 use: [{loader: "css-loader"}]
             },
             {
@@ -57,6 +56,18 @@ module.exports = {
                 type: "javascript/auto",
                 include: path.dirname(require.resolve("@finos/perspective-viewer")),
                 loader: "arraybuffer-loader"
+            },
+            {
+                test: /editor\.worker/,
+                type: "javascript/auto",
+                loader: "worker-loader",
+                options: {
+                    inline: "no-fallback"
+                }
+            },
+            {
+                test: /\.ttf$/,
+                use: ["file-loader"]
             }
         ]
     },

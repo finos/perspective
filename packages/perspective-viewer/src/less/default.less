@@ -272,6 +272,14 @@
         margin: var(--column-container--margin, 8px);
         min-height: 36px;
 
+        #add-expression {
+            padding: 6px 0px;
+            margin: -6px 0 0 0;
+            &.expr_editor_open {
+                background: rgba(0,0,0,0.05);
+            }
+        }
+
         #add-computed-expression:hover {
             background-color: rgba(0,0,0,0.05);
             border: 5px solid transparent;

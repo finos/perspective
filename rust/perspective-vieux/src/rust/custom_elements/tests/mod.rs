@@ -6,14 +6,4 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-pub mod column_style;
-pub mod expression_editor;
 pub mod vieux;
-pub mod split_panel;
-pub mod status_bar;
-pub mod radio_list;
-
-mod status_bar_counter;
-
-#[cfg(test)]
-mod tests;

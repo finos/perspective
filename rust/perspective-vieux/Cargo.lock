@@ -377,6 +377,7 @@ dependencies = [
  "js-sys",
  "num-format",
  "serde",
+ "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
