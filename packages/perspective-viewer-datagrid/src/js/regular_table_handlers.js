@@ -390,7 +390,7 @@ function get_rule(regular, tag, def) {
 export async function createModel(regular, table, view, extend = {}) {
     const config = await view.get_config();
 
-    // Extract just the expression strings from the expressions array, which
+    // Extract just the expression aliases from the expressions array, which
     // contains more metadata than we need.
     const expressions = config.expressions.map(expr => expr[0]);
 

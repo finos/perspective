@@ -35,20 +35,20 @@ struct t_expression_tables {
     void clear_transitional_tables();
 
     // Calculate the `t_transitions` value for each row.
-    void calculate_transitions(t_data_table* existed);
+    void calculate_transitions(std::shared_ptr<t_data_table> existed);
 
     void reset();
 
     // master table is calculated from t_gstate's master table
-    std::unique_ptr<t_data_table> m_master;
+    std::shared_ptr<t_data_table> m_master;
     
     // flattened, prev, current, delta, transitions calculated from the
     // tables stored on the gnode's output ports.
-    std::unique_ptr<t_data_table> m_flattened;
-    std::unique_ptr<t_data_table> m_prev;
-    std::unique_ptr<t_data_table> m_current;
-    std::unique_ptr<t_data_table> m_delta;
-    std::unique_ptr<t_data_table> m_transitions;
+    std::shared_ptr<t_data_table> m_flattened;
+    std::shared_ptr<t_data_table> m_prev;
+    std::shared_ptr<t_data_table> m_current;
+    std::shared_ptr<t_data_table> m_delta;
+    std::shared_ptr<t_data_table> m_transitions;
 };
 
 } // end namespace perspective

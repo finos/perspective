@@ -87,7 +87,7 @@ bool is_expression_column(const std::string& colname) const;
 
 t_uindex num_expressions() const;
 
-const t_expression_tables* get_expression_tables() const;
+std::shared_ptr<t_expression_tables> get_expression_tables() const;
 
 // Given shared pointers to data tables from the gnode, use them to
 // compute the results of expression columns.

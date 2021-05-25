@@ -44,8 +44,8 @@ public:
         t_dtype dtype);
 
     void compute(
-        t_data_table* source_table,
-        t_data_table* destination_table,
+        std::shared_ptr<t_data_table> source_table,
+        std::shared_ptr<t_data_table> destination_table,
         std::shared_ptr<t_vocab> vocab) const;
 
     const std::string& get_expression_alias() const;

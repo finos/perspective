@@ -31,17 +31,17 @@ t_expression_tables::t_expression_tables(
         transitions_schema.add_column(alias, DTYPE_UINT8);
     }
 
-    m_master = std::make_unique<t_data_table>(
+    m_master = std::make_shared<t_data_table>(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
-    m_flattened = std::make_unique<t_data_table>(
+    m_flattened = std::make_shared<t_data_table>(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
-    m_prev = std::make_unique<t_data_table>(
+    m_prev = std::make_shared<t_data_table>(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
-    m_current = std::make_unique<t_data_table>(
+    m_current = std::make_shared<t_data_table>(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
-    m_delta = std::make_unique<t_data_table>(
+    m_delta = std::make_shared<t_data_table>(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
-    m_transitions = std::make_unique<t_data_table>(
+    m_transitions = std::make_shared<t_data_table>(
         "", "", transitions_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
 
     m_master->init();
@@ -53,11 +53,12 @@ t_expression_tables::t_expression_tables(
 }
 
 void
-t_expression_tables::calculate_transitions(t_data_table* existed) {
-    const t_schema& schema = m_master->get_schema();
+t_expression_tables::calculate_transitions(std::shared_ptr<t_data_table> existed) {
+    const t_schema& schema = m_transitions->get_schema();
     const std::vector<std::string>& column_names = schema.m_columns;
+    const t_column& existed_column = *(existed->get_const_column("psp_existed"));
+
     auto num_cols = column_names.size();
-    const t_column& existed_column = *(existed->get_column("psp_existed"));
 
 #ifdef PSP_PARALLEL_FOR
     tbb::parallel_for(0, int(num_cols), 1,
@@ -67,11 +68,11 @@ t_expression_tables::calculate_transitions(t_data_table* existed) {
 #endif
         {
             const std::string& cname = column_names[cidx];
-            const t_column& prev_column = *(m_prev->get_column(cname).get());
-            const t_column& current_column = *(m_current->get_column(cname));
-            t_column& transition_column = *(m_transitions->get_column(cname));
+            const t_column& prev_column = *(m_prev->get_const_column(cname));
+            const t_column& current_column = *(m_current->get_const_column(cname));
+            std::shared_ptr<t_column> transition_column = m_transitions->get_column(cname);
             
-            for (t_uindex ridx = 0; ridx < transition_column.size(); ++ridx) {
+            for (t_uindex ridx = 0; ridx < transition_column->size(); ++ridx) {
                 bool row_existed = existed_column.get_nth<bool>(ridx);
 
                 t_tscalar prev_value = prev_column.get_scalar(ridx);
@@ -107,7 +108,7 @@ t_expression_tables::calculate_transitions(t_data_table* existed) {
                     transition = VALUE_TRANSITION_NEQ_FT;
                 }
 
-                transition_column.set_nth(ridx, transition);
+                transition_column->set_nth<std::uint8_t>(ridx, transition);
             }
         }
 #ifdef PSP_PARALLEL_FOR

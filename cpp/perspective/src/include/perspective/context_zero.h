@@ -94,7 +94,7 @@ private:
     std::shared_ptr<t_zcdeltas> m_deltas;
     tsl::hopscotch_set<t_tscalar> m_delta_pkeys;
     std::shared_ptr<t_vocab> m_expression_vocab;
-    std::unique_ptr<t_expression_tables> m_expression_tables;
+    std::shared_ptr<t_expression_tables> m_expression_tables;
     t_symtable m_symtable;
     bool m_has_delta;
 };

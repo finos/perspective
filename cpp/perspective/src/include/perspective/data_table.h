@@ -152,9 +152,6 @@ public:
      */
     std::shared_ptr<t_data_table>
     join(std::shared_ptr<t_data_table> other_table) const;
-    
-    std::shared_ptr<t_data_table>
-    join(const t_data_table& other_table) const;
 
     /**
      * @brief Create a new `t_data_table` from the specified schema. For each

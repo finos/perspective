@@ -392,7 +392,7 @@ t_gnode::notify_context(
 
     // Existed is special - it will never have any expression columns and can
     // be used as-is from the gnode.
-    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
+    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table());
 
     ctx->step_begin();
 
@@ -400,31 +400,31 @@ t_gnode::notify_context(
         // Join expression tables on the context with gnode tables and pass those
         // into the context so there is no distinction between expression and real
         // columns for the context.
-        const t_expression_tables* ctx_expression_tables = ctx->get_expression_tables();
+        std::shared_ptr<t_expression_tables> ctx_expression_tables = ctx->get_expression_tables();
 
-        auto joined_flattened = ctx_expression_tables->m_flattened->join(flattened);
-        auto joined_delta = ctx_expression_tables->m_delta->join(delta);
-        auto joined_prev = ctx_expression_tables->m_prev->join(prev);
-        auto joined_current = ctx_expression_tables->m_current->join(current);
-        auto joined_transitions = ctx_expression_tables->m_transitions->join(transitions);
+        auto joined_flattened = flattened->join(ctx_expression_tables->m_flattened);
+        auto joined_delta = delta->join(ctx_expression_tables->m_delta);
+        auto joined_prev = prev->join(ctx_expression_tables->m_prev);
+        auto joined_current = current->join(ctx_expression_tables->m_current);
+        auto joined_transitions = transitions->join(ctx_expression_tables->m_transitions);
 
         // pass the tables as const references - the destructors for all of the
         // joined tables will be called after this function finishes executing,
         // as the contexts do not retain a reference to these tables.
         ctx->notify(
-            *(joined_flattened.get()),
-            *(joined_delta.get()),
-            *(joined_prev.get()),
-            *(joined_current.get()),
-            *(joined_transitions.get()),
+            *joined_flattened,
+            *joined_delta,
+            *joined_prev,
+            *joined_current,
+            *joined_transitions,
             existed);
     } else {
         ctx->notify(
-            *(flattened.get()),
-            *(delta.get()),
-            *(prev.get()),
-            *(current.get()),
-            *(transitions.get()),
+            *flattened,
+            *delta,
+            *prev,
+            *current,
+            *transitions,
             existed);
     }
 
@@ -466,14 +466,12 @@ t_gnode::update_context_from_state(
         // If the context has expression columns, it has already been computed
         // in `process_table` and we can join the "real" and expression columns
         // together and pass it to the context.
-        const t_expression_tables* ctx_expression_tables = ctx->get_expression_tables();
-        const t_data_table* master_expression_table = ctx_expression_tables->m_master.get();
-        std::shared_ptr<t_data_table> joined_flattened = master_expression_table->join(flattened);
-
-        ctx->notify(*(joined_flattened.get()));
+        std::shared_ptr<t_expression_tables> ctx_expression_tables = ctx->get_expression_tables();
+        std::shared_ptr<t_data_table> joined_flattened = flattened->join(ctx_expression_tables->m_master);
+        ctx->notify(*joined_flattened);
     } else {
         // Just use the table from the gnode
-        ctx->notify(*(flattened.get()));
+        ctx->notify(*flattened);
     }
 
     ctx->step_end();

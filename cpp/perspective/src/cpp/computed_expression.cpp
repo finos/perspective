@@ -128,8 +128,8 @@ t_computed_expression::t_computed_expression(
 
 void
 t_computed_expression::compute(
-    t_data_table* source_table,
-    t_data_table* destination_table,
+    std::shared_ptr<t_data_table> source_table,
+    std::shared_ptr<t_data_table> destination_table,
     std::shared_ptr<t_vocab> vocab) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
