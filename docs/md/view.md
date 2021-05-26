@@ -291,30 +291,33 @@ Use the `filters` attribute on `<perspective-viewer>` instead of `filter`.
 </perspective-viewer>
 </div>
 
-## Computed Columns
+## Expressions
 
-The `computed-columns` property defines calculations over the Table's columns,
-allowing you to create new columns using values from existing ones.  Computed
-columns are added using the `New Column` button in
-the bottom left of `<perspective-viewer>`, which opens the expression editor.
-This allows you to create computed columns from arbitary expressions, which are
-type and syntax-checked and allow for aliasing, nesting, and evaluation in the
-correct order.  To add computed columns in via the API, pass in an array of
-Objects:
+The `expressions` attribute specifies _new_ columns in Perspective that are
+created using existing column values or arbitary scalar values defined within
+the expression. In `<perspective-viewer>`, expressions are added using the
+"New Column" button in the side panel. 
+
+A custom name can be added to an expression by making the first line a
+comment:
+
+```javascript
+// new column
+("Sales" * "Profit") - 15
+```
+
+To add expressions using the API:
 #### Example
-
-`<perspective-viewer>`'s `computed-column` attribute can be set using an
-array of expressions.
 
 ```html
 <perspective-viewer
-    columns='["(Sales + ((Profit * Quantity) / sqrt(Sales)))"]'
-    computed-columns='["\"Sales\" + \"Profit\" * \"Quantity\" / sqrt(\"Sales\")")]'>
+    columns='["new expression"]'
+    expressions='["//new expression\n"\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]'>
 </perspective-viewer>
 ```
 
 <div>
-<perspective-viewer columns='["(Sales + ((Profit * Quantity) / sqrt(Sales)))"]' computed-columns='["\"Sales\" + \"Profit\" * \"Quantity\" / sqrt(\"Sales\")"]'>
+<perspective-viewer columns='["new expression"]' expressions='["//new expression\n"\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]'>
 </perspective-viewer>
 </div>
 
