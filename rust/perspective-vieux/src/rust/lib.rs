@@ -12,8 +12,8 @@
 pub mod components;
 pub mod session;
 pub mod utils;
-pub mod column_style;
-pub mod vieux;
+pub mod custom_elements;
+pub mod exprtk;
 
 use wasm_bindgen::prelude::*;
 

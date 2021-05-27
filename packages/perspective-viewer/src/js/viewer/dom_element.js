@@ -285,7 +285,6 @@ export class DomElement extends PerspectiveElement {
      * @param {Array<String>} expressions
      */
     _reset_expressions_view(expressions) {
-        console.log("called", expressions);
         if (expressions) {
             // Only remove columns specified in `expressions`
             const columns = this._get_view_active_column_names().filter(x => !expressions.includes(x));
@@ -558,7 +557,6 @@ export class DomElement extends PerspectiveElement {
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
         this._add_expression_button = this.shadowRoot.querySelector("#add-expression");
-        this._expression_editor = this.shadowRoot.querySelector("perspective-expression-editor");
         this._side_panel = this.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");

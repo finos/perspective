@@ -1,5 +1,6 @@
 const path = require("path");
 const cssnano = require("cssnano");
+const TerserPlugin = require("terser-webpack-plugin");
 const plugins = [];
 
 function common({no_minify, inline} = {}) {
@@ -54,6 +55,32 @@ function common({no_minify, inline} = {}) {
                         options: {}
                     }
                 },
+                {
+                    test: /\.css$/,
+                    use: [
+                        {loader: "css-loader", options: {sourceMap: false}},
+                        {
+                            loader: "postcss-loader",
+                            options: {
+                                sourceMap: false,
+                                postcssOptions: {
+                                    map: {annotation: false},
+                                    minimize: true,
+                                    plugins: [
+                                        cssnano({
+                                            preset: "lite",
+                                            discardComments: {removeAll: true}
+                                        })
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    test: /\.ttf$/,
+                    use: ["file-loader"]
+                },
                 inline
                     ? {
                           test: /\.wasm$/,
@@ -73,6 +100,14 @@ function common({no_minify, inline} = {}) {
                     options: {
                         inline: "no-fallback"
                     }
+                },
+                {
+                    test: /editor\.worker/,
+                    type: "javascript/auto",
+                    loader: "worker-loader",
+                    options: {
+                        inline: "no-fallback"
+                    }
                 }
             ]
         },
@@ -82,6 +117,17 @@ function common({no_minify, inline} = {}) {
             }
         },
         devtool: "source-map",
+        optimization: {
+            minimizer: [
+                new TerserPlugin({
+                    terserOptions: {
+                        output: {
+                            ascii_only: true
+                        }
+                    }
+                })
+            ]
+        },
         performance: {
             hints: false,
             maxEntrypointSize: 512000,

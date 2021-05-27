@@ -10,6 +10,7 @@
 
 import init, * as internal from "../../pkg/perspective_vieux.js";
 import wasm_internal from "../../pkg/perspective_vieux_bg.wasm";
+import "./monaco.js";
 
 export const wasm = init(wasm_internal).then(() => {
     internal.set_panic_hook();
@@ -59,6 +60,10 @@ class PerspectiveVieuxElement extends HTMLElement {
 
     toggle_config(force) {
         return _await_index(() => this._instance.toggle_config(force));
+    }
+
+    _open_expression_editor(target) {
+        return _await_index(() => this._instance._open_expression_editor(target));
     }
 }
 

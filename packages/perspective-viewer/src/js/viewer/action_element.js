@@ -86,31 +86,18 @@ export class ActionElement extends DomElement {
      */
     _open_expression_editor(event) {
         event.stopImmediatePropagation();
-        this._expression_editor.style.display = "flex";
-        this._side_panel_actions.style.display = "none";
-        this._expression_editor.observe();
+        this._vieux._open_expression_editor(this._add_expression_button);
+        this._add_expression_button.classList.toggle("expr_editor_open", true);
     }
 
-    /**
-     * Given an expression (in the `detail` property of the
-     * `perspective-expression-editor-save` event), set the `expressions`
-     * attribute on the viewer.
-     *
-     * @param {*} event
-     */
-    _save_expression(event) {
-        const {expression, alias} = event.detail;
+    _close_expression_editor(event) {
+        event.stopImmediatePropagation();
+        this._add_expression_button.classList.toggle("expr_editor_open", false);
+    }
+
+    _save_expression(expression) {
         const expressions = this._get_view_expressions();
-        const is_duplicate = findExpressionByAlias(alias, expressions);
-
-        if (expressions.includes(expression) || is_duplicate) {
-            console.warn(`"${expression}" was not applied because it already exists.`);
-            return;
-        }
-
         expressions.push(expression);
-
-        // Will be validated in the attribute callback
         this.setAttribute("expressions", JSON.stringify(expressions));
     }
 
@@ -289,12 +276,12 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_expression_button.addEventListener("click", this._open_expression_editor.bind(this));
-        this._expression_editor.addEventListener("perspective-expression-editor-save", this._save_expression.bind(this));
-        this._expression_editor.addEventListener("perspective-expression-editor-type-check", this._type_check_expression.bind(this));
+        this._add_expression_button.addEventListener("-perspective-close-expression", this._close_expression_editor.bind(this));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());
         this._vieux.addEventListener("perspective-vieux-resize", () => this._plugin.resize.call(this));
+        this._vieux.addEventListener("-perspective-add-expression", ({detail}) => this._save_expression(detail));
 
         this._plugin_information_action.addEventListener("click", () => {
             this._debounce_update({ignore_size_check: true, limit_points: false});

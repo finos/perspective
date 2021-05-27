@@ -24,6 +24,7 @@ pub static CSS: &str = include_str!("../../../dist/css/perspective-vieux.css");
 pub struct PerspectiveVieuxProps {
     pub elem: web_sys::HtmlElement,
     pub panels: (web_sys::HtmlElement, web_sys::HtmlElement),
+    pub session: Session,
 
     #[prop_or_default]
     pub weak_link: WeakComponentLink<PerspectiveVieux>,
@@ -45,7 +46,6 @@ pub struct PerspectiveVieux {
     link: ComponentLink<Self>,
     props: PerspectiveVieuxProps,
     stats: Option<TableStats>,
-    session: Session,
     config_open: bool,
     on_rendered: Option<Sender<Result<JsValue, JsValue>>>,
 }
@@ -55,11 +55,11 @@ impl Component for PerspectiveVieux {
     type Properties = PerspectiveVieuxProps;
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         *props.weak_link.borrow_mut() = Some(link.clone());
+        props.session.set_table_stats_callback(link.callback(Msg::TableStats));
         Self {
             props,
             link: link.clone(),
             stats: None,
-            session: Session::new(link.callback(Msg::TableStats)),
             config_open: false,
             on_rendered: None,
         }
@@ -80,19 +80,19 @@ impl Component for PerspectiveVieux {
                 false
             }
             Msg::Export(flat) => {
-                self.session.download_as_csv(flat);
+                self.props.session.download_as_csv(flat);
                 false
             }
             Msg::Copy(flat) => {
-                self.session.copy_to_clipboard(flat);
+                self.props.session.copy_to_clipboard(flat);
                 false
             }
             Msg::ViewDeleted => {
-                self.session.clear_view();
+                self.props.session.clear_view();
                 false
             }
             Msg::ViewLoaded(view) => {
-                self.session.set_view(view);
+                self.props.session.set_view(view);
                 false
             }
             Msg::ToggleConfig(force, resolve) => {
@@ -123,8 +123,7 @@ impl Component for PerspectiveVieux {
     /// On rendered call notify_resize().  This also triggers any registered async
     /// callbacks to the Custom Element API.
     fn rendered(&mut self, _first_render: bool) {
-        let mut resolve: Option<Sender<Result<JsValue, JsValue>>> = None;
-        std::mem::swap(&mut resolve, &mut self.on_rendered);
+        let resolve = self.on_rendered.take();
         if let Some(resolve) = resolve {
             resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
         }
@@ -216,7 +215,7 @@ impl PerspectiveVieux {
     ) {
         let msg = Msg::TableStats(TableStats::default());
         self.link.send_message(msg);
-        let session = self.session.clone();
+        let session = self.props.session.clone();
         let _ = future_to_promise(async move {
             sender.send(session.set_table(table).await).unwrap();
             Ok(JsValue::UNDEFINED)

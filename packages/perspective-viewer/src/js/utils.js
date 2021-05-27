@@ -329,21 +329,22 @@ export const registerPlugin = (name, plugin) => {
 };
 
 /**
- * Given an expression, return its alias or undefined if it does not have one.
+ * Given an expression, return its alias.
  *
  * @param {*} expression
  * @returns String
  */
 export function getExpressionAlias(expression) {
-    const matches = expression.match(/\/\/(.+)\n/);
+    const matches = expression.match(/\/\/(.+?)$/m);
     let alias;
 
     // Has an alias - use that to type check.
     if (matches && matches.length == 2) {
         alias = matches[1].trim();
+        return alias;
+    } else {
+        return expression;
     }
-
-    return alias;
 }
 
 /**
@@ -352,17 +353,17 @@ export function getExpressionAlias(expression) {
  * @param {*} expression
  * @returns String
  */
-export function addExpressionAlias(expression) {
-    let alias;
-    expression.length > 20
-        ? (alias =
-              expression
-                  .replace("\n", " ")
-                  .substr(0, 20)
-                  .trim() + "...")
-        : (alias = expression);
-    return `//${alias}\n${expression}`;
-}
+// export function addExpressionAlias(expression) {
+//     let alias;
+//     expression.length > 20
+//         ? (alias =
+//               expression
+//                   .replace("\n", " ")
+//                   .substr(0, 20)
+//                   .trim() + "...")
+//         : (alias = expression);
+//     return `//${alias}\n${expression}`;
+// }
 
 /**
  * Given an alias and an array of string expressions, find the alias inside

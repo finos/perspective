@@ -9,6 +9,7 @@
 #![macro_use]
 
 pub mod perspective;
+pub mod monaco;
 
 use js_intern::*;
 use std::cell::RefCell;
@@ -20,19 +21,6 @@ use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 pub type JsResult<T> = Result<T, JsValue>;
-
-/// Console FFI TODO remove
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    pub fn log_val(s: &JsValue);
-
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    pub fn log_obj(s: &js_sys::Object);
-
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    pub fn log_str(s: &str);
-}
 
 pub trait ToClosure<T: Component> {
     fn to_closure<F>(&self, f: F) -> Closure<dyn Fn(MouseEvent)>
@@ -177,7 +165,7 @@ macro_rules! enable_weak_link_test {
 #[macro_export]
 macro_rules! test_html {
     ($($html:tt)*) => {{
-        use crate::components::perspective_vieux::CSS;
+        use crate::components::vieux::CSS;
         use wasm_bindgen::JsCast;
         use yew::prelude::*;
 

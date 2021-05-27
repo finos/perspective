@@ -101,7 +101,7 @@ async function get_new_page() {
 
     page.shadow_type = async function(content, ...path) {
         await this.evaluate(
-            (content, path) => {
+            async (content, path) => {
                 let elem = document;
                 while (path.length > 0) {
                     if (elem.shadowRoot) {
@@ -112,15 +112,6 @@ async function get_new_page() {
 
                 elem.focus();
 
-                function triggerKeyEvent(key, eventType) {
-                    const keyEvent = new KeyboardEvent(eventType, {
-                        bubbles: true,
-                        cancelable: true,
-                        key: key
-                    });
-                    document.dispatchEvent(keyEvent);
-                }
-
                 function triggerInputEvent(element) {
                     const event = new Event("input", {
                         bubbles: true,
@@ -130,20 +121,8 @@ async function get_new_page() {
                     element.dispatchEvent(event);
                 }
 
-                for (let i = 0; i < content.length; i++) {
-                    const char = content[i];
-                    triggerKeyEvent(char, "keydown");
-                    triggerInputEvent(elem);
-                    triggerKeyEvent(char, "keyUp");
-                    elem.value += char;
-                }
-
-                if (elem.value !== content) {
-                    elem.value = content;
-                    triggerInputEvent(elem);
-                }
-
-                document.activeElement.blur();
+                elem.value = content;
+                triggerInputEvent(elem);
             },
             content,
             path

@@ -13,7 +13,6 @@ import "./polyfill.js";
 import {bindTemplate, json_attribute, array_attribute, invertPromise, throttlePromise, getExpressionAlias, findExpressionByAlias} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
-import "./expression_editor.js";
 
 import template from "../html/viewer.html";
 
@@ -209,9 +208,6 @@ class PerspectiveViewer extends ActionElement {
         const resolve = this._set_updating();
 
         (async () => {
-            if (this._expression_editor.style.display !== "none") {
-                this._expression_editor.close();
-            }
             if (expressions === null || expressions === undefined || expressions.length === 0) {
                 // Remove expression columns from the DOM, and reset the config
                 // to exclude all expression columns.
@@ -230,7 +226,7 @@ class PerspectiveViewer extends ActionElement {
                 const validation_results = await this.table.validate_expressions(expressions);
                 expression_schema = validation_results.expression_schema;
                 const errors = validation_results.errors;
-                const validated_expressions = [];
+                const validated_expressions = {};
 
                 /**
                  * Clear the expressions attribute if the validation fails at
@@ -258,14 +254,13 @@ class PerspectiveViewer extends ActionElement {
                     // infinite recursion, so just let it fall into the error
                     // state and clear the expressions.
                     if (expression_schema[alias]) {
-                        validated_expressions.push(expression);
+                        validated_expressions[alias] = expression;
                     } else {
                         if (alias === undefined) {
-                            console.error(`Failed to set "expressions" attribute: "${expression}" does not have an alias, i.e: // Expression Alias \n "x" + "y"`);
+                            console.warn(`Failed to set "expressions" attribute: "${expression}" does not have an alias, i.e: // Expression Alias \n "x" + "y"`);
                         } else {
                             // alias is guaranteed to be in the errors map
-                            console.error(`Error in expression "${alias}": ${errors[alias]}`);
-                            console.error(`Failed to set "expressions" attribute: expression "${expression}" is invalid.`);
+                            console.warn(`Error in expression "${alias}": ${errors[alias]}\nFailed to set "expressions" attribute: expression "${expression}" is invalid.`);
                         }
                         clear_expressions = true;
                     }
@@ -296,7 +291,8 @@ class PerspectiveViewer extends ActionElement {
                     this._reset_expressions_view(to_remove);
                 }
 
-                expressions = validated_expressions;
+                expressions = Object.values(validated_expressions);
+                this.setAttribute("expressions", JSON.stringify(expressions));
             } else {
                 console.warn(`Applying unvalidated expressions: ${expressions} because the viewer does not have a Table attached!`);
             }
@@ -760,6 +756,7 @@ class PerspectiveViewer extends ActionElement {
         this.removeAttribute("column-pivots");
         this.removeAttribute("filters");
         this.removeAttribute("sort");
+        this.removeAttribute("expressions");
         if (this._initial_col_order) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));
         } else {
