@@ -569,6 +569,65 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("column pivot and hidden sort ['y'] with aggregates specified", async function() {
+                const table = await perspective.table({
+                    x: [1, 2, 3, 4],
+                    y: ["a", "a", "a", "b"]
+                });
+
+                // Aggregate for hidden sort should be ignored in column-only,
+                // so just make sure we stick to that.
+                const view = await table.view({
+                    columns: ["x"],
+                    column_pivots: ["y"],
+                    sort: [["y", "desc"]],
+                    aggregates: {
+                        y: "count"
+                    }
+                });
+
+                const paths = await view.column_paths();
+                // regular non-col sort should not change order of column paths
+                expect(paths).toEqual(["a|x", "b|x"]);
+
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    "a|x": [null, 1, 2, 3],
+                    "b|x": [4, null, null, null]
+                });
+                view.delete();
+                table.delete();
+            });
+
+            it("column pivot and hidden col sort ['y'] with aggregates specified", async function() {
+                const table = await perspective.table({
+                    x: [1, 2, 3, 4],
+                    y: ["a", "a", "a", "b"]
+                });
+
+                // Aggregate for hidden sort should be ignored in column-only,
+                // so just make sure we stick to that.
+                const view = await table.view({
+                    columns: ["x"],
+                    column_pivots: ["y"],
+                    sort: [["y", "col desc"]],
+                    aggregates: {
+                        y: "count"
+                    }
+                });
+
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["b|x", "a|x"]);
+
+                const result = await view.to_columns();
+                expect(result).toEqual({
+                    "b|x": [null, null, null, 4],
+                    "a|x": [1, 2, 3, null]
+                });
+                view.delete();
+                table.delete();
+            });
+
             it("column pivot ['y'] with overridden aggregates", async function() {
                 const table = await perspective.table({
                     x: [1, 2, 3, 4],

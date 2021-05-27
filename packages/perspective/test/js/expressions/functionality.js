@@ -1480,6 +1480,99 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Row-pivoted expression columns return correct column_paths()", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+
+            // default order
+            let view = await table.view({
+                row_pivots: ["y"],
+                expressions: ['// column\n"w" + "x"']
+            });
+
+            let paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "w", "x", "y", "z", "column"]);
+
+            await view.delete();
+
+            const expected_paths = [["x", "column"], ["column"], ["x", "column", "y"]];
+
+            for (const expected of expected_paths) {
+                const output = expected.slice();
+                output.unshift("__ROW_PATH__");
+                view = await table.view({
+                    row_pivots: ["y"],
+                    expressions: ['// column\n"w" + "x"'],
+                    columns: expected
+                });
+                paths = await view.column_paths();
+                expect(paths).toEqual(output);
+                view.delete();
+            }
+
+            for (const expected of expected_paths) {
+                const output = expected.slice();
+                output.unshift("__ROW_PATH__");
+                view = await table.view({
+                    row_pivots: ["column"],
+                    expressions: ['// column\n"w" + "x"'],
+                    columns: expected
+                });
+                paths = await view.column_paths();
+                expect(paths).toEqual(output);
+                view.delete();
+            }
+
+            table.delete();
+        });
+
+        it("Row-pivoted numeric expression columns return correct column_paths()", async function() {
+            const table = await perspective.table(expressions_common.int_float_data);
+            const config = {
+                row_pivots: ["y"],
+                expressions: ["1234"],
+                aggregates: {
+                    x: "sum",
+                    y: "count",
+                    "1234": "sum"
+                }
+            };
+            // default order
+            let view = await table.view(config);
+
+            let paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "w", "x", "y", "z", "1234"]);
+
+            await view.delete();
+
+            const expected_paths = [["x", "1234"], ["1234"], ["x", "1234", "y"]];
+
+            for (const expected of expected_paths) {
+                const output = expected.slice();
+                output.unshift("__ROW_PATH__");
+                view = await table.view({
+                    ...config,
+                    columns: expected
+                });
+                paths = await view.column_paths();
+                expect(paths).toEqual(output);
+                view.delete();
+            }
+
+            for (const expected of expected_paths) {
+                const output = expected.slice();
+                output.unshift("__ROW_PATH__");
+                view = await table.view({
+                    ...config,
+                    columns: expected
+                });
+                paths = await view.column_paths();
+                expect(paths).toEqual(output);
+                view.delete();
+            }
+
+            table.delete();
+        });
+
         it("Should be able to column pivot on an expression column.", async function() {
             const table = await perspective.table(expressions_common.int_float_data);
             const view = await table.view({

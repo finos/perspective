@@ -15,6 +15,7 @@
 #include <perspective/scalar.h>
 #include <perspective/computed_expression.h>
 #include <tsl/ordered_map.h>
+#include <tsl/hopscotch_set.h>
 #include <unordered_set>
 #include <tuple>
 
@@ -153,6 +154,8 @@ private:
      * @return t_index
      */
     t_index get_aggregate_index(const std::string& column) const;
+
+    void make_aggspec(const std::string& column, const std::vector<std::string>& aggregate, t_dtype dtype);
 
     // containers for primitive data that does not need transformation into abstractions
     std::vector<std::string> m_row_pivots;
