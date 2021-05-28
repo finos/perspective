@@ -7,6 +7,7 @@
         "examples": "docusaurus-examples",
         "start": "npm run build:arrow && npm run theme && docusaurus-start",
         "build": "echo 'No build'",
+        "clean": "rimraf dist",
         "build:arrow": "cpx ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
         "build:webpack": "webpack --config webpack.config.js --color",
         "docs": "npm run build:webpack && npm run theme && docusaurus-build",

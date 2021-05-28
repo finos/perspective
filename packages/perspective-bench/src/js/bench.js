@@ -83,7 +83,20 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
         const puppeteer = require("puppeteer");
         let browser = await puppeteer.launch({
             headless: true,
-            args: ["--no-sandbox"]
+            args: [
+                "--no-sandbox",
+                "--allow-file-access-from-files",
+                `--window-size=1280,1024`,
+                "--disable-accelerated-2d-canvas",
+                "--disable-gpu",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                '--proxy-server="direct://"',
+                "--proxy-bypass-list=*",
+                "--disable-web-security",
+                "--allow-file-access"
+            ]
         });
 
         execSync(`renice -n -20 ${browser.process().pid}`, {stdio: "inherit"});

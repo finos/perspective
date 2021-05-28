@@ -35,6 +35,8 @@ const JPMC_VERSIONS = [
 const FINOS_VERSIONS = ["0.3.1", "0.3.0", "0.3.0-rc.3", "0.3.0-rc.2", "0.3.0-rc.1"];
 
 const UMD_VERSIONS = [
+    "0.8.3",
+    "0.7.0",
     "0.6.0",
     "0.5.6",
     "0.5.5",
