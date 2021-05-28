@@ -21,26 +21,7 @@ const COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"]];
 const ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]];
 const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
 
-const COMPUTED_FUNCS = {
-    "+": (x, y) => x + y,
-    "-": (x, y) => x - y,
-    "*": (x, y) => x * y,
-    "/": (x, y) => x / y,
-    pow2: x => Math.pow(x, 2),
-    sqrt: x => Math.sqrt(x),
-    uppercase: x => x.toUpperCase(),
-    concat_comma: (x, y) => x + y,
-    week_bucket: x => {
-        let date = new Date(x);
-        let day = date.getDay();
-        let diff = date.getDate() - day + (day == 0 ? -6 : 1);
-        date.setHours(0);
-        date.setMinutes(0);
-        date.setSeconds(0);
-        date.setDate(diff);
-        return date;
-    }
-};
+const COMPUTED_FUNCS = ["+", "-", "*", "/", "pow2", "sqrt", "uppercase", "concat_comma", "week_bucket"];
 
 const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"]};
 
@@ -64,10 +45,10 @@ const COMPLEX_COMPUTED_CONFIGS = {
     datetime: [
         {computed_function_name: "day_bucket", column: "computed", inputs: ["Order Date"]},
         {computed_function_name: "second_bucket", column: "computed2", inputs: ["Order Date"]},
-        {computed_function_name: "day_of_week", column: "computed3", inputs: ["computed2"]},
+        {computed_function_name: "day_of_week", column: "computed3", inputs: ["Order Date"]},
         {computed_function_name: "month_of_year", column: "computed4", inputs: ["Ship Date"]},
-        {computed_function_name: "year_bucket", column: "computed5", inputs: ["computed2"]},
-        {computed_function_name: "minute_bucket", column: "computed6", inputs: ["computed2"]}
+        {computed_function_name: "year_bucket", column: "computed5", inputs: ["Ship Date"]},
+        {computed_function_name: "minute_bucket", column: "computed6", inputs: ["Ship Date"]}
     ]
 };
 
@@ -83,14 +64,7 @@ const COMPLEX_EXPRESSIONS = {
         `concat(lower("Customer ID"), ', ', lower("Order ID"))`,
         `concat("State", ' ', "City")`
     ],
-    datetime: [
-        `bucket("Order Date", 'D')`,
-        `// computed2\n bucket("Order Date", 'S')`,
-        `day_of_week("computed2")`,
-        `month_of_year("Ship Date")`,
-        `bucket("computed2", 'Y')`,
-        `bucket("computed2", 'm')`
-    ]
+    datetime: [`bucket("Order Date", 'D')`, `bucket("Order Date", 's')`, `day_of_week("Order Date")`, `month_of_year("Ship Date")`, `bucket("Ship Date", 'Y')`, `bucket("Ship Date", 'm')`]
 };
 
 /******************************************************************************
@@ -501,380 +475,329 @@ describe("View", async () => {
     }
 });
 
-// describe("Expression/Computed Column", async () => {
-//     for (const name of Object.keys(COMPUTED_FUNCS)) {
-//         describe("mixed", async () => {
-//             // Use a single source table for computed
-//             let table;
-
-//             afterEach(async () => {
-//                 await table.delete();
-//             });
-
-//             COMPUTED_CONFIG.computed_function_name = name;
-
-//             switch (name) {
-//                 case "pow2":
-//                 case "sqrt":
-//                     {
-//                         COMPUTED_CONFIG.inputs = ["Sales"];
-//                     }
-//                     break;
-//                 case "uppercase":
-//                     {
-//                         COMPUTED_CONFIG.inputs = ["Customer Name"];
-//                     }
-//                     break;
-//                 case "concat_comma":
-//                     {
-//                         COMPUTED_CONFIG.inputs = ["State", "City"];
-//                     }
-//                     break;
-//                 case "week_bucket":
-//                     {
-//                         COMPUTED_CONFIG.inputs = ["Order Date"];
-//                     }
-//                     break;
-//                 default: {
-//                     COMPUTED_CONFIG.inputs = ["Sales", "Profit"];
-//                 }
-//             }
-
-//             describe("ctx0", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-//                 let add_computed_method;
-
-//                 if (table.add_computed) {
-//                     add_computed_method = table.add_computed;
-//                 }
-
-//                 benchmark(`computed: \`${name}\``, async () => {
-//                     if (add_computed_method) {
-//                         COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
-//                         COMPUTED_CONFIG.type = "float";
-
-//                         table = table.add_computed([COMPUTED_CONFIG]);
-//                     } else {
-//                         let config = {};
-//                         if (view.expression_schema) {
-//                             // New expressions API
-//                             config.expressions = SIMPLE_EXPRESSION;
-//                         } else {
-//                             // Old computed_columns API
-//                             config.computed_columns = [COMPUTED_CONFIG];
-//                         }
-
-//                         view = await table.view(config);
-//                     }
-
-//                     // must process update
-//                     await table.size();
-//                 });
-
-//                 if (!add_computed_method) {
-//                     benchmark(`sort computed: \`${name}\``, async () => {
-//                         let config = {
-//                             sort: [["computed", "desc"]]
-//                         };
-
-//                         if (view.expression_schema) {
-//                             // New expressions API
-//                             config.expressions = SIMPLE_EXPRESSION;
-//                         } else {
-//                             // Old computed_columns API
-//                             config.computed_columns = [COMPUTED_CONFIG];
-//                         }
-
-//                         view = await table.view(config);
-
-//                         await table.size();
-//                     });
-//                 }
-//             });
-
-//             describe("ctx1", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Not running pivoted computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`row pivot computed: \`${name}\``, async () => {
-//                     let config = {
-//                         row_pivots: ["computed"]
-//                     };
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = SIMPLE_EXPRESSION;
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = [COMPUTED_CONFIG];
-//                     }
-
-//                     view = await table.view(config);
-
-//                     await table.size();
-//                 });
-//             });
-
-//             describe("ctx2", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Not running pivoted computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`row and column pivot computed: \`${name}\``, async () => {
-//                     let config = {
-//                         row_pivots: ["computed"],
-//                         column_pivots: ["computed"]
-//                     };
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = SIMPLE_EXPRESSION;
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = [COMPUTED_CONFIG];
-//                     }
-
-//                     view = await table.view(config);
-
-//                     await table.size();
-//                 });
-//             });
-
-//             describe("ctx1.5", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Not running pivoted computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`column pivot computed: \`${name}\``, async () => {
-//                     let config = {
-//                         column_pivots: ["computed"]
-//                     };
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = SIMPLE_EXPRESSION;
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = [COMPUTED_CONFIG];
-//                     }
-
-//                     view = await table.view(config);
-
-//                     await table.size();
-//                 });
-//             });
-//         });
-//     }
-
-//     // multi-dependency computed columns
-//     for (const name in COMPLEX_COMPUTED_CONFIGS) {
-//         describe("mixed", async () => {
-//             // Use a single source table for computed
-//             let table;
-
-//             afterEach(async () => {
-//                 await table.delete();
-//             });
-
-//             describe("ctx0", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`computed complex: \`${name}\``, async () => {
-//                     let config = {};
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = COMPLEX_EXPRESSIONS[name];
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
-//                     }
-
-//                     view = await table.view(config);
-
-//                     await table.size();
-//                 });
-
-//                 benchmark(`sort computed complex: \`${name}\``, async () => {
-//                     let config = {};
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = COMPLEX_EXPRESSIONS[name];
-//                         config.sort = [[COMPLEX_EXPRESSIONS[name][0], "desc"]];
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
-//                         config.sort = [["computed", "desc"]];
-//                     }
-
-//                     view = await table.view(config);
-
-//                     await table.size();
-//                 });
-//             });
-
-//             describe("ctx1", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`row pivot computed complex: \`${name}\``, async () => {
-//                     let config = {};
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = COMPLEX_EXPRESSIONS[name];
-//                         config.row_pivots = [COMPLEX_EXPRESSIONS[name][0]];
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
-//                         config.row_pivots = ["computed"];
-//                     }
-
-//                     view = await table.view(config);
-//                     await table.size();
-//                 });
-//             });
-
-//             describe("ctx2", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`row and column pivot computed complex: \`${name}\``, async () => {
-//                     let config = {};
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = COMPLEX_EXPRESSIONS[name];
-//                         config.row_pivots = [COMPLEX_EXPRESSIONS[name][0]];
-//                         config.column_pivots = [COMPLEX_EXPRESSIONS[name][1]];
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
-//                         config.row_pivots = ["computed"];
-//                         config.column_pivots = ["computed2"];
-//                     }
-
-//                     view = await table.view(config);
-//                     await table.size();
-//                 });
-//             });
-
-//             describe("ctx1.5", async () => {
-//                 let view;
-
-//                 afterEach(async () => {
-//                     if (view) {
-//                         await view.delete();
-//                     }
-//                 });
-
-//                 table = await worker.table(data.arrow.slice());
-
-//                 if (table.add_computed) {
-//                     console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-//                     return;
-//                 }
-
-//                 benchmark(`column pivot computed complex: \`${name}\``, async () => {
-//                     let config = {};
-
-//                     if (view.expression_schema) {
-//                         // New expressions API
-//                         config.expressions = COMPLEX_EXPRESSIONS[name];
-//                         config.column_pivots = [COMPLEX_EXPRESSIONS[name][0]];
-//                     } else {
-//                         // Old computed_columns API
-//                         config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
-//                         config.column_pivots = ["computed"];
-//                     }
-
-//                     view = await table.view(config);
-//                     await table.size();
-//                 });
-//             });
-//         });
-//     }
-// });
+describe("Expression/Computed Column", async () => {
+    for (const computed_func of COMPUTED_FUNCS) {
+        describe("mixed", async () => {
+            // Use a single source table for computed
+            let table;
+
+            afterEach(async () => {
+                await table.delete();
+            });
+
+            COMPUTED_CONFIG.computed_function_name = computed_func;
+
+            switch (computed_func) {
+                case "pow2":
+                case "sqrt":
+                    {
+                        COMPUTED_CONFIG.inputs = ["Sales"];
+                    }
+                    break;
+                case "uppercase":
+                    {
+                        COMPUTED_CONFIG.inputs = ["Customer Name"];
+                    }
+                    break;
+                case "concat_comma":
+                    {
+                        COMPUTED_CONFIG.inputs = ["State", "City"];
+                    }
+                    break;
+                case "week_bucket":
+                    {
+                        COMPUTED_CONFIG.inputs = ["Order Date"];
+                    }
+                    break;
+                default: {
+                    COMPUTED_CONFIG.inputs = ["Sales", "Profit"];
+                }
+            }
+
+            describe("ctx0", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`computed: \`${computed_func}\``, async () => {
+                    let config = {};
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
+                    await table.size();
+                });
+
+                benchmark(`sort computed: \`${computed_func}\``, async () => {
+                    let config = {
+                        sort: [["computed", "desc"]]
+                    };
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
+
+                    await table.size();
+                });
+            });
+
+            describe("ctx1", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`row pivot computed: \`${computed_func}\``, async () => {
+                    let config = {
+                        row_pivots: ["computed"]
+                    };
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
+
+                    await table.size();
+                });
+            });
+
+            describe("ctx2", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`row and column pivot computed: \`${computed_func}\``, async () => {
+                    let config = {
+                        row_pivots: ["computed"],
+                        column_pivots: ["computed"]
+                    };
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
+
+                    await table.size();
+                });
+            });
+
+            describe("ctx1.5", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`column pivot computed: \`${computed_func}\``, async () => {
+                    let config = {
+                        column_pivots: ["computed"]
+                    };
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
+
+                    view = await table.view(config);
+
+                    await table.size();
+                });
+            });
+        });
+    }
+
+    // multi-dependency computed columns
+    for (const data_type in COMPLEX_COMPUTED_CONFIGS) {
+        describe("mixed", async () => {
+            // Use a single source table for computed
+            let table;
+
+            afterEach(async () => {
+                await table.delete();
+            });
+
+            describe("ctx0", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`computed complex: \`${data_type}\``, async () => {
+                    let config = {};
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
+                    }
+
+                    view = await table.view(config);
+
+                    await table.size();
+                });
+
+                benchmark(`sort computed complex: \`${data_type}\``, async () => {
+                    let config = {};
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.sort = [[COMPLEX_EXPRESSIONS[data_type][0], "desc"]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
+                        config.sort = [["computed", "desc"]];
+                    }
+
+                    view = await table.view(config);
+
+                    await table.size();
+                });
+            });
+
+            describe("ctx1", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`row pivot computed complex: \`${data_type}\``, async () => {
+                    let config = {};
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.row_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
+                        config.row_pivots = ["computed"];
+                    }
+
+                    view = await table.view(config);
+                    await table.size();
+                });
+            });
+
+            describe("ctx2", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`row and column pivot computed complex: \`${data_type}\``, async () => {
+                    let config = {};
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.row_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
+                        config.column_pivots = [COMPLEX_EXPRESSIONS[data_type][1]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
+                        config.row_pivots = ["computed"];
+                        config.column_pivots = ["computed2"];
+                    }
+
+                    view = await table.view(config);
+                    await table.size();
+                });
+            });
+
+            describe("ctx1.5", async () => {
+                let view;
+
+                afterEach(async () => {
+                    if (view) {
+                        await view.delete();
+                    }
+                });
+
+                table = await worker.table(data.arrow.slice());
+
+                benchmark(`column pivot computed complex: \`${data_type}\``, async () => {
+                    let config = {};
+
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.column_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
+                        config.column_pivots = ["computed"];
+                    }
+
+                    view = await table.view(config);
+                    await table.size();
+                });
+            });
+        });
+    }
+});
 
 /******************************************************************************
  *
