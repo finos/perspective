@@ -178,7 +178,11 @@ public:
         const t_config& config) const;
 
     void update_shape_from_static(const t_dtree_ctx& ctx);
-    void update_aggs_from_static(const t_dtree_ctx& ctx, const t_gstate& gstate);
+
+    void update_aggs_from_static(
+        const t_dtree_ctx& ctx,
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table);
 
     t_uindex size() const;
 
@@ -254,7 +258,10 @@ public:
     void clear();
 
     t_tscalar first_last_helper(
-        t_uindex nidx, const t_aggspec& spec, const t_gstate& gstate) const;
+        t_uindex nidx,
+        const t_aggspec& spec,
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table) const;
 
     bool node_exists(t_uindex nidx);
 
@@ -283,8 +290,15 @@ protected:
     t_uindex genidx();
     t_uindex gen_aggidx();
     std::vector<t_uindex> get_children(t_uindex idx) const;
-    void update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_ridx,
-        t_uindex dst_ridx, t_index nstrands, const t_gstate& gstate);
+
+    void update_agg_table(
+        t_uindex nidx,
+        t_agg_update_info& info,
+        t_uindex src_ridx,
+        t_uindex dst_ridx,
+        t_index nstrands,
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table);
 
     bool is_leaf(t_uindex nidx) const;
 
@@ -293,6 +307,57 @@ protected:
 
     void populate_pkey_idx(const t_dtree_ctx& ctx, const t_dtree& dtree, t_uindex dptidx,
         t_uindex sptidx, t_uindex ndepth, t_idxpkey& new_idx_pkey);
+
+        
+    // Methods that use `t_gstate`'s mapping of primary keys to row indices
+    // to extract values from a data table. Because these methods can either
+    // extract from the expressions table or the master table of the gnode,
+    // these methods abstract away the "is_expression" check.
+
+    void read_column_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        std::vector<t_tscalar>& out_data) const;
+
+    void read_column_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        std::vector<double>& out_data,
+        bool include_none) const;
+
+    t_tscalar read_by_pkey_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        t_tscalar& pkey) const;
+
+    bool is_unique_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        t_tscalar& value) const;
+
+    bool apply_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        t_tscalar& value,
+        std::function<bool(const t_tscalar&, t_tscalar&)> fn) const;
+
+    template <typename FN_T>
+    typename FN_T::result_type
+    reduce_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        FN_T fn) const;
 
 private:
     std::vector<t_pivot> m_pivots;
@@ -317,6 +382,5 @@ private:
     bool m_has_delta;
     std::string m_grand_agg_str;
 };
-
 
 } // end namespace perspective

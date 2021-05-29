@@ -45,13 +45,25 @@ public:
 
     t_tscalar get_pkey(t_index idx) const;
 
-    void fill_sort_elem(std::shared_ptr<const t_gstate> gstate, const t_config& config,
-        const std::vector<t_tscalar>& row, t_mselem& out_elem) const;
+    void fill_sort_elem(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const t_config& config,
+        t_tscalar pkey,
+        t_mselem& out_elem);
 
-    void fill_sort_elem(std::shared_ptr<const t_gstate> gstate, const t_config& config,
-        t_tscalar pkey, t_mselem& out_elem);
+    // sorting over a whole row whose data we already have, so we don't need
+    // the expression table separately.
+    void fill_sort_elem(
+        const t_gstate& gstate,
+        const t_config& config,
+        const std::vector<t_tscalar>& row,
+        t_mselem& out_elem) const;
 
-    void sort_by(std::shared_ptr<const t_gstate> gstate, const t_config& config,
+    void sort_by(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const t_config& config,
         const std::vector<t_sortspec>& sortby);
 
     t_index size() const;
@@ -74,10 +86,17 @@ public:
 
     void step_end();
 
-    void add_row(std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey);
+    void add_row(
+        const t_gstate& gstate, 
+        const t_data_table& expression_master_table,
+        const t_config& config,
+        t_tscalar pkey);
 
     void update_row(
-        std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey);
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const t_config& config,
+        t_tscalar pkey);
 
     void delete_row(t_tscalar pkey);
 
@@ -86,12 +105,19 @@ public:
 
     void reset_step_state();
 
-    t_uindex lower_bound_row_idx(std::shared_ptr<const t_gstate> gstate, const t_config& config,
+    t_uindex lower_bound_row_idx(const t_gstate& gstate, const t_config& config,
         const std::vector<t_tscalar>& row) const;
 
     t_index get_row_idx(t_tscalar pkey) const;
 
 private:
+    t_tscalar get_from_gstate(
+        const t_gstate& gstate,
+        const t_data_table& expression_master_table,
+        const std::string& colname,
+        t_tscalar pkey
+    ) const;
+
     t_index m_step_deletes;
     t_index m_step_inserts;
 

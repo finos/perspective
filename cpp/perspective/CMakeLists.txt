@@ -250,6 +250,7 @@ if (PSP_WASM_BUILD)
 			-s DISABLE_EXCEPTION_CATCHING=0 \
 			-s ASSERTIONS=2 \
 			-s DEMANGLE_SUPPORT=1 \
+			-s SAFE_HEAP=1 \
 			")
 	else()
 		set(OPT_FLAGS " \
@@ -501,6 +502,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/dense_tree_context.cpp
 	${PSP_CPP_SRC}/src/cpp/dense_tree.cpp
 	${PSP_CPP_SRC}/src/cpp/dependency.cpp
+	${PSP_CPP_SRC}/src/cpp/expression_tables.cpp
 	${PSP_CPP_SRC}/src/cpp/extract_aggregate.cpp
 	${PSP_CPP_SRC}/src/cpp/filter.cpp
 	${PSP_CPP_SRC}/src/cpp/flat_traversal.cpp

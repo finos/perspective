@@ -36,6 +36,32 @@ async function leak_test(test, num_iterations = 10000) {
     expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
 }
 
+/**
+ * Given columns a (int), b (float), c (string) and d (datetime),
+ * generate expressions that use all columns and scalar values.
+ */
+function generate_expressions() {
+    const expressions = ["concat('abcd', \"c\", 'efg')"];
+
+    for (const op of ["+", "-", "*", "/", "^", "%"]) {
+        expressions.push(`("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`);
+    }
+
+    for (const fn of ["sqrt", "log10", "deg2rad"]) {
+        expressions.push(`${fn}("b")`);
+    }
+
+    for (const fn of ["upper", "lower", "length"]) {
+        expressions.push(`${fn}("c")`);
+    }
+
+    for (const unit of ["m", "D"]) {
+        expressions.push(`bucket("d", '${unit}')`);
+    }
+
+    return expressions;
+}
+
 describe("leaks", function() {
     describe("view", function() {
         describe("1-sided", function() {
@@ -69,6 +95,79 @@ describe("leaks", function() {
             expect(count).toBeGreaterThan(0);
             view.delete();
             table.delete();
+        });
+    });
+
+    describe("expression columns", function() {
+        it("0 sided does not leak", async () => {
+            const table = await perspective.table({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d"],
+                d: [new Date(), new Date(), new Date(), new Date()]
+            });
+
+            const expressions = generate_expressions();
+
+            await leak_test(async () => {
+                const view = await table.view({
+                    expressions: [expressions[Math.floor(Math.random() * expressions.length)]]
+                });
+                const expression_schema = await view.expression_schema();
+                expect(Object.keys(expression_schema).length).toEqual(1);
+                await view.delete();
+            });
+
+            await table.delete();
+        });
+
+        it("1 sided does not leak", async () => {
+            const table = await perspective.table({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d"],
+                d: [new Date(), new Date(), new Date(), new Date()]
+            });
+
+            const columns = ["a", "b", "c", "d"];
+            const expressions = generate_expressions();
+
+            await leak_test(async () => {
+                const view = await table.view({
+                    row_pivots: [columns[Math.floor(Math.random() * columns.length)]],
+                    expressions: [expressions[Math.floor(Math.random() * expressions.length)]]
+                });
+                const expression_schema = await view.expression_schema();
+                expect(Object.keys(expression_schema).length).toEqual(1);
+                await view.delete();
+            }, 3000);
+
+            await table.delete();
+        });
+
+        it("2 sided does not leak", async () => {
+            const table = await perspective.table({
+                a: [1, 2, 3, 4],
+                b: [1.5, 2.5, 3.5, 4.5],
+                c: ["a", "b", "c", "d"],
+                d: [new Date(), new Date(), new Date(), new Date()]
+            });
+
+            const columns = ["a", "b", "c", "d"];
+            const expressions = generate_expressions();
+
+            await leak_test(async () => {
+                const view = await table.view({
+                    row_pivots: [columns[Math.floor(Math.random() * columns.length)]],
+                    column_pivots: [columns[Math.floor(Math.random() * columns.length)]],
+                    expressions: [expressions[Math.floor(Math.random() * expressions.length)]]
+                });
+                const expression_schema = await view.expression_schema();
+                expect(Object.keys(expression_schema).length).toEqual(1);
+                await view.delete();
+            }, 3000);
+
+            await table.delete();
         });
     });
 });

@@ -362,18 +362,16 @@ t_gstate::get_cpp_mask() const {
 }
 
 std::shared_ptr<t_data_table>
-t_gstate::get_table() {
-    return m_table;
-}
-
-std::shared_ptr<const t_data_table>
 t_gstate::get_table() const {
     return m_table;
 }
 
 t_tscalar
-t_gstate::read_by_pkey(const std::string& colname, t_tscalar& pkey) const {
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+t_gstate::read_by_pkey(
+    const t_data_table& table,
+    const std::string& colname,
+    t_tscalar& pkey) const {
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
     t_mapping::const_iterator iter = m_mapping.find(pkey);
     if (iter != m_mapping.end()) {
@@ -384,10 +382,13 @@ t_gstate::read_by_pkey(const std::string& colname, t_tscalar& pkey) const {
 }
 
 void
-t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+t_gstate::read_column(
+    const t_data_table& table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
     std::vector<t_tscalar>& out_data) const {
     t_index num_rows = pkeys.size();
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
     std::vector<t_tscalar> rval(num_rows);
 
@@ -402,16 +403,23 @@ t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& 
 }
 
 void
-t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+t_gstate::read_column(
+    const t_data_table& table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
     std::vector<double>& out_data) const {
-    read_column(colname, pkeys, out_data, true);
+    read_column(table, colname, pkeys, out_data, true);
 }
 
 void
-t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
-    std::vector<double>& out_data, bool include_nones) const {
+t_gstate::read_column(
+    const t_data_table& table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    std::vector<double>& out_data,
+    bool include_nones) const {
     t_index num_rows = pkeys.size();
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
 
     std::vector<double> rval;
@@ -430,6 +438,7 @@ t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& 
 
 void
 t_gstate::read_column(
+    const t_data_table& table,
     const std::string& colname,
     t_uindex start_idx,
     t_uindex end_idx,
@@ -441,7 +450,7 @@ t_gstate::read_column(
         return;
     }
 
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
 
     std::vector<t_tscalar> rval(num_rows);
@@ -457,10 +466,11 @@ t_gstate::read_column(
 
 void
 t_gstate::read_column(
+    const t_data_table& table,
     const std::string& colname, 
     const std::vector<t_uindex>& row_indices,
     std::vector<t_tscalar>& out_data) const {
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
 
     t_index num_rows = row_indices.size();
@@ -476,38 +486,43 @@ t_gstate::read_column(
 }
 
 t_tscalar
-t_gstate::get(t_tscalar pkey, const std::string& colname) const {
+t_gstate::get(
+    const t_data_table& table,
+    const std::string& colname,
+    t_tscalar pkey) const {
     t_mapping::const_iterator iter = m_mapping.find(pkey);
     if (iter != m_mapping.end()) {
-        std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+        std::shared_ptr<const t_column> col = table.get_const_column(colname);
         return col->get_scalar(iter->second);
     }
 
     return t_tscalar();
 }
 
-std::vector<t_tscalar>
-t_gstate::get_row(t_tscalar pkey) const {
-    auto columns = m_table->get_const_columns();
-    std::vector<t_tscalar> rval(columns.size());
+t_tscalar
+t_gstate::get_value(
+    const t_data_table& table,
+    const std::string& colname,
+    const t_tscalar& pkey) const {
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
+    const t_column* col_ = col.get();
+    t_tscalar rval = mknone();
 
-    t_mapping::const_iterator iter = m_mapping.find(pkey);
-    PSP_VERBOSE_ASSERT(iter != m_mapping.end(), "Reached end");
-
-    t_uindex ridx = iter->second;
-    t_uindex idx = 0;
-
-    for (auto c : columns) {
-        rval[idx].set(c->get_scalar(ridx));
-        ++idx;
+    auto iter = m_mapping.find(pkey);
+    if (iter != m_mapping.end()) {
+        rval.set(col_->get_scalar(iter->second));
     }
+
     return rval;
 }
 
 bool
 t_gstate::is_unique(
-    const std::vector<t_tscalar>& pkeys, const std::string& colname, t_tscalar& value) const {
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+    const t_data_table& table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    t_tscalar& value) const {
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
     value = mknone();
 
@@ -525,9 +540,13 @@ t_gstate::is_unique(
 }
 
 bool
-t_gstate::apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
-    t_tscalar& value, std::function<bool(const t_tscalar&, t_tscalar&)> fn) const {
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
+t_gstate::apply(
+    const t_data_table& table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    t_tscalar& value,
+    std::function<bool(const t_tscalar&, t_tscalar&)> fn) const {
+    std::shared_ptr<const t_column> col = table.get_const_column(colname);
     const t_column* col_ = col.get();
 
     value = mknone();
@@ -849,20 +868,6 @@ t_gstate::reset() {
     m_table->reset();
     m_mapping.clear();
     m_free.clear();
-}
-
-t_tscalar
-t_gstate::get_value(const t_tscalar& pkey, const std::string& colname) const {
-    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
-    const t_column* col_ = col.get();
-    t_tscalar rval = mknone();
-
-    auto iter = m_mapping.find(pkey);
-    if (iter != m_mapping.end()) {
-        rval.set(col_->get_scalar(iter->second));
-    }
-
-    return rval;
 }
 
 const t_schema&

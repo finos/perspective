@@ -13,6 +13,48 @@
  */
 module.exports = perspective => {
     describe("String functions", function() {
+        it("Pivoted", async function() {
+            const table = await perspective.table({
+                a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
+                b: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"],
+                c: [2, 2, 4, 4]
+            });
+            const view = await table.view({
+                aggregates: {column: "last"},
+                row_pivots: ["column"],
+                expressions: [`//column\nconcat("a", ', ', 'here is a long string, ', "b")`]
+            });
+            let result = await view.to_columns();
+
+            expect(result["column"]).toEqual([
+                "hhs, here is a long string, HIjK",
+                "abc, here is a long string, ABC",
+                "abcdefghijk, here is a long string, lMNoP",
+                "deeeeef, here is a long string, DEF",
+                "fg, here is a long string, EfG",
+                "hhs, here is a long string, HIjK"
+            ]);
+
+            view.delete();
+            table.delete();
+        });
+
+        it("Filtered", async function() {
+            const table = await perspective.table({
+                a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
+                b: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"],
+                c: [2, 2, 4, 4]
+            });
+            const view = await table.view({
+                filter: [["column", "==", "hhs, here is a long string, HIjK"]],
+                expressions: [`//column\nconcat("a", ', ', 'here is a long string, ', "b")`]
+            });
+            let result = await view.to_columns();
+            expect(result["column"]).toEqual(["hhs, here is a long string, HIjK"]);
+            view.delete();
+            table.delete();
+        });
+
         it("Length", async function() {
             const table = await perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"]

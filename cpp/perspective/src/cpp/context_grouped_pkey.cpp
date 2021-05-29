@@ -42,8 +42,24 @@ t_ctx_grouped_pkey::init() {
     m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
+
+    m_expression_vocab = std::make_shared<t_vocab>();
+    m_expression_vocab->init(false);
+
+    // Each context stores its own expression columns in separate
+    // `t_data_table`s so that each context's expressions are isolated
+    // and do not affect other contexts when they are calculated.
+    const auto& expressions = m_config.get_expressions();
+    m_expression_tables = std::make_shared<t_expression_tables>(expressions);
+
     m_init = true;
 }
+
+std::shared_ptr<t_expression_tables>
+t_ctx_grouped_pkey::get_expression_tables() const {
+    return m_expression_tables;
+}
+
 
 t_index
 t_ctx_grouped_pkey::get_row_count() const {
@@ -149,7 +165,7 @@ t_ctx_grouped_pkey::get_data(
         if (m_has_label && ridx > 0) {
             // Get pkey
             auto iters = m_tree->get_pkeys_for_leaf(nidx);
-            tree_value.set(m_gstate->get_value(iters.first->m_pkey, grouping_label_col));
+            tree_value.set(get_value_from_gstate(grouping_label_col, iters.first->m_pkey));
         }
 
         tmpvalues[(ridx - ext.m_srow) * ncols] = tree_value;
@@ -337,44 +353,6 @@ t_ctx_grouped_pkey::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& 
     return rval;
 }
 
-std::vector<t_tscalar>
-t_ctx_grouped_pkey::get_cell_data(
-    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    if (!m_traversal->validate_cells(cells)) {
-        std::vector<t_tscalar> rval;
-        return rval;
-    }
-
-    std::vector<t_tscalar> rval(cells.size());
-    t_tscalar empty = mknone();
-
-    auto aggtable = m_tree->get_aggtable();
-    auto aggcols = aggtable->get_const_columns();
-    const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
-
-    for (t_index idx = 0, loop_end = cells.size(); idx < loop_end; ++idx) {
-        const auto& cell = cells[idx];
-        if (cell.second == 0) {
-            rval[idx].set(empty);
-            continue;
-        }
-
-        t_index rptidx = m_traversal->get_tree_index(cell.first);
-        t_uindex aggidx = cell.second - 1;
-        t_index p_rptidx = m_tree->get_parent_idx(rptidx);
-
-        t_uindex agg_ridx = m_tree->get_aggidx(rptidx);
-        t_index agg_pridx
-            = p_rptidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(p_rptidx);
-
-        rval[idx] = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
-    }
-
-    return rval;
-}
-
 void
 t_ctx_grouped_pkey::set_feature_state(t_ctx_feature feature, bool state) {
     m_features[feature] = state;
@@ -423,12 +401,14 @@ t_ctx_grouped_pkey::get_cell_delta(t_index bidx, t_index eidx) const {
 }
 
 void
-t_ctx_grouped_pkey::reset() {
+t_ctx_grouped_pkey::reset(bool reset_expressions) {
     auto pivots = m_config.get_row_pivots();
     m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_tree->set_deltas_enabled(get_feature_state(CTX_FEAT_DELTA));
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
+
+    if (reset_expressions) m_expression_tables->reset();
 }
 
 void
@@ -685,6 +665,91 @@ t_ctx_grouped_pkey::get_column_dtype(t_uindex idx) const {
 
     auto aggtable = m_tree->_get_aggtable();
     return aggtable->get_const_column(idx - 1)->get_dtype();
+}
+
+void
+t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
+    // Clear the transitional expression tables on the context so they are
+    // ready for the next update.
+    m_expression_tables->clear_transitional_tables();
+
+    std::shared_ptr<t_data_table> master_expression_table = m_expression_tables->m_master;
+
+    // Set the master table to the right size.
+    master_expression_table->set_size(flattened_masked->size());
+
+    const auto& expressions = m_config.get_expressions();
+    for (const t_computed_expression& expr : expressions) {
+        // Compute the expressions on the master table.
+        expr.compute(flattened_masked, master_expression_table, m_expression_vocab);
+    }
+}
+
+void
+t_ctx_grouped_pkey::compute_expressions(
+    std::shared_ptr<t_data_table> master,
+    std::shared_ptr<t_data_table> flattened,
+    std::shared_ptr<t_data_table> delta,
+    std::shared_ptr<t_data_table> prev,
+    std::shared_ptr<t_data_table> current,
+    std::shared_ptr<t_data_table> transitions,
+    std::shared_ptr<t_data_table> existed) {
+    // Clear the tables so they are ready for this round of updates
+    m_expression_tables->clear_transitional_tables();
+
+    // All tables are the same size
+    m_expression_tables->set_transitional_table_capacity(flattened->size());
+    m_expression_tables->set_transitional_table_size(flattened->size());
+
+    // Update the master expression table's capacity and size
+    m_expression_tables->m_master->set_capacity(master->get_capacity());
+    m_expression_tables->m_master->set_size(master->size());
+
+    const auto& expressions = m_config.get_expressions();
+    for (const auto& expr : expressions) {
+        // master: compute based on latest state of the gnode state table
+        expr.compute(master, m_expression_tables->m_master, m_expression_vocab);
+
+        // flattened: compute based on the latest update dataset
+        expr.compute(flattened, m_expression_tables->m_flattened, m_expression_vocab);
+
+        // delta: for each numerical column, the numerical delta between the
+        // previous value and the current value in the row.
+        expr.compute(delta, m_expression_tables->m_delta, m_expression_vocab);
+
+        // prev: the values of the updated rows before this update was applied
+        expr.compute(prev, m_expression_tables->m_prev, m_expression_vocab);
+
+        // current: the current values of the updated rows
+        expr.compute(current, m_expression_tables->m_current, m_expression_vocab);
+    }
+
+    // Calculate the transitions now that the intermediate tables are computed
+    m_expression_tables->calculate_transitions(existed);
+}
+
+t_uindex
+t_ctx_grouped_pkey::num_expressions() const {
+    const auto& expressions = m_config.get_expressions();
+    return expressions.size();
+}
+
+bool
+t_ctx_grouped_pkey::is_expression_column(const std::string& colname) const {
+    const t_schema& schema = m_expression_tables->m_master->get_schema();
+    return schema.has_column(colname);
+}
+
+t_tscalar
+t_ctx_grouped_pkey::get_value_from_gstate(
+    const std::string& colname,
+    const t_tscalar& pkey) const {
+    if (is_expression_column(colname)) {
+        return m_gstate->get_value(*(m_expression_tables->m_master), colname, pkey);
+    } else {
+        std::shared_ptr<t_data_table> master_table = m_gstate->get_table();
+        return m_gstate->get_value(*master_table, colname, pkey);
+    }
 }
 
 std::vector<t_tscalar>

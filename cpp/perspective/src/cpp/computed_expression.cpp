@@ -62,17 +62,15 @@ t_computed_expression_parser::LOWER_VALIDATOR_FN = computed_function::lower(null
 computed_function::length
 t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nullptr);
 
-// Register functions in a centralized macro instead of copy-pasting the same
-// lines between compute/recompute
 #define REGISTER_COMPUTE_FUNCTIONS()                                                        \
-    computed_function::day_of_week day_of_week_fn = computed_function::day_of_week(m_expression_vocab);         \
-    computed_function::month_of_year month_of_year_fn = computed_function::month_of_year(m_expression_vocab);   \
-    computed_function::intern intern_fn = computed_function::intern(m_expression_vocab);    \
-    computed_function::concat concat_fn = computed_function::concat(m_expression_vocab);    \
-    computed_function::order order_fn = computed_function::order(m_expression_vocab);       \
-    computed_function::upper upper_fn = computed_function::upper(m_expression_vocab);       \
-    computed_function::lower lower_fn = computed_function::lower(m_expression_vocab);       \
-    computed_function::length length_fn = computed_function::length(m_expression_vocab);    \
+    computed_function::day_of_week day_of_week_fn = computed_function::day_of_week(vocab);         \
+    computed_function::month_of_year month_of_year_fn = computed_function::month_of_year(vocab);   \
+    computed_function::intern intern_fn = computed_function::intern(vocab);    \
+    computed_function::concat concat_fn = computed_function::concat(vocab);    \
+    computed_function::order order_fn = computed_function::order(vocab);       \
+    computed_function::upper upper_fn = computed_function::upper(vocab);       \
+    computed_function::lower lower_fn = computed_function::lower(vocab);       \
+    computed_function::length length_fn = computed_function::length(vocab);    \
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
     sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);              \
@@ -130,7 +128,9 @@ t_computed_expression::t_computed_expression(
 
 void
 t_computed_expression::compute(
-    std::shared_ptr<t_data_table> data_table) const {
+    std::shared_ptr<t_data_table> source_table,
+    std::shared_ptr<t_data_table> destination_table,
+    std::shared_ptr<t_vocab> vocab) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
@@ -148,7 +148,7 @@ t_computed_expression::compute(
     for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
         const std::string& column_id = m_column_ids[cidx].first;
         const std::string& column_name = m_column_ids[cidx].second;
-        columns[column_id] = data_table->get_column(column_name);
+        columns[column_id] = source_table->get_column(column_name);
 
         t_tscalar rval;
         rval.m_type = columns[column_id]->get_dtype();
@@ -171,22 +171,8 @@ t_computed_expression::compute(
     }
 
     // create or get output column using m_expression_alias
-    auto output_column = data_table->add_column_sptr(m_expression_alias, m_dtype, true);
-
-    // Stop if the column has a different dtype from m_dtype - that means
-    // this expression already exists and is a different dtype, and setting to
-    // it results in undefined behavior.
-    if (output_column->get_dtype() != m_dtype) {
-        std::stringstream ss;
-        ss << "[t_computed_expression::compute] Cannot overwrite column: `"
-            << m_expression_alias
-            << "` with an expression of a different type!"
-            << std::endl;
-
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
-    auto num_rows = data_table->size();
+    auto output_column = destination_table->add_column_sptr(m_expression_alias, m_dtype, true);
+    auto num_rows = source_table->size();
     output_column->reserve(num_rows);
 
     for (t_uindex ridx = 0; ridx < num_rows; ++ridx) {
@@ -205,168 +191,6 @@ t_computed_expression::compute(
         output_column->set_scalar(ridx, value);
     }
 };
-
-void
-t_computed_expression::recompute(
-    std::shared_ptr<t_data_table> gstate_table,
-    std::shared_ptr<t_data_table> flattened,
-    const std::vector<t_rlookup>& changed_rows) const {
-    exprtk::symbol_table<t_tscalar> sym_table;
-    sym_table.add_constants();
-
-    REGISTER_COMPUTE_FUNCTIONS()
-
-    exprtk::expression<t_tscalar> expr_definition;
-    std::vector<std::pair<std::string, t_tscalar>> values;
-
-    /**
-     * To properly recompute columns when updates have been applied, we need 
-     * to keep both the columns from flattened (the table that contains the 
-     * new round of update data) and the gstate_table (the master table that 
-     * contains the entire state of the Perspective table up to this point).
-     * 
-     * This is especially important for partial updates, where cells can be
-     * `null` or `undefined`, and we need to apply/not apply computations
-     * based on both the value in `flattened` and the `gstate_table`.
-     */
-    tsl::hopscotch_map<std::string, std::shared_ptr<t_column>> flattened_columns;
-    tsl::hopscotch_map<std::string, std::shared_ptr<t_column>> gstate_table_columns;
-
-    auto num_input_columns = m_column_ids.size();
-
-    values.resize(num_input_columns);
-    flattened_columns.reserve(num_input_columns);
-    gstate_table_columns.reserve(num_input_columns);
-
-    for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
-        const std::string& column_id = m_column_ids[cidx].first;
-        const std::string& column_name = m_column_ids[cidx].second;
-        flattened_columns[column_id] = flattened->get_column(column_name);
-        gstate_table_columns[column_id] = gstate_table->get_column(column_name);
-
-        t_tscalar rval;
-        rval.m_type = flattened_columns[column_id]->get_dtype();
-        values[cidx] = std::pair<std::string, t_tscalar>(column_id, rval);
-        sym_table.add_variable(column_id, values[cidx].second);
-    }
-
-    expr_definition.register_symbol_table(sym_table);
-
-    if (!t_computed_expression_parser::PARSER->compile(m_parsed_expression_string, expr_definition)) {
-        std::stringstream ss;
-        ss << "[t_computed_expression::recompute] Failed to parse expression: `"
-            << m_parsed_expression_string
-            << "`, failed with error: "
-            << t_computed_expression_parser::PARSER->error()
-            << std::endl;
-
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
-    // get or create the output column
-    auto output_column = flattened->add_column_sptr(m_expression_alias, m_dtype, true);
-
-    // Stop if the column has a different dtype from m_dtype - that means
-    // this expression already exists and is a different dtype, and setting to
-    // it results in undefined behavior.
-    if (output_column->get_dtype() != m_dtype) {
-        std::stringstream ss;
-        ss << "[t_computed_expression::recompute] Cannot overwrite column: `"
-            << m_expression_alias
-            << "` with an expression of a different type!"
-            << std::endl;
-
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
-    output_column->reserve(gstate_table->size());
-
-    t_uindex num_rows = changed_rows.size();
-
-    if (num_rows == 0) {
-        num_rows = gstate_table->size();
-    } 
-
-    for (t_uindex idx = 0; idx < num_rows; ++idx) {
-        bool row_already_exists = false;
-
-        // if changed_rows is not empty, ridx will point to a row index in
-        // the gnode state master table, whereas idx will always point to
-        // the row index in the flattened table containing the data from
-        // this update/process cycle.
-        t_uindex ridx = idx;
-
-        if (changed_rows.size() > 0) {
-            ridx = changed_rows[idx].m_idx;
-            row_already_exists = changed_rows[idx].m_exists;
-        }
-    
-        bool skip_row = false;
-
-        for (t_uindex cidx = 0; cidx < num_input_columns; ++cidx) {
-            const std::string& column_id = m_column_ids[cidx].first;
-
-            t_tscalar arg = flattened_columns[column_id]->get_scalar(idx);
-
-            if (!arg.is_valid()) {
-                /**
-                 * TODO: should these semantics change now that we don't
-                 * check or maintain intermediates?
-                 * 
-                 * If the row already exists on the gstate table and the cell
-                 * in `flattened` is `STATUS_CLEAR`, do not compute the row and
-                 * unset its value in the output column.
-                 * 
-                 * If the row does not exist, and the cell in `flattened` is
-                 * `STATUS_INVALID`, do not compute the row and unset its value
-                 * in the output column.
-                 * 
-                 * `idx` is used here instead of `ridx`, as `ridx` refers
-                 * to the row index in changed_rows, i.e. the changed row
-                 * on the gstate table, whereas idx is the row index
-                 * in the flattened table.
-                 */
-                bool should_unset = 
-                    (row_already_exists && flattened_columns[column_id]->is_cleared(idx)) ||
-                    (!row_already_exists && !flattened_columns[column_id]->is_valid(idx));
-
-                /**
-                 * Use `unset` instead of `clear`, as
-                 * `t_gstate::update_master_table` will reconcile `STATUS_CLEAR`
-                 * into `STATUS_INVALID`.
-                 */
-                if (should_unset) {
-                    output_column->unset(idx);
-                    skip_row = true;
-                    break;  
-                } else {
-                    // Get the value from the master table using `ridx`,
-                    // which points to a row in the master table that is
-                    // being overwritten in this partial update.
-                    arg = gstate_table_columns[column_id]->get_scalar(ridx);
-                }
-            }
-
-            values[cidx].second.set(arg);
-        }
-
-        if (skip_row) continue;
-
-        t_tscalar value = expr_definition.value();
-
-        if (!value.is_valid() || value.is_none()) {
-            output_column->clear(idx);
-            continue;
-        }
-        
-        output_column->set_scalar(idx, value);
-    }
-}
-
-void
-t_computed_expression::set_expression_vocab(std::shared_ptr<t_vocab> expression_vocab) {
-    m_expression_vocab = expression_vocab;
-}
 
 const std::string&
 t_computed_expression::get_expression_alias() const {

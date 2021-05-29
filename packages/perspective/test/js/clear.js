@@ -20,6 +20,20 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("to_columns output is empty", async function() {
+            const table = await perspective.table([{x: 1}]);
+            const view = await table.view();
+            let result = await view.to_columns();
+            expect(result).toEqual({
+                x: [1]
+            });
+            table.clear();
+            result = await view.to_columns();
+            expect(result).toEqual({});
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("Replace", function() {

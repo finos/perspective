@@ -280,6 +280,11 @@ t_data_table::set_size(t_uindex size) {
 }
 
 void
+t_data_table::set_table_size(t_uindex size) {
+    m_size = size;
+}
+
+void
 t_data_table::reserve(t_uindex capacity) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -604,6 +609,52 @@ t_data_table::borrow(const std::vector<std::string>& columns) const {
     }
 
     rval->set_size(size());
+    return rval;
+}
+
+std::shared_ptr<t_data_table>
+t_data_table::join(std::shared_ptr<t_data_table> other_table) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+
+    if (size() != other_table->size()) {
+        std::stringstream ss;
+        ss << "[t_data_table::join] Cannot join two tables of unequal sizes! Current size: "
+            << size() << ", size of other table: "
+            << other_table->size() << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+
+    // join both schemas
+    t_schema schema = m_schema;
+    const t_schema& other_schema = other_table->get_schema();
+    std::vector<std::string> other_columns;
+
+    for (const std::string& column : other_schema.m_columns) {
+        // Only append unique columns
+        if (!schema.has_column(column)) {
+            schema.add_column(column, other_schema.get_dtype(column));
+            other_columns.push_back(column);
+        }
+    } 
+
+    std::shared_ptr<t_data_table> rval = std::make_shared<t_data_table>(
+        "", "", schema, get_capacity(), BACKING_STORE_MEMORY);
+    rval->init();
+
+    // borrow columns from the current table
+    for (const std::string& column : m_schema.m_columns) {
+        rval->set_column(column, get_column(column));
+    }
+
+    for (const std::string& column : other_columns) {
+        rval->set_column(column, other_table->get_column(column));
+    }
+
+    // don't set size on the columns - they are already of equal size, and we
+    // don't want to mutate the columns.
+    rval->set_table_size(size());
+
     return rval;
 }
 

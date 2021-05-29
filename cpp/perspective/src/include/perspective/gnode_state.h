@@ -92,73 +92,59 @@ public:
         const std::vector<t_uindex>& master_table_indexes,
         t_uindex num_rows);
 
-    t_tscalar read_by_pkey(
-        const std::string& colname, t_tscalar& pkey) const;
+    // Operations that use the gnode state's internal `m_mapping` of
+    // primary keys to row indices in order to access subsets of data from
+    // a column in a given `t_data_table`. Because these methods are used
+    // extensively in the context objects, and because expression columns are
+    // stored in tables on the context, these methods receive a pointer to
+    // a `t_data_table` - usually a pointer to the gnode state's master
+    // table or the expression table from the context.
 
-    /**
-     * @brief Read the values with the specified `pkeys` from the column at 
-     * `colname`, writing into `out_data`.
-     * 
-     * @param colname 
-     * @param pkeys 
-     * @param out_data 
-     */
+    t_tscalar read_by_pkey(
+        const t_data_table& table,
+        const std::string& colname,
+        t_tscalar& pkey) const;
+
     void read_column(
+        const t_data_table& table,
         const std::string& colname,
         const std::vector<t_tscalar>& pkeys,
         std::vector<t_tscalar>& out_data) const;
 
     void read_column(
+        const t_data_table& table,
         const std::string& colname,
         const std::vector<t_tscalar>& pkeys,
         std::vector<double>& out_data) const;
 
     void read_column(
+        const t_data_table& table,
         const std::string& colname,
         const std::vector<t_tscalar>& pkeys,
         std::vector<double>& out_data,
         bool include_nones) const;
 
-    /**
-     * @brief Read a column from `start_idx` to `end_idx` into `out_data`.
-     * 
-     * @param colname 
-     * @param start_idx
-     * @param end_idx
-     * @param out_data 
-     */
     void read_column(
+        const t_data_table& table,
         const std::string& colname,
         t_uindex start_idx,
         t_uindex end_idx,
         std::vector<t_tscalar>& out_data) const;
 
-    /**
-     * @brief Read a column using `row_indices` (not necessarily contiguous)
-     * into `out_data`.
-     * 
-     * @param colname 
-     * @param row_indices 
-     * @param out_data 
-     */
     void read_column(
+        const t_data_table& table,
         const std::string& colname,
         const std::vector<t_uindex>& row_indices,
         std::vector<t_tscalar>& out_data) const;
 
-    /**
-     * @brief Apply the lambda `fn` to each primary-keyed value in the column,
-     * stopping when the lambda returns `true`.
-     * 
-     * @param pkeys 
-     * @param colname 
-     * @param value 
-     * @param fn 
-     * @return true 
-     * @return false 
-     */
-    bool apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
-        t_tscalar& value, std::function<bool(const t_tscalar&, t_tscalar&)> fn) const;
+    // Also called extensively in contexts during aggregate calculation
+
+    bool apply(
+        const t_data_table& table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        t_tscalar& value,
+        std::function<bool(const t_tscalar&, t_tscalar&)> fn) const;
 
     /**
      * @brief Reduce the column's values at the specified primary keys, and
@@ -172,18 +158,15 @@ public:
      */
     template <typename FN_T>
     typename FN_T::result_type reduce(
-        const std::vector<t_tscalar>& pkeys, const std::string& colname, FN_T fn) const;
+        const t_data_table& table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        FN_T fn) const;
 
-    /**
-     * @brief Returns whether `value` is unique inside `colname`.
-     * 
-     * @param pkeys 
-     * @param colname 
-     * @param value 
-     * @return true 
-     * @return false 
-     */
-    bool is_unique(const std::vector<t_tscalar>& pkeys, const std::string& colname,
+    bool is_unique(
+        const t_data_table& table,
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
         t_tscalar& value) const;
 
     /**
@@ -194,7 +177,10 @@ public:
      * @param colname 
      * @return t_tscalar 
      */
-    t_tscalar get(t_tscalar pkey, const std::string& colname) const;
+    t_tscalar get(
+        const t_data_table& table,
+        const std::string& colname,
+        t_tscalar pkey) const;
 
     /**
      * @brief Get the scalar value for `pkey` in `colname`.
@@ -203,7 +189,10 @@ public:
      * @param colname 
      * @return t_tscalar 
      */
-    t_tscalar get_value(const t_tscalar& pkey, const std::string& colname) const;
+    t_tscalar get_value(
+        const t_data_table& table,
+        const std::string& colname,
+        const t_tscalar& pkey) const;
 
     /**
      * @brief Return the number of rows on the master `t_data_table`.
@@ -234,8 +223,7 @@ public:
     void reset();
 
     // Getters
-    std::shared_ptr<t_data_table> get_table();
-    std::shared_ptr<const t_data_table> get_table() const;
+    std::shared_ptr<t_data_table> get_table() const;
 
     std::shared_ptr<t_data_table> get_pkeyed_table(const t_schema& schema) const;
     std::shared_ptr<t_data_table> get_pkeyed_table() const;
@@ -294,14 +282,9 @@ private:
     std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> get_pkeys() const;
 
-    std::vector<t_tscalar> get_row(t_tscalar pkey) const;
-
-    // Unimplemented header
-    bool apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
-        t_tscalar& value) const;
-
     t_schema m_input_schema; // pkeyed
     t_schema m_output_schema; // tblschema
+
     bool m_init;
     std::shared_ptr<t_data_table> m_table;
     t_mapping m_mapping;
@@ -314,9 +297,12 @@ private:
 template <typename FN_T>
 typename FN_T::result_type
 t_gstate::reduce(
-    const std::vector<t_tscalar>& pkeys, const std::string& colname, FN_T fn) const {
+    const t_data_table& table,
+    const std::string& colname,
+    const std::vector<t_tscalar>& pkeys,
+    FN_T fn) const {
     std::vector<t_tscalar> data;
-    read_column(colname, pkeys, data);
+    read_column(table, colname, pkeys, data);
     return fn(data);
 }
 

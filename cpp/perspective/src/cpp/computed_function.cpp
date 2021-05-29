@@ -213,11 +213,6 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
     }
 
     t_uindex interned = m_expression_vocab->get_interned(result);
-
-    // Return the sentinel with the uint64 data field set to the
-    // index of the string in the vocab. The compute() and recompute() methods
-    // will look in the uint64 field for all DTYPE_STR scalars from
-    // expression.value().
     rval.set(m_expression_vocab->unintern_c(interned));
 
     return rval;
@@ -1186,8 +1181,6 @@ t_tscalar min_fn::operator()(t_parameter_list parameters) {
         if (t_generic_type::e_scalar == gt.type) {
             t_scalar_view _temp(gt);
             t_tscalar temp = _temp();
-
-            std::cout << temp.repr() << std::endl;
 
             if (!temp.is_numeric()) {
                 rval.m_status = STATUS_CLEAR;

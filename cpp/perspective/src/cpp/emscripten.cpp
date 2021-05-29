@@ -1355,7 +1355,8 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_view_config>
-    make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
+    make_view_config(
+        std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
         // extract vectors from JS, where they were created
         auto row_pivots = config.call<std::vector<std::string>>("get_row_pivots");
         auto column_pivots = config.call<std::vector<std::string>>("get_column_pivots");
@@ -1487,6 +1488,8 @@ namespace binding {
     std::shared_ptr<View<CTX_T>>
     make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
         t_val view_config, t_val date_parser) {
+        // Use a copy of the table schema that we can freely mutate during
+        // `make_view_config`.
         std::shared_ptr<t_schema> schema = std::make_shared<t_schema>(table->get_schema());
         std::shared_ptr<t_view_config> config = make_view_config<t_val>(schema, date_parser, view_config);
 

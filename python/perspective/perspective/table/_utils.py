@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import logging
 import re
 from datetime import date, datetime
 from functools import partial
@@ -149,7 +148,7 @@ def _parse_expression_strings(expressions):
        names, which will be used by the engine.
     """
     validated_expressions = []
-    alias_set = set()
+    alias_map = {}
 
     for expression in expressions:
         if '""' in expression:
@@ -160,22 +159,15 @@ def _parse_expression_strings(expressions):
 
         alias_match = re.match(ALIAS_REGEX, expression)
 
+        # initialize `parsed` here so we keep `expression` unedited as the
+        # user typed it into Perspective
+        parsed = expression
+
         if alias_match:
             alias = alias_match.group(1).strip()
 
-            # Don't allow for duplicate aliases
-            if alias in alias_set:
-                logging.warn(
-                    "Skipping expression `{}` as it reuses alias `{}`!".format(
-                        expression, alias
-                    )
-                )
-                continue
-
-            alias_set.add(alias)
-
             # Remove the alias from the expression
-            expression = re.sub(ALIAS_REGEX, "", expression)
+            parsed = re.sub(ALIAS_REGEX, "", expression)
         else:
             # Expression itself is the alias
             alias = expression
@@ -191,7 +183,7 @@ def _parse_expression_strings(expressions):
             running_cidx,
         )
 
-        parsed = re.sub(EXPRESSION_COLUMN_NAME_REGEX, replacer_fn, expression)
+        parsed = re.sub(EXPRESSION_COLUMN_NAME_REGEX, replacer_fn, parsed)
         parsed = re.sub(
             STRING_LITERAL_REGEX,
             lambda match: "intern({0})".format(match.group(0)),
@@ -201,6 +193,13 @@ def _parse_expression_strings(expressions):
         # remove the `intern()` in bucket - TODO: this is messy
         parsed = re.sub(BUCKET_LITERAL_REGEX, _replace_bucket_unit, parsed)
 
-        validated_expressions.append([alias, expression, parsed, column_id_map])
+        validated = [alias, expression, parsed, column_id_map]
+
+        if alias_map.get(alias) is not None:
+            idx = alias_map[alias]
+            validated_expressions[idx] = validated
+        else:
+            validated_expressions.append(validated)
+            alias_map[alias] = len(validated_expressions) - 1
 
     return validated_expressions

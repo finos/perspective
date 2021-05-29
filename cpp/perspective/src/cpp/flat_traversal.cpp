@@ -96,46 +96,67 @@ t_ftrav::get_pkey(t_index idx) const {
 }
 
 void
-t_ftrav::fill_sort_elem(std::shared_ptr<const t_gstate> gstate, const t_config& config,
-    t_tscalar pkey, t_mselem& out_elem) {
-    out_elem.m_pkey = pkey;
+t_ftrav::fill_sort_elem(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const t_config& config,
+    t_tscalar pkey,
+    t_mselem& out_elem) {
     t_index sortby_size = m_sortby.size();
     out_elem.m_row.reserve(sortby_size);
+    out_elem.m_pkey = pkey;
+
     for (const t_sortspec& sort : m_sortby) {
         // maintain backwards compatibility
         std::string colname;
+
         if (sort.m_colname != "") {
             colname = config.get_sort_by(sort.m_colname);
         } else {
             colname = config.col_at(sort.m_agg_index);
         }
+
         const std::string& sortby_colname = config.get_sort_by(colname);
+
         out_elem.m_row.push_back(
-            m_symtable.get_interned_tscalar(gstate->get(pkey, sortby_colname)));
+            m_symtable.get_interned_tscalar(
+                get_from_gstate(gstate, expression_master_table, sortby_colname, pkey)
+            )
+        );
     }
 }
 
 void
-t_ftrav::fill_sort_elem(std::shared_ptr<const t_gstate> gstate, const t_config& config,
-    const std::vector<t_tscalar>& row, t_mselem& out_elem) const {
-    out_elem.m_pkey = mknone();
+t_ftrav::fill_sort_elem(
+    const t_gstate& gstate,
+    const t_config& config,
+    const std::vector<t_tscalar>& row,
+    t_mselem& out_elem) const {
     t_index sortby_size = m_sortby.size();
     out_elem.m_row.reserve(sortby_size);
+    out_elem.m_pkey = mknone();
+
     for (const t_sortspec& sort : m_sortby) {
         std::string colname;
+
         if (sort.m_colname != "") {
             colname = config.get_sort_by(sort.m_colname);
         } else {
             colname = config.col_at(sort.m_agg_index);
         }
+
         const std::string& sortby_colname = config.get_sort_by(colname);
+
         out_elem.m_row.push_back(
             get_interned_tscalar(row.at(config.get_colidx(sortby_colname))));
     }
 }
 
 void
-t_ftrav::sort_by(std::shared_ptr<const t_gstate> gstate, const t_config& config,
+t_ftrav::sort_by(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const t_config& config,
     const std::vector<t_sortspec>& sortby) {
     if (sortby.empty())
         return;
@@ -147,7 +168,7 @@ t_ftrav::sort_by(std::shared_ptr<const t_gstate> gstate, const t_config& config,
     for (t_index idx = 0; idx < size; ++idx) {
         t_mselem& elem = (*sort_elems)[idx];
         t_tscalar pkey = (*m_index)[idx].m_pkey;
-        fill_sort_elem(gstate, config, pkey, elem);
+        fill_sort_elem(gstate, expression_master_table, config, pkey, elem);
     }
 
     std::swap(m_index, sort_elems);
@@ -311,25 +332,31 @@ t_ftrav::step_end() {
 
 void
 t_ftrav::add_row(
-    std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey) {
+    const t_gstate& gstate, 
+    const t_data_table& expression_master_table,
+    const t_config& config,
+    t_tscalar pkey) {
     t_mselem mselem;
-    fill_sort_elem(gstate, config, pkey, mselem);
+    fill_sort_elem(gstate, expression_master_table, config, pkey, mselem);
     m_new_elems[pkey] = mselem;
     ++m_step_inserts;
 }
 
 void
 t_ftrav::update_row(
-    std::shared_ptr<const t_gstate> gstate, const t_config& config, t_tscalar pkey) {
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const t_config& config,
+    t_tscalar pkey) {
     if (m_sortby.empty())
         return;
     auto pkiter = m_pkeyidx.find(pkey);
     if (pkiter == m_pkeyidx.end()) {
-        add_row(gstate, config, pkey);
+        add_row(gstate, expression_master_table, config, pkey);
         return;
     }
     t_mselem mselem;
-    fill_sort_elem(gstate, config, pkey, mselem);
+    fill_sort_elem(gstate, expression_master_table, config, pkey, mselem);
     (*m_index)[pkiter->second].m_updated = true;
     m_new_elems[pkey] = mselem;
 }
@@ -362,7 +389,7 @@ t_ftrav::reset_step_state() {
 }
 
 t_uindex
-t_ftrav::lower_bound_row_idx(std::shared_ptr<const t_gstate> gstate, const t_config& config,
+t_ftrav::lower_bound_row_idx(const t_gstate& gstate, const t_config& config,
     const std::vector<t_tscalar>& row) const {
     t_multisorter sorter(get_sort_orders(m_sortby));
     t_mselem target_val;
@@ -380,6 +407,23 @@ t_ftrav::get_row_idx(t_tscalar pkey) const {
     if (pkiter == m_pkeyidx.end())
         return -1;
     return pkiter->second;
+}
+
+t_tscalar 
+t_ftrav::get_from_gstate(
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table,
+    const std::string& colname,
+    t_tscalar pkey
+) const {
+    const t_schema& expression_schema = expression_master_table.get_schema();
+
+    if (expression_schema.has_column(colname)) {
+        return gstate.get(expression_master_table, colname, pkey);
+    } else {
+        std::shared_ptr<t_data_table> master_table = gstate.get_table();
+        return gstate.get(*master_table, colname, pkey);
+    }
 }
 
 } // end namespace perspective

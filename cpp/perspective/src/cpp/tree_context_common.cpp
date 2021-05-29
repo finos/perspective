@@ -22,12 +22,17 @@
 namespace perspective {
 
 void
-notify_sparse_tree_common(std::shared_ptr<t_data_table> strands,
-    std::shared_ptr<t_data_table> strand_deltas, std::shared_ptr<t_stree> tree,
-    std::shared_ptr<t_traversal> traversal, bool process_traversal,
+notify_sparse_tree_common(
+    std::shared_ptr<t_data_table> strands,
+    std::shared_ptr<t_data_table> strand_deltas,
+    std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal,
+    bool process_traversal,
     const std::vector<t_aggspec>& aggregates,
     const std::vector<std::pair<std::string, std::string>>& tree_sortby,
-    const std::vector<t_sortspec>& ctx_sortby, const t_gstate& gstate) {
+    const std::vector<t_sortspec>& ctx_sortby,
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table) {
     t_filter fltr;
     if (t_env::log_data_nsparse_strands()) {
         std::cout << "nsparse_strands" << std::endl;
@@ -73,7 +78,7 @@ notify_sparse_tree_common(std::shared_ptr<t_data_table> strands,
 
     tree->populate_leaf_index(non_zero_leaves);
 
-    tree->update_aggs_from_static(dctx, gstate);
+    tree->update_aggs_from_static(dctx, gstate, expression_master_table);
 
     std::set<t_uindex> visited;
 
@@ -128,13 +133,22 @@ notify_sparse_tree_common(std::shared_ptr<t_data_table> strands,
 }
 
 void
-notify_sparse_tree(std::shared_ptr<t_stree> tree, std::shared_ptr<t_traversal> traversal,
-    bool process_traversal, const std::vector<t_aggspec>& aggregates,
+notify_sparse_tree(
+    std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal,
+    bool process_traversal,
+    const std::vector<t_aggspec>& aggregates,
     const std::vector<std::pair<std::string, std::string>>& tree_sortby,
-    const std::vector<t_sortspec>& ctx_sortby, const t_data_table& flattened,
-    const t_data_table& delta, const t_data_table& prev, const t_data_table& current,
-    const t_data_table& transitions, const t_data_table& existed, const t_config& config,
-    const t_gstate& gstate) {
+    const std::vector<t_sortspec>& ctx_sortby,
+    const t_data_table& flattened,
+    const t_data_table& delta,
+    const t_data_table& prev,
+    const t_data_table& current,
+    const t_data_table& transitions,
+    const t_data_table& existed,
+    const t_config& config,
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table) {
 
     auto strand_values = tree->build_strand_table(
         flattened, delta, prev, current, transitions, aggregates, config);
@@ -142,21 +156,27 @@ notify_sparse_tree(std::shared_ptr<t_stree> tree, std::shared_ptr<t_traversal> t
     auto strands = strand_values.first;
     auto strand_deltas = strand_values.second;
     notify_sparse_tree_common(strands, strand_deltas, tree, traversal, process_traversal,
-        aggregates, tree_sortby, ctx_sortby, gstate);
+        aggregates, tree_sortby, ctx_sortby, gstate, expression_master_table);
 }
 
 void
-notify_sparse_tree(std::shared_ptr<t_stree> tree, std::shared_ptr<t_traversal> traversal,
-    bool process_traversal, const std::vector<t_aggspec>& aggregates,
+notify_sparse_tree(
+    std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal,
+    bool process_traversal,
+    const std::vector<t_aggspec>& aggregates,
     const std::vector<std::pair<std::string, std::string>>& tree_sortby,
-    const std::vector<t_sortspec>& ctx_sortby, const t_data_table& flattened,
-    const t_config& config, const t_gstate& gstate) {
+    const std::vector<t_sortspec>& ctx_sortby,
+    const t_data_table& flattened,
+    const t_config& config,
+    const t_gstate& gstate,
+    const t_data_table& expression_master_table) {
     auto strand_values = tree->build_strand_table(flattened, aggregates, config);
 
     auto strands = strand_values.first;
     auto strand_deltas = strand_values.second;
     notify_sparse_tree_common(strands, strand_deltas, tree, traversal, process_traversal,
-        aggregates, tree_sortby, ctx_sortby, gstate);
+        aggregates, tree_sortby, ctx_sortby, gstate, expression_master_table);
 }
 
 std::vector<t_path>
