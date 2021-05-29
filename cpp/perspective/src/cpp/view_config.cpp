@@ -200,63 +200,32 @@ t_view_config::get_column_pivot_depth() const {
 // PRIVATE
 void
 t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
-    /*
-     * Provide aggregates for columns that are shown but NOT specified in 
-     * `m_aggregates`, including expressions that are in the `columns`
-     * array but not the `aggregates` map.
-     */
+    auto max_agg_count = m_columns.size() + m_sort.size();
+    m_aggspecs.reserve(max_agg_count);
+    m_aggregate_names.reserve(max_agg_count);
+
+    // Iterate through the columns array - if the column is in the
+    // aggregates map, use the specified aggregate or generate a default. If
+    // an aggregate is in the aggregate map but NOT in the columns list,
+    // it is ignored and NOT applied.
     for (const std::string& column : m_columns) {
-        if (m_aggregates.count(column) != 0) {
-            continue;
-        }
-
         t_dtype dtype = schema->get_dtype(column);
-        std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
-        t_aggtype agg_type
-            = t_aggtype::AGGTYPE_ANY; // use aggtype here since we are not parsing aggs
+        const auto& agg_iter = m_aggregates.find(column);
 
-        if (!m_column_only) {
-            agg_type = _get_default_aggregate(dtype);
-        }
-
-        // create aggregate specification, and memoize the column name
-        m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
-        m_aggregate_names.push_back(column);
-    }
-
-    /**
-     * Construct aggspecs for aggregates explicitly specified in `m_aggregates`. 
-     */
-    for (auto const& iter : m_aggregates) {
-        auto column = iter.first;
-        auto aggregate = iter.second;
-        if (std::find(m_columns.begin(), m_columns.end(), column) == m_columns.end()) {
-            continue;
-        }
-
-        std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
-        t_aggtype agg_type;
-
-        if (m_column_only) {
-            agg_type = t_aggtype::AGGTYPE_ANY;
+        if (agg_iter != m_aggregates.end()) {
+            // If the column name is in the aggregate map, use the custom
+            // aggregate as defined by the map and add it to m_aggspecs
+            // and m_aggregate_names.
+            const std::vector<std::string>& aggregate = agg_iter->second;
+            make_aggspec(column, aggregate, dtype);
         } else {
-            if (aggregate.at(0) == "weighted mean") {
-                dependencies.push_back(t_dep(aggregate.at(1), DEPTYPE_COLUMN));
-                agg_type = AGGTYPE_WEIGHTED_MEAN;
-            } else {
-                agg_type = str_to_aggtype(aggregate.at(0));
-            }
-        }
-
-        if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX) {
-            dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
-            m_aggspecs.push_back(
-                t_aggspec(column, column, agg_type, dependencies, SORTTYPE_ASCENDING));
-        } else {
+            // Generate a default aggregate based on the column type.
+            std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
+            t_aggtype agg_type;
+            m_column_only ? agg_type = AGGTYPE_ANY : agg_type = _get_default_aggregate(dtype);
             m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
+            m_aggregate_names.push_back(column);
         }
-
-        m_aggregate_names.push_back(column);
     }
 
     // construct aggspecs for hidden sorts
@@ -342,6 +311,39 @@ t_view_config::get_aggregate_index(const std::string& column) const {
         return t_index(std::distance(m_aggregate_names.begin(), it));
     }
     return t_index();
+}
+
+void
+t_view_config::make_aggspec(
+    const std::string& column, const std::vector<std::string>& aggregate, t_dtype dtype) {
+    t_aggtype agg_type;
+    t_aggspec aggspec;
+
+    // Maximum of 2 dependencies, based on the aggregate type
+    std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
+    dependencies.reserve(2);
+
+    if (m_column_only) {
+        agg_type = t_aggtype::AGGTYPE_ANY;
+    } else {
+        if (aggregate.at(0) == "weighted mean") {
+            dependencies.push_back(t_dep(aggregate.at(1), DEPTYPE_COLUMN));
+            agg_type = AGGTYPE_WEIGHTED_MEAN;
+        } else {
+            agg_type = str_to_aggtype(aggregate.at(0));
+        }
+    }
+
+    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX) {
+        dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
+        aggspec = t_aggspec(
+            column, column, agg_type, dependencies, SORTTYPE_ASCENDING);
+    } else {
+        aggspec = t_aggspec(column, agg_type, dependencies);
+    }
+
+    m_aggspecs.push_back(aggspec);
+    m_aggregate_names.push_back(column);
 }
 
 } // end namespace perspective

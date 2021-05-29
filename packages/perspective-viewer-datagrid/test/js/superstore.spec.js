@@ -101,6 +101,18 @@ utils.with_server({}, () => {
                     }
                 });
             });
+
+            test.capture("expression columns have the right row pivot headers", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+
+                // create expression columns with aliases
+                await page.evaluate(element => element.setAttribute("expressions", JSON.stringify([`// abc\n upper("State")`, `// def \n bucket("Order Date", 'M')`])), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", '["abc"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("columns", '["abc", "def"]'), viewer);
+            });
         },
         {reload_page: false, root: path.join(__dirname, "..", "..")}
     );

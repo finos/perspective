@@ -133,6 +133,17 @@ class TestView(object):
         paths = view.column_paths()
         assert paths == ["__ROW_PATH__", "a", "b"]
 
+    def test_view_column_path_one_numeric_names(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5],
+            "1234": [5, 6, 7]
+        }
+        tbl = Table(data)
+        view = tbl.view(row_pivots=["a"], columns=["b", "1234", "a"])
+        paths = view.column_paths()
+        assert paths == ["__ROW_PATH__", "b", "1234", "a"]
+
     def test_view_column_path_two(self):
         data = {
             "a": [1, 2, 3],
@@ -317,25 +328,36 @@ class TestView(object):
             aggregates={"c": "avg", "a": "last"},
             columns=[]
         )
+        assert view.column_paths() == ["__ROW_PATH__"]
         assert view.to_records() == [
             {"__ROW_PATH__": []},
             {"__ROW_PATH__": [1]},
             {"__ROW_PATH__": [3]}
         ]
 
-    def test_view_aggregates_column_order(self):
+    def test_view_aggregates_default_column_order(self):
         '''Order of columns are entirely determined by the `columns` kwarg. If
-        it is not provided, order of columns is undefined behavior.'''
+        it is not provided, order of columns is default based on the order
+        of table.columns().'''
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
+        cols = tbl.columns();
         view = tbl.view(
             row_pivots=["a"],
-            aggregates={"c": "avg", "a": "last"},
-            columns=["a", "c"]
+            aggregates={"c": "avg", "a": "last"}
         )
 
-        order = ["__ROW_PATH__", "a", "c"]
+        order = ["__ROW_PATH__"] + cols
         assert view.column_paths() == order
+
+        # check that default aggregates have been applied
+        result = view.to_dict()
+        assert result["b"] == [6, 2, 4]
+        assert result["d"] == [10, 4, 6]
+
+        # and that specified aggregates are applied
+        assert result["a"] == [3, 1, 3]
+        assert result["c"] == [4, 3, 5]
 
     # row and column pivot paths
     def test_view_row_pivot_datetime_row_paths_are_same_as_data(self):
