@@ -236,9 +236,29 @@ module.exports = perspective => {
                 aggregates: {x: "join"}
             });
             var answer = [
-                {__ROW_PATH__: [], x: "1, 2, 3, 4, "},
-                {__ROW_PATH__: [false], x: "2, 4, "},
-                {__ROW_PATH__: [true], x: "1, 3, "}
+                {__ROW_PATH__: [], x: "1, 2, 3, 4"},
+                {__ROW_PATH__: [false], x: "2, 4"},
+                {__ROW_PATH__: [true], x: "1, 3"}
+            ];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], join exceeds max join size", async function() {
+            let data2 = JSON.parse(JSON.stringify(data));
+            data2.push({x: 5, y: "abcdefghijklmnopqrstuvwxyz".repeat(12), z: false});
+            var table = await perspective.table(data2);
+            var view = await table.view({
+                row_pivots: ["z"],
+                columns: ["y"],
+                aggregates: {y: "join"}
+            });
+            var answer = [
+                {__ROW_PATH__: [], y: "a"},
+                {__ROW_PATH__: [false], y: ""},
+                {__ROW_PATH__: [true], y: "a, c"}
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
