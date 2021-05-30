@@ -31,6 +31,9 @@
 
 namespace perspective {
 
+// Tweet length
+const t_uindex MAX_JOIN_SIZE = 280; 
+
 t_tscalar
 get_dominant(std::vector<t_tscalar>& values) {
     if (values.empty())
@@ -1055,9 +1058,19 @@ t_stree::update_agg_table(
                         }
 
                         std::stringstream ss;
+                        t_uindex str_size = 0, idx = 0;
                         for (std::set<t_tscalar>::const_iterator iter = vset.begin();
                              iter != vset.end(); ++iter) {
-                            ss << *iter << ", ";
+                            str_size += strlen(iter->get_char_ptr()) + 2;
+                            if (str_size > MAX_JOIN_SIZE) {
+                                break;
+                            }
+
+                            if (iter != vset.begin()) {
+                                ss << ", ";
+                            }
+
+                            ss << *iter;
                         }
                         return m_symtable.get_interned_tscalar(ss.str().c_str());
                     })

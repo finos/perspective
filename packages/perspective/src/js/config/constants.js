@@ -43,6 +43,7 @@ const NUMBER_AGGREGATES = [
     "last by index",
     "last",
     "high",
+    "join",
     "low",
     "mean",
     "median",
@@ -54,7 +55,7 @@ const NUMBER_AGGREGATES = [
     "unique"
 ];
 
-const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique"];
+const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "join", "last by index", "last", "unique"];
 
 const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique"];
 

@@ -28,6 +28,7 @@ class Aggregate(Enum):
     LAST_BY_INDEX = "last by index"
     LAST = "last"
     HIGH = "high"
+    JOIN = "join"
     LOW = "low"
     MEAN = "mean"
     MEDIAN = "median"
