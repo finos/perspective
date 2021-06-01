@@ -21,26 +21,7 @@ const COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"]];
 const ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]];
 const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
 
-const COMPUTED_FUNCS = {
-    "+": (x, y) => x + y,
-    "-": (x, y) => x - y,
-    "*": (x, y) => x * y,
-    "/": (x, y) => x / y,
-    pow2: x => Math.pow(x, 2),
-    sqrt: x => Math.sqrt(x),
-    uppercase: x => x.toUpperCase(),
-    concat_comma: (x, y) => x + y,
-    week_bucket: x => {
-        let date = new Date(x);
-        let day = date.getDay();
-        let diff = date.getDate() - day + (day == 0 ? -6 : 1);
-        date.setHours(0);
-        date.setMinutes(0);
-        date.setSeconds(0);
-        date.setDate(diff);
-        return date;
-    }
-};
+const COMPUTED_FUNCS = ["+", "-", "*", "/", "pow2", "sqrt", "uppercase", "concat_comma", "week_bucket"];
 
 const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"]};
 
@@ -64,10 +45,10 @@ const COMPLEX_COMPUTED_CONFIGS = {
     datetime: [
         {computed_function_name: "day_bucket", column: "computed", inputs: ["Order Date"]},
         {computed_function_name: "second_bucket", column: "computed2", inputs: ["Order Date"]},
-        {computed_function_name: "day_of_week", column: "computed3", inputs: ["computed2"]},
+        {computed_function_name: "day_of_week", column: "computed3", inputs: ["Order Date"]},
         {computed_function_name: "month_of_year", column: "computed4", inputs: ["Ship Date"]},
-        {computed_function_name: "year_bucket", column: "computed5", inputs: ["computed2"]},
-        {computed_function_name: "minute_bucket", column: "computed6", inputs: ["computed2"]}
+        {computed_function_name: "year_bucket", column: "computed5", inputs: ["Ship Date"]},
+        {computed_function_name: "minute_bucket", column: "computed6", inputs: ["Ship Date"]}
     ]
 };
 
@@ -83,14 +64,7 @@ const COMPLEX_EXPRESSIONS = {
         `concat(lower("Customer ID"), ', ', lower("Order ID"))`,
         `concat("State", ' ', "City")`
     ],
-    datetime: [
-        `bucket("Order Date", 'D')`,
-        `// computed2\n bucket("Order Date", 'S')`,
-        `day_of_week("computed2")`,
-        `month_of_year("Ship Date")`,
-        `bucket("computed2", 'Y')`,
-        `bucket("computed2", 'm')`
-    ]
+    datetime: [`bucket("Order Date", 'D')`, `bucket("Order Date", 's')`, `day_of_week("Order Date")`, `month_of_year("Ship Date")`, `bucket("Ship Date", 'Y')`, `bucket("Ship Date", 'm')`]
 };
 
 /******************************************************************************
@@ -182,8 +156,8 @@ describe("Update", async () => {
             });
 
             describe("ctx0 sorted", async () => {
-                table = worker.table(data.arrow.slice());
-                view = table.view({
+                table = await worker.table(data.arrow.slice());
+                view = await table.view({
                     sort: [["Customer Name", "desc"]]
                 });
 
@@ -198,9 +172,9 @@ describe("Update", async () => {
             });
 
             describe("ctx0 sorted deep", async () => {
-                table = worker.table(data.arrow.slice());
+                table = await worker.table(data.arrow.slice());
                 //table_indexed = worker.table(data.arrow.slice(), {index: "Row ID"});
-                view = table.view({
+                view = await table.view({
                     sort: [
                         ["Customer Name", "desc"],
                         ["Order Date", "asc"]
@@ -292,110 +266,110 @@ describe("Update", async () => {
     }
 });
 
-describe("Deltas", async () => {
-    // Generate update data from Perspective
-    const static_table = await worker.table(data.arrow.slice());
-    const static_view = await static_table.view();
+// describe("Deltas", async () => {
+//     // Generate update data from Perspective
+//     const static_table = await worker.table(data.arrow.slice());
+//     const static_view = await static_table.view();
 
-    let table, view;
+//     let table, view;
 
-    afterEach(async () => {
-        await view.delete();
-        await table.delete();
-    });
+//     afterEach(async () => {
+//         await view.delete();
+//         await table.delete();
+//     });
 
-    describe("mixed", async () => {
-        describe("ctx0", async () => {
-            table = await worker.table(data.arrow.slice());
-            view = await table.view();
-            view.on_update(() => {}, {mode: "row"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("row delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice ? test_data.slice() : test_data);
-                    await table.size();
-                }
-            });
-        });
+//     describe("mixed", async () => {
+//         describe("ctx0", async () => {
+//             table = await worker.table(data.arrow.slice());
+//             view = await table.view();
+//             view.on_update(() => {}, {mode: "row"});
+//             const test_data = await static_view.to_arrow({end_row: 500});
+//             benchmark("row delta", async () => {
+//                 for (let i = 0; i < 3; i++) {
+//                     table.update(test_data.slice ? test_data.slice() : test_data);
+//                     await table.size();
+//                 }
+//             });
+//         });
 
-        describe("ctx1", async () => {
-            table = await worker.table(data.arrow.slice());
-            view = await table.view({
-                row_pivots: ["State"]
-            });
-            view.on_update(() => {}, {mode: "row"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("row delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice());
-                    await table.size();
-                }
-            });
-        });
+//         describe("ctx1", async () => {
+//             table = await worker.table(data.arrow.slice());
+//             view = await table.view({
+//                 row_pivots: ["State"]
+//             });
+//             view.on_update(() => {}, {mode: "row"});
+//             const test_data = await static_view.to_arrow({end_row: 500});
+//             benchmark("row delta", async () => {
+//                 for (let i = 0; i < 3; i++) {
+//                     table.update(test_data.slice());
+//                     await table.size();
+//                 }
+//             });
+//         });
 
-        describe("ctx1 deep", async () => {
-            table = await worker.table(data.arrow.slice());
-            view = await table.view({
-                row_pivots: ["State", "City"]
-            });
-            view.on_update(() => {}, {mode: "row"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("row delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice());
-                    await table.size();
-                }
-            });
-        });
+//         describe("ctx1 deep", async () => {
+//             table = await worker.table(data.arrow.slice());
+//             view = await table.view({
+//                 row_pivots: ["State", "City"]
+//             });
+//             view.on_update(() => {}, {mode: "row"});
+//             const test_data = await static_view.to_arrow({end_row: 500});
+//             benchmark("row delta", async () => {
+//                 for (let i = 0; i < 3; i++) {
+//                     table.update(test_data.slice());
+//                     await table.size();
+//                 }
+//             });
+//         });
 
-        describe("ctx2", async () => {
-            table = await worker.table(data.arrow.slice());
-            view = await table.view({
-                row_pivots: ["State"],
-                column_pivots: ["Sub-Category"]
-            });
-            view.on_update(() => {}, {mode: "row"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("row delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice());
-                    await table.size();
-                }
-            });
-        });
+//         describe("ctx2", async () => {
+//             table = await worker.table(data.arrow.slice());
+//             view = await table.view({
+//                 row_pivots: ["State"],
+//                 column_pivots: ["Sub-Category"]
+//             });
+//             view.on_update(() => {}, {mode: "row"});
+//             const test_data = await static_view.to_arrow({end_row: 500});
+//             benchmark("row delta", async () => {
+//                 for (let i = 0; i < 3; i++) {
+//                     table.update(test_data.slice());
+//                     await table.size();
+//                 }
+//             });
+//         });
 
-        describe("ctx2 deep", async () => {
-            table = await worker.table(data.arrow.slice());
-            view = await table.view({
-                row_pivots: ["State", "City"],
-                column_pivots: ["Sub-Category"]
-            });
-            view.on_update(() => {}, {mode: "row"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("row delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice());
-                    await table.size();
-                }
-            });
-        });
+//         describe("ctx2 deep", async () => {
+//             table = await worker.table(data.arrow.slice());
+//             view = await table.view({
+//                 row_pivots: ["State", "City"],
+//                 column_pivots: ["Sub-Category"]
+//             });
+//             view.on_update(() => {}, {mode: "row"});
+//             const test_data = await static_view.to_arrow({end_row: 500});
+//             benchmark("row delta", async () => {
+//                 for (let i = 0; i < 3; i++) {
+//                     table.update(test_data.slice());
+//                     await table.size();
+//                 }
+//             });
+//         });
 
-        describe("ctx1.5", async () => {
-            table = await worker.table(data.arrow.slice());
-            view = await table.view({
-                column_pivots: ["Sub-Category"]
-            });
-            view.on_update(() => {}, {mode: "row"});
-            const test_data = await static_view.to_arrow({end_row: 500});
-            benchmark("row delta", async () => {
-                for (let i = 0; i < 3; i++) {
-                    table.update(test_data.slice());
-                    await table.size();
-                }
-            });
-        });
-    });
-});
+//         describe("ctx1.5", async () => {
+//             table = await worker.table(data.arrow.slice());
+//             view = await table.view({
+//                 column_pivots: ["Sub-Category"]
+//             });
+//             view.on_update(() => {}, {mode: "row"});
+//             const test_data = await static_view.to_arrow({end_row: 500});
+//             benchmark("row delta", async () => {
+//                 for (let i = 0; i < 3; i++) {
+//                     table.update(test_data.slice());
+//                     await table.size();
+//                 }
+//             });
+//         });
+//     });
+// });
 
 describe("View", async () => {
     let table;
@@ -437,7 +411,7 @@ describe("View", async () => {
                         });
 
                         benchmark(`sorted float asc`, async () => {
-                            view = table.view({
+                            view = await table.view({
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
@@ -447,7 +421,7 @@ describe("View", async () => {
                         });
 
                         benchmark(`sorted float desc`, async () => {
-                            view = table.view({
+                            view = await table.view({
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
@@ -457,7 +431,7 @@ describe("View", async () => {
                         });
 
                         benchmark(`sorted str asc`, async () => {
-                            view = table.view({
+                            view = await table.view({
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
@@ -467,7 +441,7 @@ describe("View", async () => {
                         });
 
                         benchmark(`sorted str desc`, async () => {
-                            view = table.view({
+                            view = await table.view({
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
@@ -502,7 +476,7 @@ describe("View", async () => {
 });
 
 describe("Expression/Computed Column", async () => {
-    for (const name of Object.keys(COMPUTED_FUNCS)) {
+    for (const computed_func of COMPUTED_FUNCS) {
         describe("mixed", async () => {
             // Use a single source table for computed
             let table;
@@ -511,9 +485,9 @@ describe("Expression/Computed Column", async () => {
                 await table.delete();
             });
 
-            COMPUTED_CONFIG.computed_function_name = name;
+            COMPUTED_CONFIG.computed_function_name = computed_func;
 
-            switch (name) {
+            switch (computed_func) {
                 case "pow2":
                 case "sqrt":
                     {
@@ -550,54 +524,38 @@ describe("Expression/Computed Column", async () => {
                 });
 
                 table = await worker.table(data.arrow.slice());
-                let add_computed_method;
 
-                if (table.add_computed) {
-                    add_computed_method = table.add_computed;
-                }
-
-                benchmark(`computed: \`${name}\``, async () => {
-                    if (add_computed_method) {
-                        COMPUTED_CONFIG.func = COMPUTED_FUNCS[name];
-                        COMPUTED_CONFIG.type = "float";
-
-                        table = table.add_computed([COMPUTED_CONFIG]);
+                benchmark(`computed: \`${computed_func}\``, async () => {
+                    let config = {};
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
                     } else {
-                        let config = {};
-                        if (view.expression_schema) {
-                            // New expressions API
-                            config.expressions = SIMPLE_EXPRESSION;
-                        } else {
-                            // Old computed_columns API
-                            config.computed_columns = [COMPUTED_CONFIG];
-                        }
-
-                        view = await table.view(config);
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
                     }
 
-                    // must process update
+                    view = await table.view(config);
                     await table.size();
                 });
 
-                if (!add_computed_method) {
-                    benchmark(`sort computed: \`${name}\``, async () => {
-                        let config = {
-                            sort: [["computed", "desc"]]
-                        };
+                benchmark(`sort computed: \`${computed_func}\``, async () => {
+                    let config = {
+                        sort: [["computed", "desc"]]
+                    };
 
-                        if (view.expression_schema) {
-                            // New expressions API
-                            config.expressions = SIMPLE_EXPRESSION;
-                        } else {
-                            // Old computed_columns API
-                            config.computed_columns = [COMPUTED_CONFIG];
-                        }
+                    if (table.validate_expressions) {
+                        // New expressions API
+                        config.expressions = SIMPLE_EXPRESSION;
+                    } else {
+                        // Old computed_columns API
+                        config.computed_columns = [COMPUTED_CONFIG];
+                    }
 
-                        view = await table.view(config);
+                    view = await table.view(config);
 
-                        await table.size();
-                    });
-                }
+                    await table.size();
+                });
             });
 
             describe("ctx1", async () => {
@@ -611,17 +569,12 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Not running pivoted computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`row pivot computed: \`${name}\``, async () => {
+                benchmark(`row pivot computed: \`${computed_func}\``, async () => {
                     let config = {
                         row_pivots: ["computed"]
                     };
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
                         config.expressions = SIMPLE_EXPRESSION;
                     } else {
@@ -646,18 +599,13 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Not running pivoted computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`row and column pivot computed: \`${name}\``, async () => {
+                benchmark(`row and column pivot computed: \`${computed_func}\``, async () => {
                     let config = {
                         row_pivots: ["computed"],
                         column_pivots: ["computed"]
                     };
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
                         config.expressions = SIMPLE_EXPRESSION;
                     } else {
@@ -682,17 +630,12 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Not running pivoted computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`column pivot computed: \`${name}\``, async () => {
+                benchmark(`column pivot computed: \`${computed_func}\``, async () => {
                     let config = {
                         column_pivots: ["computed"]
                     };
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
                         config.expressions = SIMPLE_EXPRESSION;
                     } else {
@@ -709,7 +652,7 @@ describe("Expression/Computed Column", async () => {
     }
 
     // multi-dependency computed columns
-    for (const name in COMPLEX_COMPUTED_CONFIGS) {
+    for (const data_type in COMPLEX_COMPUTED_CONFIGS) {
         describe("mixed", async () => {
             // Use a single source table for computed
             let table;
@@ -729,20 +672,15 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`computed complex: \`${name}\``, async () => {
+                benchmark(`computed complex: \`${data_type}\``, async () => {
                     let config = {};
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[name];
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
                     } else {
                         // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
                     }
 
                     view = await table.view(config);
@@ -750,16 +688,16 @@ describe("Expression/Computed Column", async () => {
                     await table.size();
                 });
 
-                benchmark(`sort computed complex: \`${name}\``, async () => {
+                benchmark(`sort computed complex: \`${data_type}\``, async () => {
                     let config = {};
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[name];
-                        config.sort = [[COMPLEX_EXPRESSIONS[name][0], "desc"]];
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.sort = [[COMPLEX_EXPRESSIONS[data_type][0], "desc"]];
                     } else {
                         // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
                         config.sort = [["computed", "desc"]];
                     }
 
@@ -780,21 +718,16 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`row pivot computed complex: \`${name}\``, async () => {
+                benchmark(`row pivot computed complex: \`${data_type}\``, async () => {
                     let config = {};
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[name];
-                        config.row_pivots = [COMPLEX_EXPRESSIONS[name][0]];
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.row_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
                     } else {
                         // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
                         config.row_pivots = ["computed"];
                     }
 
@@ -814,22 +747,17 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`row and column pivot computed complex: \`${name}\``, async () => {
+                benchmark(`row and column pivot computed complex: \`${data_type}\``, async () => {
                     let config = {};
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[name];
-                        config.row_pivots = [COMPLEX_EXPRESSIONS[name][0]];
-                        config.column_pivots = [COMPLEX_EXPRESSIONS[name][1]];
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.row_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
+                        config.column_pivots = [COMPLEX_EXPRESSIONS[data_type][1]];
                     } else {
                         // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
                         config.row_pivots = ["computed"];
                         config.column_pivots = ["computed2"];
                     }
@@ -850,21 +778,16 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                if (table.add_computed) {
-                    console.error("Cannot run complex computed column benchmarks on versions before 0.5.0.");
-                    return;
-                }
-
-                benchmark(`column pivot computed complex: \`${name}\``, async () => {
+                benchmark(`column pivot computed complex: \`${data_type}\``, async () => {
                     let config = {};
 
-                    if (view.expression_schema) {
+                    if (table.validate_expressions) {
                         // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[name];
-                        config.column_pivots = [COMPLEX_EXPRESSIONS[name][0]];
+                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                        config.column_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
                     } else {
                         // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[name];
+                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
                         config.column_pivots = ["computed"];
                     }
 

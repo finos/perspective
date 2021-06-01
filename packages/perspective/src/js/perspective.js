@@ -25,6 +25,8 @@ if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
 
+const WARNED_KEYS = new Set();
+
 /**
  * The main API module for `@finos/perspective`.
  *
@@ -1494,13 +1496,19 @@ export default function(Module) {
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
                 if (!config[defaults.CONFIG_ALIASES[key]]) {
-                    console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                    if (!WARNED_KEYS.has(key)) {
+                        console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                        WARNED_KEYS.add(key);
+                    }
                     config[defaults.CONFIG_ALIASES[key]] = _config[key];
                 } else {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
             } else if (key === "aggregate") {
-                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
+                if (!WARNED_KEYS.has("aggregate")) {
+                    console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
+                    WARNED_KEYS.add("aggregate");
+                }
                 // backwards compatibility: deconstruct `aggregate` into
                 // `aggregates` and `columns`
                 config["aggregates"] = {};
