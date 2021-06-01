@@ -73,6 +73,7 @@ public:
 
     t_time();
     explicit t_time(std::int64_t raw_val);
+
     t_time(std::int32_t year, std::int32_t month, std::int32_t day, std::int32_t hour,
         std::int32_t min, std::int32_t sec);
 

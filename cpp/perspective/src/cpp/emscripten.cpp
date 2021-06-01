@@ -1391,7 +1391,7 @@ namespace binding {
         }
 
         auto js_expressions = config.call<std::vector<std::vector<t_val>>>("get_expressions");
-        std::vector<t_computed_expression> expressions;
+        std::vector<std::shared_ptr<t_computed_expression>> expressions;
         expressions.reserve(js_expressions.size());
 
         // Will either abort() or succeed completely, and this isn't a public
@@ -1427,10 +1427,10 @@ namespace binding {
             }
 
             // If the expression cannot be parsed, it will abort() here.
-            t_computed_expression expression = t_computed_expression_parser::precompute(
+            std::shared_ptr<t_computed_expression> expression = t_computed_expression_parser::precompute(
                 expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
-            schema->add_column(expression_alias, expression.get_dtype());
+            schema->add_column(expression_alias, expression->get_dtype());
             expressions.push_back(expression);
         }
 
@@ -1919,7 +1919,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             const std::vector<std::string>&,
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
-            const std::vector<t_computed_expression>&,
+            const std::vector<std::shared_ptr<t_computed_expression>>&,
             const std::string,
             bool>()
         .smart_ptr<std::shared_ptr<t_view_config>>("shared_ptr<t_view_config>")

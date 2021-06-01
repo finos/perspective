@@ -139,7 +139,7 @@ make_view_config(
     }
 
     auto p_expressions = config.attr("get_expressions")().cast<std::vector<std::vector<t_val>>>();
-    std::vector<t_computed_expression> expressions;
+    std::vector<std::shared_ptr<t_computed_expression>> expressions;
     expressions.reserve(p_expressions.size());
 
     // Will either abort() or succeed completely, and this isn't a public
@@ -174,11 +174,11 @@ make_view_config(
         }
 
         // If the expression cannot be parsed, it will abort() here.
-        t_computed_expression expression = t_computed_expression_parser::precompute(
+        std::shared_ptr<t_computed_expression> expression = t_computed_expression_parser::precompute(
             expression_alias, expression_string, parsed_expression_string, column_ids, schema);
 
         expressions.push_back(expression);
-        schema->add_column(expression_alias, expression.get_dtype());
+        schema->add_column(expression_alias, expression->get_dtype());
     }
 
     // construct filters with filter terms, and fill the vector of tuples

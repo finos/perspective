@@ -31,36 +31,6 @@ typedef typename exprtk::igeneric_function<t_tscalar>::generic_type t_generic_ty
 typedef typename t_generic_type::scalar_view t_scalar_view;
 typedef typename t_generic_type::string_view t_string_view;
 
-/**
- * @brief A custom exprtk function that reaches into a column and returns the
- * value of the next row. Basically like an iterator but slow and bad, and this
- * should be fully deleted with a better implementation of "get a value from
- * a column". Unfortunately, because ExprTk UDFs don't allow vector return
- * this seems like a logical first step.
- * 
- * @tparam T 
- */
-// template <typename T>
-// struct col : public exprtk::igeneric_function<T> {
-//     typedef typename exprtk::igeneric_function<T>::parameter_list_t t_parameter_list;
-//     typedef typename exprtk::igeneric_function<T>::generic_type t_generic_type;
-//     typedef typename t_generic_type::string_view t_string_view;
-
-//     col(std::shared_ptr<t_data_table> data_table, const tsl::hopscotch_set<std::string>& input_columns);
-//     col(std::shared_ptr<t_schema> schema);
-
-//     ~col();
-
-//     T next(const std::string& column_name);
-
-//     T operator()(t_parameter_list parameters);
-
-//     std::shared_ptr<t_schema> m_schema;
-//     tsl::hopscotch_set<std::string> m_input_columns;
-//     std::map<std::string, std::shared_ptr<t_column>> m_columns;
-//     std::map<std::string, t_uindex> m_ridxs;
-// };
-
 #define STRING_FUNCTION_HEADER(NAME)                                    \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {        \
         NAME(std::shared_ptr<t_vocab> expression_vocab);               \
@@ -68,7 +38,6 @@ typedef typename t_generic_type::string_view t_string_view;
         t_tscalar operator()(t_parameter_list parameters);              \
         std::shared_ptr<t_vocab> m_expression_vocab;                    \
         t_tscalar m_sentinel;                                           \
-        t_tscalar m_none;                                               \
     };                                                                  \
 
 // Place string literals into `expression_vocab` so they do not go out
@@ -108,7 +77,6 @@ struct order : public exprtk::igeneric_function<t_tscalar> {
 
     std::shared_ptr<t_vocab> m_expression_vocab;
     t_tscalar m_sentinel;
-    t_tscalar m_none;
 };
 
 /**
@@ -123,7 +91,6 @@ STRING_FUNCTION_HEADER(contains)
         NAME();                                                         \
         ~NAME();                                                        \
         t_tscalar operator()(t_parameter_list parameters);              \
-        t_tscalar m_none;                                               \
     };                                                                  \
 
 /**
@@ -172,7 +139,6 @@ struct bucket : public exprtk::igeneric_function<t_tscalar> {
 
     // faster unit lookups, since we are calling this lookup in a tight loop.
     static tsl::hopscotch_map<std::string, t_date_bucket_unit> UNIT_MAP;
-    t_tscalar m_none;
 };
 
 
@@ -227,6 +193,38 @@ FUNCTION_HEADER(is_null)
  * 
  */
 FUNCTION_HEADER(is_not_null)
+
+/**
+ * @brief Convert a column or scalar of any type to a string.
+ * 
+ */
+FUNCTION_HEADER(to_string)
+
+/**
+ * @brief Convert a column or scalar of any type to an integer, or null
+ * if the value is not parsable as an integer.
+ */
+FUNCTION_HEADER(to_integer)
+
+/**
+ * @brief Convert a column or scalar of any type to a float, or null
+ * if the value is not parsable as an float.
+ */
+FUNCTION_HEADER(to_float)
+
+/**
+ * @brief Given a Year, Month (1-12), and Day, create a new date value.
+ * Because we also extensively use `date.h` which exports its symbols under
+ * `date`, this function is given a name that does not conflict (even though
+ * it is registered using "date").
+ */
+FUNCTION_HEADER(make_date)
+
+/**
+ * @brief Given a POSIX timestamp of milliseconds since epoch, create a
+ * new datetime value.
+ */
+FUNCTION_HEADER(make_datetime)
 
 } // end namespace computed_function
 } // end namespace perspective

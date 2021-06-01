@@ -11,23 +11,14 @@
 
 namespace perspective {
 
-t_expression_tables::t_expression_tables() {
-    m_master = nullptr;
-    m_flattened = nullptr;
-    m_prev = nullptr;
-    m_current = nullptr;
-    m_delta = nullptr;
-    m_transitions = nullptr;
-}
-
 t_expression_tables::t_expression_tables(
-    const std::vector<t_computed_expression>& expressions) {
+    const std::vector<std::shared_ptr<t_computed_expression>>& expressions) {
     t_schema schema;
     t_schema transitions_schema;
 
     for (const auto& expr : expressions) {
-        const std::string& alias = expr.get_expression_alias();
-        schema.add_column(alias, expr.get_dtype());
+        const std::string& alias = expr->get_expression_alias();
+        schema.add_column(alias, expr->get_dtype());
         transitions_schema.add_column(alias, DTYPE_UINT8);
     }
 

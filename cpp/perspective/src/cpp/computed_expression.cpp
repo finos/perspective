@@ -36,6 +36,12 @@ t_computed_expression_parser::IS_NULL_FN = computed_function::is_null();
 computed_function::is_not_null
 t_computed_expression_parser::IS_NOT_NULL_FN = computed_function::is_not_null();
 
+computed_function::make_date
+t_computed_expression_parser::MAKE_DATE_FN = computed_function::make_date();
+
+computed_function::make_datetime
+t_computed_expression_parser::MAKE_DATETIME_FN = computed_function::make_datetime();
+
 // As well as functions used for validation that have state but don't
 // need it to validate input types.
 computed_function::day_of_week
@@ -62,7 +68,7 @@ t_computed_expression_parser::LOWER_VALIDATOR_FN = computed_function::lower(null
 computed_function::length
 t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nullptr);
 
-#define REGISTER_COMPUTE_FUNCTIONS()                                                        \
+#define REGISTER_COMPUTE_FUNCTIONS(vocab)                                                        \
     computed_function::day_of_week day_of_week_fn = computed_function::day_of_week(vocab);         \
     computed_function::month_of_year month_of_year_fn = computed_function::month_of_year(vocab);   \
     computed_function::intern intern_fn = computed_function::intern(vocab);    \
@@ -88,6 +94,8 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
+    sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);             \
+    sym_table.add_function("datetime", t_computed_expression_parser::MAKE_DATETIME_FN);     \
 
 #define REGISTER_VALIDATION_FUNCTIONS()                                                     \
     sym_table.add_function("today", computed_function::today);                              \
@@ -107,6 +115,8 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
+    sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);             \
+    sym_table.add_function("datetime", t_computed_expression_parser::MAKE_DATETIME_FN);     \
 
 /******************************************************************************
  *
@@ -135,7 +145,7 @@ t_computed_expression::compute(
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
-    REGISTER_COMPUTE_FUNCTIONS()
+    REGISTER_COMPUTE_FUNCTIONS(vocab)
 
     exprtk::expression<t_tscalar> expr_definition;
     std::vector<std::pair<std::string, t_tscalar>> values;
@@ -230,7 +240,7 @@ t_computed_expression_parser::init() {
         .disable_base_function(exprtk::parser<t_tscalar>::settings_store::e_bf_max);
 }
 
-t_computed_expression
+std::shared_ptr<t_computed_expression>
 t_computed_expression_parser::precompute(
     const std::string& expression_alias,
     const std::string& expression_string,
@@ -277,7 +287,7 @@ t_computed_expression_parser::precompute(
 
     t_tscalar v = expr_definition.value();
 
-    return t_computed_expression(
+    return std::make_shared<t_computed_expression>(
         expression_alias,
         expression_string,
         parsed_expression_string,
