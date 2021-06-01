@@ -60,6 +60,20 @@ class PerspectiveWebpackPlugin {
         if (this.options.inline || this.options.inlineWorker) {
             rules[rules.length - 2].use.options.inline = "no-fallback";
             rules[rules.length - 1].use.options.inline = "no-fallback";
+        } else {
+            rules.push({
+                test: /\.js$/,
+                include: /@finos\/perspective\-vieux/,
+                use: [
+                    {
+                        loader: "string-replace-loader",
+                        options: {
+                            search: /webpackMode:\s*?"eager"/g,
+                            replace: ""
+                        }
+                    }
+                ]
+            });
         }
 
         if (!(this.options.inline || this.options.inlineWasm)) {

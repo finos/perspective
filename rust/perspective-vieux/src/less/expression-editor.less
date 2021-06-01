@@ -21,7 +21,16 @@
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
     background-color: white;
-
+    
+    #monaco-container {
+        width:400px;
+        height:200px;
+        resize:both;
+        overflow:auto;
+        &::-webkit-resizer {
+            appearance: var(--monaco-container--appearance, auto);
+        }
+    }
     .monaco-editor .cursors-layer .cursor {
         visibility: var(--monaco-cursor--visibility, inherit) !important;
     }

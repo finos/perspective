@@ -29,15 +29,21 @@ impl ResizableMessage for <ExpressionEditor as Component>::Message {
 
 impl PerspectiveExpressionEditorElement {
     pub fn new(
-        target: HtmlElement,
+        custom_element: HtmlElement,
         session: Session,
-        callback: Rc<dyn Fn(JsValue)>,
+        on_save_callback: Rc<dyn Fn(JsValue)>,
+        on_init_callback: Rc<dyn Fn()>,
+        on_validate_callback: Rc<dyn Fn(bool)>,
     ) -> PerspectiveExpressionEditorElement {
-        let props = ExpressionEditorProps { callback, session };
-        let modal = ModalElement::new(target, props);
-        PerspectiveExpressionEditorElement {
-            modal,
-        }
+        let props = ExpressionEditorProps {
+            on_save_callback,
+            on_init_callback,
+            on_validate_callback,
+            session,
+        };
+
+        let modal = ModalElement::new(custom_element, props);
+        PerspectiveExpressionEditorElement { modal }
     }
 
     pub fn open(&mut self, target: HtmlElement) -> Result<(), JsValue> {
