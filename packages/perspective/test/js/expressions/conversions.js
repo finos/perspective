@@ -12,6 +12,94 @@
  * environments and parameters - different types, nulls, undefined, etc.
  */
 module.exports = perspective => {
+    describe("string()", () => {
+        it("Should create string from all column types", async () => {
+            const table = await perspective.table({
+                a: "date",
+                b: "datetime",
+                c: "integer",
+                d: "float",
+                e: "string",
+                f: "boolean"
+            });
+
+            const view = await table.view({
+                expressions: [
+                    '// computed\n string("a")',
+                    '// computed2\n string("b")',
+                    '// computed3\n string("c")',
+                    '// computed4\n string("d")',
+                    '// computed5\n string("e")',
+                    '// computed6\n string("f")',
+                    "// computed7\n string(1234.5678)"
+                ]
+            });
+
+            table.update({
+                a: [new Date(2020, 4, 30), new Date(2021, 6, 13)],
+                b: [new Date(2015, 10, 29, 23, 59, 59), new Date(2016, 10, 29, 23, 59, 59)],
+                c: [12345678, 1293879852],
+                d: [1.2792013981, 19.218975981],
+                e: ["abcdefghijklmnop", "def"],
+                f: [false, true]
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                computed: "string",
+                computed2: "string",
+                computed3: "string",
+                computed4: "string",
+                computed5: "string",
+                computed6: "string",
+                computed7: "string"
+            });
+
+            const result = await view.to_columns();
+
+            expect(result["computed"]).toEqual(["2020-05-30", "2021-07-13"]);
+            expect(result["computed2"]).toEqual(["2015-11-29 23:59:59.000", "2016-11-29 23:59:59.000"]);
+            expect(result["computed3"]).toEqual(["12345678", "1293879852"]);
+            expect(result["computed4"]).toEqual(["1.2792", "19.219"]);
+            expect(result["computed5"]).toEqual(["abcdefghijklmnop", "def"]);
+            expect(result["computed6"]).toEqual(["false", "true"]);
+            expect(result["computed7"]).toEqual(["1234.57", "1234.57"]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create string from scalars", async () => {
+            const table = await perspective.table({
+                x: [1]
+            });
+
+            const view = await table.view({
+                row_pivots: ["computed"],
+                aggregates: {
+                    computed: "last",
+                    computed2: "last",
+                    computed3: "last"
+                },
+                expressions: ["// computed\n string('abcdefg')", "// computed2\n string(1234)", "// computed3\n string(1234.5678)"]
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                computed: "string",
+                computed2: "string",
+                computed3: "string"
+            });
+
+            const result = await view.to_columns();
+
+            expect(result["__ROW_PATH__"]).toEqual([[], ["abcdefg"]]);
+            expect(result["computed2"]).toEqual(["1234", "1234"]);
+            expect(result["computed3"]).toEqual(["1234.57", "1234.57"]);
+
+            await view.delete();
+            await table.delete();
+        });
+    });
+
     describe("integer()", () => {
         it("Should create integers from scalars", async () => {
             const table = await perspective.table({x: [1]});
@@ -24,11 +112,18 @@ module.exports = perspective => {
                     `//computed5\ninteger(0.00001)`,
                     `//computed6\ninteger(1.9999999999)`,
                     `//computed7\ninteger(2147483647)`,
-                    `//computed8\ninteger(-2147483647)`
+                    `//computed8\ninteger(-2147483647)`,
+                    `//computed9\ninteger('957187281')`,
+                    `//computed10\ninteger('1928.2817')`,
+                    `//computed11\ninteger('1234abcd')`,
+                    `//computed12\ninteger('abcdefg1234')`,
+                    `//computed13\ninteger('2147483648')`,
+                    `//computed14\ninteger('-2147483649')`
                 ]
             });
 
             const result = await view.to_columns();
+
             expect(result["computed"]).toEqual([999999]);
             expect(result["computed2"]).toEqual([null]);
             expect(result["computed3"]).toEqual([null]);
@@ -37,6 +132,15 @@ module.exports = perspective => {
             expect(result["computed6"]).toEqual([1]);
             expect(result["computed7"]).toEqual([2147483647]);
             expect(result["computed8"]).toEqual([-2147483647]);
+            expect(result["computed9"]).toEqual([957187281]);
+            expect(result["computed10"]).toEqual([1928]);
+
+            // unparsable strings
+            expect(result["computed11"]).toEqual([null]);
+            expect(result["computed12"]).toEqual([null]);
+            // check for overflow
+            expect(result["computed13"]).toEqual([null]);
+            expect(result["computed14"]).toEqual([null]);
 
             await view.delete();
             await table.delete();
@@ -130,10 +234,17 @@ module.exports = perspective => {
             await table.delete();
         });
 
-        it("Should validate types", async () => {
-            const table = await perspective.table({x: "string"});
-            const validated = await table.validate_expressions([`integer('abc')`, `integer("x")`]);
-            expect(validated.expression_schema).toEqual({});
+        it("Should create integers from string columns", async () => {
+            const table = await perspective.table({x: ["1", "2", "3", "abc", "4.5", "0.101928317581729083", "-123456"]});
+
+            const view = await table.view({
+                expressions: [`//computed\ninteger("x")`]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([1, 2, 3, null, 4, 0, -123456]);
+
+            await view.delete();
             await table.delete();
         });
     });
@@ -150,7 +261,17 @@ module.exports = perspective => {
                     `//computed5\n float(0.00001)`,
                     `//computed6\n float(1.9999999992)`,
                     `//computed7\n float(2147483647.1234567)`,
-                    `//computed8\n float(-2147483647)`
+                    `//computed8\n float(-2147483647)`,
+                    `//computed9\n float('957187281.00000001')`,
+                    `//computed10\n float('1928.2817')`,
+                    `//computed11\n float('abcdefg')`,
+                    `//computed12\n float('abcdefg1234.123125')`,
+                    `//computed13\n float('2147483648.1234566')`,
+                    `//computed14\n float('-2147483649')`,
+                    `//computed15\n float('inf')`,
+                    `//computed16\n float('-inf')`,
+                    `//computed17\n float(inf)`,
+                    `//computed18\n float(-inf)`
                 ]
             });
 
@@ -162,7 +283,17 @@ module.exports = perspective => {
                 computed5: "float",
                 computed6: "float",
                 computed7: "float",
-                computed8: "float"
+                computed8: "float",
+                computed9: "float",
+                computed10: "float",
+                computed11: "float",
+                computed12: "float",
+                computed13: "float",
+                computed14: "float",
+                computed15: "float",
+                computed16: "float",
+                computed17: "float",
+                computed18: "float"
             });
 
             const result = await view.to_columns();
@@ -174,6 +305,16 @@ module.exports = perspective => {
             expect(result["computed6"]).toEqual([1.9999999992]);
             expect(result["computed7"]).toEqual([2147483647.1234567]);
             expect(result["computed8"]).toEqual([-2147483647]);
+            expect(result["computed9"]).toEqual([957187281.00000001]);
+            expect(result["computed10"]).toEqual([1928.2817]);
+            expect(result["computed11"]).toEqual([null]);
+            expect(result["computed12"]).toEqual([null]);
+            expect(result["computed13"]).toEqual([2147483648.1234566]);
+            expect(result["computed14"]).toEqual([-2147483649]);
+            expect(result["computed15"]).toEqual([Infinity]);
+            expect(result["computed16"]).toEqual([-Infinity]);
+            expect(result["computed17"]).toEqual([Infinity]);
+            expect(result["computed18"]).toEqual([-Infinity]);
 
             await view.delete();
             await table.delete();
@@ -266,10 +407,19 @@ module.exports = perspective => {
             await table.delete();
         });
 
-        it("Should validate types", async () => {
-            const table = await perspective.table({x: "string"});
-            const validated = await table.validate_expressions([`float('abc')`, `float("x")`]);
-            expect(validated.expression_schema).toEqual({});
+        it("Should create floats from string columns", async () => {
+            const table = await perspective.table({
+                x: ["1.1238757869112321", "2.0000001", "abcdefg1234.12878591", "12354.1827389abc", "4.555555555", "0.101928317581729083", "-123456.21831729054781"]
+            });
+
+            const view = await table.view({
+                expressions: [`//computed\n float("x")`]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([1.1238757869112321, 2.0000001, null, null, 4.555555555, 0.101928317581729083, -123456.21831729054781]);
+
+            await view.delete();
             await table.delete();
         });
     });
@@ -421,6 +571,25 @@ module.exports = perspective => {
             const result = await view.to_columns();
             expect(result["computed"]).toEqual(Array(4).fill(a));
             expect(result["computed2"]).toEqual(Array(4).fill(b));
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create a datetime from a float()", async () => {
+            const table = await perspective.table({
+                x: [new Date(2005, 6, 31, 11, 59, 32)]
+            });
+
+            const view = await table.view({
+                expressions: [`//computed \n datetime(float("x"))`]
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                computed: "datetime"
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([new Date(2005, 6, 31, 11, 59, 32).getTime()]);
             await view.delete();
             await table.delete();
         });

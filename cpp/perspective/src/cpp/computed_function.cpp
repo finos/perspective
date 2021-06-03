@@ -1189,6 +1189,50 @@ t_tscalar is_not_null::operator()(t_parameter_list parameters) {
     return rval;
 }
 
+to_string::to_string(std::shared_ptr<t_vocab> expression_vocab)
+    : exprtk::igeneric_function<t_tscalar>("T")
+    , m_expression_vocab(expression_vocab)  {
+        t_tscalar sentinel;
+        sentinel.clear();
+
+        // The sentinel is a string scalar that is returned to indicate a
+        // valid call to the function without actually computing any values.
+        sentinel.m_type = DTYPE_STR;
+        sentinel.m_data.m_charptr = nullptr;
+        m_sentinel = sentinel;
+    }
+
+to_string::~to_string() {}
+
+t_tscalar to_string::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_STR;
+    std::string temp_str;
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
+    temp_str = val.to_string();
+
+    // don't try to intern an empty string as it will throw an error, but
+    // by this point we know the params are valid - so return the sentinel
+    // string value.
+    if (temp_str == "" || m_expression_vocab == nullptr) {
+        return m_sentinel;
+    }
+
+    t_uindex interned = m_expression_vocab->get_interned(temp_str);
+    rval.set(m_expression_vocab->unintern_c(interned));
+    return rval;
+}
+
 to_integer::to_integer()
     : exprtk::igeneric_function<t_tscalar>("T") {}
 
@@ -1210,26 +1254,31 @@ t_tscalar to_integer::operator()(t_parameter_list parameters) {
     t_scalar_view temp(gt);
     val.set(temp());
 
-    if (val.get_dtype() == DTYPE_STR) {
-        rval.m_status = STATUS_CLEAR;
-        return rval;
-    }
-
     if (!val.is_valid()) {
         return rval;
     }
 
-    double value = val.to_double();
+    double number = 0;
+
+    // Parse numbers inside strings
+    if (val.get_dtype() == DTYPE_STR) {
+        std::stringstream ss(val.to_string());
+        ss >> number;
+
+        if (ss.fail()) return rval;
+    } else {
+        number = val.to_double();
+    }
 
 #ifdef PSP_ENABLE_WASM
     // check for overflow
-    if (value > std::numeric_limits<std::int32_t>::max() || value < std::numeric_limits<std::int32_t>::min()) {
+    if (number > std::numeric_limits<std::int32_t>::max() || number < std::numeric_limits<std::int32_t>::min()) {
         return rval;
     }
 
-    rval.set(static_cast<std::int32_t>(value));
+    rval.set(static_cast<std::int32_t>(number));
 #else
-    rval.set(static_cast<std::int64_t>(value));
+    rval.set(static_cast<std::int64_t>(number));
 #endif
 
     return rval;
@@ -1250,16 +1299,28 @@ t_tscalar to_float::operator()(t_parameter_list parameters) {
     t_scalar_view temp(gt);
     val.set(temp());
 
-    if (val.get_dtype() == DTYPE_STR) {
-        rval.m_status = STATUS_CLEAR;
-        return rval;
-    }
-
     if (!val.is_valid()) {
         return rval;
     }
 
-    rval.set(val.to_double());
+    double number = 0;
+
+    // Parse numbers inside strings
+    if (val.get_dtype() == DTYPE_STR) {
+        std::stringstream ss(val.to_string());
+        ss >> number;
+
+        if (ss.fail()) return rval;
+    } else {
+        number = val.to_double();
+    }
+
+    // Don't allow NaN to leak
+    if (std::isnan(number)) {
+        return rval;
+    }
+
+    rval.set(number);
     return rval;
 }
 

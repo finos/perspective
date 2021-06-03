@@ -1145,3 +1145,72 @@ class TestViewExpression(object):
 
         assert result["computed"] == [datetime(2015, 11, 29, 23, 59, 59)]
 
+    def test_view_datetime_expression_roundtrip(self):
+        table = Table({
+            "x": [datetime(2015, 11, 29, 23, 59, 59)]
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n datetime(float("x"))'
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "computed": datetime
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == [datetime(2015, 11, 29, 23, 59, 59)]
+
+    def test_view_string_expression(self):
+        table = Table({
+            "a": date,
+            "b": datetime,
+            "c": int,
+            "d": float,
+            "e": str,
+            "f": bool
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n string("a")',
+                '// computed2\n string("b")',
+                '// computed3\n string("c")',
+                '// computed4\n string("d")',
+                '// computed5\n string("e")',
+                '// computed6\n string("f")',
+                '// computed7\n string(1234.5678)'
+            ]
+        )
+
+        table.update({
+            "a": [date(2020, 5, 30), date(2021, 7, 13)],
+            "b": [datetime(2015, 11, 29, 23, 59, 59), datetime(2016, 11, 29, 23, 59, 59)],
+            "c": [12345678, 1293879852],
+            "d": [1.2792013981, 19.218975981],
+            "e": ["abcdefghijklmnop", "def"],
+            "f": [False, True]
+        })
+
+        assert view.expression_schema() == {
+            "computed": str,
+            "computed2": str,
+            "computed3": str,
+            "computed4": str,
+            "computed5": str,
+            "computed6": str,
+            "computed7": str
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == ["2020-05-30", "2021-07-13"]
+        assert result["computed2"] == ["2015-11-29 23:59:59.000", "2016-11-29 23:59:59.000"]
+        assert result["computed3"] == ["12345678", "1293879852"]
+        assert result["computed4"] == ["1.2792", "19.219"]
+        assert result["computed5"] == ["abcdefghijklmnop", "def"]
+        assert result["computed6"] == ["false", "true"]
+        assert result["computed7"] == ["1234.57"] * 2

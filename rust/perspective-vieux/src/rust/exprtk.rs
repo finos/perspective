@@ -37,6 +37,13 @@ thread_local! {
     static COMPLETIONS: RegisterCompletionItemSuggestions = RegisterCompletionItemSuggestions {
         suggestions: vec![
             CompletionItemSuggestion {
+                label: "var",
+                kind: 17,
+                insert_text: "var ${1:x := 1}",
+                insert_text_rules: 4,
+                documentation: "Declare a new local variable",
+            },
+            CompletionItemSuggestion {
                 label: "abs",
                 kind: 1,
                 insert_text: "abs(${1:x})",
@@ -53,7 +60,7 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "bucket",
                 kind: 1,
-                insert_text: "bucket(${1:x})",
+                insert_text: "bucket(${1:x}, ${2:y})",
                 insert_text_rules: 4,
                 documentation: "Bucket x by y",
             },
@@ -130,7 +137,7 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "logn",
                 kind: 1,
-                insert_text: "logn(${1:x})",
+                insert_text: "logn(${1:x}, ${2:N})",
                 insert_text_rules: 4,
                 documentation: "Base N log of x where N >= 0",
             },
@@ -165,14 +172,14 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "pow",
                 kind: 1,
-                insert_text: "pow(${1:x})",
+                insert_text: "pow(${1:x}, ${2:y})",
                 insert_text_rules: 4,
                 documentation: "x to the power of y",
             },
             CompletionItemSuggestion {
                 label: "root",
                 kind: 1,
-                insert_text: "root(${1:x})",
+                insert_text: "root(${1:x}, ${2:N})",
                 insert_text_rules: 4,
                 documentation: "N-th root of x where N >= 0",
             },
@@ -340,7 +347,7 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "concat",
                 kind: 1,
-                insert_text: "concat(${1:x})",
+                insert_text: "concat(${1:x}, ${2:y})",
                 insert_text_rules: 4,
                 documentation: "Concatenate string literals and columns",
             },
@@ -382,14 +389,14 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "now",
                 kind: 1,
-                insert_text: "now(${1:x})",
+                insert_text: "now()",
                 insert_text_rules: 4,
                 documentation: "The current datetime in local time",
             },
             CompletionItemSuggestion {
                 label: "today",
                 kind: 1,
-                insert_text: "today(${1:x})",
+                insert_text: "today()",
                 insert_text_rules: 4,
                 documentation: "The current date in local time",
             },
@@ -429,18 +436,60 @@ thread_local! {
                 documentation: "Boolean value false",
             },
             CompletionItemSuggestion {
-                label: "if else",
-                kind: 1,
-                insert_text: "if else(${1:x})",
+                label: "if",
+                kind: 17,
+                insert_text: "if (${1:condition}) {} else {}",
                 insert_text_rules: 4,
-                documentation: "if/else conditional",
+                documentation: "If/else conditional",
+            },
+            CompletionItemSuggestion {
+                label: "else if",
+                kind: 17,
+                insert_text: "else if (${1:condition}) {}",
+                insert_text_rules: 4,
+                documentation: "Else if conditional",
             },
             CompletionItemSuggestion {
                 label: "for",
-                kind: 1,
-                insert_text: "for(${1:x})",
+                kind: 17,
+                insert_text: "for (${1:x}) {}",
                 insert_text_rules: 4,
                 documentation: "For loop",
+            },
+            CompletionItemSuggestion {
+                label: "string",
+                kind: 1,
+                insert_text: "string(${1:x})",
+                insert_text_rules: 4,
+                documentation: "Convert the argument to a string",
+            },
+            CompletionItemSuggestion {
+                label: "integer",
+                kind: 1,
+                insert_text: "integer(${1:x})",
+                insert_text_rules: 4,
+                documentation: "Convert the argument to an integer",
+            },
+            CompletionItemSuggestion {
+                label: "float",
+                kind: 1,
+                insert_text: "float(${1:x})",
+                insert_text_rules: 4,
+                documentation: "Convert the argument to a float",
+            },
+            CompletionItemSuggestion {
+                label: "date",
+                kind: 1,
+                insert_text: "date(${1:year}, ${1:month}, ${1:day})",
+                insert_text_rules: 4,
+                documentation: "Given a year, month (1-12) and day, create a new date",
+            },
+            CompletionItemSuggestion {
+                label: "datetime",
+                kind: 1,
+                insert_text: "datetime(${1:timestamp})",
+                insert_text_rules: 4,
+                documentation: "Given a POSIX timestamp of milliseconds since epoch, create a new datetime",
             },
         ]
     };

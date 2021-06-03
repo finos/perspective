@@ -74,6 +74,9 @@ t_computed_expression_parser::LOWER_VALIDATOR_FN = computed_function::lower(null
 computed_function::length
 t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nullptr);
 
+computed_function::to_string
+t_computed_expression_parser::TO_STRING_VALIDATOR_FN = computed_function::to_string(nullptr);
+
 #define REGISTER_COMPUTE_FUNCTIONS(vocab)                                                        \
     computed_function::day_of_week day_of_week_fn = computed_function::day_of_week(vocab);         \
     computed_function::month_of_year month_of_year_fn = computed_function::month_of_year(vocab);   \
@@ -83,6 +86,7 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     computed_function::upper upper_fn = computed_function::upper(vocab);       \
     computed_function::lower lower_fn = computed_function::lower(vocab);       \
     computed_function::length length_fn = computed_function::length(vocab);    \
+    computed_function::to_string to_string_fn = computed_function::to_string(vocab);        \
     sym_table.add_function("today", computed_function::today);                              \
     sym_table.add_function("now", computed_function::now);                                  \
     sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);              \
@@ -95,6 +99,7 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("upper", upper_fn);                                              \
     sym_table.add_function("lower", lower_fn);                                              \
     sym_table.add_function("length", length_fn);                                            \
+    sym_table.add_function("string", to_string_fn);                                         \
     sym_table.add_reserved_function("min", t_computed_expression_parser::MIN_FN);           \
     sym_table.add_reserved_function("max", t_computed_expression_parser::MAX_FN);           \
     sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
@@ -123,6 +128,7 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
+    sym_table.add_function("string", t_computed_expression_parser::TO_STRING_VALIDATOR_FN); \
     sym_table.add_function("integer", t_computed_expression_parser::TO_INTEGER_FN);         \
     sym_table.add_function("float", t_computed_expression_parser::TO_FLOAT_FN);             \
     sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);             \

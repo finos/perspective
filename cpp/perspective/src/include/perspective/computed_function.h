@@ -198,19 +198,18 @@ FUNCTION_HEADER(is_not_null)
  * @brief Convert a column or scalar of any type to a string.
  * 
  */
-FUNCTION_HEADER(to_string)
+STRING_FUNCTION_HEADER(to_string)
 
 /**
- * @brief Convert a column or scalar of a non-string type to an integer, or null
- * if the value is not parsable as an integer. If a string is passed in,
- * return 0.
+ * @brief Convert a column or scalar to an integer, or null if the value is not
+ * parsable as an integer. In the WASM runtime, the integer is 32-bit and will
+ * return none if the result under/over flows.
  */
 FUNCTION_HEADER(to_integer)
 
 /**
- * @brief Convert a column or scalar of a non-string type to a float, or null
- * if the value is not parsable as an float. If a string is passed in,
- * return 0.
+ * @brief Convert a column or scalar to a float, or null if the value is not
+ * parsable as an float.
  */
 FUNCTION_HEADER(to_float)
 
