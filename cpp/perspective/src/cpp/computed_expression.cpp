@@ -39,6 +39,12 @@ t_computed_expression_parser::IS_NOT_NULL_FN = computed_function::is_not_null();
 computed_function::make_date
 t_computed_expression_parser::MAKE_DATE_FN = computed_function::make_date();
 
+computed_function::to_integer
+t_computed_expression_parser::TO_INTEGER_FN = computed_function::to_integer();
+
+computed_function::to_float
+t_computed_expression_parser::TO_FLOAT_FN = computed_function::to_float();
+
 computed_function::make_datetime
 t_computed_expression_parser::MAKE_DATETIME_FN = computed_function::make_datetime();
 
@@ -94,6 +100,8 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
+    sym_table.add_function("integer", t_computed_expression_parser::TO_INTEGER_FN);         \
+    sym_table.add_function("float", t_computed_expression_parser::TO_FLOAT_FN);             \
     sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);             \
     sym_table.add_function("datetime", t_computed_expression_parser::MAKE_DATETIME_FN);     \
 
@@ -115,6 +123,8 @@ t_computed_expression_parser::LENGTH_VALIDATOR_FN = computed_function::length(nu
     sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);      \
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);            \
     sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);    \
+    sym_table.add_function("integer", t_computed_expression_parser::TO_INTEGER_FN);         \
+    sym_table.add_function("float", t_computed_expression_parser::TO_FLOAT_FN);             \
     sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);             \
     sym_table.add_function("datetime", t_computed_expression_parser::MAKE_DATETIME_FN);     \
 

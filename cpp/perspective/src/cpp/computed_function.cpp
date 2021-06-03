@@ -1189,6 +1189,80 @@ t_tscalar is_not_null::operator()(t_parameter_list parameters) {
     return rval;
 }
 
+to_integer::to_integer()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+to_integer::~to_integer() {}
+
+t_tscalar to_integer::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar rval;
+    rval.clear();
+
+    // Use 32-bit integers for WASM
+#ifdef PSP_ENABLE_WASM
+    rval.m_type = DTYPE_INT32;
+#else
+    rval.m_type = DTYPE_INT64;
+#endif
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
+
+    if (val.get_dtype() == DTYPE_STR) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
+    }
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
+    double value = val.to_double();
+
+#ifdef PSP_ENABLE_WASM
+    // check for overflow
+    if (value > std::numeric_limits<std::int32_t>::max() || value < std::numeric_limits<std::int32_t>::min()) {
+        return rval;
+    }
+
+    rval.set(static_cast<std::int32_t>(value));
+#else
+    rval.set(static_cast<std::int64_t>(value));
+#endif
+
+    return rval;
+}
+
+to_float::to_float()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+to_float::~to_float() {}
+
+t_tscalar to_float::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
+
+    if (val.get_dtype() == DTYPE_STR) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
+    }
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
+    rval.set(val.to_double());
+    return rval;
+}
+
 make_date::make_date()
     : exprtk::igeneric_function<t_tscalar>("TTT") {}
 

@@ -12,6 +12,268 @@
  * environments and parameters - different types, nulls, undefined, etc.
  */
 module.exports = perspective => {
+    describe("integer()", () => {
+        it("Should create integers from scalars", async () => {
+            const table = await perspective.table({x: [1]});
+            const view = await table.view({
+                expressions: [
+                    `//computed\ninteger(999999.999)`,
+                    `//computed2\ninteger(2147483648)`,
+                    `//computed3\ninteger(-2147483649)`,
+                    `//computed4\ninteger(123456789)`,
+                    `//computed5\ninteger(0.00001)`,
+                    `//computed6\ninteger(1.9999999999)`,
+                    `//computed7\ninteger(2147483647)`,
+                    `//computed8\ninteger(-2147483647)`
+                ]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([999999]);
+            expect(result["computed2"]).toEqual([null]);
+            expect(result["computed3"]).toEqual([null]);
+            expect(result["computed4"]).toEqual([123456789]);
+            expect(result["computed5"]).toEqual([0]);
+            expect(result["computed6"]).toEqual([1]);
+            expect(result["computed7"]).toEqual([2147483647]);
+            expect(result["computed8"]).toEqual([-2147483647]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create integers from integer columns", async () => {
+            const table = await perspective.table({x: "integer"});
+
+            const view = await table.view({
+                expressions: [`//computed\ninteger("x")`]
+            });
+
+            table.update({
+                x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([100, -17238, 0, -1, null, 12836215]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create integers from float columns", async () => {
+            const table = await perspective.table({x: "float"});
+
+            const view = await table.view({
+                expressions: [`//computed\ninteger("x")`]
+            });
+
+            table.update({
+                x: [100.9999999, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([100, -17238, 0, -1, null, 12836215]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create integers from date columns", async () => {
+            const table = await perspective.table({x: "date"});
+
+            const view = await table.view({
+                expressions: [`//computed\ninteger("x")`]
+            });
+
+            const value = new Date(2020, 5, 30);
+
+            table.update({
+                x: [value]
+            });
+
+            const result = await view.to_columns();
+
+            // The custom format that Perspective uses to store dates - we
+            // can validate correctness by applying bitmask/shifting.
+            const expected = 132384030;
+
+            expect(result["computed"]).toEqual([expected]);
+
+            const year = (expected & 0xffff0000) >> 16;
+            const month = (expected & 0x0000ff00) >> 8;
+            const day = (expected & 0x000000ff) >> 0;
+
+            expect(year).toEqual(2020);
+            expect(month).toEqual(5);
+            expect(day).toEqual(30);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create integers from datetime columns", async () => {
+            const table = await perspective.table({x: "datetime"});
+
+            const view = await table.view({
+                expressions: [`//computed\ninteger("x")`]
+            });
+
+            // first will not overflow, second will
+            table.update({
+                x: [new Date(1970, 0, 1, 1), new Date(2020, 0, 1, 1)]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([new Date(1970, 0, 1, 1).getTime(), null]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should validate types", async () => {
+            const table = await perspective.table({x: "string"});
+            const validated = await table.validate_expressions([`integer('abc')`, `integer("x")`]);
+            expect(validated.expression_schema).toEqual({});
+            await table.delete();
+        });
+    });
+
+    describe("float()", () => {
+        it("Should create float from scalars", async () => {
+            const table = await perspective.table({x: [1]});
+            const view = await table.view({
+                expressions: [
+                    `//computed\n float(999999.999)`,
+                    `//computed2\n float(2147483648)`,
+                    `//computed3\n float(-2147483649)`,
+                    `//computed4\n float(123456789)`,
+                    `//computed5\n float(0.00001)`,
+                    `//computed6\n float(1.9999999992)`,
+                    `//computed7\n float(2147483647.1234567)`,
+                    `//computed8\n float(-2147483647)`
+                ]
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                computed: "float",
+                computed2: "float",
+                computed3: "float",
+                computed4: "float",
+                computed5: "float",
+                computed6: "float",
+                computed7: "float",
+                computed8: "float"
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([999999.999]);
+            expect(result["computed2"]).toEqual([2147483648]);
+            expect(result["computed3"]).toEqual([-2147483649]);
+            expect(result["computed4"]).toEqual([123456789]);
+            expect(result["computed5"]).toEqual([0.00001]);
+            expect(result["computed6"]).toEqual([1.9999999992]);
+            expect(result["computed7"]).toEqual([2147483647.1234567]);
+            expect(result["computed8"]).toEqual([-2147483647]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create float from integer columns", async () => {
+            const table = await perspective.table({x: "integer"});
+
+            const view = await table.view({
+                expressions: [`//computed\nfloat("x")`]
+            });
+
+            table.update({
+                x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([100, -17238, 0, -1, null, 12836215]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create float from float columns", async () => {
+            const table = await perspective.table({x: "float"});
+
+            const view = await table.view({
+                expressions: [`//computed\n float("x")`]
+            });
+
+            table.update({
+                x: [100.9999999, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([100.9999999, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create float from date columns", async () => {
+            const table = await perspective.table({x: "date"});
+
+            const view = await table.view({
+                expressions: [`//computed\nfloat("x")`]
+            });
+
+            const value = new Date(2020, 5, 30);
+
+            table.update({
+                x: [value]
+            });
+
+            const result = await view.to_columns();
+
+            // The custom format that Perspective uses to store dates - we
+            // can validate correctness by applying bitmask/shifting.
+            const expected = 132384030;
+
+            expect(result["computed"]).toEqual([expected]);
+
+            const year = (expected & 0xffff0000) >> 16;
+            const month = (expected & 0x0000ff00) >> 8;
+            const day = (expected & 0x000000ff) >> 0;
+
+            expect(year).toEqual(2020);
+            expect(month + 1).toEqual(6);
+            expect(day).toEqual(30);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should create float from datetime columns", async () => {
+            const table = await perspective.table({x: "datetime"});
+
+            const view = await table.view({
+                expressions: [`//computed\nfloat("x")`]
+            });
+
+            table.update({
+                x: [new Date(2020, 0, 1, 1), new Date(2020, 0, 1, 1, 50)]
+            });
+
+            const result = await view.to_columns();
+            expect(result["computed"]).toEqual([new Date(2020, 0, 1, 1).getTime(), new Date(2020, 0, 1, 1, 50).getTime()]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should validate types", async () => {
+            const table = await perspective.table({x: "string"});
+            const validated = await table.validate_expressions([`float('abc')`, `float("x")`]);
+            expect(validated.expression_schema).toEqual({});
+            await table.delete();
+        });
+    });
+
     describe("date()", () => {
         it("Should create a date from scalars", async () => {
             const table = await perspective.table({

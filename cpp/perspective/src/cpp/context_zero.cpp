@@ -678,7 +678,6 @@ t_ctx0::read_column_from_gstate(
     const std::string& colname,
     const std::vector<t_tscalar>& pkeys,
     std::vector<t_tscalar>& out_data) const {
-    std::shared_ptr<t_data_table> master_table = m_gstate->get_table();
 
     if (is_expression_column(colname)) {
         m_gstate->read_column(
@@ -687,6 +686,7 @@ t_ctx0::read_column_from_gstate(
             pkeys,
             out_data);
     } else {
+        std::shared_ptr<t_data_table> master_table = m_gstate->get_table();
         m_gstate->read_column(
             *master_table,
             colname,

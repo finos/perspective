@@ -201,14 +201,16 @@ FUNCTION_HEADER(is_not_null)
 FUNCTION_HEADER(to_string)
 
 /**
- * @brief Convert a column or scalar of any type to an integer, or null
- * if the value is not parsable as an integer.
+ * @brief Convert a column or scalar of a non-string type to an integer, or null
+ * if the value is not parsable as an integer. If a string is passed in,
+ * return 0.
  */
 FUNCTION_HEADER(to_integer)
 
 /**
- * @brief Convert a column or scalar of any type to a float, or null
- * if the value is not parsable as an float.
+ * @brief Convert a column or scalar of a non-string type to a float, or null
+ * if the value is not parsable as an float. If a string is passed in,
+ * return 0.
  */
 FUNCTION_HEADER(to_float)
 

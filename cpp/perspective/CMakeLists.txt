@@ -250,7 +250,6 @@ if (PSP_WASM_BUILD)
 			-s DISABLE_EXCEPTION_CATCHING=0 \
 			-s ASSERTIONS=2 \
 			-s DEMANGLE_SUPPORT=1 \
-			-s SAFE_HEAP=1 \
 			")
 	else()
 		set(OPT_FLAGS " \

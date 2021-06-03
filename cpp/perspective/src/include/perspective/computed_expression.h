@@ -136,6 +136,8 @@ public:
     static computed_function::max_fn MAX_FN;
     static computed_function::is_null IS_NULL_FN;
     static computed_function::is_not_null IS_NOT_NULL_FN;
+    static computed_function::to_integer TO_INTEGER_FN;
+    static computed_function::to_float TO_FLOAT_FN;
     static computed_function::make_date MAKE_DATE_FN;
     static computed_function::make_datetime MAKE_DATETIME_FN;
 };
