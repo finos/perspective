@@ -56,5 +56,19 @@ namespace binding {
     t_val scalar_to(const t_tscalar& scalar);
     t_val scalar_to_val(
         const t_tscalar& scalar, bool cast_double = false, bool cast_string = false);
+
+
+    // Create a static wstring -> string converter. Because the constructor
+    // we use (with error strings) uses a shift state that is reset before
+    // each conversion (), it should be safe to statically initialize the
+    // converter just once, especially as there are no thread safety issues
+    // (yet) to worry about in the WASM binding.
+    struct _wstring_converter {
+        // Store the static variable inside a class so it doesn't get shadowed
+        // in every .cpp file. The static variable gets initialized at the top
+        // of emscripten.cpp.
+        static std::wstring_convert<utf8convert_type, wchar_t> CONVERTER;
+    };
+
 } // namespace binding
 } // namespace perspective

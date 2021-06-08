@@ -18,6 +18,10 @@ using namespace perspective;
 namespace perspective {
 namespace binding {
 
+    // Initialize static wstring -> string converter for use in `scalar_to_val`.
+    std::wstring_convert<utf8convert_type, wchar_t> _wstring_converter::CONVERTER = 
+        std::wstring_convert<utf8convert_type, wchar_t>("", L"<Invalid>");
+
     /******************************************************************************
      *
      * Utility
@@ -150,8 +154,7 @@ namespace binding {
             }
             case DTYPE_STR:
             default: {
-                std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
-                return t_val(converter.from_bytes(scalar.to_string()));
+                return t_val(_wstring_converter::CONVERTER.from_bytes(scalar.to_string()));
             }
         }
     }
