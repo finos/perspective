@@ -10,7 +10,7 @@ use js_intern::*;
 use js_sys::Reflect;
 use serde_json::error;
 use std::cell::Cell;
-use wasm_bindgen::{JsCast, prelude::*};
+use wasm_bindgen::{prelude::*, JsCast};
 
 use crate::js_object;
 use crate::utils::monaco::*;
@@ -444,28 +444,6 @@ thread_local! {
             },
         ]
     };
-
-    static THEME: DefineThemeArgs<'static> = DefineThemeArgs {
-        base: "vs",
-        inherit: true,
-        rules: vec![
-            // DefineThemeToken {
-            //     token: "exprtk-comment",
-            //     foreground: "#007700",
-            //     font_style: None,
-            // },
-            // DefineThemeToken {
-            //     token: "exprtk-symbol",
-            //     foreground: "#0000ff",
-            //     font_style: None,
-            // },
-            // DefineThemeToken {
-            //     token: "exprtk-column",
-            //     foreground: "#990000",
-            //     font_style: None,
-            // },
-        ],
-    }
 }
 
 /// This helper _must_ create the `JsValue` anew on each call, or it causes strange
@@ -477,7 +455,7 @@ fn get_suggestions() -> JsValue {
 
 /// Initializes the `plang` language definition using Monaco's `Languages`
 /// module.
-async fn init_language() -> Result<Editor, error::Error> {
+async fn init_language(base: &str) -> Result<Editor, error::Error> {
     let exts = monaco_exts();
     let module = monaco_module().await.unchecked_into::<MonacoModule>();
     let languages = module.languages();
@@ -489,7 +467,14 @@ async fn init_language() -> Result<Editor, error::Error> {
     let items = js_object!("provideCompletionItems", provider.as_ref()).into();
     provider.forget();
     languages.register_completion_item_provider("exprtk", items);
-    editor.define_theme("exprtk-theme", THEME.with(|x| JsValue::from_serde(&x))?);
+    editor.define_theme(
+        "exprtk-theme",
+        JsValue::from_serde(&DefineThemeArgs {
+            base,
+            inherit: true,
+            rules: vec![],
+        })?,
+    );
     exts.await;
     Ok(editor)
 }
@@ -504,13 +489,16 @@ fn init_environment() -> Result<(), error::Error> {
 }
 
 /// Initialize the `ExprTK` language in `monaco`.  This should only be done once.
-pub async fn init_monaco() -> Result<Editor, error::Error> {
+pub async fn init_monaco(base: &str) -> Result<Editor, error::Error> {
     if IS_REGISTERED.with(|x| !x.get()) {
-        let editor = init_language().await?;
+        let editor = init_language(base).await?;
         init_environment()?;
         IS_REGISTERED.with(|x| x.set(true));
         Ok(editor)
     } else {
-        Ok(monaco_module().await.unchecked_into::<MonacoModule>().editor())
+        Ok(monaco_module()
+            .await
+            .unchecked_into::<MonacoModule>()
+            .editor())
     }
 }
