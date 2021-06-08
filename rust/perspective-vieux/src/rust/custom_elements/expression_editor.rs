@@ -34,11 +34,13 @@ impl PerspectiveExpressionEditorElement {
         on_save_callback: Rc<dyn Fn(JsValue)>,
         on_init_callback: Rc<dyn Fn()>,
         on_validate_callback: Rc<dyn Fn(bool)>,
+        monaco_theme: String
     ) -> PerspectiveExpressionEditorElement {
         let props = ExpressionEditorProps {
             on_save_callback,
             on_init_callback,
             on_validate_callback,
+            monaco_theme,
             session,
         };
 

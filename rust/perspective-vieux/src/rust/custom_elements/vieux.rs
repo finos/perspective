@@ -21,6 +21,16 @@ use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::prelude::*;
 
+fn get_theme(elem: &HtmlElement) -> String {
+    let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();
+    match &styles.get_property_value("--monaco-theme") {
+        Err(_) => "vs",
+        Ok(ref s) if s.trim() == "" => "vs",
+        Ok(x) => x.trim(),
+    }
+    .to_owned()
+}
+
 /// A `customElements` external API.
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -119,12 +129,14 @@ impl PerspectiveVieuxElement {
                 .unwrap();
         });
 
+        let monaco_theme = get_theme(&target);
         let mut element = PerspectiveExpressionEditorElement::new(
             editor,
             self.session.clone(),
             on_save,
             on_init,
             on_validate,
+            monaco_theme,
         );
 
         element.open(target).unwrap();

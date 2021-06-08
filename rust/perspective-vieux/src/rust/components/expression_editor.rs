@@ -33,6 +33,7 @@ pub struct ExpressionEditorProps {
     pub on_init_callback: Rc<dyn Fn()>,
     pub on_validate_callback: Rc<dyn Fn(bool)>,
     pub session: Session,
+    pub monaco_theme: String,
 }
 
 /// A label widget which displays a row count and a "projection" count, the number of
@@ -144,7 +145,7 @@ impl Component for ExpressionEditor {
         if first_render {
             let this = self.clone();
             let _ = future_to_promise(async move {
-                let editor = init_monaco().await.unwrap();
+                let editor = init_monaco(&this.props.monaco_theme).await.unwrap();
                 let args = EditorArgs {
                     theme: "exprtk-theme",
                     value: "",
