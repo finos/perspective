@@ -28,29 +28,63 @@ extern "C" {
     pub fn new() -> EditorWorker;
 }
 
-#[cfg_attr(not(test), wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.api"))]
-#[cfg_attr(test, wasm_bindgen(inline_js = "export function editor() {} export function languages() {}"))]
+#[cfg_attr(not(test), wasm_bindgen(inline_js = "
+    export async function monaco_module() {
+        return import(
+            /* webpackChunkName: \"perspective-viewer.monaco-exts\" */
+            /* webpackMode: \"eager\" */
+            '../../../src/js/monaco.js'
+        ); 
+    }
+"))]
+#[cfg_attr(test, wasm_bindgen(inline_js = "export async function monaco_module() {}"))]
 extern "C" {
-    #[wasm_bindgen(js_name = editor)]
+    #[wasm_bindgen(js_name = "monaco_module")]
+    pub async fn monaco_exts();
+}
+
+#[cfg_attr(not(test), wasm_bindgen(inline_js = "
+    export async function monaco_module() { 
+        return import(
+            /* webpackChunkName: \"perspective-viewer.monaco\" */
+            /* webpackMode: \"eager\" */
+            'monaco-editor/esm/vs/editor/editor.api'
+        ); 
+    }
+"))]
+#[cfg_attr(test, wasm_bindgen(inline_js = "export async function monaco_module() {}"))]
+extern "C" {
+    pub type MonacoModule;
+
+    #[wasm_bindgen(js_name = "monaco_module")]
+    pub async fn monaco_module() -> JsValue;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn editor(this: &MonacoModule) -> Editor;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn languages(this: &MonacoModule) -> Languages;
+
+    // #[wasm_bindgen(js_name = editor)]
     pub type Editor;
 
-    #[wasm_bindgen(static_method_of = Editor, js_class = "editor")]
-    pub fn create(container: HtmlElement, options: JsValue) -> MonacoEditor;
+    #[wasm_bindgen(method)]
+    pub fn create(this: &Editor, container: HtmlElement, options: JsValue) -> MonacoEditor;
 
-    #[wasm_bindgen(static_method_of = Editor, js_class = "editor", js_name = "defineTheme")]
-    pub fn define_theme(id: &str, options: JsValue);
+    #[wasm_bindgen(method, js_name = "defineTheme")]
+    pub fn define_theme(this: &Editor, id: &str, options: JsValue);
 
-    #[wasm_bindgen(js_name = languages)]
+    // #[wasm_bindgen(js_name = languages)]
     pub type Languages;
 
-    #[wasm_bindgen(static_method_of = Languages, js_class = "languages")]
-    pub fn register(options: JsValue);
+    #[wasm_bindgen(method)]
+    pub fn register(this: &Languages, options: JsValue);
 
-    #[wasm_bindgen(static_method_of = Languages, js_class = "languages", js_name = "setMonarchTokensProvider")]
-    pub fn set_monarch_tokens_provider(id: &str, options: JsValue);
+    #[wasm_bindgen(method, js_name = "setMonarchTokensProvider")]
+    pub fn set_monarch_tokens_provider(this: &Languages, id: &str, options: JsValue);
 
-    #[wasm_bindgen(static_method_of = Languages, js_class = "languages", js_name = "registerCompletionItemProvider")]
-    pub fn register_completion_item_provider(id: &str, options: JsValue);
+    #[wasm_bindgen(method, js_name = "registerCompletionItemProvider")]
+    pub fn register_completion_item_provider(this: &Languages, id: &str, options: JsValue);
 
     #[derive(Clone)]
     pub type MonacoEditor;

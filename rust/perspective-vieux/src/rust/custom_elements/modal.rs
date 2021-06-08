@@ -18,7 +18,7 @@ use yew::prelude::*;
 /// to any existing on-page elements, accounting for viewport, scroll position, etc.
 pub struct ModalElement<T: Component> {
     root: ComponentLink<T>,
-    elem: HtmlElement,
+    custom_element: HtmlElement,
     target: Rc<RefCell<Option<HtmlElement>>>,
     blurhandler: Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>,
 }
@@ -33,7 +33,7 @@ where
     fn clone(&self) -> Self {
         ModalElement {
             root: self.root.clone(),
-            elem: self.elem.clone(),
+            custom_element: self.custom_element.clone(),
             target: self.target.clone(),
             blurhandler: self.blurhandler.clone(),
         }
@@ -135,10 +135,13 @@ where
     T: Component,
     <T as Component>::Message: ResizableMessage,
 {
-    pub fn new(elem: web_sys::HtmlElement, props: T::Properties) -> ModalElement<T> {
-        elem.set_attribute("tabindex", "0").unwrap();
+    pub fn new(
+        custom_element: web_sys::HtmlElement,
+        props: T::Properties,
+    ) -> ModalElement<T> {
+        custom_element.set_attribute("tabindex", "0").unwrap();
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
-        let shadow_root = elem
+        let shadow_root = custom_element
             .attach_shadow(&init)
             .unwrap()
             .unchecked_into::<web_sys::Element>();
@@ -148,7 +151,7 @@ where
         let blurhandler = Rc::new(RefCell::new(None));
         ModalElement {
             root,
-            elem,
+            custom_element,
             target: Rc::new(RefCell::new(None)),
             blurhandler,
         }
@@ -170,10 +173,10 @@ where
             .unwrap()
             .body()
             .unwrap()
-            .append_child(&self.elem)?;
+            .append_child(&self.custom_element)?;
 
         // Check if the modal has been positioned off-screen and re-locate if necessary
-        match calc_relative_position(&self.elem, top, left, height, width) {
+        match calc_relative_position(&self.custom_element, top, left, height, width) {
             None => (),
             Some((top, left)) => {
                 let msg = T::Message::resize(top as u32, left as u32);
@@ -187,7 +190,7 @@ where
                 this.close().unwrap();
             }) as Box<dyn FnMut(FocusEvent)>));
 
-        self.elem.add_event_listener_with_callback(
+        self.custom_element.add_event_listener_with_callback(
             "blur",
             self.blurhandler
                 .borrow()
@@ -197,7 +200,7 @@ where
                 .unchecked_ref(),
         )?;
 
-        self.elem.focus()
+        self.custom_element.focus()
     }
 
     /// Open this modal by attaching directly to `document.body` with position
@@ -207,7 +210,7 @@ where
     /// Because the Custom Element has a `blur` handler, we must invoke this before
     /// attempting to re-parent the element.
     pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
-        self.elem.blur().unwrap();
+        self.custom_element.blur().unwrap();
         let window = web_sys::window().unwrap();
         let mut this = self.clone();
         window.request_animation_frame(
@@ -219,7 +222,7 @@ where
 
     /// Remove from document and cleanup.
     pub fn close(&mut self) -> Result<(), JsValue> {
-        self.elem.remove_event_listener_with_callback(
+        self.custom_element.remove_event_listener_with_callback(
             "blur",
             self.blurhandler
                 .borrow()
@@ -236,11 +239,10 @@ where
             .unwrap()
             .body()
             .unwrap()
-            .remove_child(&self.elem)?;
+            .remove_child(&self.custom_element)?;
 
-    
         let target = self.target.borrow_mut().take().unwrap();
-        let event = web_sys::CustomEvent::new("-perspective-close-expression")?;        
+        let event = web_sys::CustomEvent::new("-perspective-close-expression")?;
         target.dispatch_event(&event)?;
         Ok(())
     }

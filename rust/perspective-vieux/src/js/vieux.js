@@ -10,7 +10,6 @@
 
 import init, * as internal from "../../pkg/perspective_vieux.js";
 import wasm_internal from "../../pkg/perspective_vieux_bg.wasm";
-import "./monaco.js";
 
 export const wasm = init(wasm_internal).then(() => {
     internal.set_panic_hook();

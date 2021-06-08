@@ -10,7 +10,7 @@ use js_intern::*;
 use js_sys::Reflect;
 use serde_json::error;
 use std::cell::Cell;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{JsCast, prelude::*};
 
 use crate::js_object;
 use crate::utils::monaco::*;
@@ -477,16 +477,21 @@ fn get_suggestions() -> JsValue {
 
 /// Initializes the `plang` language definition using Monaco's `Languages`
 /// module.
-fn init_language() -> Result<(), error::Error> {
-    Languages::register(REGISTER.with(|x| JsValue::from_serde(&x))?);
+async fn init_language() -> Result<Editor, error::Error> {
+    let exts = monaco_exts();
+    let module = monaco_module().await.unchecked_into::<MonacoModule>();
+    let languages = module.languages();
+    let editor = module.editor();
+    languages.register(REGISTER.with(|x| JsValue::from_serde(&x))?);
     let tokenizer = TOKENIZER.with(|x| JsValue::from_serde(&x))?;
-    Languages::set_monarch_tokens_provider("exprtk", tokenizer);
+    languages.set_monarch_tokens_provider("exprtk", tokenizer);
     let provider = Closure::wrap(Box::new(get_suggestions) as Box<dyn Fn() -> JsValue>);
     let items = js_object!("provideCompletionItems", provider.as_ref()).into();
     provider.forget();
-    Languages::register_completion_item_provider("exprtk", items);
-    Editor::define_theme("exprtk-theme", THEME.with(|x| JsValue::from_serde(&x))?);
-    Ok(())
+    languages.register_completion_item_provider("exprtk", items);
+    editor.define_theme("exprtk-theme", THEME.with(|x| JsValue::from_serde(&x))?);
+    exts.await;
+    Ok(editor)
 }
 
 /// Initializes the `MonacoEnvironment` global definition, which the monaco library
@@ -499,12 +504,13 @@ fn init_environment() -> Result<(), error::Error> {
 }
 
 /// Initialize the `ExprTK` language in `monaco`.  This should only be done once.
-pub fn init_monaco() -> Result<(), error::Error> {
+pub async fn init_monaco() -> Result<Editor, error::Error> {
     if IS_REGISTERED.with(|x| !x.get()) {
-        init_language()?;
+        let editor = init_language().await?;
         init_environment()?;
         IS_REGISTERED.with(|x| x.set(true));
+        Ok(editor)
+    } else {
+        Ok(monaco_module().await.unchecked_into::<MonacoModule>().editor())
     }
-
-    Ok(())
 }

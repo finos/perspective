@@ -89,18 +89,42 @@ impl PerspectiveVieuxElement {
         future_to_promise(async move { receiver.await.unwrap() })
     }
 
-    fn create_expression_editor(&self, target: HtmlElement, ed: &mut Option<PerspectiveExpressionEditorElement>) {
+    fn create_expression_editor(
+        &self,
+        target: HtmlElement,
+        ed: &mut Option<PerspectiveExpressionEditorElement>,
+    ) {
         let document = window().unwrap().document().unwrap();
         let editor = document
             .create_element("perspective-expression-editor")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
+        editor
+            .toggle_attribute_with_force("initializing", true)
+            .unwrap();
+
         let this = self.clone();
+        let on_save = Rc::new(move |val| this.clone().save_expr(val));
+
+        let this = editor.clone();
+        let on_init = Rc::new(move || {
+            this.toggle_attribute_with_force("initializing", false)
+                .unwrap();
+        });
+
+        let this = editor.clone();
+        let on_validate = Rc::new(move |valid| {
+            this.toggle_attribute_with_force("validating", valid)
+                .unwrap();
+        });
+
         let mut element = PerspectiveExpressionEditorElement::new(
             editor,
             self.session.clone(),
-            Rc::new(move |val| this.clone().save_expr(val)),
+            on_save,
+            on_init,
+            on_validate,
         );
 
         element.open(target).unwrap();
@@ -113,7 +137,7 @@ impl PerspectiveVieuxElement {
         let mut x = self.expression_editor.borrow_mut();
         match x.as_mut() {
             Some(x) => x.open(target).unwrap(),
-            _ => self.create_expression_editor(target, &mut *x)
+            _ => self.create_expression_editor(target, &mut *x),
         };
     }
 

@@ -11,7 +11,7 @@
 use crate::utils::monaco::*;
 use crate::{exprtk::*, session::Session};
 
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
@@ -29,22 +29,25 @@ pub enum ExpressionEditorMsg {
 
 #[derive(Properties, Clone)]
 pub struct ExpressionEditorProps {
-    pub callback: Rc<dyn Fn(JsValue)>,
+    pub on_save_callback: Rc<dyn Fn(JsValue)>,
+    pub on_init_callback: Rc<dyn Fn()>,
+    pub on_validate_callback: Rc<dyn Fn(bool)>,
     pub session: Session,
 }
 
 /// A label widget which displays a row count and a "projection" count, the number of
 /// rows in the `View` which includes aggregate rows.
+#[derive(Clone)]
 pub struct ExpressionEditor {
     top: u32,
     left: u32,
     container: NodeRef,
-    editor: Option<MonacoEditor>,
+    editor: Rc<RefCell<Option<MonacoEditor>>>,
     props: ExpressionEditorProps,
     link: ComponentLink<Self>,
     save_enabled: bool,
-    on_validate_callback: Closure<dyn Fn(JsValue)>,
-    on_save_callback: Closure<dyn Fn(JsValue)>,
+    on_validate_callback: Rc<Closure<dyn Fn(JsValue)>>,
+    on_save_callback: Rc<Closure<dyn Fn(JsValue)>>,
 }
 
 async fn proc(
@@ -65,20 +68,22 @@ impl Component for ExpressionEditor {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let cb = link.callback(|x| ExpressionEditorMsg::Validate(x));
-        let on_validate_callback = Closure::wrap(Box::new(move |x| {
+        let on_validate_callback = Rc::new(Closure::wrap(Box::new(move |x| {
             cb.emit(x);
-        }) as Box<dyn Fn(JsValue)>);
+        })
+            as Box<dyn Fn(JsValue)>));
 
         let cb = link.callback(|_| ExpressionEditorMsg::SaveExpr);
-        let on_save_callback = Closure::wrap(Box::new(move |x| {
+        let on_save_callback = Rc::new(Closure::wrap(Box::new(move |x| {
             cb.emit(x);
-        }) as Box<dyn Fn(JsValue)>);
+        })
+            as Box<dyn Fn(JsValue)>));
 
         ExpressionEditor {
             top: 0,
             left: 0,
             container: NodeRef::default(),
-            editor: None,
+            editor: Rc::new(RefCell::new(None)),
             props,
             link,
             save_enabled: false,
@@ -92,7 +97,7 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SetPos(top, left) => {
                 self.top = top;
                 self.left = left;
-                match self.editor.as_ref() {
+                match self.editor.borrow().as_ref() {
                     Some(x) => x.set_value(""),
                     None => {}
                 }
@@ -101,7 +106,8 @@ impl Component for ExpressionEditor {
             }
             ExpressionEditorMsg::Validate(_val) => {
                 // web_sys::console::log_1(&val);
-                let expr = self.editor.as_ref().unwrap().get_value();
+                let expr = self.editor.borrow().as_ref().unwrap().get_value();
+                (self.props.on_validate_callback)(true);
                 let callback = self
                     .link
                     .callback_once(|x| ExpressionEditorMsg::EnableSave(x));
@@ -110,16 +116,17 @@ impl Component for ExpressionEditor {
                 false
             }
             ExpressionEditorMsg::EnableSave(x) => {
+                (self.props.on_validate_callback)(false);
                 self.save_enabled = x;
                 true
             }
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
-                    match self.editor.as_ref() {
+                    match self.editor.borrow().as_ref() {
                         None => {}
                         Some(x) => {
                             let expr = x.get_value();
-                            (self.props.callback)(expr);
+                            (self.props.on_save_callback)(expr);
                             x.set_value("");
                         }
                     }
@@ -135,35 +142,50 @@ impl Component for ExpressionEditor {
 
     fn rendered(&mut self, first_render: bool) {
         if first_render {
-            init_monaco().unwrap();
-            let args = EditorArgs {
-                theme: "exprtk-theme",
-                value: "",
-                language: "exprtk",
-                automatic_layout: true,
-                minimap: MinimapArgs { enabled: false },
-            };
+            let this = self.clone();
+            let _ = future_to_promise(async move {
+                let editor = init_monaco().await.unwrap();
+                let args = EditorArgs {
+                    theme: "exprtk-theme",
+                    value: "",
+                    language: "exprtk",
+                    automatic_layout: true,
+                    minimap: MinimapArgs { enabled: false },
+                };
 
-            let container = self.container.cast::<HtmlElement>().unwrap();
-            let editor = Editor::create(container, JsValue::from_serde(&args).unwrap());
-            editor.add_command(
-                (KeyMod::Shift as u32) | (KeyCode::Enter as u32),
-                self.on_save_callback.as_ref().unchecked_ref(),
-            );
+                let container = this.container.cast::<HtmlElement>().unwrap();
+                let editor =
+                    editor.create(container, JsValue::from_serde(&args).unwrap());
+                editor.add_command(
+                    (KeyMod::Shift as u32) | (KeyCode::Enter as u32),
+                    this.on_save_callback.as_ref().as_ref().unchecked_ref(),
+                );
 
-            let model = editor.get_model();
-            model.on_did_change_content(
-                self.on_validate_callback.as_ref().unchecked_ref(),
-            );
+                let model = editor.get_model();
+                model.on_did_change_content(
+                    this.on_validate_callback.as_ref().as_ref().unchecked_ref(),
+                );
 
-            self.editor = Some(editor.clone());
-            let on_init = Closure::once_into_js(move || editor.focus());
-            web_sys::window()
-                .unwrap()
-                .request_animation_frame(on_init.unchecked_ref())
-                .unwrap();
-        } else {
-            self.editor.as_ref().unwrap().focus();
+                *this.editor.borrow_mut() = Some(editor.clone());
+                let on_init_callback = this.props.on_init_callback.clone();
+                let on_init = Closure::once_into_js(move || {
+                    editor.focus();
+                    web_sys::window()
+                        .unwrap()
+                        .request_animation_frame(
+                            Closure::once_into_js(move || on_init_callback())
+                                .unchecked_ref(),
+                        )
+                        .unwrap();
+                });
+
+                web_sys::window()
+                    .unwrap()
+                    .request_animation_frame(on_init.unchecked_ref())
+                    .map(JsValue::from)
+            });
+        } else if self.editor.borrow().is_some() {
+            self.editor.borrow().as_ref().unwrap().focus();
         }
     }
 
@@ -175,7 +197,7 @@ impl Component for ExpressionEditor {
                     { &CSS }
                     { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
-                <div ref={ self.container.clone() } style="width:400px;height:200px;resize:both;overflow:auto"></div>
+                <div id="monaco-container" ref={ self.container.clone() } style=""></div>
                 <div id="psp-expression-editor-actions">
                     <button
                         id="psp-expression-editor-button-save"
