@@ -10,11 +10,8 @@ use crate::utils::perspective::*;
 use crate::{components::vieux::*, session::Session};
 use crate::utils::*;
 use crate::*;
-use wasm_bindgen_futures::JsFuture;
 
 use futures::channel::oneshot::*;
-use std::cell::RefCell;
-use std::iter::FromIterator;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
@@ -22,18 +19,6 @@ use web_sys::*;
 use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
-
-#[wasm_bindgen(inline_js = "
-
-    export async function worker() {
-        await import('/pkg/perspective.inline.js');
-        return window.perspective.worker();
-    }
-
-")]
-extern "C" {
-    fn worker() -> js_sys::Promise;
-}
 
 fn set_up_html() -> (WeakComponentLink<PerspectiveVieux>, web_sys::ShadowRoot) {
     let link: WeakComponentLink<PerspectiveVieux> = WeakComponentLink::default();
@@ -98,41 +83,14 @@ pub fn test_settings_open() {
     }
 }
 
-/// Generate a test `Table`, but only create teh webworker once or the tests will
-/// figuratively literally run forever.
-async fn get_table() -> PerspectiveJsTable {
-    thread_local! {
-        static WORKER: RefCell<Option<PerspectiveJsWorker>> = RefCell::new(None);
-    }
-
-    let worker: PerspectiveJsWorker = match WORKER.with(|x| x.borrow().clone()) {
-        Some(x) => x,
-        None => JsFuture::from(worker()).await.unwrap().unchecked_into(),
-    };
-
-    WORKER.with(|x| {
-        *x.borrow_mut() = Some(worker.clone());
-    });
-
-    worker
-        .table(js_object!(
-            "A",
-            js_sys::Array::from_iter(
-                [JsValue::from(1), JsValue::from(2), JsValue::from(3)].iter()
-            )
-        ))
-        .await
-        .unwrap()
-}
-
 #[wasm_bindgen_test]
 pub async fn test_load_table() {
     let (link, root) = set_up_html();
-    let table = get_table().await;
+    let table = get_mock_table().await;
     let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
     let vieux = link.borrow().clone().unwrap();
     vieux.send_message(Msg::ToggleConfig(Some(true), None));
-    vieux.send_message(Msg::LoadTable(js_sys::Promise::resolve(&table), sender));
+    vieux.send_message(Msg::LoadTable(table, sender));
     receiver.await.unwrap().unwrap();
     assert_eq!(
         root.query_selector("#rows").unwrap().unwrap().inner_html(),
@@ -144,11 +102,11 @@ pub async fn test_load_table() {
 pub async fn test_export_button() {
     let document = window().unwrap().document().unwrap();
     let (link, _) = set_up_html();
-    let table = get_table().await;
+    let table: PerspectiveJsTable = get_mock_table().await;
     let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
     let vieux = link.borrow().clone().unwrap();
     vieux.send_message(Msg::ToggleConfig(Some(true), None));
-    vieux.send_message(Msg::LoadTable(js_sys::Promise::resolve(&table), sender));
+    vieux.send_message(Msg::LoadTable(table, sender));
     let _ = receiver.await.unwrap().unwrap();
 
     // Create a `MutationListener` and async channel to signal us when the download

@@ -9,8 +9,8 @@
 use crate::components::split_panel::SplitPanel;
 use crate::components::status_bar::StatusBar;
 use crate::session::{Session, TableStats};
-use crate::utils::perspective::PerspectiveJsView;
-use crate::utils::WeakComponentLink;
+use crate::utils::perspective::*;
+use crate::utils::*;
 
 use futures::channel::oneshot::*;
 use js_sys::*;
@@ -31,7 +31,7 @@ pub struct PerspectiveVieuxProps {
 }
 
 pub enum Msg {
-    LoadTable(Promise, Sender<Result<JsValue, JsValue>>),
+    LoadTable(PerspectiveJsTable, Sender<Result<JsValue, JsValue>>),
     Reset,
     Export(bool),
     Copy(bool),
@@ -55,7 +55,9 @@ impl Component for PerspectiveVieux {
     type Properties = PerspectiveVieuxProps;
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         *props.weak_link.borrow_mut() = Some(link.clone());
-        props.session.set_table_stats_callback(link.callback(Msg::TableStats));
+        props
+            .session
+            .set_on_stats_callback(link.callback(Msg::TableStats));
         Self {
             props,
             link: link.clone(),
@@ -201,7 +203,7 @@ impl PerspectiveVieux {
                     .callback_once(move |_| Msg::ConfigToggled(force, sender));
 
                 let task = toggle_config_task(force, self.props.clone(), callback);
-                let _ = future_to_promise(task);
+                let _promise = future_to_promise(task);
             }
         };
     }
@@ -211,12 +213,12 @@ impl PerspectiveVieux {
     fn set_session_table(
         &mut self,
         sender: Sender<Result<JsValue, JsValue>>,
-        table: Promise,
+        table: PerspectiveJsTable,
     ) {
         let msg = Msg::TableStats(TableStats::default());
         self.link.send_message(msg);
         let session = self.props.session.clone();
-        let _ = future_to_promise(async move {
+        let _promise = future_to_promise(async move {
             sender.send(session.set_table(table).await).unwrap();
             Ok(JsValue::UNDEFINED)
         });
@@ -227,12 +229,12 @@ impl PerspectiveVieux {
 async fn toggle_config_task(
     open: bool,
     props: PerspectiveVieuxProps,
-    callback: Callback<()>,
+    on_toggle: Callback<()>,
 ) -> Result<JsValue, JsValue> {
-    let element = find_custom_element(&props, &callback).ok_or(JsValue::UNDEFINED)?;
+    let element = find_custom_element(&props, &on_toggle).ok_or(JsValue::UNDEFINED)?;
     if open {
         dispatch_settings_event(element.clone(), open)?;
-        callback.emit(());
+        on_toggle.emit(());
         plugin_resize(element).await;
     } else {
         let main_panel: web_sys::HtmlElement = props
@@ -250,7 +252,7 @@ async fn toggle_config_task(
         main_panel.style().set_property("width", "")?;
         main_panel.style().set_property("height", "")?;
         dispatch_settings_event(element, open)?;
-        callback.emit(());
+        on_toggle.emit(());
     }
 
     Ok(JsValue::UNDEFINED)

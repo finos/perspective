@@ -125,9 +125,9 @@ pub fn test_color_enabled() {
     let result: Rc<RefCell<ColumnStyleConfig>> =
         Rc::new(RefCell::new(ColumnStyleConfig::default()));
     let on_change = {
-        let _result = result.clone();
+        clone!(result);
         Callback::from(move |config| {
-            *_result.borrow_mut() = config;
+            *result.borrow_mut() = config;
         })
     };
 
@@ -151,9 +151,9 @@ pub fn test_color_mode_changed() {
     let mut default_config = ColumnStyleDefaultConfig::default();
     default_config.pos_color = "#123".to_owned();
     let on_change = {
-        let _result = result.clone();
+        clone!(result);
         Callback::from(move |config| {
-            *_result.borrow_mut() = config;
+            *result.borrow_mut() = config;
         })
     };
 

@@ -14,6 +14,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 
 use crate::js_object;
 use crate::utils::monaco::*;
+use crate::utils::*;
 
 thread_local! {
 
@@ -491,7 +492,7 @@ thread_local! {
 /// This helper _must_ create the `JsValue` anew on each call, or it causes strange
 /// & subtle bugs in monaco.
 /// https://github.com/microsoft/monaco-editor/issues/1510
-fn get_suggestions() -> JsValue {
+fn get_suggestions(_: JsValue) -> JsValue {
     COMPLETIONS.with(|x| JsValue::from_serde(x)).unwrap()
 }
 
@@ -505,7 +506,7 @@ async fn init_language(base: &str) -> Result<Editor, error::Error> {
     languages.register(REGISTER.with(|x| JsValue::from_serde(&x))?);
     let tokenizer = TOKENIZER.with(|x| JsValue::from_serde(&x))?;
     languages.set_monarch_tokens_provider("exprtk", tokenizer);
-    let provider = Closure::wrap(Box::new(get_suggestions) as Box<dyn Fn() -> JsValue>);
+    let provider = get_suggestions.to_closure();
     let items = js_object!("provideCompletionItems", provider.as_ref()).into();
     provider.forget();
     languages.register_completion_item_provider("exprtk", items);

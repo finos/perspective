@@ -1058,7 +1058,7 @@ t_stree::update_agg_table(
                         }
 
                         std::stringstream ss;
-                        t_uindex str_size = 0, idx = 0;
+                        t_uindex str_size = 0;
                         for (std::set<t_tscalar>::const_iterator iter = vset.begin();
                              iter != vset.end(); ++iter) {
                             str_size += strlen(iter->get_char_ptr()) + 2;

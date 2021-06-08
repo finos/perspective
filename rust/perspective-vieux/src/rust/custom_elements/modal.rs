@@ -6,6 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::utils::*;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -186,9 +188,7 @@ where
 
         let mut this = self.clone();
         *self.blurhandler.borrow_mut() =
-            Some(Closure::wrap(Box::new(move |_event: FocusEvent| {
-                this.close().unwrap();
-            }) as Box<dyn FnMut(FocusEvent)>));
+            Some((move |_| this.close().unwrap()).to_closure_mut());
 
         self.custom_element.add_event_listener_with_callback(
             "blur",

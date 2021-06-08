@@ -11,6 +11,7 @@ use crate::custom_elements::expression_editor::PerspectiveExpressionEditorElemen
 use crate::session::Session;
 use crate::utils::perspective::*;
 use crate::utils::WeakComponentLink;
+use crate::*;
 
 use futures::channel::oneshot::*;
 use std::cell::RefCell;
@@ -18,6 +19,7 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen_futures::JsFuture;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -77,10 +79,14 @@ impl PerspectiveVieuxElement {
 
     pub fn load(&self, table: js_sys::Promise) -> js_sys::Promise {
         assert!(!table.is_undefined());
-
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
-        self.root.send_message(Msg::LoadTable(table, sender));
-        future_to_promise(async move { receiver.await.unwrap() })
+        let root = self.root.clone();
+        future_to_promise(async move {
+            let promise = JsFuture::from(table).await?;
+            let table: PerspectiveJsTable = promise.unchecked_into();
+            root.send_message(Msg::LoadTable(table, sender));
+            receiver.await.unwrap()
+        })
     }
 
     pub fn set_view(&self, view: PerspectiveJsView) {
@@ -114,20 +120,28 @@ impl PerspectiveVieuxElement {
             .toggle_attribute_with_force("initializing", true)
             .unwrap();
 
-        let this = self.clone();
-        let on_save = Rc::new(move |val| this.clone().save_expr(val));
+        let on_save = {
+            let this = self.clone();
+            Rc::new(move |val| this.clone().save_expr(val))
+        };
 
-        let this = editor.clone();
-        let on_init = Rc::new(move || {
-            this.toggle_attribute_with_force("initializing", false)
-                .unwrap();
-        });
+        let on_init = {
+            clone!(editor);
+            Rc::new(move || {
+                editor
+                    .toggle_attribute_with_force("initializing", false)
+                    .unwrap();
+            })
+        };
 
-        let this = editor.clone();
-        let on_validate = Rc::new(move |valid| {
-            this.toggle_attribute_with_force("validating", valid)
-                .unwrap();
-        });
+        let on_validate = {
+            clone!(editor);
+            Rc::new(move |valid| {
+                editor
+                    .toggle_attribute_with_force("validating", valid)
+                    .unwrap();
+            })
+        };
 
         let monaco_theme = get_theme(&target);
         let mut element = PerspectiveExpressionEditorElement::new(

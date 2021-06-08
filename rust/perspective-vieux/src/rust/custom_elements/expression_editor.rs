@@ -31,15 +31,15 @@ impl PerspectiveExpressionEditorElement {
     pub fn new(
         custom_element: HtmlElement,
         session: Session,
-        on_save_callback: Rc<dyn Fn(JsValue)>,
-        on_init_callback: Rc<dyn Fn()>,
-        on_validate_callback: Rc<dyn Fn(bool)>,
+        on_save: Rc<dyn Fn(JsValue)>,
+        on_init: Rc<dyn Fn()>,
+        on_validate: Rc<dyn Fn(bool)>,
         monaco_theme: String
     ) -> PerspectiveExpressionEditorElement {
         let props = ExpressionEditorProps {
-            on_save_callback,
-            on_init_callback,
-            on_validate_callback,
+            on_save,
+            on_init,
+            on_validate,
             monaco_theme,
             session,
         };

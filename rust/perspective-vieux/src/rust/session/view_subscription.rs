@@ -8,11 +8,14 @@
 
 use crate::utils::perspective::*;
 use crate::utils::*;
+use crate::*;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
+/// Metadata snapshot of the current `Table()`/`View()` state which may be of interest
+/// to components.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TableStats {
     pub is_pivot: bool,
@@ -20,35 +23,27 @@ pub struct TableStats {
     pub virtual_rows: Option<u32>,
 }
 
-type ViewSubscriptionData =
-    (PerspectiveJsTable, PerspectiveJsView, Callback<TableStats>);
-
-pub struct ViewSubscription {
-    data: ViewSubscriptionData,
-    closure: Closure<dyn Fn() -> js_sys::Promise>,
+#[derive(Clone)]
+struct ViewSubscriptionData {
+    table: PerspectiveJsTable,
+    view: PerspectiveJsView,
+    on_stats: Callback<TableStats>,
 }
 
-impl ViewSubscription {
-    pub fn new(
-        table: PerspectiveJsTable,
-        view: PerspectiveJsView,
-        callback: Callback<TableStats>,
-    ) -> ViewSubscription {
-        let data = (table, view.clone(), callback);
-        let closure = async_method_to_jsfunction(&data, Self::update_view_stats);
-        view.on_update(closure.as_ref().unchecked_ref());
-        let _ = promisify_ignore_view_delete(Self::update_view_stats(data.clone()));
-        ViewSubscription { data, closure }
-    }
+/// A subscription to `on_update()` events from a Perspective `View()`, managing
+/// the `Closure` state as well as cleanup via `on_delete()`.
+pub struct ViewSubscription {
+    data: ViewSubscriptionData,
+    closure: Closure<dyn Fn(JsValue) -> js_sys::Promise>,
+}
 
+impl ViewSubscriptionData {
     /// TODO Use serde to serialize the full view config, instead of calculating
     /// `is_pivot` here.
-    pub async fn update_view_stats(
-        (table, view, callback): ViewSubscriptionData,
-    ) -> Result<JsValue, JsValue> {
-        let config = view.get_config().await?;
-        let num_rows = table.size().await? as u32;
-        let virtual_rows = view.num_rows().await? as u32;
+    pub async fn update_view_stats(self) -> Result<JsValue, JsValue> {
+        let config = self.view.get_config().await?;
+        let num_rows = self.table.size().await? as u32;
+        let virtual_rows = self.view.num_rows().await? as u32;
         let stats = TableStats {
             num_rows: Some(num_rows),
             virtual_rows: Some(virtual_rows),
@@ -57,18 +52,59 @@ impl ViewSubscription {
                 || virtual_rows != num_rows,
         };
 
-        callback.emit(stats);
+        self.on_stats.emit(stats);
         Ok(JsValue::UNDEFINED)
     }
+}
 
+impl ViewSubscription {
+    /// Create a new `ViewSubscription` with the provided Perspective `Table()` and
+    /// `View()` pair.  During initialization, any necessary Perspective API events
+    /// will be subscribed to and subsequently cleaned up via `Drop` trait.
+    ///
+    /// # Arguments
+    /// * `table` - a Perspective `Table()`
+    /// * `view` - a Perspective `View()` on this `table`.
+    /// * `on_stats` - a callback for metadata notifications, from Perspective's
+    ///   `View.on_update()`.
+    pub fn new(
+        table: PerspectiveJsTable,
+        view: PerspectiveJsView,
+        on_stats: Callback<TableStats>,
+    ) -> ViewSubscription {
+        let data = ViewSubscriptionData {
+            table,
+            view,
+            on_stats,
+        };
+
+        let fun = {
+            clone!(data);
+            move |_| promisify_ignore_view_delete(data.clone().update_view_stats())
+        };
+
+        let closure = fun.to_closure();
+        data.view.on_update(closure.as_ref().unchecked_ref());
+        let _ = promisify_ignore_view_delete(data.clone().update_view_stats());
+        ViewSubscription { data, closure }
+    }
+
+    /// Getter for the underlying `View()`.
     pub fn view(&self) -> &PerspectiveJsView {
-        &self.data.1
+        &self.data.view
+    }
+
+    /// Getter for the underlying `Table()`.
+    /// TODO this is un-used, but I'm leaving it as a reminder that the API
+    /// intends this to be public.
+    pub fn _table(&self) -> &PerspectiveJsTable {
+        &self.data.table
     }
 }
 
 impl Drop for ViewSubscription {
     fn drop(&mut self) {
         let update = self.closure.as_ref().unchecked_ref();
-        self.data.1.remove_update(update);
+        self.data.view.remove_update(update);
     }
 }

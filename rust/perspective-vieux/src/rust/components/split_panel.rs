@@ -61,11 +61,15 @@ impl ResizingState {
             start: client_x,
             width: first_elem.offset_width(),
             body_style: body.style(),
-            mouseup: split_panel.to_closure(|_| SplitPanelMsg::StopResizing),
-            mousemove: split_panel.to_closure(|event| {
-                let client_x = event.client_x();
-                SplitPanelMsg::MoveResizing(client_x)
-            }),
+            mouseup: split_panel
+                .callback(|_| SplitPanelMsg::StopResizing)
+                .to_closure(),
+            mousemove: split_panel
+                .callback(|event: MouseEvent| {
+                    let client_x = event.client_x();
+                    SplitPanelMsg::MoveResizing(client_x)
+                })
+                .to_closure(),
         };
 
         state.capture_cursor()?;

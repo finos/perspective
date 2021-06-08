@@ -24,18 +24,18 @@ pub fn test_callbacks_invoked() {
     let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
     let token = Rc::new(Cell::new(0));
     let on_reset = Callback::from({
-        let _token = token.clone();
-        move |()| _token.set(1)
+        clone!(token);
+        move |()| token.set(1)
     });
 
     let on_download = Callback::from({
-        let _token = token.clone();
-        move |_: bool| _token.set(2)
+        clone!(token);
+        move |_: bool| token.set(2)
     });
 
     let on_copy = Callback::from({
-        let _token = token.clone();
-        move |_: bool| _token.set(3)
+        clone!(token);
+        move |_: bool| token.set(3)
     });
 
     test_html! {

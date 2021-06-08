@@ -6,21 +6,19 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js_object;
+use crate::*;
 use crate::utils::perspective::*;
 
-use js_sys::{Array, Promise, Uint8Array};
+use js_sys::*;
 use std::iter::FromIterator;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
 
-type JsResult<T> = Result<T, JsValue>;
-
 /// Download a flat (unpivoted with all columns) CSV.
 #[wasm_bindgen]
 pub fn download_flat(table: &PerspectiveJsTable) -> Promise {
-    let table = table.clone();
+    clone!(table);
     future_to_promise(async move {
         let view = table.view(js_object!()).await?;
         download_async(&view).await?;
@@ -32,7 +30,7 @@ pub fn download_flat(table: &PerspectiveJsTable) -> Promise {
 /// Download a CSV
 #[wasm_bindgen]
 pub fn download(view: &PerspectiveJsView) -> Promise {
-    let view = view.clone();
+    clone!(view);
     future_to_promise(async move {
         download_async(&view).await?;
         Ok(JsValue::NULL)
@@ -40,7 +38,7 @@ pub fn download(view: &PerspectiveJsView) -> Promise {
 }
 
 /// Download a CSV, but not a `Promise`.  Used to implement the public methods.
-async fn download_async(view: &PerspectiveJsView) -> JsResult<()> {
+async fn download_async(view: &PerspectiveJsView) -> Result<(), JsValue> {
     let csv_fut = view.to_csv(js_object!("formatted", true));
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();

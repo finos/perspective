@@ -24,10 +24,8 @@
 #include <perspective/computed_function.h>
 #include <perspective/expression_tables.h>
 #include <tsl/ordered_map.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <thread>
-#endif
 #ifdef PSP_PARALLEL_FOR
+#include <thread>
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
 #endif
@@ -207,7 +205,7 @@ public:
     void pprint() const;
     std::string repr() const;
 
-#ifdef PSP_ENABLE_PYTHON
+#ifdef PSP_PARALLEL_FOR
     void set_event_loop_thread_id(std::thread::id id);
 #endif
 
