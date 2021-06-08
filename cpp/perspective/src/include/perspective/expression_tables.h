@@ -27,8 +27,10 @@ namespace perspective {
  */
 struct t_expression_tables {
 
-    t_expression_tables();
-    t_expression_tables(const std::vector<t_computed_expression>& expressions);
+    PSP_NON_COPYABLE(t_expression_tables);
+
+    t_expression_tables(
+        const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
     
     void set_transitional_table_capacity(t_uindex capacity);
     void set_transitional_table_size(t_uindex size);

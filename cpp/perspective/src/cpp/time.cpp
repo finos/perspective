@@ -32,7 +32,7 @@ t_time::t_time(std::int64_t raw_val)
     : m_storage(raw_val) {}
 
 t_time::t_time(int year, int month, int day, int hour, int min, int sec)
-    : m_storage(to_gmtime(year, month, day, hour, min, sec) * 1000000LL) {}
+    : m_storage(static_cast<std::int64_t>(to_gmtime(year, month, day, hour, min, sec) * 1000)) {}
 
 std::int64_t
 t_time::raw_value() const {

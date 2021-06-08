@@ -8,6 +8,7 @@
 
 from pytest import raises
 from datetime import date, datetime
+from time import mktime
 from perspective import Table, PerspectiveCppError
 from .test_view import compare_delta
 
@@ -1004,3 +1005,212 @@ class TestViewExpression(object):
             "a": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 15)],
             "bucket": [datetime(2020, 1, 1), None, None, datetime(2020, 3, 1)],
         }
+
+    def test_view_integer_expression(self):
+        table = Table({
+            "x": int,
+            "y": date,
+            "z": float
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n integer(2147483648)',
+                '// computed2\n integer(-2147483649)',
+                '// computed3 \n integer(123.456)',
+                '// computed4 \n integer("x")',
+                '// computed5 \n integer("y")',
+                '// computed6 \n integer("z")'
+            ]
+        )
+
+        table.update({
+            "x": [12136582],
+            "y": [date(2020, 6, 30)],
+            "z": [1.23456]
+        })
+
+        assert view.expression_schema() == {
+            "computed": int,
+            "computed2": int,
+            "computed3": int,
+            "computed4": int,
+            "computed5": int,
+            "computed6": int,
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == [2147483648]
+        assert result["computed2"] == [-2147483649]
+        assert result["computed3"] == [123]
+        assert result["computed4"] == [12136582]
+        assert result["computed5"] == [132384030]
+        assert result["computed6"] == [1]
+
+    def test_view_float_expression(self):
+        table = Table({
+            "w": datetime,
+            "x": int,
+            "y": date,
+            "z": float
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n float(2147483648)',
+                '// computed2\n float(-2147483649)',
+                '// computed3 \n float(123.456789123)',
+                '// computed4 \n float("x")',
+                '// computed5 \n float("y")',
+                '// computed6 \n float("z")',
+                '// computed7 \n float("w")'
+            ]
+        )
+
+        dt = datetime(2018, 8, 12, 15, 32, 55)
+
+        table.update({
+            "w": [dt],
+            "x": [12136582],
+            "y": [date(2020, 6, 30)],
+            "z": [1.23456]
+        })
+
+        assert view.expression_schema() == {
+            "computed": float,
+            "computed2": float,
+            "computed3": float,
+            "computed4": float,
+            "computed5": float,
+            "computed6": float,
+            "computed7": float,
+        }
+
+        result = view.to_dict()
+
+        seconds_timestamp = mktime(dt.timetuple()) + dt.microsecond / 1000000.0
+        ms_timestamp = int(seconds_timestamp * 1000)
+
+        assert result["computed"] == [2147483648]
+        assert result["computed2"] == [-2147483649]
+        assert result["computed3"] == [123.456789123]
+        assert result["computed4"] == [12136582]
+        assert result["computed5"] == [132384030]
+        assert result["computed6"] == [1.23456]
+        assert result["computed7"] == [ms_timestamp]
+    
+    def test_view_date_expression(self):
+        table = Table({
+            "x": [1]
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n date(2020, 5, 30)',
+                '// computed2\n date(1997, 8, 31)'
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "computed": date,
+            "computed2": date
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == [datetime(2020, 5, 30)]
+        assert result["computed2"] == [datetime(1997, 8, 31)]
+
+    def test_view_datetime_expression(self):
+        table = Table({
+            "x": [1]
+        })
+
+        dt = datetime(2015, 11, 29, 23, 59, 59)
+        seconds_timestamp = mktime(dt.timetuple()) + dt.microsecond / 1000000.0
+        ms_timestamp = int(seconds_timestamp * 1000)
+
+        view = table.view(
+            expressions=[
+                '// computed\n datetime({})'.format(ms_timestamp)
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "computed": datetime
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == [datetime(2015, 11, 29, 23, 59, 59)]
+
+    def test_view_datetime_expression_roundtrip(self):
+        table = Table({
+            "x": [datetime(2015, 11, 29, 23, 59, 59)]
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n datetime(float("x"))'
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "computed": datetime
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == [datetime(2015, 11, 29, 23, 59, 59)]
+
+    def test_view_string_expression(self):
+        table = Table({
+            "a": date,
+            "b": datetime,
+            "c": int,
+            "d": float,
+            "e": str,
+            "f": bool
+        })
+
+        view = table.view(
+            expressions=[
+                '// computed\n string("a")',
+                '// computed2\n string("b")',
+                '// computed3\n string("c")',
+                '// computed4\n string("d")',
+                '// computed5\n string("e")',
+                '// computed6\n string("f")',
+                '// computed7\n string(1234.5678)'
+            ]
+        )
+
+        table.update({
+            "a": [date(2020, 5, 30), date(2021, 7, 13)],
+            "b": [datetime(2015, 11, 29, 23, 59, 59), datetime(2016, 11, 29, 23, 59, 59)],
+            "c": [12345678, 1293879852],
+            "d": [1.2792013981, 19.218975981],
+            "e": ["abcdefghijklmnop", "def"],
+            "f": [False, True]
+        })
+
+        assert view.expression_schema() == {
+            "computed": str,
+            "computed2": str,
+            "computed3": str,
+            "computed4": str,
+            "computed5": str,
+            "computed6": str,
+            "computed7": str
+        }
+
+        result = view.to_dict()
+
+        assert result["computed"] == ["2020-05-30", "2021-07-13"]
+        assert result["computed2"] == ["2015-11-29 23:59:59.000", "2016-11-29 23:59:59.000"]
+        assert result["computed3"] == ["12345678", "1293879852"]
+        assert result["computed4"] == ["1.2792", "19.219"]
+        assert result["computed5"] == ["abcdefghijklmnop", "def"]
+        assert result["computed6"] == ["false", "true"]
+        assert result["computed7"] == ["1234.57"] * 2

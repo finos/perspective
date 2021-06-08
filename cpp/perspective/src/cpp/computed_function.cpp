@@ -24,72 +24,6 @@ using uint64 = std::uint64_t;
 using float32 = float;
 using float64 = double;
 
-// template <typename T>
-// col<T>::col(std::shared_ptr<t_data_table> data_table, const tsl::hopscotch_set<std::string>& input_columns)
-//     : m_schema(nullptr)
-//     , m_input_columns(std::move(input_columns))
-//     , m_columns({})
-//     , m_ridxs({}) {
-//         // TODO: move into init()?
-//         for (const auto& column_name : input_columns) {
-//             m_columns[column_name] = data_table->get_column(column_name);
-//             m_ridxs[column_name] = 0;
-//         }
-//     }
-
-// template <typename T>
-// col<T>::col(std::shared_ptr<t_schema> schema)
-//     : m_schema(schema)
-//     , m_columns({})
-//     , m_ridxs({}) {}
-
-// template <typename T>
-// col<T>::~col() {}
-
-// template <typename T>
-// T col<T>::next(
-//     const std::string& column_name) {
-//     // std::cout << "NOT IMPLEMENTED" << std::endl;
-//     std::string error = "next<T>() Not implemented!\n";
-//     PSP_COMPLAIN_AND_ABORT(error);
-// }
-
-// template <>
-// t_tscalar col<t_tscalar>::next(
-//     const std::string& column_name) {
-//     t_uindex ridx = m_ridxs[column_name];
-//     t_tscalar rval = m_columns[column_name]->get_scalar(ridx);
-//     m_ridxs[column_name] += 1;
-//     return rval;
-// }
-
-// template <typename T>
-// T col<T>::operator()(t_parameter_list parameters) {
-//     auto num_params = parameters.size();
-
-//     if (num_params == 0) {
-//         std::stringstream ss;
-//         ss << "Expression error: col() function cannot be empty." << std::endl;
-//         // std::cout << ss.str();
-//         PSP_COMPLAIN_AND_ABORT(ss.str());
-//     }
-
-//     t_string_view param = t_string_view(parameters[0]);
-//     std::string column_name(param.begin(), param.size());
-
-//     if (m_schema != nullptr) {
-//         t_tscalar rval;
-//         // scalar is valid here, as operations would fail and return
-//         // none if the inputs are not valid scalars.
-//         rval.m_status = STATUS_VALID;
-//         rval.m_type = m_schema->get_dtype(column_name);
-//         m_input_columns.insert(column_name);
-//         return rval;
-//     }
-
-//     return next(column_name);
-// }
-
 intern::intern(std::shared_ptr<t_vocab> expression_vocab)
     : exprtk::igeneric_function<t_tscalar>("S")
     , m_expression_vocab(expression_vocab)  {
@@ -101,34 +35,25 @@ intern::intern(std::shared_ptr<t_vocab> expression_vocab)
         sentinel.m_type = DTYPE_STR;
         sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 intern::~intern() {}
 
 t_tscalar intern::operator()(t_parameter_list parameters) {
-    std::string temp_str;
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_STR;
 
-    if (parameters.size() != 1) {
-        return m_none;
-    }
+    std::string temp_str;
 
     t_generic_type& gt = parameters[0];
 
-    if (t_generic_type::e_string == gt.type) {
-        // intern('abc') - with a scalar string
-        t_string_view temp_string(gt);
-        temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
+    // intern('abc') - with a scalar string
+    t_string_view temp_string(gt);
+    temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
 
-        // Don't allow empty strings
-        if (temp_str == "") return m_none;
-    } else {
-        // An invalid call.
-        return m_none;
-    }
+    // Don't allow empty strings
+    if (temp_str == "") return rval;
 
     // If the vocab is a nullptr, we are in type checking mode - TODO might be
     // better to make this explicit so that we never fall into an invalid mode
@@ -141,7 +66,6 @@ t_tscalar intern::operator()(t_parameter_list parameters) {
     // string inside the vocabulary.
     t_uindex interned = m_expression_vocab->get_interned(temp_str);
 
-    t_tscalar rval;
     rval.set(m_expression_vocab->unintern_c(interned));
     return rval;
 }
@@ -157,10 +81,6 @@ concat::concat(std::shared_ptr<t_vocab> expression_vocab)
         sentinel.m_type = DTYPE_STR;
         sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 concat::~concat() {}
@@ -171,7 +91,7 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
     rval.clear();
     rval.m_type = DTYPE_STR;
 
-    if (parameters.size() == 0) return m_none;
+    if (parameters.size() == 0) return rval;
     
     for (auto i = 0; i < parameters.size(); ++i) {
         t_generic_type& gt = parameters[i];
@@ -201,7 +121,7 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
             result += temp_scalar.to_string();
         } else {
             // An invalid call.
-            return m_none;
+            return rval;
         }
     }
 
@@ -219,7 +139,7 @@ t_tscalar concat::operator()(t_parameter_list parameters) {
 }
 
 upper::upper(std::shared_ptr<t_vocab> expression_vocab)
-    : exprtk::igeneric_function<t_tscalar>("?")
+    : exprtk::igeneric_function<t_tscalar>("T")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
         sentinel.clear();
@@ -229,10 +149,6 @@ upper::upper(std::shared_ptr<t_vocab> expression_vocab)
         sentinel.m_type = DTYPE_STR;
         sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 upper::~upper() {}
@@ -244,29 +160,23 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
     std::string temp_str;
 
     if (parameters.size() != 1) {
-        return m_none;
+        return rval;
     }
 
     t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar = temp();
 
-    if (t_generic_type::e_scalar == gt.type) {
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar = temp();
-
-        if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
-            rval.m_status = STATUS_CLEAR;
-            return rval;
-        }
-
-        if (!temp_scalar.is_valid()) {
-            return rval;
-        }
-
-        temp_str = temp_scalar.to_string();
-    } else {
-        // An invalid call.
-        return m_none;
+    if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
     }
+
+    if (!temp_scalar.is_valid()) {
+        return rval;
+    }
+
+    temp_str = temp_scalar.to_string();
 
     // don't try to intern an empty string as it will throw an error, but
     // by this point we know the params are valid - so return the sentinel
@@ -283,7 +193,7 @@ t_tscalar upper::operator()(t_parameter_list parameters) {
 }
 
 lower::lower(std::shared_ptr<t_vocab> expression_vocab)
-    : exprtk::igeneric_function<t_tscalar>("?")
+    : exprtk::igeneric_function<t_tscalar>("T")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
         sentinel.clear();
@@ -293,10 +203,6 @@ lower::lower(std::shared_ptr<t_vocab> expression_vocab)
         sentinel.m_type = DTYPE_STR;
         sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 lower::~lower() {}
@@ -308,30 +214,23 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
     std::string temp_str;
 
     if (parameters.size() != 1) {
-        return m_none;
+        return rval;
     }
 
     t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar = temp();
 
-    if (t_generic_type::e_scalar == gt.type) {
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar = temp();
-
-        if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
-            rval.m_status = STATUS_CLEAR;
-            return rval;
-        }
-
-        if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
-            return rval;
-        }
-
-        temp_str = temp_scalar.to_string();
-    } else {
-        // An invalid call.
-        return m_none;
+    if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
     }
 
+    if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
+        return rval;
+    }
+
+    temp_str = temp_scalar.to_string();
     // don't try to intern an empty string as it will throw an error, but
     // by this point we know the params are valid - so return the sentinel
     // string value.
@@ -347,7 +246,7 @@ t_tscalar lower::operator()(t_parameter_list parameters) {
 }
 
 length::length(std::shared_ptr<t_vocab> expression_vocab)
-    : exprtk::igeneric_function<t_tscalar>("?")
+    : exprtk::igeneric_function<t_tscalar>("T")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
         sentinel.clear();
@@ -356,10 +255,6 @@ length::length(std::shared_ptr<t_vocab> expression_vocab)
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_FLOAT64;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 length::~length() {}
@@ -376,29 +271,23 @@ t_tscalar length::operator()(t_parameter_list parameters) {
     rval.m_type = DTYPE_FLOAT64;
 
     if (parameters.size() != 1) {
-        return m_none;
+        return rval;
     }
 
     t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar = temp();
 
-    if (t_generic_type::e_scalar == gt.type) {
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar = temp();
-
-        if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
-            rval.m_status = STATUS_CLEAR;
-            return rval;
-        }
-
-        if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
-            return rval;
-        }
-
-        temp_str = temp_scalar.to_string();
-    } else {
-        // An invalid call.
-        return m_none;
+    if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
     }
+
+    if (!temp_scalar.is_valid() || temp_scalar.is_none()) {
+        return rval;
+    }
+
+    temp_str = temp_scalar.to_string();
 
     if (m_expression_vocab == nullptr) {
         return m_sentinel;
@@ -419,10 +308,6 @@ order::order(std::shared_ptr<t_vocab> expression_vocab)
         // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_FLOAT64;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 order::~order() {}
@@ -439,46 +324,42 @@ t_tscalar order::operator()(t_parameter_list parameters) {
     std::string temp_str;
 
     if (parameters.size() <= 1) {
-        return m_none;
+        return rval;
     }
 
     // generate the map if not generated
     if (m_order_map.size() == 0) {
         for (auto i = 0; i < parameters.size(); ++i) {
+            // Because all strings are interned, there should be no string
+            // literals passed to any functions.
             t_generic_type& gt = parameters[i];
+            t_scalar_view temp(gt);
+            t_tscalar temp_scalar = temp();
 
-            if (t_generic_type::e_scalar == gt.type) {
-                t_scalar_view temp(gt);
-                t_tscalar temp_scalar = temp();
+            // Invalid type
+            if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
 
-                // Invalid type
-                if (temp_scalar.get_dtype() != DTYPE_STR || temp_scalar.m_status == STATUS_CLEAR) {
-                    rval.m_status = STATUS_CLEAR;
-                    return rval;
-                }
+            // current param is the right type and we are type checking,
+            // so move on to the next param
+            if (m_expression_vocab == nullptr) {
+                continue;
+            }
 
-                // current param is the right type and we are type checking,
-                // so move on to the next param
-                if (m_expression_vocab == nullptr) {
-                    continue;
-                }
+            // no longer in type-checking - return if the param is invalid.
+            if (!temp_scalar.is_valid()) {
+                return rval;
+            }
 
-                // no longer in type-checking - return if the param is invalid.
-                if (!temp_scalar.is_valid()) {
-                    return rval;
-                }
-
-                // params[0] is the column, params[1] onward are sort params
-                if (i > 0) {
-                    // Read the string param and assign to the order map, and
-                    // then increment the internal counter.
-                    std::string value = temp_scalar.to_string();
-                    m_order_map[value] = m_order_idx;
-                    m_order_idx++;
-                }
-            } else {
-                // An invalid call.
-                return m_none;
+            // params[0] is the column, params[1] onward are sort params
+            if (i > 0) {
+                // Read the string param and assign to the order map, and
+                // then increment the internal counter.
+                std::string value = temp_scalar.to_string();
+                m_order_map[value] = m_order_idx;
+                m_order_idx++;
             }
         }
     }
@@ -515,9 +396,7 @@ t_tscalar order::operator()(t_parameter_list parameters) {
 }
 
 hour_of_day::hour_of_day()
-    : exprtk::igeneric_function<t_tscalar>("?") {
-    m_none = mknone();
-}
+    : exprtk::igeneric_function<t_tscalar>("T") {}
 
 hour_of_day::~hour_of_day() {}
 
@@ -532,31 +411,22 @@ t_tscalar hour_of_day::operator()(t_parameter_list parameters) {
     // be false, as comparisons are False across types.
     rval.m_type = DTYPE_FLOAT64;
 
-    if (parameters.size() != 1) {
-        return m_none;
-    }
-
     t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar = temp();
 
-    if (t_generic_type::e_scalar == gt.type) {
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar = temp();
-        t_dtype dtype = temp_scalar.get_dtype();
-        bool valid_dtype = dtype == DTYPE_DATE || dtype == DTYPE_TIME;
+    t_dtype dtype = temp_scalar.get_dtype();
+    bool valid_dtype = dtype == DTYPE_DATE || dtype == DTYPE_TIME;
 
-        if (!valid_dtype || temp_scalar.m_status == STATUS_CLEAR) {
-            rval.m_status = STATUS_CLEAR;
-        }
-
-        if (!temp_scalar.is_valid()) {
-            return rval;
-        }
-
-        val.set(temp_scalar);
-    } else {
-        // An invalid call.
-        return m_none;
+    if (!valid_dtype || temp_scalar.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
     }
+
+    if (!temp_scalar.is_valid()) {
+        return rval;
+    }
+
+    val.set(temp_scalar);
     
     if (val.get_dtype() == DTYPE_TIME) {
         // Convert the int64 to a milliseconds duration timestamp
@@ -606,7 +476,7 @@ const std::string months_of_year[12] = {
 };
 
 day_of_week::day_of_week(std::shared_ptr<t_vocab> expression_vocab)
-    : exprtk::igeneric_function<t_tscalar>("?")
+    : exprtk::igeneric_function<t_tscalar>("T")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
         sentinel.clear();
@@ -616,10 +486,6 @@ day_of_week::day_of_week(std::shared_ptr<t_vocab> expression_vocab)
         sentinel.m_type = DTYPE_STR;
         sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 day_of_week::~day_of_week() {}
@@ -630,31 +496,21 @@ t_tscalar day_of_week::operator()(t_parameter_list parameters) {
     rval.clear();
     rval.m_type = DTYPE_STR;
 
-    if (parameters.size() != 1) {
-        return m_none;
-    }
-
     t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar = temp();
+    t_dtype dtype = temp_scalar.get_dtype();
+    bool valid_dtype = dtype == DTYPE_DATE || dtype == DTYPE_TIME;
 
-    if (t_generic_type::e_scalar == gt.type) {
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar = temp();
-        t_dtype dtype = temp_scalar.get_dtype();
-        bool valid_dtype = dtype == DTYPE_DATE || dtype == DTYPE_TIME;
-
-        if (!valid_dtype || temp_scalar.m_status == STATUS_CLEAR) {
-            rval.m_status = STATUS_CLEAR;
-        }
-
-        if (!temp_scalar.is_valid()) {
-            return rval;
-        }
-
-        val.set(temp_scalar);
-    } else {
-        // An invalid call.
-        return m_none;
+    if (!valid_dtype || temp_scalar.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
     }
+
+    if (!temp_scalar.is_valid()) {
+        return rval;
+    }
+
+    val.set(temp_scalar);
 
     if (m_expression_vocab == nullptr) {
         return m_sentinel;
@@ -702,7 +558,7 @@ t_tscalar day_of_week::operator()(t_parameter_list parameters) {
 }
 
 month_of_year::month_of_year(std::shared_ptr<t_vocab> expression_vocab)
-    : exprtk::igeneric_function<t_tscalar>("?")
+    : exprtk::igeneric_function<t_tscalar>("T")
     , m_expression_vocab(expression_vocab)  {
         t_tscalar sentinel;
         sentinel.clear();
@@ -712,10 +568,6 @@ month_of_year::month_of_year(std::shared_ptr<t_vocab> expression_vocab)
         sentinel.m_type = DTYPE_STR;
         sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
-
-        // m_none is a scalar with DTYPE_NONE that indicates an invalid
-        // call to the function.
-        m_none = mknone();
     }
 
 month_of_year::~month_of_year() {}
@@ -726,31 +578,22 @@ t_tscalar month_of_year::operator()(t_parameter_list parameters) {
     rval.clear();
     rval.m_type = DTYPE_STR;
 
-    if (parameters.size() != 1) {
-        return m_none;
-    }
-
     t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar = temp();
 
-    if (t_generic_type::e_scalar == gt.type) {
-        t_scalar_view temp(gt);
-        t_tscalar temp_scalar = temp();
-        t_dtype dtype = temp_scalar.get_dtype();
-        bool valid_dtype = dtype == DTYPE_DATE || dtype == DTYPE_TIME;
+    t_dtype dtype = temp_scalar.get_dtype();
+    bool valid_dtype = dtype == DTYPE_DATE || dtype == DTYPE_TIME;
 
-        if (!valid_dtype || temp_scalar.m_status == STATUS_CLEAR) {
-            rval.m_status = STATUS_CLEAR;
-        }
-
-        if (!temp_scalar.is_valid()) {
-            return rval;
-        }
-
-        val.set(temp_scalar);
-    } else {
-        // An invalid call.
-        return m_none;
+    if (!valid_dtype || temp_scalar.m_status == STATUS_CLEAR) {
+        rval.m_status = STATUS_CLEAR;
     }
+
+    if (!temp_scalar.is_valid()) {
+        return rval;
+    }
+
+    val.set(temp_scalar);
 
     if (m_expression_vocab == nullptr) {
         return m_sentinel;
@@ -803,9 +646,7 @@ bucket::UNIT_MAP = {
 
 
 bucket::bucket()
-    : exprtk::igeneric_function<t_tscalar>("T?") {
-    m_none = mknone();
-}
+    : exprtk::igeneric_function<t_tscalar>("T?") {}
 
 bucket::~bucket() {}
 
@@ -850,8 +691,10 @@ t_tscalar bucket::operator()(t_parameter_list parameters) {
     std::string unit_str = std::string(temp_string.begin(), temp_string.end());
 
     if (bucket::UNIT_MAP.count(unit_str) == 0) {
-        std::cerr << "[bucket] unknown unit in bucket - the valid units are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'." << unit << std::endl;
-        return m_none;
+        std::cerr << "[bucket] unknown unit in bucket - the valid units are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'." << std::endl;
+        rval.m_type = DTYPE_TIME;
+        rval.m_status = STATUS_CLEAR;
+        return rval;
     }
 
     t_date_bucket_unit date_bucket_unit = bucket::UNIT_MAP[unit_str];
@@ -878,8 +721,7 @@ t_tscalar bucket::operator()(t_parameter_list parameters) {
                 rval.m_type = DTYPE_DATE;
             } break;
             default: {
-                // shouldn't trigger this block - unit has already been validated
-                return m_none;
+                PSP_COMPLAIN_AND_ABORT("[bucket] invalid date bucket unit!");
             } break;
         }
     } else {
@@ -914,8 +756,7 @@ t_tscalar bucket::operator()(t_parameter_list parameters) {
             _year_bucket(val, rval);
         } break;
         default: {
-            // shouldn't trigger this block - unit has already been validated
-            return m_none;
+            PSP_COMPLAIN_AND_ABORT("[bucket] invalid date bucket unit!");
         } break;
     }
 
@@ -1162,7 +1003,7 @@ t_tscalar today() {
     return rval;
 }
 
-min_fn::min_fn() : m_none(mknone()) {}
+min_fn::min_fn() {}
 
 min_fn::~min_fn() {}
 
@@ -1192,7 +1033,7 @@ t_tscalar min_fn::operator()(t_parameter_list parameters) {
             }
         } else {
             std::cerr << "[min_fn] Invalid parameter in min_fn()" << std::endl;
-            return m_none;
+            return rval;
         }
     }
 
@@ -1213,7 +1054,7 @@ t_tscalar min_fn::operator()(t_parameter_list parameters) {
     return rval;
 }
 
-max_fn::max_fn() : m_none(mknone())  {}
+max_fn::max_fn() {}
 
 max_fn::~max_fn() {}
 
@@ -1243,7 +1084,7 @@ t_tscalar max_fn::operator()(t_parameter_list parameters) {
             }
         } else {
             std::cerr << "[max_fn] Invalid parameter in max_fn()" << std::endl;
-            return m_none;
+            return rval;
         }
     }
 
@@ -1265,8 +1106,7 @@ t_tscalar max_fn::operator()(t_parameter_list parameters) {
 }
 
 percent_of::percent_of()
-    : exprtk::igeneric_function<t_tscalar>("TT")
-    , m_none(mknone()) {}
+    : exprtk::igeneric_function<t_tscalar>("TT") {}
 
 percent_of::~percent_of() {}
 
@@ -1276,8 +1116,6 @@ t_tscalar percent_of::operator()(t_parameter_list parameters) {
 
     // Return a float so we can use it in conditionals
     rval.m_type = DTYPE_FLOAT64;
-
-    if (parameters.size() != 2) return m_none;
 
     t_generic_type& _x = parameters[0];
     t_generic_type& _y = parameters[1];
@@ -1305,8 +1143,7 @@ t_tscalar percent_of::operator()(t_parameter_list parameters) {
 }
 
 is_null::is_null()
-    : exprtk::igeneric_function<t_tscalar>("T")
-    , m_none(mknone()) {}
+    : exprtk::igeneric_function<t_tscalar>("T"){}
 
 is_null::~is_null() {}
 
@@ -1319,17 +1156,9 @@ t_tscalar is_null::operator()(t_parameter_list parameters) {
     // Return a float so we can use it in conditionals
     rval.m_type = DTYPE_FLOAT64;
 
-    for (auto i = 0; i < parameters.size(); ++i) {
-        t_generic_type& gt = parameters[i];
-
-        if (t_generic_type::e_scalar == gt.type) {
-            t_scalar_view temp(gt);
-            val.set(temp());
-        } else {
-            std::cerr << "[is_null] Invalid parameter in is_null()" << std::endl;
-            return m_none;
-        }
-    }
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
 
     // Return a double so we can use it in conditionals
     rval.set(static_cast<double>(val.is_none() || !val.is_valid()));
@@ -1338,8 +1167,7 @@ t_tscalar is_null::operator()(t_parameter_list parameters) {
 }
 
 is_not_null::is_not_null()
-    : exprtk::igeneric_function<t_tscalar>("T")
-    , m_none(mknone()) {}
+    : exprtk::igeneric_function<t_tscalar>("T") {}
 
 is_not_null::~is_not_null() {}
 
@@ -1352,22 +1180,224 @@ t_tscalar is_not_null::operator()(t_parameter_list parameters) {
     // Return a float so we can use it in conditionals
     rval.m_type = DTYPE_FLOAT64;
 
-    for (auto i = 0; i < parameters.size(); ++i) {
-        t_generic_type& gt = parameters[i];
-
-        if (t_generic_type::e_scalar == gt.type) {
-            t_scalar_view temp(gt);
-            val.set(temp());
-        } else {
-            std::cerr << "[is_null] Invalid parameter in is_null()" << std::endl;
-            return m_none;
-        }
-    }
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
 
     rval.set(static_cast<double>(!val.is_none() && val.is_valid()));
 
     return rval;
 }
+
+to_string::to_string(std::shared_ptr<t_vocab> expression_vocab)
+    : exprtk::igeneric_function<t_tscalar>("T")
+    , m_expression_vocab(expression_vocab)  {
+        t_tscalar sentinel;
+        sentinel.clear();
+
+        // The sentinel is a string scalar that is returned to indicate a
+        // valid call to the function without actually computing any values.
+        sentinel.m_type = DTYPE_STR;
+        sentinel.m_data.m_charptr = nullptr;
+        m_sentinel = sentinel;
+    }
+
+to_string::~to_string() {}
+
+t_tscalar to_string::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_STR;
+    std::string temp_str;
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
+    temp_str = val.to_string();
+
+    // don't try to intern an empty string as it will throw an error, but
+    // by this point we know the params are valid - so return the sentinel
+    // string value.
+    if (temp_str == "" || m_expression_vocab == nullptr) {
+        return m_sentinel;
+    }
+
+    t_uindex interned = m_expression_vocab->get_interned(temp_str);
+    rval.set(m_expression_vocab->unintern_c(interned));
+    return rval;
+}
+
+to_integer::to_integer()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+to_integer::~to_integer() {}
+
+t_tscalar to_integer::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar rval;
+    rval.clear();
+
+    // Use 32-bit integers for WASM
+#ifdef PSP_ENABLE_WASM
+    rval.m_type = DTYPE_INT32;
+#else
+    rval.m_type = DTYPE_INT64;
+#endif
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
+    double number = 0;
+
+    // Parse numbers inside strings
+    if (val.get_dtype() == DTYPE_STR) {
+        std::stringstream ss(val.to_string());
+        ss >> number;
+
+        if (ss.fail()) return rval;
+    } else {
+        number = val.to_double();
+    }
+
+#ifdef PSP_ENABLE_WASM
+    // check for overflow
+    if (number > std::numeric_limits<std::int32_t>::max() || number < std::numeric_limits<std::int32_t>::min()) {
+        return rval;
+    }
+
+    rval.set(static_cast<std::int32_t>(number));
+#else
+    rval.set(static_cast<std::int64_t>(number));
+#endif
+
+    return rval;
+}
+
+to_float::to_float()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+to_float::~to_float() {}
+
+t_tscalar to_float::operator()(t_parameter_list parameters) {
+    t_tscalar val;
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    val.set(temp());
+
+    if (!val.is_valid()) {
+        return rval;
+    }
+
+    double number = 0;
+
+    // Parse numbers inside strings
+    if (val.get_dtype() == DTYPE_STR) {
+        std::stringstream ss(val.to_string());
+        ss >> number;
+
+        if (ss.fail()) return rval;
+    } else {
+        number = val.to_double();
+    }
+
+    // Don't allow NaN to leak
+    if (std::isnan(number)) {
+        return rval;
+    }
+
+    rval.set(number);
+    return rval;
+}
+
+make_date::make_date()
+    : exprtk::igeneric_function<t_tscalar>("TTT") {}
+
+make_date::~make_date() {}
+
+t_tscalar make_date::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_DATE;
+
+    // 0 = year, 1 = month, 2 = day
+    std::int32_t values[3] {0};
+
+    for (auto i = 0; i < parameters.size(); ++i) {
+        t_generic_type& gt = parameters[i];
+        t_scalar_view temp(gt);
+        t_tscalar temp_scalar;
+        
+        temp_scalar.set(temp());
+
+        if (!temp_scalar.is_numeric()) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!temp_scalar.is_valid()) {
+            return rval;
+        }
+
+        std::int32_t value = temp_scalar.to_double();
+        values[i] = value;
+    }
+
+    // Disallow negative values
+    if (values[0] < 0 || values[1] <= 0 || values[1] > 12 || values[2] <= 0 || values[2] > 31) {
+        return rval;
+    }
+
+    // month is 0-11 in t_date
+    rval.set(t_date(values[0], values[1] - 1, values[2]));
+    return rval;
+}
+
+make_datetime::make_datetime()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+make_datetime::~make_datetime() {}
+
+t_tscalar make_datetime::operator()(t_parameter_list parameters) {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_TIME;
+
+    t_generic_type& gt = parameters[0];
+    t_scalar_view temp(gt);
+    t_tscalar temp_scalar;
+    
+    temp_scalar.set(temp());
+    t_dtype dtype = temp_scalar.get_dtype();
+
+    if (dtype != DTYPE_INT64 && dtype != DTYPE_FLOAT64) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
+    }
+
+    if (!temp_scalar.is_valid()) {
+        return rval;
+    }
+    
+    std::int64_t timestamp = temp_scalar.to_double();
+    rval.set(t_time(timestamp));
+    return rval;
+}
+
 
 } // end namespace computed_function
 } // end namespace perspective

@@ -32,9 +32,7 @@ namespace perspective {
  */
 class PERSPECTIVE_EXPORT t_computed_expression {
 public:
-    // allow this struct to be copy constructed since we store it in
-    // gnode, config, etc.
-    t_computed_expression() = default;
+    PSP_NON_COPYABLE(t_computed_expression);
 
     t_computed_expression(
         const std::string& expression_alias,
@@ -69,8 +67,9 @@ public:
 
     /**
      * @brief Given expression strings, validate the expression's dtype and
-     * return a new `t_computed_expression`. This method will abort() if
-     * an input column is invalid or the expression cannot be parsed.
+     * return a shared pointer to a new `t_computed_expression`. This method
+     * will abort() if an input column is invalid or the expression cannot be
+     * parsed.
      * 
      * @param expression_alias an alias for the expression, which will become
      * the name of the new expression column on the table.
@@ -81,9 +80,9 @@ public:
      * @param column_ids A map of column IDs to column names, which is used to
      * properly access column names from the symbol table.
      * @param schema 
-     * @return t_computed_expression 
+     * @return std::shared_ptr<t_computed_expression> 
      */
-    static t_computed_expression precompute(
+    static std::shared_ptr<t_computed_expression> precompute(
         const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
@@ -137,6 +136,11 @@ public:
     static computed_function::max_fn MAX_FN;
     static computed_function::is_null IS_NULL_FN;
     static computed_function::is_not_null IS_NOT_NULL_FN;
+    static computed_function::to_string TO_STRING_VALIDATOR_FN;
+    static computed_function::to_integer TO_INTEGER_FN;
+    static computed_function::to_float TO_FLOAT_FN;
+    static computed_function::make_date MAKE_DATE_FN;
+    static computed_function::make_datetime MAKE_DATETIME_FN;
 };
 
 /**

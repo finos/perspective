@@ -21,7 +21,7 @@ t_config::t_config(
     const std::vector<std::string>& detail_columns,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<t_computed_expression>& expressions)
+    const std::vector<std::shared_ptr<t_computed_expression>>& expressions)
     : m_detail_columns(detail_columns)
     , m_fterms(fterms)
     , m_expressions(expressions)
@@ -48,7 +48,7 @@ t_config::t_config(
     const std::vector<t_aggspec>& aggregates,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<t_computed_expression>& expressions)
+    const std::vector<std::shared_ptr<t_computed_expression>>& expressions)
     : m_aggregates(aggregates)
     , m_fterms(fterms)
     , m_expressions(expressions)
@@ -70,7 +70,7 @@ t_config::t_config(
     const t_totals totals,
     const std::vector<t_fterm>& fterms,
     t_filter_op combiner,
-    const std::vector<t_computed_expression>& expressions,
+    const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
     bool column_only)
     : m_aggregates(aggregates)
     , m_fterms(fterms)
@@ -380,7 +380,7 @@ t_config::get_fterms() const {
     return m_fterms;
 }
 
-std::vector<t_computed_expression>
+std::vector<std::shared_ptr<t_computed_expression>>
 t_config::get_expressions() const {
     return m_expressions;
 }
