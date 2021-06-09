@@ -94,9 +94,11 @@ declare module "@finos/perspective" {
         num_rows(): Promise<number>;
         on_delete(callback: Function): void;
         on_update(callback: UpdateCallback, options?: {mode?: string}): void;
+        remove_update(callback: UpdateCallback): void;
+        remove_delete(callback: Function): void;
         schema(): Promise<Schema>;
         expression_schema(): Promise<Schema>;
-        to_arrow(options?: SerializeConfig & {data_slice: any}): Promise<ArrayBuffer>;
+        to_arrow(options?: SerializeConfig): Promise<ArrayBuffer>;
         to_columns(options?: SerializeConfig): Promise<Array<object>>;
         to_csv(options?: SerializeConfig & {config: object}): Promise<string>;
         to_json(options?: SerializeConfig): Promise<Array<object>>;
@@ -107,9 +109,15 @@ declare module "@finos/perspective" {
 
     export type TableData = string | Array<object> | {[key: string]: Array<object>} | {[key: string]: string} | ArrayBuffer;
 
+    export interface ExpressionError {
+        error_message: string;
+        line: number;
+        column: number;
+    }
+
     export type ValidatedExpressions = {
         expression_schema: Schema;
-        errors: {[key: string]: string};
+        errors: {[key: string]: ExpressionError};
     };
 
     export type TableOptions = {
@@ -137,8 +145,11 @@ declare module "@finos/perspective" {
         schema(): Promise<Schema>;
         size(): Promise<number>;
         update(data: TableData, options?: {port_id?: number}): void;
+        remove(data: Array<any>, options?: {port_id?: number}): void;
         view(config?: ViewConfig): Promise<View>;
         make_port(): number;
+        get_index(): Promise<string | null>;
+        get_limit(): Promise<number | null>;
     };
 
     /**** perspective ****/

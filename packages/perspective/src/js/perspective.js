@@ -708,9 +708,6 @@ export default function(Module) {
      *
      * @param {Object} [options] An optional configuration object.
      *
-     * @param {*} options.data_slice A data slice object from which to
-     * serialize.
-     *
      * @param {number} options.start_row The starting row index from which to
      * serialize.
      * @param {number} options.end_row The ending row index from which to
