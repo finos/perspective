@@ -302,9 +302,18 @@ PYBIND11_MODULE(libbinding, m)
      * t_validated_expression_map
      */
     py::class_<t_validated_expression_map>(m, "t_validated_expression_map")
-        .def(py::init<t_uindex>())
-        .def("get_expressions", &t_validated_expression_map::get_expressions)
-        .def("get_results", &t_validated_expression_map::get_results);
+        .def(py::init<>())
+        .def("get_expression_schema", &t_validated_expression_map::get_expression_schema)
+        .def("get_expression_errors", &t_validated_expression_map::get_expression_errors);
+
+    /******************************************************************************
+     *
+     * t_expression_error
+     */
+    py::class_<t_expression_error>(m, "t_expression_error")
+        .def_readwrite("error_message", &t_expression_error::m_error_message)
+        .def_readwrite("line", &t_expression_error::m_line)
+        .def_readwrite("column", &t_expression_error::m_column);
 
     /******************************************************************************
      *

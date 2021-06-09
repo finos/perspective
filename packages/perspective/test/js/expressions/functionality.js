@@ -20,8 +20,23 @@ module.exports = perspective => {
             it("if without else should be invalid", async function() {
                 const table = await perspective.table(expressions_common.int_float_data);
                 const validate = await table.validate_expressions(['if ("w" > 1) 5;', 'if ("w" > 1) 5']);
+
                 expect(validate.expression_schema['if ("w" > 1) 5;']).toBeUndefined();
                 expect(validate.expression_schema['if ("w" > 1) 5']).toBeUndefined();
+
+                expect(validate.errors).toEqual({
+                    'if ("w" > 1) 5': {
+                        column: 0,
+                        error_message: "",
+                        line: 8
+                    },
+                    'if ("w" > 1) 5;': {
+                        column: 0,
+                        error_message: "",
+                        line: 8
+                    }
+                });
+
                 table.delete();
             });
 

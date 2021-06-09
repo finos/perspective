@@ -318,7 +318,7 @@ t_computed_expression_parser::get_dtype(
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
     const t_schema& schema,
-    std::string& error_string
+    t_expression_error& error
 ) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
@@ -337,7 +337,9 @@ t_computed_expression_parser::get_dtype(
         const std::string& column_name = column_ids[cidx].second;
 
         if (!schema.has_column(column_name)) {
-            error_string += ("Value Error - Input column \"" + column_name + "\" does not exist.");
+            error.m_error_message = ("Value Error - Input column \"" + column_name + "\" does not exist.");
+            error.m_line = 0;
+            error.m_column = 0;
             return DTYPE_NONE;
         }
 
@@ -353,55 +355,90 @@ t_computed_expression_parser::get_dtype(
     expr_definition.register_symbol_table(sym_table);
 
     if (!t_computed_expression_parser::PARSER->compile(parsed_expression_string, expr_definition)) {
-        auto error = t_computed_expression_parser::PARSER->error();
-        // strip the Exprtk error codes such as "ERR001 -"
-        error_string += "Parser Error " + error.substr(error.find("- "));
+        // Error count should always be above 0 if there is a compile error -
+        // We simply take the first error and return it.
+        if (t_computed_expression_parser::PARSER->error_count() > 0) {
+            auto parser_error = t_computed_expression_parser::PARSER->get_error(0);
+            
+            // Given an error object and an expression, `update_error` maps the
+            // error to a line and column number inside the expression. 
+            exprtk::parser_error::update_error(parser_error, parsed_expression_string);
+
+            // Take the error message and strip the ExprTk error code
+            std::string error_message(parser_error.diagnostic.c_str());
+
+            // strip the Exprtk error codes such as "ERR001 -"
+            error.m_error_message = "Parser Error " + error_message.substr(error_message.find("- "));
+
+            error.m_line = parser_error.line_no;
+            error.m_column = parser_error.column_no;
+        } else {
+            // If for whatever reason the error count is at 0, output a generic
+            // parser error so that we report back a valid error object.
+            error.m_error_message = "Parser Error";
+            error.m_line = 0;
+            error.m_column = 0;
+        }
+
         return DTYPE_NONE;
     }
 
     t_tscalar v = expr_definition.value();
 
     if (v.m_status == STATUS_CLEAR) {
-        error_string += "Type Error - inputs do not resolve to a valid expression.";
+        error.m_error_message = "Type Error - inputs do not resolve to a valid expression.";
+        error.m_line = 0;
+        error.m_column = 0;
         return DTYPE_NONE;
     }
 
     return v.get_dtype();
 }
 
-t_validated_expression_map::t_validated_expression_map(t_uindex capacity) {
-    if (capacity > 0) {
-        m_expressions.reserve(capacity);
-        m_results.reserve(capacity);
-        m_expression_map.reserve(capacity);
-    }
-}
+t_validated_expression_map::t_validated_expression_map() {}
 
 void
-t_validated_expression_map::add(
-    const std::string& expression_alias, const std::string& result) {
-    if (m_expression_map.count(expression_alias)) {
-        t_uindex idx = m_expression_map[expression_alias];
-        m_results[idx] = result;
-    } else {
-        m_expressions.push_back(expression_alias);
-        m_results.push_back(result);
-        m_expression_map[expression_alias] = m_expressions.size() - 1;
+t_validated_expression_map::add_expression(
+    const std::string& expression_alias, const std::string& type_string) {
+    // If the expression is in the error map, it should be removed as it is now
+    // valid. This can happen when validating multiple expressions with the same
+    // alias where the first instance is invalid, and the next occurence is
+    // valid, and so on. This maintains the property that an expression will
+    // exist in the schema OR the error map.
+    auto error_iter = m_expression_errors.find(expression_alias);
+
+    if (error_iter != m_expression_errors.end()) {
+        m_expression_errors.erase(error_iter);
     }
+
+    m_expression_schema[expression_alias] = type_string;
 }
 
-t_uindex
-t_validated_expression_map::size() const {
-    return m_expression_map.size();
+void 
+t_validated_expression_map::add_error(
+    const std::string& expression_alias, t_expression_error& error) {
+    // If the expression is in the schema, it should be removed as it is now
+    // invalid. This can happen when validating multiple expressions with the
+    // same alias where the first instance is valid, and the next occurence is
+    // invalid, and so on. This maintains the property that an expression will
+    // exist in the schema OR the error map.
+    auto schema_iter = m_expression_schema.find(expression_alias);
+
+    if (schema_iter != m_expression_schema.end()) {
+        m_expression_schema.erase(schema_iter);
+    }
+
+    m_expression_errors[expression_alias] = error;
 }
 
-const std::vector<std::string>&
-t_validated_expression_map::get_expressions() const {
-    return m_expressions;
+std::map<std::string, std::string>
+t_validated_expression_map::get_expression_schema() const {
+    return m_expression_schema;
 }
 
-const std::vector<std::string>&
-t_validated_expression_map::get_results() const {
-    return m_results;
+std::map<std::string, t_expression_error>
+t_validated_expression_map::get_expression_errors() const {
+    return m_expression_errors;
 }
+
 } // end namespace perspective

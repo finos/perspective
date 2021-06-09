@@ -321,13 +321,12 @@ namespace binding {
     
     /**
      * @brief Given a table and a list of expressions, validate the expressions
-     * and return a map of all expressions with a string dtype or a string
-     * error message if the expression is invalid in any way.
+     * and return a `t_validated_expression_map` object.
      * 
      * @tparam T 
      * @param table 
      * @param j_expressions 
-     * @return t_schema 
+     * @return t_validated_expression_map 
      */
     template <typename T>
     t_validated_expression_map

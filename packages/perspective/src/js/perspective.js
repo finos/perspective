@@ -1392,28 +1392,39 @@ export default function(Module) {
         }
 
         const validation_results = __MODULE__.validate_expressions(this._Table, vector);
-        const aliases = validation_results.get_expressions();
-        const results = validation_results.get_results();
+        const expression_schema = validation_results.get_expression_schema();
+        const expression_errors = validation_results.get_expression_errors();
 
-        for (let i = 0; i < aliases.size(); i++) {
-            const alias = aliases.get(i);
-            let result = results.get(i);
+        const expression_aliases = expression_schema.keys();
 
-            if (defaults.DATA_TYPES[result]) {
-                // valid - returned a type
-                if (override && this.overridden_types[alias]) {
-                    result = this.overridden_types[alias];
-                }
+        for (let i = 0; i < expression_aliases.size(); i++) {
+            const alias = expression_aliases.get(i);
+            let dtype = expression_schema.get(alias);
 
-                validated.expression_schema[alias] = result;
-            } else {
-                // Invalid - returned an error message
-                validated.errors[alias] = result;
+            if (override && this.overridden_types[alias]) {
+                dtype = this.overridden_types[alias];
             }
+
+            validated.expression_schema[alias] = dtype;
         }
 
-        aliases.delete();
-        results.delete();
+        const error_aliases = expression_errors.keys();
+
+        for (let i = 0; i < error_aliases.size(); i++) {
+            const alias = error_aliases.get(i);
+
+            // bound using `value_object` in embind so no need to manually
+            // convert to Object, or call delete() as memory is auto-managed.
+            const error_object = expression_errors.get(alias);
+
+            console.log(error_object);
+            validated.errors[alias] = error_object;
+        }
+
+        error_aliases.delete();
+        expression_aliases.delete();
+        expression_errors.delete();
+        expression_schema.delete();
         validation_results.delete();
 
         return validated;

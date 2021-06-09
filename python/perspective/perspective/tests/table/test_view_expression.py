@@ -26,6 +26,35 @@ class TestViewExpression(object):
         assert view.to_columns() == {"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]}
         assert view.expression_schema() == {}
 
+    def test_table_validate_expressions_with_errors(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validate = table.validate_expressions(
+            ['"Sales" + "Profit"', "datetime()", "string()", "for () {}"]
+        )
+        assert validate["expression_schema"] == {}
+        assert validate["errors"] == {
+            '"Sales" + "Profit"': {
+                "column": 0,
+                "error_message": 'Value Error - Input column "Sales" does not exist.',
+                "line": 0,
+            },
+            "datetime()": {
+                "column": 10,
+                "error_message": "Parser Error - Zero parameter call to generic function: datetime not allowed",
+                "line": 0,
+            },
+            "for () {}": {
+                "column": 5,
+                "error_message": "Parser Error - Premature end of expression[2]",
+                "line": 0,
+            },
+            "string()": {
+                "column": 8,
+                "error_message": "Parser Error - Zero parameter call to generic function: string not allowed",
+                "line": 0,
+            },
+        }
+
     def test_view_expression_create(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(expressions=['// computed \n "a" + "b"'])
