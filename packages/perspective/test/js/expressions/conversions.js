@@ -542,8 +542,16 @@ module.exports = perspective => {
             });
 
             expect(validated.errors).toEqual({
-                computed: "Parser Error - Zero parameter call to generic function: date not allowed",
-                computed2: "Type Error - inputs do not resolve to a valid expression."
+                computed: {
+                    column: 8,
+                    error_message: "Parser Error - Zero parameter call to generic function: date not allowed",
+                    line: 1
+                },
+                computed2: {
+                    column: 0,
+                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    line: 0
+                }
             });
 
             await table.delete();
@@ -679,11 +687,31 @@ module.exports = perspective => {
             expect(validated.expression_schema).toEqual({});
 
             expect(validated.errors).toEqual({
-                computed1: "Parser Error - Zero parameter call to generic function: datetime not allowed",
-                computed2: "Type Error - inputs do not resolve to a valid expression.",
-                computed3: "Type Error - inputs do not resolve to a valid expression.",
-                computed4: "Type Error - inputs do not resolve to a valid expression.",
-                computed5: "Parser Error - Failed parameter type check for function 'datetime', Expected 'T'  call set: 'TT'"
+                computed1: {
+                    column: 12,
+                    error_message: "Parser Error - Zero parameter call to generic function: datetime not allowed",
+                    line: 1
+                },
+                computed2: {
+                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0
+                },
+                computed3: {
+                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0
+                },
+                computed4: {
+                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0
+                },
+                computed5: {
+                    error_message: "Parser Error - Failed parameter type check for function 'datetime', Expected 'T'  call set: 'TT'",
+                    column: 21,
+                    line: 1
+                }
             });
 
             await table.delete();

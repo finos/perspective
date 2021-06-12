@@ -73,7 +73,7 @@ Table::validate_expressions(
             std::string,
             std::string,
             std::vector<std::pair<std::string, std::string>>>>& expressions) const {
-    t_validated_expression_map rval(expressions.size());
+    t_validated_expression_map rval = t_validated_expression_map();
 
     // Expression columns live on the `t_gstate` master table, so this
     // schema will always contain ALL expressions columns created by ALL views
@@ -88,45 +88,35 @@ Table::validate_expressions(
 
     for (const auto& expr : expressions) {
         const std::string& expression_alias = std::get<0>(expr);
-        std::string error_string;
+        const std::string& expression_string = std::get<1>(expr);
+        const std::string& parsed_expression_string = std::get<2>(expr);
+        t_expression_error error;
 
         // Cannot overwrite a "real" column with an expression column
         if (gnode_schema.has_column(expression_alias)) {
-            error_string += "Value Error - expression \"" + expression_alias + "\" cannot overwrite an existing column.";
-            rval.add(expression_alias, error_string);
+            error.m_error_message = "Value Error - expression \"" + expression_alias + "\" cannot overwrite an existing column.";
+            error.m_line = 0;
+            error.m_column = 0;
+            rval.add_error(expression_alias, error);
             continue;
         }
 
+        const auto& column_ids = std::get<3>(expr);
+
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
             expression_alias,
-            std::get<1>(expr),
-            std::get<2>(expr),
-            std::get<3>(expr),
+            expression_string,
+            parsed_expression_string,
+            column_ids,
             gnode_schema,
-            error_string);
+            error);
 
         if (expression_dtype == DTYPE_NONE) {
             // extract the error from the stream and set it in the returned map
-            rval.add(expression_alias, error_string);
+            rval.add_error(expression_alias, error);
         } else {
-            // Check if the expression tries to overwrite an existing
-            // expression with a different type - i.e. expression abc exists
-            // and is a float, but is being overwritten with a string. Because
-            // this causes issues with writing to columns, we should not
-            // allow this case.
-            if (master_table_schema.has_column(expression_alias) && master_table_schema.get_dtype(expression_alias) != expression_dtype) {
-                std::stringstream ss;
-                ss <<  "ValueError: cannot overwrite "
-                    << "expression \"" << expression_alias << "\" of type \""
-                    << dtype_to_str(master_table_schema.get_dtype(expression_alias))
-                    << "\" with an expression of type \""
-                    << dtype_to_str(expression_dtype)
-                    << "\"";
-                rval.add(expression_alias, ss.str());
-                continue;
-            }
-
-            rval.add(expression_alias, dtype_to_str(expression_dtype));
+            rval.add_expression(
+                expression_alias, dtype_to_str(expression_dtype));
         }
     }
 

@@ -27,6 +27,16 @@
 namespace perspective {
 
 /**
+ * @brief A thin container for an error message and position (start and end
+ * row/column) from Exprtk.
+ */
+struct PERSPECTIVE_EXPORT t_expression_error {
+    std::string m_error_message;
+    t_uindex m_line;
+    t_uindex m_column;
+};
+
+/**
  * @brief Contains the metadata for a single expression and the methods which
  * will compute the expression's output.
  */
@@ -116,7 +126,7 @@ public:
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
         const t_schema& schema,
-        std::string& error_string);
+        t_expression_error& error);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
@@ -148,25 +158,16 @@ public:
  * offers fast lookups.
  */
 struct PERSPECTIVE_EXPORT t_validated_expression_map {
-    t_validated_expression_map(t_uindex capacity);
+    t_validated_expression_map();
 
-    /**
-     * @brief Add an expression and its result (a `t_dtype` as string or an
-     * error message) to the map. If the expression is already in the map,
-     * it is replaced with the new result.
-     * 
-     * @param expression 
-     * @param result 
-     */
-    void add(const std::string& expression_alias, const std::string& result);
-    
-    t_uindex size() const;
-    const std::vector<std::string>& get_expressions() const;
-    const std::vector<std::string>& get_results() const;
+    void add_expression(const std::string& expression_alias, const std::string& type_string);
+    void add_error(const std::string& expression_alias, t_expression_error& error);
 
-    std::vector<std::string> m_expressions;
-    std::vector<std::string> m_results;
-    tsl::hopscotch_map<std::string, t_uindex> m_expression_map;
+    std::map<std::string, std::string> get_expression_schema() const;
+    std::map<std::string, t_expression_error> get_expression_errors() const;
+
+    std::map<std::string, std::string> m_expression_schema;
+    std::map<std::string, t_expression_error> m_expression_errors;
 };
 
 } // end namespace perspective

@@ -194,25 +194,25 @@ jobs:
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
-        artifactName: "perspective-viewer"
+        artifactName: "perspective-viewer-$(Build.BuildNumber)"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
-        artifactName: "perspective-viewer-datagrid"
+        artifactName: "perspective-viewer-datagrid-$(Build.BuildNumber)"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
-        artifactName: "perspective-viewer-d3fc"
+        artifactName: "perspective-viewer-d3fc-$(Build.BuildNumber)"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
-        artifactName: "perspective-workspace"
+        artifactName: "perspective-workspace-$(Build.BuildNumber)"
 
 
 - job: 'Linux'

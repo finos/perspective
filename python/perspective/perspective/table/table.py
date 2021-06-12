@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from six import string_types
+from six import string_types, iteritems
 from datetime import date, datetime
 from .view import View
 from ._accessor import _PerspectiveAccessor
@@ -163,7 +163,8 @@ class Table(object):
         """Returns an :obj:`dict` with two keys: "expression_schema", which is
         a schema containing the column names and data types for each valid
         expression in ``expressions``, and "errors", which is a dict of
-        expressions to error messages.
+        expressions to error objects that contain additional metadata:
+        `error_message`, `line`, and `column`.
 
         Args:
             expressions (:obj:`list`): A list of string expressions to validate
@@ -180,20 +181,21 @@ class Table(object):
 
         expressions = _parse_expression_strings(expressions)
         validation_results = validate_expressions(self._table, expressions)
-        expression_aliases = validation_results.get_expressions()
-        results = validation_results.get_results()
+        expression_schema = validation_results.get_expression_schema()
+        expression_errors = validation_results.get_expression_errors()
 
-        for i in range(0, len(expression_aliases)):
-            alias = expression_aliases[i]
-            dtype = _str_to_pythontype(results[i])
-            if dtype is not None:
-                # valid expression - returned a type
-                if as_string:
-                    dtype = results[i]
-                validated["expression_schema"][alias] = dtype
-            else:
-                # invalid - returned an error message
-                validated["errors"][alias] = results[i]
+        for (alias, dtype) in iteritems(expression_schema):
+            if not as_string:
+                dtype = _str_to_pythontype(dtype)
+            validated["expression_schema"][alias] = expression_schema[alias]
+
+        for (alias, error) in iteritems(expression_errors):
+            error_dict = {}
+            error_dict["error_message"] = error.error_message
+            error_dict["line"] = error.line
+            error_dict["column"] = error.column
+
+            validated["errors"][alias] = error_dict
 
         return validated
 

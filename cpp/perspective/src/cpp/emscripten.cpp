@@ -2032,18 +2032,27 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_validated_expression_map
-     */
-    class_<t_validated_expression_map>("t_validated_expression_map")
-        .constructor<t_uindex>()
-        .function("get_expressions", &t_validated_expression_map::get_expressions)
-        .function("get_results", &t_validated_expression_map::get_results);
-
-    /******************************************************************************
-     *
      * t_tscalar
      */
     class_<t_tscalar>("t_tscalar");
+
+    /******************************************************************************
+     *
+     * t_validated_expression_map
+     */
+    class_<t_validated_expression_map>("t_validated_expression_map")
+        .constructor<>()
+        .function("get_expression_schema", &t_validated_expression_map::get_expression_schema)
+        .function("get_expression_errors", &t_validated_expression_map::get_expression_errors);
+
+    /******************************************************************************
+     *
+     * t_expression_error
+     */
+    value_object<t_expression_error>("t_expression_error")
+        .field("error_message", &t_expression_error::m_error_message)
+        .field("line", &t_expression_error::m_line)
+        .field("column", &t_expression_error::m_column);
 
     /******************************************************************************
      *
@@ -2095,8 +2104,12 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     register_map<std::string, std::string>(
         "std::map<std::string, std::string>");
+
     register_map<std::string, std::map<std::string, std::string>>(
         "std::map<std::string, std::map<std::string, std::string>>");
+
+    register_map<std::string, t_expression_error>(
+        "std::map<std::string, t_expression_error>");
 
     /******************************************************************************
      *
