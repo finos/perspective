@@ -57,17 +57,43 @@ impl Session {
 
     /// Reset this `Session`'s state with a new `Table`.  Implicitly calls
     /// `clear_view()`, which will need to be re-initialized later via `set_view()`.
-    pub async fn set_table(self, table: PerspectiveJsTable) -> Result<JsValue, JsValue> {
+    pub async fn set_table(
+        self,
+        table: PerspectiveJsTable,
+    ) -> Result<JsValue, JsValue> {
         self.clear_view();
         self.borrow_mut().table = Some(table);
         self.update_table_stats().await?;
         Ok(JsValue::UNDEFINED)
     }
 
+    /// The `table`'s unique column names.  This value is not 
+    pub async fn get_column_names(self) -> Result<Vec<String>, JsValue> {
+        match self.borrow().table.as_ref() {
+            None => Ok(vec![]),
+            Some(table) => {
+                let columns = table.columns().await?;
+                if columns.length() > 0 {
+                    Ok((0..columns.length())
+                        .map(|i| columns.get(i).as_string().unwrap())
+                        .collect::<Vec<String>>())
+                } else {
+                    Ok(vec![])
+                }
+            }
+        }
+    }
+
     pub async fn validate_expr(self, expr: JsValue) -> Result<bool, JsValue> {
         let arr = Array::new();
         arr.push(&expr);
-        let result = self.borrow().table.as_ref().unwrap().validate_expressions(arr).await?;
+        let result = self
+            .borrow()
+            .table
+            .as_ref()
+            .unwrap()
+            .validate_expressions(arr)
+            .await?;
         let error_count = js_sys::Object::keys(&result.errors()).length();
         Ok(error_count == 0)
     }

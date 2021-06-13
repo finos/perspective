@@ -60,7 +60,6 @@ impl Component for ExpressionEditor {
             link.callback(|x| ExpressionEditorMsg::Validate(x))
                 .to_closure(),
         );
-        
         let on_save = Rc::new(
             link.callback(|_| ExpressionEditorMsg::SaveExpr)
                 .to_closure(),
@@ -91,8 +90,7 @@ impl Component for ExpressionEditor {
 
                 true
             }
-            ExpressionEditorMsg::Validate(val) => {
-                web_sys::console::log_1(&val);
+            ExpressionEditorMsg::Validate(_val) => {
                 let _promise = future_to_promise(self.clone().validate_expr());
                 false
             }
@@ -156,7 +154,9 @@ impl ExpressionEditor {
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
+        let column_names = self.props.session.get_column_names();
         let monaco = init_monaco(&self.props.monaco_theme).await.unwrap();
+        set_global_completion_column_names(column_names.await?);
         let args = EditorArgs {
             theme: "exprtk-theme",
             value: "",
@@ -170,10 +170,8 @@ impl ExpressionEditor {
         let editor = monaco.create(container, editor_args);
         let cmd = (KeyMod::Shift as u32) | (KeyCode::Enter as u32);
         editor.add_command(cmd, self.on_save.as_ref().as_ref().unchecked_ref());
-        editor
-            .get_model()
-            .on_did_change_content(self.on_validate.as_ref().as_ref().unchecked_ref());
-
+        let cb = self.on_validate.as_ref().as_ref().unchecked_ref();
+        editor.get_model().on_did_change_content(cb);
         *self.editor.borrow_mut() = Some(editor.clone());
         await_animation_frame().await?;
         editor.focus();
