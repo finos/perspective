@@ -36,6 +36,45 @@ class TestTable(object):
         tbl.update({"a": [4, 5, 6]})
         assert _PerspectiveStateManager.TO_PROCESS == {}
 
+    def test_table_csv(self):
+        data = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false"
+        tbl = Table(data)
+        assert tbl.schema() == {
+            "x": int,
+            "y": str,
+            "z": bool
+        }
+        view = tbl.view()
+        assert view.to_dict() == {
+            "x": [1, 2, 3, 4],
+            "y": ["a", "b", "c", "d"],
+            "z": [True, False, True, False]
+        }
+
+    def test_table_correct_csv_nan_end(self):
+        tbl = Table("str,int\n,1\n,2\nabc,3")
+        assert tbl.schema() == {
+            "str": str,
+            "int": int
+        }
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "str": ["", "", "abc"],
+            "int": [1, 2, 3]
+        }
+
+    def test_table_correct_csv_nan_intermittent(self):
+        tbl = Table("str,float\nabc,\n,2.5\nghi,")
+        assert tbl.schema() == {
+            "str": str,
+            "float": float
+        }
+        assert tbl.size() == 3
+        assert tbl.view().to_dict() == {
+            "str": ["abc", "", "ghi"],
+            "float": [None, 2.5, None]
+        }
+
     def test_table_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)

@@ -172,9 +172,8 @@ namespace apachearrow {
         }
     }
 
-#ifdef PSP_ENABLE_WASM
     void
-    ArrowLoader::init_csv(std::string& csv, bool is_update,  std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& psp_schema) {        
+    ArrowLoader::init_csv(std::string& csv, bool is_update, std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& psp_schema) {        
         m_table = csvToTable(csv, is_update, psp_schema);
 
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
@@ -185,7 +184,6 @@ namespace apachearrow {
             m_types.push_back(convert_type(field->type()->name()));
         }
     }
-#endif
 
     void
     ArrowLoader::fill_table(

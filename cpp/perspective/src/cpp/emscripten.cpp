@@ -1160,7 +1160,7 @@ namespace binding {
                 arrow_loader.initialize(ptr, length);
             }
             
-            // Always use the `Table` column names and data types on up
+            // Always use the `Table` column names and data types on update
             if (table_initialized && is_update) {
                 auto gnode_output_schema = gnode->get_output_schema();
                 auto schema = gnode_output_schema.drop({"psp_okey"});
