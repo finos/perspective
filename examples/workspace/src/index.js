@@ -40,15 +40,9 @@ const DEFAULT_LAYOUT = {
     }
 };
 
-window.addEventListener("load", () => {
-    window.workspace.tables.set("superstore", datasource());
-
-    const savedLayout = localStorage.getItem("layout");
-
-    window.workspace.restore(savedLayout ? JSON.parse(savedLayout) : DEFAULT_LAYOUT);
-    // window.workspace.restore(DEFAULT_LAYOUT);
-
-    window.workspace.addEventListener("workspace-layout-update", () => {
-        localStorage.setItem("layout", JSON.stringify(window.workspace.save()));
-    });
+window.workspace.tables.set("superstore", datasource());
+const savedLayout = localStorage.getItem("layout");
+window.workspace.restore(savedLayout ? JSON.parse(savedLayout) : DEFAULT_LAYOUT);
+window.workspace.addEventListener("workspace-layout-update", () => {
+    localStorage.setItem("layout", JSON.stringify(window.workspace.save()));
 });

@@ -99,9 +99,14 @@ async function get_new_page() {
         }, path);
     };
 
-    page.shadow_type = async function(content, ...path) {
+    page.shadow_type = async function(content, is_incremental, ...path) {
+        if (typeof is_incremental !== "boolean") {
+            path.unshift(is_incremental);
+            is_incremental = false;
+        }
+
         await this.evaluate(
-            async (content, path) => {
+            async (content, path, is_incremental) => {
                 let elem = document;
                 while (path.length > 0) {
                     if (elem.shadowRoot) {
@@ -121,11 +126,21 @@ async function get_new_page() {
                     element.dispatchEvent(event);
                 }
 
-                elem.value = content;
-                triggerInputEvent(elem);
+                if (is_incremental) {
+                    while (content.length > 0) {
+                        elem.value += content[0];
+                        triggerInputEvent(elem);
+                        await new Promise(requestAnimationFrame);
+                        content = content.slice(1);
+                    }
+                } else {
+                    elem.value = content;
+                    triggerInputEvent(elem);
+                }
             },
             content,
-            path
+            path,
+            is_incremental
         );
     };
 

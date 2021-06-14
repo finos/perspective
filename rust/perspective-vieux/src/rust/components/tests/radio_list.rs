@@ -22,9 +22,9 @@ pub fn test_change_u32() {
     let link: WeakComponentLink<RadioList<u32>> = WeakComponentLink::default();
     let result: Rc<RefCell<u32>> = Rc::new(RefCell::new(1000));
     let on_change = {
-        let _result = result.clone();
+        clone!(result);
         Callback::from(move |val| {
-            *_result.borrow_mut() = val;
+            *result.borrow_mut() = val;
         })
     };
 

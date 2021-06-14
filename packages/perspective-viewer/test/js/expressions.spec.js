@@ -7,15 +7,6 @@
  *
  */
 
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
-
 const utils = require("@finos/perspective-test");
 const path = require("path");
 
@@ -68,7 +59,7 @@ utils.with_server({}, () => {
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
                 await page.waitForSelector("perspective-expression-editor:not([initializing])");
-                await page.shadow_type('"Sales" + "Category"', "perspective-expression-editor", "textarea");
+                await page.shadow_type('"Sales" + "Category"', true, "perspective-expression-editor", "textarea");
                 await page.waitForSelector("perspective-expression-editor:not([validating])");
             });
 
@@ -77,24 +68,9 @@ utils.with_server({}, () => {
                 await page.$("perspective-viewer");
                 await page.shadow_click("perspective-viewer", "#add-expression");
                 await page.waitForSelector("perspective-expression-editor:not([initializing])");
-                await page.shadow_type('"aaaa" + "Sales"', "perspective-expression-editor", "textarea");
+                await page.shadow_type('"aaaa" + "Sales"', true, "perspective-expression-editor", "textarea");
                 await page.waitForSelector("perspective-expression-editor:not([validating])");
             });
-
-            // test.capture("Should show the help panel", async page => {
-            //     const viewer = await page.$("perspective-viewer");
-            //     await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-            //     await page.shadow_click("perspective-viewer", "#add-expression");
-            //     await page.evaluate(
-            //         element =>
-            //             element.shadowRoot
-            //                 .querySelector("perspective-expression-editor")
-            //                 .shadowRoot.querySelector("#psp-expression-editor-button-help")
-            //                 .click(),
-            //         viewer
-            //     );
-            //     await page.evaluate(() => document.activeElement.blur());
-            // });
 
             test.skip("Typing tab should enter an indent", async page => {
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());

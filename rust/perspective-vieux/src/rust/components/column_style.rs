@@ -94,6 +94,7 @@ pub struct ColumnStyleDefaultConfig {
 }
 
 pub enum ColumnStyleMsg {
+    Reset(ColumnStyleConfig),
     SetPos(u32, u32),
     FixedChanged(String),
     ColorEnabledChanged(bool),
@@ -159,35 +160,20 @@ impl Component for ColumnStyle {
 
     fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
         *props.weak_link.borrow_mut() = Some(_link);
-        let config = props.config.clone();
-        let default_config = props.default_config.clone();
-        let gradient = match config.gradient {
-            Some(x) => x,
-            None => default_config.gradient,
-        };
-
-        let (color_mode, pos_color, neg_color) = match config.color_mode {
-            Some(x) => (x, config.pos_color.unwrap(), config.neg_color.unwrap()),
-            None => (
-                Default::default(),
-                default_config.pos_color,
-                default_config.neg_color,
-            ),
-        };
-
-        ColumnStyle {
-            top: 0,
-            left: 0,
-            props,
-            color_mode,
-            pos_color,
-            neg_color,
-            gradient,
-        }
+        ColumnStyle::reset(props)
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
         match _msg {
+            ColumnStyleMsg::Reset(config) => {
+                let props = ColumnStyleProps {
+                    config,
+                    ..self.props.clone()
+                };
+
+                std::mem::swap(self, &mut ColumnStyle::reset(props));
+                true
+            }
             ColumnStyleMsg::SetPos(top, left) => {
                 self.top = top;
                 self.left = left;
@@ -395,6 +381,36 @@ impl Component for ColumnStyle {
                     </div>
                 </div>
             </>
+        }
+    }
+}
+
+impl ColumnStyle {
+    fn reset(props: ColumnStyleProps) -> ColumnStyle {
+        let config = props.config.clone();
+        let default_config = props.default_config.clone();
+        let gradient = match config.gradient {
+            Some(x) => x,
+            None => default_config.gradient,
+        };
+
+        let (color_mode, pos_color, neg_color) = match config.color_mode {
+            Some(x) => (x, config.pos_color.unwrap(), config.neg_color.unwrap()),
+            None => (
+                Default::default(),
+                default_config.pos_color,
+                default_config.neg_color,
+            ),
+        };
+
+        ColumnStyle {
+            top: 0,
+            left: 0,
+            props,
+            color_mode,
+            pos_color,
+            neg_color,
+            gradient,
         }
     }
 }

@@ -77,7 +77,12 @@ class PerspectiveColumnStyleElement extends HTMLElement {
 
     open(target, config, default_config) {
         _await_index(() => {
-            this._instance = new _index.PerspectiveColumnStyleElement(this, config, default_config);
+            if (this._instance) {
+                this._instance.reset(config, default_config);
+            } else {
+                this._instance = new _index.PerspectiveColumnStyleElement(this, config, default_config);
+            }
+
             this._instance.open(target);
         });
     }

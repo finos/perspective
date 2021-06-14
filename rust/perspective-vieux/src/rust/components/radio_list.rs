@@ -167,7 +167,6 @@ where
     /// Render a single row of the `RadioList`.
     ///
     /// # Arguments
-    ///
     /// * `idx` - The index of this row.
     /// * `child` - The `Html` row content.
     /// * `class` - The `class` attribute string.

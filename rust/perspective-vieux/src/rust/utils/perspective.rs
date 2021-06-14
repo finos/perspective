@@ -44,6 +44,9 @@ extern "C" {
     #[derive(Clone)]
     pub type PerspectiveJsTable;
 
+    #[wasm_bindgen(method, catch, js_name = columns)]
+    pub async fn _columns(this: &PerspectiveJsTable) -> Result<JsValue, JsValue>;
+
     #[wasm_bindgen(method, catch, js_name = delete)]
     pub async fn _delete(this: &PerspectiveJsTable) -> Result<JsValue, JsValue>;
 
@@ -103,6 +106,7 @@ impl PerspectiveJsWorker {
 }
 
 impl PerspectiveJsTable {
+    async_typed!(_columns, columns() -> js_sys::Array);
     async_typed!(_delete, delete() -> ());
     async_typed!(_validate_expressions, validate_expressions(exprs: Array) -> PerspectiveValidatedExpressions);
     async_typed!(_view, view(config: js_sys::Object) -> PerspectiveJsView);

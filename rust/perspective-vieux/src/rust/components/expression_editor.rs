@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////, kind: (), insert_text: (), insert_text_rules: (), documentation: () ///////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (c) 2018, the Perspective Authors.
 //
@@ -6,19 +6,19 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-// use crate::*;
-// use crate::utils::WeakComponentLink;
+use crate::exprtk::*;
+use crate::session::Session;
 use crate::utils::monaco::*;
-use crate::{exprtk::*, session::Session};
+use crate::utils::*;
 
-use std::{cell::RefCell, rc::Rc};
-
+use std::cell::RefCell;
+use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::prelude::*;
 
-pub static CSS: &str = include_str!("../../../dist/css/expression-editor.css");
+static CSS: &str = include_str!("../../../dist/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
     SetPos(u32, u32),
@@ -29,9 +29,9 @@ pub enum ExpressionEditorMsg {
 
 #[derive(Properties, Clone)]
 pub struct ExpressionEditorProps {
-    pub on_save_callback: Rc<dyn Fn(JsValue)>,
-    pub on_init_callback: Rc<dyn Fn()>,
-    pub on_validate_callback: Rc<dyn Fn(bool)>,
+    pub on_save: Rc<dyn Fn(JsValue)>,
+    pub on_init: Rc<dyn Fn()>,
+    pub on_validate: Rc<dyn Fn(bool)>,
     pub session: Session,
     pub monaco_theme: String,
 }
@@ -47,20 +47,8 @@ pub struct ExpressionEditor {
     props: ExpressionEditorProps,
     link: ComponentLink<Self>,
     save_enabled: bool,
-    on_validate_callback: Rc<Closure<dyn Fn(JsValue)>>,
-    on_save_callback: Rc<Closure<dyn Fn(JsValue)>>,
-}
-
-async fn proc(
-    session: Session,
-    expr: JsValue,
-    callback: Callback<bool>,
-) -> Result<JsValue, JsValue> {
-    let result = session.clone().validate_expr(expr).await?;
-    // web_sys::console::log_1(&result);
-    let error_count = js_sys::Object::keys(&result.errors()).length();
-    callback.emit(error_count == 0);
-    Ok(JsValue::UNDEFINED)
+    on_validate: Rc<Closure<dyn Fn(JsValue)>>,
+    on_save: Rc<Closure<dyn Fn(JsValue)>>,
 }
 
 impl Component for ExpressionEditor {
@@ -68,17 +56,14 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let cb = link.callback(|x| ExpressionEditorMsg::Validate(x));
-        let on_validate_callback = Rc::new(Closure::wrap(Box::new(move |x| {
-            cb.emit(x);
-        })
-            as Box<dyn Fn(JsValue)>));
-
-        let cb = link.callback(|_| ExpressionEditorMsg::SaveExpr);
-        let on_save_callback = Rc::new(Closure::wrap(Box::new(move |x| {
-            cb.emit(x);
-        })
-            as Box<dyn Fn(JsValue)>));
+        let on_validate = Rc::new(
+            link.callback(|x| ExpressionEditorMsg::Validate(x))
+                .to_closure(),
+        );
+        let on_save = Rc::new(
+            link.callback(|_| ExpressionEditorMsg::SaveExpr)
+                .to_closure(),
+        );
 
         ExpressionEditor {
             top: 0,
@@ -88,8 +73,8 @@ impl Component for ExpressionEditor {
             props,
             link,
             save_enabled: false,
-            on_validate_callback,
-            on_save_callback,
+            on_validate,
+            on_save,
         }
     }
 
@@ -106,18 +91,11 @@ impl Component for ExpressionEditor {
                 true
             }
             ExpressionEditorMsg::Validate(_val) => {
-                // web_sys::console::log_1(&val);
-                let expr = self.editor.borrow().as_ref().unwrap().get_value();
-                (self.props.on_validate_callback)(true);
-                let callback = self
-                    .link
-                    .callback_once(|x| ExpressionEditorMsg::EnableSave(x));
-                let _ =
-                    future_to_promise(proc(self.props.session.clone(), expr, callback));
+                let _promise = future_to_promise(self.clone().validate_expr());
                 false
             }
             ExpressionEditorMsg::EnableSave(x) => {
-                (self.props.on_validate_callback)(false);
+                (self.props.on_validate)(false);
                 self.save_enabled = x;
                 true
             }
@@ -127,7 +105,7 @@ impl Component for ExpressionEditor {
                         None => {}
                         Some(x) => {
                             let expr = x.get_value();
-                            (self.props.on_save_callback)(expr);
+                            (self.props.on_save)(expr);
                             x.set_value("");
                         }
                     }
@@ -143,48 +121,7 @@ impl Component for ExpressionEditor {
 
     fn rendered(&mut self, first_render: bool) {
         if first_render {
-            let this = self.clone();
-            let _ = future_to_promise(async move {
-                let editor = init_monaco(&this.props.monaco_theme).await.unwrap();
-                let args = EditorArgs {
-                    theme: "exprtk-theme",
-                    value: "",
-                    language: "exprtk",
-                    automatic_layout: true,
-                    minimap: MinimapArgs { enabled: false },
-                };
-
-                let container = this.container.cast::<HtmlElement>().unwrap();
-                let editor =
-                    editor.create(container, JsValue::from_serde(&args).unwrap());
-                editor.add_command(
-                    (KeyMod::Shift as u32) | (KeyCode::Enter as u32),
-                    this.on_save_callback.as_ref().as_ref().unchecked_ref(),
-                );
-
-                let model = editor.get_model();
-                model.on_did_change_content(
-                    this.on_validate_callback.as_ref().as_ref().unchecked_ref(),
-                );
-
-                *this.editor.borrow_mut() = Some(editor.clone());
-                let on_init_callback = this.props.on_init_callback.clone();
-                let on_init = Closure::once_into_js(move || {
-                    editor.focus();
-                    web_sys::window()
-                        .unwrap()
-                        .request_animation_frame(
-                            Closure::once_into_js(move || on_init_callback())
-                                .unchecked_ref(),
-                        )
-                        .unwrap();
-                });
-
-                web_sys::window()
-                    .unwrap()
-                    .request_animation_frame(on_init.unchecked_ref())
-                    .map(JsValue::from)
-            });
+            let _promise = future_to_promise(self.clone().init_monaco_editor());
         } else if self.editor.borrow().is_some() {
             self.editor.borrow().as_ref().unwrap().focus();
         }
@@ -210,5 +147,46 @@ impl Component for ExpressionEditor {
                 </div>
             </>
         }
+    }
+}
+
+impl ExpressionEditor {
+    /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
+    /// This method should only be called once per element.
+    async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
+        let column_names = self.props.session.get_column_names();
+        let monaco = init_monaco(&self.props.monaco_theme).await.unwrap();
+        set_global_completion_column_names(column_names.await?);
+        let args = EditorArgs {
+            theme: "exprtk-theme",
+            value: "",
+            language: "exprtk",
+            automatic_layout: true,
+            minimap: MinimapArgs { enabled: false },
+        };
+
+        let container = self.container.cast::<HtmlElement>().unwrap();
+        let editor_args = JsValue::from_serde(&args).unwrap();
+        let editor = monaco.create(container, editor_args);
+        let cmd = (KeyMod::Shift as u32) | (KeyCode::Enter as u32);
+        editor.add_command(cmd, self.on_save.as_ref().as_ref().unchecked_ref());
+        let cb = self.on_validate.as_ref().as_ref().unchecked_ref();
+        editor.get_model().on_did_change_content(cb);
+        *self.editor.borrow_mut() = Some(editor.clone());
+        await_animation_frame().await?;
+        editor.focus();
+        (self.props.on_init)();
+        Ok(JsValue::UNDEFINED)
+    }
+
+    /// Validate the editor's current value, and toggle the Save button state
+    /// if the expression is valid.
+    async fn validate_expr(self) -> Result<JsValue, JsValue> {
+        let expr = self.editor.borrow().as_ref().unwrap().get_value();
+        (self.props.on_validate)(true);
+        let result = self.props.session.validate_expr(expr).await?;
+        let msg = ExpressionEditorMsg::EnableSave(result);
+        self.link.send_message(msg);
+        Ok(JsValue::UNDEFINED)
     }
 }

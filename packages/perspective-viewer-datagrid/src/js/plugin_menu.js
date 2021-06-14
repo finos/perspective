@@ -11,7 +11,10 @@ import chroma from "chroma-js";
 
 export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
 
+let MENU = undefined;
+
 export function activate_plugin_menu(regularTable, target, column_max) {
+    MENU = MENU || document.createElement("perspective-column-style");
     const target_meta = regularTable.getMeta(target);
     const column_name = target_meta.column_header[target_meta.column_header.length - 1];
     const column_type = this._schema[column_name];
@@ -31,8 +34,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         return;
     }
 
-    const menu = document.createElement("perspective-column-style");
-    const scroll_handler = () => menu.blur();
+    const scroll_handler = () => MENU.blur();
     const update_handler = event => {
         const config = event.detail;
         if (config.pos_color) {
@@ -48,15 +50,15 @@ export function activate_plugin_menu(regularTable, target, column_max) {
 
     const blur_handler = async () => {
         regularTable.removeEventListener("regular-table-scroll", scroll_handler);
-        menu.removeEventListener("perspective-column-style-change", update_handler);
-        menu.removeEventListener("blur", blur_handler);
+        MENU.removeEventListener("perspective-column-style-change", update_handler);
+        MENU.removeEventListener("blur", blur_handler);
         this._open_column_styles_menu.pop();
         await regularTable.draw();
         regularTable.parentElement.dispatchEvent(new Event("perspective-config-update"));
     };
 
-    menu.addEventListener("perspective-column-style-change", update_handler);
-    menu.addEventListener("blur", blur_handler);
+    MENU.addEventListener("perspective-column-style-change", update_handler);
+    MENU.addEventListener("blur", blur_handler);
     regularTable.addEventListener("regular-table-scroll", scroll_handler);
 
     // Get the current column style config
@@ -68,5 +70,5 @@ export function activate_plugin_menu(regularTable, target, column_max) {
     }
 
     // open the menu
-    menu.open(target, config, default_config);
+    MENU.open(target, config, default_config);
 }
