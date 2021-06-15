@@ -42,6 +42,10 @@ thread_local! {
             //     close: "\""
             // },
             AutoClosingPairs {
+                open: "'",
+                close: "'"
+            },
+            AutoClosingPairs {
                 open: "(",
                 close: ")"
             },

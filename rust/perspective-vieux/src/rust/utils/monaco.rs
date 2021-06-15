@@ -65,6 +65,7 @@ extern "C" {
     #[wasm_bindgen(method, getter)]
     pub fn languages(this: &MonacoModule) -> Languages;
 
+    #[derive(Clone)]
     pub type Editor;
 
     #[wasm_bindgen(method)]
@@ -72,6 +73,9 @@ extern "C" {
 
     #[wasm_bindgen(method, js_name = "defineTheme")]
     pub fn define_theme(this: &Editor, id: &str, options: JsValue);
+
+    #[wasm_bindgen(method, js_name = "setModelMarkers")]
+    pub fn set_model_markers(this: &Editor, model: &MonacoModel, id: &str, errors: &js_sys::Array);
 
     pub type Languages;
 
@@ -235,4 +239,16 @@ pub struct DefineThemeToken<'a> {
     pub token: &'a str,
     pub foreground: &'a str,
     pub font_style: Option<&'a str>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MonacoModelMarker<'a> {
+    pub code: String,
+    pub start_line_number: u32,
+    pub end_line_number: u32,
+    pub start_column: u32,
+    pub end_column: u32,
+    pub severity: &'a str,
+    pub message: String
 }
