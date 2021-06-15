@@ -183,6 +183,7 @@ public:
     std::shared_ptr<t_column> clone(const t_mask& mask) const;
 
     void valid_raw_fill();
+    void invalid_raw_fill();
 
     template <typename DATA_T>
     void copy_helper(

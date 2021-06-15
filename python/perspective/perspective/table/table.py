@@ -60,6 +60,9 @@ class Table(object):
             # always true if we are loading a CSV
             self._is_arrow = True
 
+            if len(data) > 0 and data[0] == ",":
+                data = "_" + data
+
         if self._is_arrow:
             _accessor = data
         else:
@@ -284,6 +287,9 @@ class Table(object):
             # always true if we are loading a CSV
             _is_arrow = True
 
+            if len(data) > 0 and data[0] == ",":
+                data = "_" + data
+
         if _is_arrow:
             _accessor = data
             self._table = make_table(
@@ -293,7 +299,7 @@ class Table(object):
                 self._index or "",
                 t_op.OP_INSERT,
                 True,
-                True,
+                _is_arrow,
                 _is_csv,
                 port_id,
             )

@@ -67,13 +67,27 @@ std::shared_ptr<Table> make_table_py(
     // Determine metadata
     bool is_delete = op == OP_DELETE;
     if (is_arrow && !is_delete) {
+        std::string csv_string;
+        std::int32_t binary_size;
+
         if (is_csv) {
             // Load a string in CSV format
-            std::string s = accessor.cast<std::string>();
-            auto map = std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>();
+            csv_string = accessor.cast<std::string>();
+        } else {
+            // Load an arrow binary
+            py::bytes bytes = accessor.cast<py::bytes>();
+            binary_size = bytes.attr("__len__")().cast<std::int32_t>();
+            ptr = malloc(binary_size);
+            std::memcpy(ptr, bytes.cast<std::string>().c_str(), binary_size);
+        }
 
-            {
-                PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
+        {
+            PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
+
+            // With the GIL released, load the arrow
+            if (is_csv) {
+                auto map = std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>();
+
                 if (is_update) {
                     auto gnode_output_schema = gnode->get_output_schema();
                     auto schema = gnode_output_schema.drop({"psp_okey"});
@@ -123,65 +137,54 @@ std::shared_ptr<Table> make_table_py(
                     }
                 }
 
-                arrow_loader.init_csv(s, is_update, map);
-                column_names = arrow_loader.names();
-                data_types = arrow_loader.types();
+                arrow_loader.init_csv(csv_string, is_update, map);
+            } else {
+                arrow_loader.initialize((uintptr_t)ptr, binary_size);
             }
-        } else {
-            // Load an arrow binary
-            py::bytes bytes = accessor.cast<py::bytes>();
-            std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
-            ptr = malloc(size);
-            std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
-            {
-                PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
-            
-                arrow_loader.initialize((uintptr_t)ptr, size);
 
-                // Always use the `Table` column names and data types on update.
-                if (table_initialized && is_update) {
-                    auto gnode_output_schema = gnode->get_output_schema();
-                    auto schema = gnode_output_schema.drop({"psp_okey"});
-                    column_names = schema.columns();
-                    data_types = schema.types();
+            // Always use the `Table` column names and data types on update.
+            if (table_initialized && is_update) {
+                auto gnode_output_schema = gnode->get_output_schema();
+                auto schema = gnode_output_schema.drop({"psp_okey"});
+                column_names = schema.columns();
+                data_types = schema.types();
 
-                    auto data_table = gnode->get_table();
-                    if (data_table->size() == 0) {
-                        /**
-                         * If updating a table created from schema, a 32-bit int/float
-                         * needs to be promoted to a 64-bit int/float if specified in
-                         * the Arrow schema.
-                         */
-                        std::vector<t_dtype> arrow_dtypes = arrow_loader.types();
-                        for (auto idx = 0; idx < column_names.size(); ++idx) {
-                            const std::string& name = column_names[idx];
-                            bool can_retype = name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
-                            bool is_32_bit = data_types[idx] == DTYPE_INT32 || data_types[idx] == DTYPE_FLOAT32;
-                            if (can_retype && is_32_bit) {
-                                t_dtype arrow_dtype = arrow_dtypes[idx];
-                                switch (arrow_dtype) {
-                                    case DTYPE_INT64:
-                                    case DTYPE_FLOAT64: {
-                                        std::cout << "Promoting column `" 
-                                                    << column_names[idx] 
-                                                    << "` to maintain consistency with Arrow type."
-                                                    << std::endl;
-                                        gnode->promote_column(name, arrow_dtype);
-                                    } break;
-                                    default: {
-                                        continue;
-                                    }
+                auto data_table = gnode->get_table();
+                if (data_table->size() == 0) {
+                    /**
+                     * If updating a table created from schema, a 32-bit int/float
+                     * needs to be promoted to a 64-bit int/float if specified in
+                     * the Arrow schema.
+                     */
+                    std::vector<t_dtype> arrow_dtypes = arrow_loader.types();
+                    for (auto idx = 0; idx < column_names.size(); ++idx) {
+                        const std::string& name = column_names[idx];
+                        bool can_retype = name != "psp_okey" && name != "psp_pkey" && name != "psp_op";
+                        bool is_32_bit = data_types[idx] == DTYPE_INT32 || data_types[idx] == DTYPE_FLOAT32;
+                        if (can_retype && is_32_bit) {
+                            t_dtype arrow_dtype = arrow_dtypes[idx];
+                            switch (arrow_dtype) {
+                                case DTYPE_INT64:
+                                case DTYPE_FLOAT64: {
+                                    std::cout << "Promoting column `" 
+                                                << column_names[idx] 
+                                                << "` to maintain consistency with Arrow type."
+                                                << std::endl;
+                                    gnode->promote_column(name, arrow_dtype);
+                                } break;
+                                default: {
+                                    continue;
                                 }
                             }
                         }
                     }
-                    // Make sure promoted types are used to construct data table
-                    auto new_schema = gnode->get_output_schema().drop({"psp_okey"});
-                    data_types = new_schema.types();
-                } else {
-                    column_names = arrow_loader.names();
-                    data_types = arrow_loader.types();
                 }
+                // Make sure promoted types are used to construct data table
+                auto new_schema = gnode->get_output_schema().drop({"psp_okey"});
+                data_types = new_schema.types();
+            } else {
+                column_names = arrow_loader.names();
+                data_types = arrow_loader.types();
             }
         }
     } else if (is_update || is_delete) {

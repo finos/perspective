@@ -51,6 +51,35 @@ class TestTable(object):
             "z": [True, False, True, False]
         }
 
+    def test_table_csv_with_nulls(self):
+        tbl = Table("x,y\n1,")
+        assert tbl.schema() == {
+            "x": int,
+            "y": str
+        }
+        view = tbl.view()
+        assert view.to_dict() == {
+            "x": [1],
+            "y": [None]
+        }
+
+    def test_table_csv_with_nulls_updated(self):
+        tbl = Table("x,y\n1,", index="x")
+        assert tbl.schema() == {
+            "x": int,
+            "y": str
+        }
+        view = tbl.view()
+        assert view.to_dict() == {
+            "x": [1],
+            "y": [None]
+        }
+        tbl.update("x,y\n1,abc\n2,123")
+        assert view.to_dict() == {
+            "x": [1, 2],
+            "y": ["abc", "123"]
+        }
+
     def test_table_correct_csv_nan_end(self):
         tbl = Table("str,int\n,1\n,2\nabc,3")
         assert tbl.schema() == {
