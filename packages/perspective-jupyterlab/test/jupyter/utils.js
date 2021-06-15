@@ -88,7 +88,7 @@ test.jupyterlab = async (name, cells, body, args = {}) => {
     generate_notebook(notebook_name, cells);
     args = Object.assign(args, {
         url: `doc/tree/${notebook_name}`,
-        host: "host.docker.internal"
+        host: "localhost"
     });
 
     // On linux, use localhost instead of host.docker.internal since

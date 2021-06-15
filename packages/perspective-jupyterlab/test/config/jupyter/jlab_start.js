@@ -50,7 +50,9 @@ const wait_for_jlab = async function() {
     }
 };
 
-if (require.main === module) {
+// if (require.main === module) {
+
+exports.start_jlab = function() {
     /*
      * Spawn the Jupyterlab server. This script is separate from the rest of the
      * Jest code as it cannot be executed within the Puppeteer Docker image,
@@ -64,7 +66,7 @@ if (require.main === module) {
         process.chdir(path.join(PACKAGE_ROOT, "dist", "umd"));
 
         console.log("Spawning Jupyterlab process");
-        spawn("jupyter", ["lab", "--no-browser", `--port=${process.env.__JUPYTERLAB_PORT__}`, `--config=${process.env.JUPYTER_CONFIG_DIR}/jupyter_notebook_config.json`], {
+        const proc = spawn("jupyter", ["lab", "--no-browser", `--port=${process.env.__JUPYTERLAB_PORT__}`, `--config=${process.env.JUPYTER_CONFIG_DIR}/jupyter_notebook_config.json`], {
             env: {
                 ...process.env,
                 PYTHONPATH: path.join(ROOT, "python", "perspective")
@@ -72,14 +74,14 @@ if (require.main === module) {
         });
 
         // Wait for Jupyterlab to start up
-        wait_for_jlab().then(() => {
+        return wait_for_jlab().then(() => {
             execute`ps aux | grep jupyterlab`;
             execute`jupyter server list`;
-            process.exit(0);
+            return proc;
         });
     } catch (e) {
         console.error(e);
         kill_jlab();
         process.exit(1);
     }
-}
+};

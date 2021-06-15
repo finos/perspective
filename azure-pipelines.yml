@@ -317,6 +317,9 @@ jobs:
     - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
       displayName: "Install Labextensions"
 
+    - bash: yarn add puppeteer
+      displayName: "Install Labextensions"
+
     - task: DownloadPipelineArtifact@2
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'

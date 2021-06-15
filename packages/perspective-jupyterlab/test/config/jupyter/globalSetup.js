@@ -6,10 +6,12 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {kill_jlab} = require("./jlab_start");
+const {start_jlab, kill_jlab} = require("./jlab_start");
 const {get} = require("http");
 
 module.exports = async function() {
+    let proc = await start_jlab();
+    console.log(proc);
     get(`http://127.0.0.1:6538`, res => {
         console.log(res.statusCode);
         console.log(res.headers);
