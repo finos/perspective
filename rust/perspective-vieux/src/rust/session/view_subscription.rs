@@ -40,7 +40,7 @@ pub struct ViewSubscription {
 impl ViewSubscriptionData {
     /// TODO Use serde to serialize the full view config, instead of calculating
     /// `is_pivot` here.
-    pub async fn update_view_stats(self) -> Result<JsValue, JsValue> {
+    async fn update_view_stats(self) -> Result<JsValue, JsValue> {
         let config = self.view.get_config().await?;
         let num_rows = self.table.size().await? as u32;
         let virtual_rows = self.view.num_rows().await? as u32;
