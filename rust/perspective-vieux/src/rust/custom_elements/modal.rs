@@ -49,19 +49,12 @@ fn calc_page_position(target: &HtmlElement) -> Result<(u32, u32), JsValue> {
     let mut left = 0;
     let mut elem = target.clone().unchecked_into::<HtmlElement>();
     while !elem.is_undefined() {
-        let is_sticky = match web_sys::window().unwrap().get_computed_style(&elem)? {
-            Some(x) => x.get_property_value("position")? == "sticky",
-            _ => false,
-        };
-
         top += elem.offset_top();
         left += elem.offset_left();
         elem = match elem.offset_parent() {
             Some(elem) => {
-                if is_sticky {
-                    top -= elem.scroll_top();
-                    left -= elem.scroll_left();
-                }
+                top -= elem.scroll_top();
+                left -= elem.scroll_left();
                 elem.unchecked_into::<HtmlElement>()
             }
             None => match elem.dyn_into::<ShadowRoot>() {
