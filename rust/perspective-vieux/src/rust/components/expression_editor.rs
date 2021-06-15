@@ -9,6 +9,7 @@
 use crate::exprtk::*;
 use crate::session::Session;
 use crate::utils::monaco::*;
+use crate::utils::perspective::*;
 use crate::utils::*;
 
 use std::cell::RefCell;
@@ -43,7 +44,7 @@ pub struct ExpressionEditor {
     top: u32,
     left: u32,
     container: NodeRef,
-    editor: Rc<RefCell<Option<MonacoEditor>>>,
+    editor: Rc<RefCell<Option<(Editor, MonacoEditor)>>>,
     props: ExpressionEditorProps,
     link: ComponentLink<Self>,
     save_enabled: bool,
@@ -84,7 +85,7 @@ impl Component for ExpressionEditor {
                 self.top = top;
                 self.left = left;
                 match self.editor.borrow().as_ref() {
-                    Some(x) => x.set_value(""),
+                    Some((_, x)) => x.set_value(""),
                     None => {}
                 }
 
@@ -103,7 +104,7 @@ impl Component for ExpressionEditor {
                 if self.save_enabled {
                     match self.editor.borrow().as_ref() {
                         None => {}
-                        Some(x) => {
+                        Some((_, x)) => {
                             let expr = x.get_value();
                             (self.props.on_save)(expr);
                             x.set_value("");
@@ -123,7 +124,7 @@ impl Component for ExpressionEditor {
         if first_render {
             let _promise = future_to_promise(self.clone().init_monaco_editor());
         } else if self.editor.borrow().is_some() {
-            self.editor.borrow().as_ref().unwrap().focus();
+            self.editor.borrow().as_ref().unwrap().1.focus();
         }
     }
 
@@ -172,7 +173,7 @@ impl ExpressionEditor {
         editor.add_command(cmd, self.on_save.as_ref().as_ref().unchecked_ref());
         let cb = self.on_validate.as_ref().as_ref().unchecked_ref();
         editor.get_model().on_did_change_content(cb);
-        *self.editor.borrow_mut() = Some(editor.clone());
+        *self.editor.borrow_mut() = Some((monaco, editor.clone()));
         await_animation_frame().await?;
         editor.focus();
         (self.props.on_init)();
@@ -182,11 +183,34 @@ impl ExpressionEditor {
     /// Validate the editor's current value, and toggle the Save button state
     /// if the expression is valid.
     async fn validate_expr(self) -> Result<JsValue, JsValue> {
-        let expr = self.editor.borrow().as_ref().unwrap().get_value();
+        let (monaco, editor) = self.editor.borrow().as_ref().unwrap().clone();
+        let expr = editor.get_value();
         (self.props.on_validate)(true);
-        let result = self.props.session.validate_expr(expr).await?;
-        let msg = ExpressionEditorMsg::EnableSave(result);
-        self.link.send_message(msg);
+        let model = editor.get_model();
+        let arr = js_sys::Array::new();
+        let msg = match self.props.session.validate_expr(expr).await? {
+            None => true,
+            Some(err) => {
+                let marker = error_to_market(err);
+                arr.push(&JsValue::from_serde(&marker).unwrap());
+                false
+            }
+        };
+
+        monaco.set_model_markers(&model, "exprtk", &arr);
+        self.link.send_message(ExpressionEditorMsg::EnableSave(msg));
         Ok(JsValue::UNDEFINED)
+    }
+}
+
+fn error_to_market(err: PerspectiveValidationError) -> MonacoModelMarker<'static> {
+    MonacoModelMarker {
+        code: "".to_owned(),
+        start_line_number: err.line + 1,
+        end_line_number: err.line + 1,
+        start_column: err.column,
+        end_column: err.column,
+        severity: "error",
+        message: err.error_message,
     }
 }

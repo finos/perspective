@@ -13,7 +13,6 @@
     position: absolute;
     z-index: 10000;
     outline: none;
-    padding-top: 6px;
     font-family: "Open Sans";
     font-size: 12px;
     font-weight: 300;
@@ -31,8 +30,11 @@
             appearance: var(--monaco-container--appearance, auto);
         }
     }
-    .monaco-editor .cursors-layer .cursor {
-        visibility: var(--monaco-cursor--visibility, inherit) !important;
+    .monaco-editor {
+        padding-top: 6px;
+        .cursors-layer .cursor {
+            visibility: var(--monaco-cursor--visibility, inherit) !important;
+        }
     }
 
     #psp-expression-editor-actions {
@@ -53,6 +55,7 @@
 
         &:hover {
             cursor: pointer;
+            background-color: rgba(0,0,0,0.05);
         }
 
         &[disabled] {
@@ -67,7 +70,7 @@
             font-size: 12px;
             height: 36px;
             opacity: 0.1;
-            background-color: var(--plugin--background, #fff);
+            background-color: inherit;
             transition: background-color 0.2s;
             padding-right: 0 6px;
 

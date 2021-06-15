@@ -84,7 +84,7 @@ impl Session {
         }
     }
 
-    pub async fn validate_expr(self, expr: JsValue) -> Result<bool, JsValue> {
+    pub async fn validate_expr(self, expr: JsValue) -> Result<Option<PerspectiveValidationError>, JsValue> {
         let arr = Array::new();
         arr.push(&expr);
         let result = self
@@ -94,8 +94,16 @@ impl Session {
             .unwrap()
             .validate_expressions(arr)
             .await?;
-        let error_count = js_sys::Object::keys(&result.errors()).length();
-        Ok(error_count == 0)
+
+        let errors = result.errors();
+        let error_keys = js_sys::Object::keys(&errors);
+        if error_keys.length() > 0 {
+            let js_err = js_sys::Reflect::get(&errors, &error_keys.get(0))?;
+            let error: PerspectiveValidationError = js_err.into_serde().unwrap();
+            Ok(Some(error))
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn copy_to_clipboard(&self, flat: bool) {

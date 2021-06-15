@@ -7,6 +7,7 @@
 // file.
 
 use js_sys::Array;
+use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -118,4 +119,12 @@ impl PerspectiveJsView {
     async_typed!(_num_rows, num_rows() -> f64);
     async_typed!(_delete, delete() -> ());
     async_typed!(_get_config, get_config() -> PerspectiveJsViewConfig);
+}
+
+#[derive(Deserialize)]
+#[serde()]
+pub struct PerspectiveValidationError {
+    pub error_message: String,
+    pub line: u32,
+    pub column: u32,
 }
