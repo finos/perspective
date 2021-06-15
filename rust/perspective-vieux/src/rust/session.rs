@@ -12,12 +12,12 @@ mod view_subscription;
 
 use crate::session::view_subscription::*;
 use crate::utils::perspective::*;
-use js_sys::Array;
 pub use view_subscription::TableStats;
 
 use copy::*;
 use download::*;
 use std::cell::RefCell;
+use std::iter::FromIterator;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -67,7 +67,7 @@ impl Session {
         Ok(JsValue::UNDEFINED)
     }
 
-    /// The `table`'s unique column names.  This value is not 
+    /// The `table`'s unique column names.  This value is not
     pub async fn get_column_names(self) -> Result<Vec<String>, JsValue> {
         match self.borrow().table.as_ref() {
             None => Ok(vec![]),
@@ -84,23 +84,26 @@ impl Session {
         }
     }
 
-    pub async fn validate_expr(self, expr: JsValue) -> Result<Option<PerspectiveValidationError>, JsValue> {
-        let arr = Array::new();
-        arr.push(&expr);
-        let result = self
+    /// Validate an expression string (as a JsValue since it comes from `monaco`),
+    /// and marshall the results.
+    pub async fn validate_expr(
+        self,
+        expr: JsValue,
+    ) -> Result<Option<PerspectiveValidationError>, JsValue> {
+        let arr = js_sys::Array::from_iter([expr].iter());
+        let errors = self
             .borrow()
             .table
             .as_ref()
             .unwrap()
             .validate_expressions(arr)
-            .await?;
+            .await?
+            .errors();
 
-        let errors = result.errors();
         let error_keys = js_sys::Object::keys(&errors);
         if error_keys.length() > 0 {
             let js_err = js_sys::Reflect::get(&errors, &error_keys.get(0))?;
-            let error: PerspectiveValidationError = js_err.into_serde().unwrap();
-            Ok(Some(error))
+            Ok(Some(js_err.into_serde().unwrap()))
         } else {
             Ok(None)
         }
