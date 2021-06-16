@@ -13,6 +13,7 @@ use crate::utils::perspective::*;
 use crate::utils::*;
 
 use std::cell::RefCell;
+use std::iter::FromIterator;
 use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
@@ -187,13 +188,13 @@ impl ExpressionEditor {
         let expr = editor.get_value();
         (self.props.on_validate)(true);
         let model = editor.get_model();
-        let arr = js_sys::Array::new();
-        let msg = match self.props.session.validate_expr(expr).await? {
-            None => true,
+        let (msg, arr) = match self.props.session.validate_expr(expr).await? {
+            None => (true, js_sys::Array::new()),
             Some(err) => {
                 let marker = error_to_market(err);
-                arr.push(&JsValue::from_serde(&marker).unwrap());
-                false
+                let args = JsValue::from_serde(&marker).unwrap();
+                let arr = js_sys::Array::from_iter([args].iter());
+                (false, arr)
             }
         };
 

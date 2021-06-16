@@ -1413,8 +1413,6 @@ export default function(Module) {
             // bound using `value_object` in embind so no need to manually
             // convert to Object, or call delete() as memory is auto-managed.
             const error_object = expression_errors.get(alias);
-
-            console.log(error_object);
             validated.errors[alias] = error_object;
         }
 
@@ -1423,7 +1421,6 @@ export default function(Module) {
         expression_errors.delete();
         expression_schema.delete();
         validation_results.delete();
-
         return validated;
     };
 
