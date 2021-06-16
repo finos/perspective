@@ -141,7 +141,7 @@ function get_arrow(callback) {
 }
 
 window.addEventListener("DOMContentLoaded", async function() {
-    if (window.location.pathname !== "/") {
+    if (window.location.pathname !== "/" && window.location.pathname !== "/index.html") {
         return;
     }
 

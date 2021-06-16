@@ -13,8 +13,9 @@ For more information, see the
         * [.get_config()](#module_perspective..view+get_config) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;object&gt;</code>
         * [.delete()](#module_perspective..view+delete)
         * [.schema()](#module_perspective..view+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-        * [.computed_schema()](#module_perspective..view+computed_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+        * [.expression_schema()](#module_perspective..view+expression_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
         * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
+        * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
         * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
         * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
         * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code>
@@ -40,13 +41,12 @@ For more information, see the
         * [.remove_delete(callback)](#module_perspective..table+remove_delete)
         * [.size()](#module_perspective..table+size) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
         * [.schema()](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-        * [.computed_schema(computed_columns)](#module_perspective..table+computed_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+        * [.validate_expressions(expressions)](#module_perspective..table+validate_expressions) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
         * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
-        * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
+        * [.view([config])](#module_perspective..table+view) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code>
         * [.update(data)](#module_perspective..table+update)
         * [.remove(data)](#module_perspective..table+remove)
-        * [.get_computed_functions()](#module_perspective..table+get_computed_functions)
-        * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
+        * [.columns()](#module_perspective..table+columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
 
 
 * * *
@@ -61,8 +61,9 @@ For more information, see the
     * [.get_config()](#module_perspective..view+get_config) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;object&gt;</code>
     * [.delete()](#module_perspective..view+delete)
     * [.schema()](#module_perspective..view+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-    * [.computed_schema()](#module_perspective..view+computed_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+    * [.expression_schema()](#module_perspective..view+expression_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
     * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
+    * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
     * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
     * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
     * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code>
@@ -99,7 +100,7 @@ by invoking the [view](#module_perspective..table+view) method.
 **Example**  
 ```js
 // Returns a new View, pivoted in the row space by the "name" column.
-table.view({row_pivots: ["name"]});
+await table.view({row_pivots: ["name"]});
 ```
 
 * * *
@@ -145,7 +146,7 @@ columns in the underlying [table](#module_perspective..table).
 **Example**  
 ```js
 // Create a view
-const view = table.view({
+const view = await table.view({
      columns: ["a", "b"]
 });
 const schema = await view.schema(); // {a: "float", b: "string"}
@@ -153,11 +154,11 @@ const schema = await view.schema(); // {a: "float", b: "string"}
 
 * * *
 
-<a name="module_perspective..view+computed_schema"></a>
+<a name="module_perspective..view+expression_schema"></a>
 
-#### view.computed\_schema() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-The computed column schema of this [view](#module_perspective..view),
-containing only user-created computed columns.
+#### view.expression\_schema() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+The expression schema of this [view](#module_perspective..view),
+which contains only the expressions created on this view.
 
 A schema is an Object, the keys of which are the columns of this
 [view](#module_perspective..view), and the values are their string type
@@ -167,18 +168,15 @@ columns in the underlying [table](#module_perspective..table).
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code> - A Promise of this
-[view](#module_perspective..view)'s computed column schema.  
+[view](#module_perspective..view)'s expression schema.  
 **Example**  
 ```js
-// Create a view with computed columns
+// Create a view with expressions
 const view = table.view({
-     computed_columns: [{
-         column: "x + y",
-         computed_function_name: "+",
-         inputs: ["x", "y"]
-     }]
+     expressions: ['"x" + "y" - 100']
 });
-const computed_schema = await view.computed_schema(); // {x: "float"}
+
+await view.expression_schema(); // {'"x" + "y" - 100': "float"}
 ```
 
 * * *
@@ -194,6 +192,21 @@ are applied.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 **Returns**: <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code> - an Array of Strings containing the column paths.  
+
+* * *
+
+<a name="module_perspective..view+get_min_max"></a>
+
+#### view.get\_min\_max(colname) ⇒ <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
+Calculates the [min, max] of the leaf nodes of a column `colname`.
+
+**Kind**: instance method of [<code>view</code>](#module_perspective..view)  
+**Returns**: <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - A tuple of [min, max], whose types are column
+and aggregate dependent.  
+**Params**
+
+- colname <code>String</code> - A column name in this `View`.
+
 
 * * *
 
@@ -326,8 +339,6 @@ format containing data from the view.
 **Params**
 
 - [options] <code>Object</code> - An optional configuration object.
-    - .data_slice <code>\*</code> - A data slice object from which to
-serialize.
     - .start_row <code>number</code> - The starting row index from which to
 serialize.
     - .end_row <code>number</code> - The ending row index from which to
@@ -489,13 +500,12 @@ view.remove_delete(callback);
     * [.remove_delete(callback)](#module_perspective..table+remove_delete)
     * [.size()](#module_perspective..table+size) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
     * [.schema()](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-    * [.computed_schema(computed_columns)](#module_perspective..table+computed_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+    * [.validate_expressions(expressions)](#module_perspective..table+validate_expressions) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
     * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
-    * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
+    * [.view([config])](#module_perspective..table+view) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code>
     * [.update(data)](#module_perspective..table+update)
     * [.remove(data)](#module_perspective..table+remove)
-    * [.get_computed_functions()](#module_perspective..table+get_computed_functions)
-    * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
+    * [.columns()](#module_perspective..table+columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
 
 
 * * *
@@ -623,21 +633,32 @@ names.
 
 * * *
 
-<a name="module_perspective..table+computed_schema"></a>
+<a name="module_perspective..table+validate_expressions"></a>
 
-#### table.computed\_schema(computed_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-Given an array of computed column definitions, perform type lookups to
-create a schema for the computed column without calculating or
-constructing any new columns.
+#### table.validate\_expressions(expressions) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+Given an array of expressions, return an object containing `expressions`,
+which map expression aliases to data types, and `errors`, which
+maps expression aliases to error messages. If an expression that was
+passed in is not in `expressions`, it is guaranteed to be in `errors`.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code> - A Promise that resolves to a computed schema
-based on the computed column definitions provided.  
 **Params**
 
-- computed_columns <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - an array of computed column
-definitions.
+- expressions <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code> - An array of string expressions to
+be validated.
 
+**Example**  
+```js
+const results = await table.validate_expressions([
+ '"Sales" + "Profit"', "invalid", "1 + 'string'"
+]);
+
+// {'"Sales" + "Profit"': "float"}
+console.log(results.expression_schema);
+
+// {"invalid": "unknown token!", "1 + 'string'": "TypeError"}
+console.log(results.errors);
+```
 
 * * *
 
@@ -657,15 +678,16 @@ null or undefined.
 
 <a name="module_perspective..table+view"></a>
 
-#### table.view([config]) ⇒ <code>view</code>
+#### table.view([config]) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code>
 Create a new [view](#module_perspective..view) from this table with a
 specified configuration. For a better understanding of the View
 configuration options, see the
 [Documentation](https://perspective.finos.org/docs/md/view.html).
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>view</code> - A new [view](#module_perspective..view) object for the
-supplied configuration, bound to this table  
+**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code> - A Promise that resolves to a new
+[view](#module_perspective..view) object for the supplied configuration,
+bound to this table.  
 **Params**
 
 - [config] <code>Object</code> - The configuration object for this
@@ -692,7 +714,7 @@ desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
 
 **Example**  
 ```js
-var view = table.view({
+const view = await table.view({
      row_pivots: ["region"],
      columns: ["region"],
      aggregates: {"region": "dominant"},
@@ -738,41 +760,14 @@ pushed down to any derived [view](#module_perspective..view) objects.
 
 * * *
 
-<a name="module_perspective..table+get_computed_functions"></a>
-
-#### table.get\_computed\_functions()
-Return an Object containing computed function metadata. Keys are strings,
-and each value is an Object containing the following metadata:
-
-- name
-- label
-- pattern
-- computed_function_name: the name of the computed function
-- input_type: the type of its input columns (all input columns are of
-the same type)
-- return_type: the return type of its output column
-- group: a category for the function
-- num_params: the number of input parameters
-- format_function: an anonymous function used for naming new columns
-- help: a help string that can be displayed in the UI.
-
-**Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-
-* * *
-
 <a name="module_perspective..table+columns"></a>
 
-#### table.columns(computed) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
+#### table.columns() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
 The column names of this table.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code> - An array of column names for this
 table.  
-**Params**
-
-- computed <code>boolean</code> - Should computed columns be included? (default
-false)
-
 
 * * *
 

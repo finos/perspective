@@ -19,7 +19,8 @@ relevent DOM method e.g. `document.createElement("perspective-viewer")` or
         * [new PerspectiveViewer()](#new_module_perspective-viewer..PerspectiveViewer_new)
         * [.sort](#module_perspective-viewer..PerspectiveViewer+sort) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
         * [.columns](#module_perspective-viewer..PerspectiveViewer+columns) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
-        * [.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns) : <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
+        * <del>[.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns) : <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code></del>
+        * [.expressions](#module_perspective-viewer..PerspectiveViewer+expressions) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
         * [.aggregates](#module_perspective-viewer..PerspectiveViewer+aggregates) : <code>Object</code>
         * [.filters](#module_perspective-viewer..PerspectiveViewer+filters) : <code>[ &#x27;Array&#x27; ].&lt;Array&gt;</code>
         * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>String</code>
@@ -55,7 +56,8 @@ relevent DOM method e.g. `document.createElement("perspective-viewer")` or
     * [new PerspectiveViewer()](#new_module_perspective-viewer..PerspectiveViewer_new)
     * [.sort](#module_perspective-viewer..PerspectiveViewer+sort) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
     * [.columns](#module_perspective-viewer..PerspectiveViewer+columns) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
-    * [.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns) : <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
+    * <del>[.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns) : <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code></del>
+    * [.expressions](#module_perspective-viewer..PerspectiveViewer+expressions) : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
     * [.aggregates](#module_perspective-viewer..PerspectiveViewer+aggregates) : <code>Object</code>
     * [.filters](#module_perspective-viewer..PerspectiveViewer+filters) : <code>[ &#x27;Array&#x27; ].&lt;Array&gt;</code>
     * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>String</code>
@@ -150,27 +152,41 @@ elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
 
 <a name="module_perspective-viewer..PerspectiveViewer+computed-columns"></a>
 
-#### perspectiveViewer.computed-columns : <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
-Sets new computed columns for the viewer.
+#### <del>perspectiveViewer.computed-columns : <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code></del>
+***Deprecated***
+
+DEPRECATED: use the expressions API instead.
+
+**Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
+**Params**
+
+- computed-columns <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - DEPRECATED - use the
+"expressions" API instead.
+
+
+* * *
+
+<a name="module_perspective-viewer..PerspectiveViewer+expressions"></a>
+
+#### perspectiveViewer.expressions : <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
+Sets this `perspective.table.view`'s `expressions` property, which will
+output new columns from the given expressions.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Emits**: <code>PerspectiveViewer#event:perspective-config-update</code>  
 **Params**
 
-- computed-columns <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - An Array of computed column objects,
-which have three properties: `column`, a column name for the new column,
-`computed_function_name`, a String representing the computed function to
-apply, and `inputs`, an Array of String column names to be used as
-inputs to the computation.
+- expressions <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code> - An array of string expressions to
+be calculated by Perspective.
 
 **Example** *(via Javascript DOM)*  
 ```js
 let elem = document.getElementById('my_viewer');
-elem.setAttribute('computed-columns', JSON.stringify([{column: "x+y", computed_function_name: "+", inputs: ["x", "y"]}]));
+elem.setAttribute('expressions', JSON.stringify(['"x" + ("y" + 20)']));
 ```
 **Example** *(via HTML)*  
 ```js
-<perspective-viewer computed-columns="[{column:'x+y',computed_function_name:'+',inputs:['x','y']}]""></perspective-viewer>
+<perspective-viewer expressions='[\'"x" + 10\']'></perspective-viewer>
 ```
 
 * * *
@@ -328,7 +344,7 @@ PerspectiveViewer#perspective-view-update
 **Example** *(Load perspective.table)*  
 ```js
 const my_viewer = document.getElementById('#my_viewer');
-const tbl = perspective.table("x,y\n1,a\n2,b");
+const tbl = await perspective.table("x,y\n1,a\n2,b");
 my_viewer.load(tbl);
 ```
 **Example** *(Load Promise&lt;perspective.table&gt;)*  
@@ -370,7 +386,7 @@ elements
 Deletes this element and clears it's internal state (but not its
 user state).  This (or the underlying `perspective.view`'s equivalent
 method) must be called in order for its memory to be reclaimed, as well
-as the recipcorcal method on the `perspective.table` which this viewer is
+as the reciprocal method on the `perspective.table` which this viewer is
 bound to.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  

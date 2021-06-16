@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-test",
-    "version": "0.8.3",
+    "version": "0.9.0",
     "description": "Test utility based on perspective",
     "private": true,
     "main": "src/js/index.js",
@@ -22,7 +22,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.8.4",
-        "@finos/perspective": "^0.8.3",
+        "@finos/perspective": "^0.9.0",
         "core-js": "^3.6.4"
     }
 }
