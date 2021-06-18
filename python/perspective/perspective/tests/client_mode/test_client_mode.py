@@ -330,22 +330,6 @@ class TestClient(object):
         widget.update(data)
         assert hasattr(widget, "table") is False
 
-    def test_widget_client_update_cached(self):
-        import perspective
-        assert perspective.is_libpsp() is False
-        data = {"a": [1, 2]}
-        widget = perspective.PerspectiveWidget(data)
-        mocked_post = partial(mock_post, assert_msg={
-            "cmd": "update",
-            "data": data
-        })
-        widget.post = MethodType(mocked_post, widget)
-        widget.update(data)
-        assert widget._predisplay_update_cache == [data]
-        widget._displayed = True
-        widget.update(data)
-        assert widget._predisplay_update_cache == [data]
-
     def test_widget_client_replace(self):
         import perspective
         assert perspective.is_libpsp() is False
