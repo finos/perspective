@@ -847,7 +847,7 @@ class TestTablePandas(object):
             "datetime": [None, datetime(2019, 7, 11, 10, 30, 55)]
         }
 
-    def test_table_correct_csv_nan_end(self):
+    def test_table_pandas_correct_csv_nan_end(self):
         s = "str,int\n,1\n,2\nabc,3"
         if six.PY2:
             s = unicode(s)
@@ -866,7 +866,7 @@ class TestTablePandas(object):
             "int": [1, 2, 3]
         }
 
-    def test_table_correct_csv_nan_intermittent(self):
+    def test_table_pandas_correct_csv_nan_intermittent(self):
         s = "str,float\nabc,\n,2\nghi,"
         if six.PY2:
             s = unicode(s)

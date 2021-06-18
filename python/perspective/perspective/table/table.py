@@ -53,6 +53,16 @@ class Table(object):
                 writing at row 0.
         """
         self._is_arrow = isinstance(data, (bytes, bytearray))
+        self._is_csv = isinstance(data, str)
+
+        if self._is_csv:
+            # CSVs are loaded using the Arrow interface, so is_arrow is
+            # always true if we are loading a CSV
+            self._is_arrow = True
+
+            if len(data) > 0 and data[0] == ",":
+                data = "_" + data
+
         if self._is_arrow:
             _accessor = data
         else:
@@ -74,6 +84,7 @@ class Table(object):
             t_op.OP_INSERT,
             False,
             self._is_arrow,
+            self._is_csv,
             0,
         )
 
@@ -269,6 +280,15 @@ class Table(object):
             port_id = 0
 
         _is_arrow = isinstance(data, (bytes, bytearray))
+        _is_csv = isinstance(data, str)
+
+        if _is_csv:
+            # CSVs are loaded using the Arrow interface, so is_arrow is
+            # always true if we are loading a CSV
+            _is_arrow = True
+
+            if len(data) > 0 and data[0] == ",":
+                data = "_" + data
 
         if _is_arrow:
             _accessor = data
@@ -279,7 +299,8 @@ class Table(object):
                 self._index or "",
                 t_op.OP_INSERT,
                 True,
-                True,
+                _is_arrow,
+                _is_csv,
                 port_id,
             )
             self._state_manager.set_process(
@@ -317,6 +338,7 @@ class Table(object):
             t_op.OP_INSERT,
             True,
             False,
+            False,
             port_id,
         )
         self._state_manager.set_process(self._table.get_pool(), self._table.get_id())
@@ -353,6 +375,7 @@ class Table(object):
             self._index or "",
             t_op.OP_DELETE,
             True,
+            False,
             False,
             port_id,
         )

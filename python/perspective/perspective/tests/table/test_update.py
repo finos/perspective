@@ -27,6 +27,43 @@ class TestUpdate(object):
         tbl.update({"a": ["abc"], "b": [123]})
         assert tbl.view().to_records() == [{"a": "abc", "b": 123}]
 
+    def test_update_csv(self):
+        tbl = Table({
+            "a": str,
+            "b": int
+        })
+
+        view = tbl.view()
+        tbl.update("a,b\nxyz,123\ndef,100000000")
+
+        assert view.to_dict() == {
+            "a": ["xyz", "def"],
+            "b": [123, 100000000]
+        }
+
+    def test_update_csv_indexed(self):
+        tbl = Table({
+            "a": str,
+            "b": float
+        }, index="a")
+
+        view = tbl.view()
+        tbl.update("a,b\nxyz,1.23456718\ndef,100000000.1")
+
+        assert view.to_dict() == {
+            "a": ["def", "xyz"],
+            "b": [100000000.1, 1.23456718]
+        }
+
+        tbl.update("a,b\nxyz,0.00000001\ndef,1234.5678\nefg,100.2")
+
+        assert view.to_dict() == {
+            "a": ["def", "efg", "xyz"],
+            "b": [1234.5678, 100.2, 0.00000001]
+        }
+
+
+
     def test_update_append(self):
         tbl = Table([{"a": "abc", "b": 123}])
         tbl.update([{"a": "def", "b": 456}])

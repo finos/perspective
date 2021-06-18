@@ -822,6 +822,11 @@ t_column::valid_raw_fill() {
 }
 
 void
+t_column::invalid_raw_fill() {
+    m_status->raw_fill(STATUS_INVALID);
+}
+
+void
 t_column::copy(const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
     PSP_VERBOSE_ASSERT(m_dtype == other->get_dtype(), "Cannot copy from diff dtype");
 

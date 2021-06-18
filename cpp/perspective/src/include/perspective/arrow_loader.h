@@ -20,10 +20,7 @@
 #include <arrow/util/decimal.h>
 #include <arrow/io/memory.h>
 #include <arrow/ipc/reader.h>
-
-#if ARROW_VERSION_MAJOR >= 1
 #include <perspective/arrow_csv.h>
-#endif
 
 namespace perspective {
 namespace apachearrow {
@@ -40,14 +37,12 @@ namespace apachearrow {
          */
         void initialize(uintptr_t ptr, std::uint32_t);
 
-#ifdef PSP_ENABLE_WASM
         /**
          * @brief Initialize the arrow loader with a CSV.
          * 
          * @param ptr 
          */
         void init_csv(std::string& csv, bool is_update, std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& schema);
-#endif
 
         /**
          * @brief Given an arrow binary and a data table, load the arrow into

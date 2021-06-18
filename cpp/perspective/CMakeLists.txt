@@ -546,6 +546,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/view.cpp
 	${PSP_CPP_SRC}/src/cpp/view_config.cpp
 	${PSP_CPP_SRC}/src/cpp/vocab.cpp
+	${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
 	)
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
@@ -553,7 +554,6 @@ set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
 )
 
 set(WASM_SOURCE_FILES ${SOURCE_FILES}
-	${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
 	${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
 )
 

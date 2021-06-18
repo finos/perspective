@@ -77,6 +77,24 @@ class TestAsync(object):
         assert _task() == 5
         tbl.delete()
 
+    def test_async_queue_process_csv(self):
+        """Make sure GIL release during CSV loading works"""     
+        tbl = Table("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
+        manager = PerspectiveManager()
+        manager.set_loop_callback(TestAsync.loop.add_callback)
+        manager.host(tbl)
+
+        @syncify
+        def _task():
+            assert tbl.size() == 4
+            for i in range(5):
+                tbl.update("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
+            return tbl.size()
+
+        assert _task() == 24
+
+        tbl.delete()
+
     def test_async_call_loop(self):
         tbl = Table({"a": int, "b": float, "c": str})
         manager = PerspectiveManager()

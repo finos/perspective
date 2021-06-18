@@ -104,6 +104,7 @@ set(ARROW_SRCS
 if (PSP_PYTHON_BUILD)
     set(ARROW_SRCS
         ${ARROW_SRCS}
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
