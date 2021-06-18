@@ -88,6 +88,7 @@ try {
         cmd += `${PYTHON} setup.py bdist_wheel`;
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
     } else {
+        // Windows
         cmd += `${PYTHON} setup.py bdist_wheel`;
     }
 

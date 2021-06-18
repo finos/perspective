@@ -133,15 +133,18 @@ parameters:
     type: stepList
     default:
       # Build a python wheel for Mac 10.14
-      - bash: yarn _wheel_python --ci $(python_flag) --macos
+      - bash: yarn _wheel_python $(python_flag) --macos
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
         displayName: 'Build wheel'
 
       # Test the wheel
       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
         displayName: 'Test Mac Wheel'
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
         inputs:
           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
           artifactName: '$(artifact_name)'
@@ -151,21 +154,36 @@ parameters:
     default:
       # Build a python wheel for Manylinux
       - bash: yarn _wheel_python --ci $(python_flag) $(manylinux_flag)
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
         displayName: 'Build Manylinux Wheel'
         env:
           PSP_DOCKER: 1
 
       # Test the wheel
       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) $(manylinux_flag)
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
         displayName: 'Test Manylinux Wheel'
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), ne(variables['manylinux_flag'], ''))
+        condition: and(succeeded(), ne(variables['manylinux_flag'], ''), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
         inputs:
           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/'
+          artifactName: '$(artifact_name)'
+  
+  - name: pythonWindowsWheelSteps
+    type: stepList
+    default:
+      # Build a python wheel for Windows
+      - bash: yarn _wheel_python $(python_flag)
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        displayName: 'Build Windows Wheel'
+
+      # Save the artifact to Azure storage
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
           artifactName: '$(artifact_name)'
 
 jobs:
@@ -286,24 +304,28 @@ jobs:
       Python37:
         python.version: '3.7'
         python_flag: ''
+        artifact_name: 'cp37-cp37m-win64_amd'
+
       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
         Python36:
           python.version: '3.6'
           python_flag: '--python36'
+          artifact_name: 'cp36-cp36m-win64_amd'
         Python38:
           python.version: '3.8'
           python_flag: '--python38'
+          artifact_name: 'cp38-cp38m-win64_amd'
         Python39:
           python.version: '3.9'
           python_flag: '--python39'
+          artifact_name: 'cp39-cp39m-win64_amd'
 
   steps:
     - ${{ parameters.initSteps }}
     - ${{ parameters.windowsInitSteps }}
     - ${{ parameters.pythonBuildSteps }}
+    - ${{ parameters.pythonWindowsWheelSteps }}
 
-    - script: yarn build_python --ci $(python_flag)
-      displayName: 'build'
 
 - job: 'MacOS_Catalina'
   pool:
@@ -312,10 +334,6 @@ jobs:
   strategy:
     matrix:
 
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
-        artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
       Python39:
         python.version: '3.9'
         python_flag: '--python39'
@@ -326,7 +344,12 @@ jobs:
           python.version: '3.6'
           python_flag: '--python36'
           artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
-  
+
+        Python37:
+          python.version: '3.7'
+          python_flag: ''
+          artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
+    
         Python38:
           python.version: '3.8'
           python_flag: '--python38'
