@@ -9,7 +9,7 @@
 
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
 import {DomElement} from "./dom_element.js";
-import {findExpressionByAlias} from "../utils.js";
+import {findExpressionByAlias, throttlePromise} from "../utils.js";
 
 export class ActionElement extends DomElement {
     async _toggle_config(event) {
@@ -18,7 +18,7 @@ export class ActionElement extends DomElement {
             const panel = this.shadowRoot.querySelector("#pivot_chart_container");
             if (!this._show_config) {
                 await this._pre_resize(
-                    panel.clientWidth + this._side_panel.clientWidth,
+                    panel.clientWidth + this._side_panel().clientWidth,
                     panel.clientHeight + this._top_panel.clientHeight,
                     () => {
                         this._app.classList.remove("settings-open");
@@ -58,7 +58,8 @@ export class ActionElement extends DomElement {
         this._datavis.style.height = `${height}px`;
         try {
             if (!document.hidden && this.offsetParent) {
-                await this._plugin.resize.call(this);
+                let plugin = await this._vieux.get_plugin();
+                await plugin.resize();
             }
         } finally {
             pre?.();
@@ -72,7 +73,8 @@ export class ActionElement extends DomElement {
         pre?.();
         try {
             if (!document.hidden && this.offsetParent) {
-                await this._plugin.resize.call(this);
+                let plugin = await this._vieux.get_plugin();
+                await plugin.resize();
             }
         } finally {
             post();
@@ -125,15 +127,23 @@ export class ActionElement extends DomElement {
         this._expression_editor.type_check_expression(await this._table.validate_expressions([expression]));
     }
 
-    _column_visibility_clicked(ev) {
-        const parent = ev.currentTarget;
+    @throttlePromise
+    async _column_visibility_clicked(_ev) {
+        const parent = _ev.currentTarget;
+        const shiftKey = _ev.detail.shiftKey;
+        let plugin = await this._vieux.get_plugin();
+        if (!parent || !parent.parentElement) {
+            return;
+        }
+
         const is_active = parent.parentElement.getAttribute("id") === "active_columns";
+
         if (is_active) {
-            const min_columns = this._plugin.initial?.count || 1;
+            const min_columns = plugin.initial?.count || 1;
             if (this._get_view_active_valid_column_count() === min_columns) {
                 return;
             }
-            if (ev.detail.shiftKey) {
+            if (shiftKey) {
                 for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                     if (child !== parent) {
                         this._active_columns.removeChild(child);
@@ -141,15 +151,15 @@ export class ActionElement extends DomElement {
                 }
             } else {
                 const index = Array.prototype.slice.call(this._active_columns.children).indexOf(parent);
-                if (index < this._plugin.initial?.count) {
+                if (index < plugin.initial?.count) {
                     return;
-                } else if (index < this._plugin.initial?.names?.length - 1) {
+                } else if (index < plugin.initial?.names?.length - 1) {
                     this._active_columns.insertBefore(this._new_row(null), parent);
                 }
                 this._active_columns.removeChild(parent);
             }
         } else {
-            if ((ev.detail.shiftKey && this._plugin.selectMode === "toggle") || (!ev.detail.shiftKey && this._plugin.selectMode === "select")) {
+            if ((shiftKey && plugin.selectMode === "toggle") || (!shiftKey && plugin.selectMode === "select")) {
                 for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                     this._active_columns.removeChild(child);
                 }
@@ -237,14 +247,23 @@ export class ActionElement extends DomElement {
         }
     }
 
-    _vis_selector_changed() {
+    _vis_selector_changed(plugin) {
+        this._cached_plugin = plugin;
+        let plugin_name = this.getAttribute("plugin");
+        if (plugin_name !== plugin.name) {
+            this._setAttributeSafe("plugin", plugin.name);
+        }
+
         this._plugin_information.classList.add("hidden");
-        this.setAttribute("plugin", this._vis_selector.value);
         this._active_columns.classList.remove("one_lock", "two_lock");
-        const classname = ["one_lock", "two_lock"][this._plugin.initial?.count - 1];
+        const classname = ["one_lock", "two_lock"][plugin.initial?.count - 1];
         if (classname) {
             this._active_columns.classList.add(classname);
         }
+
+        this._set_row_styles(plugin);
+        this._set_column_defaults(plugin);
+        this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
 
@@ -278,15 +297,15 @@ export class ActionElement extends DomElement {
         this._add_expression_button.addEventListener("click", this._open_expression_editor.bind(this));
         this._add_expression_button.addEventListener("-perspective-close-expression", this._close_expression_editor.bind(this));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
-        this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());
-        this._vieux.addEventListener("perspective-vieux-resize", () => this._plugin.resize.call(this));
+        this._vieux.addEventListener("-perspective-plugin-changed", ({detail}) => this._vis_selector_changed(detail));
         this._vieux.addEventListener("-perspective-add-expression", ({detail}) => this._save_expression(detail));
 
-        this._plugin_information_action.addEventListener("click", () => {
+        this._plugin_information_action.addEventListener("click", async () => {
+            let plugin = await this._vieux.get_plugin();
             this._debounce_update({ignore_size_check: true, limit_points: false});
             this._plugin_information.classList.add("hidden");
-            this._plugin.render_warning = false;
+            plugin.render_warning = false;
         });
     }
 }

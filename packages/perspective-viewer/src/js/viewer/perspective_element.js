@@ -134,6 +134,7 @@ export class PerspectiveElement extends StateElement {
      * @param {*} table
      */
     async _load_table(table, resolve) {
+        let plugin = await this._vieux.get_plugin();
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
 
         this._clear_state();
@@ -215,7 +216,7 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        while (shown.length < this._plugin.initial?.names?.length) {
+        while (shown.length < plugin.initial?.names?.length) {
             shown.push(null);
         }
 
@@ -264,9 +265,10 @@ export class PerspectiveElement extends StateElement {
     }
 
     async get_maxes() {
+        let plugin = await this._vieux.get_plugin();
         // If the plugin is set to not render a warning, i.e. after the user
         // selects "Render all points", then return null for max_cols/max_rows.
-        if (typeof this._plugin.max_columns !== "undefined" && this._plugin.render_warning === false) {
+        if (typeof plugin.max_columns !== "undefined" && plugin.render_warning === false) {
             return {
                 max_cols: null,
                 max_rows: null
@@ -277,14 +279,14 @@ export class PerspectiveElement extends StateElement {
         const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
         const schema_columns = Object.keys(schema || {}).length || 1;
 
-        if (typeof this._plugin.max_columns !== "undefined") {
-            const column_group_diff = this._plugin.max_columns % schema_columns;
-            const column_limit = this._plugin.max_columns + column_group_diff;
+        if (typeof plugin.max_columns !== "undefined") {
+            const column_group_diff = plugin.max_columns % schema_columns;
+            const column_limit = plugin.max_columns + column_group_diff;
             max_cols = column_limit < num_columns ? column_limit : undefined;
         }
 
-        if (typeof this._plugin.max_cells !== "undefined") {
-            max_rows = Math.ceil(max_cols ? this._plugin.max_cells / max_cols : this._plugin.max_cells / (num_columns || 1));
+        if (typeof plugin.max_cells !== "undefined") {
+            max_rows = Math.ceil(max_cols ? plugin.max_cells / max_cols : plugin.max_cells / (num_columns || 1));
         }
 
         return {max_cols, max_rows};
@@ -348,7 +350,7 @@ export class PerspectiveElement extends StateElement {
         return Math.max(0, timeout);
     }
 
-    _view_on_update(limit_points) {
+    async _view_on_update(limit_points) {
         if (!this._debounced) {
             this._debounced = setTimeout(async () => {
                 this._debounced = undefined;
@@ -357,17 +359,19 @@ export class PerspectiveElement extends StateElement {
                     this._task.cancel();
                 }
                 const task = (this._task = new CancelTask());
-                const updater = this._plugin.update || this._plugin.create;
+                let plugin = await this.pre_activate_plugin();
+                const updater = plugin.update || plugin.draw;
                 try {
                     if (limit_points) {
                         const {max_cols, max_rows} = await this.get_maxes();
                         if (!task.cancelled) {
                             await this._warn_render_size_exceeded(max_cols, max_rows);
-                            await updater.call(this, this._datavis, this._view, task, max_cols, max_rows);
+                            await updater.call(plugin, this._view, task, max_cols, max_rows);
                         }
                     } else {
-                        await updater.call(this, this._datavis, this._view, task);
+                        await updater.call(plugin, this._view, task);
                     }
+                    await this.post_activate_plugin(plugin);
                     timer();
                     task.cancel();
                 } finally {
@@ -481,11 +485,14 @@ export class PerspectiveElement extends StateElement {
             if (!ignore_size_check) {
                 await this._warn_render_size_exceeded(max_cols, max_rows);
             }
+            const plugin = await this.pre_activate_plugin();
+
             if (limit_points) {
-                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows, force_update);
+                await plugin.draw(this._view, task, max_cols, max_rows, force_update);
             } else {
-                await this._plugin.create.call(this, this._datavis, this._view, task, undefined, undefined, force_update);
+                await plugin.draw(this._view, task, undefined, undefined, force_update);
             }
+            await this.post_activate_plugin(plugin);
         } catch (err) {
             console.warn(err);
         } finally {
@@ -497,6 +504,23 @@ export class PerspectiveElement extends StateElement {
             timer();
             task.cancel();
         }
+    }
+
+    async pre_activate_plugin() {
+        let plugin = await this._vieux.get_plugin();
+        if (this.children[0] !== plugin) {
+            plugin.style.opacity = 0;
+            this.appendChild(plugin);
+        }
+
+        return plugin;
+    }
+
+    post_activate_plugin(plugin) {
+        if (this.children[0] !== plugin) {
+            this.removeChild(this.children[0]);
+        }
+        plugin.style.opacity = 1;
     }
 
     _check_loaded_table() {
@@ -518,9 +542,9 @@ export class PerspectiveElement extends StateElement {
     }
 
     _restyle_plugin() {
-        if (this._plugin.styleElement) {
+        if (this._plugin.restyleElement) {
             const task = (this._task = new CancelTask());
-            this._plugin.styleElement.call(this, this._datavis, this._view, task);
+            this._plugin.restyleElement(this._view, task);
         }
     }
 

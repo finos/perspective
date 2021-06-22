@@ -102,7 +102,7 @@
         line-height: 1.42857143;
     }
     #app {
-        #side_panel {
+        #columns_container {
             width: 100%;
         }
     }
@@ -387,22 +387,10 @@
             --psp_row-display: inline-block;
         }
     }
-    #side_panel {
-        position: relative;
-        flex: 0 0 auto;
-        padding: var(--side_panel--padding, 10px 2px 0px 11px);
-    }
-    #side_panel > div {
+    #columns_container {
         display: flex;
     }
-    #vis_selector_container {
-        min-height: 29px;
-        margin-left: var(--column_selector--width, 20px);
-        overflow: hidden;
-    }
-    #vis_selector {
-        flex-grow: 1;
-    }
+ 
     #transpose_button {
         cursor: pointer;
         min-width: 5px;

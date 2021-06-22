@@ -54,13 +54,28 @@ export function registerElement(templateString, styleString, proto) {
     }
     template.innerHTML = `<style id="psp_styles" scope="${template.getAttribute("id")}">test{}</style>` + template.innerHTML;
 
+    let is_locked = 0;
     const _perspective_element = class extends proto {
         attributeChangedCallback(name, old, value) {
+            if (is_locked > 0) {
+                return;
+            }
+
             if (value === null) {
                 value = "null";
             }
+
             if (name[0] !== "_" && old != value && !!Object.getOwnPropertyDescriptor(proto.prototype, name).set) {
                 this[name] = value;
+            }
+        }
+
+        _setAttributeSafe(key, val) {
+            is_locked++;
+            try {
+                this.setAttribute(key, val);
+            } finally {
+                is_locked--;
             }
         }
 
@@ -71,6 +86,11 @@ export function registerElement(templateString, styleString, proto) {
             this._initializing = true;
             var node = document.importNode(template.content, true);
             this.attachShadow({mode: "open"});
+            if (this._vieux) {
+                this._vieux.appendChild(node);
+                node = this._vieux;
+            }
+
             this.shadowRoot.appendChild(node);
 
             if (super.connectedCallback) {

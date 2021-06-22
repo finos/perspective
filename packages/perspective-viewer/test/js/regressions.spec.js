@@ -39,7 +39,7 @@ utils.with_server({}, () => {
                     await page.evaluate(
                         async (viewer, data, schema) => {
                             const table = await window.WORKER.table(schema);
-                            viewer.load(table);
+                            await viewer.load(table);
                             table.update(data);
                         },
                         viewer,
@@ -52,7 +52,7 @@ utils.with_server({}, () => {
                     await page.evaluate(
                         async (viewer, data, schema) => {
                             const table = await window.WORKER.table(schema);
-                            viewer.load(table);
+                            await viewer.load(table);
                             table.update(data);
                         },
                         viewer,
@@ -73,7 +73,7 @@ utils.with_server({}, () => {
                         async (viewer, data) => {
                             const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
                             const table = await window.WORKER.table(arrow);
-                            viewer.load(table);
+                            await viewer.load(table);
                             // force _process to run - otherwise reading
                             // bytelength will return the un-transfered arrow.
                             await viewer.table.size();
@@ -101,19 +101,19 @@ utils.with_server({}, () => {
                     const byte_length = await page.evaluate(
                         async (viewer, data, schema) => {
                             const table = await window.WORKER.table(schema);
-                            viewer.load(table);
+                            await viewer.load(table);
                             const arrow = Uint8Array.from([...data].map(ch => ch.charCodeAt())).buffer;
                             table.update(arrow);
                             // force _process to run - otherwise reading
                             // bytelength will return the un-transfered arrow.
                             await viewer.table.size();
+                            await viewer.flush();
                             return arrow.byteLength;
                         },
                         viewer,
                         arraybuffer_to_string(arrow),
                         schema
                     );
-                    await page.waitForSelector("perspective-viewer:not([updating])");
                     expect(byte_length).toBe(0);
                 },
                 {wait_for_update: false}

@@ -9,69 +9,62 @@
 
 <template id="perspective-viewer">
 
-    <perspective-vieux id="app">
-
-        <div slot="side_panel" id='side_panel' class="column fixed noselect">
-            <div id="vis_selector_container">
-                <select id="vis_selector">
-                </select>
+    <div slot="side_panel" id="columns_container" style="visibility: hidden">
+        <ul id='active_columns'></ul>
+        <div id="sub_columns">
+            <ul id='inactive_columns'></ul>
+            <div id="side_panel__actions" style="visibility: hidden">
+                <div id="add-expression" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
             </div>
-            <div id="columns_container" style="visibility: hidden">
-                <ul id='active_columns'></ul>
-                <div id="sub_columns">
-                    <ul id='inactive_columns'></ul>
-                    <div id="side_panel__actions" style="visibility: hidden">
-                        <div id="add-expression" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
-                    </div>
+        </div>
+    </div>
+
+    <div slot="top_panel" id='top_panel'>
+        <div class="rrow">
+            <div id="row_pivots">
+                <div class="psp-text-field">
+                    <ul class="psp-text-field__input" for="row-pivots"></ul>
+                    <label for="row_pivots"></label>
                 </div>
             </div>
         </div>
-
-        <div slot="top_panel" id='top_panel'>
-            <div class="rrow">
-                <div id="row_pivots">
-                    <div class="psp-text-field">
-                        <ul class="psp-text-field__input" for="row-pivots"></ul>
-                        <label for="row_pivots"></label>
-                    </div>
-                </div>
-            </div>
-            <span id="transpose_button" class="rrow centered" title="Transpose Pivots">&#x21C4;</span>
-            <div class="rrow">
-                <div id="column_pivots">
-                    <div class="psp-text-field">
-                        <ul class="psp-text-field__input" for="column-pivots"></ul>
-                        <label for="column_pivots"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="rrow">
-                <div id="sort">
-                    <div class="psp-text-field">
-                        <ul class="psp-text-field__input" for="sort"></ul>
-                        <label for="sort"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="rrow" style='flex-grow:3;height:auto;flex:1 1 400px;max-width:none'>
-                <div id="filters">
-                    <div class="psp-text-field">
-                        <ul class="psp-text-field__input" for='filters'></ul>
-                        <label for="filters"></label>
-                    </div>
+        <span id="transpose_button" class="rrow centered" title="Transpose Pivots">&#x21C4;</span>
+        <div class="rrow">
+            <div id="column_pivots">
+                <div class="psp-text-field">
+                    <ul class="psp-text-field__input" for="column-pivots"></ul>
+                    <label for="column_pivots"></label>
                 </div>
             </div>
         </div>
-
-        <div slot="main_panel" id="pivot_chart_container">
-            <div class="plugin_information plugin_information--warning hidden" id="plugin_information--size">
-                <span class="plugin_information__text" id="plugin_information_count">Estimated rendering</span>
-                <span class="plugin_information__actions">
-                    <span class="plugin_information__action">Render all points</span>
-                </span>
+        <div class="rrow">
+            <div id="sort">
+                <div class="psp-text-field">
+                    <ul class="psp-text-field__input" for="sort"></ul>
+                    <label for="sort"></label>
+                </div>
             </div>
-            <div id="pivot_chart"></div>
         </div>
+        <div class="rrow" style='flex-grow:3;height:auto;flex:1 1 400px;max-width:none'>
+            <div id="filters">
+                <div class="psp-text-field">
+                    <ul class="psp-text-field__input" for='filters'></ul>
+                    <label for="filters"></label>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    </perspective-vieux>
+    <div slot="main_panel" id="pivot_chart_container">
+        <div class="plugin_information plugin_information--warning hidden" id="plugin_information--size">
+            <span class="plugin_information__text" id="plugin_information_count">Estimated rendering</span>
+            <span class="plugin_information__actions">
+                <span class="plugin_information__action">Render all points</span>
+            </span>
+        </div>
+        <div id="pivot_chart">
+            <slot></slot>
+        </div>
+    </div>
+
 </template>

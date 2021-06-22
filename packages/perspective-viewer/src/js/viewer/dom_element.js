@@ -9,25 +9,9 @@
 
 import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {dragend} from "./dragdrop.js";
-import {renderers} from "./renderers.js";
 
 import {PerspectiveElement} from "./perspective_element.js";
-import {html, render} from "lit-html";
 import {findExpressionByAlias, getExpressionAlias, getRawExpression} from "../utils.js";
-
-/**
- * Render `<option>` blocks
- * @param {*} names name objects
- */
-const options = vals => {
-    const opts = [];
-    for (let name in vals) {
-        opts.push(html`
-            <option value="${name}">${vals[name].name || name}</option>
-        `);
-    }
-    return opts;
-};
 
 export class DomElement extends PerspectiveElement {
     _clear_columns() {
@@ -355,12 +339,22 @@ export class DomElement extends PerspectiveElement {
     }
 
     _update_column_view(columns, reset = false) {
+        if (this._cached_plugin) {
+            return this._update_column_view_sync(this._cached_plugin, columns, reset);
+        } else {
+            this._vieux.get_plugin().then(plugin => {
+                this._update_column_view_sync(plugin, columns, reset);
+            });
+        }
+    }
+
+    _update_column_view_sync(plugin, columns, reset) {
         if (!columns) {
             columns = this._get_view_active_column_names();
         }
 
-        if (this._plugin.initial && this._plugin.initial.names) {
-            while (columns.length < this._plugin.initial.names.length) {
+        if (plugin.initial && plugin.initial.names) {
+            while (columns.length < plugin.initial.names.length) {
                 columns.push(null);
             }
         }
@@ -442,11 +436,11 @@ export class DomElement extends PerspectiveElement {
         }
     }
 
-    _set_row_styles() {
+    _set_row_styles(plugin) {
         let style = "";
-        if (this._plugin.initial && this._plugin.initial.names) {
-            for (const nidx in this._plugin.initial.names) {
-                const name = this._plugin.initial.names[nidx];
+        if (plugin.initial && plugin.initial.names) {
+            for (const nidx in plugin.initial.names) {
+                const name = plugin.initial.names[nidx];
                 style += `#active_columns perspective-row:nth-child(${parseInt(nidx) + 1}){margin-top:23px;}`;
                 style += `#active_columns perspective-row:nth-child(${parseInt(nidx) + 1}):before{content:"${name}";}`;
             }
@@ -472,24 +466,24 @@ export class DomElement extends PerspectiveElement {
         }
     }
 
-    _set_column_defaults() {
+    _set_column_defaults(plugin) {
         const cols = this._get_view_inactive_columns();
         const active_cols = this._get_view_active_valid_columns();
         const valid_active_cols = this._get_view_active_valid_column_names();
         if (cols.length > 0) {
-            if (this._plugin.initial) {
+            if (plugin.initial) {
                 let pref = [];
-                let count = this._plugin.initial.count || 2;
+                let count = plugin.initial.count || 2;
                 this._fill_numeric(active_cols, pref);
                 this._fill_numeric(cols, pref);
                 this._fill_numeric(cols, pref, true);
                 pref = pref.slice(0, count);
-                const labels = this._plugin.initial.names;
+                const labels = plugin.initial.names;
                 while (labels && pref.length < labels.length) {
                     pref.push(null);
                 }
                 this.setAttribute("columns", JSON.stringify(pref));
-            } else if (this._plugin.selectMode === "select") {
+            } else if (plugin.selectMode === "select") {
                 this.setAttribute("columns", JSON.stringify([cols[0].getAttribute("name")]));
             } else {
                 this.setAttribute("columns", JSON.stringify(valid_active_cols));
@@ -514,19 +508,19 @@ export class DomElement extends PerspectiveElement {
             if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
                 if (!app.classList.contains("columns_horizontal")) {
                     const old = this._persisted_side_panel_width;
-                    this._persisted_side_panel_width = this._side_panel.style.width;
-                    this._side_panel.style.width = old || "";
+                    this._persisted_side_panel_width = this._side_panel().style.width;
+                    this._side_panel().style.width = old || "";
                     app.classList.add("columns_horizontal");
                 }
             } else if (app.classList.contains("columns_horizontal")) {
                 const panel = this.shadowRoot.querySelector("#pivot_chart_container");
-                panel.clientWidth + this._side_panel.clientWidth;
-                const width = this._persisted_side_panel_width || panel.clientWidth + this._side_panel.clientWidth / 2;
+                panel.clientWidth + this._side_panel().clientWidth;
+                const width = this._persisted_side_panel_width || panel.clientWidth + this._side_panel().clientWidth / 2;
                 const height = panel.clientHeight + 50;
                 await this._pre_resize(width, height, () => {
                     const old = this._persisted_side_panel_width;
-                    this._persisted_side_panel_width = this._side_panel.style.width;
-                    this._side_panel.style.width = old || "";
+                    this._persisted_side_panel_width = this._side_panel().style.width;
+                    this._side_panel().style.width = old || "";
                     app.classList.remove("columns_horizontal");
                 });
                 return true;
@@ -557,7 +551,7 @@ export class DomElement extends PerspectiveElement {
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
         this._add_expression_button = this.shadowRoot.querySelector("#add-expression");
-        this._side_panel = this.shadowRoot.querySelector("#side_panel");
+        this._side_panel = () => this._vieux.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
         this._transpose_button = this.shadowRoot.querySelector("#transpose_button");
@@ -565,13 +559,6 @@ export class DomElement extends PerspectiveElement {
         this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
         this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
         this._columns_container = this.shadowRoot.querySelector("#columns_container");
-        this._vieux = this.shadowRoot.querySelector("perspective-vieux");
-    }
-
-    // sets state, manipulates DOM
-    _register_view_options() {
-        let current_renderers = renderers.getInstance();
-        render(options(current_renderers), this._vis_selector);
     }
 
     _autocomplete_choices(json, type) {

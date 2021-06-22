@@ -8,10 +8,10 @@
  */
 
 import {wasm} from "../../dist/esm/@finos/perspective-vieux";
+import "./plugins.js";
 import "./polyfill.js";
 
 import {bindTemplate, json_attribute, array_attribute, invertPromise, throttlePromise, getExpressionAlias, findExpressionByAlias} from "./utils.js";
-import {renderers, register_debug_plugin} from "./viewer/renderers.js";
 import "./row.js";
 
 import template from "../html/viewer.html";
@@ -79,19 +79,15 @@ class PerspectiveViewer extends ActionElement {
         this._resize_handler = this.notifyResize.bind(this);
         this._edit_port = null;
         this._edit_port_lock = invertPromise();
+        this._vieux = document.createElement("perspective-vieux");
+        this._vieux.setAttribute("id", "app");
         window.addEventListener("resize", this._resize_handler);
     }
 
     connectedCallback() {
-        if (Object.keys(renderers.getInstance()).length === 0) {
-            register_debug_plugin();
-        }
-
         this.toggleAttribute("settings", false);
-
         this._register_ids();
         this._register_callbacks();
-        this._register_view_options();
         this._check_loaded_table();
     }
 
@@ -410,33 +406,16 @@ class PerspectiveViewer extends ActionElement {
      */
     set plugin(v) {
         if (v === "null" || v === null || v === undefined) {
-            this.setAttribute("plugin", this._vis_selector.options[0].value);
+            this._vieux.set_plugin_default();
             return;
         }
-        this.innerHTML = "";
-        const plugin_names = Object.keys(renderers.getInstance());
+
         if (this.hasAttribute("plugin")) {
             let plugin = this.getAttribute("plugin");
-            if (plugin_names.indexOf(plugin) === -1) {
-                const guess_plugin = plugin_names.find(x => x.indexOf(plugin) > -1);
-                if (guess_plugin) {
-                    console.warn(`Unknown plugin "${plugin}", using "${guess_plugin}"`);
-                    this.setAttribute("plugin", guess_plugin);
-                } else {
-                    console.error(`Unknown plugin "${plugin}"`);
-                    this.setAttribute("plugin", this._vis_selector.options[0].value);
-                }
-            } else {
-                if (this._vis_selector.value !== plugin) {
-                    this._vis_selector.value = plugin;
-                    this._vis_selector_changed();
-                }
-                this._set_row_styles();
-                this._set_column_defaults();
-                this.dispatchEvent(new Event("perspective-config-update"));
-            }
+            this._vieux.set_plugin(plugin);
         } else {
-            this.setAttribute("plugin", this._vis_selector.options[0].value);
+            this._vieux.set_plugin_default();
+            return;
         }
     }
 
@@ -629,7 +608,8 @@ class PerspectiveViewer extends ActionElement {
     async notifyResize(immediate) {
         const resized = await this._check_responsive_layout();
         if (!resized && !document.hidden && this.offsetParent) {
-            await this._plugin.resize.call(this, immediate);
+            let plugin = await this._vieux.get_plugin();
+            await plugin.resize(immediate);
         }
     }
 
@@ -640,10 +620,10 @@ class PerspectiveViewer extends ActionElement {
      *
      * @param {any} widget A `<perspective-viewer>` instance to clone.
      */
-    clone(widget) {
+    async clone(widget) {
         const resolve = this._set_updating();
         this._load_table(widget.table, resolve);
-        this.restore(widget.save());
+        this.restore(await widget.save());
     }
 
     /**
@@ -658,9 +638,12 @@ class PerspectiveViewer extends ActionElement {
      */
     delete() {
         let x = this._clear_state();
-        if (this._plugin.delete) {
-            this._plugin.delete.call(this);
-        }
+        this._vieux.get_plugin().then(plugin => {
+            if (plugin?.delete) {
+                plugin.delete();
+            }
+        });
+
         window.removeEventListener("resize", this._resize_handler);
         return x;
     }
@@ -677,7 +660,7 @@ class PerspectiveViewer extends ActionElement {
      *
      * @returns {object} a serialized element.
      */
-    save() {
+    async save() {
         let obj = {};
         const cols = new Set(PERSISTENT_ATTRIBUTES);
         for (let key = 0; key < this.attributes.length; key++) {
@@ -696,8 +679,9 @@ class PerspectiveViewer extends ActionElement {
         for (const col of cols) {
             obj[col] = null;
         }
-        if (this._plugin.save) {
-            obj.plugin_config = this._plugin.save.call(this);
+        let plugin = await this._vieux.get_plugin();
+        if (plugin.save) {
+            obj.plugin_config = plugin.save();
         }
         return obj;
     }
@@ -714,6 +698,7 @@ class PerspectiveViewer extends ActionElement {
         if (typeof config === "string") {
             config = JSON.parse(config);
         }
+
         for (const key of PERSISTENT_ATTRIBUTES) {
             if (config.hasOwnProperty(key)) {
                 let val = config[key];
@@ -730,10 +715,14 @@ class PerspectiveViewer extends ActionElement {
             }
         }
 
-        if (this._plugin.restore && config.plugin_config) {
-            this._plugin.restore.call(this, config.plugin_config);
+        const plugin_promise = this._vieux.get_plugin();
+        const update_promise = this._debounce_update();
+        const plugin = await plugin_promise;
+        if (plugin.restore && config.plugin_config) {
+            plugin.restore(config.plugin_config);
         }
-        await this._debounce_update();
+
+        await update_promise;
     }
 
     /**
@@ -762,8 +751,12 @@ class PerspectiveViewer extends ActionElement {
         } else {
             this.removeAttribute("columns");
         }
-        this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
-        this._plugin.restore?.call(this, {});
+
+        this.removeAttribute("plugin");
+        this._vieux.get_plugin().then(plugin => {
+            plugin.restore({});
+        });
+
         this.dispatchEvent(new Event("perspective-config-update"));
     }
 
