@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::plugin_selector::PluginSelector;
 use crate::components::split_panel::SplitPanel;
 use crate::components::status_bar::StatusBar;
+use crate::plugin::*;
 use crate::session::{Session, TableStats};
 use crate::utils::perspective::*;
 use crate::utils::*;
 
 use futures::channel::oneshot::*;
-use js_sys::*;
 use wasm_bindgen::{prelude::*, JsCast};
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 pub static CSS: &str = include_str!("../../../dist/css/perspective-vieux.css");
@@ -25,6 +26,7 @@ pub struct PerspectiveVieuxProps {
     pub elem: web_sys::HtmlElement,
     pub panels: (web_sys::HtmlElement, web_sys::HtmlElement),
     pub session: Session,
+    pub plugin: Plugin,
 
     #[prop_or_default]
     pub weak_link: WeakComponentLink<PerspectiveVieux>,
@@ -60,7 +62,7 @@ impl Component for PerspectiveVieux {
             .set_on_stats_callback(link.callback(Msg::TableStats));
         Self {
             props,
-            link: link.clone(),
+            link,
             stats: None,
             config_open: false,
             on_rendered: None,
@@ -141,7 +143,11 @@ impl Component for PerspectiveVieux {
                 <>
                     <style>{ &CSS }</style>
                     <SplitPanel id="app_panel">
-                        <slot name="side_panel"></slot>
+                        <div id="side_panel" class="column noselect">
+                            <PluginSelector plugin=self.props.plugin.clone()>
+                            </PluginSelector>
+                            <slot name="side_panel"></slot>
+                        </div>
                         <div id="main_column">
                             <slot name="top_panel"></slot>
                             <div id="main_panel_container">
@@ -203,7 +209,7 @@ impl PerspectiveVieux {
                     .callback_once(move |_| Msg::ConfigToggled(force, sender));
 
                 let task = toggle_config_task(force, self.props.clone(), callback);
-                let _promise = future_to_promise(task);
+                let _promise = promisify_ignore_view_delete(task);
             }
         };
     }
@@ -232,10 +238,11 @@ async fn toggle_config_task(
     on_toggle: Callback<()>,
 ) -> Result<JsValue, JsValue> {
     let element = find_custom_element(&props, &on_toggle).ok_or(JsValue::UNDEFINED)?;
+    let plugin = props.plugin.get_plugin()?;
     if open {
         dispatch_settings_event(element.clone(), open)?;
         on_toggle.emit(());
-        plugin_resize(element).await;
+        let _resize = plugin.resize().await;
     } else {
         let main_panel: web_sys::HtmlElement = props
             .elem
@@ -248,7 +255,7 @@ async fn toggle_config_task(
         let new_height = format!("{}px", element.client_height());
         main_panel.style().set_property("width", &new_width)?;
         main_panel.style().set_property("height", &new_height)?;
-        plugin_resize(element.clone()).await;
+        let _resize = plugin.resize().await;
         main_panel.style().set_property("width", "")?;
         main_panel.style().set_property("height", "")?;
         dispatch_settings_event(element, open)?;
@@ -287,30 +294,10 @@ fn find_custom_element(
         callback.emit(());
         None
     } else {
-        Some(
-            elem.unwrap()
-                .get_root_node()
+        elem.map(|elem| {
+            elem.get_root_node()
                 .unchecked_into::<web_sys::ShadowRoot>()
-                .host(),
-        )
-    }
-}
-
-/// FFI to the wrapper Custom Element, find the `_plugin` and call `resize()`.
-///
-/// # TODO
-/// * Not all `resize` are `async`?
-/// * Not all `_plugin` have `resize`?
-async fn plugin_resize(custom_element: web_sys::Element) {
-    let plugin = Reflect::get(&custom_element, &JsValue::from("_plugin")).unwrap();
-    let resize: Function = Reflect::get(&plugin, &JsValue::from("resize"))
-        .unwrap()
-        .unchecked_into();
-
-    if !resize.is_undefined() {
-        let fut = resize.call0(&custom_element).unwrap();
-        if !fut.is_undefined() {
-            let _ = JsFuture::from(fut.unchecked_into::<Promise>()).await;
-        }
+                .host()
+        })
     }
 }

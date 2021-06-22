@@ -69,7 +69,7 @@ where
     /// can occur when looking up values.
     fn validate(&self) {
         assert_eq!(self.children.len(), self.values.len());
-        assert!(self.values.iter().find(|&x| *x == self.selected).is_some());
+        assert!(self.values.iter().any(|x| *x == self.selected));
     }
 }
 
@@ -122,13 +122,12 @@ where
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            RadioListMsg::Change(value) => match T::from_str(&value) {
-                Ok(x) => {
+            RadioListMsg::Change(value) => {
+                if let Ok(x) = T::from_str(&value) {
                     self.props.selected = x.clone();
                     self.props.on_change.emit(x);
                 }
-                Err(_) => (),
-            },
+            }
         };
         false
     }
@@ -171,15 +170,15 @@ where
     /// * `child` - The `Html` row content.
     /// * `class` - The `class` attribute string.
     /// * `on_change` - The callback when this `<input>` changes.
-    fn render_item<'a>(
+    fn render_item(
         &self,
         idx: usize,
         child: Html,
-        class: &String,
+        class: &str,
         on_change: Callback<InputData>,
     ) -> Html {
         html! {
-            <div class={ class }>
+            <div class={ class.to_string() }>
                 <input
                     id={ format!("radio-list-{}", idx) }
                     name="radio-list"
@@ -187,7 +186,7 @@ where
                     value={ self.props.values[idx].clone() }
                     class="parameter"
                     oninput={ on_change }
-                    disabled={ self.props.disabled }
+                    disabled=self.props.disabled
                     checked={ self.props.selected == self.props.values[idx] } />
                 { child }
             </div>

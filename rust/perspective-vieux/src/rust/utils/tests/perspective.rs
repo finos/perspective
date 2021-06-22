@@ -18,7 +18,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 pub async fn test_table_size() {
     let table = get_mock_table().await;
     let size = table.size().await.unwrap();
-    assert_eq!(size, 3 as f64);
+    assert_eq!(size, 3_f64);
 }
 
 #[wasm_bindgen_test]
@@ -29,7 +29,7 @@ pub async fn test_table_validate_valid_expressions() {
     let results = table.validate_expressions(array).await.unwrap();
     let errors = results.errors();
     let len = js_sys::Object::keys(&errors).length();
-    assert_eq!(len, 0 as u32);
+    assert_eq!(len, 0);
 }
 
 #[wasm_bindgen_test]
@@ -40,7 +40,7 @@ pub async fn test_table_validate_invalid_expressions() {
     let results = table.validate_expressions(array).await.unwrap();
     let errors = results.errors();
     let len = js_sys::Object::keys(&errors).length();
-    assert_eq!(len, 1 as u32);
+    assert_eq!(len, 1);
 }
 
 #[wasm_bindgen_test]
@@ -56,7 +56,7 @@ pub async fn test_view_num_rows() {
     let table = get_mock_table().await;
     let view = table.view(js_object!()).await.unwrap();
     let num_rows = view.num_rows().await.unwrap();
-    assert_eq!(num_rows, 3 as f64);
+    assert_eq!(num_rows, 3_f64);
 }
 
 #[wasm_bindgen_test]
@@ -66,7 +66,7 @@ pub async fn test_view_get_config() {
     let config = view.get_config().await.unwrap();
     assert!(JsValue::is_object(&config));
     let row_pivot_len = config.row_pivots().length();
-    assert_eq!(row_pivot_len, 0 as u32);
+    assert_eq!(row_pivot_len, 0);
     let col_pivot_len = config.column_pivots().length();
-    assert_eq!(col_pivot_len, 0 as u32);
+    assert_eq!(col_pivot_len, 0);
 }

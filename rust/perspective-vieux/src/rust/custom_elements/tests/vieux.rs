@@ -8,6 +8,7 @@
 
 use crate::utils::perspective::*;
 use crate::{components::vieux::*, session::Session};
+use crate::plugin::*;
 use crate::utils::*;
 use crate::*;
 
@@ -28,13 +29,15 @@ fn set_up_html() -> (WeakComponentLink<PerspectiveVieux>, web_sys::ShadowRoot) {
     let div1: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let div2: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::new();
+    let plugin = Plugin::new(session.clone(), vec!(Box::new(move |_| ())));
     test_html! {
         <PerspectiveVieux
             weak_link=link.clone()
             ref=root.clone()
             elem=elem
+            plugin=plugin
             session=session
-            panels= (div1, div2)>
+            panels=(div1, div2)>
         </PerspectiveVieux>
     };
 

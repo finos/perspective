@@ -15,6 +15,8 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
+type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;
+
 /// A `ModalElement` wraps the parameterized yew `Component` in a Custom Element.
 /// Via the `open()` and `close()` methods, a `ModalElement` can be positioned next
 /// to any existing on-page elements, accounting for viewport, scroll position, etc.
@@ -22,7 +24,7 @@ pub struct ModalElement<T: Component> {
     root: ComponentLink<T>,
     custom_element: HtmlElement,
     target: Rc<RefCell<Option<HtmlElement>>>,
-    blurhandler: Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>,
+    blurhandler: BlurHandlerType,
 }
 
 // `#[derive(Clone)]` generates the trait bound `T: Clone`, which is not required
