@@ -12,7 +12,7 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("ohlc", "d3_ohlc", {template: "shares-template"});
+withTemplate("ohlc", "OHLC", {template: "shares-template"});
 
 utils.with_server({}, () => {
     describe.page(

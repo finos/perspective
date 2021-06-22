@@ -13,7 +13,7 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("sunburst", "d3_sunburst");
+withTemplate("sunburst", "Sunburst");
 
 utils.with_server({}, () => {
     describe.page(
@@ -31,7 +31,7 @@ utils.with_server({}, () => {
                 await page.shadow_blur();
                 const result = await page.waitFor(
                     element => {
-                        let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".segment");
+                        let elem = element.children[0].shadowRoot.querySelector(".segment");
                         if (elem) {
                             // TODO Full label is clipped
                             return elem.textContent.includes("11/");
@@ -54,7 +54,7 @@ utils.with_server({}, () => {
                 await page.mouse.click(500, 400);
                 const result = await page.waitFor(
                     element => {
-                        let elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".parent");
+                        let elem = element.children[0].shadowRoot.querySelector(".parent");
                         if (elem) {
                             return elem.textContent.includes("11/12/2013, 12:00:00 AM");
                         }

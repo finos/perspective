@@ -85,8 +85,7 @@ function columnChart(container, settings) {
     container.call(legend);
 }
 columnChart.plugin = {
-    type: "d3_y_bar",
-    name: "Y Bar Chart",
+    name: "Y Bar",
     max_cells: 1000,
     max_columns: 50,
     render_warning: true

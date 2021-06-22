@@ -8,4 +8,4 @@
  */
 
 import {register} from "../plugin/plugin.js";
-register("d3_sunburst");
+register("Sunburst");

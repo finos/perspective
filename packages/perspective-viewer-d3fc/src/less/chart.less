@@ -22,8 +22,8 @@
         padding: 15px;
         overflow: hidden;
 
-        &.d3_heatmap,
-        &.d3_treemap {
+        &.heatmap,
+        &.treemap {
             d3fc-group.cartesian-chart {
                 grid-template-columns: minmax(0em, max-content) auto 1fr auto minmax(
                         0em,
@@ -40,11 +40,11 @@
             display: none;
         }
 
-        &.d3_heatmap {
+        &.heatmap {
             padding-right: 120px;
         }
 
-        &.d3_sunburst {
+        &.sunburst {
             padding: 0;
             font-size: 14px;
 
@@ -92,7 +92,7 @@
             padding-right: 120px;
         }
 
-        &.d3_treemap {
+        &.treemap {
            
 
             & .treemap-container {
@@ -205,10 +205,10 @@
         & d3fc-canvas.plot-area {
             display: none;
         }
-        &.d3_xy_scatter,
-        &.d3_xy_line,
-        &.d3_ohlc,
-        &.d3_candlestick {
+        &.xyscatter,
+        &.xyline,
+        &.ohlc,
+        &.candlestick {
             & d3fc-canvas.plot-area {
                 display: block;
             }
@@ -258,15 +258,15 @@
             content: var(--d3fc-y2-label--content, "\1f845");
         }
 
-        &.d3_y_bar .y-axis path,
-        &.d3_y_line .y-axis path,
-        &.d3_xy_line .y-axis path,
-        &.d3_xy_line .x-axis path,
-        &.d3_y_area .y-axis path,
-        &.d3_y_scatter .y-axis path,
-        &.d3_xy_scatter .y-axis path,
-        &.d3_xy_scatter .x-axis path,
-        &.d3_x_bar .x-axis path {
+        &.ybar .y-axis path,
+        &.yline .y-axis path,
+        &.xyline .y-axis path,
+        &.xyline .x-axis path,
+        &.yarea .y-axis path,
+        &.yscatter .y-axis path,
+        &.xyscatter .y-axis path,
+        &.xyscatter .x-axis path,
+        &.xbar .x-axis path {
             visibility: hidden;
         }
 
@@ -407,15 +407,15 @@
         }
     }
 
-    .d3_heatmap .legend-container.legend-color {
+    .heatmap .legend-container.legend-color {
         height: 200px;
     }
 
-    .d3_treemap .legend-container.legend-color {
+    .treemap .legend-container.legend-color {
         height: 200px;
     }
 
-    .d3_treemap .legend-container:not(.legend-color) {
+    .treemap .legend-container:not(.legend-color) {
         width: 100px;
     }
 

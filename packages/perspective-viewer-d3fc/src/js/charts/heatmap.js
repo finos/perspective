@@ -59,7 +59,6 @@ function heatmapChart(container, settings) {
     container.call(legend);
 }
 heatmapChart.plugin = {
-    type: "d3_heatmap",
     name: "Heatmap",
     max_cells: 1000,
     max_columns: 50,
