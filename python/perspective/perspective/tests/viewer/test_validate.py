@@ -15,13 +15,13 @@ import perspective.viewer.validate as validate
 class TestValidate:
 
     def test_validate_plugin_valid_instance(self):
-        assert validate.validate_plugin(Plugin.XBAR) == "x_bar"
+        assert validate.validate_plugin(Plugin.XBAR) == "X Bar"
 
     def test_validate_plugin_valid_instance_datagrid(self):
         assert validate.validate_plugin(Plugin.GRID) == "datagrid"
 
     def test_validate_plugin_valid_string(self):
-        assert validate.validate_plugin("x_bar") == "x_bar"
+        assert validate.validate_plugin("X Bar") == "X Bar"
 
     def test_validate_plugin_invalid_string(self):
         with raises(PerspectiveError):

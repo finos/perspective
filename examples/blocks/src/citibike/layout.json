@@ -31,7 +31,7 @@
     "mode": "globalFilters",
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_0": {
-            "plugin": "d3_xy_scatter",
+            "plugin": "X/Y Scatter",
             "columns": [
                 "lon",
                 "lat",

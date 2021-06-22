@@ -77,7 +77,7 @@
         };
 
         window.addEventListener("load", () => {
-            const plugin = window.getPlugin("d3_heatmap");
+            const plugin = window.getPlugin("Heatmap");
             plugin.max_cells = 10000;
             plugin.max_columns = 200;
             window.workspace.tables.set("olympics", datasource());
@@ -125,7 +125,7 @@
                         table: "olympics"
                     },
                     Three: {
-                        plugin: "d3_heatmap",
+                        plugin: "Heatmap",
                         "row-pivots": ["sport"],
                         "column-pivots": ["age"],
                         sort: [["total"]],
@@ -152,7 +152,7 @@
                         table: "olympics"
                     },
                     PERSPECTIVE_GENERATED_ID_2: {
-                        plugin: "d3_y_line",
+                        plugin: "Y Line",
                         aggregates: {
                             age: "avg"
                         },
@@ -170,7 +170,7 @@
                         table: "olympics"
                     },
                     PERSPECTIVE_GENERATED_ID_0: {
-                        plugin: "d3_y_line",
+                        plugin: "Y Line",
                         columns: ["age", "total"],
                         "row-pivots": ["year"],
                         aggregates: {

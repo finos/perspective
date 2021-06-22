@@ -159,7 +159,7 @@ digraph G {
 
             ]
             viewer1 [
-                label = "<perspective-viewer\l    view=\"y_bar\"\l    row-pivots='[\"Category\"]'\l    filters='[[\"State\",\"==\",\"Texas\"]]'>\l"
+                label = "<perspective-viewer\l    view=\"Y Bar\"\l    row-pivots='[\"Category\"]'\l    filters='[[\"State\",\"==\",\"Texas\"]]'>\l"
                 width=2.8
             ];
             viewer2 [

@@ -81,7 +81,7 @@
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_2": {
-            "plugin": "d3_treemap",
+            "plugin": "Treemap",
             "row-pivots": [
                 "State"
             ],

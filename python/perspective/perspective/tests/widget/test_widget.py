@@ -22,8 +22,8 @@ def mock_post(self, msg, msg_id=None, assert_msg=None):
 class TestWidget:
     def test_widget(self):
         data = {"a": np.arange(0, 50)}
-        widget = PerspectiveWidget(data, plugin="x_bar")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(data, plugin="X Bar")
+        assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
             "id": -2,
@@ -36,8 +36,8 @@ class TestWidget:
 
     def test_widget_indexed(self):
         data = {"a": np.arange(0, 50)}
-        widget = PerspectiveWidget(data, plugin="x_bar", index="a")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(data, plugin="X Bar", index="a")
+        assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
             "id": -2,
@@ -51,8 +51,8 @@ class TestWidget:
         }
 
     def test_widget_no_data(self):
-        widget = PerspectiveWidget(None, plugin="x_bar", row_pivots=["a"])
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(None, plugin="X Bar", row_pivots=["a"])
+        assert widget.plugin == "X Bar"
         assert widget.row_pivots == ["a"]
 
     def test_widget_schema(self):
@@ -87,8 +87,8 @@ class TestWidget:
 
     def test_widget_eventual_data(self):
         table = Table({"a": np.arange(0, 50)})
-        widget = PerspectiveWidget(None, plugin="x_bar")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(None, plugin="X Bar")
+        assert widget.plugin == "X Bar"
 
         with raises(PerspectiveError):
             widget._make_load_message()
@@ -106,8 +106,8 @@ class TestWidget:
         }
 
     def test_widget_eventual_data_server(self):
-        widget = PerspectiveWidget(None, plugin="x_bar", server=True)
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(None, plugin="X Bar", server=True)
+        assert widget.plugin == "X Bar"
         widget.load({"a": np.arange(0, 50)}, index="a")
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
@@ -119,8 +119,8 @@ class TestWidget:
         }
 
     def test_widget_eventual_data_indexed(self):
-        widget = PerspectiveWidget(None, plugin="x_bar")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(None, plugin="X Bar")
+        assert widget.plugin == "X Bar"
         widget.load({"a": np.arange(0, 50)}, index="a")
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
@@ -136,8 +136,8 @@ class TestWidget:
 
     def test_widget_eventual_table_indexed(self):
         table = Table({"a": np.arange(0, 50)}, index="a")
-        widget = PerspectiveWidget(None, plugin="x_bar")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(None, plugin="X Bar")
+        assert widget.plugin == "X Bar"
         widget.load(table)
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
@@ -153,8 +153,8 @@ class TestWidget:
 
     def test_widget_load_table(self):
         table = Table({"a": np.arange(0, 50)})
-        widget = PerspectiveWidget(table, plugin="x_bar")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(table, plugin="X Bar")
+        assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
             "id": -2,
@@ -167,8 +167,8 @@ class TestWidget:
 
     def test_widget_load_table_indexed(self):
         table = Table({"a": np.arange(0, 50)}, index="a")
-        widget = PerspectiveWidget(table, plugin="x_bar")
-        assert widget.plugin == "x_bar"
+        widget = PerspectiveWidget(table, plugin="X Bar")
+        assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
         assert load_msg.to_dict() == {
             "id": -2,

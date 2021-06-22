@@ -42,7 +42,7 @@
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_2": {
             "selectable": true,
-            "plugin": "datagrid",
+            "plugin": "Datagrid",
             "row-pivots": [
                 "Distributor"
             ],
@@ -59,7 +59,7 @@
                 "US Gross"
             ],
             "editable": null,
-            "computed-columns": null,
+            "expressions": null,
             "column-pivots": null,
             "filters": null,
             "plugin_config": {
@@ -102,7 +102,7 @@
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_0": {
-            "plugin": "d3_xy_scatter",
+            "plugin": "X/Y Scatter",
             "row-pivots": [
                 "Title"
             ],
@@ -129,7 +129,7 @@
             ],
             "selectable": null,
             "editable": null,
-            "computed-columns": null,
+            "expressions": null,
             "column-pivots": null,
             "filters": null,
             "plugin_config": {
@@ -154,12 +154,12 @@
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_3": {
-            "plugin": "d3_y_area",
-            "computed-columns": [
-                "year_bucket(\"Release Date\")"
+            "plugin": "Y Area",
+            "expressions": [
+                "bucket(\"Release Date\", 'Y')"
             ],
             "row-pivots": [
-                "year_bucket(Release Date)"
+                "bucket(\"Release Date\", 'Y')"
             ],
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
@@ -189,12 +189,12 @@
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_1": {
-            "plugin": "d3_y_line",
-            "computed-columns": [
-                "year_bucket(\"Release Date\")"
+            "plugin": "Y Line",
+            "expressions": [
+                "bucket(\"Release Date\", 'Y')"
             ],
             "row-pivots": [
-                "year_bucket(Release Date)"
+                "bucket(\"Release Date\", 'Y')"
             ],
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"

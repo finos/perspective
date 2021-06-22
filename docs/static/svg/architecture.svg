@@ -176,7 +176,7 @@
 
 <polygon fill="#ffffff" stroke="#b3b3b3" points="890,-350.4017 688,-350.4017 688,-303.5983 890,-303.5983 890,-350.4017" style=""></polygon>
 <text text-anchor="start" x="696" y="-339" font-family="monospace" font-size="8.00" fill="#000000" style="">&lt;perspective-viewer</text>
-<text text-anchor="start" x="696" y="-329.4" font-family="monospace" font-size="8.00" fill="#000000" style=""> &nbsp;&nbsp;&nbsp;view="y_bar"</text>
+<text text-anchor="start" x="696" y="-329.4" font-family="monospace" font-size="8.00" fill="#000000" style=""> &nbsp;&nbsp;&nbsp;view="Y Bar"</text>
 <text text-anchor="start" x="696" y="-319.8" font-family="monospace" font-size="8.00" fill="#000000" style=""> &nbsp;&nbsp;&nbsp;row-pivots='["Category"]'</text>
 <text text-anchor="start" x="696" y="-310.2" font-family="monospace" font-size="8.00" fill="#000000" style=""> &nbsp;&nbsp;&nbsp;filters='[["State","==","Texas"]]'&gt;</text>
 </g>

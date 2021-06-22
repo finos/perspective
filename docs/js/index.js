@@ -86,20 +86,20 @@ function select(id) {
             },
             "#cyclone": {
                 columns: ["chg"],
-                plugin: "d3_x_bar",
+                plugin: "X Bar",
                 sort: [["chg", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#pivot": {
                 columns: ["vol"],
-                plugin: "d3_heatmap",
+                plugin: "Heatmap",
                 sort: [["vol", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#crosssect": {
-                plugin: "d3_xy_scatter",
+                plugin: "X/Y Scatter",
                 "row-pivots": ["name"],
                 "column-pivots": [],
                 columns: ["bid", "ask", "vol", "id"],
@@ -107,7 +107,7 @@ function select(id) {
                 sort: []
             },
             "#intersect": {
-                plugin: "d3_treemap",
+                plugin: "Treemap",
                 "row-pivots": ["name", "client"],
                 "column-pivots": [],
                 columns: ["bid", "chg"],
@@ -118,7 +118,7 @@ function select(id) {
                 ]
             },
             "#enhance": {
-                plugin: "d3_y_line",
+                plugin: "Y Line",
                 "row-pivots": [],
                 "column-pivots": [],
                 sort: [["lastUpdate", "desc"]],
@@ -176,7 +176,7 @@ window.addEventListener("DOMContentLoaded", async function() {
             "row-pivots": ["Sub-Category"],
             "column-pivots": ["Segment"],
             columns: ["Sales"],
-            plugin: "d3_y_bar"
+            plugin: "Y Bar"
         });
 
         const psp2 = document.querySelector("#get_started perspective-viewer");
@@ -184,7 +184,7 @@ window.addEventListener("DOMContentLoaded", async function() {
         psp2.load(tbl2);
         psp2.toggleConfig();
         psp2.restore({
-            plugin: "d3_heatmap",
+            plugin: "Heatmap",
             "column-pivots": ["Sub-Category"],
             "row-pivots": ["State"],
             sort: [

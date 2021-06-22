@@ -39,6 +39,17 @@ export class PerspectiveDockPanel extends DiscreteDockPanel {
         }
     }
 
+    static getWidgets(layout) {
+        if (layout?.hasOwnProperty("main")) {
+            return PerspectiveDockPanel.getWidgets(layout.main);
+        } else if (layout?.children) {
+            return layout.children.flatMap(widget => PerspectiveDockPanel.getWidgets(widget));
+        } else if (layout?.widgets) {
+            return layout.widgets;
+        }
+        return [];
+    }
+
     static mapWidgets(widgetFunc, layout) {
         if (layout.main) {
             layout.main = PerspectiveDockPanel.mapWidgets(widgetFunc, layout.main);
