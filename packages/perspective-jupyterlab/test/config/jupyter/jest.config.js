@@ -10,6 +10,7 @@ const main_config = require("@finos/perspective-test/jest.config.js");
 
 module.exports = Object.assign(main_config, {
     globalSetup: "<rootDir>/test/config/jupyter/globalSetup.js",
+    setupFilesAfterEnv: ["<rootDir>/test/config/jupyter/teardown.js"],
     testMatch: ["<rootDir>/test/jupyter/*.spec.js"],
     roots: ["test"]
 });

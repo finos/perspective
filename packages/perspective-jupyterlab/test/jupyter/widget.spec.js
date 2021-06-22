@@ -41,12 +41,13 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     return tbl.querySelector("thead tr").childElementCount;
                 });
 
+                expect(num_columns).toEqual(3);
+
                 const num_rows = await viewer.evaluate(async viewer => {
                     const tbl = viewer.querySelector("regular-table");
                     return tbl.querySelectorAll("tbody tr").length;
                 });
 
-                expect(num_columns).toEqual(3);
                 expect(num_rows).toEqual(5);
             });
 
@@ -69,12 +70,12 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     return tbl.querySelector("thead tr").childElementCount;
                 });
 
+                expect(num_columns).toEqual(14);
+
                 const num_rows = await viewer.evaluate(async viewer => {
                     const tbl = viewer.querySelector("regular-table");
                     return tbl.querySelectorAll("tbody tr").length;
                 });
-
-                expect(num_columns).toEqual(14);
 
                 // 2 levels of pivots, 5 rows each, plus total row
                 expect(num_rows).toEqual(11);
@@ -89,111 +90,93 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                 expect(num_headers).toEqual(2);
             });
 
-            test.jupyterlab(
-                "Sets row and column pivots",
-                [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.row_pivots = ['datetime']"], ["w.column_pivots = ['str']"]],
-                async page => {
-                    const viewer = await default_body(page);
-                    const num_headers = await viewer.evaluate(async viewer => {
-                        const tbl = viewer.querySelector("regular-table");
-                        return tbl.querySelector("thead").childElementCount;
-                    });
-                    expect(num_headers).toEqual(2);
-
-                    const num_rows = await viewer.evaluate(async viewer => {
-                        const tbl = viewer.querySelector("regular-table");
-                        return tbl.querySelectorAll("tbody tr").length;
-                    });
-
-                    expect(num_rows).toEqual(6);
-                }
-            );
-
             // test.jupyterlab(
-            //     "Sets aggregates",
-            //     [
-            //         ["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"],
-            //         ["w"],
-            //         ["w.aggregates = {'datetime': 'last'}"],
-            //         ["w.columns = ['datetime']"],
-            //         ["w.row_pivots = ['str']"]
-            //     ],
+            //     "Sets row and column pivots",
+            //     [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.row_pivots = ['datetime']"], ["w.column_pivots = ['str']"]],
             //     async page => {
             //         const viewer = await default_body(page);
-            //         const config = await viewer.evaluate(viewer => viewer.save());
-            //         expect(config["aggregates"]).toEqual({
-            //             datetime: "last"
+            //         const num_headers = await viewer.evaluate(async viewer => {
+            //             const tbl = viewer.querySelector("regular-table");
+            //             return tbl.querySelector("thead").childElementCount;
             //         });
+            //         expect(num_headers).toEqual(2);
+
+            //         const num_rows = await viewer.evaluate(async viewer => {
+            //             const tbl = viewer.querySelector("regular-table");
+            //             return tbl.querySelectorAll("tbody tr").length;
+            //         });
+
+            //         expect(num_rows).toEqual(6);
             //     }
             // );
 
-            test.jupyterlab("Sets filters", [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.filters = [['bool', '==', True]]"]], async page => {
-                const viewer = await default_body(page);
+            // test.jupyterlab("Sets filters", [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.filters = [['bool', '==', True]]"]], async page => {
+            //     const viewer = await default_body(page);
 
-                const num_rows = await viewer.evaluate(async viewer => {
-                    const tbl = viewer.querySelector("regular-table");
-                    return tbl.querySelectorAll("tbody tr").length;
-                });
+            //     const num_rows = await viewer.evaluate(async viewer => {
+            //         const tbl = viewer.querySelector("regular-table");
+            //         return tbl.querySelectorAll("tbody tr").length;
+            //     });
 
-                expect(num_rows).toEqual(3);
-            });
+            //     expect(num_rows).toEqual(3);
+            // });
 
-            test.jupyterlab("Sets sort", [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.sort = [['datetime', 'desc']]"]], async page => {
-                const viewer = await default_body(page);
-                const config = await viewer.evaluate(viewer => viewer.save());
-                expect(config["sort"]).toEqual([["datetime", "desc"]]);
-            });
+            // test.jupyterlab("Sets sort", [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.sort = [['datetime', 'desc']]"]], async page => {
+            //     const viewer = await default_body(page);
+            //     const config = await viewer.evaluate(viewer => viewer.save());
+            //     expect(config["sort"]).toEqual([["datetime", "desc"]]);
+            // });
 
-            test.jupyterlab("Resets", [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table, row_pivots=['str'])"], ["w"], ["w.reset()"]], async page => {
-                const viewer = await default_body(page);
+            // test.jupyterlab("Resets", [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table, row_pivots=['str'])"], ["w"], ["w.reset()"]], async page => {
+            //     const viewer = await default_body(page);
 
-                const num_columns = await viewer.evaluate(async viewer => {
-                    const tbl = viewer.querySelector("regular-table");
-                    return tbl.querySelector("thead tr").childElementCount;
-                });
+            //     const num_columns = await viewer.evaluate(async viewer => {
+            //         const tbl = viewer.querySelector("regular-table");
+            //         return tbl.querySelector("thead tr").childElementCount;
+            //     });
 
-                const num_rows = await viewer.evaluate(async viewer => {
-                    const tbl = viewer.querySelector("regular-table");
-                    return tbl.querySelectorAll("tbody tr").length;
-                });
+            //     const num_rows = await viewer.evaluate(async viewer => {
+            //         const tbl = viewer.querySelector("regular-table");
+            //         return tbl.querySelectorAll("tbody tr").length;
+            //     });
 
-                expect(num_columns).toEqual(13);
-                expect(num_rows).toEqual(5);
-            });
+            //     expect(num_columns).toEqual(13);
+            //     expect(num_rows).toEqual(5);
+            // });
 
-            test.jupyterlab(
-                "Restores",
-                [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.restore(columns=['date'], sort=[['i64', 'desc']], row_pivots=['str'])"]],
-                async page => {
-                    const viewer = await default_body(page);
+            // test.jupyterlab(
+            //     "Restores",
+            //     [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.restore(columns=['date'], sort=[['i64', 'desc']], row_pivots=['str'])"]],
+            //     async page => {
+            //         const viewer = await default_body(page);
 
-                    const num_columns = await viewer.evaluate(async viewer => {
-                        const tbl = viewer.querySelector("regular-table");
-                        return tbl.querySelector("thead").childElementCount;
-                    });
+            //         const num_columns = await viewer.evaluate(async viewer => {
+            //             const tbl = viewer.querySelector("regular-table");
+            //             return tbl.querySelector("thead").childElementCount;
+            //         });
 
-                    const num_rows = await viewer.evaluate(async viewer => {
-                        const tbl = viewer.querySelector("regular-table");
-                        return tbl.querySelectorAll("tbody tr").length;
-                    });
+            //         const num_rows = await viewer.evaluate(async viewer => {
+            //             const tbl = viewer.querySelector("regular-table");
+            //             return tbl.querySelectorAll("tbody tr").length;
+            //         });
 
-                    expect(num_columns).toEqual(1);
-                    expect(num_rows).toEqual(6);
-                }
-            );
+            //         expect(num_columns).toEqual(1);
+            //         expect(num_rows).toEqual(6);
+            //     }
+            // );
 
-            test.jupyterlab(
-                "Reads updates",
-                [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.row_pivots = ['datetime', 'str']\n", "table.update(arrow_data)"]],
-                async page => {
-                    const viewer = await default_body(page);
-                    const num_rows = await viewer.evaluate(async viewer => {
-                        const tbl = viewer.querySelector("regular-table");
-                        return tbl.querySelectorAll("tbody tr").length;
-                    });
-                    expect(num_rows).toEqual(11);
-                }
-            );
+            // test.jupyterlab(
+            //     "Reads updates",
+            //     [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.row_pivots = ['datetime', 'str']\n", "table.update(arrow_data)"]],
+            //     async page => {
+            //         const viewer = await default_body(page);
+            //         const num_rows = await viewer.evaluate(async viewer => {
+            //             const tbl = viewer.querySelector("regular-table");
+            //             return tbl.querySelectorAll("tbody tr").length;
+            //         });
+            //         expect(num_rows).toEqual(11);
+            //     }
+            // );
         },
         {name: "Simple", reload_page: false, root: path.join(__dirname, "..", "..")}
     );

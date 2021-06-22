@@ -232,6 +232,43 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
         artifactName: "perspective-workspace-$(Build.BuildNumber)"
 
+    # `yarn pack` the public packages so the Jupyterlab tests can use the
+    # already-built `dist` folder for perspective, perspective-viewer,
+    # perspective-viewer-datagrid and perspective-viewer-d3fc.
+
+    - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective && yarn pack --filename=perspective.tgz
+      displayName: "yarn pack perspective"
+
+    - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-viewer && yarn pack --filename=perspective-viewer.tgz
+      displayName: "yarn pack perspective-viewer"
+
+    - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid && yarn pack --filename=perspective-viewer-datagrid.tgz
+      displayName: "yarn pack perspective-viewer-datagrid"
+
+    - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc && yarn pack --filename=perspective-viewer-d3fc.tgz
+      displayName: "yarn pack perspective-viewer-d3fc"
+
+    # Upload the packed versions
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective/perspective.tgz"
+        artifactName: "perspective-dist"
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-viewer/perspective-viewer.tgz"
+        artifactName: "perspective-dist"
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/perspective-viewer-datagrid.tgz"
+        artifactName: "perspective-dist"
+      
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/perspective-viewer-d3fc.tgz"
+        artifactName: "perspective-dist"
+
 
 - job: 'Linux'
   pool:
@@ -294,100 +331,146 @@ jobs:
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
 
+# - job: 'Windows'
+#   pool:
+#     vmImage: 'vs2017-win2016'
+
+#   strategy:
+#     matrix:
+#       Python37:
+#         python.version: '3.7'
+#         python_flag: ''
+#         artifact_name: 'cp37-cp37m-win64_amd'
+
+#       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+#         Python36:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#           artifact_name: 'cp36-cp36m-win64_amd'
+#         Python38:
+#           python.version: '3.8'
+#           python_flag: '--python38'
+#           artifact_name: 'cp38-cp38m-win64_amd'
+#         Python39:
+#           python.version: '3.9'
+#           python_flag: '--python39'
+#           artifact_name: 'cp39-cp39m-win64_amd'
+
+#   steps:
+#     - ${{ parameters.initSteps }}
+#     - ${{ parameters.windowsInitSteps }}
+#     - ${{ parameters.pythonBuildSteps }}
+#     - ${{ parameters.pythonWindowsWheelSteps }}
+
+
+# - job: 'MacOS_Catalina'
+#   pool:
+#     vmImage: 'macos-10.15'
+
+#   strategy:
+#     matrix:
+
+#       Python39:
+#         python.version: '3.9'
+#         python_flag: '--python39'
+#         artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
+
+#       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+#         Python36:
+#           python.version: '3.6'
+#           python_flag: '--python36'
+#           artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
+
+#         Python37:
+#           python.version: '3.7'
+#           python_flag: ''
+#           artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
+    
+#         Python38:
+#           python.version: '3.8'
+#           python_flag: '--python38'
+#           artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
+
+#   steps:
+#     - ${{ parameters.initSteps }}
+#     - ${{ parameters.macInitSteps }}
+#     - ${{ parameters.pythonBuildSteps }}
+#     - ${{ parameters.pythonCoverageSteps }}
+#     - ${{ parameters.pythonMacWheelSteps }}
+
+
 - job: "Jupyterlab"
   dependsOn: ["WebAssembly", "Linux"]
   pool: 
-    vmImage: "ubuntu-16.04"
+    vmImage: "ubuntu-latest"
+  variables:
+    python.version: "3.7"
+    python_flag: ""
+    manylinux_flag: "--manylinux2010"
+    artifact_name: "cp37-cp37m-manylinux2010_x86_64"
 
   steps:
     - ${{ parameters.initSteps }}
     - ${{ parameters.linuxInitSteps }}
 
     - task: DownloadPipelineArtifact@2
+      displayName: "Download Python 3.7 Perspective Wheel"
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
-        artifactName: "perspective-viewer-d3fc-$(Build.BuildNumber)"
+        artifact: $(artifact_name)
+        path: $(System.DefaultWorkingDirectory)/wheel
 
     - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
       displayName: "Install perspective-python from wheel"
-
-    - bash: python -m pip install jupyterlab
-      displayName: "Install Jupyterlab"
 
     - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
       displayName: "Install Labextensions"
 
     - bash: yarn add puppeteer
-      displayName: "Install Labextensions"
+      displayName: "Install Puppeteer"
 
     - task: DownloadPipelineArtifact@2
+      displayName: "Download perspective dist"
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
-        artifactName: "perspective-workspace-$(Build.BuildNumber)"
+        artifact: "perspective-dist"
+        path: $(System.DefaultWorkingDirectory)
 
-- job: 'Windows'
-  pool:
-    vmImage: 'vs2017-win2016'
+    - task: DownloadPipelineArtifact@2
+      displayName: "Download perspective-viewer dist"
+      inputs:
+        artifact: "perspective-viewer-dist"
+        path: $(System.DefaultWorkingDirectory)
 
-  strategy:
-    matrix:
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
-        artifact_name: 'cp37-cp37m-win64_amd'
+    - task: DownloadPipelineArtifact@2
+      displayName: "Download perspective-viewer-datagrid dist"
+      inputs:
+        artifact: "perspective-viewer-datagrid-dist"
+        path: $(System.DefaultWorkingDirectory)
 
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
-        Python36:
-          python.version: '3.6'
-          python_flag: '--python36'
-          artifact_name: 'cp36-cp36m-win64_amd'
-        Python38:
-          python.version: '3.8'
-          python_flag: '--python38'
-          artifact_name: 'cp38-cp38m-win64_amd'
-        Python39:
-          python.version: '3.9'
-          python_flag: '--python39'
-          artifact_name: 'cp39-cp39m-win64_amd'
+    - task: DownloadPipelineArtifact@2
+      displayName: "Download perspective-viewer-d3fc dist"
+      inputs:
+        artifact: "perspective-viewer-d3fc-dist"
+        path: $(System.DefaultWorkingDirectory)
 
-  steps:
-    - ${{ parameters.initSteps }}
-    - ${{ parameters.windowsInitSteps }}
-    - ${{ parameters.pythonBuildSteps }}
-    - ${{ parameters.pythonWindowsWheelSteps }}
+    - bash: tar -xvf $(System.DefaultWorkingDirectory)/perspective-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective
+      displayName: "Install perspective dist"
 
+    - bash: tar -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-viewer
+      displayName: "Install perspective-viewer dist"
 
-- job: 'MacOS_Catalina'
-  pool:
-    vmImage: 'macos-10.15'
+    - bash: tar -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-datagrid-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid
+      displayName: "Install perspective-viewer-datagrid dist"
 
-  strategy:
-    matrix:
+    - bash: tar -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-d3fc-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc
+      displayName: "Install perspective-viewer-d3fc dist"
 
-      Python39:
-        python.version: '3.9'
-        python_flag: '--python39'
-        artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
+    - bash: jupyter labextension install packages/perspective-jupyterlab
+      displayName: "Install perspective-jupyterlab labextension"
 
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
-        Python36:
-          python.version: '3.6'
-          python_flag: '--python36'
-          artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
+    - bash: yarn jlab_link
+      displayName: "Link local Perspective to Jupyterlab"
 
-        Python37:
-          python.version: '3.7'
-          python_flag: ''
-          artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
-    
-        Python38:
-          python.version: '3.8'
-          python_flag: '--python38'
-          artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
-
-  steps:
-    - ${{ parameters.initSteps }}
-    - ${{ parameters.macInitSteps }}
-    - ${{ parameters.pythonBuildSteps }}
-    - ${{ parameters.pythonCoverageSteps }}
-    - ${{ parameters.pythonMacWheelSteps }}
+    - bash: yarn test_js --jupyter
+      displayName: "Run Jupyterlab tests"
+      env:
+        PACKAGE: perspective-jupyterlab

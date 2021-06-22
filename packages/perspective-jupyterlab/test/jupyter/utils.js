@@ -13,8 +13,6 @@ const notebook_template = require("./notebook_template.json");
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
-const IS_LOCAL_PUPPETEER = process.env.IS_LOCAL_PUPPETEER;
-const IS_LINUX = process.platform !== "darwin" && process.platform != "win32";
 
 const remove_jupyter_artifacts = () => {
     rimraf(path.join(TEST_CONFIG_ROOT, "lab"), () => {});
@@ -87,15 +85,8 @@ test.jupyterlab = async (name, cells, body, args = {}) => {
     const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
     generate_notebook(notebook_name, cells);
     args = Object.assign(args, {
-        url: `doc/tree/${notebook_name}`,
-        host: "localhost"
+        url: `doc/tree/${notebook_name}`
     });
-
-    // On linux, use localhost instead of host.docker.internal since
-    // --network=host works.
-    if (IS_LOCAL_PUPPETEER || IS_LINUX) {
-        delete args.host;
-    }
 
     await test.run(name, body, args);
 };

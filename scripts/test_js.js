@@ -104,10 +104,14 @@ function get_regex() {
     }
 }
 
-// TODO: this script could probably get refactored a bit better.
 try {
     if (!IS_INSIDE_PUPPETEER && !IS_LOCAL_PUPPETEER) {
+        if (IS_JUPYTER) {
+            throw new Error("Error: Jupyterlab tests must be run against local puppeteer!");
+        }
+
         execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+        execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
         execute`yarn --silent clean --screenshots`;
 
         if (!PACKAGE || minimatch("perspective-vieux", PACKAGE)) {
@@ -115,24 +119,7 @@ try {
             execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
         }
 
-        // Run docker with --network=host if we are running the Jupyter tests.
-        let cmd = bash`${docker("puppeteer", IS_JUPYTER)} node scripts/test_js.js --private-puppeteer ${getarg()}`;
-
-        if (IS_JUPYTER) {
-            // Always start the Jupyter server on the local machine, not
-            // inside the Docker image. We can't start it later on because
-            // this whole script will get re-executed in a Docker context.
-            execute`node_modules/.bin/lerna run test:jupyter:jlab_start --stream --scope="@finos/${PACKAGE}"`;
-
-            // Clean up the Jupyter server always
-            cmd += bash` || pkill -f "jupyter-lab --no-browser"`;
-        } else {
-            // test:build is irrelevant for jupyter tests and adds about 20
-            // seconds to the Jupyter test execution.
-            execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
-        }
-
-        execute_throw(cmd);
+        execute`${docker("puppeteer")} node scripts/test_js.js --private-puppeteer ${getarg()}`;
     } else {
         if (!IS_INSIDE_PUPPETEER && (!PACKAGE || minimatch("perspective-vieux", PACKAGE))) {
             console.log("-- Running Rust tests");
@@ -143,9 +130,8 @@ try {
             execute`yarn --silent clean --screenshots`;
             execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
 
-            // If we are in local puppeteer, Jupyter hasn't been started yet
-            // so start the server here.
             if (IS_JUPYTER) {
+                // Start the Jupyterlab server
                 execute`node_modules/.bin/lerna run test:jupyter:jlab_start --stream --scope="@finos/${PACKAGE}"`;
             } else {
                 execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
@@ -182,8 +168,8 @@ try {
 } catch (e) {
     console.log(e.message);
 
-    // Run cleanup here only if we aren't running in Docker - in Docker
-    // the cleanup is already appended to the command and will always run.
+    // If we are running Jupyterlab tests, need to clean up the process if
+    // the tests error for any reason.
     if (IS_JUPYTER && IS_LOCAL_PUPPETEER) {
         console.log("-- Cleaning up Jupyterlab process after test error...");
         execute`pkill -f "jupyter-lab --no-browser"`;

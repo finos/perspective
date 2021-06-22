@@ -32,13 +32,15 @@ const wait_for_jlab = async function() {
     let loaded = false;
 
     while (!loaded) {
-        get(`http://localhost:${process.env.__JUPYTERLAB_PORT__}`, res => {
-            console.log(res.statusCode);
-            console.log(res.headers);
+        get(`http://127.0.0.1:${process.env.__JUPYTERLAB_PORT__}/lab?`, res => {
+            if (res.statusCode !== 200) {
+                throw new Error(`${res.statusCode} not 200!`);
+            }
+
             console.log(`Jupyterlab server has started on ${process.env.__JUPYTERLAB_PORT__}`);
             loaded = true;
         }).on("error", err => {
-            if (num_errors > 5) {
+            if (num_errors > 50) {
                 kill_jlab();
                 throw new Error(`Could not launch Jupyterlab: ${err}`);
             }
@@ -46,7 +48,7 @@ const wait_for_jlab = async function() {
             num_errors++;
         });
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
     }
 };
 
@@ -54,15 +56,13 @@ const wait_for_jlab = async function() {
 
 exports.start_jlab = function() {
     /*
-     * Spawn the Jupyterlab server. This script is separate from the rest of the
-     * Jest code as it cannot be executed within the Puppeteer Docker image,
-     * so it is run as a separate process by the test_js script.
+     * Spawn the Jupyterlab server.
      */
     try {
-        // TODO be able to stop this proc somehow after the fact
+        // Does not alter the global env, only the env for this process
         process.env.JUPYTER_CONFIG_DIR = path.join(PACKAGE_ROOT, "test", "config", "jupyter");
 
-        // start jupyterlab with a root to dist/umd where the notebooks will be.
+        // Start jupyterlab with a root to dist/umd where the notebooks will be.
         process.chdir(path.join(PACKAGE_ROOT, "dist", "umd"));
 
         console.log("Spawning Jupyterlab process");
@@ -75,8 +75,6 @@ exports.start_jlab = function() {
 
         // Wait for Jupyterlab to start up
         return wait_for_jlab().then(() => {
-            execute`ps aux | grep jupyterlab`;
-            execute`jupyter server list`;
             return proc;
         });
     } catch (e) {

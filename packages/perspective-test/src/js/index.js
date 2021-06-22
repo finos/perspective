@@ -317,7 +317,7 @@ expect.extend({
     }
 });
 
-test.run = function run(name, body, {host = "127.0.0.1", url = page_url, timeout = 60000, viewport = null}) {
+test.run = function run(name, body, {url = page_url, timeout = 60000, viewport = null}) {
     test(
         name,
         async () => {
@@ -328,14 +328,14 @@ test.run = function run(name, body, {host = "127.0.0.1", url = page_url, timeout
                 });
             }
             await new Promise(setTimeout);
-            await page.goto(`http://${host}:${__PORT__}/${url}`, {waitUntil: "domcontentloaded"});
+            await page.goto(`http://127.0.0.1:${__PORT__}/${url}`, {waitUntil: "domcontentloaded"});
             await body(page);
         },
         timeout
     );
 };
 
-test.capture = function capture(name, body, {host = "127.0.0.1", url = page_url, timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
+test.capture = function capture(name, body, {url = page_url, timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
     const _reload_page = page_reload;
     const spec = test(
         name,
@@ -363,12 +363,12 @@ test.capture = function capture(name, body, {host = "127.0.0.1", url = page_url,
                 if (_reload_page) {
                     await page.close();
                     page = await get_new_page();
-                    await page.goto(`http://${host}:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                    await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                 } else {
                     if (!OLD_SETTINGS[test_root + url]) {
                         await page.close();
                         page = await get_new_page();
-                        await page.goto(`http://${host}:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                        await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                     } else {
                         await page.evaluate(async x => {
                             const viewer = document.querySelector("perspective-viewer");
