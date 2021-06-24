@@ -131,10 +131,8 @@ try {
             execute`yarn --silent clean --screenshots`;
             execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
 
-            if (IS_JUPYTER) {
-                // Start the Jupyterlab server
-                execute`node_modules/.bin/lerna run test:jupyter:jlab_start --stream --scope="@finos/${PACKAGE}"`;
-            } else {
+            if (!IS_JUPYTER) {
+                // test:build irrelevant for jupyter tests
                 execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
             }
         }

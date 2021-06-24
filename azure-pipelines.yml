@@ -51,7 +51,7 @@ parameters:
           architecture: 'x64'
         displayName: 'Use Python $(python.version)'
   
-      - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=2" "black==20.8b1" flake8-black
+      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=2" "black==20.8b1" flake8-black
         displayName: 'Install Python base dependencies'
         condition: and(succeeded(), ne(variables['python.version'], '2.7'))
   
@@ -90,16 +90,10 @@ parameters:
       - bash: yarn build_js --ci
         displayName: "Build"
 
-      # - bash: yarn test_js --quiet --ci
-      #   displayName: "Test"
-      #   env:
-      #     PSP_DOCKER: 1
-
-      # - task: PublishTestResults@2
-      #   condition: succeededOrFailed()
-      #   inputs:
-      #     testRunner: JUnit
-      #     testResultsFiles: 'junit.xml'
+      - bash: yarn test_js --quiet --ci
+        displayName: "Test"
+        env:
+          PSP_DOCKER: 1
 
   - name: pythonBuildSteps
     type: stepList
@@ -202,35 +196,35 @@ jobs:
     - ${{ parameters.linuxInitSteps }}
     - ${{ parameters.webassemblySteps }}
 
-    # - task: PublishTestResults@2
-    #   condition: succeeded()
-    #   inputs:
-    #     testRunner: JUnit
-    #     testResultsFiles: 'junit.xml'
+    - task: PublishTestResults@2
+      condition: succeeded()
+      inputs:
+        testRunner: JUnit
+        testResultsFiles: 'junit.xml'
 
-    # - task: PublishPipelineArtifact@1
-    #   condition: failed()
-    #   inputs:
-    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
-    #     artifactName: "perspective-viewer-$(Build.BuildNumber)"
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
+        artifactName: "perspective-viewer-$(Build.BuildNumber)"
 
-    # - task: PublishPipelineArtifact@1
-    #   condition: failed()
-    #   inputs:
-    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
-    #     artifactName: "perspective-viewer-datagrid-$(Build.BuildNumber)"
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
+        artifactName: "perspective-viewer-datagrid-$(Build.BuildNumber)"
 
-    # - task: PublishPipelineArtifact@1
-    #   condition: failed()
-    #   inputs:
-    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
-    #     artifactName: "perspective-viewer-d3fc-$(Build.BuildNumber)"
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
+        artifactName: "perspective-viewer-d3fc-$(Build.BuildNumber)"
 
-    # - task: PublishPipelineArtifact@1
-    #   condition: failed()
-    #   inputs:
-    #     targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
-    #     artifactName: "perspective-workspace-$(Build.BuildNumber)"
+    - task: PublishPipelineArtifact@1
+      condition: failed()
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
+        artifactName: "perspective-workspace-$(Build.BuildNumber)"
 
     # `yarn pack` the public packages so the Jupyterlab tests can use the
     # already-built `dist` folder for perspective, perspective-viewer,
@@ -339,72 +333,68 @@ jobs:
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
 
-# - job: 'Windows'
-#   pool:
-#     vmImage: 'vs2017-win2016'
+- job: 'Windows'
+  pool:
+    vmImage: 'vs2017-win2016'
 
-#   strategy:
-#     matrix:
-#       Python37:
-#         python.version: '3.7'
-#         python_flag: ''
-#         artifact_name: 'cp37-cp37m-win64_amd'
+  strategy:
+    matrix:
+      Python37:
+        python.version: '3.7'
+        python_flag: ''
+        artifact_name: 'cp37-cp37m-win64_amd'
 
-#       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
-#         Python36:
-#           python.version: '3.6'
-#           python_flag: '--python36'
-#           artifact_name: 'cp36-cp36m-win64_amd'
-#         Python38:
-#           python.version: '3.8'
-#           python_flag: '--python38'
-#           artifact_name: 'cp38-cp38m-win64_amd'
-#         Python39:
-#           python.version: '3.9'
-#           python_flag: '--python39'
-#           artifact_name: 'cp39-cp39m-win64_amd'
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+        Python38:
+          python.version: '3.8'
+          python_flag: '--python38'
+          artifact_name: 'cp38-cp38m-win64_amd'
+        Python39:
+          python.version: '3.9'
+          python_flag: '--python39'
+          artifact_name: 'cp39-cp39m-win64_amd'
 
-#   steps:
-#     - ${{ parameters.initSteps }}
-#     - ${{ parameters.windowsInitSteps }}
-#     - ${{ parameters.pythonBuildSteps }}
-#     - ${{ parameters.pythonWindowsWheelSteps }}
+  steps:
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.windowsInitSteps }}
+    - ${{ parameters.pythonBuildSteps }}
+    - ${{ parameters.pythonWindowsWheelSteps }}
 
 
-# - job: 'MacOS_Catalina'
-#   pool:
-#     vmImage: 'macos-10.15'
+- job: 'MacOS_Catalina'
+  pool:
+    vmImage: 'macos-10.15'
 
-#   strategy:
-#     matrix:
+  strategy:
+    matrix:
 
-#       Python39:
-#         python.version: '3.9'
-#         python_flag: '--python39'
-#         artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
+      Python39:
+        python.version: '3.9'
+        python_flag: '--python39'
+        artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
 
-#       ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
-#         Python36:
-#           python.version: '3.6'
-#           python_flag: '--python36'
-#           artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+        Python36:
+          python.version: '3.6'
+          python_flag: '--python36'
+          artifact_name: 'cp36-cp36m-macosx_10_15_x86_64'
 
-#         Python37:
-#           python.version: '3.7'
-#           python_flag: ''
-#           artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
+        Python37:
+          python.version: '3.7'
+          python_flag: ''
+          artifact_name: 'cp37-cp37m-macosx_10_15_x86_64'
     
-#         Python38:
-#           python.version: '3.8'
-#           python_flag: '--python38'
-#           artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
+        Python38:
+          python.version: '3.8'
+          python_flag: '--python38'
+          artifact_name: 'cp38-cp38-macosx_10_15_x86_64'
 
-#   steps:
-#     - ${{ parameters.initSteps }}
-#     - ${{ parameters.macInitSteps }}
-#     - ${{ parameters.pythonBuildSteps }}
-#     - ${{ parameters.pythonCoverageSteps }}
-#     - ${{ parameters.pythonMacWheelSteps }}
+  steps:
+    - ${{ parameters.initSteps }}
+    - ${{ parameters.macInitSteps }}
+    - ${{ parameters.pythonBuildSteps }}
+    - ${{ parameters.pythonCoverageSteps }}
+    - ${{ parameters.pythonMacWheelSteps }}
 
 
 - job: "Jupyterlab"
@@ -418,7 +408,29 @@ jobs:
     artifact_name: "cp37-cp37m-manylinux2010_x86_64"
 
   steps:
-    - ${{ parameters.initSteps }}
+    # don't use InitSteps because we don't want to cache local puppeteer
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
+
+    - bash: npm install -g yarn
+      displayName: 'Install Yarn'
+
+    - bash: yarn --frozen-lockfile
+      displayName: "Install Deps"
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+        architecture: 'x64'
+      displayName: 'Use Python $(python.version)'
+
+    - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=2" "black==20.8b1" flake8-black
+      displayName: 'Install Python base dependencies'
+      condition: and(succeeded(), ne(variables['python.version'], '2.7'))
+
+    - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      displayName: "Install wasm-pack"
 
     - task: DownloadPipelineArtifact@2
       displayName: "Download Python 3.7 Perspective Wheel"
@@ -428,9 +440,6 @@ jobs:
 
     - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
       displayName: "Install perspective-python from wheel"
-
-    - bash: python -c "import perspective;perspective.Table({'a':[1, 2, 3]})"
-      displayName: "Debug wheel"
 
     - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
       displayName: "Install Labextensions"
@@ -489,16 +498,7 @@ jobs:
     - bash: yarn jlab_link
       displayName: "Link local Perspective to Jupyterlab"
 
-    - bash: jupyter lab paths && jupyter labextension list && jupyter kernelspec list
-      displayName: "Debug"
-
     - bash: yarn test_js --jupyter --debug
       displayName: "Run Jupyterlab tests"
       env:
         PACKAGE: perspective-jupyterlab
-
-    - task: PublishPipelineArtifact@1
-      condition: succeededOrFailed()
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab/screenshots/'
-        artifactName: "perspective-jupyterlab-$(Build.BuildNumber)"

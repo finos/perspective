@@ -26,7 +26,6 @@
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
         "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd && webpack --color --config src/config/webpack.config.js",
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
-        "test:jupyter:jlab_start": "__JUPYTERLAB_PORT__=6538 node test/config/jupyter/jlab_start.js",
         "test:jupyter:build": "cpx \"test/html/*\" dist/umd && cpx \"test/arrow/*\" dist/umd && cpx \"test/css/*\" dist/umd",
         "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color --verbose",
         "test": "npm-run-all test:build test:run",
