@@ -42,18 +42,6 @@ function styleListener(regularTable) {
         td.classList.toggle("psp-align-left", !is_numeric);
         td.classList.toggle("psp-menu-open", this._open_column_styles_menu[0] === metadata._virtual_x);
         td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
-
-        // Color plugin
-        // const plugin = plugins[column_name];
-        // if (plugin?.pos_color !== undefined) {
-        //     const [, r, g, b] = plugin.pos_color;
-        //     const foreground = infer_foreground_from_background([r, g, b]);
-        //     td.style.backgroundColor = plugin.pos_color[0];
-        //     td.style.color = foreground;
-        // } else {
-        //     td.style.backgroundColor = "";
-        //     td.style.color = "";
-        // }
     }
 
     const m = [];
@@ -113,6 +101,7 @@ function styleListener(regularTable) {
                     }
                 })();
 
+                td.style.position = "";
                 if (plugin?.color_mode === "background") {
                     const source = this._plugin_background;
                     const foreground = infer_foreground_from_background(rgbaToRgb([r, g, b, 1], source));
@@ -127,6 +116,13 @@ function styleListener(regularTable) {
                 } else if (plugin?.color_mode === "disabled") {
                     td.style.backgroundColor = "";
                     td.style.color = "";
+                } else if (plugin?.color_mode === "bar") {
+                    td.style.backgroundColor = "";
+                    td.style.color = "";
+                    td.style.position = "relative";
+                    if (td.children.length > 0 && td.children[0].nodeType === Node.ELEMENT_NODE) {
+                        td.children[0].style.backgroundColor = `rgb(${r},${g},${b})`;
+                    }
                 } else {
                     td.style.backgroundColor = "";
                     td.style.color = hex;
@@ -306,21 +302,29 @@ function _format(parts, val, plugins = {}, use_table_schema = false) {
     const plugin = plugins[title];
     const type = (use_table_schema && this._table_schema[title]) || this._schema[title] || "string";
     const is_numeric = type === "integer" || type === "float";
-    const is_plugin_override = is_numeric && plugin && plugin.fixed !== undefined;
-    let formatter_key = is_plugin_override ? `${type}${plugin.fixed}` : type;
-    if (FORMATTERS[formatter_key] === undefined) {
-        const type_config = get_type_config(type);
-        if (is_plugin_override) {
-            const opts = {minimumFractionDigits: plugin.fixed, maximumFractionDigits: plugin.fixed};
-            FORMATTERS[formatter_key] = new FORMATTER_CONS[type]("en-us", opts);
-        } else if (FORMATTER_CONS[type] && type_config.format) {
-            FORMATTERS[formatter_key] = new FORMATTER_CONS[type]("en-us", type_config.format);
-        } else {
-            FORMATTERS[formatter_key] = false;
+    if (is_numeric && plugin?.color_mode === "bar") {
+        const a = Math.max(0, Math.min(0.95, Math.abs(val / plugin.gradient) * 0.95));
+        const div = document.createElement("div");
+        const anchor = val >= 0 ? "left" : "right";
+        div.setAttribute("style", `width:${(a * 100).toFixed(2)}%;position:absolute;${anchor}:0;height:80%;top:10%;`);
+        return div;
+    } else {
+        const is_plugin_override = is_numeric && plugin && plugin.fixed !== undefined;
+        let formatter_key = is_plugin_override ? `${type}${plugin.fixed}` : type;
+        if (FORMATTERS[formatter_key] === undefined) {
+            const type_config = get_type_config(type);
+            if (is_plugin_override) {
+                const opts = {minimumFractionDigits: plugin.fixed, maximumFractionDigits: plugin.fixed};
+                FORMATTERS[formatter_key] = new FORMATTER_CONS[type]("en-us", opts);
+            } else if (FORMATTER_CONS[type] && type_config.format) {
+                FORMATTERS[formatter_key] = new FORMATTER_CONS[type]("en-us", type_config.format);
+            } else {
+                FORMATTERS[formatter_key] = false;
+            }
         }
-    }
 
-    return FORMATTERS[formatter_key] ? FORMATTERS[formatter_key].format(val) : val;
+        return FORMATTERS[formatter_key] ? FORMATTERS[formatter_key].format(val) : val;
+    }
 }
 
 function* _tree_header(paths = [], row_headers, regularTable) {

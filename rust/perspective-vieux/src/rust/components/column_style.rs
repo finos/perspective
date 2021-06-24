@@ -33,6 +33,9 @@ pub enum ColorMode {
 
     #[serde(rename = "gradient")]
     Gradient,
+
+    #[serde(rename = "bar")]
+    Bar,
 }
 
 impl Default for ColorMode {
@@ -47,6 +50,7 @@ impl Display for ColorMode {
             ColorMode::Foreground => "foreground",
             ColorMode::Background => "background",
             ColorMode::Gradient => "gradient",
+            ColorMode::Bar => "bar",
             _ => panic!("Unknown color mode!"),
         };
 
@@ -61,6 +65,7 @@ impl FromStr for ColorMode {
             "foreground" => Ok(ColorMode::Foreground),
             "background" => Ok(ColorMode::Background),
             "gradient" => Ok(ColorMode::Gradient),
+            "bar" => Ok(ColorMode::Bar),
             x => Err(format!("Unknown ColorMode::{}", x)),
         }
     }
@@ -73,6 +78,10 @@ impl ColorMode {
 
     fn is_enabled(&self) -> bool {
         *self != ColorMode::Disabled
+    }
+
+    fn needs_gradient(&self) -> bool {
+        *self == ColorMode::Gradient || *self == ColorMode::Bar
     }
 }
 
@@ -141,9 +150,26 @@ pub struct ColumnStyleProps {
 }
 
 impl ColumnStyleProps {
-    /// When this config has changed, we must signal the wrapper element to
+    /// When this config has changed, we must signal the wrapper element.
     fn dispatch_config(&self) {
-        self.on_change.emit(self.config.clone());
+        let config = match &self.config {
+            ColumnStyleConfig {
+                pos_color: Some(pos_color),
+                neg_color: Some(neg_color),
+                ..
+            } if *pos_color == self.default_config.pos_color
+                && *neg_color == self.default_config.neg_color =>
+            {
+                ColumnStyleConfig {
+                    pos_color: None,
+                    neg_color: None,
+                    ..self.config
+                }
+            }
+            x => x.clone(),
+        };
+
+        self.on_change.emit(config);
     }
 
     /// Human readable precision hint, e.g. "Prec 0.001" for `{fixed: 3}`.
@@ -218,7 +244,7 @@ impl Component for ColumnStyle {
                     self.props.config.color_mode = color_mode;
                     self.props.config.pos_color = Some(self.pos_color.to_owned());
                     self.props.config.neg_color = Some(self.neg_color.to_owned());
-                    if self.color_mode == ColorMode::Gradient {
+                    if self.color_mode.needs_gradient() {
                         self.props.config.gradient = Some(self.gradient);
                     } else {
                         self.props.config.gradient = None;
@@ -248,7 +274,7 @@ impl Component for ColumnStyle {
             ColumnStyleMsg::ColorModeChanged(val) => {
                 self.color_mode = val;
                 self.props.config.color_mode = val;
-                if self.color_mode == ColorMode::Gradient {
+                if self.color_mode.needs_gradient() {
                     self.props.config.gradient = Some(self.gradient);
                 } else {
                     self.props.config.gradient = None;
@@ -335,8 +361,21 @@ impl Component for ColumnStyle {
                 move |event: InputData| ColumnStyleMsg::GradientChanged(event.value),
             );
 
-        let gradient_enabled = self.props.config.color_mode.is_enabled()
-            && self.color_mode == ColorMode::Gradient;
+        let gradient_gradient_enabled = if self.props.config.color_mode.is_enabled()
+            && self.color_mode == ColorMode::Gradient
+        {
+            ""
+        } else {
+            "display:none"
+        };
+
+        let bar_gradient_enabled = if self.props.config.color_mode.is_enabled()
+            && self.color_mode == ColorMode::Bar
+        {
+            ""
+        } else {
+            "display:none"
+        };
 
         html! {
             <>
@@ -388,7 +427,7 @@ impl Component for ColumnStyle {
                     <RadioList<ColorMode>
                         class="indent"
                         disabled={ !self.props.config.color_mode.is_enabled() }
-                        values={ vec!(ColorMode::Foreground, ColorMode::Background, ColorMode::Gradient) }
+                        values={ vec!(ColorMode::Foreground, ColorMode::Background, ColorMode::Gradient, ColorMode::Bar) }
                         selected={ color_mode_selected }
                         on_change={ color_mode_changed } >
 
@@ -396,12 +435,24 @@ impl Component for ColumnStyle {
                         <span>{ "Background" }</span>
                         <>
                             <span>{ "Gradient" }</span>
-                            <div class="row indent" style={ if gradient_enabled { "" } else { "display:none" } }>
+                            <div class="row indent" style={ gradient_gradient_enabled }>
                                 <input
                                     id="gradient-param"
                                     value={ self.gradient }
                                     class="parameter"
-                                    oninput={ gradient_changed }
+                                    oninput={ &gradient_changed }
+                                    type="number"
+                                    min="0" />
+                            </div>
+                        </>
+                        <>
+                            <span>{ "Bar" }</span>
+                            <div class="row indent" style={ bar_gradient_enabled }>
+                                <input
+                                    id="gradient-param"
+                                    value={ self.gradient }
+                                    class="parameter"
+                                    oninput={ &gradient_changed }
                                     type="number"
                                     min="0" />
                             </div>

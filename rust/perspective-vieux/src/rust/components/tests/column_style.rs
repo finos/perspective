@@ -148,7 +148,7 @@ pub fn test_color_enabled() {
 
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(true));
-    assert_eq!(result.borrow().color_mode, Some(ColorMode::Foreground));
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
 }
 
 #[wasm_bindgen_test]
@@ -177,12 +177,12 @@ pub fn test_color_mode_changed() {
     };
 
     let column_style = link.borrow().clone().unwrap();
-    assert_eq!(result.borrow().color_mode, None);
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
     assert_eq!(result.borrow().pos_color, None);
-    column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(true));
-    assert_eq!(result.borrow().color_mode, Some(ColorMode::Foreground));
-    assert_eq!(result.borrow().pos_color, Some("#123".to_owned()));
+    column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(false));
+    assert_eq!(result.borrow().color_mode, ColorMode::Disabled);
+    assert_eq!(result.borrow().pos_color, None);
     column_style.send_message(ColumnStyleMsg::ColorModeChanged(ColorMode::Background));
-    assert_eq!(result.borrow().color_mode, Some(ColorMode::Background));
-    assert_eq!(result.borrow().pos_color, Some("#123".to_owned()));
+    assert_eq!(result.borrow().color_mode, ColorMode::Background);
+    assert_eq!(result.borrow().pos_color, None);
 }
