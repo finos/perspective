@@ -13,6 +13,13 @@ export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
 
 let MENU = undefined;
 
+export function make_gradient(chromahex) {
+    const [r, g, b] = chromahex.rgb();
+    const [r1, g1, b1] = chromahex.set("hsl.h", (chromahex.get("hsl.h") - 15) % 360).rgb();
+    const [r2, g2, b2] = chromahex.set("hsl.h", (chromahex.get("hsl.h") + 15) % 360).rgb();
+    return `linear-gradient(to right top,rgb(${r1},${g1},${b1}),rgb(${r},${g},${b}) 50%,rgb(${r2},${g2},${b2}))`;
+}
+
 export function activate_plugin_menu(regularTable, target, column_max) {
     MENU = MENU || document.createElement("perspective-column-style");
     const target_meta = regularTable.getMeta(target);
@@ -39,8 +46,8 @@ export function activate_plugin_menu(regularTable, target, column_max) {
     const update_handler = event => {
         const config = event.detail;
         if (config.pos_color) {
-            config.pos_color = [config.pos_color, ...chroma(config.pos_color).rgb()];
-            config.neg_color = [config.neg_color, ...chroma(config.neg_color).rgb()];
+            config.pos_color = [config.pos_color, ...chroma(config.pos_color).rgb(), make_gradient(chroma(config.pos_color))];
+            config.neg_color = [config.neg_color, ...chroma(config.neg_color).rgb(), make_gradient(chroma(config.neg_color))];
         }
 
         regularTable[PLUGIN_SYMBOL] = regularTable[PLUGIN_SYMBOL] || {};
