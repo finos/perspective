@@ -12,8 +12,8 @@ use crate::utils::WeakComponentLink;
 use crate::*;
 
 use wasm_bindgen::prelude::*;
-use yew::prelude::*;
 use web_sys::*;
+use yew::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -71,20 +71,26 @@ impl PerspectiveColumnStyleElement {
         }
     }
 
-    /// Reset to a provided JSON config, to be used in place of `new()` when 
+    /// Reset to a provided JSON config, to be used in place of `new()` when
     /// re-using this component.
-    /// 
+    ///
     /// # Arguments
     /// * `config` - a `ColumnStyle` config in JSON form.
-    pub fn reset(&mut self, config: JsValue) {
-        let msg = ColumnStyleMsg::Reset(config.into_serde().unwrap());
+    /// * `default_config` - the default `ColumnStyle` config for this column
+    ///   type, in JSON form.
+    pub fn reset(&mut self, config: JsValue, default_config: JsValue) {
+        let msg = ColumnStyleMsg::Reset(
+            config.into_serde().unwrap(),
+            default_config.into_serde().unwrap(),
+        );
+
         if let Some(elem) = self.weak_link.borrow().as_ref() {
             elem.send_message(msg);
         }
     }
 
     /// Dispatches to `ModalElement::open(target)`
-    /// 
+    ///
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
     pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {

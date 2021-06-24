@@ -134,10 +134,8 @@ where
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         props.validate();
-        let should_render = props.selected != self.props.selected
-            || props.disabled != self.props.disabled;
         self.props = props;
-        should_render
+        true
     }
 
     fn view(&self) -> Html {

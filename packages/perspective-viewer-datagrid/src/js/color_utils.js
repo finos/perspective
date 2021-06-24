@@ -7,8 +7,6 @@
  *
  */
 
-export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
-
 // AFAICT `chroma-js` has no alpha-aware blending? So we need a function to get
 // the color of a heatmap cell over the background.
 export function rgbaToRgb([r, g, b, a], source = [255, 255, 255]) {

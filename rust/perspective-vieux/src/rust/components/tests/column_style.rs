@@ -148,7 +148,9 @@ pub fn test_color_enabled() {
 
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(true));
-    assert_eq!(result.borrow().color_mode, Some(ColorMode::Foreground));
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
+    column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(false));
+    assert_eq!(result.borrow().color_mode, ColorMode::Disabled);
 }
 
 #[wasm_bindgen_test]
@@ -177,12 +179,100 @@ pub fn test_color_mode_changed() {
     };
 
     let column_style = link.borrow().clone().unwrap();
-    assert_eq!(result.borrow().color_mode, None);
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
     assert_eq!(result.borrow().pos_color, None);
-    column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(true));
-    assert_eq!(result.borrow().color_mode, Some(ColorMode::Foreground));
-    assert_eq!(result.borrow().pos_color, Some("#123".to_owned()));
+    column_style.send_message(ColumnStyleMsg::ColorEnabledChanged(false));
+    assert_eq!(result.borrow().color_mode, ColorMode::Disabled);
+    assert_eq!(result.borrow().pos_color, None);
     column_style.send_message(ColumnStyleMsg::ColorModeChanged(ColorMode::Background));
-    assert_eq!(result.borrow().color_mode, Some(ColorMode::Background));
-    assert_eq!(result.borrow().pos_color, Some("#123".to_owned()));
+    assert_eq!(result.borrow().color_mode, ColorMode::Background);
+    assert_eq!(result.borrow().pos_color, None);
 }
+
+
+#[wasm_bindgen_test]
+pub fn test_pos_color_changed_override_defaults() {
+    let link: WeakComponentLink<ColumnStyle> = WeakComponentLink::default();
+    let result: Rc<RefCell<ColumnStyleConfig>> =
+        Rc::new(RefCell::new(ColumnStyleConfig::default()));
+    let default_config = ColumnStyleDefaultConfig {
+        pos_color: "#123".to_owned(),
+        neg_color: "#321".to_owned(),
+        ..ColumnStyleDefaultConfig::default()
+    };
+
+    let on_change = {
+        clone!(result);
+        Callback::from(move |config| {
+            *result.borrow_mut() = config;
+        })
+    };
+
+    test_html! {
+        <ColumnStyle
+            default_config=default_config
+            on_change=on_change
+            weak_link=link.clone() >
+        </ColumnStyle>
+    };
+
+    let column_style = link.borrow().clone().unwrap();
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
+    assert_eq!(result.borrow().neg_color, None);
+    assert_eq!(result.borrow().pos_color, None);
+    column_style.send_message(ColumnStyleMsg::PosColorChanged("#666".to_owned()));
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
+    assert_eq!(result.borrow().pos_color, Some("#666".to_owned()));
+    assert_eq!(result.borrow().neg_color, Some("#321".to_owned()));
+    column_style.send_message(ColumnStyleMsg::PosColorChanged("#123".to_owned()));
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
+    assert_eq!(result.borrow().pos_color, None);
+    assert_eq!(result.borrow().neg_color, None);
+}
+
+#[wasm_bindgen_test]
+pub fn test_pos_color_and_mode_changed_override_defaults() {
+    let link: WeakComponentLink<ColumnStyle> = WeakComponentLink::default();
+    let result: Rc<RefCell<ColumnStyleConfig>> =
+        Rc::new(RefCell::new(ColumnStyleConfig::default()));
+    let default_config = ColumnStyleDefaultConfig {
+        pos_color: "#123".to_owned(),
+        neg_color: "#321".to_owned(),
+        ..ColumnStyleDefaultConfig::default()
+    };
+
+    let on_change = {
+        clone!(result);
+        Callback::from(move |config| {
+            *result.borrow_mut() = config;
+        })
+    };
+
+    test_html! {
+        <ColumnStyle
+            default_config=default_config
+            on_change=on_change
+            weak_link=link.clone() >
+        </ColumnStyle>
+    };
+
+    let column_style = link.borrow().clone().unwrap();
+    assert_eq!(result.borrow().color_mode, ColorMode::Foreground);
+    assert_eq!(result.borrow().neg_color, None);
+    assert_eq!(result.borrow().pos_color, None);
+    column_style.send_message(ColumnStyleMsg::ColorModeChanged(ColorMode::Background));
+    assert_eq!(result.borrow().color_mode, ColorMode::Background);
+    assert_eq!(result.borrow().pos_color, None);
+    assert_eq!(result.borrow().neg_color, None);
+    column_style.send_message(ColumnStyleMsg::PosColorChanged("#666".to_owned()));
+    assert_eq!(result.borrow().color_mode, ColorMode::Background);
+    assert_eq!(result.borrow().pos_color, Some("#666".to_owned()));
+    assert_eq!(result.borrow().neg_color, Some("#321".to_owned()));
+    column_style.send_message(ColumnStyleMsg::PosColorChanged("#123".to_owned()));
+    assert_eq!(result.borrow().color_mode, ColorMode::Background);
+    assert_eq!(result.borrow().pos_color, None);
+    assert_eq!(result.borrow().neg_color, None);
+}
+
+
+

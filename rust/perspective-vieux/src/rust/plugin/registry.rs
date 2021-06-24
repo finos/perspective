@@ -31,6 +31,9 @@ pub trait PluginRegistry {
     fn default_plugin_name(&'static self) -> String;
     fn available_plugin_names(&'static self) -> Vec<String>;
     fn register_plugin(&'static self, name: &str);
+
+    #[cfg(test)]
+    fn reset(&'static self);
 }
 
 impl PluginRegistry for LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
@@ -94,6 +97,11 @@ impl PluginRegistry for LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
 
             plugin.borrow_mut().push(record);
         });
+    }
+
+    #[cfg(test)]
+    fn reset(&'static self) {
+        self.with(|plugins| plugins.borrow_mut().clear());
     }
 }
 

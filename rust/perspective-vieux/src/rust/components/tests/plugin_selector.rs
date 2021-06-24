@@ -87,6 +87,7 @@ extern "C" {
 
 #[wasm_bindgen_test]
 pub fn test_plugin_selected() {
+    PLUGIN_REGISTRY.reset();
     register_test_components().unwrap();
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug2");
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug3");
